@@ -86,13 +86,15 @@ async function seed() {
       `0x${index}881595732642f4D73884b2b1ea39D20Af1D3e888`,
     ),
     isApproved: true,
-
+    phone: `98654054${index}`,
+    dob: new Date(),
     latitude: 27.713009571767344,
     longitude: 85.38533286023136,
     bankStatus: BankStatus.BANKED,
     internetAccess: InternetAccess.HOME_INTERNET,
     phoneOwnership: PhoneOwnership.SMART,
     address: 'Kathmandu',
+
     projects: {
       connect: { id: proj1.id },
     },
