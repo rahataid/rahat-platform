@@ -10,7 +10,6 @@ on:
 
 env:
   CI: false
-  env_stage: ${{ secrets.ENV_STAGE }}
 
 jobs:
   deploy:
@@ -20,10 +19,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: stage
-
-      - name: create environment file
-        run: |
-          touch ./.env && echo "$env_stage" >> ./.env
 
       - name: setup docker buildx
         uses: docker/setup-buildx-action@v2
@@ -42,7 +37,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: esatya/rahat-api:stage
+          tags: esatya/rahat-backend-api:stage
 
       - name: Build Docker image
         if: github.event_name == 'pull_request'
