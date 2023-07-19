@@ -170,3 +170,5 @@ model User {
 
   @@map(name: "tbl_users")
 }
+
+
