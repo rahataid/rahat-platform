@@ -48,10 +48,10 @@ export class UserController {
     return this.userService.findAll(query);
   }
 
-  @Get(':id')
+  @Get(':walletAddress')
   // @CheckAbilities(new ReadUserAbility())
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  findOne(@Param('walletAddress') walletAddress: string) {
+    return this.userService.findOne(walletAddress);
   }
 
   @Patch(':id')
@@ -65,6 +65,11 @@ export class UserController {
   // @CheckAbilities({ action: Action.DELETE, subject: User })
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
+  }
+
+  @Patch(':walletAddress/approve')
+  approve(@Param('walletAddress') walletAddress: string) {
+    return this.userService.approve(walletAddress);
   }
 
   @Post('login/otp')

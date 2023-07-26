@@ -1,9 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
+import { PrismaService } from 'nestjs-prisma';
+import { UserService } from 'src/user/user.service';
+import { CreateAuthDto, WalletLoginDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 
 @Injectable()
 export class AuthsService {
+  constructor(
+    private prisma: PrismaService,
+    private readonly userService: UserService,
+  ) {}
+
   create(createAuthDto: CreateAuthDto) {
     return 'This action adds a new auth';
   }
@@ -22,5 +29,10 @@ export class AuthsService {
 
   remove(id: number) {
     return `This action removes a #${id} auth`;
+  }
+
+  loginWallet(walletLoginData: WalletLoginDto) {
+    console.log('walletLoginData', walletLoginData);
+    return this.userService.findOne(walletLoginData.walletAddress);
   }
 }

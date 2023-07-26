@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { paginate } from '@utils/paginate';
-import { hexStringToBuffer } from '@utils/string-format';
+import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ListUserDto } from './dto/list-user.dto';
@@ -28,6 +28,18 @@ export class UserService {
     const where: Prisma.UserWhereInput = {
       deletedAt: null,
     };
+    const select: Prisma.UserSelect = {
+      name: true,
+      roles: {
+        select: {
+          name: true,
+        },
+      },
+      profileImage: true,
+      isApproved: true,
+      walletAddress: true,
+      id: true,
+    };
     if (rest.name) {
       where.name = {
         contains: rest.name,
@@ -37,18 +49,24 @@ export class UserService {
 
     return paginate(
       this.prisma.user,
-      { where },
+      { where, select },
       {
         page,
         perPage,
+        transformRows: (rows) =>
+          rows.map((r) => ({
+            ...r,
+            walletAddress: bufferToHexString(r.walletAddress),
+            roles: r.roles.map((role) => role.name).join(', '),
+          })),
       },
     );
   }
 
-  findOne(id: number) {
+  findOne(walletAddress: string) {
     return this.prisma.user.findUniqueOrThrow({
       where: {
-        id,
+        walletAddress: hexStringToBuffer(walletAddress),
       },
     });
   }
@@ -60,6 +78,17 @@ export class UserService {
         id,
       },
       data: { ...updateUserDto, walletAddress },
+    });
+  }
+
+  approve(walletAddress: string) {
+    return this.prisma.user.update({
+      where: {
+        walletAddress: hexStringToBuffer(walletAddress),
+      },
+      data: {
+        isApproved: true,
+      },
     });
   }
 

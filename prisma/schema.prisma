@@ -104,6 +104,7 @@ model Project {
   location        String?
   projectType     String?
   projectManager  String?
+  coverImage      String?
   description     String?
   contractAddress Bytes?   @unique
   isApproved      Boolean  @default(false)
@@ -162,13 +163,26 @@ model User {
   email         String  @unique
   walletAddress Bytes?  @unique
   profileImage  String?
+  isApproved  Boolean @default(false)
 
   projects  Project[] @relation("UserProjects")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+  roles   Role[] @relation("UserRoles")
 
   @@map(name: "tbl_users")
 }
 
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  users     User[] @relation("UserRoles")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@map(name: "tbl_roles")
+}
 

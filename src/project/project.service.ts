@@ -39,21 +39,27 @@ export class ProjectService {
     const where: Prisma.ProjectWhereInput = {
       deletedAt: null,
     };
-    const include: Prisma.ProjectInclude = {
-      owner: {
-        select: {
-          id: true,
-          name: true,
-          walletAddress: true,
-        },
-      },
-      _count: {
-        select: {
-          beneficiaries: true,
-          owner: true,
-          vendors: true,
-        },
-      },
+    const select: Prisma.ProjectSelect = {
+      id: true,
+      budget: true,
+      contractAddress: true,
+      name: true,
+      createdAt: true,
+      startDate: true,
+      endDate: true,
+      description: true,
+
+      // _count: {
+      //   select: {
+      //     beneficiaries: true,
+      //     owner: true,
+      //     vendors: true,
+      //   },
+      // },
+    };
+
+    const orderBy: Prisma.ProjectOrderByWithRelationInput = {
+      createdAt: 'desc',
     };
 
     if (rest.name) {
@@ -65,7 +71,7 @@ export class ProjectService {
 
     return paginate(
       this.prisma.project,
-      { where, include },
+      { where, select, orderBy },
       {
         page,
         perPage,
@@ -73,10 +79,6 @@ export class ProjectService {
           return rows.map((r) => ({
             ...r,
             contractAddress: bufferToHexString(r.contractAddress),
-            owner: r.owner.map((o) => ({
-              ...o,
-              walletAddress: bufferToHexString(o.walletAddress),
-            })),
           }));
         },
       },

@@ -48,6 +48,7 @@ Table tbl_projects {
   location String
   projectType String
   projectManager String
+  coverImage String
   description String
   contractAddress Bytes [unique]
   isApproved Boolean [not null, default: false]
@@ -96,7 +97,18 @@ Table tbl_users {
   email String [unique, not null]
   walletAddress Bytes [unique]
   profileImage String
+  isApproved Boolean [not null, default: false]
   projects tbl_projects [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+  roles tbl_roles [not null]
+}
+
+Table tbl_roles {
+  id Int [pk, increment]
+  name String [unique, not null]
+  users tbl_users [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   deletedAt DateTime

@@ -60,6 +60,7 @@ CREATE TABLE "tbl_projects" (
     "location" TEXT,
     "projectType" TEXT,
     "projectManager" TEXT,
+    "coverImage" TEXT,
     "description" TEXT,
     "contractAddress" BYTEA,
     "isApproved" BOOLEAN NOT NULL DEFAULT false,
@@ -121,6 +122,17 @@ CREATE TABLE "tbl_users" (
 );
 
 -- CreateTable
+CREATE TABLE "tbl_roles" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_roles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_BeneficiaryProjects" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
@@ -134,6 +146,12 @@ CREATE TABLE "_UserProjects" (
 
 -- CreateTable
 CREATE TABLE "_ProjectDistributors" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_UserRoles" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
 );
@@ -157,6 +175,9 @@ CREATE UNIQUE INDEX "tbl_users_email_key" ON "tbl_users"("email");
 CREATE UNIQUE INDEX "tbl_users_walletAddress_key" ON "tbl_users"("walletAddress");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "tbl_roles_name_key" ON "tbl_roles"("name");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "_BeneficiaryProjects_AB_unique" ON "_BeneficiaryProjects"("A", "B");
 
 -- CreateIndex
@@ -173,6 +194,12 @@ CREATE UNIQUE INDEX "_ProjectDistributors_AB_unique" ON "_ProjectDistributors"("
 
 -- CreateIndex
 CREATE INDEX "_ProjectDistributors_B_index" ON "_ProjectDistributors"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_UserRoles_AB_unique" ON "_UserRoles"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_UserRoles_B_index" ON "_UserRoles"("B");
 
 -- AddForeignKey
 ALTER TABLE "_BeneficiaryProjects" ADD CONSTRAINT "_BeneficiaryProjects_A_fkey" FOREIGN KEY ("A") REFERENCES "tbl_beneficiaries"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -191,3 +218,9 @@ ALTER TABLE "_ProjectDistributors" ADD CONSTRAINT "_ProjectDistributors_A_fkey" 
 
 -- AddForeignKey
 ALTER TABLE "_ProjectDistributors" ADD CONSTRAINT "_ProjectDistributors_B_fkey" FOREIGN KEY ("B") REFERENCES "tbl_vendors"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_UserRoles" ADD CONSTRAINT "_UserRoles_A_fkey" FOREIGN KEY ("A") REFERENCES "tbl_roles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_UserRoles" ADD CONSTRAINT "_UserRoles_B_fkey" FOREIGN KEY ("B") REFERENCES "tbl_users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
