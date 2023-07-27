@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { paginate } from '@utils/paginate';
 import { PrismaService } from 'nestjs-prisma';
-import { CreateAppSettingDto, GetContractByNameDto } from './app-settings.dto';
+import { CreateAppSettingDto, GetSettingsByNameDto } from './app-settings.dto';
 
 @Injectable()
 export class AppService {
@@ -13,7 +14,7 @@ export class AppService {
     });
   }
 
-  getAppSettings(query: GetContractByNameDto) {
+  getAppSettings(query: GetSettingsByNameDto) {
     const { name } = query;
     const where: Prisma.AppSettingsWhereInput = {};
     if (name) {
@@ -22,13 +23,32 @@ export class AppService {
       };
     }
 
-    return this.prisma.appSettings.findMany({ where });
+    return paginate(
+      this.prisma.appSettings,
+      { where },
+      { page: 1, perPage: 100 },
+    );
   }
 
   getContracts() {
     return this.prisma.appSettings.findFirstOrThrow({
       where: {
         name: 'CONTRACT_ADDRESS',
+      },
+      select: {
+        name: true,
+        value: true,
+      },
+    });
+  }
+  getBlockchain() {
+    return this.prisma.appSettings.findFirstOrThrow({
+      where: {
+        name: 'BLOCKCHAIN',
+      },
+      select: {
+        name: true,
+        value: true,
       },
     });
   }

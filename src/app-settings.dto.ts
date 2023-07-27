@@ -23,12 +23,13 @@ export class CreateAppSettingDto {
   value: Prisma.JsonObject;
 }
 
-export class GetContractByNameDto {
+export class GetSettingsByNameDto {
   @ApiProperty({
     example: 'CONTRACT_ADDRESS',
     description: 'Name of the app settings',
-    required: true,
+    required: false,
   })
   @IsString()
+  @IsOptional()
   name: string;
 }
