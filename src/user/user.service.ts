@@ -12,15 +12,59 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  create(createUserDto: CreateUserDto) {
-    const walletAddress = hexStringToBuffer(createUserDto.walletAddress);
-
-    return this.prisma.user.create({
-      data: {
-        ...createUserDto,
-        walletAddress,
+  async create(createUserDto: CreateUserDto) {
+    console.log('createUserDto', createUserDto);
+    const data = {
+      ...createUserDto,
+      walletAddress: hexStringToBuffer(createUserDto.walletAddress),
+      roles: {
+        connect: {
+          name: 'User',
+        },
       },
+    };
+
+    if (createUserDto.role) {
+      data.roles.connect = {
+        name: createUserDto.role,
+      };
+    }
+
+    const user = await this.prisma.user.create({
+      data,
     });
+
+    return {
+      ...user,
+      walletAddress: bufferToHexString(user.walletAddress),
+    };
+  }
+  async register(registerUserData: CreateUserDto) {
+    console.log('registerUserData', registerUserData);
+    const data = {
+      ...registerUserData,
+      walletAddress: hexStringToBuffer(registerUserData.walletAddress),
+      roles: {
+        connect: {
+          name: 'User',
+        },
+      },
+    };
+
+    if (registerUserData.role) {
+      data.roles.connect = {
+        name: registerUserData.role,
+      };
+    }
+
+    const user = await this.prisma.user.create({
+      data,
+    });
+
+    return {
+      ...user,
+      walletAddress: bufferToHexString(user.walletAddress),
+    };
   }
 
   findAll(query: ListUserDto) {
@@ -63,12 +107,16 @@ export class UserService {
     );
   }
 
-  findOne(walletAddress: string) {
-    return this.prisma.user.findUniqueOrThrow({
+  async findOne(walletAddress: string) {
+    const user = await this.prisma.user.findUniqueOrThrow({
       where: {
         walletAddress: hexStringToBuffer(walletAddress),
       },
     });
+    return {
+      ...user,
+      walletAddress: bufferToHexString(user.walletAddress),
+    };
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

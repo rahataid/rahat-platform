@@ -160,8 +160,8 @@ model Transaction {
 model User {
   id            Int     @id @default(autoincrement())
   name          String
-  email         String  @unique
-  walletAddress Bytes?  @unique
+  email         String?  @unique
+  walletAddress Bytes  @unique
   profileImage  String?
   isApproved  Boolean @default(false)
 

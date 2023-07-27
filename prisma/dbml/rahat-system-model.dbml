@@ -94,8 +94,8 @@ Table tbl_transactions {
 Table tbl_users {
   id Int [pk, increment]
   name String [not null]
-  email String [unique, not null]
-  walletAddress Bytes [unique]
+  email String [unique]
+  walletAddress Bytes [unique, not null]
   profileImage String
   isApproved Boolean [not null, default: false]
   projects tbl_projects [not null]

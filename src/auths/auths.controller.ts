@@ -27,6 +27,11 @@ export class AuthsController {
     return this.authsService.findAll();
   }
 
+  @Post('login-wallet')
+  loginWallet(@Body() walletLoginData: WalletLoginDto) {
+    return this.authsService.loginWallet(walletLoginData);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.authsService.findOne(+id);
@@ -40,11 +45,5 @@ export class AuthsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.authsService.remove(+id);
-  }
-
-  @Post('login-wallet')
-  loginWallet(@Body() walletLoginData: WalletLoginDto) {
-    console.log('walletLoginData', walletLoginData);
-    return this.authsService.loginWallet(walletLoginData);
   }
 }
