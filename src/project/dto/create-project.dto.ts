@@ -1,94 +1,113 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateProjectDto {
   @ApiProperty({
-    type: 'number',
+    type: 'string',
     required: true,
   })
-  id: number;
-
-  @ApiProperty({
-    type: 'string',
-    required: false,
-  })
+  @IsString()
   name: string;
 
   @ApiProperty({
     type: 'string',
-    required: false,
+    required: true,
   })
+  @IsString()
   startDate: string;
 
   @ApiProperty({
     type: 'string',
-    required: false,
+    required: true,
   })
+  @IsString()
   endDate: string;
 
   @ApiProperty({
-    type: 'number',
-    required: false,
-  })
-  owner: number;
-
-  @ApiProperty({
-    type: 'number',
-    required: false,
-  })
-  budget: number;
-
-  @ApiProperty({
-    type: 'number',
-    required: false,
-  })
-  disbursed: number;
-
-  @ApiProperty({
     type: 'string',
-    required: false,
+    required: true,
   })
-  extras: string;
-
-  @ApiProperty({
-    type: 'string',
-    required: false,
-  })
-  location: string;
-
-  @ApiProperty({
-    type: 'string',
-    required: false,
-  })
-  projectType: string;
-
-  @ApiProperty({
-    type: 'string',
-    required: false,
-  })
-  projectManager: string;
-
-  @ApiProperty({
-    type: 'string',
-    required: false,
-  })
-  description: string;
-
-  @ApiProperty({
-    type: 'string',
-    required: false,
-  })
+  @IsString()
   contractAddress: string;
 
   @ApiProperty({
     type: 'string',
     required: false,
   })
-  deletedAt: string;
+  @IsString()
+  @IsOptional()
+  location?: string;
+
+  @ApiProperty({
+    type: 'string',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  projectManager?: string;
+
+  @ApiProperty({
+    type: 'string',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @ApiProperty({
+    type: 'number',
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  owner?: number;
+
+  @ApiProperty({
+    type: 'string',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  projectType?: string;
+
+  @ApiProperty({
+    type: 'number',
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  budget?: number;
+
+  @ApiProperty({
+    type: 'number',
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  disbursed?: number;
+
+  @ApiProperty({
+    type: 'string',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  extras?: string;
+
+  @ApiProperty({
+    type: 'string',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  deletedAt?: string;
 
   @ApiProperty({
     type: 'boolean',
     required: false,
     default: false,
   })
+  @IsBoolean()
+  @IsOptional()
   isApproved?: boolean;
 }
