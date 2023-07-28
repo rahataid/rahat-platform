@@ -13,7 +13,6 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
-    console.log('createUserDto', createUserDto);
     const data = {
       ...createUserDto,
       walletAddress: hexStringToBuffer(createUserDto.walletAddress),
@@ -29,6 +28,7 @@ export class UserService {
         name: createUserDto.role,
       };
     }
+    delete createUserDto?.role;
 
     const user = await this.prisma.user.create({
       data,
