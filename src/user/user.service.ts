@@ -28,7 +28,7 @@ export class UserService {
         name: createUserDto.role,
       };
     }
-    delete createUserDto?.role;
+    delete data?.role;
 
     const user = await this.prisma.user.create({
       data,
