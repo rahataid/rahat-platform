@@ -33,9 +33,12 @@ export class ProjectController {
     return this.projectService.findOne(address);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
-    return this.projectService.update(+id, updateProjectDto);
+  @Patch(':address')
+  update(
+    @Param('address') address: string,
+    @Body() updateProjectDto: UpdateProjectDto,
+  ) {
+    return this.projectService.update(address, updateProjectDto);
   }
 
   @Get(':address/beneficiaries')

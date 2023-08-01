@@ -1,10 +1,11 @@
 // src/main.ts
 import { Logger, VersioningType } from '@nestjs/common';
 
-import { ValidationPipe } from '@nestjs/common';
+// import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@pipes/validation.pipe';
 import { AppModule } from './app.module';
 import { RsExceptionFilter } from './utils/exceptions/rs-exception.filter';
 
@@ -19,7 +20,7 @@ async function bootstrap() {
 
   app.enableCors();
 
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new RsExceptionFilter());
 
   app.setGlobalPrefix('api').enableVersioning({

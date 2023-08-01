@@ -110,21 +110,11 @@ export class ProjectService {
     };
   }
 
-  async update(id: number, updateProjectDto: UpdateProjectDto) {
-    const { owner, contractAddress, ...rest } = updateProjectDto;
-
+  async update(contractAddress: string, updateProjectDto: UpdateProjectDto) {
     return this.prisma.project.update({
-      data: {
-        ...rest,
-        contractAddress: hexStringToBuffer(contractAddress),
-        owner: {
-          connect: {
-            id: owner,
-          },
-        },
-      },
+      data: updateProjectDto,
       where: {
-        id,
+        contractAddress: hexStringToBuffer(contractAddress),
       },
     });
   }
