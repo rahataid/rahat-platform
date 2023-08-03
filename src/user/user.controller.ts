@@ -12,7 +12,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ListUserDto } from './dto/list-user.dto';
 import { RequestUserOtpDto, VerifyUserOtpDto } from './dto/login-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, UpdateUserRoleDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
 
 @Controller('users')
@@ -34,6 +34,18 @@ export class UserController {
   // @CheckAbilities(new ReadUserAbility())
   findAll(@Query() query: ListUserDto) {
     return this.userService.findAll(query);
+  }
+
+  @Patch(':walletAddress/role')
+  async updateRole(
+    @Param('walletAddress') walletAddress: string,
+    @Body() updateUserRoleDto: UpdateUserRoleDto,
+  ) {
+    const updatedUser = await this.userService.updateRole(
+      walletAddress,
+      updateUserRoleDto,
+    );
+    return updatedUser;
   }
 
   @Get(':walletAddress')

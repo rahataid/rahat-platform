@@ -6,7 +6,7 @@ import { PrismaService } from 'nestjs-prisma';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ListUserDto } from './dto/list-user.dto';
 import { RequestUserOtpDto, VerifyUserOtpDto } from './dto/login-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, UpdateUserRoleDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -176,5 +176,27 @@ export class UserService {
       token: 1234,
       // privateKey: PRIVATE_KEYS_ADMIN.privateKey,
     };
+  }
+
+  async updateRole(
+    walletAddress: string,
+    updateUserRoleDto: UpdateUserRoleDto,
+  ) {
+    const { role } = updateUserRoleDto;
+
+    const user = await this.prisma.user.update({
+      where: {
+        walletAddress: hexStringToBuffer(walletAddress),
+      },
+      data: {
+        roles: {
+          connect: {
+            name: role,
+          },
+        },
+      },
+    });
+
+    return user;
   }
 }
