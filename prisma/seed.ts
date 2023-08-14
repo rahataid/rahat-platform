@@ -11,35 +11,6 @@ import { hexStringToBuffer } from '../src/utils/string-format';
 const prisma = new PrismaClient();
 
 async function seed() {
-  const appSettings = await prisma.appSettings.createMany({
-    data: [
-      {
-        name: 'CONTRACT_ADDRESS',
-        value: {
-          RahatDonor: '0xDcd6F86EB1b62216F79943f4E6177F6892538120',
-          RahatClaim: '0xCa8B87AF8CDa654eF873ae16665932abec836583',
-          RahatToken: '0x422416b9203de06be4487D17DD1C76725c6049d7',
-          RahatCommunity: '0x531e0540f4Ba3453C40EF1ef9D19dDa85e930aCc',
-          CVAProject: '0x216EC842b77e424671219ABB817467fCEa991409',
-        },
-      },
-      {
-        name: 'BLOCKCHAIN',
-        value: {
-          networkUrl: 'https://rumsan-chain.xd.rahat.io',
-          chainWebSocket: 'wss://rumsan-chain.xd.rahat.io/ws',
-          chainId: 1337,
-          networkId: 9670,
-          chainName: 'Rumsan',
-          nativeCurrency: {
-            name: 'RTH',
-            decimals: 18,
-            symbol: 'RTH',
-          },
-        },
-      },
-    ],
-  });
   const roles1 = await prisma.role.create({
     data: {
       name: 'Donor',
@@ -47,12 +18,17 @@ async function seed() {
   });
   const roles2 = await prisma.role.create({
     data: {
-      name: 'Manager',
+      name: 'Field Agent',
     },
   });
   const roles3 = await prisma.role.create({
     data: {
-      name: 'User',
+      name: 'Vendors',
+    },
+  });
+  const roles4 = await prisma.role.create({
+    data: {
+      name: 'Stakeholders',
     },
   });
 
@@ -95,6 +71,20 @@ async function seed() {
       roles: {
         connect: {
           id: roles3.id,
+        },
+      },
+    },
+  });
+  const user4 = await prisma.user.create({
+    data: {
+      name: 'User 4',
+      email: 'user4@rahat.com',
+      walletAddress: hexStringToBuffer(
+        '0x456EC842b77e424671219ABB817467fCEa991404',
+      ),
+      roles: {
+        connect: {
+          id: roles4.id,
         },
       },
     },

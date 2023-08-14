@@ -12,6 +12,7 @@ export class ProjectService {
   constructor(private prisma: PrismaService) {}
 
   async create(createProjectDto: CreateProjectDto) {
+    console.log('first', createProjectDto);
     const { owner, contractAddress, ...rest } = createProjectDto;
 
     // contractAddress =
@@ -19,7 +20,7 @@ export class ProjectService {
       data: {
         ...rest,
 
-        contractAddress: Buffer.from(contractAddress.substring(2), 'hex'),
+        contractAddress: hexStringToBuffer(contractAddress),
         owner: {
           connect: {
             id: owner,

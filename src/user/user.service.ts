@@ -18,7 +18,7 @@ export class UserService {
       walletAddress: hexStringToBuffer(createUserDto.walletAddress),
       roles: {
         connect: {
-          name: 'User',
+          name: 'Stakeholders',
         },
       },
     };
@@ -46,7 +46,7 @@ export class UserService {
       walletAddress: hexStringToBuffer(registerUserData.walletAddress),
       roles: {
         connect: {
-          name: 'User',
+          name: 'Stakeholders',
         },
       },
     };
@@ -56,6 +56,8 @@ export class UserService {
         name: registerUserData.role,
       };
     }
+
+    console.log('first', registerUserData);
 
     const user = await this.prisma.user.create({
       data,
