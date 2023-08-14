@@ -128,7 +128,3 @@ Specify the project's license.
 ## Contact
 
 For questions or collaboration: team@rahat.io
-
-```
-
-```
