@@ -55,6 +55,11 @@ export class BeneficiaryService {
           projects: true,
         },
       },
+      projects: {
+        select: {
+          name: true,
+        },
+      },
     };
     const orderBy: Prisma.BeneficiaryOrderByWithRelationInput = {};
 
@@ -98,6 +103,7 @@ export class BeneficiaryService {
             return {
               ...row,
               walletAddress: bufferToHexString(row.walletAddress),
+              projects: row.projects.map((p) => p.name).join(', '),
             };
           });
         },
