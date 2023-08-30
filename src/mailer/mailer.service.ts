@@ -10,7 +10,13 @@ export class MailService {
 
   constructor(@InjectQueue(MAIL_QUEUE) private readonly _mailQueue: Queue) {}
 
-  public async sendOTP({ email, otp }: { email: string; otp: string }): Promise<void> {
+  public async sendOTP({
+    email,
+    otp,
+  }: {
+    email: string;
+    otp: string;
+  }): Promise<void> {
     try {
       await this._mailQueue.add(
         SENT_OTP,
@@ -26,7 +32,13 @@ export class MailService {
     }
   }
 
-  public async welcome({ name, email }: { name: string; email: string }): Promise<void> {
+  public async welcome({
+    name,
+    email,
+  }: {
+    name: string;
+    email: string;
+  }): Promise<void> {
     try {
       await this._mailQueue.add(
         WELCOME_MSG,
