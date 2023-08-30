@@ -7,7 +7,7 @@ import {
   hexStringToBuffer,
   stringifyWithBigInt,
 } from '@utils/string-format';
-import { PrismaService } from 'nestjs-prisma';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBeneficiaryDto } from './dto/create-beneficiary.dto';
 import {
   ListBeneficiaryDto,

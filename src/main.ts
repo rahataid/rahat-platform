@@ -3,10 +3,11 @@ import { Logger, VersioningType } from '@nestjs/common';
 
 // import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@pipes/validation.pipe';
 import { AppModule } from './app.module';
+import { AuthGuard } from './auth/guards/auth.global.guard';
 import { RsExceptionFilter } from './utils/exceptions/rs-exception.filter';
 
 async function bootstrap() {
@@ -16,6 +17,8 @@ async function bootstrap() {
     // new FastifyAdapter({ logger: false }), // turn on/off for production
   );
   const configService = app.get(ConfigService);
+  const reflector = app.get(Reflector);
+
   const appPort = configService.get<number>('PORT', 5400);
 
   app.enableCors();
@@ -27,6 +30,8 @@ async function bootstrap() {
     type: VersioningType.URI,
     defaultVersion: '1',
   });
+
+  app.useGlobalGuards(new AuthGuard(reflector));
 
   const config = new DocumentBuilder()
     .setTitle('Rahat Platform')
