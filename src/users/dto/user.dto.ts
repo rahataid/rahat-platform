@@ -4,6 +4,7 @@ import {
   IsArray,
   IsEmail,
   IsEthereumAddress,
+  IsNotEmpty,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -42,3 +43,12 @@ export class CreateUserDto {
 }
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {}
+
+export class UpdateUserRoleDto {
+  @ApiProperty({
+    description: 'User role',
+  })
+  @IsString()
+  @IsNotEmpty()
+  role: string;
+}
