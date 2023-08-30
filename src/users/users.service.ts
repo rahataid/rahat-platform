@@ -37,8 +37,12 @@ export class UsersService {
   }
 
   async findAll() {
-    this._logger.log(`Finding all users`);
-    return this.prisma.user.findMany();
+    this._logger.log(`Finding all active users`);
+    return this.prisma.user.findMany({
+      where: {
+        isActive: true,
+      },
+    });
   }
 
   async findOne(id: number) {
@@ -94,27 +98,12 @@ export class UsersService {
   ) {
     const { role } = updateUserRoleDto;
 
-    const user = await this.prisma.user.findUnique({
-      where: {
-        walletAddress: hexStringToBuffer(walletAddress),
-      },
-      select: {
-        roles: true,
-      },
-    });
-
-    if (!user) {
-      return null;
-    }
-
-    const updatedRoles = [...user.roles, role as Role];
-
     const updatedUser = await this.prisma.user.update({
       where: {
         walletAddress: hexStringToBuffer(walletAddress),
       },
       data: {
-        roles: updatedRoles,
+        roles: [role as Role],
       },
     });
 

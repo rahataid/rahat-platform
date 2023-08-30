@@ -7,7 +7,6 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@pipes/validation.pipe';
 import { AppModule } from './app.module';
-import { AuthGuard } from './auth/guards/auth.global.guard';
 import { RsExceptionFilter } from './utils/exceptions/rs-exception.filter';
 
 async function bootstrap() {
@@ -31,7 +30,7 @@ async function bootstrap() {
     defaultVersion: '1',
   });
 
-  app.useGlobalGuards(new AuthGuard(reflector));
+  // app.useGlobalGuards(new AuthGuard(reflector));
 
   const config = new DocumentBuilder()
     .setTitle('Rahat Platform')
