@@ -45,13 +45,12 @@ export class AuthService {
   async sendOtp(AuthDto: Omit<AuthDto, 'otp'>) {
     this._logger.log(`Sending Login OTP to ${AuthDto?.email}`);
     const { email } = AuthDto;
-    console.log(email);
     const user = await this.userService.findOneByEmail(email);
-    console.log(user);
     if (user && user?.isActive) {
       this._logger.log(`Generating Login OTP to ${AuthDto?.email}`);
       const token = totp.generate(process.env.OTP_SECRET);
       if (token) {
+        console.log('otp', token);
         this.mailService.sendOTP({ email: user?.email, otp: token });
         return { success: true, msg: 'OTP sent successfully' };
       }
