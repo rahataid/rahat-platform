@@ -6,22 +6,18 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
-import { RoleGuard } from 'src/auth/guards/role.guard';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  UpdateUserRoleDto,
+} from './dto/user.dto';
 import { UsersService } from './users.service';
 
-@ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard, RoleGuard)
+// @ApiBearerAuth('access-token')
+// @UseGuards(JwtAuthGuard, RoleGuard)
 @Controller('users')
 @ApiTags('Users')
 export class UsersController {
@@ -89,5 +85,34 @@ export class UsersController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
+  }
+
+  @Roles('ADMIN')
+  @Patch(':walletAddress/role')
+  @ApiOperation({ summary: 'Update user role by wallet address' })
+  @ApiResponse({
+    status: 200,
+    description: 'The updated user with roles',
+    type: CreateUserDto,
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  updateRole(
+    @Param('walletAddress') walletAddress: string,
+    @Body() updateUserRoleDto: UpdateUserRoleDto,
+  ) {
+    return this.usersService.updateRole(walletAddress, updateUserRoleDto);
+  }
+
+  @Roles('ADMIN')
+  @Patch(':walletAddress/approve')
+  @ApiOperation({ summary: 'Approve a user by wallet address' })
+  @ApiResponse({
+    status: 200,
+    description: 'The approved user',
+    type: CreateUserDto,
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  approve(@Param('walletAddress') walletAddress: string) {
+    return this.usersService.approve(walletAddress);
   }
 }
