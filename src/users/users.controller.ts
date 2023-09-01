@@ -6,9 +6,11 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { ListUserDto } from './dto/list-user.dto';
 import {
   CreateUserDto,
   UpdateUserDto,
@@ -44,8 +46,8 @@ export class UsersController {
     type: [CreateUserDto],
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() query: ListUserDto) {
+    return this.usersService.findAll(query);
   }
 
   @Roles('ADMIN')

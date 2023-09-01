@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
+import { paginate } from '@utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { hexStringToBuffer } from 'src/utils/string-format';
+import { bufferToHexString, hexStringToBuffer } from 'src/utils/string-format';
+import { ListUserDto } from './dto/list-user.dto';
 import {
   CreateUserDto,
   UpdateUserDto,
@@ -36,13 +38,41 @@ export class UsersService {
     });
   }
 
-  async findAll() {
-    this._logger.log(`Finding all active users`);
-    return this.prisma.user.findMany({
-      where: {
-        isActive: true,
+  async findAll(query: ListUserDto) {
+    const { perPage, page, ...rest } = query;
+    const where: Prisma.UserWhereInput = {
+      deletedAt: null,
+      isActive: true,
+    };
+    const select: Prisma.UserSelect = {
+      name: true,
+      roles: true,
+      profileImage: true,
+      isApproved: true,
+      walletAddress: true,
+      id: true,
+    };
+    if (rest.name) {
+      where.name = {
+        contains: rest.name,
+        mode: 'insensitive',
+      };
+    }
+
+    return paginate(
+      this.prisma.user,
+      { where, select },
+      {
+        page,
+        perPage,
+        transformRows: (rows) =>
+          rows.map((r) => ({
+            ...r,
+            walletAddress: bufferToHexString(r.walletAddress),
+            roles: r.roles.join(', '),
+          })),
       },
-    });
+    );
   }
 
   async findOne(id: number) {
