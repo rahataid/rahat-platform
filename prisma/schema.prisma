@@ -80,6 +80,7 @@ model Beneficiary {
   longitude      Float?
   latitude       Float?
   isApproved     Boolean        @default(false)
+  isActive       Boolean        @default(true)
   bankStatus     BankStatus     @default(UNKNOWN)
   phoneOwnership PhoneOwnership @default(UNKNOWN)
   internetAccess InternetAccess @default(UNKNOWN)

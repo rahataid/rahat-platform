@@ -66,6 +66,16 @@ export class BeneficiaryController {
     return this.beneficiaryService.remove(uuid);
   }
 
+  @Patch(':id/disable')
+  disable(@Param('id') id: string) {
+    return this.beneficiaryService.disable(+id);
+  }
+
+  @Post('disable-multiple')
+  disableMultiple(@Body() requestBody: { beneficiaryIds: number[] }) {
+    return this.beneficiaryService.disableMultiple(requestBody.beneficiaryIds);
+  }
+
   @Get(':uuid/transactions')
   getTransactions(
     @Param('uuid') uuid: string,

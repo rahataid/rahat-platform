@@ -48,6 +48,7 @@ export class BeneficiaryService {
     const { page, perPage, ...rest } = query;
     const where: Prisma.BeneficiaryWhereInput = {
       deletedAt: null,
+      isActive: true,
     };
     const include: Prisma.BeneficiaryInclude = {
       _count: {
@@ -167,6 +168,28 @@ export class BeneficiaryService {
       },
       where: {
         uuid,
+      },
+    });
+  }
+
+  async disable(id: number) {
+    return this.prisma.beneficiary.update({
+      where: { id },
+      data: {
+        isActive: false,
+      },
+    });
+  }
+
+  async disableMultiple(ids: number[]) {
+    return this.prisma.beneficiary.updateMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      data: {
+        isActive: false,
       },
     });
   }
