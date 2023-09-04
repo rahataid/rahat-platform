@@ -5,7 +5,10 @@ import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ListProjectDto } from './dto/list-project-dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
+import {
+  UpdateProjectCampaignDto,
+  UpdateProjectDto,
+} from './dto/update-project.dto';
 
 @Injectable()
 export class ProjectService {
@@ -127,6 +130,19 @@ export class ProjectService {
       },
       where: {
         id,
+      },
+    });
+  }
+
+  updateCampaign(contractAddress: string, campaigns: UpdateProjectCampaignDto) {
+    return this.prisma.project.update({
+      where: {
+        contractAddress: hexStringToBuffer(contractAddress),
+      },
+      data: {
+        campaigns: {
+          push: campaigns.ids,
+        },
       },
     });
   }

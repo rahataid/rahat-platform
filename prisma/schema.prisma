@@ -114,6 +114,7 @@ model Project {
   owner         User[]        @relation("UserProjects")
   beneficiaries Beneficiary[] @relation("BeneficiaryProjects")
   vendors       Vendor[]      @relation("ProjectDistributors")
+  campaigns     Int[]         @default([])
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
