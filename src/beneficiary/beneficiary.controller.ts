@@ -48,6 +48,11 @@ export class BeneficiaryController {
     return this.beneficiaryService.getStats();
   }
 
+  @Patch(':walletAddress/disable')
+  disable(@Param('walletAddress') walletAddress: string) {
+    return this.beneficiaryService.disableBeneficiary(walletAddress);
+  }
+
   @Get(':uuid')
   findOne(@Param('uuid') uuid: string) {
     return this.beneficiaryService.findOne(uuid);
@@ -64,16 +69,6 @@ export class BeneficiaryController {
   @Delete(':uuid')
   remove(@Param('uuid') uuid: string) {
     return this.beneficiaryService.remove(uuid);
-  }
-
-  @Patch(':id/disable')
-  disable(@Param('id') id: string) {
-    return this.beneficiaryService.disable(+id);
-  }
-
-  @Post('disable-multiple')
-  disableMultiple(@Body() requestBody: { beneficiaryIds: number[] }) {
-    return this.beneficiaryService.disableMultiple(requestBody.beneficiaryIds);
   }
 
   @Get(':uuid/transactions')

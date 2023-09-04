@@ -75,7 +75,7 @@ model Beneficiary {
   phone          String?
   dob            DateTime?
   gender         Gender         @default(UNKNOWN)
-  walletAddress  Bytes?
+  walletAddress  Bytes?         @unique
   address        String?
   longitude      Float?
   latitude       Float?

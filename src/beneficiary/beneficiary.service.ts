@@ -172,24 +172,13 @@ export class BeneficiaryService {
     });
   }
 
-  async disable(id: number) {
+  async disableBeneficiary(walletAddress: string) {
     return this.prisma.beneficiary.update({
-      where: { id },
       data: {
         isActive: false,
       },
-    });
-  }
-
-  async disableMultiple(ids: number[]) {
-    return this.prisma.beneficiary.updateMany({
       where: {
-        id: {
-          in: ids,
-        },
-      },
-      data: {
-        isActive: false,
+        walletAddress: hexStringToBuffer(walletAddress),
       },
     });
   }
