@@ -225,7 +225,7 @@ export class BeneficiaryService {
   SELECT
     SUM(CASE WHEN "gender" = 'MALE' THEN 1 ELSE 0 END) as "maleCount",
     SUM(CASE WHEN "gender" = 'FEMALE' THEN 1 ELSE 0 END) as "femaleCount",
-    SUM(CASE WHEN "gender" = 'OTHERS' THEN 1 ELSE 0 END) as "othersCount",
+    SUM(CASE WHEN "gender" = 'OTHER' THEN 1 ELSE 0 END) as "othersCount",
     SUM(CASE WHEN "gender" = 'UNKNOWN' THEN 1 ELSE 0 END) as "unknownCount",
     SUM(CASE WHEN "bankStatus" = 'UNKNOWN' THEN 1 ELSE 0 END) as "unknownBankCount",
     SUM(CASE WHEN "bankStatus" = 'UNBANKED' THEN 1 ELSE 0 END) as "unbankedCount",
@@ -233,16 +233,17 @@ export class BeneficiaryService {
     SUM(CASE WHEN "bankStatus" = 'UNDERBANKED' THEN 1 ELSE 0 END) as "underbankedCount",
     SUM(CASE WHEN "phoneOwnership" = 'UNKNOWN' THEN 1 ELSE 0 END) as "unknownPhoneCount",
     SUM(CASE WHEN "phoneOwnership" = 'NO_PHONE' THEN 1 ELSE 0 END) as "noPhoneCount",
-    SUM(CASE WHEN "phoneOwnership" = 'FEATURE_PHONE' THEN 1 ELSE 0 END) as "featurePhoneCount",
-    SUM(CASE WHEN "phoneOwnership" = 'SMART_PHONE' THEN 1 ELSE 0 END) as "smartPhoneCount",
+    SUM(CASE WHEN "phoneOwnership" = 'FEATURE' THEN 1 ELSE 0 END) as "featurePhoneCount",
+    SUM(CASE WHEN "phoneOwnership" = 'SMART' THEN 1 ELSE 0 END) as "smartPhoneCount",
     SUM(CASE WHEN "internetAccess" = 'UNKNOWN' THEN 1 ELSE 0 END) as "unknownInternetCount",
     SUM(CASE WHEN "internetAccess" = 'NO_INTERNET' THEN 1 ELSE  0 END) as "noInternetCount",
     SUM(CASE WHEN "internetAccess" = 'PHONE_INTERNET' THEN 1 ELSE 0 END) as "phoneInternetCount",
     SUM(CASE WHEN "internetAccess" = 'HOME_INTERNET' THEN 1 ELSE 0 END) as "homeInternetCount"
-  FROM "Beneficiary"
+  FROM "tbl_beneficiaries"
 `;
 
     totalCount = stringifyWithBigInt(totalCount);
+    console.log('totalCount', totalCount);
 
     const gender = {
       MALE: totalCount[0].maleCount,
