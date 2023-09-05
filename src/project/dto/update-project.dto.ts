@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class UpdateProjectDto {
   @ApiProperty({
@@ -67,10 +73,10 @@ export class UpdateProjectDto {
 
 export class UpdateProjectCampaignDto {
   @ApiProperty({
-    type: 'array',
+    type: 'number',
     required: true,
-    example: [1, 2, 3],
+    example: 1,
   })
-  @IsArray()
-  ids: number[];
+  @IsNumber()
+  id: number;
 }

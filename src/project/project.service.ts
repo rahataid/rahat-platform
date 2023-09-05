@@ -141,7 +141,7 @@ export class ProjectService {
       },
       data: {
         campaigns: {
-          push: campaigns.ids,
+          push: campaigns.id,
         },
       },
     });
