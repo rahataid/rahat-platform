@@ -22,6 +22,7 @@ import { VendorsModule } from './vendors/vendors.module';
         redis: {
           host: configService.get<string>('REDIS_HOST'),
           port: +configService.get<number>('REDIS_PORT'),
+          password: configService.get<string>('REDIS_PASSWORD'),
           retryStrategy: (times) => {
             // reconnect after
             return Math.min(times * 50, 2000);

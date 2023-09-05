@@ -1,8 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { SENT_OTP, MAIL_QUEUE, WELCOME_MSG } from './constants';
-import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
-import { jobOptions } from './config/bullOptions';
+import { Injectable, Logger } from '@nestjs/common';
+import { JobOptions, Queue } from 'bull';
+import { MAIL_QUEUE, SENT_OTP, WELCOME_MSG } from './constants';
+
+const jobOptions: JobOptions = {
+  attempts: 3,
+  removeOnComplete: 20,
+  backoff: {
+    type: 'exponential',
+    delay: 1000,
+  },
+}
 
 @Injectable()
 export class MailService {
