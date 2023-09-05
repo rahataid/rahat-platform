@@ -10,7 +10,7 @@ const jobOptions: JobOptions = {
     type: 'exponential',
     delay: 1000,
   },
-}
+};
 
 @Injectable()
 export class MailService {
