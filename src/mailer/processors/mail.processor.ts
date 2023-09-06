@@ -77,7 +77,7 @@ export class MailProcessor {
       return this._mailerService.sendMail({
         to: job.data.email,
         from: this._configService.get('EMAIL_ADDRESS'),
-        subject: 'Greetings from Seed2.0',
+        subject: 'Greetings from Rahat',
         template: './welcome',
         context: { name: job.data.name },
       });

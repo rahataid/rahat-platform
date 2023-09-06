@@ -40,6 +40,7 @@ CREATE TABLE "tbl_beneficiaries" (
     "longitude" DOUBLE PRECISION,
     "latitude" DOUBLE PRECISION,
     "isApproved" BOOLEAN NOT NULL DEFAULT false,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
     "bankStatus" "BankStatus" NOT NULL DEFAULT 'UNKNOWN',
     "phoneOwnership" "PhoneOwnership" NOT NULL DEFAULT 'UNKNOWN',
     "internetAccess" "InternetAccess" NOT NULL DEFAULT 'UNKNOWN',
@@ -67,6 +68,7 @@ CREATE TABLE "tbl_projects" (
     "description" TEXT,
     "contractAddress" BYTEA,
     "isApproved" BOOLEAN NOT NULL DEFAULT false,
+    "campaigns" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -148,6 +150,9 @@ CREATE TABLE "_ProjectDistributors" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_beneficiaries_uuid_key" ON "tbl_beneficiaries"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_beneficiaries_walletAddress_key" ON "tbl_beneficiaries"("walletAddress");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_projects_contractAddress_key" ON "tbl_projects"("contractAddress");
