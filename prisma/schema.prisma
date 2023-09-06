@@ -75,11 +75,12 @@ model Beneficiary {
   phone          String?
   dob            DateTime?
   gender         Gender         @default(UNKNOWN)
-  walletAddress  Bytes?
+  walletAddress  Bytes?         @unique
   address        String?
   longitude      Float?
   latitude       Float?
   isApproved     Boolean        @default(false)
+  isActive       Boolean        @default(true)
   bankStatus     BankStatus     @default(UNKNOWN)
   phoneOwnership PhoneOwnership @default(UNKNOWN)
   internetAccess InternetAccess @default(UNKNOWN)
@@ -113,6 +114,7 @@ model Project {
   owner         User[]        @relation("UserProjects")
   beneficiaries Beneficiary[] @relation("BeneficiaryProjects")
   vendors       Vendor[]      @relation("ProjectDistributors")
+  campaigns     Int[]         @default([])
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

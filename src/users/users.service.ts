@@ -47,6 +47,7 @@ export class UsersService {
     const select: Prisma.UserSelect = {
       name: true,
       roles: true,
+      email: true,
       profileImage: true,
       isApproved: true,
       walletAddress: true,

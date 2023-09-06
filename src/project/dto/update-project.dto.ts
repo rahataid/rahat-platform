@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class UpdateProjectDto {
   @ApiProperty({
@@ -63,4 +69,14 @@ export class UpdateProjectDto {
   })
   @IsOptional()
   isApproved?: boolean;
+}
+
+export class UpdateProjectCampaignDto {
+  @ApiProperty({
+    type: 'number',
+    required: true,
+    example: 1,
+  })
+  @IsNumber()
+  id: number;
 }

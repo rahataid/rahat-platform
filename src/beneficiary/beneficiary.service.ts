@@ -48,6 +48,7 @@ export class BeneficiaryService {
     const { page, perPage, ...rest } = query;
     const where: Prisma.BeneficiaryWhereInput = {
       deletedAt: null,
+      isActive: true,
     };
     const include: Prisma.BeneficiaryInclude = {
       _count: {
@@ -167,6 +168,17 @@ export class BeneficiaryService {
       },
       where: {
         uuid,
+      },
+    });
+  }
+
+  async disableBeneficiary(walletAddress: string) {
+    return this.prisma.beneficiary.update({
+      data: {
+        isActive: false,
+      },
+      where: {
+        walletAddress: hexStringToBuffer(walletAddress),
       },
     });
   }
