@@ -44,6 +44,14 @@ export class ProjectController {
     return this.projectService.updateCampaign(address, campaigns);
   }
 
+  @Patch('/remove/:address/campaigns')
+  removeCampaignFromProject(
+    @Param('address') address: string,
+    @Body() campaigns: number[],
+  ) {
+    return this.projectService.removeCampaignFromProject(address, campaigns);
+  }
+
   @Patch(':address')
   update(
     @Param('address') address: string,

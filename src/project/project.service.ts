@@ -147,6 +147,33 @@ export class ProjectService {
     });
   }
 
+  async removeCampaignFromProject(
+    contractAddress: string,
+    campaigns: number[],
+  ) {
+    const project = await this.prisma.project.findUnique({
+      where: { contractAddress: hexStringToBuffer(contractAddress) },
+      select: {
+        campaigns: true,
+      },
+    });
+
+    const filteredCampaigns = project.campaigns.filter(
+      (c) => !campaigns.includes(c),
+    );
+
+    return this.prisma.project.update({
+      where: {
+        contractAddress: hexStringToBuffer(contractAddress),
+      },
+      data: {
+        campaigns: {
+          set: filteredCampaigns,
+        },
+      },
+    });
+  }
+
   // TODO: implement search and pagination feature and create dto
   async getBeneficiaries(address: string) {
     const select: Prisma.BeneficiarySelect = {
