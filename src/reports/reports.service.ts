@@ -6,19 +6,25 @@ export class ReportsService {
   constructor(private prisma: PrismaService) {}
 
   async getDashboardSummary() {
-    return 'report';
-    // const totalBeneficiaries = await this.prisma.beneficiary.count();
-    // const totalTokens = await this.prisma.beneficiary.aggregate({
-    //   _sum: {
-    //     tokensClaimed: true,
-    //   },
-    // });
-    // const totalProjects = await this.prisma.project.count();
+    // return 'report';
+    let totalBeneficiaries: number;
+    let totalProjects: number;
+    let totalTokens;
 
-    // return {
-    //   totalBeneficiaries,
-    //   totalTokens,
-    //   totalProjects,
-    // };
+    await this.prisma.$transaction(async (transaction) => {
+      totalBeneficiaries = await transaction.beneficiary.count();
+      totalTokens = await transaction.project.aggregate({
+        _sum: {
+          disbursed: true,
+        },
+      });
+      totalProjects = await transaction.project.count();
+    });
+
+    return {
+      totalBeneficiaries,
+      totalTokens: totalTokens._sum.disbursed,
+      totalProjects,
+    };
   }
 }
