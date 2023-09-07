@@ -7,7 +7,7 @@ import {
   hexStringToBuffer,
   stringifyWithBigInt,
 } from '@utils/string-format';
-import { PrismaService } from 'nestjs-prisma';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBeneficiaryDto } from './dto/create-beneficiary.dto';
 import {
   ListBeneficiaryDto,
@@ -48,11 +48,17 @@ export class BeneficiaryService {
     const { page, perPage, ...rest } = query;
     const where: Prisma.BeneficiaryWhereInput = {
       deletedAt: null,
+      isActive: true,
     };
     const include: Prisma.BeneficiaryInclude = {
       _count: {
         select: {
           projects: true,
+        },
+      },
+      projects: {
+        select: {
+          name: true,
         },
       },
     };
@@ -98,6 +104,7 @@ export class BeneficiaryService {
             return {
               ...row,
               walletAddress: bufferToHexString(row.walletAddress),
+              projects: row.projects.map((p) => p.name).join(', '),
             };
           });
         },
@@ -161,6 +168,17 @@ export class BeneficiaryService {
       },
       where: {
         uuid,
+      },
+    });
+  }
+
+  async disableBeneficiary(walletAddress: string) {
+    return this.prisma.beneficiary.update({
+      data: {
+        isActive: false,
+      },
+      where: {
+        walletAddress: hexStringToBuffer(walletAddress),
       },
     });
   }
@@ -237,7 +255,6 @@ FROM "tbl_beneficiaries"
 `;
 
     totalCount = stringifyWithBigInt(totalCount);
-    console.log('totalCount', totalCount);
 
     const gender = {
       MALE: totalCount[0].maleCount,
