@@ -255,7 +255,6 @@ FROM "tbl_beneficiaries"
 `;
 
     totalCount = stringifyWithBigInt(totalCount);
-    console.log('totalCount', totalCount);
 
     const gender = {
       MALE: totalCount[0].maleCount,
