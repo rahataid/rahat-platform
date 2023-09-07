@@ -1,12 +1,12 @@
 FROM node:18-alpine3.17 AS builder
 RUN apk add --update bash git
 WORKDIR /opt/app
-COPY package.json yarn.lock ./
-RUN yarn install
+COPY package.json package-lock.json ./
+RUN npm install
 COPY . .
 # Generate Prisma client
 RUN npx prisma generate
-RUN yarn build
+RUN npm run build
 
 # Final Image
 FROM node:18-alpine3.17
