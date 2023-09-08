@@ -5,6 +5,7 @@ import { IsOptional, IsString } from 'class-validator';
 interface BeneficiaryFilter {
   name?: string;
   orderBy?: string;
+  phone?: string;
   order?: 'asc' | 'desc';
   bankStatus: BankStatus;
   phoneOwnership: PhoneOwnership;
@@ -35,6 +36,12 @@ export class ListBeneficiaryDto {
   })
   @IsOptional()
   name?: BeneficiaryFilter['name'];
+  @ApiProperty({
+    type: 'string',
+    required: false,
+  })
+  @IsOptional()
+  phone?: BeneficiaryFilter['phone'];
 
   @ApiProperty({
     type: 'string',
