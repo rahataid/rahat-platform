@@ -36,6 +36,7 @@ export class ListBeneficiaryDto {
   })
   @IsOptional()
   name?: BeneficiaryFilter['name'];
+
   @ApiProperty({
     type: 'string',
     required: false,
