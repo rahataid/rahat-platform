@@ -45,6 +45,7 @@
     "class-validator": "^0.14.0",
     "ethers": "^6.6.3",
     "handlebars": "^4.7.8",
+    "nestjs-prisma": "^0.22.0",
     "nodemailer": "^6.9.4",
     "otplib": "^12.0.1",
     "passport-jwt": "^4.0.1",
