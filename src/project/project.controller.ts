@@ -64,4 +64,12 @@ export class ProjectController {
   getBeneficiaries(@Param('address') address: string) {
     return this.projectService.getBeneficiaries(address);
   }
+
+  @Patch('/remove/:address/beneficiaries')
+  removeBeneficiariesFromProject(
+    @Param('address') address:string,
+    @Body() beneficiaries: string[]  
+  ) {
+    return this.projectService.removeBeneficiariesFromProject(address,beneficiaries)
+  }
 }

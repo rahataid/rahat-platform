@@ -126,6 +126,34 @@ export class VendorsService {
     });
   }
 
+  
+  async toogleState(walletAddress: string) {
+
+     const vendor  = await this.prisma.vendor.findUnique({
+      where: {
+        walletAddress: hexStringToBuffer(walletAddress),
+      },      
+     }) 
+
+      if(!vendor) {
+        return null
+      }
+      
+    const updateVendor = await this.prisma.vendor.update({
+      where: {
+        walletAddress: hexStringToBuffer(walletAddress),
+      },
+      data: {
+     isActive:!vendor.isActive
+      },
+      select:{
+        isActive:true
+      }
+    });
+
+    return  updateVendor.isActive
+  }
+
   register(registerVendorDto: any) {
     return 'This registers vendors';
   }
