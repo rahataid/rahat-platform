@@ -127,18 +127,13 @@ export class VendorsService {
   }
 
   
-  async toogleState(walletAddress: string) {
+  async changeVendorState(walletAddress: string) {
 
      const vendor  = await this.prisma.vendor.findUnique({
       where: {
         walletAddress: hexStringToBuffer(walletAddress),
       },      
      }) 
-
-      if(!vendor) {
-        return null
-      }
-      
     const updateVendor = await this.prisma.vendor.update({
       where: {
         walletAddress: hexStringToBuffer(walletAddress),

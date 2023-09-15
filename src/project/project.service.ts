@@ -238,6 +238,7 @@ export class ProjectService {
         beneficiaries: true, // Include the updated list of beneficiaries
       },
     });
+    
   
     return updatedProject.beneficiaries;
   }
