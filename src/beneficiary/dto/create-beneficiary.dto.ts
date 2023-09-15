@@ -36,12 +36,12 @@ export class CreateBeneficiaryDto {
   @IsOptional()
   address?: Address;
 
-  @ApiProperty({
-    example: '1',
-  })
-  @IsOptional()
-  @IsString()
-  projectId?: string;
+  // @ApiProperty({
+  //   example: '1',
+  // })
+  // @IsOptional()
+  // @IsString()
+  // projectId?: string;
 
   @ApiProperty({
     example: '1',
