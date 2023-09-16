@@ -227,20 +227,23 @@ export class ProjectService {
     contractAddress: string,
     beneficiaries: string[],
   ) {
-    const updatedProject = await this.prisma.project.update({
+    for(const benAddress of beneficiaries){
+    await this.prisma.project.update({
       where: { contractAddress: hexStringToBuffer(contractAddress) },
       data: {
         beneficiaries: {
-          disconnect: beneficiaries.map((uuid) => ({ uuid })),
+          disconnect:{
+            walletAddress:hexStringToBuffer( benAddress)},
         },
       },
       include: {
         beneficiaries: true, // Include the updated list of beneficiaries
       },
     });
+  }
+  return 'Disconnected Succesfully'
     
   
-    return updatedProject.beneficiaries;
   }
 
 }
