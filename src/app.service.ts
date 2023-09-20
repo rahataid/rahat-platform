@@ -31,6 +31,7 @@ export class AppService {
   }
 
   getContracts() {
+    console.log('INSIDE GET CONTRACTS');
     return this.prisma.appSettings.findFirstOrThrow({
       where: {
         name: 'CONTRACT_ADDRESS',
@@ -53,15 +54,18 @@ export class AppService {
     });
   }
 
-  getContractByName(contractName: string) {
-    return this.prisma.appSettings.findFirstOrThrow({
+  async getContractByName(contractName: string) {
+    const addresses = await this.prisma.appSettings.findMany({
       where: {
         name: 'CONTRACT_ADDRESS',
-        value: {
-          path: [contractName],
-          string_contains: '0x0',
-        },
       },
     });
+
+    const address = addresses[0].value[contractName];
+    if (!address) {
+      throw new Error(`Contract ${contractName} not found.`);
+    }
+
+    return address;
   }
 }

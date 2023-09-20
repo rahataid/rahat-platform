@@ -141,6 +141,7 @@ export class VendorsService {
   }
 
   register(registerVendorDto: any) {
+    console.log('INSIDE REGISTER VENDOR FUNCTION');
     return 'This registers vendors';
   }
 }
