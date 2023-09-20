@@ -1,25 +1,26 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["clientExtensions"]
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator dbml {
-  provider            = "prisma-dbml-generator"
-  output              = "./dbml"
-  outputName          = "rahat-system-model.dbml"
-  projectName         = "Rahat System"
-  projectDatabaseType = "PostgreSQL"
-  projectNote         = "Rahat System"
-}
+// generator dbml {
+//   provider            = "prisma-dbml-generator"
+//   output              = "./dbml"
+//   outputName          = "rahat-system-model.dbml"
+//   projectName         = "Rahat System"
+//   projectDatabaseType = "PostgreSQL"
+//   projectNote         = "Rahat System"
+// }
 
-generator docs {
-  provider = "node node_modules/prisma-docs-generator"
-  output   = "./docs"
-}
+// generator docs {
+//   provider = "node node_modules/prisma-docs-generator"
+//   output   = "./docs"
+// }
 
 enum Gender {
   MALE
@@ -74,17 +75,18 @@ model Beneficiary {
   phone          String?
   dob            DateTime?
   gender         Gender         @default(UNKNOWN)
-  walletAddress  Bytes?
+  walletAddress  Bytes?         @unique
   address        String?
-  longitude     Float?
-  latitude      Float?
+  longitude      Float?
+  latitude       Float?
   isApproved     Boolean        @default(false)
+  isActive       Boolean        @default(true)
   bankStatus     BankStatus     @default(UNKNOWN)
   phoneOwnership PhoneOwnership @default(UNKNOWN)
   internetAccess InternetAccess @default(UNKNOWN)
   extras         Json?
 
-  projects  Project[] @relation("BeneficiaryProjects")
+  projects Project[] @relation("BeneficiaryProjects")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -112,6 +114,7 @@ model Project {
   owner         User[]        @relation("UserProjects")
   beneficiaries Beneficiary[] @relation("BeneficiaryProjects")
   vendors       Vendor[]      @relation("ProjectDistributors")
+  campaigns     Int[]         @default([])
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -121,13 +124,13 @@ model Project {
 }
 
 model Vendor {
-  id             Int     @id @default(autoincrement())
-  name           String
-  walletAddress  Bytes?  @unique
-  phone          String?
-  email          String?
-  address        Json
-  isApproved       Boolean @default(false)
+  id            Int     @id @default(autoincrement())
+  name          String
+  walletAddress Bytes?  @unique
+  phone         String?
+  email         String?
+  address       Json
+  isApproved    Boolean @default(false)
 
   projects Project[] @relation("ProjectDistributors")
 
@@ -158,31 +161,26 @@ model Transaction {
 }
 
 model User {
-  id            Int     @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   name          String
-  email         String?  @unique
-  walletAddress Bytes  @unique
+  email         String?   @unique
+  walletAddress Bytes     @unique
   profileImage  String?
-  isApproved  Boolean @default(false)
-
-  projects  Project[] @relation("UserProjects")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  roles   Role[] @relation("UserRoles")
+  isApproved    Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  roles         Role[]    @default([USER])
+  projects      Project[] @relation("UserProjects")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  lastLoggedIn  DateTime? @default(now())
 
   @@map(name: "tbl_users")
 }
 
-
-model Role {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  users     User[] @relation("UserRoles")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
-
-  @@map(name: "tbl_roles")
+enum Role {
+  DONOR
+  STAKEHOLDER
+  ADMIN
+  USER
 }
-

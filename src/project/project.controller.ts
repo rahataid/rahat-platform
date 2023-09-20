@@ -10,7 +10,10 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ListProjectDto } from './dto/list-project-dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
+import {
+  UpdateProjectCampaignDto,
+  UpdateProjectDto,
+} from './dto/update-project.dto';
 import { ProjectService } from './project.service';
 
 @Controller('projects')
@@ -31,6 +34,22 @@ export class ProjectController {
   @Get(':address')
   findOne(@Param('address') address: string) {
     return this.projectService.findOne(address);
+  }
+
+  @Patch(':address/campaigns')
+  updateCampaign(
+    @Param('address') address: string,
+    @Body() campaigns: UpdateProjectCampaignDto,
+  ) {
+    return this.projectService.updateCampaign(address, campaigns);
+  }
+
+  @Patch('/remove/:address/campaigns')
+  removeCampaignFromProject(
+    @Param('address') address: string,
+    @Body() campaigns: number[],
+  ) {
+    return this.projectService.removeCampaignFromProject(address, campaigns);
   }
 
   @Patch(':address')

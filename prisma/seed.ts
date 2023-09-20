@@ -1,274 +1,48 @@
-import {
-  BankStatus,
-  Gender,
-  InternetAccess,
-  PhoneOwnership,
-  PrismaClient,
-  TxStatus,
-} from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import { hexStringToBuffer } from '../src/utils/string-format';
 
 const prisma = new PrismaClient();
 
 async function seed() {
-  const roles1 = await prisma.role.create({
-    data: {
-      name: 'Donor',
-    },
-  });
-  const roles2 = await prisma.role.create({
-    data: {
-      name: 'Field Agent',
-    },
-  });
-  const roles3 = await prisma.role.create({
-    data: {
-      name: 'Vendors',
-    },
-  });
-  const roles4 = await prisma.role.create({
-    data: {
-      name: 'Stakeholders',
-    },
-  });
-
   // Create users
   const user1 = await prisma.user.create({
     data: {
-      name: 'User 1',
-      email: 'user1@rahat.com',
+      name: 'Rahat Admin',
+      email: 'rahatadmin@mailinator.com',
       walletAddress: hexStringToBuffer(
         '0x422416b9203de06be4487D17DD1C76725c6049d7',
       ),
-      roles: {
-        connect: {
-          id: roles1.id,
-        },
-      },
+      roles: [Role.ADMIN],
+      isActive: true,
     },
   });
   const user2 = await prisma.user.create({
     data: {
-      name: 'User 2',
-      email: 'user2@rahat.com',
+      name: 'Rahat User',
+      email: 'rahatuser@mailinator.com',
       walletAddress: hexStringToBuffer(
         '0x216EC842b77e424671219ABB817467fCEa991409',
       ),
-      roles: {
-        connect: {
-          id: roles2.id,
-        },
-      },
+      isActive: true,
+
+      roles: [Role.USER],
     },
   });
   const user3 = await prisma.user.create({
     data: {
-      name: 'User 3',
-      email: 'user3@rahat.com',
+      name: 'Stakeholder',
+      email: 'stake@mailinator.com',
       walletAddress: hexStringToBuffer(
         '0x216EC842b77e424671219ABB817467fCEa991404',
       ),
-      roles: {
-        connect: {
-          id: roles3.id,
-        },
-      },
+      roles: [Role.STAKEHOLDER],
+      isActive: true,
     },
   });
-  const user4 = await prisma.user.create({
-    data: {
-      name: 'User 4',
-      email: 'user4@rahat.com',
-      walletAddress: hexStringToBuffer(
-        '0x456EC842b77e424671219ABB817467fCEa991404',
-      ),
-      roles: {
-        connect: {
-          id: roles4.id,
-        },
-      },
-    },
-  });
-
-  // Create projects
-  const proj1 = await prisma.project.create({
-    data: {
-      name: 'Project 1',
-      startDate: new Date(),
-      endDate: new Date(),
-      budget: 1000,
-      disbursed: 2000,
-      extras: { target: 10 },
-      location: 'Kathmandu',
-      projectType: 'Construction',
-      projectManager: 'Balen Shah',
-      description: 'Kathmandu to Pokhara highway road construction',
-      contractAddress: hexStringToBuffer(
-        '0x1B3799cC1F513b9fF0b63c36266b3F214295A900',
-      ),
-      isApproved: true,
-      owner: {
-        connect: {
-          id: user1.id,
-        },
-      },
-    },
-  });
-  const proj2 = await prisma.project.create({
-    data: {
-      name: 'Project 2',
-      startDate: new Date(),
-      endDate: new Date(),
-      budget: 1000,
-      disbursed: 2000,
-      extras: { target: 10 },
-      location: 'Kathmandu',
-      projectType: 'Construction',
-      projectManager: 'Manjik Shrestha',
-      description: 'Kathmandu to New York highway road construction',
-      contractAddress: hexStringToBuffer(
-        '0xA82593bC6a9f5Ac3De17EEEB91240af019fF82C7',
-      ),
-      isApproved: true,
-      owner: {
-        connect: {
-          id: user2.id,
-        },
-      },
-    },
-  });
-
-  const beneficiary1 = [...Array(25)].map((_, index) => ({
-    name: `Beneficiary ${index}`,
-    gender: Gender.MALE,
-    walletAddress: hexStringToBuffer(
-      `0x${index}881595732642f4D73884b2b1ea39D20Af1D3e888`,
-    ),
-    isApproved: true,
-    phone: `98654054${index}`,
-    dob: new Date(),
-    latitude: 27.713009571767344,
-    longitude: 85.38533286023136,
-    bankStatus: BankStatus.BANKED,
-    internetAccess: InternetAccess.HOME_INTERNET,
-    phoneOwnership: PhoneOwnership.SMART,
-    address: 'Kathmandu',
-
-    projects: {
-      connect: { id: proj1.id },
-    },
-  }));
-
-  for (const bens of beneficiary1) {
-    await prisma.beneficiary.create({
-      data: {
-        ...bens,
-      },
-    });
-  }
-  const beneficiary2 = [...Array(20)].map((_, index) => ({
-    name: `Beneficiary ${index + 19}`,
-    gender: Gender.FEMALE,
-    walletAddress: hexStringToBuffer(
-      `0x${index * 5}81595732642f4D73884b2b1ea39D20Af1D3e888`,
-    ),
-    isApproved: false,
-
-    latitude: 27.713009571767344,
-    longitude: 85.38533286023136,
-    bankStatus: BankStatus.UNDERBANKED,
-    internetAccess: InternetAccess.PHONE_INTERNET,
-    phoneOwnership: PhoneOwnership.FEATURE,
-    address: 'Chitwan',
-
-    projects: {
-      connect: { id: proj2.id },
-    },
-  }));
-
-  for (const bens of beneficiary2) {
-    await prisma.beneficiary.create({
-      data: {
-        ...bens,
-      },
-    });
-  }
-
-  // Create vendors
-  const vendor1 = await prisma.vendor.create({
-    data: {
-      name: 'Vendor 1',
-      walletAddress: hexStringToBuffer(
-        '0x92b1DF3274DcF866621716D43bc18a5D67b78704',
-      ),
-      address: {
-        location: 'ktm',
-      },
-      projects: {
-        connect: { id: proj1.id },
-      },
-    },
-  });
-  const vendor2 = await prisma.vendor.create({
-    data: {
-      name: 'Vendor 2',
-      walletAddress: hexStringToBuffer(
-        '0xd1FD8ca9F40A3DD2aa212A6d89Ef5Ee68041D26c',
-      ),
-      address: {
-        location: 'ktm',
-      },
-      projects: {
-        connect: { id: proj2.id },
-      },
-    },
-  });
-
-  const transactions = [
-    {
-      txHash: hexStringToBuffer(
-        `0x885fd64b56dd9a419728fc684a21abcfbcd88613b5af124a1a7d330e62c7b04b`,
-      ),
-      txStatus: TxStatus.NEW,
-    },
-    {
-      txHash: hexStringToBuffer(
-        `0xaa4c5412881f428ca73adeea35275d3bace9a863f66ba7be98936cfe1c498cb6`,
-      ),
-      txStatus: TxStatus.NEW,
-    },
-    {
-      txHash: hexStringToBuffer(
-        `0x461863b2107fc9988bc01834e4f375dcb612da55a72b13dbafef49763591be99`,
-      ),
-      txStatus: TxStatus.NEW,
-    },
-    {
-      txHash: hexStringToBuffer(
-        `0xdf80efead23a4080acddfe5a69fd067428812639ea445d7c2b113f22622992a8`,
-      ),
-      txStatus: TxStatus.NEW,
-    },
-  ];
-
-  for (const trans of transactions) {
-    await prisma.transaction.create({
-      data: {
-        ...trans,
-      },
-    });
-  }
 
   console.log({
-    proj1,
-    proj2,
     user1,
     user2,
-    beneficiary1,
-    beneficiary2,
-    vendor1,
-    vendor2,
-    transactions,
   });
 }
 
