@@ -11,16 +11,21 @@ import { UpdateVendorDto } from './dto/update-vendor.dto';
 export class VendorsService {
   constructor(private prisma: PrismaService) {}
 
-  create(createVendorDto: CreateVendorDto) {
+  async create(createVendorDto: CreateVendorDto) {
     const { walletAddress, name, address } = createVendorDto;
     const vendorCreateInput = {
       walletAddress: hexStringToBuffer(walletAddress),
       name,
       address: JSON.stringify(address),
     };
-    return this.prisma.vendor.create({
+    const vendorCreated = await this.prisma.vendor.create({
       data: vendorCreateInput,
     });
+    console.log(vendorCreated);
+    return {
+      ...vendorCreated,
+      walletAddress: bufferToHexString(vendorCreateInput.walletAddress),
+    };
   }
 
   findAll(query: ListVendorDto) {
@@ -127,6 +132,7 @@ export class VendorsService {
   }
 
   register(registerVendorDto: any) {
+    console.log('INSIDE REGISTER VENDOR FUNCTION');
     return 'This registers vendors';
   }
 }
