@@ -23,22 +23,15 @@ export class BeneficiaryService {
   prisma = null;
   constructor(private _prisma: PrismaService) {
     this.prisma = _prisma.$extends(PrismaWriteOperations);
+    // this._prisma = _prisma;
   }
 
   create(createBeneficiaryDto: CreateBeneficiaryDto) {
-    let optional: { project: any | null };
-
-    if (createBeneficiaryDto.projectId) {
-      optional.project = {
-        connect: {
-          id: +createBeneficiaryDto.projectId,
-        },
-      };
-    }
-
     return this.prisma.beneficiary.create({
       data: {
         ...createBeneficiaryDto,
+
+        // ...optional,
         walletAddress: hexStringToBuffer(createBeneficiaryDto.walletAddress),
       },
     });

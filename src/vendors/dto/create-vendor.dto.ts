@@ -23,6 +23,13 @@ export class CreateVendorDto {
   walletAddress: string;
 
   @ApiProperty({
+    example: '9864624214',
+  })
+  @IsString()
+  @IsNotEmpty()
+  phone: string;
+
+  @ApiProperty({
     example: {
       location: 'ktm',
       postal: 224214,

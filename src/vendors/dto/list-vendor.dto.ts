@@ -3,7 +3,9 @@ import { IsOptional, IsString } from 'class-validator';
 
 interface VendorFilter {
   name?: string;
+  phone?: string;
   orderBy?: string;
+  walletAddress?: string;
 }
 
 export class ListVendorDto {
@@ -30,6 +32,21 @@ export class ListVendorDto {
   })
   @IsOptional()
   name?: VendorFilter['name'];
+
+  @ApiProperty({
+    type: 'string',
+    required: false,
+  })
+  @IsOptional()
+  phone?: VendorFilter['phone'];
+
+  @ApiProperty({
+    type: 'string',
+    required: false,
+  })
+  @IsOptional()
+  // @IsEthereumAddress()
+  walletAddress?: VendorFilter['walletAddress'];
 
   @ApiProperty({
     type: 'string',

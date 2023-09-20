@@ -11,16 +11,18 @@ import { UpdateVendorDto } from './dto/update-vendor.dto';
 export class VendorsService {
   constructor(private prisma: PrismaService) {}
 
-  create(createVendorDto: CreateVendorDto) {
-    const { walletAddress, name, address } = createVendorDto;
-    const vendorCreateInput = {
-      walletAddress: hexStringToBuffer(walletAddress),
-      name,
-      address: JSON.stringify(address),
-    };
-    return this.prisma.vendor.create({
-      data: vendorCreateInput,
+  async create(createVendorDto: CreateVendorDto) {
+    const vendor = await this.prisma.vendor.create({
+      data: {
+        ...createVendorDto,
+        walletAddress: hexStringToBuffer(createVendorDto.walletAddress),
+        address: JSON.stringify(createVendorDto.address),
+      },
     });
+    return {
+      ...vendor,
+      walletAddress: bufferToHexString(vendor.walletAddress),
+    };
   }
 
   findAll(query: ListVendorDto) {
@@ -32,6 +34,17 @@ export class VendorsService {
         contains: rest.name,
         mode: 'insensitive',
       };
+    }
+
+    if (rest.phone) {
+      where.phone = {
+        contains: rest.phone,
+        mode: 'insensitive',
+      };
+    }
+
+    if (rest.walletAddress) {
+      where.walletAddress = hexStringToBuffer(rest.walletAddress);
     }
     const include: Prisma.VendorInclude = {
       _count: {
@@ -57,6 +70,7 @@ export class VendorsService {
           rows.map((r) => ({
             ...r,
             walletAddress: bufferToHexString(r.walletAddress),
+            address: JSON.parse(r.address),
           })),
       },
     );
