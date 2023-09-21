@@ -44,6 +44,10 @@ export const PrismaTransaction = _defineExtension(
             console.log('xxxx------', model);
             return query(args);
           },
+          delete({ operation, model, args, query }) {
+            console.log('Delete Operation ------', model);
+            return query(args);
+          },
         },
       },
     }),
