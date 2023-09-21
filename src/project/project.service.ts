@@ -104,8 +104,10 @@ export class ProjectService {
             owner: true,
             vendors: true,
           },
+         
         },
-      },
+       
+      }
     });
 
     return {
@@ -219,4 +221,29 @@ export class ProjectService {
       },
     );
   }
+
+  
+  async removeBeneficiariesFromProject(
+    contractAddress: string,
+    beneficiaries: string[],
+  ) {
+    for(const benAddress of beneficiaries){
+    await this.prisma.project.update({
+      where: { contractAddress: hexStringToBuffer(contractAddress) },
+      data: {
+        beneficiaries: {
+          disconnect:{
+            walletAddress:hexStringToBuffer( benAddress)},
+        },
+      },
+      include: {
+        beneficiaries: true, // Include the updated list of beneficiaries
+      },
+    });
+  }
+  return 'Disconnected Succesfully'
+    
+  
+  }
+
 }

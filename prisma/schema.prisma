@@ -131,7 +131,7 @@ model Vendor {
   email         String?
   address       Json
   isApproved    Boolean @default(false)
-
+  isActive      Boolean @default(false)
   projects Project[] @relation("ProjectDistributors")
 
   createdAt DateTime  @default(now())

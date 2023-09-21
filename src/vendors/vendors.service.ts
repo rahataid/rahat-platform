@@ -140,6 +140,29 @@ export class VendorsService {
     });
   }
 
+  
+  async changeVendorState(walletAddress: string) {
+
+     const vendor  = await this.prisma.vendor.findUnique({
+      where: {
+        walletAddress: hexStringToBuffer(walletAddress),
+      },      
+     }) 
+    const updateVendor = await this.prisma.vendor.update({
+      where: {
+        walletAddress: hexStringToBuffer(walletAddress),
+      },
+      data: {
+     isActive:!vendor.isActive
+      },
+      select:{
+        isActive:true
+      }
+    });
+
+    return  updateVendor.isActive
+  }
+
   register(registerVendorDto: any) {
     console.log('INSIDE REGISTER VENDOR FUNCTION');
     return 'This registers vendors';
