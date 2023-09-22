@@ -67,9 +67,12 @@ export class ProjectController {
 
   @Patch('/remove/:address/beneficiaries')
   removeBeneficiariesFromProject(
-    @Param('address') address:string,
-    @Body() beneficiaries: string[]  
+    @Param('address') address: string,
+    @Body() beneficiaries: string[],
   ) {
-    return this.projectService.removeBeneficiariesFromProject(address,beneficiaries)
+    return this.projectService.removeBeneficiariesFromProject(
+      address,
+      beneficiaries,
+    );
   }
 }

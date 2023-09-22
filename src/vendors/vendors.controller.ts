@@ -57,9 +57,7 @@ export class VendorsController {
     return this.vendorService.register(createVendorDto);
   }
   @Patch(':walletAddress/toogleState')
-  changeVendorState(@Param('walletAddress') walletAddress:string){
-    return this.vendorService.changeVendorState(walletAddress)
+  changeVendorState(@Param('walletAddress') walletAddress: string) {
+    return this.vendorService.changeVendorState(walletAddress);
   }
-
-
 }

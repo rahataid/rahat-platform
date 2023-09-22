@@ -65,11 +65,11 @@ export class TransactionsService {
   }
 
   remove(txHash: string) {
-  // /  return `This action removes a #${txHash} transaction`;
+    // /  return `This action removes a #${txHash} transaction`;
     return this.prisma.transaction.delete({
-      where:{
-        txHash:txHash
-      }
-    })
+      where: {
+        txHash: txHash,
+      },
+    });
   }
 }
