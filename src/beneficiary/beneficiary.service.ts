@@ -84,6 +84,10 @@ export class BeneficiaryService {
       where.phone = rest.phone;
     }
 
+    if (rest.walletAddress) {
+      where.walletAddress = hexStringToBuffer(rest.walletAddress);
+    }
+
     // if (rest.isTokenAssigned) {
     //   where.tokensAssigned = {
     //     gt: 0,
