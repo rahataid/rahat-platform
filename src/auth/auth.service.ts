@@ -10,6 +10,7 @@ import { totp } from 'otplib';
 import { MailService } from 'src/mailer/mailer.service';
 import { UsersService } from 'src/users/users.service';
 
+import { bufferToHexString } from '@utils/string-format';
 import { CreateUserDto } from 'src/users/dto/user.dto';
 import { AuthDto } from './dto';
 @Injectable()
@@ -72,6 +73,7 @@ export class AuthService {
     };
     return {
       ...user,
+      walletAddress: bufferToHexString(user.walletAddress),
       access_token: this.jwtService.sign(payload),
       refresh_token: this.jwtService.sign(payload, {
         expiresIn: +process.env.JWT_EXPIRATION_LONG_TIME,
