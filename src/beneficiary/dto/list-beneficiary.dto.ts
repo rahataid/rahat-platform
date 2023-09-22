@@ -6,6 +6,7 @@ interface BeneficiaryFilter {
   name?: string;
   orderBy?: string;
   phone?: string;
+  walletAddress?: string;
   order?: 'asc' | 'desc';
   bankStatus: BankStatus;
   phoneOwnership: PhoneOwnership;
@@ -43,6 +44,13 @@ export class ListBeneficiaryDto {
   })
   @IsOptional()
   phone?: BeneficiaryFilter['phone'];
+
+  @ApiProperty({
+    type: 'string',
+    required: false,
+  })
+  @IsOptional()
+  walletAddress?: BeneficiaryFilter['walletAddress'];
 
   @ApiProperty({
     type: 'string',

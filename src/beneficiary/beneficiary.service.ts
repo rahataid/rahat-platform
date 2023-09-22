@@ -80,6 +80,14 @@ export class BeneficiaryService {
       where.phoneOwnership = rest.phoneOwnership;
     }
 
+    if (rest.phone) {
+      where.phone = rest.phone;
+    }
+
+    if (rest.walletAddress) {
+      where.walletAddress = hexStringToBuffer(rest.walletAddress);
+    }
+
     // if (rest.isTokenAssigned) {
     //   where.tokensAssigned = {
     //     gt: 0,

@@ -8,7 +8,7 @@ async function seed() {
   const user1 = await prisma.user.create({
     data: {
       name: 'Rahat Admin',
-      email: 'rahatadmin@mailinator.com',
+      email: 'rahat@mailinator.com',
       walletAddress: hexStringToBuffer(
         '0x422416b9203de06be4487D17DD1C76725c6049d7',
       ),
