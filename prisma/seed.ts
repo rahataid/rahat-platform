@@ -7,10 +7,10 @@ async function seed() {
   // Create users
   const user1 = await prisma.user.create({
     data: {
-      name: 'Rahat Admin',
+      name: 'Raghav - Admin',
       email: 'rahat@mailinator.com',
       walletAddress: hexStringToBuffer(
-        '0x422416b9203de06be4487D17DD1C76725c6049d7',
+        '0xAC6bFaf10e89202c293dD795eCe180BBf1430d7B',
       ),
       roles: [Role.ADMIN],
       isActive: true,
@@ -18,14 +18,14 @@ async function seed() {
   });
   const user2 = await prisma.user.create({
     data: {
-      name: 'Rahat User',
+      name: 'Raghav - Donor',
       email: 'rahatuser@mailinator.com',
       walletAddress: hexStringToBuffer(
-        '0x216EC842b77e424671219ABB817467fCEa991409',
+        '0x30418a5C1C1Fd8297414F596A6C7B3bb8F7B4b7d',
       ),
       isActive: true,
 
-      roles: [Role.USER],
+      roles: [Role.ADMIN],
     },
   });
   const user3 = await prisma.user.create({
