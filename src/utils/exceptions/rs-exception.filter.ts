@@ -84,6 +84,7 @@ export class RsExceptionFilter implements PipeTransform<any>, ExceptionFilter {
       responseData.statusCode = exception.getStatus();
       responseData.message = exception.message;
       responseData.group = 'HTTP';
+      console.log('HttpException occured', responseData);
     } else if (exception instanceof RsException) {
       // exceptionResponse = exception?.getResponse();
 
@@ -96,6 +97,7 @@ export class RsExceptionFilter implements PipeTransform<any>, ExceptionFilter {
       responseData.statusCode = exception.httpCode;
       responseData.name = exception.name;
       responseData.group = exception.group;
+      console.log('RS Exception occured', responseData);
     } else if (exception instanceof Prisma?.PrismaClientKnownRequestError) {
       responseData.name = exception.code;
       //responseData.meta = exception.meta;
@@ -103,6 +105,7 @@ export class RsExceptionFilter implements PipeTransform<any>, ExceptionFilter {
       responseData.message = prismaError.message;
       responseData.statusCode = prismaError.httpCode;
       responseData.group = 'DBERROR';
+      console.log('Prisma Error occured:', responseData);
     } else if (exception instanceof Error) {
       responseData.name = exception.name;
       responseData.message = exception.message;

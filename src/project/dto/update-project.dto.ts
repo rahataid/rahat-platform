@@ -1,58 +1,43 @@
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class UpdateProjectDto {
-  @ApiProperty({
-    type: 'number',
-    required: true,
-  })
-  id: number;
-
   @ApiProperty({
     type: 'string',
     required: false,
   })
+  @IsNotEmpty()
+  @IsString()
   name: string;
 
   @ApiProperty({
     type: 'string',
     required: false,
   })
+  @IsNotEmpty()
+  @IsString()
   startDate: string;
 
   @ApiProperty({
     type: 'string',
     required: false,
   })
+  @IsNotEmpty()
+  @IsString()
   endDate: string;
 
   @ApiProperty({
-    type: 'number',
-    required: false,
-  })
-  owner: number;
-
-  @ApiProperty({
-    type: 'number',
-    required: false,
-  })
-  budget: number;
-
-  @ApiProperty({
-    type: 'number',
-    required: false,
-  })
-  disbursed: number;
-
-  @ApiProperty({
     type: 'string',
     required: false,
   })
-  extras: string;
-
-  @ApiProperty({
-    type: 'string',
-    required: false,
-  })
+  @IsNotEmpty()
+  @IsString()
   location: string;
 
   @ApiProperty({
@@ -65,30 +50,33 @@ export class UpdateProjectDto {
     type: 'string',
     required: false,
   })
+  @IsNotEmpty()
+  @IsString()
   projectManager: string;
 
   @ApiProperty({
     type: 'string',
     required: false,
   })
+  @IsString()
+  @IsNotEmpty()
   description: string;
-
-  @ApiProperty({
-    type: 'string',
-    required: false,
-  })
-  contractAddress: string;
-
-  @ApiProperty({
-    type: 'string',
-    required: false,
-  })
-  deletedAt: string;
 
   @ApiProperty({
     type: 'boolean',
     required: false,
     default: false,
   })
-  isApproved?: boolean = false;
+  @IsOptional()
+  isApproved?: boolean;
+}
+
+export class UpdateProjectCampaignDto {
+  @ApiProperty({
+    type: 'number',
+    required: true,
+    example: 1,
+  })
+  @IsNumber()
+  id: number;
 }

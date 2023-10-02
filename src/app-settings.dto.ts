@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Prisma } from '@prisma/client';
-import { IsOptional, IsString } from 'class-validator';
+import { IsNotEmptyObject, IsOptional, IsString } from 'class-validator';
 
 export class CreateAppSettingDto {
   @ApiProperty({
@@ -12,6 +11,7 @@ export class CreateAppSettingDto {
 
   @ApiProperty({
     type: 'object',
+
     example: {
       RahatDonor: '0xDcd6F86EB1b62216F79943f4E6177F6892538120',
       RahatClaim: '0xCa8B87AF8CDa654eF873ae16665932abec836583',
@@ -20,15 +20,17 @@ export class CreateAppSettingDto {
       CVAProject: '0x216EC842b77e424671219ABB817467fCEa991409',
     },
   })
-  value: Prisma.JsonObject;
+  @IsNotEmptyObject()
+  value: Record<string, any>;
 }
 
-export class GetContractByNameDto {
+export class GetSettingsByNameDto {
   @ApiProperty({
     example: 'CONTRACT_ADDRESS',
     description: 'Name of the app settings',
-    required: true,
+    required: false,
   })
   @IsString()
+  @IsOptional()
   name: string;
 }

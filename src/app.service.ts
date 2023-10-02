@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from 'nestjs-prisma';
-import { CreateAppSettingDto, GetContractByNameDto } from './app-settings.dto';
+import { paginate } from '@utils/paginate';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateAppSettingDto, GetSettingsByNameDto } from './app-settings.dto';
 
 @Injectable()
 export class AppService {
@@ -13,7 +14,7 @@ export class AppService {
     });
   }
 
-  getAppSettings(query: GetContractByNameDto) {
+  getAppSettings(query: GetSettingsByNameDto) {
     const { name } = query;
     const where: Prisma.AppSettingsWhereInput = {};
     if (name) {
@@ -22,26 +23,49 @@ export class AppService {
       };
     }
 
-    return this.prisma.appSettings.findMany({ where });
+    return paginate(
+      this.prisma.appSettings,
+      { where },
+      { page: 1, perPage: 100 },
+    );
   }
 
   getContracts() {
+    console.log('INSIDE GET CONTRACTS');
     return this.prisma.appSettings.findFirstOrThrow({
       where: {
         name: 'CONTRACT_ADDRESS',
+      },
+      select: {
+        name: true,
+        value: true,
+      },
+    });
+  }
+  getBlockchain() {
+    return this.prisma.appSettings.findFirstOrThrow({
+      where: {
+        name: 'BLOCKCHAIN',
+      },
+      select: {
+        name: true,
+        value: true,
       },
     });
   }
 
-  getContractByName(contractName: string) {
-    return this.prisma.appSettings.findFirstOrThrow({
+  async getContractByName(contractName: string) {
+    const addresses = await this.prisma.appSettings.findMany({
       where: {
         name: 'CONTRACT_ADDRESS',
-        value: {
-          path: [contractName],
-          string_contains: '0x0',
-        },
       },
     });
+
+    const address = addresses[0].value[contractName];
+    if (!address) {
+      throw new Error(`Contract ${contractName} not found.`);
+    }
+
+    return address;
   }
 }

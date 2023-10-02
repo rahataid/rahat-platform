@@ -10,7 +10,10 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ListProjectDto } from './dto/list-project-dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
+import {
+  UpdateProjectCampaignDto,
+  UpdateProjectDto,
+} from './dto/update-project.dto';
 import { ProjectService } from './project.service';
 
 @Controller('projects')
@@ -33,13 +36,43 @@ export class ProjectController {
     return this.projectService.findOne(address);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
-    return this.projectService.update(+id, updateProjectDto);
+  @Patch(':address/campaigns')
+  updateCampaign(
+    @Param('address') address: string,
+    @Body() campaigns: UpdateProjectCampaignDto,
+  ) {
+    return this.projectService.updateCampaign(address, campaigns);
+  }
+
+  @Patch('/remove/:address/campaigns')
+  removeCampaignFromProject(
+    @Param('address') address: string,
+    @Body() campaigns: number[],
+  ) {
+    return this.projectService.removeCampaignFromProject(address, campaigns);
+  }
+
+  @Patch(':address')
+  update(
+    @Param('address') address: string,
+    @Body() updateProjectDto: UpdateProjectDto,
+  ) {
+    return this.projectService.update(address, updateProjectDto);
   }
 
   @Get(':address/beneficiaries')
   getBeneficiaries(@Param('address') address: string) {
     return this.projectService.getBeneficiaries(address);
+  }
+
+  @Patch('/remove/:address/beneficiaries')
+  removeBeneficiariesFromProject(
+    @Param('address') address: string,
+    @Body() beneficiaries: string[],
+  ) {
+    return this.projectService.removeBeneficiariesFromProject(
+      address,
+      beneficiaries,
+    );
   }
 }

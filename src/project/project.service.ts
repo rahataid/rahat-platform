@@ -2,16 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, Project } from '@prisma/client';
 import { paginate } from '@utils/paginate';
 import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
-import { PrismaService } from 'nestjs-prisma';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ListProjectDto } from './dto/list-project-dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
+import {
+  UpdateProjectCampaignDto,
+  UpdateProjectDto,
+} from './dto/update-project.dto';
 
 @Injectable()
 export class ProjectService {
   constructor(private prisma: PrismaService) {}
 
   async create(createProjectDto: CreateProjectDto) {
+    console.log('first', createProjectDto);
     const { owner, contractAddress, ...rest } = createProjectDto;
 
     // contractAddress =
@@ -19,7 +23,7 @@ export class ProjectService {
       data: {
         ...rest,
 
-        contractAddress: Buffer.from(contractAddress.substring(2), 'hex'),
+        contractAddress: hexStringToBuffer(contractAddress),
         owner: {
           connect: {
             id: owner,
@@ -39,21 +43,27 @@ export class ProjectService {
     const where: Prisma.ProjectWhereInput = {
       deletedAt: null,
     };
-    const include: Prisma.ProjectInclude = {
-      owner: {
-        select: {
-          id: true,
-          name: true,
-          walletAddress: true,
-        },
-      },
-      _count: {
-        select: {
-          beneficiaries: true,
-          owner: true,
-          vendors: true,
-        },
-      },
+    const select: Prisma.ProjectSelect = {
+      id: true,
+      budget: true,
+      contractAddress: true,
+      name: true,
+      createdAt: true,
+      startDate: true,
+      endDate: true,
+      description: true,
+
+      // _count: {
+      //   select: {
+      //     beneficiaries: true,
+      //     owner: true,
+      //     vendors: true,
+      //   },
+      // },
+    };
+
+    const orderBy: Prisma.ProjectOrderByWithRelationInput = {
+      createdAt: 'desc',
     };
 
     if (rest.name) {
@@ -65,7 +75,7 @@ export class ProjectService {
 
     return paginate(
       this.prisma.project,
-      { where, include },
+      { where, select, orderBy },
       {
         page,
         perPage,
@@ -73,10 +83,6 @@ export class ProjectService {
           return rows.map((r) => ({
             ...r,
             contractAddress: bufferToHexString(r.contractAddress),
-            owner: r.owner.map((o) => ({
-              ...o,
-              walletAddress: bufferToHexString(o.walletAddress),
-            })),
           }));
         },
       },
@@ -108,21 +114,11 @@ export class ProjectService {
     };
   }
 
-  async update(id: number, updateProjectDto: UpdateProjectDto) {
-    const { owner, contractAddress, ...rest } = updateProjectDto;
-
+  async update(contractAddress: string, updateProjectDto: UpdateProjectDto) {
     return this.prisma.project.update({
-      data: {
-        ...rest,
-        contractAddress: hexStringToBuffer(contractAddress),
-        owner: {
-          connect: {
-            id: owner,
-          },
-        },
-      },
+      data: updateProjectDto,
       where: {
-        id,
+        contractAddress: hexStringToBuffer(contractAddress),
       },
     });
   }
@@ -134,6 +130,46 @@ export class ProjectService {
       },
       where: {
         id,
+      },
+    });
+  }
+
+  updateCampaign(contractAddress: string, campaigns: UpdateProjectCampaignDto) {
+    return this.prisma.project.update({
+      where: {
+        contractAddress: hexStringToBuffer(contractAddress),
+      },
+      data: {
+        campaigns: {
+          push: campaigns.id,
+        },
+      },
+    });
+  }
+
+  async removeCampaignFromProject(
+    contractAddress: string,
+    campaigns: number[],
+  ) {
+    const project = await this.prisma.project.findUnique({
+      where: { contractAddress: hexStringToBuffer(contractAddress) },
+      select: {
+        campaigns: true,
+      },
+    });
+
+    const filteredCampaigns = project.campaigns.filter(
+      (c) => !campaigns.includes(c),
+    );
+
+    return this.prisma.project.update({
+      where: {
+        contractAddress: hexStringToBuffer(contractAddress),
+      },
+      data: {
+        campaigns: {
+          set: filteredCampaigns,
+        },
       },
     });
   }
@@ -182,5 +218,27 @@ export class ProjectService {
           })),
       },
     );
+  }
+
+  async removeBeneficiariesFromProject(
+    contractAddress: string,
+    beneficiaries: string[],
+  ) {
+    for (const benAddress of beneficiaries) {
+      await this.prisma.project.update({
+        where: { contractAddress: hexStringToBuffer(contractAddress) },
+        data: {
+          beneficiaries: {
+            disconnect: {
+              walletAddress: hexStringToBuffer(benAddress),
+            },
+          },
+        },
+        include: {
+          beneficiaries: true, // Include the updated list of beneficiaries
+        },
+      });
+    }
+    return 'Disconnected Succesfully';
   }
 }

@@ -7,7 +7,7 @@ import {
   hexStringToBuffer,
   stringifyWithBigInt,
 } from '@utils/string-format';
-import { PrismaService } from 'nestjs-prisma';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBeneficiaryDto } from './dto/create-beneficiary.dto';
 import {
   ListBeneficiaryDto,
@@ -23,22 +23,15 @@ export class BeneficiaryService {
   prisma = null;
   constructor(private _prisma: PrismaService) {
     this.prisma = _prisma.$extends(PrismaWriteOperations);
+    // this._prisma = _prisma;
   }
 
   create(createBeneficiaryDto: CreateBeneficiaryDto) {
-    let optional: { project: any | null };
-
-    if (createBeneficiaryDto.projectId) {
-      optional.project = {
-        connect: {
-          id: +createBeneficiaryDto.projectId,
-        },
-      };
-    }
-
     return this.prisma.beneficiary.create({
       data: {
         ...createBeneficiaryDto,
+
+        // ...optional,
         walletAddress: hexStringToBuffer(createBeneficiaryDto.walletAddress),
       },
     });
@@ -48,11 +41,17 @@ export class BeneficiaryService {
     const { page, perPage, ...rest } = query;
     const where: Prisma.BeneficiaryWhereInput = {
       deletedAt: null,
+      isActive: true,
     };
     const include: Prisma.BeneficiaryInclude = {
       _count: {
         select: {
           projects: true,
+        },
+      },
+      projects: {
+        select: {
+          name: true,
         },
       },
     };
@@ -81,6 +80,14 @@ export class BeneficiaryService {
       where.phoneOwnership = rest.phoneOwnership;
     }
 
+    if (rest.phone) {
+      where.phone = rest.phone;
+    }
+
+    if (rest.walletAddress) {
+      where.walletAddress = hexStringToBuffer(rest.walletAddress);
+    }
+
     // if (rest.isTokenAssigned) {
     //   where.tokensAssigned = {
     //     gt: 0,
@@ -98,6 +105,7 @@ export class BeneficiaryService {
             return {
               ...row,
               walletAddress: bufferToHexString(row.walletAddress),
+              projects: row.projects.map((p) => p.name).join(', '),
             };
           });
         },
@@ -165,6 +173,17 @@ export class BeneficiaryService {
     });
   }
 
+  async disableBeneficiary(walletAddress: string) {
+    return this.prisma.beneficiary.update({
+      data: {
+        isActive: false,
+      },
+      where: {
+        walletAddress: hexStringToBuffer(walletAddress),
+      },
+    });
+  }
+
   getTransactions(uuid: string, query: ListBeneficiaryTransactionsDto) {
     const { page, perPage } = query;
 
@@ -216,24 +235,24 @@ export class BeneficiaryService {
 
   async getStats() {
     let totalCount = await this.prisma.$queryRaw`
-  SELECT
-    SUM(CASE WHEN "gender" = 'MALE' THEN 1 ELSE 0 END) as "maleCount",
-    SUM(CASE WHEN "gender" = 'FEMALE' THEN 1 ELSE 0 END) as "femaleCount",
-    SUM(CASE WHEN "gender" = 'OTHERS' THEN 1 ELSE 0 END) as "othersCount",
-    SUM(CASE WHEN "gender" = 'UNKNOWN' THEN 1 ELSE 0 END) as "unknownCount",
-    SUM(CASE WHEN "bankStatus" = 'UNKNOWN' THEN 1 ELSE 0 END) as "unknownBankCount",
-    SUM(CASE WHEN "bankStatus" = 'UNBANKED' THEN 1 ELSE 0 END) as "unbankedCount",
-    SUM(CASE WHEN "bankStatus" = 'BANKED' THEN 1 ELSE 0 END) as "bankedCount",
-    SUM(CASE WHEN "bankStatus" = 'UNDERBANKED' THEN 1 ELSE 0 END) as "underbankedCount",
-    SUM(CASE WHEN "phoneOwnership" = 'UNKNOWN' THEN 1 ELSE 0 END) as "unknownPhoneCount",
-    SUM(CASE WHEN "phoneOwnership" = 'NO_PHONE' THEN 1 ELSE 0 END) as "noPhoneCount",
-    SUM(CASE WHEN "phoneOwnership" = 'FEATURE_PHONE' THEN 1 ELSE 0 END) as "featurePhoneCount",
-    SUM(CASE WHEN "phoneOwnership" = 'SMART_PHONE' THEN 1 ELSE 0 END) as "smartPhoneCount",
-    SUM(CASE WHEN "internetAccess" = 'UNKNOWN' THEN 1 ELSE 0 END) as "unknownInternetCount",
-    SUM(CASE WHEN "internetAccess" = 'NO_INTERNET' THEN 1 ELSE  0 END) as "noInternetCount",
-    SUM(CASE WHEN "internetAccess" = 'PHONE_INTERNET' THEN 1 ELSE 0 END) as "phoneInternetCount",
-    SUM(CASE WHEN "internetAccess" = 'HOME_INTERNET' THEN 1 ELSE 0 END) as "homeInternetCount"
-  FROM "Beneficiary"
+SELECT
+  SUM(CASE WHEN "gender" = 'MALE' THEN 1 ELSE 0 END) as "maleCount",
+  SUM(CASE WHEN "gender" = 'FEMALE' THEN 1 ELSE 0 END) as "femaleCount",
+  SUM(CASE WHEN "gender" = 'OTHER' THEN 1 ELSE 0 END) as "othersCount",
+  SUM(CASE WHEN "gender" = 'UNKNOWN' THEN 1 ELSE 0 END) as "unknownCount",
+  SUM(CASE WHEN "bankStatus" = 'UNKNOWN' THEN 1 ELSE 0 END) as "unknownBankCount",
+  SUM(CASE WHEN "bankStatus" = 'UNBANKED' THEN 1 ELSE 0 END) as "unbankedCount",
+  SUM(CASE WHEN "bankStatus" = 'BANKED' THEN 1 ELSE 0 END) as "bankedCount",
+  SUM(CASE WHEN "bankStatus" = 'UNDERBANKED' THEN 1 ELSE 0 END) as "underbankedCount",
+  SUM(CASE WHEN "phoneOwnership" = 'UNKNOWN' THEN 1 ELSE 0 END) as "unknownPhoneCount",
+  SUM(CASE WHEN "phoneOwnership" = 'NO_PHONE' THEN 1 ELSE 0 END) as "noPhoneCount",
+  SUM(CASE WHEN "phoneOwnership" = 'FEATURE' THEN 1 ELSE 0 END) as "featurePhoneCount",
+  SUM(CASE WHEN "phoneOwnership" = 'SMART' THEN 1 ELSE 0 END) as "smartPhoneCount",
+  SUM(CASE WHEN "internetAccess" = 'UNKNOWN' THEN 1 ELSE 0 END) as "unknownInternetCount",
+  SUM(CASE WHEN "internetAccess" = 'NO_INTERNET' THEN 1 ELSE  0 END) as "noInternetCount",
+  SUM(CASE WHEN "internetAccess" = 'PHONE_INTERNET' THEN 1 ELSE 0 END) as "phoneInternetCount",
+  SUM(CASE WHEN "internetAccess" = 'HOME_INTERNET' THEN 1 ELSE 0 END) as "homeInternetCount"
+FROM "tbl_beneficiaries"
 `;
 
     totalCount = stringifyWithBigInt(totalCount);

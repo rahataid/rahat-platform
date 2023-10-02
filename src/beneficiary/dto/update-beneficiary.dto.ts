@@ -19,3 +19,10 @@ export class AssignBeneficiaryToProjectDto {
   @IsString()
   projectId: string;
 }
+
+export class DisableBeneficiaryDto {
+  @ApiProperty({
+    example: '0x123',
+  })
+  walletAddress: string;
+}

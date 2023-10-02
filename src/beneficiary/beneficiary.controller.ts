@@ -48,6 +48,11 @@ export class BeneficiaryController {
     return this.beneficiaryService.getStats();
   }
 
+  @Patch(':walletAddress/disable')
+  disable(@Param('walletAddress') walletAddress: string) {
+    return this.beneficiaryService.disableBeneficiary(walletAddress);
+  }
+
   @Get(':uuid')
   findOne(@Param('uuid') uuid: string) {
     return this.beneficiaryService.findOne(uuid);

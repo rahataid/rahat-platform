@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { paginate } from '@utils/paginate';
 import { PrismaTransaction } from '@utils/prisma/prisma.extensions';
 import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
-import { PrismaService } from 'nestjs-prisma';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { ListTransactionDto } from './dto/list-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -64,6 +64,11 @@ export class TransactionsService {
   }
 
   remove(txHash: string) {
-    return `This action removes a #${txHash} transaction`;
+    // /  return `This action removes a #${txHash} transaction`;
+    return this.prisma.transaction.delete({
+      where: {
+        txHash: txHash,
+      },
+    });
   }
 }
