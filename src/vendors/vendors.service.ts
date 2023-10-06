@@ -46,7 +46,11 @@ export class VendorsService {
     if (rest.walletAddress) {
       where.walletAddress = hexStringToBuffer(rest.walletAddress);
     }
-    const include: Prisma.VendorInclude = {
+    const select: Prisma.VendorSelect = {
+      name: true,
+      walletAddress: true,
+      isApproved: true,
+      isActive: true,
       _count: {
         select: {
           projects: true,
@@ -62,7 +66,7 @@ export class VendorsService {
 
     return paginate(
       this.prisma.vendor,
-      { where, include },
+      { where, select },
       {
         page,
         perPage,
@@ -70,7 +74,6 @@ export class VendorsService {
           rows.map((r) => ({
             ...r,
             walletAddress: bufferToHexString(r.walletAddress),
-            address: JSON.parse(r.address),
           })),
       },
     );
@@ -81,7 +84,18 @@ export class VendorsService {
       where: {
         walletAddress: hexStringToBuffer(walletAddress),
       },
-      include: {
+      select: {
+        address: true,
+        name: true,
+        phone: true,
+        walletAddress: true,
+        isApproved: true,
+        isActive: true,
+        createdAt: true,
+        deletedAt: true,
+        updatedAt: true,
+        email: true,
+        id: true,
         projects: {
           select: {
             name: true,

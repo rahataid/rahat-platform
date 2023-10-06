@@ -72,7 +72,7 @@ model Beneficiary {
   id             Int            @id @default(autoincrement())
   uuid           String         @unique @default(uuid())
   name           String
-  phone          String?        @unique
+  phone          String?    @unique @default("")
   dob            DateTime?
   gender         Gender         @default(UNKNOWN)
   walletAddress  Bytes?         @unique
@@ -127,7 +127,7 @@ model Vendor {
   id            Int     @id @default(autoincrement())
   name          String
   walletAddress Bytes?  @unique
-  phone         String?
+  phone         String? @unique @default("")
   email         String?
   address       Json
   isApproved    Boolean @default(false)
