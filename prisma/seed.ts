@@ -14,6 +14,31 @@ async function seed() {
       ),
       roles: [Role.ADMIN],
       isActive: true,
+      isApproved: true,
+    },
+  });
+  const user2 = await prisma.user.create({
+    data: {
+      name: 'Shristi K',
+      email: 'shristi.khayargoli@agriclear.io',
+      walletAddress: hexStringToBuffer(
+        '0x0fc030c2b2b8e466b4a2779e780978e7ee5a406f',
+      ),
+      roles: [Role.ADMIN],
+      isActive: true,
+      isApproved: true,
+    },
+  });
+  const user3 = await prisma.user.create({
+    data: {
+      name: 'Ashmita- Rumsan',
+      email: 'ashmita@rahat.io',
+      walletAddress: hexStringToBuffer(
+        '0xf14da5a200e614b9b6bd3903d0c6bd4f7bb61ca2',
+      ),
+      roles: [Role.ADMIN],
+      isActive: true,
+      isApproved: true,
     },
   });
 
