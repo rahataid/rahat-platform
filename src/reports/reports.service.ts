@@ -13,7 +13,11 @@ export class ReportsService {
     let totalTokens;
 
     await this.prisma.$transaction(async (transaction) => {
-      totalBeneficiaries = await transaction.beneficiary.count();
+      totalBeneficiaries = await transaction.beneficiary.count({
+        where: {
+          isActive: true,
+        },
+      });
       totalTokens = await transaction.project.aggregate({
         _sum: {
           disbursed: true,

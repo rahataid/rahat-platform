@@ -8,41 +8,42 @@ async function seed() {
   const user1 = await prisma.user.create({
     data: {
       name: 'Raghav - Admin',
-      email: 'rahat@mailinator.com',
+      email: 'raghav.kattel@rumsan.net',
       walletAddress: hexStringToBuffer(
         '0xAC6bFaf10e89202c293dD795eCe180BBf1430d7B',
       ),
       roles: [Role.ADMIN],
       isActive: true,
+      isApproved: true,
     },
   });
   const user2 = await prisma.user.create({
     data: {
-      name: 'Raghav - Donor',
-      email: 'rahatuser@mailinator.com',
+      name: 'Shristi K',
+      email: 'shristi.khayargoli@agriclear.io',
       walletAddress: hexStringToBuffer(
-        '0x30418a5C1C1Fd8297414F596A6C7B3bb8F7B4b7d',
+        '0x0fc030c2b2b8e466b4a2779e780978e7ee5a406f',
       ),
-      isActive: true,
-
       roles: [Role.ADMIN],
+      isActive: true,
+      isApproved: true,
     },
   });
   const user3 = await prisma.user.create({
     data: {
-      name: 'Stakeholder',
-      email: 'stake@mailinator.com',
+      name: 'Ashmita- Rumsan',
+      email: 'ashmita@rahat.io',
       walletAddress: hexStringToBuffer(
-        '0x216EC842b77e424671219ABB817467fCEa991404',
+        '0xf14da5a200e614b9b6bd3903d0c6bd4f7bb61ca2',
       ),
-      roles: [Role.STAKEHOLDER],
+      roles: [Role.ADMIN],
       isActive: true,
+      isApproved: true,
     },
   });
 
   console.log({
     user1,
-    user2,
   });
 }
 
