@@ -4,7 +4,10 @@ import { paginate } from '@utils/paginate';
 import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { ListProjectDto } from './dto/list-project-dto';
+import {
+  ListProjectBeneficiaryDto,
+  ListProjectDto,
+} from './dto/list-project-dto';
 import {
   UpdateProjectCampaignDto,
   UpdateProjectDto,
@@ -175,7 +178,9 @@ export class ProjectService {
   }
 
   // TODO: implement search and pagination feature and create dto
-  async getBeneficiaries(address: string) {
+  async getBeneficiaries(address: string, query: ListProjectBeneficiaryDto) {
+    const { page, perPage, walletAddress, ...rest } = query;
+
     const select: Prisma.BeneficiarySelect = {
       uuid: true,
       name: true,
@@ -202,6 +207,33 @@ export class ProjectService {
       },
     };
 
+    if (rest.name) {
+      where.name = {
+        contains: rest.name,
+        mode: 'insensitive',
+      };
+    }
+
+    if (rest.phone) {
+      where.phone = rest.phone;
+    }
+
+    if (rest.bankStatus) {
+      where.bankStatus = rest.bankStatus;
+    }
+
+    if (rest.internetAccess) {
+      where.internetAccess = rest.internetAccess;
+    }
+
+    if (rest.phoneOwnership) {
+      where.phoneOwnership = rest.phoneOwnership;
+    }
+
+    if (walletAddress) {
+      where.walletAddress = hexStringToBuffer(walletAddress);
+    }
+
     return paginate(
       this.prisma.beneficiary,
       {
@@ -210,7 +242,8 @@ export class ProjectService {
         orderBy,
       },
       {
-        page: 1,
+        page,
+        perPage,
         transformRows: (rows) =>
           rows.map((r) => ({
             ...r,

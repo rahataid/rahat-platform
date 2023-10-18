@@ -9,12 +9,15 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { ListProjectDto } from './dto/list-project-dto';
 import {
   UpdateProjectCampaignDto,
   UpdateProjectDto,
 } from './dto/update-project.dto';
 import { ProjectService } from './project.service';
+import {
+  ListProjectBeneficiaryDto,
+  ListProjectDto,
+} from './dto/list-project-dto';
 
 @Controller('projects')
 @ApiTags('projects')
@@ -61,8 +64,11 @@ export class ProjectController {
   }
 
   @Get(':address/beneficiaries')
-  getBeneficiaries(@Param('address') address: string) {
-    return this.projectService.getBeneficiaries(address);
+  getBeneficiaries(
+    @Param('address') address: string,
+    @Query() query: ListProjectBeneficiaryDto,
+  ) {
+    return this.projectService.getBeneficiaries(address, query);
   }
 
   @Patch('/remove/:address/beneficiaries')
