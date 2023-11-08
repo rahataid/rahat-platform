@@ -255,8 +255,9 @@ SELECT
   SUM(CASE WHEN "internetAccess" = 'PHONE_INTERNET' THEN 1 ELSE 0 END) as "phoneInternetCount",
   SUM(CASE WHEN "internetAccess" = 'HOME_INTERNET' THEN 1 ELSE 0 END) as "homeInternetCount"
 FROM "tbl_beneficiaries"
+WHERE "isActive" = true 
 `;
-
+    // AND "deletedAt" IS NULL
     totalCount = stringifyWithBigInt(totalCount);
 
     const gender = {
