@@ -18,7 +18,6 @@ export class ProjectService {
   constructor(private prisma: PrismaService) {}
 
   async create(createProjectDto: CreateProjectDto) {
-    console.log('first', createProjectDto);
     const { owner, contractAddress, ...rest } = createProjectDto;
 
     // contractAddress =
@@ -104,7 +103,11 @@ export class ProjectService {
       include: {
         _count: {
           select: {
-            beneficiaries: true,
+            beneficiaries: {
+              where: {
+                deletedAt: null,
+              },
+            },
             owner: true,
             vendors: true,
           },
