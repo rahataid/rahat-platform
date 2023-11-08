@@ -55,6 +55,7 @@ export class ProjectService {
       startDate: true,
       endDate: true,
       description: true,
+      extras: true,
 
       // _count: {
       //   select: {
