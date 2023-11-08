@@ -118,6 +118,7 @@ export class BeneficiaryService {
       where: {
         uuid,
         deletedAt: null,
+        isActive: true,
       },
       include: {
         _count: {
@@ -177,6 +178,7 @@ export class BeneficiaryService {
     return this.prisma.beneficiary.update({
       data: {
         isActive: false,
+        // deletedAt: new Date(),
       },
       where: {
         walletAddress: hexStringToBuffer(walletAddress),

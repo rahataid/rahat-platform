@@ -105,7 +105,8 @@ export class ProjectService {
           select: {
             beneficiaries: {
               where: {
-                deletedAt: null,
+                // deletedAt: null,
+                isActive: true,
               },
             },
             owner: true,
