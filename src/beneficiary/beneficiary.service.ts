@@ -167,6 +167,7 @@ export class BeneficiaryService {
     return this.prisma.beneficiary.update({
       data: {
         deletedAt: new Date(),
+        isActive: false,
       },
       where: {
         uuid,
