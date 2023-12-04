@@ -101,6 +101,15 @@ export class ProjectService {
       },
 
       include: {
+        vendors: {
+          where: {
+            deletedAt: null,
+          },
+          select: {
+            walletAddress: true,
+            id: true,
+          },
+        },
         _count: {
           select: {
             beneficiaries: {
