@@ -99,12 +99,8 @@ export class ProjectService {
           equals: hexStringToBuffer(contractAddress),
         },
       },
-
       include: {
         vendors: {
-          where: {
-            deletedAt: null,
-          },
           select: {
             walletAddress: true,
             id: true,
