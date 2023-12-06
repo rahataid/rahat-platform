@@ -31,7 +31,6 @@ export class AppService {
   }
 
   getContracts() {
-    console.log('INSIDE GET CONTRACTS');
     return this.prisma.appSettings.findFirstOrThrow({
       where: {
         name: 'CONTRACT_ADDRESS',
