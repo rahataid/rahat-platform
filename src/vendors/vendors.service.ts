@@ -22,6 +22,7 @@ export class VendorsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createVendorDto: CreateVendorDto) {
+    console.log('CREATE VENDOR', createVendorDto);
     const vendor = await this.prisma.vendor.create({
       data: {
         ...createVendorDto,
@@ -29,6 +30,7 @@ export class VendorsService {
         address: JSON.stringify(createVendorDto.address),
       },
     });
+    console.log(vendor);
     return {
       ...vendor,
       walletAddress: bufferToHexString(vendor.walletAddress),
@@ -215,7 +217,7 @@ export class VendorsService {
     return console.log('INSIDE REGISTER VENDOR FUNCTION', name, phone);
   }
 
-  async getProjectBalance(projectId: string) {
+  async getProjectBalance(projectId = 'CVAProject') {
     const contractFn = await this.createContractInstance('RahatToken');
     const CVAProject = await this.getContractByName(projectId);
     return (await contractFn?.balanceOf(CVAProject.address))?.toString();
@@ -334,5 +336,16 @@ export class VendorsService {
       'INSIDE GET VENDOR WALLET NONCE FUNCTION',
       walletAddress,
     );
+  }
+
+  async getChainData(walletAddress: string) {
+    const [allowance, balance, distributed, isVendorApproved] =
+      await Promise.all([
+        this.getVendorAllowance(walletAddress),
+        this.getProjectBalance(),
+        this.getDisbursed(walletAddress),
+        this.checkIsVendorApproved(walletAddress),
+      ]);
+    return { allowance, balance, distributed, isVendorApproved };
   }
 }

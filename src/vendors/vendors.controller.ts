@@ -131,4 +131,9 @@ export class VendorsController {
   getVendorWalletNonce(@Param('walletAddress') walletAddress: string) {
     return this.vendorService.getVendorWalletNonce(walletAddress);
   }
+
+  @Get(':walletAddress/chainData')
+  getChainData(@Param('walletAddress') walletAddress: string) {
+    return this.vendorService.getChainData(walletAddress);
+  }
 }
