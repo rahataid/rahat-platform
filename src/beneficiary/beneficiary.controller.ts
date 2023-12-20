@@ -7,8 +7,9 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { BeneficiaryService } from './beneficiary.service';
 import { CreateBeneficiaryDto } from './dto/create-beneficiary.dto';
 import {
@@ -16,12 +17,16 @@ import {
   ListBeneficiaryTransactionsDto,
 } from './dto/list-beneficiary.dto';
 
+import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
+import { RoleGuard } from 'src/auth/guards/role.guard';
 import {
   AssignBeneficiaryToProjectDto,
   UpdateBeneficiaryDto,
   UpdateBeneficiaryStatusDto,
 } from './dto/update-beneficiary.dto';
 
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RoleGuard)
 @Controller('beneficiaries')
 @ApiTags('beneficiaries')
 export class BeneficiaryController {

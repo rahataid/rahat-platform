@@ -6,19 +6,24 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
+import { RoleGuard } from 'src/auth/guards/role.guard';
 import { CreateProjectDto } from './dto/create-project.dto';
+import {
+  ListProjectBeneficiaryDto,
+  ListProjectDto,
+} from './dto/list-project-dto';
 import {
   UpdateProjectCampaignDto,
   UpdateProjectDto,
 } from './dto/update-project.dto';
 import { ProjectService } from './project.service';
-import {
-  ListProjectBeneficiaryDto,
-  ListProjectDto,
-} from './dto/list-project-dto';
 
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RoleGuard)
 @Controller('projects')
 @ApiTags('projects')
 export class ProjectController {

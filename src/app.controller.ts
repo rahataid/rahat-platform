@@ -1,8 +1,20 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateAppSettingDto, GetSettingsByNameDto } from './app-settings.dto';
 import { AppService } from './app.service';
+import { JwtAuthGuard } from './auth/guards/jwt.auth.guard';
+import { RoleGuard } from './auth/guards/role.guard';
 
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RoleGuard)
 @Controller('app')
 @ApiTags('app')
 export class AppController {
