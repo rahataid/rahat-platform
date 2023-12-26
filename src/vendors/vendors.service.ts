@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { paginate } from '@utils/paginate';
 import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
-import { Contract, JsonRpcProvider } from 'ethers';
+import { Contract, JsonRpcProvider, ethers } from 'ethers';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import {
@@ -213,6 +213,21 @@ export class VendorsService {
     return new Contract(contract.address, contract.abi, provider);
   }
 
+  async createContractInstanceSign(projectName: string) {
+    //  Get Contract
+    const contract = await this.getContractByName(projectName);
+
+    //  Create wallet from private key
+    const provider = new JsonRpcProvider('http://localhost:8545');
+    const privateKey = process.env.RAHAT_ADMIN_PRIVATE_KEY;
+    console.log('PRIVATE KEY', privateKey);
+    const wallet = new ethers.Wallet(privateKey, provider);
+    console.log('created Wallet', wallet);
+
+    //  Create an instance of the contract
+    return new Contract(contract.address, contract.abi, wallet);
+  }
+
   register({ name, phone }: RegisterProps) {
     return console.log('INSIDE REGISTER VENDOR FUNCTION', name, phone);
   }
@@ -249,8 +264,12 @@ export class VendorsService {
     return (await contractFn?.vendorAllowance(vendorAddress))?.toString();
   }
 
-  async acceptTokensByVendor(numberOfTokens: string) {
-    const contractFn = await this.createContractInstance('CVAProject');
+  async acceptTokensByVendor(walletAddress: string, numberOfTokens: string) {
+    if (!numberOfTokens)
+      numberOfTokens = await this.getPendingTokensToAccept(walletAddress);
+    console.log('INSIDE ACCEPT PENDING TOKENS');
+    const contractFn = await this.createContractInstanceSign('CVAProject');
+    console.log('NUMBER OF TOKEN', numberOfTokens.toString());
     return contractFn?.acceptAllowanceByVendor(numberOfTokens.toString());
   }
 
@@ -323,8 +342,40 @@ export class VendorsService {
     });
   }
 
-  async chargeBeneficiary(walletAddress: string) {
-    return console.log(`Charge beneficiary-${walletAddress}`);
+  async chargeBeneficiary(walletAddress: string, payload: any) {
+    console.log(`Charge beneficiary-${walletAddress}`);
+    const { phone, amount } = payload;
+    console.log('PAYLOAD', payload);
+    const beneficiary = await this.prisma.beneficiary.findFirstOrThrow({
+      where: {
+        phone,
+      },
+      include: {
+        _count: {
+          select: {
+            projects: true,
+          },
+        },
+        projects: {
+          select: {
+            name: true,
+            projectType: true,
+            contractAddress: true,
+          },
+        },
+      },
+    });
+    beneficiary.address = bufferToHexString(beneficiary.walletAddress);
+    // const beneficiary = await this.findAll({
+    //   phone,
+    //   order: 'asc',
+    //   orderBy: 'name',
+    // });
+    const beneficiaryBalance = await this.getBeneficiaryBalance(
+      beneficiary.address,
+    );
+    if (!beneficiaryBalance) throw "Beneficiary Doesn't have enough balance";
+    console.log({ beneficiary }, { beneficiaryBalance });
   }
 
   async verifyOtp(walletAddress: string) {
@@ -339,13 +390,18 @@ export class VendorsService {
   }
 
   async getChainData(walletAddress: string) {
-    const [allowance, balance, distributed, isVendorApproved] =
+    const [allowance, balance, distributed, pendingTokens, isVendorApproved] =
       await Promise.all([
         this.getVendorAllowance(walletAddress),
         this.getProjectBalance(),
         this.getDisbursed(walletAddress),
+        this.getPendingTokensToAccept(walletAddress),
         this.checkIsVendorApproved(walletAddress),
       ]);
-    return { allowance, balance, distributed, isVendorApproved };
+    return { allowance, balance, distributed, pendingTokens, isVendorApproved };
+  }
+
+  async syncTransactions(transactions: any) {
+    console.log('SIGNED MESSAGE', transactions);
   }
 }

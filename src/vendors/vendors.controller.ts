@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { ChargeBeneficiaryDto } from 'src/beneficiary/dto/update-beneficiary.dto';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import {
   ListVendorDto,
@@ -95,9 +96,12 @@ export class VendorsController {
     return this.vendorService.getVendorAllowance(walletAddress);
   }
 
-  @Get(':walletAddress/acceptTokensByVendor')
-  acceptTokensByVendor(@Param('walletAddress') walletAddress: string) {
-    return this.vendorService.acceptTokensByVendor(walletAddress);
+  @Get(':walletAddress/acceptTokens/:tokens')
+  acceptTokensByVendor(
+    @Param('walletAddress') walletAddress: string,
+    @Param('tokens') tokens: string,
+  ) {
+    return this.vendorService.acceptTokensByVendor(walletAddress, tokens);
   }
 
   @Get(':beneficiaryAddress/beneficiaryBalance')
@@ -117,9 +121,12 @@ export class VendorsController {
     return this.vendorService.processTokenRequest(query);
   }
 
-  @Get(':walletAddress/chargeBeneficiary')
-  chargeBeneficiary(@Param('walletAddress') walletAddress: string) {
-    return this.vendorService.chargeBeneficiary(walletAddress);
+  @Post(':walletAddress/chargeBeneficiary')
+  chargeBeneficiary(
+    @Param('walletAddress') walletAddress: string,
+    @Body() payload: ChargeBeneficiaryDto,
+  ) {
+    return this.vendorService.chargeBeneficiary(walletAddress, payload);
   }
 
   @Get(':walletAddress/verifyOtp')
@@ -135,5 +142,10 @@ export class VendorsController {
   @Get(':walletAddress/chainData')
   getChainData(@Param('walletAddress') walletAddress: string) {
     return this.vendorService.getChainData(walletAddress);
+  }
+
+  @Post('/syncTransactions')
+  syncTransactions(@Body() payload: any) {
+    return this.vendorService.syncTransactions(payload);
   }
 }
