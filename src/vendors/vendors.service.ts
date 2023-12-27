@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { paginate } from '@utils/paginate';
 import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
-import { Contract, JsonRpcProvider, ethers } from 'ethers';
+import {
+  createContractInstance,
+  createContractInstanceSign,
+  multiSend,
+  verifyMessage,
+} from '@utils/web3';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import {
@@ -15,6 +20,24 @@ import { UpdateVendorDto } from './dto/update-vendor.dto';
 type RegisterProps = {
   name: string;
   phone: string;
+};
+
+enum Status {
+  NEW,
+  OFFLINE,
+  ONLINE,
+  SUCCESS,
+  FAIL,
+}
+
+type IOfflineTransactionItem = {
+  createdAt: string;
+  amount: string;
+  status: Status;
+  isOffline: boolean;
+  hash?: string;
+  walletAddress?: string;
+  phone?: string;
 };
 
 @Injectable()
@@ -202,65 +225,51 @@ export class VendorsService {
     return address;
   }
 
-  async createContractInstance(projectName: string) {
-    //  Get Contract
-    const contract = await this.getContractByName(projectName);
-
-    //  Create Provider
-    const provider = new JsonRpcProvider('http://localhost:8545');
-
-    //  Create an instance of the contract
-    return new Contract(contract.address, contract.abi, provider);
-  }
-
-  async createContractInstanceSign(projectName: string) {
-    //  Get Contract
-    const contract = await this.getContractByName(projectName);
-
-    //  Create wallet from private key
-    const provider = new JsonRpcProvider('http://localhost:8545');
-    const privateKey = process.env.RAHAT_ADMIN_PRIVATE_KEY;
-    console.log('PRIVATE KEY', privateKey);
-    const wallet = new ethers.Wallet(privateKey, provider);
-    console.log('created Wallet', wallet);
-
-    //  Create an instance of the contract
-    return new Contract(contract.address, contract.abi, wallet);
-  }
-
   register({ name, phone }: RegisterProps) {
     return console.log('INSIDE REGISTER VENDOR FUNCTION', name, phone);
   }
 
   async getProjectBalance(projectId = 'CVAProject') {
-    const contractFn = await this.createContractInstance('RahatToken');
+    const contractFn = await createContractInstance(
+      await this.getContractByName('RahatToken'),
+    );
     const CVAProject = await this.getContractByName(projectId);
     return (await contractFn?.balanceOf(CVAProject.address))?.toString();
   }
 
   async checkIsVendorApproved(vendorAddress: string) {
-    const contractFn = await this.createContractInstance('RahatCommunity');
+    const contractFn = await createContractInstance(
+      await this.getContractByName('RahatCommunity'),
+    );
     const vendorRole = await contractFn?.VENDOR_ROLE();
     return contractFn?.hasRole(vendorRole, vendorAddress);
   }
 
   async checkIsProjectLocked(projectId = 'CVAProject') {
-    const contractFn = await this.createContractInstance(projectId);
+    const contractFn = await createContractInstance(
+      await this.getContractByName(projectId),
+    );
     return contractFn?.isLocked();
   }
 
   async getPendingTokensToAccept(vendorAddress: string) {
-    const contractFn = await this.createContractInstance('CVAProject');
+    const contractFn = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+    );
     return (await contractFn?.vendorAllowancePending(vendorAddress)).toString();
   }
 
   async getDisbursed(walletAddress: string) {
-    const contractFn = await this.createContractInstance('RahatToken');
+    const contractFn = await createContractInstance(
+      await this.getContractByName('RahatToken'),
+    );
     return (await contractFn?.balanceOf(walletAddress)).toString();
   }
 
   async getVendorAllowance(vendorAddress: string) {
-    const contractFn = await this.createContractInstance('CVAProject');
+    const contractFn = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+    );
     return (await contractFn?.vendorAllowance(vendorAddress))?.toString();
   }
 
@@ -268,13 +277,17 @@ export class VendorsService {
     if (!numberOfTokens)
       numberOfTokens = await this.getPendingTokensToAccept(walletAddress);
     console.log('INSIDE ACCEPT PENDING TOKENS');
-    const contractFn = await this.createContractInstanceSign('CVAProject');
+    const contractFn = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+    );
     console.log('NUMBER OF TOKEN', numberOfTokens.toString());
     return contractFn?.acceptAllowanceByVendor(numberOfTokens.toString());
   }
 
   async getBeneficiaryBalance(beneficiaryAddress: string) {
-    const contractFn = await this.createContractInstance('CVAProject');
+    const contractFn = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+    );
     let balance = await contractFn
       ?.beneficiaryClaims(beneficiaryAddress)
       .catch(
@@ -300,9 +313,11 @@ export class VendorsService {
 
   async requestTokenFromBeneficiary(query: RequestTokenFromBeneficiaryDto) {
     const { to, amount } = query;
-    const contractFn = await this.createContractInstance('CVAProject');
-    const RahatClaimContractFn = await this.createContractInstance(
-      'RahatClaim',
+    const contractFn = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+    );
+    const RahatClaimContractFn = await createContractInstance(
+      await this.getContractByName('RahatClaim'),
     );
     const transaction = await contractFn[
       'requestTokenFromBeneficiary(address,uint256)'
@@ -325,7 +340,9 @@ export class VendorsService {
 
   async processTokenRequest(query: ProcessTokenRequest) {
     const { beneficiary, otp } = query;
-    const contractFn = await this.createContractInstance('CVAProject');
+    const contractFn = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+    );
     contractFn?.processTokenRequest(beneficiary, otp).catch((error: any) => {
       try {
         let message = error.error.error.error.toString();
@@ -401,7 +418,37 @@ export class VendorsService {
     return { allowance, balance, distributed, pendingTokens, isVendorApproved };
   }
 
-  async syncTransactions(transactions: any) {
-    console.log('SIGNED MESSAGE', transactions);
+  mapCallData(transactions: any, vendorAddress: string) {
+    const res = transactions.map((el: IOfflineTransactionItem) => [
+      el.walletAddress,
+      vendorAddress,
+      el.amount,
+    ]);
+    return res;
+  }
+
+  async syncTransactions(payload: any) {
+    const { message, signedMessage } = payload;
+    const walletAddress = verifyMessage(JSON.stringify(message), signedMessage);
+    // console.log('wallet address', walletAddress);
+
+    const callData = this.mapCallData(message, walletAddress);
+    // console.log('CALL DATA\n', callData);
+
+    const CVAProject = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+    );
+    // console.log(
+    //   'BENEFICIARY CLAIMS',
+    //   await CVAProject.beneficiaryClaims(
+    //     '0x1e5d0b89701670190c42478b1b12859cb941cf77',
+    //   ),
+    //   'VENDOR ALLOWANCE',
+    //   await CVAProject.vendorAllowance(
+    //     '0xf93BbEE1477150645Ae19CF9275DE23aB81949CC',
+    //   ),
+    // );
+
+    return multiSend(CVAProject, 'sendBeneficiaryTokenToVendor', callData);
   }
 }
