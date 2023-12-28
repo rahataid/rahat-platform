@@ -9,6 +9,7 @@ import {
   verifyMessage,
 } from '@utils/web3';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { BlockchainVendorDTO } from './dto/blockchain-vendor.dto';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import {
   ListVendorDto,
@@ -39,6 +40,8 @@ type IOfflineTransactionItem = {
   walletAddress?: string;
   phone?: string;
 };
+
+type IParams = string[];
 
 @Injectable()
 export class VendorsService {
@@ -229,7 +232,8 @@ export class VendorsService {
     return console.log('INSIDE REGISTER VENDOR FUNCTION', name, phone);
   }
 
-  async getProjectBalance(projectId = 'CVAProject') {
+  async getProjectBalance(params: IParams) {
+    const [projectId] = params;
     const contractFn = await createContractInstance(
       await this.getContractByName('RahatToken'),
     );
@@ -237,7 +241,8 @@ export class VendorsService {
     return (await contractFn?.balanceOf(CVAProject.address))?.toString();
   }
 
-  async checkIsVendorApproved(vendorAddress: string) {
+  async checkIsVendorApproved(params: IParams) {
+    const [vendorAddress] = params;
     const contractFn = await createContractInstance(
       await this.getContractByName('RahatCommunity'),
     );
@@ -245,46 +250,54 @@ export class VendorsService {
     return contractFn?.hasRole(vendorRole, vendorAddress);
   }
 
-  async checkIsProjectLocked(projectId = 'CVAProject') {
+  async checkIsProjectLocked(params: IParams) {
+    let [projectId] = params;
+    if (!projectId) projectId = 'CVAProject';
     const contractFn = await createContractInstance(
       await this.getContractByName(projectId),
     );
     return contractFn?.isLocked();
   }
 
-  async getPendingTokensToAccept(vendorAddress: string) {
+  async getPendingTokensToAccept(params: IParams) {
+    const [vendorAddress] = params;
     const contractFn = await createContractInstance(
       await this.getContractByName('CVAProject'),
     );
     return (await contractFn?.vendorAllowancePending(vendorAddress)).toString();
   }
 
-  async getDisbursed(walletAddress: string) {
+  async getDisbursed(params: IParams) {
+    const [walletAddress] = params;
     const contractFn = await createContractInstance(
       await this.getContractByName('RahatToken'),
     );
     return (await contractFn?.balanceOf(walletAddress)).toString();
   }
 
-  async getVendorAllowance(vendorAddress: string) {
+  async getVendorAllowance(params: IParams) {
+    const [vendorAddress] = params;
     const contractFn = await createContractInstance(
       await this.getContractByName('CVAProject'),
     );
     return (await contractFn?.vendorAllowance(vendorAddress))?.toString();
   }
 
-  async acceptTokensByVendor(walletAddress: string, numberOfTokens: string) {
+  async acceptPendingTokens(params: IParams) {
+    const walletAddress = params[0];
+    let numberOfTokens = params[1];
     if (!numberOfTokens)
-      numberOfTokens = await this.getPendingTokensToAccept(walletAddress);
+      numberOfTokens = await this.getPendingTokensToAccept([walletAddress]);
     console.log('INSIDE ACCEPT PENDING TOKENS');
     const contractFn = await createContractInstanceSign(
       await this.getContractByName('CVAProject'),
     );
     console.log('NUMBER OF TOKEN', numberOfTokens.toString());
-    return contractFn?.acceptAllowanceByVendor(numberOfTokens.toString());
+    return contractFn?.acceptAllowanceByVendor(numberOfTokens);
   }
 
-  async getBeneficiaryBalance(beneficiaryAddress: string) {
+  async getBeneficiaryBalance(params: IParams) {
+    const [beneficiaryAddress] = params;
     const contractFn = await createContractInstance(
       await this.getContractByName('CVAProject'),
     );
@@ -388,9 +401,9 @@ export class VendorsService {
     //   order: 'asc',
     //   orderBy: 'name',
     // });
-    const beneficiaryBalance = await this.getBeneficiaryBalance(
+    const beneficiaryBalance = await this.getBeneficiaryBalance([
       beneficiary.address,
-    );
+    ]);
     if (!beneficiaryBalance) throw "Beneficiary Doesn't have enough balance";
     console.log({ beneficiary }, { beneficiaryBalance });
   }
@@ -406,14 +419,15 @@ export class VendorsService {
     );
   }
 
-  async getChainData(walletAddress: string) {
+  async getChainData(params: IParams) {
+    const [walletAddress] = params;
     const [allowance, balance, distributed, pendingTokens, isVendorApproved] =
       await Promise.all([
-        this.getVendorAllowance(walletAddress),
-        this.getProjectBalance(),
-        this.getDisbursed(walletAddress),
-        this.getPendingTokensToAccept(walletAddress),
-        this.checkIsVendorApproved(walletAddress),
+        this.getVendorAllowance([walletAddress]),
+        this.getProjectBalance(['CVAProject']),
+        this.getDisbursed([walletAddress]),
+        this.getPendingTokensToAccept([walletAddress]),
+        this.checkIsVendorApproved([walletAddress]),
       ]);
     return { allowance, balance, distributed, pendingTokens, isVendorApproved };
   }
@@ -427,8 +441,8 @@ export class VendorsService {
     return res;
   }
 
-  async syncTransactions(payload: any) {
-    const { message, signedMessage } = payload;
+  async syncTransactions(params: IParams) {
+    const [message, signedMessage] = params;
     const walletAddress = verifyMessage(JSON.stringify(message), signedMessage);
     // console.log('wallet address', walletAddress);
 
@@ -450,5 +464,33 @@ export class VendorsService {
     // );
 
     return multiSend(CVAProject, 'sendBeneficiaryTokenToVendor', callData);
+  }
+
+  async blockchainCall(payload: BlockchainVendorDTO) {
+    const { method, params } = payload;
+    switch (method) {
+      case 'getChainData':
+        return this.getChainData(params);
+      case 'getProjectBalance':
+        return this.getProjectBalance(params);
+      case 'getPendingTokensToAccept':
+        return this.getPendingTokensToAccept(params);
+      case 'getDisbursed':
+        return this.getDisbursed(params);
+      case 'getVendorAllowance':
+        return this.getVendorAllowance(params);
+      case 'checkIsVendorApproved':
+        return this.checkIsVendorApproved(params);
+      case 'checkIsProjectLocked':
+        return this.checkIsProjectLocked(params);
+      case 'getBeneficiaryBalance':
+        return this.getBeneficiaryBalance(params);
+      case 'acceptPendingTokens':
+        return this.acceptPendingTokens(params);
+      case 'syncTransactions':
+        return this.syncTransactions(params);
+      default:
+        throw new Error(`${method} method doesn't exist`);
+    }
   }
 }

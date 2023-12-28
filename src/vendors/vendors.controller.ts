@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ChargeBeneficiaryDto } from 'src/beneficiary/dto/update-beneficiary.dto';
+import { BlockchainVendorDTO } from './dto/blockchain-vendor.dto';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import {
   ListVendorDto,
@@ -66,49 +67,9 @@ export class VendorsController {
     return this.vendorService.changeVendorState(walletAddress);
   }
 
-  @Get(':projectId/projectBalance')
-  getProjectBalance(@Param('projectId') projectId?: string) {
-    return this.vendorService.getProjectBalance(projectId);
-  }
-
-  @Get(':walletAddress/checkIsVendorApproved')
-  checkIsVendorApproved(@Param('walletAddress') walletAddress: string) {
-    return this.vendorService.checkIsVendorApproved(walletAddress);
-  }
-
-  @Get(':projectId/checkIsProjectLocked')
-  checkIsProjectLocked(@Param('projectId') projectId?: string) {
-    return this.vendorService.checkIsProjectLocked(projectId);
-  }
-
-  @Get(':walletAddress/pendingTokensToAccept')
-  getPendingTokensToAccept(@Param('walletAddress') walletAddress: string) {
-    return this.vendorService.getPendingTokensToAccept(walletAddress);
-  }
-
-  @Get(':walletAddress/disbursed')
-  getDisbursed(@Param('walletAddress') walletAddress: string) {
-    return this.vendorService.getDisbursed(walletAddress);
-  }
-
-  @Get(':walletAddress/vendorAllowance')
-  getVendorAllowance(@Param('walletAddress') walletAddress: string) {
-    return this.vendorService.getVendorAllowance(walletAddress);
-  }
-
-  @Get(':walletAddress/acceptTokens/:tokens')
-  acceptTokensByVendor(
-    @Param('walletAddress') walletAddress: string,
-    @Param('tokens') tokens: string,
-  ) {
-    return this.vendorService.acceptTokensByVendor(walletAddress, tokens);
-  }
-
-  @Get(':beneficiaryAddress/beneficiaryBalance')
-  getBeneficiaryBalance(
-    @Param('beneficiaryAddress') beneficiaryAddress: string,
-  ) {
-    return this.vendorService.getBeneficiaryBalance(beneficiaryAddress);
+  @Post('blockchain')
+  blockchainCall(@Body() blockchainVendorDTO: BlockchainVendorDTO) {
+    return this.vendorService.blockchainCall(blockchainVendorDTO);
   }
 
   @Get('/requestTokenFromBeneficiary')
@@ -137,15 +98,5 @@ export class VendorsController {
   @Get(':walletAddress/getVendorWalletNonce')
   getVendorWalletNonce(@Param('walletAddress') walletAddress: string) {
     return this.vendorService.getVendorWalletNonce(walletAddress);
-  }
-
-  @Get(':walletAddress/chainData')
-  getChainData(@Param('walletAddress') walletAddress: string) {
-    return this.vendorService.getChainData(walletAddress);
-  }
-
-  @Post('/syncTransactions')
-  syncTransactions(@Body() payload: any) {
-    return this.vendorService.syncTransactions(payload);
   }
 }
