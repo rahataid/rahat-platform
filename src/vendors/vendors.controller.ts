@@ -9,14 +9,9 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ChargeBeneficiaryDto } from 'src/beneficiary/dto/update-beneficiary.dto';
 import { BlockchainVendorDTO } from './dto/blockchain-vendor.dto';
 import { CreateVendorDto } from './dto/create-vendor.dto';
-import {
-  ListVendorDto,
-  ProcessTokenRequest,
-  RequestTokenFromBeneficiaryDto,
-} from './dto/list-vendor.dto';
+import { ListVendorDto } from './dto/list-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { VendorsService } from './vendors.service';
 
@@ -58,10 +53,6 @@ export class VendorsController {
     return this.vendorService.approval(walletAddress);
   }
 
-  @Post('register')
-  register(@Body() createVendorDto: CreateVendorDto) {
-    return this.vendorService.register(createVendorDto);
-  }
   @Patch(':walletAddress/toogleState')
   changeVendorState(@Param('walletAddress') walletAddress: string) {
     return this.vendorService.changeVendorState(walletAddress);
@@ -70,33 +61,5 @@ export class VendorsController {
   @Post('blockchain')
   blockchainCall(@Body() blockchainVendorDTO: BlockchainVendorDTO) {
     return this.vendorService.blockchainCall(blockchainVendorDTO);
-  }
-
-  @Get('/requestTokenFromBeneficiary')
-  requestTokenFromBeneficiary(@Query() query: RequestTokenFromBeneficiaryDto) {
-    return this.vendorService.requestTokenFromBeneficiary(query);
-  }
-
-  @Get(':walletAddress/processTokenRequest')
-  processTokenRequest(@Query() query: ProcessTokenRequest) {
-    return this.vendorService.processTokenRequest(query);
-  }
-
-  @Post(':walletAddress/chargeBeneficiary')
-  chargeBeneficiary(
-    @Param('walletAddress') walletAddress: string,
-    @Body() payload: ChargeBeneficiaryDto,
-  ) {
-    return this.vendorService.chargeBeneficiary(walletAddress, payload);
-  }
-
-  @Get(':walletAddress/verifyOtp')
-  verifyOtp(@Param('walletAddress') walletAddress: string) {
-    return this.vendorService.verifyOtp(walletAddress);
-  }
-
-  @Get(':walletAddress/getVendorWalletNonce')
-  getVendorWalletNonce(@Param('walletAddress') walletAddress: string) {
-    return this.vendorService.getVendorWalletNonce(walletAddress);
   }
 }
