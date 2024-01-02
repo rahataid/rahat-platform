@@ -20,8 +20,6 @@ import { VendorsService } from './vendors.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 import { RoleGuard } from 'src/auth/guards/role.guard';
 
-@ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard, RoleGuard)
 @Controller('vendors')
 @ApiTags('vendors')
 export class VendorsController {
@@ -32,6 +30,8 @@ export class VendorsController {
     return this.vendorService.create(createVendorDto);
   }
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Get()
   findAll(@Query() query: ListVendorDto) {
     return this.vendorService.findAll(query);
@@ -42,6 +42,8 @@ export class VendorsController {
     return this.vendorService.findOne(walletAddress);
   }
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Patch(':walletAddress')
   update(
     @Param('walletAddress') walletAddress: string,
@@ -50,16 +52,22 @@ export class VendorsController {
     return this.vendorService.update(walletAddress, updateVendorDto);
   }
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Delete(':walletAddress')
   remove(@Param('walletAddress') walletAddress: string) {
     return this.vendorService.remove(walletAddress);
   }
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Patch(':walletAddress/approval')
   approval(@Param('walletAddress') walletAddress: string) {
     return this.vendorService.approval(walletAddress);
   }
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Patch(':walletAddress/toogleState')
   changeVendorState(@Param('walletAddress') walletAddress: string) {
     return this.vendorService.changeVendorState(walletAddress);
