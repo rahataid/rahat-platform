@@ -1,7 +1,11 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
+import { RoleGuard } from 'src/auth/guards/role.guard';
 import { ReportsService } from './reports.service';
 
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard, RoleGuard)
 @Controller('reports')
 @ApiTags('reports')
 export class ReportsController {

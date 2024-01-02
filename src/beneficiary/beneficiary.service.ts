@@ -118,6 +118,7 @@ export class BeneficiaryService {
       where: {
         uuid,
         deletedAt: null,
+        isActive: true,
       },
       include: {
         _count: {
@@ -166,6 +167,7 @@ export class BeneficiaryService {
     return this.prisma.beneficiary.update({
       data: {
         deletedAt: new Date(),
+        isActive: false,
       },
       where: {
         uuid,
@@ -177,6 +179,7 @@ export class BeneficiaryService {
     return this.prisma.beneficiary.update({
       data: {
         isActive: false,
+        // deletedAt: new Date(),
       },
       where: {
         walletAddress: hexStringToBuffer(walletAddress),
@@ -253,8 +256,9 @@ SELECT
   SUM(CASE WHEN "internetAccess" = 'PHONE_INTERNET' THEN 1 ELSE 0 END) as "phoneInternetCount",
   SUM(CASE WHEN "internetAccess" = 'HOME_INTERNET' THEN 1 ELSE 0 END) as "homeInternetCount"
 FROM "tbl_beneficiaries"
+WHERE "isActive" = true 
 `;
-
+    // AND "deletedAt" IS NULL
     totalCount = stringifyWithBigInt(totalCount);
 
     const gender = {

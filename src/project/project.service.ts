@@ -18,7 +18,6 @@ export class ProjectService {
   constructor(private prisma: PrismaService) {}
 
   async create(createProjectDto: CreateProjectDto) {
-    console.log('first', createProjectDto);
     const { owner, contractAddress, ...rest } = createProjectDto;
 
     // contractAddress =
@@ -100,11 +99,21 @@ export class ProjectService {
           equals: hexStringToBuffer(contractAddress),
         },
       },
-
       include: {
+        vendors: {
+          select: {
+            walletAddress: true,
+            id: true,
+          },
+        },
         _count: {
           select: {
-            beneficiaries: true,
+            beneficiaries: {
+              where: {
+                // deletedAt: null,
+                isActive: true,
+              },
+            },
             owner: true,
             vendors: true,
           },

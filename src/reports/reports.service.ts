@@ -43,6 +43,10 @@ export class ReportsService {
 
       select: {
         beneficiaries: {
+          where: {
+            isActive: true,
+            // deletedAt: null,
+          },
           select: {
             gender: true,
             bankStatus: true,
