@@ -26,3 +26,17 @@ export class DisableBeneficiaryDto {
   })
   walletAddress: string;
 }
+
+export class ChargeBeneficiaryDto {
+  @ApiProperty({
+    example: '10',
+  })
+  @IsString()
+  amount: string;
+
+  @ApiProperty({
+    example: '9860243992',
+  })
+  @IsString()
+  phone: string;
+}

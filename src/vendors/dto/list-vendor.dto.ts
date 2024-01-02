@@ -54,3 +54,43 @@ export class ListVendorDto {
   })
   orderBy: VendorFilter['orderBy'];
 }
+
+export class RequestTokenFromBeneficiaryDto {
+  @ApiProperty({
+    description: 'to',
+    example: '0x1e5d0b89701670190c42478b1b12859cb941cf77',
+    required: true,
+  })
+  @IsString()
+  @IsOptional()
+  to?: string;
+
+  @ApiProperty({
+    description: 'amount',
+    example: '10',
+    required: true,
+  })
+  @IsString()
+  @IsOptional()
+  amount?: string;
+}
+
+export class ProcessTokenRequest {
+  @ApiProperty({
+    description: 'Beneficiary Address',
+    example: '0x1e5d0b89701670190c42478b1b12859cb941cf77',
+    required: true,
+  })
+  @IsString()
+  @IsOptional()
+  beneficiary?: string;
+
+  @ApiProperty({
+    description: 'OTP',
+    example: '4430',
+    required: true,
+  })
+  @IsString()
+  @IsOptional()
+  otp?: string;
+}

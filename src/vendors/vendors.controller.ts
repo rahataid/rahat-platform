@@ -9,7 +9,9 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { BlockchainVendorDTO } from './dto/blockchain-vendor.dto';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { ListVendorDto } from './dto/list-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
@@ -58,12 +60,13 @@ export class VendorsController {
     return this.vendorService.approval(walletAddress);
   }
 
-  @Post('register')
-  register(@Body() createVendorDto: CreateVendorDto) {
-    return this.vendorService.register(createVendorDto);
-  }
   @Patch(':walletAddress/toogleState')
   changeVendorState(@Param('walletAddress') walletAddress: string) {
     return this.vendorService.changeVendorState(walletAddress);
+  }
+
+  @Post('blockchain')
+  blockchainCall(@Body() blockchainVendorDTO: BlockchainVendorDTO) {
+    return this.vendorService.blockchainCall(blockchainVendorDTO);
   }
 }

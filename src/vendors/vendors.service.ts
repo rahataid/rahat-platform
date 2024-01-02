@@ -2,10 +2,37 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { paginate } from '@utils/paginate';
 import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
+import {
+  createContractInstance,
+  createContractInstanceSign,
+  multiSend,
+  verifyMessage,
+} from '@utils/web3';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { BlockchainVendorDTO } from './dto/blockchain-vendor.dto';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { ListVendorDto } from './dto/list-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
+
+enum Status {
+  NEW,
+  OFFLINE,
+  ONLINE,
+  SUCCESS,
+  FAIL,
+}
+
+type IOfflineTransactionItem = {
+  createdAt: string;
+  amount: string;
+  status: Status;
+  isOffline: boolean;
+  hash?: string;
+  walletAddress?: string;
+  phone?: string;
+};
+
+type IParams = string[];
 
 @Injectable()
 export class VendorsService {
@@ -175,8 +202,179 @@ export class VendorsService {
     return updateVendor.isActive;
   }
 
-  register(registerVendorDto: any) {
-    console.log('INSIDE REGISTER VENDOR FUNCTION');
-    return 'This registers vendors';
+  async getContractByName(contractName: string) {
+    const addresses = await this.prisma.appSettings.findMany({
+      where: {
+        name: 'CONTRACT_ADDRESS',
+      },
+    });
+
+    const address = addresses[0].value[contractName];
+    if (!address) {
+      throw new Error(`Contract ${contractName} not found.`);
+    }
+
+    return address;
+  }
+
+  async getProjectBalance(params: IParams) {
+    const [projectId] = params;
+    const contractFn = await createContractInstance(
+      await this.getContractByName('RahatToken'),
+    );
+    const CVAProject = await this.getContractByName(projectId);
+    return (await contractFn?.balanceOf(CVAProject.address))?.toString();
+  }
+
+  async checkIsVendorApproved(params: IParams) {
+    const [vendorAddress] = params;
+    const contractFn = await createContractInstance(
+      await this.getContractByName('RahatCommunity'),
+    );
+    const vendorRole = await contractFn?.VENDOR_ROLE();
+    return contractFn?.hasRole(vendorRole, vendorAddress);
+  }
+
+  async checkIsProjectLocked(params: IParams) {
+    let [projectId] = params;
+    if (!projectId) projectId = 'CVAProject';
+    const contractFn = await createContractInstance(
+      await this.getContractByName(projectId),
+    );
+    return contractFn?.isLocked();
+  }
+
+  async getPendingTokensToAccept(params: IParams) {
+    const [vendorAddress] = params;
+    const contractFn = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+    );
+    return (await contractFn?.vendorAllowancePending(vendorAddress)).toString();
+  }
+
+  async getDisbursed(params: IParams) {
+    const [walletAddress] = params;
+    const contractFn = await createContractInstance(
+      await this.getContractByName('RahatToken'),
+    );
+    return (await contractFn?.balanceOf(walletAddress)).toString();
+  }
+
+  async getVendorAllowance(params: IParams) {
+    const [vendorAddress] = params;
+    const contractFn = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+    );
+    return (await contractFn?.vendorAllowance(vendorAddress))?.toString();
+  }
+
+  async acceptPendingTokens(params: IParams) {
+    const walletAddress = params[0];
+    let numberOfTokens = params[1];
+    if (!numberOfTokens)
+      numberOfTokens = await this.getPendingTokensToAccept([walletAddress]);
+    const contractFn = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+    );
+    return contractFn?.acceptAllowanceByVendor(numberOfTokens);
+  }
+
+  async getBeneficiaryBalance(params: IParams) {
+    const [beneficiaryAddress] = params;
+    const contractFn = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+    );
+    let balance = await contractFn
+      ?.beneficiaryClaims(beneficiaryAddress)
+      .catch(
+        (error: { error: { error: { error: { toString: () => any } } } }) => {
+          try {
+            let message = error.error.error.error.toString();
+            message = message.replace(
+              'Error: VM Exception while processing transaction: revert ',
+              '',
+            );
+          } catch (e) {
+            console.error(error);
+          }
+        },
+      );
+    balance = balance?.toString();
+    return balance;
+  }
+
+  async chargeBeneficiary(params: any) {
+    const [message, signedMessage] = params;
+    const walletAddress = verifyMessage(JSON.stringify(message), signedMessage);
+    const CVAProject = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+    );
+    return CVAProject.sendBeneficiaryTokenToVendor(
+      message?.walletAddress,
+      walletAddress,
+      message?.amount,
+    );
+  }
+
+  async getChainData(params: IParams) {
+    const [walletAddress] = params;
+    const [allowance, balance, distributed, pendingTokens, isVendorApproved] =
+      await Promise.all([
+        this.getVendorAllowance([walletAddress]),
+        this.getProjectBalance(['CVAProject']),
+        this.getDisbursed([walletAddress]),
+        this.getPendingTokensToAccept([walletAddress]),
+        this.checkIsVendorApproved([walletAddress]),
+      ]);
+    return { allowance, balance, distributed, pendingTokens, isVendorApproved };
+  }
+
+  mapCallData(transactions: any, vendorAddress: string) {
+    const res = transactions.map((el: IOfflineTransactionItem) => [
+      el.walletAddress,
+      vendorAddress,
+      el.amount,
+    ]);
+    return res;
+  }
+
+  async syncTransactions(params: IParams) {
+    const [message, signedMessage] = params;
+    const walletAddress = verifyMessage(JSON.stringify(message), signedMessage);
+    const callData = this.mapCallData(message, walletAddress);
+    const CVAProject = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+    );
+    return multiSend(CVAProject, 'sendBeneficiaryTokenToVendor', callData);
+  }
+
+  async blockchainCall(payload: BlockchainVendorDTO) {
+    const { method, params } = payload;
+    switch (method) {
+      case 'getChainData':
+        return this.getChainData(params);
+      case 'getProjectBalance':
+        return this.getProjectBalance(params);
+      case 'getPendingTokensToAccept':
+        return this.getPendingTokensToAccept(params);
+      case 'getDisbursed':
+        return this.getDisbursed(params);
+      case 'getVendorAllowance':
+        return this.getVendorAllowance(params);
+      case 'checkIsVendorApproved':
+        return this.checkIsVendorApproved(params);
+      case 'checkIsProjectLocked':
+        return this.checkIsProjectLocked(params);
+      case 'getBeneficiaryBalance':
+        return this.getBeneficiaryBalance(params);
+      case 'acceptPendingTokens':
+        return this.acceptPendingTokens(params);
+      case 'syncTransactions':
+        return this.syncTransactions(params);
+      case 'chargeBeneficiary':
+        return this.chargeBeneficiary(params);
+      default:
+        throw new Error(`${method} method doesn't exist`);
+    }
   }
 }
