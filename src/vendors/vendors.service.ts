@@ -221,6 +221,7 @@ export class VendorsService {
     const [projectId] = params;
     const contractFn = await createContractInstance(
       await this.getContractByName('RahatToken'),
+      this.prisma.appSettings,
     );
     const CVAProject = await this.getContractByName(projectId);
     return (await contractFn?.balanceOf(CVAProject.address))?.toString();
@@ -230,6 +231,7 @@ export class VendorsService {
     const [vendorAddress] = params;
     const contractFn = await createContractInstance(
       await this.getContractByName('RahatCommunity'),
+      this.prisma.appSettings,
     );
     const vendorRole = await contractFn?.VENDOR_ROLE();
     return contractFn?.hasRole(vendorRole, vendorAddress);
@@ -240,6 +242,7 @@ export class VendorsService {
     if (!projectId) projectId = 'CVAProject';
     const contractFn = await createContractInstance(
       await this.getContractByName(projectId),
+      this.prisma.appSettings,
     );
     return contractFn?.isLocked();
   }
@@ -248,6 +251,7 @@ export class VendorsService {
     const [vendorAddress] = params;
     const contractFn = await createContractInstance(
       await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
     );
     return (await contractFn?.vendorAllowancePending(vendorAddress)).toString();
   }
@@ -256,6 +260,7 @@ export class VendorsService {
     const [walletAddress] = params;
     const contractFn = await createContractInstance(
       await this.getContractByName('RahatToken'),
+      this.prisma.appSettings,
     );
     return (await contractFn?.balanceOf(walletAddress)).toString();
   }
@@ -264,6 +269,7 @@ export class VendorsService {
     const [vendorAddress] = params;
     const contractFn = await createContractInstance(
       await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
     );
     return (await contractFn?.vendorAllowance(vendorAddress))?.toString();
   }
@@ -275,6 +281,7 @@ export class VendorsService {
       numberOfTokens = await this.getPendingTokensToAccept([walletAddress]);
     const contractFn = await createContractInstanceSign(
       await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
     );
     return contractFn?.acceptAllowanceByVendor(numberOfTokens);
   }
@@ -283,6 +290,7 @@ export class VendorsService {
     const [beneficiaryAddress] = params;
     const contractFn = await createContractInstance(
       await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
     );
     let balance = await contractFn
       ?.beneficiaryClaims(beneficiaryAddress)
@@ -308,6 +316,7 @@ export class VendorsService {
     const walletAddress = verifyMessage(JSON.stringify(message), signedMessage);
     const CVAProject = await createContractInstanceSign(
       await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
     );
     return CVAProject.sendBeneficiaryTokenToVendor(
       message?.walletAddress,
@@ -344,6 +353,7 @@ export class VendorsService {
     const callData = this.mapCallData(message, walletAddress);
     const CVAProject = await createContractInstanceSign(
       await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
     );
     return multiSend(CVAProject, 'sendBeneficiaryTokenToVendor', callData);
   }

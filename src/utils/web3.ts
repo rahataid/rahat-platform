@@ -10,23 +10,45 @@ import {
 type IStringArr = string[];
 type ICallData = IStringArr[];
 
-export async function createContractInstance(contract: any) {
+export async function createContractInstance(contract: any, model: any) {
   //  Get Contract
   //   const contract = await getContractByName(projectName);
 
+  //  Get RPC URL
+  const res = await model.findFirstOrThrow({
+    where: {
+      name: 'BLOCKCHAIN',
+    },
+    select: {
+      name: true,
+      value: true,
+    },
+  });
+
   //  Create Provider
-  const provider = new JsonRpcProvider('http://localhost:8545');
+  const provider = new JsonRpcProvider(res?.value?.rpcUrl);
 
   //  Create an instance of the contract
   return new Contract(contract.address, contract.abi, provider);
 }
 
-export async function createContractInstanceSign(contract: any) {
+export async function createContractInstanceSign(contract: any, model: any) {
   //  Get Contract
   //   const contract = await this.getContractByName(projectName);
 
+  //  Get RPC URL
+  const res = await model.findFirstOrThrow({
+    where: {
+      name: 'BLOCKCHAIN',
+    },
+    select: {
+      name: true,
+      value: true,
+    },
+  });
+
   //  Create wallet from private key
-  const provider = new JsonRpcProvider('http://localhost:8545');
+  const provider = new JsonRpcProvider(res?.value?.rpcUrl);
   const privateKey = process.env.RAHAT_ADMIN_PRIVATE_KEY;
 
   const wallet = new ethers.Wallet(privateKey, provider);
