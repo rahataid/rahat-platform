@@ -22,28 +22,34 @@ import {
 } from './dto/update-project.dto';
 import { ProjectService } from './project.service';
 
-@ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard, RoleGuard)
 @Controller('projects')
 @ApiTags('projects')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Post()
   create(@Body() createProjectDto: CreateProjectDto) {
     return this.projectService.create(createProjectDto);
   }
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Get()
   findAll(@Query() query: ListProjectDto) {
     return this.projectService.findAll(query);
   }
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Get(':address')
   findOne(@Param('address') address: string) {
     return this.projectService.findOne(address);
   }
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Patch(':address/campaigns')
   updateCampaign(
     @Param('address') address: string,
@@ -52,6 +58,8 @@ export class ProjectController {
     return this.projectService.updateCampaign(address, campaigns);
   }
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Patch('/remove/:address/campaigns')
   removeCampaignFromProject(
     @Param('address') address: string,
@@ -60,6 +68,8 @@ export class ProjectController {
     return this.projectService.removeCampaignFromProject(address, campaigns);
   }
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Patch(':address')
   update(
     @Param('address') address: string,
@@ -68,6 +78,8 @@ export class ProjectController {
     return this.projectService.update(address, updateProjectDto);
   }
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Get(':address/beneficiaries')
   getBeneficiaries(
     @Param('address') address: string,
@@ -76,6 +88,8 @@ export class ProjectController {
     return this.projectService.getBeneficiaries(address, query);
   }
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Patch('/remove/:address/beneficiaries')
   removeBeneficiariesFromProject(
     @Param('address') address: string,
@@ -85,5 +99,15 @@ export class ProjectController {
       address,
       beneficiaries,
     );
+  }
+
+  @Post('/:address/offlineBeneficiaries')
+  setOfflineBeneficiariesFromProject(@Param('address') address: string) {
+    return this.projectService.setOfflineBeneficiariesFromProject(address);
+  }
+
+  @Get('/:address/offlineBeneficiaries')
+  getOfflineBeneficiariesFromProject(@Param('address') address: string) {
+    return this.projectService.getOfflineBeneficiariesFromProject(address);
   }
 }
