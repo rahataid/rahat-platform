@@ -16,7 +16,7 @@ import {
 
 @Injectable()
 export class ProjectService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(createProjectDto: CreateProjectDto) {
     const { owner, contractAddress, ...rest } = createProjectDto;
@@ -350,7 +350,12 @@ export class ProjectService {
     });
 
     offlineBeneficiariesWithProjects = offlineBeneficiariesWithProjects.map(
-      (el: any, i: number) => ({ ...el, tokens: multiRes[i].toString() }),
+      (el: any, i: number) => ({
+        ...el,
+        tokens: multiRes[i].toString(),
+        otpHash: bufferToHexString(el.otpHash),
+        walletAddress: bufferToHexString(el.walletAddress),
+      }),
     );
     return offlineBeneficiariesWithProjects;
   }
