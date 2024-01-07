@@ -5,8 +5,9 @@ import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
 import {
   createContractInstance,
   createContractInstanceSign,
+  isAddress,
   multiSend,
-  verifyMessage,
+  verifyMessage
 } from '@utils/web3';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BlockchainVendorDTO } from './dto/blockchain-vendor.dto';
@@ -36,7 +37,7 @@ type IParams = string[];
 
 @Injectable()
 export class VendorsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(createVendorDto: CreateVendorDto) {
     const vendor = await this.prisma.vendor.create({
@@ -325,6 +326,54 @@ export class VendorsService {
     );
   }
 
+  //#region online Transactions Pathwork - need to change
+
+  async assertBeneficiary(beneficiaryId: string): Promise<string> {
+    if (isAddress(beneficiaryId)) return beneficiaryId;
+    const beneficiary = await this.prisma.beneficiary.findUnique({
+      where: {
+        phone: beneficiaryId,
+      },
+    });
+    if (!beneficiary) throw new Error('Invalid Beneficiary Address');
+    return bufferToHexString(beneficiary?.walletAddress);
+  }
+
+  async initiateTransactionForVendor(params: IParams) {
+    console.log({ params });
+    const [vendorAddress, beneficiaryId, amount] = params;
+    const beneficiaryAddress = await this.assertBeneficiary(beneficiaryId);
+
+    console.log(vendorAddress, beneficiaryAddress, amount);
+    const CVAProject = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    return CVAProject?.initiateTokenRequestForVendor(
+      vendorAddress,
+      beneficiaryAddress,
+      amount,
+    );
+  }
+
+  async processTransactionForVendor(params: IParams) {
+    const [vendorAddress, beneficiaryId, otp] = params;
+    console.log({ vendorAddress, beneficiaryId, otp });
+    const beneficiaryAddress = await this.assertBeneficiary(beneficiaryId);
+    console.log({ vendorAddress, beneficiaryAddress, otp });
+    const CVAProject = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    return CVAProject?.processTokenRequestForVendor(
+      vendorAddress,
+      beneficiaryAddress,
+      otp,
+    );
+  }
+
+  //#endregion
+
   async getChainData(params: IParams) {
     const [walletAddress] = params;
     const [allowance, balance, distributed, pendingTokens, isVendorApproved] =
@@ -383,6 +432,10 @@ export class VendorsService {
         return this.syncTransactions(params);
       case 'chargeBeneficiary':
         return this.chargeBeneficiary(params);
+      case 'initiateTransactionForVendor':
+        return this.initiateTransactionForVendor(params);
+      case 'processTransactionForVendor':
+        return this.processTransactionForVendor(params);
       default:
         throw new Error(`${method} method doesn't exist`);
     }

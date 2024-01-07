@@ -7,6 +7,8 @@ import {
   recoverAddress,
 } from 'ethers';
 
+export { isAddress } from 'ethers';
+
 type IStringArr = string[];
 type ICallData = IStringArr[];
 
@@ -105,6 +107,19 @@ export async function multiSend(
   const tx = await contract.multicall(encodedData);
   const result = await tx.wait();
   return result;
+}
+
+export async function multiCall(
+  contract: ethers.Contract,
+  functionName: string,
+  callData?: ICallData,
+) {
+  const encodedData = await generateMultiCallData(
+    contract,
+    functionName,
+    callData,
+  );
+  return contract.multicall.staticCall(encodedData);
 }
 
 export async function getFunctionsList(contractInstance: any) {
