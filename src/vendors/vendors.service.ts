@@ -5,8 +5,9 @@ import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
 import {
   createContractInstance,
   createContractInstanceSign,
+  isAddress,
   multiSend,
-  verifyMessage,
+  verifyMessage
 } from '@utils/web3';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BlockchainVendorDTO } from './dto/blockchain-vendor.dto';
@@ -327,9 +328,24 @@ export class VendorsService {
 
   //#region online Transactions Pathwork - need to change
 
+  async assertBeneficiary(beneficiaryId: string): Promise<string> {
+    if (isAddress(beneficiaryId)) return beneficiaryId;
+    const beneficiary = await this.prisma.beneficiary.findUnique({
+      where: {
+        phone: beneficiaryId,
+      },
+    });
+    if (!beneficiary) throw new Error('Invalid Beneficiary Address');
+    return bufferToHexString(beneficiary?.walletAddress);
+  }
+
   async initiateTransactionForVendor(params: IParams) {
-    const [vendorAddress, beneficiaryAddress, amount] = params;
-    const CVAProject = await createContractInstance(
+    console.log({ params });
+    const [vendorAddress, beneficiaryId, amount] = params;
+    const beneficiaryAddress = await this.assertBeneficiary(beneficiaryId);
+
+    console.log(vendorAddress, beneficiaryAddress, amount);
+    const CVAProject = await createContractInstanceSign(
       await this.getContractByName('CVAProject'),
       this.prisma.appSettings,
     );
@@ -341,8 +357,11 @@ export class VendorsService {
   }
 
   async processTransactionForVendor(params: IParams) {
-    const [vendorAddress, beneficiaryAddress, otp] = params;
-    const CVAProject = await createContractInstance(
+    const [vendorAddress, beneficiaryId, otp] = params;
+    console.log({ vendorAddress, beneficiaryId, otp });
+    const beneficiaryAddress = await this.assertBeneficiary(beneficiaryId);
+    console.log({ vendorAddress, beneficiaryAddress, otp });
+    const CVAProject = await createContractInstanceSign(
       await this.getContractByName('CVAProject'),
       this.prisma.appSettings,
     );

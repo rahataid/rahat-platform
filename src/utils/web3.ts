@@ -7,6 +7,8 @@ import {
   recoverAddress,
 } from 'ethers';
 
+export { isAddress } from 'ethers';
+
 type IStringArr = string[];
 type ICallData = IStringArr[];
 
