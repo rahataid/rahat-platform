@@ -342,6 +342,7 @@ export class ProjectService {
       await this.getContractByName('CVAProject'),
       this.prisma.appSettings,
     );
+
     let multiRes = await multiCall(CVAProject, 'beneficiaryClaims', callData);
     multiRes = multiRes.map((el) => {
       return CVAProject.interface
@@ -350,8 +351,14 @@ export class ProjectService {
     });
 
     offlineBeneficiariesWithProjects = offlineBeneficiariesWithProjects.map(
-      (el: any, i: number) => ({ ...el, tokens: multiRes[i].toString() }),
+      (el: any, i: number) => ({
+        ...el,
+        token: multiRes[i].toString(),
+        walletAddress: bufferToHexString(el.walletAddress),
+        otpHash: bufferToHexString(el.otpHash),
+      }),
     );
+
     return offlineBeneficiariesWithProjects;
   }
 
