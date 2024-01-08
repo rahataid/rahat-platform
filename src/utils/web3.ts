@@ -107,6 +107,19 @@ export async function multiSend(
   return result;
 }
 
+export async function multiCall(
+  contract: ethers.Contract,
+  functionName: string,
+  callData?: ICallData,
+) {
+  const encodedData = await generateMultiCallData(
+    contract,
+    functionName,
+    callData,
+  );
+  return contract.multicall.staticCall(encodedData);
+}
+
 export async function getFunctionsList(contractInstance: any) {
   const functions = contractInstance.interface.fragments;
   const funcArr = [];

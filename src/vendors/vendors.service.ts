@@ -36,7 +36,7 @@ type IParams = string[];
 
 @Injectable()
 export class VendorsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(createVendorDto: CreateVendorDto) {
     const vendor = await this.prisma.vendor.create({
@@ -325,6 +325,36 @@ export class VendorsService {
     );
   }
 
+  //#region online Transactions Pathwork - need to change
+
+  async initiateTransactionForVendor(params: IParams) {
+    const [vendorAddress, beneficiaryAddress, amount] = params;
+    const CVAProject = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    return CVAProject?.initiateTokenRequestForVendor(
+      vendorAddress,
+      beneficiaryAddress,
+      amount,
+    );
+  }
+
+  async processTransactionForVendor(params: IParams) {
+    const [vendorAddress, beneficiaryAddress, otp] = params;
+    const CVAProject = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    return CVAProject?.processTokenRequestForVendor(
+      vendorAddress,
+      beneficiaryAddress,
+      otp,
+    );
+  }
+
+  //#endregion
+
   async getChainData(params: IParams) {
     const [walletAddress] = params;
     const [allowance, balance, distributed, pendingTokens, isVendorApproved] =
@@ -383,6 +413,10 @@ export class VendorsService {
         return this.syncTransactions(params);
       case 'chargeBeneficiary':
         return this.chargeBeneficiary(params);
+      case 'initiateTransactionForVendor':
+        return this.initiateTransactionForVendor(params);
+      case 'processTransactionForVendor':
+        return this.processTransactionForVendor(params);
       default:
         throw new Error(`${method} method doesn't exist`);
     }
