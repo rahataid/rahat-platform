@@ -398,7 +398,7 @@ export class VendorsService {
     for (const request of requests) {
       const result = await request;
       results.push(result);
-      await this.delay(100);
+      await this.delay(1000);
     }
 
     return results;
