@@ -7,7 +7,7 @@ import {
   createContractInstanceSign,
   isAddress,
   multiSend,
-  verifyMessage
+  verifyMessage,
 } from '@utils/web3';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BlockchainVendorDTO } from './dto/blockchain-vendor.dto';
@@ -37,7 +37,7 @@ type IParams = string[];
 
 @Injectable()
 export class VendorsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async create(createVendorDto: CreateVendorDto) {
     const vendor = await this.prisma.vendor.create({
@@ -376,15 +376,36 @@ export class VendorsService {
 
   async getChainData(params: IParams) {
     const [walletAddress] = params;
-    const [allowance, balance, distributed, pendingTokens, isVendorApproved] =
-      await Promise.all([
-        this.getVendorAllowance([walletAddress]),
-        this.getProjectBalance(['CVAProject']),
-        this.getDisbursed([walletAddress]),
-        this.getPendingTokensToAccept([walletAddress]),
-        this.checkIsVendorApproved([walletAddress]),
-      ]);
-    return { allowance, balance, distributed, pendingTokens, isVendorApproved };
+    // const [allowance, balance, distributed, pendingTokens, isVendorApproved] =
+    //   await Promise.all([
+    //     this.getVendorAllowance([walletAddress]),
+    //     this.getProjectBalance(['CVAProject']),
+    //     this.getDisbursed([walletAddress]),
+    //     this.getPendingTokensToAccept([walletAddress]),
+    //     this.checkIsVendorApproved([walletAddress]),
+    //   ]);
+    // return { allowance, balance, distributed, pendingTokens, isVendorApproved };
+    const requests = [
+      this.getVendorAllowance([walletAddress]),
+      this.getProjectBalance(['CVAProject']),
+      this.getDisbursed([walletAddress]),
+      this.getPendingTokensToAccept([walletAddress]),
+      this.checkIsVendorApproved([walletAddress]),
+    ];
+
+    const results = [];
+
+    for (const request of requests) {
+      const result = await request;
+      results.push(result);
+      // await this.delay(100);
+    }
+
+    return results;
+  }
+
+  delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   mapCallData(transactions: any, vendorAddress: string) {
