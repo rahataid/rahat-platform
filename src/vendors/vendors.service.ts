@@ -5,7 +5,9 @@ import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
 import {
   createContractInstance,
   createContractInstanceSign,
+  getHash,
   isAddress,
+  multiFunctionCall,
   multiSend,
   verifyMessage,
 } from '@utils/web3';
@@ -234,7 +236,8 @@ export class VendorsService {
       await this.getContractByName('RahatCommunity'),
       this.prisma.appSettings,
     );
-    const vendorRole = await contractFn?.VENDOR_ROLE();
+    const vendorRole = getHash('VENDOR');
+    console.log({ vendorRole });
     return contractFn?.hasRole(vendorRole, vendorAddress);
   }
 
@@ -375,38 +378,46 @@ export class VendorsService {
   //#endregion
 
   async getChainData(params: IParams) {
-    const [walletAddress] = params;
     // const [allowance, balance, distributed, pendingTokens, isVendorApproved] =
     //   await Promise.all([
-    //     this.getVendorAllowance([walletAddress]),
-    //     this.getProjectBalance(['CVAProject']),
-    //     this.getDisbursed([walletAddress]),
-    //     this.getPendingTokensToAccept([walletAddress]),
-    //     this.checkIsVendorApproved([walletAddress]),
+    //     this.getVendorAllowance([walletAddress]), //CVAProject/
+    //     this.getProjectBalance(['CVAProject']), //RahatToken
+    //     this.getDisbursed([walletAddress]), //RahatToken
+    //     this.getPendingTokensToAccept([walletAddress]), //CVAProject
+    //     this.checkIsVendorApproved([walletAddress]), //CVAProject
     //   ]);
     // return { allowance, balance, distributed, pendingTokens, isVendorApproved };
-    const requests = [
-      this.getVendorAllowance([walletAddress]),
-      this.getProjectBalance(['CVAProject']),
-      this.getDisbursed([walletAddress]),
-      this.getPendingTokensToAccept([walletAddress]),
-      this.checkIsVendorApproved([walletAddress]),
-    ];
 
-    const results = [];
+    //TODO make multicalls
+    const [walletAddress] = params;
+    const CVAProject = await this.getContractByName('CVAProject');
+    const cvaProject = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    const rahatToken = await createContractInstance(
+      await this.getContractByName('RahatToken'),
+      this.prisma.appSettings,
+    );
+    const isVendorApproved = await this.checkIsVendorApproved([walletAddress]);
+    const [allowance, pendingTokens] = await multiFunctionCall(
+      cvaProject,
+      ['vendorAllowance', 'vendorAllowancePending'],
+      [[walletAddress], [walletAddress]],
+    );
 
-    for (const request of requests) {
-      const result = await request;
-      results.push(result);
-      await this.delay(1000);
-    }
-
-    return results;
-  }
-
-  delay(ms) {
-    console.log('DELAY', ms);
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    const rahatTokenMultiFunctionCallData = await multiFunctionCall(
+      rahatToken,
+      ['balanceOf', 'balanceOf'],
+      [[CVAProject.address], [walletAddress]],
+    );
+    return {
+      allowance: allowance[0].toString(),
+      pendingTokens: pendingTokens[0].toString(),
+      balance: rahatTokenMultiFunctionCallData[0].toString(),
+      disbursed: rahatTokenMultiFunctionCallData[1].toString(),
+      isVendorApproved,
+    };
   }
 
   mapCallData(transactions: any, vendorAddress: string) {
