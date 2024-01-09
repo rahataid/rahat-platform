@@ -398,13 +398,14 @@ export class VendorsService {
     for (const request of requests) {
       const result = await request;
       results.push(result);
-      // await this.delay(100);
+      await this.delay(100);
     }
 
     return results;
   }
 
   delay(ms) {
+    console.log('DELAY', ms);
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
