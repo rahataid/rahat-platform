@@ -7,7 +7,7 @@ import {
   createContractInstanceSign,
   isAddress,
   multiSend,
-  verifyMessage
+  verifyMessage,
 } from '@utils/web3';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BlockchainVendorDTO } from './dto/blockchain-vendor.dto';
@@ -37,7 +37,7 @@ type IParams = string[];
 
 @Injectable()
 export class VendorsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async create(createVendorDto: CreateVendorDto) {
     const vendor = await this.prisma.vendor.create({

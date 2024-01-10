@@ -22,7 +22,7 @@ async function seed() {
       name: 'Shristi K',
       email: 'shristi.khayargoli@agriclear.io',
       walletAddress: hexStringToBuffer(
-        '0x0fc030c2b2b8e466b4a2779e780978e7ee5a406f',
+        '0x0fC030C2b2b8E466B4a2779E780978e7ee5a406F',
       ),
       roles: [Role.ADMIN],
       isActive: true,
