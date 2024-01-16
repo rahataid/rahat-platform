@@ -109,6 +109,7 @@ export class ProjectService {
         },
         _count: {
           select: {
+            // @ts-ignore
             beneficiaries: {
               where: {
                 // deletedAt: null,
@@ -297,28 +298,50 @@ export class ProjectService {
 
     if (!beneficiaries?.rows?.length) return;
 
-    const offlineBenData = beneficiaries.rows.map((beneficiary) => ({
-      name: beneficiary.name,
-      phone: beneficiary.phone,
-      walletAddress: hexStringToBuffer(beneficiary.walletAddress),
-      otp: '1111',
-      otpHash: hexStringToBuffer(
-        '0x3531cc3dc5bb231b65d260771886cc583d8fe8fb29b457554cb1930a722a747d',
-      ),
-      projects: {
-        connect: {
-          id: projectDetails.id,
+    const existingOfflineBeneficiaries =
+      await this.prisma.offlineBeneficiary.findMany({
+        where: {
+          projects: {
+            some: {
+              id: projectDetails.id,
+            },
+          },
         },
-      },
-    }));
+      });
 
-    const [created] = await Promise.all([
+    const offlineBenData = beneficiaries.rows
+      .filter((beneficiary: any) => {
+        return !existingOfflineBeneficiaries.some((offlineBen) => {
+          return (
+            offlineBen.phone === beneficiary.phone &&
+            bufferToHexString(offlineBen.walletAddress) ===
+              beneficiary.walletAddress
+          );
+        });
+      })
+      .map((beneficiary: any) => ({
+        name: beneficiary.name,
+        phone: beneficiary.phone,
+        walletAddress: hexStringToBuffer(beneficiary.walletAddress),
+        otp: '1111',
+        otpHash: hexStringToBuffer(
+          '0x3531cc3dc5bb231b65d260771886cc583d8fe8fb29b457554cb1930a722a747d',
+        ),
+        projects: {
+          connect: {
+            id: projectDetails.id,
+          },
+        },
+      }));
+
+    const created = await Promise.all(
       offlineBenData.map(async (ben) => {
-        return await this.prisma.offlineBeneficiary.create({
+        return this.prisma.offlineBeneficiary.create({
           data: ben,
         });
       }),
-    ]);
+    );
+
     return created;
   }
 

@@ -4,6 +4,7 @@ import {
   SignatureLike,
   ethers,
   hashMessage,
+  id,
   recoverAddress,
 } from 'ethers';
 
@@ -120,6 +121,48 @@ export async function multiCall(
     callData,
   );
   return contract.multicall.staticCall(encodedData);
+}
+
+export async function generateMultiFunctionCallData(
+  contract: ethers.Contract,
+  functionName: string[],
+  callData: ICallData,
+) {
+  const encodedData = [];
+  if (callData) {
+    callData.forEach((callD, i) => {
+      const encodedD = contract.interface.encodeFunctionData(functionName[i], [
+        ...callD,
+      ]);
+      encodedData.push(encodedD);
+    });
+  }
+  return encodedData;
+}
+
+export async function multiFunctionCall(
+  contract: ethers.Contract,
+  functionName: string[],
+  callData?: ICallData,
+) {
+  const encodedData = await generateMultiFunctionCallData(
+    contract,
+    functionName,
+    callData,
+  );
+  const result = await contract.multicall.staticCall(encodedData);
+  const decodedResult = result.map((res: any, i: number) => {
+    const decoded = contract.interface.decodeFunctionResult(
+      functionName[i],
+      res,
+    );
+    return decoded;
+  });
+  return decodedResult;
+}
+
+export function getHash(data: string) {
+  return id(data);
 }
 
 export async function getFunctionsList(contractInstance: any) {
