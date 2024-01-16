@@ -5,6 +5,18 @@ const prisma = new PrismaClient();
 
 async function seed() {
   // Create users
+  const user0 = await prisma.user.create({
+    data: {
+      name: 'Manjik - Admin',
+      email: 'manjik.shrestha@rumsan.com',
+      walletAddress: hexStringToBuffer(
+        '0xcDEe632FB1Ba1B3156b36cc0bDabBfd821305e06',
+      ),
+      roles: [Role.ADMIN],
+      isActive: true,
+      isApproved: true,
+    },
+  });
   const user1 = await prisma.user.create({
     data: {
       name: 'Raghav - Admin',
