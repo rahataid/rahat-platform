@@ -1,25 +1,15 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+# rumsan
+.env
+play
+
 # compiled output
-/dist
-/node_modules
-/play
-.yarn/
-.yarnrc.yml
-# Logs
-logs
-*.log
-npm-debug.log*
-pnpm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-config
+dist
+tmp
+/out-tsc
 
-# OS
-.DS_Store
-
-# Tests
-/coverage
-/.nyc_output
+# dependencies
+node_modules
 
 # IDEs and editors
 /.idea
@@ -36,6 +26,19 @@ config
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-.env
 
-docker-apps
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
+.nx/cache

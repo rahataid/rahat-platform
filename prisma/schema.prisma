@@ -1,6 +1,8 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["clientExtensions"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -8,19 +10,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// generator dbml {
-//   provider            = "prisma-dbml-generator"
-//   output              = "./dbml"
-//   outputName          = "rahat-system-model.dbml"
-//   projectName         = "Rahat System"
-//   projectDatabaseType = "PostgreSQL"
-//   projectNote         = "Rahat System"
-// }
+// ++++++++++++++++++ START: @rumsan/user - User +++++++++++++++++++++++++++++++
 
-// generator docs {
-//   provider = "node node_modules/prisma-docs-generator"
-//   output   = "./docs"
-// }
+// ===================User Model==================
+model User {
+  id     Int     @id @default(autoincrement())
+  uuid   String  @unique @default(uuid())
+  name   String?
+  gender Gender  @default(UNKNOWN)
+  email  String?
+  phone  String?
+  wallet String?
+  extras Json?   @db.JsonB()
+
+  Auth     Auth[]
+  UserRole UserRole[]
+  Signup   Signup[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
+  createdBy Int?
+  updatedBy Int?
+
+  @@map("tbl_users")
+}
 
 enum Gender {
   MALE
@@ -29,158 +43,137 @@ enum Gender {
   UNKNOWN
 }
 
-enum BankStatus {
-  UNKNOWN
-  UNBANKED
-  UNDERBANKED
-  BANKED
+// ++++++++++++++++++ END: @rumsan/user - User +++++++++++++++++++++++++++++++
+// ++++++++++++++++++ START: @rumsan/user - Role/Auth ++++++++++++++++++++++++
+
+// ===================Role Model==================
+model Role {
+  id       Int       @unique @default(autoincrement())
+  name     String    @unique @db.VarChar()
+  isSystem Boolean   @default(false)
+  expiry   DateTime?
+
+  Permission Permission[]
+  UserRole   UserRole[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  createdBy Int?
+  updatedBy Int?
+
+  @@map("tbl_auth_roles")
 }
 
-enum PhoneOwnership {
-  UNKNOWN
-  NO_PHONE
-  FEATURE
-  SMART
+// ===================Permission Model==================
+model Permission {
+  id         Int     @unique @default(autoincrement())
+  roleId     Int
+  action     String  @db.VarChar()
+  subject    String  @db.VarChar()
+  inverted   Boolean @default(false)
+  conditions Json?   @db.JsonB()
+  reason     String? @db.Text()
+
+  Role Role @relation(fields: [roleId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+
+  @@map("tbl_auth_permissions")
 }
 
-enum InternetAccess {
-  UNKNOWN
-  NO_INTERNET
-  PHONE_INTERNET
-  HOME_INTERNET
-}
+model UserRole {
+  id     Int       @id @default(autoincrement())
+  userId Int
+  roleId Int
+  expiry DateTime?
 
-enum TxStatus {
-  NEW
-  PENDING
-  SUCCESS
-  FAIL
-  ERROR
-}
+  User User @relation(fields: [userId], references: [id])
+  Role Role @relation(fields: [roleId], references: [id])
 
-model AppSettings {
-  id        Int      @id @default(autoincrement())
-  name      String
-  value     Json
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdBy Int?
 
-  @@map(name: "tbl_settings")
+  @@unique([userId, roleId], name: "userRoleIdentifier")
+  @@map("tbl_users_roles")
 }
 
-model Beneficiary {
-  id             Int            @id @default(autoincrement())
-  uuid           String         @unique @default(uuid())
-  name           String
-  phone          String?    @unique @default("")
-  dob            DateTime?
-  gender         Gender         @default(UNKNOWN)
-  walletAddress  Bytes?         @unique
-  address        String?
-  longitude      Float?
-  latitude       Float?
-  isApproved     Boolean        @default(false)
-  isActive       Boolean        @default(true)
-  bankStatus     BankStatus     @default(UNKNOWN)
-  phoneOwnership PhoneOwnership @default(UNKNOWN)
-  internetAccess InternetAccess @default(UNKNOWN)
-  extras         Json?
-
-  projects Project[] @relation("BeneficiaryProjects")
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  @@map(name: "tbl_beneficiaries")
-}
-
-model Project {
-  id              Int      @id @default(autoincrement())
-  name            String
-  startDate       DateTime
-  endDate         DateTime
-  budget          Int      @default(0)
-  disbursed       Int      @default(0)
-  extras          Json?
-  location        String?
-  projectType     String?
-  projectManager  String?
-  coverImage      String?
-  description     String?
-  contractAddress Bytes?   @unique
-  isApproved      Boolean  @default(false)
-
-  owner         User[]        @relation("UserProjects")
-  beneficiaries Beneficiary[] @relation("BeneficiaryProjects")
-  vendors       Vendor[]      @relation("ProjectDistributors")
-  campaigns     Int[]         @default([])
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  @@map(name: "tbl_projects")
-}
-
-model Vendor {
-  id            Int     @id @default(autoincrement())
-  name          String
-  walletAddress Bytes?  @unique
-  phone         String? @unique @default("")
-  email         String?
-  address       Json
-  isApproved    Boolean @default(false)
-  isActive      Boolean @default(false)
-  projects Project[] @relation("ProjectDistributors")
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  @@map(name: "tbl_vendors")
-}
-
-model Transaction {
-  id              Int      @id @default(autoincrement())
-  txHash          Bytes    @unique
-  txStatus        TxStatus @default(NEW)
-  contractName    String?
-  contractAddress String?
-  timestamp       Int?
-  method          String?
-  methodParams    Json[]
-  blockNumber     Int?
-  from            String?
-  to              String?
-  value           String?
-  remarks         String?
-  events          Json     @default("{}")
-
-  @@map(name: "tbl_transactions")
-}
-
-model User {
+model Auth {
   id            Int       @id @default(autoincrement())
-  name          String
-  email         String?   @unique
-  walletAddress Bytes     @unique
-  profileImage  String?
-  isApproved    Boolean   @default(false)
-  isActive      Boolean   @default(true)
-  roles         Role[]    @default([USER])
-  projects      Project[] @relation("UserProjects")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
-  lastLoggedIn  DateTime? @default(now())
+  userId        Int
+  service       Service
+  serviceId     String
+  details       Json?     @db.JsonB()
+  challenge     String?
+  falseAttempts Int       @default(0)
+  isLocked      Boolean   @default(false)
+  lockedOnAt    DateTime?
+  lastLoginAt   DateTime?
 
-  @@map(name: "tbl_users")
+  User    User          @relation(fields: [userId], references: [id])
+  AuthLog AuthSession[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+
+  @@unique([service, serviceId], name: "authIdentifier")
+  @@map("tbl_auth")
 }
 
-enum Role {
-  DONOR
-  STAKEHOLDER
-  ADMIN
-  USER
+model AuthSession {
+  id        Int     @id @default(autoincrement())
+  clientId  String
+  sessionId String  @unique @default(uuid())
+  authId    Int
+  ip        String?
+  details   Json?   @db.JsonB()
+  userAgent String?
+
+  Auth Auth @relation(fields: [authId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("tbl_auth_sessions")
 }
+
+enum Service {
+  EMAIL
+  PHONE
+  WALLET
+  GOOGLE
+  APPLE
+  FACEBOOK
+  TWITTER
+  GITHUB
+  LINKEDIN
+}
+
+// ++++++++++++++++++ END: @rumsan/user - Role/Auth ++++++++++++++++++++++++
+// ++++++++++++++++++ START: @rumsan/user - Signup +++++++++++++++++++++++++
+
+model Signup {
+  id             Int          @id @default(autoincrement())
+  uuid           String       @unique @default(uuid())
+  userIdentifier String?
+  data           Json?        @db.JsonB()
+  status         SignupStatus @default(PENDING)
+  rejectedReason String?
+  approvedBy     Int?
+  approvedAt     DateTime?
+
+  User User? @relation(fields: [approvedBy], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+
+  @@map("tbl_users_signups")
+}
+
+enum SignupStatus {
+  PENDING
+  APPROVED
+  FAILED
+  REJECTED
+}
+
+// ++++++++++++++++++ END: @rumsan/user - Signup +++++++++++++++++++++++++++

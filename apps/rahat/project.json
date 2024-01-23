@@ -1,0 +1,53 @@
+{
+  "name": "rahat",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/rahat/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/rahat",
+        "main": "apps/rahat/src/main.ts",
+        "tsConfig": "apps/rahat/tsconfig.app.json",
+        "assets": ["apps/rahat/src/assets"],
+        "webpackConfig": "apps/rahat/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "rahat:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "rahat:build:development"
+        },
+        "production": {
+          "buildTarget": "rahat:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/rahat/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}
