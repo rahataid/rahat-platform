@@ -4,8 +4,11 @@ import {
   SignatureLike,
   ethers,
   hashMessage,
+  id,
   recoverAddress,
 } from 'ethers';
+
+export { isAddress } from 'ethers';
 
 type IStringArr = string[];
 type ICallData = IStringArr[];
@@ -105,6 +108,61 @@ export async function multiSend(
   const tx = await contract.multicall(encodedData);
   const result = await tx.wait();
   return result;
+}
+
+export async function multiCall(
+  contract: ethers.Contract,
+  functionName: string,
+  callData?: ICallData,
+) {
+  const encodedData = await generateMultiCallData(
+    contract,
+    functionName,
+    callData,
+  );
+  return contract.multicall.staticCall(encodedData);
+}
+
+export async function generateMultiFunctionCallData(
+  contract: ethers.Contract,
+  functionName: string[],
+  callData: ICallData,
+) {
+  const encodedData = [];
+  if (callData) {
+    callData.forEach((callD, i) => {
+      const encodedD = contract.interface.encodeFunctionData(functionName[i], [
+        ...callD,
+      ]);
+      encodedData.push(encodedD);
+    });
+  }
+  return encodedData;
+}
+
+export async function multiFunctionCall(
+  contract: ethers.Contract,
+  functionName: string[],
+  callData?: ICallData,
+) {
+  const encodedData = await generateMultiFunctionCallData(
+    contract,
+    functionName,
+    callData,
+  );
+  const result = await contract.multicall.staticCall(encodedData);
+  const decodedResult = result.map((res: any, i: number) => {
+    const decoded = contract.interface.decodeFunctionResult(
+      functionName[i],
+      res,
+    );
+    return decoded;
+  });
+  return decodedResult;
+}
+
+export function getHash(data: string) {
+  return id(data);
 }
 
 export async function getFunctionsList(contractInstance: any) {

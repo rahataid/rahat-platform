@@ -5,6 +5,9 @@ import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
 import {
   createContractInstance,
   createContractInstanceSign,
+  getHash,
+  isAddress,
+  multiFunctionCall,
   multiSend,
   verifyMessage,
 } from '@utils/web3';
@@ -233,7 +236,8 @@ export class VendorsService {
       await this.getContractByName('RahatCommunity'),
       this.prisma.appSettings,
     );
-    const vendorRole = await contractFn?.VENDOR_ROLE();
+    const vendorRole = getHash('VENDOR');
+    console.log({ vendorRole });
     return contractFn?.hasRole(vendorRole, vendorAddress);
   }
 
@@ -325,17 +329,95 @@ export class VendorsService {
     );
   }
 
+  //#region online Transactions Pathwork - need to change
+
+  async assertBeneficiary(beneficiaryId: string): Promise<string> {
+    if (isAddress(beneficiaryId)) return beneficiaryId;
+    const beneficiary = await this.prisma.beneficiary.findUnique({
+      where: {
+        phone: beneficiaryId,
+      },
+    });
+    if (!beneficiary) throw new Error('Invalid Beneficiary Address');
+    return bufferToHexString(beneficiary?.walletAddress);
+  }
+
+  async initiateTransactionForVendor(params: IParams) {
+    console.log({ params });
+    const [vendorAddress, beneficiaryId, amount] = params;
+    const beneficiaryAddress = await this.assertBeneficiary(beneficiaryId);
+
+    console.log(vendorAddress, beneficiaryAddress, amount);
+    const CVAProject = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    return CVAProject?.initiateTokenRequestForVendor(
+      vendorAddress,
+      beneficiaryAddress,
+      amount,
+    );
+  }
+
+  async processTransactionForVendor(params: IParams) {
+    const [vendorAddress, beneficiaryId, otp] = params;
+    console.log({ vendorAddress, beneficiaryId, otp });
+    const beneficiaryAddress = await this.assertBeneficiary(beneficiaryId);
+    console.log({ vendorAddress, beneficiaryAddress, otp });
+    const CVAProject = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    return CVAProject?.processTokenRequestForVendor(
+      vendorAddress,
+      beneficiaryAddress,
+      otp,
+    );
+  }
+
+  //#endregion
+
   async getChainData(params: IParams) {
+    // const [allowance, balance, distributed, pendingTokens, isVendorApproved] =
+    //   await Promise.all([
+    //     this.getVendorAllowance([walletAddress]), //CVAProject/
+    //     this.getProjectBalance(['CVAProject']), //RahatToken
+    //     this.getDisbursed([walletAddress]), //RahatToken
+    //     this.getPendingTokensToAccept([walletAddress]), //CVAProject
+    //     this.checkIsVendorApproved([walletAddress]), //CVAProject
+    //   ]);
+    // return { allowance, balance, distributed, pendingTokens, isVendorApproved };
+
+    //TODO make multicalls
     const [walletAddress] = params;
-    const [allowance, balance, distributed, pendingTokens, isVendorApproved] =
-      await Promise.all([
-        this.getVendorAllowance([walletAddress]),
-        this.getProjectBalance(['CVAProject']),
-        this.getDisbursed([walletAddress]),
-        this.getPendingTokensToAccept([walletAddress]),
-        this.checkIsVendorApproved([walletAddress]),
-      ]);
-    return { allowance, balance, distributed, pendingTokens, isVendorApproved };
+    const CVAProject = await this.getContractByName('CVAProject');
+    const cvaProject = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    const rahatToken = await createContractInstance(
+      await this.getContractByName('RahatToken'),
+      this.prisma.appSettings,
+    );
+    const isVendorApproved = await this.checkIsVendorApproved([walletAddress]);
+    const [allowance, pendingTokens] = await multiFunctionCall(
+      cvaProject,
+      ['vendorAllowance', 'vendorAllowancePending'],
+      [[walletAddress], [walletAddress]],
+    );
+
+    const rahatTokenMultiFunctionCallData = await multiFunctionCall(
+      rahatToken,
+      ['balanceOf', 'balanceOf'],
+      [[CVAProject.address], [walletAddress]],
+    );
+    return {
+      allowance: allowance[0].toString(),
+      pendingTokens: pendingTokens[0].toString(),
+      balance: rahatTokenMultiFunctionCallData[0].toString(),
+      disbursed: rahatTokenMultiFunctionCallData[1].toString(),
+      isVendorApproved,
+    };
   }
 
   mapCallData(transactions: any, vendorAddress: string) {
@@ -383,6 +465,10 @@ export class VendorsService {
         return this.syncTransactions(params);
       case 'chargeBeneficiary':
         return this.chargeBeneficiary(params);
+      case 'initiateTransactionForVendor':
+        return this.initiateTransactionForVendor(params);
+      case 'processTransactionForVendor':
+        return this.processTransactionForVendor(params);
       default:
         throw new Error(`${method} method doesn't exist`);
     }

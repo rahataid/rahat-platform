@@ -68,6 +68,23 @@ model AppSettings {
   @@map(name: "tbl_settings")
 }
 
+model OfflineBeneficiary {
+  id             Int            @id @default(autoincrement())
+  uuid           String         @unique @default(uuid())
+  name           String
+  phone          String?    @unique @default("")
+  walletAddress  Bytes?         @unique
+  otp            String         
+  otpHash        Bytes?     
+  projects Project[] @relation("OfflineBeneficiaryProjects")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map(name: "tbl_offlineBeneficiaries")
+}
+
 model Beneficiary {
   id             Int            @id @default(autoincrement())
   uuid           String         @unique @default(uuid())
@@ -113,6 +130,7 @@ model Project {
 
   owner         User[]        @relation("UserProjects")
   beneficiaries Beneficiary[] @relation("BeneficiaryProjects")
+  offlineBeneficiaries OfflineBeneficiary[] @relation("OfflineBeneficiaryProjects")
   vendors       Vendor[]      @relation("ProjectDistributors")
   campaigns     Int[]         @default([])
 

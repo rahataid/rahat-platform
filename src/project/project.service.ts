@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, Project } from '@prisma/client';
 import { paginate } from '@utils/paginate';
 import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
+import { createContractInstance, multiCall } from '@utils/web3';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import {
@@ -108,6 +109,7 @@ export class ProjectService {
         },
         _count: {
           select: {
+            // @ts-ignore
             beneficiaries: {
               where: {
                 // deletedAt: null,
@@ -202,6 +204,7 @@ export class ProjectService {
       longitude: true,
       walletAddress: true,
       isApproved: true,
+      phone: true,
     };
 
     const orderBy: Prisma.BeneficiaryOrderByWithRelationInput = {
@@ -283,5 +286,117 @@ export class ProjectService {
       });
     }
     return 'Disconnected Succesfully';
+  }
+
+  async setOfflineBeneficiariesFromProject(contractAddress: string) {
+    const projectDetails = await this.findOne(contractAddress);
+
+    const beneficiaries: any = await this.getBeneficiaries(contractAddress, {
+      orderBy: 'name',
+      order: 'asc',
+    });
+
+    if (!beneficiaries?.rows?.length) return;
+
+    const existingOfflineBeneficiaries =
+      await this.prisma.offlineBeneficiary.findMany({
+        where: {
+          projects: {
+            some: {
+              id: projectDetails.id,
+            },
+          },
+        },
+      });
+
+    const offlineBenData = beneficiaries.rows
+      .filter((beneficiary: any) => {
+        return !existingOfflineBeneficiaries.some((offlineBen) => {
+          return (
+            offlineBen.phone === beneficiary.phone &&
+            bufferToHexString(offlineBen.walletAddress) ===
+              beneficiary.walletAddress
+          );
+        });
+      })
+      .map((beneficiary: any) => ({
+        name: beneficiary.name,
+        phone: beneficiary.phone,
+        walletAddress: hexStringToBuffer(beneficiary.walletAddress),
+        otp: '1111',
+        otpHash: hexStringToBuffer(
+          '0x3531cc3dc5bb231b65d260771886cc583d8fe8fb29b457554cb1930a722a747d',
+        ),
+        projects: {
+          connect: {
+            id: projectDetails.id,
+          },
+        },
+      }));
+
+    const created = await Promise.all(
+      offlineBenData.map(async (ben) => {
+        return this.prisma.offlineBeneficiary.create({
+          data: ben,
+        });
+      }),
+    );
+
+    return created;
+  }
+
+  async getOfflineBeneficiariesFromProject(contractAddress: string) {
+    const { id: projectId } = await this.findOne(contractAddress);
+    let offlineBeneficiariesWithProjects =
+      await this.prisma.offlineBeneficiary.findMany({
+        where: {
+          projects: {
+            some: {
+              id: projectId,
+            },
+          },
+        },
+      });
+    const callData = offlineBeneficiariesWithProjects.map((el) => [
+      bufferToHexString(el.walletAddress),
+    ]);
+
+    const CVAProject = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+
+    let multiRes = await multiCall(CVAProject, 'beneficiaryClaims', callData);
+    multiRes = multiRes.map((el) => {
+      return CVAProject.interface
+        .decodeFunctionResult('beneficiaryClaims', el)
+        .toString();
+    });
+
+    offlineBeneficiariesWithProjects = offlineBeneficiariesWithProjects.map(
+      (el: any, i: number) => ({
+        ...el,
+        token: multiRes[i].toString(),
+        walletAddress: bufferToHexString(el.walletAddress),
+        otpHash: bufferToHexString(el.otpHash),
+      }),
+    );
+
+    return offlineBeneficiariesWithProjects;
+  }
+
+  async getContractByName(contractName: string) {
+    const addresses = await this.prisma.appSettings.findMany({
+      where: {
+        name: 'CONTRACT_ADDRESS',
+      },
+    });
+
+    const address = addresses[0].value[contractName];
+    if (!address) {
+      throw new Error(`Contract ${contractName} not found.`);
+    }
+
+    return address;
   }
 }
