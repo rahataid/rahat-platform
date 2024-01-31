@@ -316,12 +316,16 @@ export class VendorsService {
   }
 
   async chargeBeneficiary(params: any) {
+    console.log('Inside Charge beneficiary');
     const [message, signedMessage] = params;
+    console.log('Message and signed message', message, signedMessage);
     const walletAddress = verifyMessage(JSON.stringify(message), signedMessage);
+    console.log('Wallet Address after verify message', walletAddress);
     const CVAProject = await createContractInstanceSign(
       await this.getContractByName('CVAProject'),
       this.prisma.appSettings,
     );
+    console.log('CVAProject after create contract instance sign', CVAProject);
     return CVAProject.sendBeneficiaryTokenToVendor(
       message?.walletAddress,
       walletAddress,
@@ -343,15 +347,16 @@ export class VendorsService {
   }
 
   async initiateTransactionForVendor(params: IParams) {
-    console.log({ params });
+    console.log('Inside Initiate Transaction for Vendor:', { params });
     const [vendorAddress, beneficiaryId, amount] = params;
     const beneficiaryAddress = await this.assertBeneficiary(beneficiaryId);
 
-    console.log(vendorAddress, beneficiaryAddress, amount);
+    console.log({ vendorAddress, beneficiaryAddress, amount });
     const CVAProject = await createContractInstanceSign(
       await this.getContractByName('CVAProject'),
       this.prisma.appSettings,
     );
+    console.log('CVAProject after create contract instance sign', CVAProject);
     return CVAProject?.initiateTokenRequestForVendor(
       vendorAddress,
       beneficiaryAddress,
@@ -360,6 +365,7 @@ export class VendorsService {
   }
 
   async processTransactionForVendor(params: IParams) {
+    console.log('Inside Process Transaction for Vendor:', { params });
     const [vendorAddress, beneficiaryId, otp] = params;
     console.log({ vendorAddress, beneficiaryId, otp });
     const beneficiaryAddress = await this.assertBeneficiary(beneficiaryId);
@@ -368,6 +374,7 @@ export class VendorsService {
       await this.getContractByName('CVAProject'),
       this.prisma.appSettings,
     );
+    console.log('CVAProject after create contract instance sign', CVAProject);
     return CVAProject?.processTokenRequestForVendor(
       vendorAddress,
       beneficiaryAddress,
