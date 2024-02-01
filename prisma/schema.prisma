@@ -177,3 +177,25 @@ enum SignupStatus {
 }
 
 // ++++++++++++++++++ END: @rumsan/user - Signup +++++++++++++++++++++++++++
+
+// ++++++++++++++++++ START: @rumsan/settings +++++++++++++++++++++++++++
+
+model Setting {
+  name           String          @id @unique
+  value          Json
+  dataType       SettingDataType
+  requiredFields String[]
+  isReadOnly     Boolean         @default(false)
+  isPrivate      Boolean         @default(true)
+
+  @@map("tbl_settings")
+}
+
+enum SettingDataType {
+  STRING
+  NUMBER
+  BOOLEAN
+  OBJECT
+}
+
+// ++++++++++++++++++ END: @rumsan/settings +++++++++++++++++++++++++++

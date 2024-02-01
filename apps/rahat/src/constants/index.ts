@@ -16,3 +16,14 @@ export const SUBJECTS = {
 export const APP = {
   JWT_BEARER: 'JWT',
 };
+
+export const QUEUE = {
+  RAHAT: 'RAHAT',
+  DEBUG: 'BullMQ',
+};
+
+export const JOBS = {
+  EMAIL: 'email',
+  SLACK: 'slack',
+  OTP: 'otp',
+};

@@ -7,6 +7,9 @@ CREATE TYPE "Service" AS ENUM ('EMAIL', 'PHONE', 'WALLET', 'GOOGLE', 'APPLE', 'F
 -- CreateEnum
 CREATE TYPE "SignupStatus" AS ENUM ('PENDING', 'APPROVED', 'FAILED', 'REJECTED');
 
+-- CreateEnum
+CREATE TYPE "SettingDataType" AS ENUM ('STRING', 'NUMBER', 'BOOLEAN', 'OBJECT');
+
 -- CreateTable
 CREATE TABLE "tbl_users" (
     "id" SERIAL NOT NULL,
@@ -111,6 +114,18 @@ CREATE TABLE "tbl_users_signups" (
     CONSTRAINT "tbl_users_signups_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "tbl_settings" (
+    "name" TEXT NOT NULL,
+    "value" JSONB NOT NULL,
+    "dataType" "SettingDataType" NOT NULL,
+    "requiredFields" TEXT[],
+    "isReadOnly" BOOLEAN NOT NULL DEFAULT false,
+    "isPrivate" BOOLEAN NOT NULL DEFAULT true,
+
+    CONSTRAINT "tbl_settings_pkey" PRIMARY KEY ("name")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_users_uuid_key" ON "tbl_users"("uuid");
 
@@ -134,6 +149,9 @@ CREATE UNIQUE INDEX "tbl_auth_sessions_sessionId_key" ON "tbl_auth_sessions"("se
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_users_signups_uuid_key" ON "tbl_users_signups"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_settings_name_key" ON "tbl_settings"("name");
 
 -- AddForeignKey
 ALTER TABLE "tbl_auth_permissions" ADD CONSTRAINT "tbl_auth_permissions_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "tbl_auth_roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

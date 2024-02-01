@@ -1,11 +1,44 @@
+import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { RUMSAN_USER_CONSTANTS as USER } from '@rumsan/user';
+import { AuthsService, EVENTS } from '@rumsan/user';
+import { Queue } from 'bull';
+import { JOBS, QUEUE } from '../constants';
 
 @Injectable()
 export class ListenerService {
-  @OnEvent(USER.EVENTS.OTP_CREATED)
-  sendOTPEmail(data: any) {
-    console.log('Use your messenger service!', data);
+  private otp: string;
+  constructor(
+    private authService: AuthsService,
+    @InjectQueue(QUEUE.RAHAT) private readonly queue: Queue,
+    @InjectQueue(QUEUE.DEBUG) private readonly debug: Queue
+  ) {}
+  @OnEvent(EVENTS.OTP_CREATED)
+  async sendOTPEmail(data: any) {
+    console.log('OTP: ' + data.otp);
+    this.otp = data.otp;
+    await this.queue.add(JOBS.EMAIL, { test: 'test' });
+    await this.debug.add(JOBS.OTP, {
+      otp: data.otp,
+      challenge: data.challenge.challenge,
+    });
+  }
+
+  //TODO PLEASE REMOVE THIS
+  @OnEvent(EVENTS.CHALLENGE_CREATED)
+  async TEMP_createJwt(data: any) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const auth = await this.authService.loginByOtp(
+      {
+        challenge: data.challenge.challenge,
+        service: 'EMAIL',
+        otp: this.otp,
+      },
+      {
+        ip: '::1',
+        userAgent: 'na',
+      }
+    );
+    console.log(auth);
   }
 }
