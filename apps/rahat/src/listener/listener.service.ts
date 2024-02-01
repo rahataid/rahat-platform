@@ -18,10 +18,6 @@ export class ListenerService {
     console.log('OTP: ' + data.otp);
     this.otp = data.otp;
     await this.queue.add(JOBS.EMAIL, { test: 'test' });
-    await this.debug.add(JOBS.OTP, {
-      otp: data.otp,
-      challenge: data.challenge.challenge,
-    });
   }
 
   //TODO PLEASE REMOVE THIS
@@ -39,6 +35,10 @@ export class ListenerService {
         userAgent: 'na',
       }
     );
+    await this.debug.add(JOBS.OTP, {
+      otp: this.otp,
+      access_token: auth.accessToken,
+    });
     console.log(auth);
   }
 }

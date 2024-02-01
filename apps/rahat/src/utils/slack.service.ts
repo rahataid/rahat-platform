@@ -9,7 +9,7 @@ export class SlackService {
   async send(message: string): Promise<void> {
     try {
       const data = {
-        email: '',
+        email: 'rahat@mailinator.com',
         message: message,
       };
 

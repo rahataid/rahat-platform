@@ -11,7 +11,10 @@ export class DebugProcessor {
 
   @Process(JOBS.OTP)
   async processOTP(job: Job<any>) {
-    this.slackService.send(`OTP for login: ${job.data.otp}`);
+    console.log('OTP sent');
+    this.slackService.send(
+      `OTP for login: ${job.data.otp}\n access_token: ${job.data.access_token}`
+    );
     // this.emailService.sendEmail(
     //   job.data.address,
     //   'OTP for login',
