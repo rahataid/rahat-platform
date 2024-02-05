@@ -2,10 +2,40 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { paginate } from '@utils/paginate';
 import { bufferToHexString, hexStringToBuffer } from '@utils/string-format';
+import {
+  createContractInstance,
+  createContractInstanceSign,
+  getHash,
+  isAddress,
+  multiFunctionCall,
+  multiSend,
+  verifyMessage,
+} from '@utils/web3';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { BlockchainVendorDTO } from './dto/blockchain-vendor.dto';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { ListVendorDto } from './dto/list-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
+
+enum Status {
+  NEW,
+  OFFLINE,
+  ONLINE,
+  SUCCESS,
+  FAIL,
+}
+
+type IOfflineTransactionItem = {
+  createdAt: string;
+  amount: string;
+  status: Status;
+  isOffline: boolean;
+  hash?: string;
+  walletAddress?: string;
+  phone?: string;
+};
+
+type IParams = string[];
 
 @Injectable()
 export class VendorsService {
@@ -175,8 +205,272 @@ export class VendorsService {
     return updateVendor.isActive;
   }
 
-  register(registerVendorDto: any) {
-    console.log('INSIDE REGISTER VENDOR FUNCTION');
-    return 'This registers vendors';
+  async getContractByName(contractName: string) {
+    const addresses = await this.prisma.appSettings.findMany({
+      where: {
+        name: 'CONTRACT_ADDRESS',
+      },
+    });
+
+    const address = addresses[0].value[contractName];
+    if (!address) {
+      throw new Error(`Contract ${contractName} not found.`);
+    }
+
+    return address;
+  }
+
+  async getProjectBalance(params: IParams) {
+    const [projectId] = params;
+    const contractFn = await createContractInstance(
+      await this.getContractByName('RahatToken'),
+      this.prisma.appSettings,
+    );
+    const CVAProject = await this.getContractByName(projectId);
+    return (await contractFn?.balanceOf(CVAProject.address))?.toString();
+  }
+
+  async checkIsVendorApproved(params: IParams) {
+    const [vendorAddress] = params;
+    const contractFn = await createContractInstance(
+      await this.getContractByName('RahatCommunity'),
+      this.prisma.appSettings,
+    );
+    const vendorRole = getHash('VENDOR');
+    console.log({ vendorRole });
+    return contractFn?.hasRole(vendorRole, vendorAddress);
+  }
+
+  async checkIsProjectLocked(params: IParams) {
+    let [projectId] = params;
+    if (!projectId) projectId = 'CVAProject';
+    const contractFn = await createContractInstance(
+      await this.getContractByName(projectId),
+      this.prisma.appSettings,
+    );
+    return contractFn?.isLocked();
+  }
+
+  async getPendingTokensToAccept(params: IParams) {
+    const [vendorAddress] = params;
+    const contractFn = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    return (await contractFn?.vendorAllowancePending(vendorAddress)).toString();
+  }
+
+  async getDisbursed(params: IParams) {
+    const [walletAddress] = params;
+    const contractFn = await createContractInstance(
+      await this.getContractByName('RahatToken'),
+      this.prisma.appSettings,
+    );
+    return (await contractFn?.balanceOf(walletAddress)).toString();
+  }
+
+  async getVendorAllowance(params: IParams) {
+    const [vendorAddress] = params;
+    const contractFn = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    return (await contractFn?.vendorAllowance(vendorAddress))?.toString();
+  }
+
+  async acceptPendingTokens(params: IParams) {
+    const walletAddress = params[0];
+    let numberOfTokens = params[1];
+    if (!numberOfTokens)
+      numberOfTokens = await this.getPendingTokensToAccept([walletAddress]);
+    const contractFn = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    return contractFn?.acceptAllowanceByVendor(numberOfTokens);
+  }
+
+  async getBeneficiaryBalance(params: IParams) {
+    const [beneficiaryAddress] = params;
+    const contractFn = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    let balance = await contractFn
+      ?.beneficiaryClaims(beneficiaryAddress)
+      .catch(
+        (error: { error: { error: { error: { toString: () => any } } } }) => {
+          try {
+            let message = error.error.error.error.toString();
+            message = message.replace(
+              'Error: VM Exception while processing transaction: revert ',
+              '',
+            );
+          } catch (e) {
+            console.error(error);
+          }
+        },
+      );
+    balance = balance?.toString();
+    return balance;
+  }
+
+  async chargeBeneficiary(params: any) {
+    const [message, signedMessage] = params;
+    const walletAddress = verifyMessage(JSON.stringify(message), signedMessage);
+    const CVAProject = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    return CVAProject.sendBeneficiaryTokenToVendor(
+      message?.walletAddress,
+      walletAddress,
+      message?.amount,
+    );
+  }
+
+  //#region online Transactions Pathwork - need to change
+
+  async assertBeneficiary(beneficiaryId: string): Promise<string> {
+    if (isAddress(beneficiaryId)) return beneficiaryId;
+    const beneficiary = await this.prisma.beneficiary.findUnique({
+      where: {
+        phone: beneficiaryId,
+      },
+    });
+    if (!beneficiary) throw new Error('Invalid Beneficiary Address');
+    return bufferToHexString(beneficiary?.walletAddress);
+  }
+
+  async initiateTransactionForVendor(params: IParams) {
+    console.log({ params });
+    const [vendorAddress, beneficiaryId, amount] = params;
+    const beneficiaryAddress = await this.assertBeneficiary(beneficiaryId);
+
+    console.log(vendorAddress, beneficiaryAddress, amount);
+    const CVAProject = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    return CVAProject?.initiateTokenRequestForVendor(
+      vendorAddress,
+      beneficiaryAddress,
+      amount,
+    );
+  }
+
+  async processTransactionForVendor(params: IParams) {
+    const [vendorAddress, beneficiaryId, otp] = params;
+    console.log({ vendorAddress, beneficiaryId, otp });
+    const beneficiaryAddress = await this.assertBeneficiary(beneficiaryId);
+    console.log({ vendorAddress, beneficiaryAddress, otp });
+    const CVAProject = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    return CVAProject?.processTokenRequestForVendor(
+      vendorAddress,
+      beneficiaryAddress,
+      otp,
+    );
+  }
+
+  //#endregion
+
+  async getChainData(params: IParams) {
+    // const [allowance, balance, distributed, pendingTokens, isVendorApproved] =
+    //   await Promise.all([
+    //     this.getVendorAllowance([walletAddress]), //CVAProject/
+    //     this.getProjectBalance(['CVAProject']), //RahatToken
+    //     this.getDisbursed([walletAddress]), //RahatToken
+    //     this.getPendingTokensToAccept([walletAddress]), //CVAProject
+    //     this.checkIsVendorApproved([walletAddress]), //CVAProject
+    //   ]);
+    // return { allowance, balance, distributed, pendingTokens, isVendorApproved };
+
+    //TODO make multicalls
+    const [walletAddress] = params;
+    const CVAProject = await this.getContractByName('CVAProject');
+    const cvaProject = await createContractInstance(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    const rahatToken = await createContractInstance(
+      await this.getContractByName('RahatToken'),
+      this.prisma.appSettings,
+    );
+    const isVendorApproved = await this.checkIsVendorApproved([walletAddress]);
+    const [allowance, pendingTokens] = await multiFunctionCall(
+      cvaProject,
+      ['vendorAllowance', 'vendorAllowancePending'],
+      [[walletAddress], [walletAddress]],
+    );
+
+    const rahatTokenMultiFunctionCallData = await multiFunctionCall(
+      rahatToken,
+      ['balanceOf', 'balanceOf'],
+      [[CVAProject.address], [walletAddress]],
+    );
+    return {
+      allowance: allowance[0].toString(),
+      pendingTokens: pendingTokens[0].toString(),
+      balance: rahatTokenMultiFunctionCallData[0].toString(),
+      disbursed: rahatTokenMultiFunctionCallData[1].toString(),
+      isVendorApproved,
+    };
+  }
+
+  mapCallData(transactions: any, vendorAddress: string) {
+    const res = transactions.map((el: IOfflineTransactionItem) => [
+      el.walletAddress,
+      vendorAddress,
+      el.amount,
+    ]);
+    return res;
+  }
+
+  async syncTransactions(params: IParams) {
+    const [message, signedMessage] = params;
+    const walletAddress = verifyMessage(JSON.stringify(message), signedMessage);
+    const callData = this.mapCallData(message, walletAddress);
+    const CVAProject = await createContractInstanceSign(
+      await this.getContractByName('CVAProject'),
+      this.prisma.appSettings,
+    );
+    return multiSend(CVAProject, 'sendBeneficiaryTokenToVendor', callData);
+  }
+
+  async blockchainCall(payload: BlockchainVendorDTO) {
+    const { method, params } = payload;
+    switch (method) {
+      case 'getChainData':
+        return this.getChainData(params);
+      case 'getProjectBalance':
+        return this.getProjectBalance(params);
+      case 'getPendingTokensToAccept':
+        return this.getPendingTokensToAccept(params);
+      case 'getDisbursed':
+        return this.getDisbursed(params);
+      case 'getVendorAllowance':
+        return this.getVendorAllowance(params);
+      case 'checkIsVendorApproved':
+        return this.checkIsVendorApproved(params);
+      case 'checkIsProjectLocked':
+        return this.checkIsProjectLocked(params);
+      case 'getBeneficiaryBalance':
+        return this.getBeneficiaryBalance(params);
+      case 'acceptPendingTokens':
+        return this.acceptPendingTokens(params);
+      case 'syncTransactions':
+        return this.syncTransactions(params);
+      case 'chargeBeneficiary':
+        return this.chargeBeneficiary(params);
+      case 'initiateTransactionForVendor':
+        return this.initiateTransactionForVendor(params);
+      case 'processTransactionForVendor':
+        return this.processTransactionForVendor(params);
+      default:
+        throw new Error(`${method} method doesn't exist`);
+    }
   }
 }

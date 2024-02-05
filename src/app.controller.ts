@@ -13,13 +13,13 @@ import { AppService } from './app.service';
 import { JwtAuthGuard } from './auth/guards/jwt.auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
 
-@ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard, RoleGuard)
 @Controller('app')
 @ApiTags('app')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Post('settings')
   createAppSettings(@Body() createAppSettingsDto: CreateAppSettingDto) {
     return this.appService.createAppSettings(createAppSettingsDto);
