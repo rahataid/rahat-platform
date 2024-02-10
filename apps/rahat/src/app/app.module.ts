@@ -5,12 +5,13 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PrismaModule } from '@rumsan/prisma';
 import { SettingsModule } from '@rumsan/settings';
 import { RumsanUsersModule } from '@rumsan/user';
-import { ListenerModule } from '../listener/listener.module';
+import { ListenersModule } from '../listeners/listeners.module';
 import { RahatProcessor } from '../processors';
 import { ProjectModule } from '../projects/projects.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
       inject: [ConfigService],
     }),
     EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false }),
-    ListenerModule,
+    ListenersModule,
     RumsanUsersModule,
     SettingsModule,
     PrismaModule,

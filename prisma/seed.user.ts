@@ -228,18 +228,6 @@ async function main() {
       update: userRoleAttrs,
     });
   }
-
-  for await (const projectType of projectTypes) {
-    const projectTypeAttrs = cloneDeep(projectType);
-    delete projectTypeAttrs.id;
-    await prisma.projectType.upsert({
-      where: {
-        id: projectType.id,
-      },
-      create: projectTypeAttrs,
-      update: projectTypeAttrs,
-    });
-  }
 }
 
 main()

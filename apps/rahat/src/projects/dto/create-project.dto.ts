@@ -1,3 +1,4 @@
+import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 export class CreateProjectDto {
@@ -9,14 +10,6 @@ export class CreateProjectDto {
   @IsString()
   name: string;
 
-  // @ApiProperty({
-  //   required: true,
-  //   example: '0x1234567890123456789012345678901234567890',
-  // })
-  // @IsString()
-  // @IsNotEmpty()
-  // contractAddress: string;
-
   @ApiProperty({
     type: 'string',
     required: false,
@@ -26,22 +19,13 @@ export class CreateProjectDto {
   @IsOptional()
   description?: string;
 
-  // @ApiProperty({
-  //   type: 'number',
-  //   required: false,
-  //   example: 1,
-  // })
-  // @IsNumber()
-  // @IsOptional()
-  // owner?: number;
-
   @ApiProperty({
     type: 'string',
     required: false,
     example: 'anticipatory-action',
   })
   @IsString()
-  type?: string;
+  type: string;
 
   @ApiProperty({
     type: 'string',
@@ -50,5 +34,17 @@ export class CreateProjectDto {
   })
   @IsString()
   @IsOptional()
-  extras?: string;
+  extras?: object;
+
+  @ApiProperty({
+    required: true,
+    example: '0x1234567890123456789012345678901234567890',
+  })
+  @IsOptional()
+  @IsString()
+  contractAddress?: string;
 }
+
+export class UpdateProjectDto extends OmitType(PartialType(CreateProjectDto), [
+  'type',
+]) {}

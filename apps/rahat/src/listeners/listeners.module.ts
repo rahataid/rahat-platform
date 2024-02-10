@@ -1,13 +1,21 @@
+import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-import { PrismaModule } from '@rumsan/prisma';
-import { ProjectController } from './project.controller';
-import { ProjectService } from './project.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { AuthsModule } from '@rumsan/user';
+import { QUEUE } from '../constants';
+import { ListenersService } from './listeners.service';
+import { DevService } from '../utils/develop.service';
 import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    PrismaModule,
+    AuthsModule,
+    BullModule.registerQueue({
+      name: QUEUE.RAHAT,
+    }),
+    BullModule.registerQueue({
+      name: QUEUE.HOST,
+    }),
     ClientsModule.registerAsync([
       {
         name: 'RAHAT_CLIENT',
@@ -23,7 +31,6 @@ import { ConfigService } from '@nestjs/config';
       },
     ]),
   ],
-  controllers: [ProjectController],
-  providers: [ProjectService],
+  providers: [ListenersService, DevService],
 })
-export class ProjectModule {}
+export class ListenersModule {}

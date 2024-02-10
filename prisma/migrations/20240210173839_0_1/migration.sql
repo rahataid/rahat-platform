@@ -8,9 +8,6 @@ CREATE TYPE "Service" AS ENUM ('EMAIL', 'PHONE', 'WALLET', 'GOOGLE', 'APPLE', 'F
 CREATE TYPE "SignupStatus" AS ENUM ('PENDING', 'APPROVED', 'FAILED', 'REJECTED');
 
 -- CreateEnum
-CREATE TYPE "ProjectStatus" AS ENUM ('PROCESSING', 'CLOSED', 'READY');
-
--- CreateEnum
 CREATE TYPE "SettingDataType" AS ENUM ('STRING', 'NUMBER', 'BOOLEAN', 'OBJECT');
 
 -- CreateEnum
@@ -21,6 +18,9 @@ CREATE TYPE "InternetStatus" AS ENUM ('UNKNOWN', 'NO_INTERNET', 'HOME_INTERNET',
 
 -- CreateEnum
 CREATE TYPE "PhoneStatus" AS ENUM ('UNKNOWN', 'NO_PHONE', 'FEATURE_PHONE', 'SMART_PHONE');
+
+-- CreateEnum
+CREATE TYPE "ProjectStatus" AS ENUM ('NOT_READY', 'ACTIVE', 'CLOSED');
 
 -- CreateTable
 CREATE TABLE "tbl_users" (
@@ -127,35 +127,6 @@ CREATE TABLE "tbl_users_signups" (
 );
 
 -- CreateTable
-CREATE TABLE "tbl_projects_types" (
-    "id" SERIAL NOT NULL,
-    "uuid" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3),
-
-    CONSTRAINT "tbl_projects_types_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "tbl_projects" (
-    "id" SERIAL NOT NULL,
-    "uuid" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT,
-    "status" "ProjectStatus" NOT NULL DEFAULT 'PROCESSING',
-    "projectType" TEXT NOT NULL,
-    "extras" JSONB,
-    "instanceId" TEXT,
-    "contract" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3),
-
-    CONSTRAINT "tbl_projects_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "tbl_settings" (
     "name" TEXT NOT NULL,
     "value" JSONB NOT NULL,
@@ -193,6 +164,22 @@ CREATE TABLE "tbl_beneficiaries" (
     CONSTRAINT "tbl_beneficiaries_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "tbl_projects" (
+    "id" SERIAL NOT NULL,
+    "uuid" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "status" "ProjectStatus" NOT NULL DEFAULT 'NOT_READY',
+    "type" TEXT NOT NULL,
+    "contractAddress" TEXT,
+    "extras" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3),
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_projects_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_users_uuid_key" ON "tbl_users"("uuid");
 
@@ -218,19 +205,13 @@ CREATE UNIQUE INDEX "tbl_auth_sessions_sessionId_key" ON "tbl_auth_sessions"("se
 CREATE UNIQUE INDEX "tbl_users_signups_uuid_key" ON "tbl_users_signups"("uuid");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tbl_projects_types_uuid_key" ON "tbl_projects_types"("uuid");
-
--- CreateIndex
-CREATE UNIQUE INDEX "tbl_projects_types_name_key" ON "tbl_projects_types"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "tbl_projects_uuid_key" ON "tbl_projects"("uuid");
-
--- CreateIndex
 CREATE UNIQUE INDEX "tbl_settings_name_key" ON "tbl_settings"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_beneficiaries_uuid_key" ON "tbl_beneficiaries"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_projects_uuid_key" ON "tbl_projects"("uuid");
 
 -- AddForeignKey
 ALTER TABLE "tbl_auth_permissions" ADD CONSTRAINT "tbl_auth_permissions_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "tbl_auth_roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -249,6 +230,3 @@ ALTER TABLE "tbl_auth_sessions" ADD CONSTRAINT "tbl_auth_sessions_authId_fkey" F
 
 -- AddForeignKey
 ALTER TABLE "tbl_users_signups" ADD CONSTRAINT "tbl_users_signups_approvedBy_fkey" FOREIGN KEY ("approvedBy") REFERENCES "tbl_users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "tbl_projects" ADD CONSTRAINT "tbl_projects_projectType_fkey" FOREIGN KEY ("projectType") REFERENCES "tbl_projects_types"("name") ON DELETE RESTRICT ON UPDATE CASCADE;

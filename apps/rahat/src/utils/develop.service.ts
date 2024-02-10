@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   ClientProxy,
   ClientProxyFactory,
@@ -8,22 +8,14 @@ import { AuthsService } from '@rumsan/user';
 
 @Injectable()
 export class DevService {
-  private client: ClientProxy;
-  constructor(private authService: AuthsService) {
-    if (process.env.NODE_ENV === 'production') return;
-    this.client = ClientProxyFactory.create({
-      transport: Transport.REDIS,
-      options: {
-        host: 'localhost',
-        port: 6379,
-        password: 'baal9670',
-      },
-    });
-  }
+  constructor(
+    private authService: AuthsService,
+    @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy
+  ) {}
 
   log(cmd: string, data: any) {
     if (process.env.NODE_ENV === 'production') return;
-    this.client.send({ cmd, dev: true }, data).subscribe();
+    this.rahatClient.send({ cmd, dev: true }, data).subscribe();
   }
 
   async otp(data: any) {
@@ -39,7 +31,7 @@ export class DevService {
         userAgent: 'na',
       }
     );
-    this.client
+    this.rahatClient
       .send(
         { cmd: 'slack', dev: true },
         `OTP: ${data.otp}\nToken: ${auth.accessToken}`

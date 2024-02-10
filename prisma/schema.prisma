@@ -12,7 +12,7 @@ datasource db {
 
 // ++++++++++++++++++ START: @rumsan/user - User +++++++++++++++++++++++++++++++
 
-// ===================User Model==================
+// =================== User Module ==================
 model User {
   id     Int     @id @default(autoincrement())
   uuid   String  @unique @default(uuid())
@@ -43,10 +43,7 @@ enum Gender {
   UNKNOWN
 }
 
-// ++++++++++++++++++ END: @rumsan/user - User +++++++++++++++++++++++++++++++
-// ++++++++++++++++++ START: @rumsan/user - Role/Auth ++++++++++++++++++++++++
-
-// ===================Role Model==================
+// =================== Role Module ==================
 model Role {
   id       Int       @unique @default(autoincrement())
   name     String    @unique @db.VarChar()
@@ -64,7 +61,6 @@ model Role {
   @@map("tbl_auth_roles")
 }
 
-// ===================Permission Model==================
 model Permission {
   id         Int     @unique @default(autoincrement())
   roleId     Int
@@ -98,6 +94,7 @@ model UserRole {
   @@map("tbl_users_roles")
 }
 
+// =================== Auth Module ==================
 model Auth {
   id            Int       @id @default(autoincrement())
   userId        Int
@@ -177,47 +174,6 @@ enum SignupStatus {
 }
 
 // ++++++++++++++++++ END: @rumsan/user - Signup +++++++++++++++++++++++++++
-
-// ++++++++++++++++++ START: @rumsan/projects - Projects +++++++++++++++++++++++
-
-// ===================Project Model==================
-
-enum ProjectStatus {
-  PROCESSING
-  CLOSED
-  READY
-}
-
-model ProjectType {
-  id          Int       @id @default(autoincrement())
-  uuid        String    @unique @default(uuid())
-  name        String    @unique
-  projects    Project[]
-  description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt()
-
-  @@map("tbl_projects_types")
-}
-
-model Project {
-  id          Int           @id @default(autoincrement())
-  uuid        String        @unique @default(uuid())
-  name        String
-  description String?
-  status      ProjectStatus @default(PROCESSING)
-  type        ProjectType   @relation(fields: [projectType], references: [name])
-  projectType String
-  extras      Json?         @db.JsonB()
-  instanceId  String?
-  contract    String?
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt()
-
-  @@map("tbl_projects")
-}
-
 // ++++++++++++++++++ START: @rumsan/settings +++++++++++++++++++++++++++
 
 model Setting {
@@ -239,7 +195,6 @@ enum SettingDataType {
 }
 
 // ++++++++++++++++++ END: @rumsan/settings +++++++++++++++++++++++++++
-
 // ++++++++++++++++++ START: @rahat/beneficiaries +++++++++++++++++++++++++++
 
 model Beneficiary {
@@ -290,3 +245,28 @@ enum PhoneStatus {
 }
 
 // ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
+// ++++++++++++++++++ START: @rahat/projects - Projects +++++++++++++++++++++++
+model Project {
+  id              Int           @id @default(autoincrement())
+  uuid            String        @unique @default(uuid())
+  name            String
+  description     String?
+  status          ProjectStatus @default(NOT_READY)
+  type            String
+  contractAddress String?
+  extras          Json?         @db.JsonB()
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
+
+  @@map("tbl_projects")
+}
+
+enum ProjectStatus {
+  NOT_READY
+  ACTIVE
+  CLOSED
+}
+
+// ++++++++++++++++++ END: Rahat - Projects +++++++++++++++++++++++
