@@ -1,8 +1,10 @@
-import { Module } from '@nestjs/common';
-import { ListenerService } from './listener.service';
-import { AuthsModule } from '@rumsan/user';
 import { BullModule } from '@nestjs/bull';
+import { Module } from '@nestjs/common';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { AuthsModule } from '@rumsan/user';
 import { QUEUE } from '../constants';
+import { ListenerService } from './listener.service';
+import { DevService } from '../utils/develop.service';
 
 @Module({
   imports: [
@@ -11,9 +13,9 @@ import { QUEUE } from '../constants';
       name: QUEUE.RAHAT,
     }),
     BullModule.registerQueue({
-      name: QUEUE.DEBUG,
+      name: QUEUE.HOST,
     }),
   ],
-  providers: [ListenerService],
+  providers: [ListenerService, DevService],
 })
 export class ListenerModule {}

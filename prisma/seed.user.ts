@@ -1,5 +1,33 @@
 import { PrismaClient, Service } from '@prisma/client';
-import { cloneDeep } from 'lodash';
+
+function cloneDeep<T>(obj: T): T {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (obj instanceof Date) {
+    return new Date(obj.getTime()) as T;
+  }
+
+  if (Array.isArray(obj)) {
+    const arrCopy: any[] = [];
+    obj.forEach((val, i) => {
+      arrCopy[i] = cloneDeep(val);
+    });
+    return arrCopy as T;
+  }
+
+  if (obj instanceof Object) {
+    const objCopy: { [key: string]: any } = {};
+    Object.keys(obj).forEach((key) => {
+      objCopy[key] = cloneDeep((obj as { [key: string]: any })[key]);
+    });
+    return objCopy as T;
+  }
+
+  throw new Error("Unable to copy obj! Its type isn't supported.");
+}
+
 export const roles: Array<{ id?: number; name: string; isSystem?: boolean }> = [
   {
     id: 1,
@@ -113,6 +141,21 @@ export const auths: Array<{
   },
 ];
 
+const projectTypes: Array<{
+  id?: number;
+  name: string;
+  description?: string;
+}> = [
+  {
+    id: 1,
+    name: 'anticipatory-action',
+  },
+  {
+    id: 2,
+    name: 'cva',
+  },
+];
+
 const prisma = new PrismaClient();
 
 async function main() {
@@ -183,6 +226,18 @@ async function main() {
       },
       create: userRoleAttrs,
       update: userRoleAttrs,
+    });
+  }
+
+  for await (const projectType of projectTypes) {
+    const projectTypeAttrs = cloneDeep(projectType);
+    delete projectTypeAttrs.id;
+    await prisma.projectType.upsert({
+      where: {
+        id: projectType.id,
+      },
+      create: projectTypeAttrs,
+      update: projectTypeAttrs,
     });
   }
 }

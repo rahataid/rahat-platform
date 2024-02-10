@@ -19,11 +19,12 @@ export const APP = {
 
 export const QUEUE = {
   RAHAT: 'RAHAT',
-  DEBUG: 'RAHAT-DEBUG',
+  HOST: 'HOST',
 };
 
 export const JOBS = {
   EMAIL: 'email',
   SLACK: 'slack',
   OTP: 'otp',
+  PROJECT_CREATE: 'project_create',
 };

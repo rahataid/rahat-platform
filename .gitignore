@@ -2,6 +2,7 @@
 # rumsan
 .env
 play
+.npmrc
 
 # compiled output
 dist

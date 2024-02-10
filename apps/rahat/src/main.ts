@@ -8,6 +8,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ResponseTransformInterceptor, RsExceptionFilter } from '@rumsan/core';
 import { AppModule } from './app/app.module';
 import { APP } from './constants';
 
@@ -16,22 +17,26 @@ async function bootstrap() {
   //to get real ip from nginx
   app.set('trust proxy', true);
   const globalPrefix = 'v1';
+
+  //must have this if you want to implicit conversion of string to number in dto
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      //must have this if you want to implicit conversion of string to number in dto
       transform: true,
       transformOptions: { enableImplicitConversion: true },
     })
   );
+  app.useGlobalFilters(new RsExceptionFilter());
+  //TODO this is preventing from file upload. need to find a way to handle this
+  app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
 
   const port = process.env.PORT || 3333;
 
   const config = new DocumentBuilder()
     .setTitle('Rahat Core')
-    .setDescription('API reference library for Rahat Core.')
-    .setVersion(process.env.npm_package_version)
+    .setDescription('API service for Rahat Core')
+    .setVersion('1.0')
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: APP.JWT_BEARER },
       APP.JWT_BEARER

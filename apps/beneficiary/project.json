@@ -1,0 +1,24 @@
+{
+  "name": "beneficiary",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/beneficiary/src",
+  "projectType": "application",
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "beneficiary:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "beneficiary:build:development"
+        },
+        "production": {
+          "buildTarget": "beneficiary:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}
