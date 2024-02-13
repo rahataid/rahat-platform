@@ -3,25 +3,28 @@ import { Inject, Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EVENTS } from '@rumsan/user';
 import { Queue } from 'bull';
-import { JOBS, QUEUE } from '../constants';
+import { JOBS } from '../constants';
 import { EVENTS as APP_EVENTS } from '../constants/events';
 import { CreateProjectDto } from '../projects/dto/create-project.dto';
 import { DevService } from '../utils/develop.service';
 import { Project } from '@prisma/client';
 import { ClientProxy } from '@nestjs/microservices';
+import { BQUEUE } from '@rahat/sdk';
 @Injectable()
 export class ListenersService {
   private otp: string;
   private dev: DevService;
   constructor(
-    @InjectQueue(QUEUE.RAHAT) private readonly rahatQueue: Queue,
-    @InjectQueue(QUEUE.HOST) private readonly hostQueue: Queue,
+    @InjectQueue(BQUEUE.RAHAT) private readonly rahatQueue: Queue,
+    @InjectQueue(BQUEUE.HOST) private readonly hostQueue: Queue,
+    @InjectQueue(BQUEUE.RAHAT_PROJECT) private readonly projectQueue: Queue,
     private readonly devService: DevService
   ) {}
 
   @OnEvent(EVENTS.OTP_CREATED)
   async sendOTPEmail(data: any) {
     this.otp = data.otp;
+    this.projectQueue.add('beneficiary.sync', { otp: data.otp });
     await this.rahatQueue.add(JOBS.EMAIL, { test: 'test' });
   }
 

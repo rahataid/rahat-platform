@@ -11,7 +11,6 @@ import { ProjectModule } from '../projects/projects.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [

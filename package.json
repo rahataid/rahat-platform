@@ -2,10 +2,13 @@
   "name": "@rahat-os/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "preinstall": "only-allow pnpm",
+    "add:resource": "nx g @nx/nest:resource --directory=apps/$app/src --crud=true"
+  },
   "private": true,
   "dependencies": {
-    "@nestjs/bull": "^10.0.1",
+    "@nestjs/bull": "^10.1.0",
     "@nestjs/common": "^10.3.1",
     "@nestjs/config": "^3.2.0",
     "@nestjs/core": "^10.3.1",

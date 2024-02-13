@@ -1,12 +1,12 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
-import { JOBS, QUEUE } from '../constants';
+import { JOBS } from '../constants';
+import { BQUEUE } from '@rahat/sdk';
 
-@Processor(QUEUE.RAHAT)
+@Processor(BQUEUE.RAHAT)
 export class RahatProcessor {
   private readonly logger = new Logger(RahatProcessor.name);
-  constructor() {}
 
   @Process(JOBS.EMAIL)
   async sendEmail(job: Job<any>) {

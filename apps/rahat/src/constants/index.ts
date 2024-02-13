@@ -17,11 +17,6 @@ export const APP = {
   JWT_BEARER: 'JWT',
 };
 
-export const QUEUE = {
-  RAHAT: 'RAHAT',
-  HOST: 'HOST',
-};
-
 export const JOBS = {
   EMAIL: 'email',
   SLACK: 'slack',

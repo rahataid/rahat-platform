@@ -51,4 +51,18 @@ export class ProjectController {
   remove(@Param('uuid') uuid: UUID) {
     return this.projectService.remove(uuid);
   }
+
+  @Get(':uuid/beneficiaries')
+  listBeneficiaries(@Param('uuid') uuid: UUID) {
+    return this.rahatClient
+      .send({ cmd: 'rahat.projects.beneficiary.list' }, {})
+      .pipe(timeout(5000));
+  }
+
+  @Post(':uuid/actions')
+  projectActions(@Param('uuid') uuid: UUID) {
+    return this.rahatClient
+      .send({ cmd: 'project_actions', uuid }, {})
+      .pipe(timeout(5000));
+  }
 }

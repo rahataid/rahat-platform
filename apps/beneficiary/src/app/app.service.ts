@@ -1,62 +1,24 @@
-import { HttpException, Injectable } from '@nestjs/common';
-import { PaginatorTypes, paginator } from '@nodeteam/nestjs-prisma-pagination';
-import {
-  CreateBeneficiaryDto,
-  ListBeneficiaryDto,
-  UpdateBeneficiaryDto,
-} from '@rahat/sdk';
-import { PrismaService } from '@rumsan/prisma';
-import { Beneficiary } from '@prisma/client';
-
-const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
-  private rsprisma;
-  constructor(protected prisma: PrismaService) {
-    this.rsprisma = this.prisma.rsclient;
+  create() {
+    return 'This action adds a new beneficiary';
   }
 
-  async list(
-    dto: ListBeneficiaryDto
-  ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
-    const orderBy: Record<string, 'asc' | 'desc'> = {};
-    orderBy[dto.sort] = dto.order;
-    return paginate(
-      this.prisma.beneficiary,
-      {
-        where: {
-          //deletedAt: null,
-        },
-        orderBy,
-      },
-      {
-        page: dto.page,
-        perPage: dto.perPage,
-      }
-    );
+  findAll() {
+    return `This action returns all beneficiary`;
   }
 
-  async create(data: CreateBeneficiaryDto) {
-    return this.rsprisma.beneficiary.create({
-      data,
-    });
+  findOne(id: number) {
+    return `This action returns a #${id} beneficiary`;
   }
 
-  async update(uuid: string, dto: UpdateBeneficiaryDto) {
-    const findUuid = await this.prisma.beneficiary.findUnique({
-      where: {
-        uuid,
-      },
-    });
+  update(id: number) {
+    return `This action updates a #${id} beneficiary`;
+  }
 
-    if (!findUuid) throw new Error('Data not Found');
-
-    return await this.prisma.beneficiary.update({
-      where: {
-        uuid,
-      },
-      data: dto,
-    });
+  remove(id: number) {
+    return `This action removes a #${id} beneficiary`;
   }
 }

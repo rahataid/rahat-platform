@@ -1,25 +1,18 @@
 import { Module } from '@nestjs/common';
+import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryController } from './beneficiary.controller';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { PrismaModule } from '@rumsan/prisma';
 import { BullModule } from '@nestjs/bull';
 import { BQUEUE } from '@rahat/sdk';
 
 @Module({
   imports: [
-    ClientsModule.register([
-      {
-        name: 'BEN_CLIENT',
-        transport: Transport.TCP,
-        options: {
-          port: +process.env.PORT_BEN,
-        },
-      },
-    ]),
+    PrismaModule,
     BullModule.registerQueue({
       name: BQUEUE.RAHAT,
     }),
   ],
   controllers: [BeneficiaryController],
-  providers: [],
+  providers: [BeneficiaryService],
 })
 export class BeneficiaryModule {}
