@@ -50,11 +50,10 @@ export class BeneficiaryController {
   @Post('bulk')
   @UseInterceptors(FileInterceptor('file'))
   async uploadBulk(@UploadedFile() file: TFile, @Req() req: Request) {
-    const docType: Enums.UploadFileType = req.body['doctype'];
+    const docType: Enums.UploadFileType =
+      req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const beneficiaries = await DocParser(docType, file.buffer);
 
-    if (docType !== Enums.UploadFileType.JSON)
-      throw new Error('Only json file is allowed.');
     return this.client.send(
       { cmd: JOBS.BENEFICIARY.CREATE_BULK },
       beneficiaries
