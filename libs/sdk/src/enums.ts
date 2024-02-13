@@ -31,3 +31,10 @@ export enum ProjectTypes {
   EL = 'EL',
   ANTICIPATORY_ACTION = 'ANTICIPATORY_ACTION',
 }
+
+export enum UploadFileType {
+  EXCEL = 'EXCEL',
+  JSON = 'JSON',
+  API = 'API',
+  KOBO = 'KOBO',
+}

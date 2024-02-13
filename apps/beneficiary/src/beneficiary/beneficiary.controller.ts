@@ -3,7 +3,9 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { BeneficiaryService } from './beneficiary.service';
 import {
   CreateBeneficiaryDto,
+  Enums,
   ListBeneficiaryDto,
+  TFile,
   UpdateBeneficiaryDto,
 } from '@rahat/sdk';
 import { JOBS } from '@rahat/sdk';
@@ -16,6 +18,11 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: JOBS.BENEFICIARY.CREATE })
   create(@Payload() createBeneficiaryDto: CreateBeneficiaryDto) {
     return this.beneficiaryService.create(createBeneficiaryDto);
+  }
+
+  @MessagePattern({ cmd: JOBS.BENEFICIARY.CREATE_BULK })
+  uploadBulk(@Payload() data) {
+    return this.beneficiaryService.createBulk(data);
   }
 
   @MessagePattern({ cmd: JOBS.BENEFICIARY.LIST })

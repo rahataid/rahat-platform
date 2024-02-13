@@ -7,8 +7,12 @@ import {
   Param,
   Post,
   Query,
+  Req,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   BQUEUE,
@@ -16,6 +20,8 @@ import {
   ListBeneficiaryDto,
   JOBS,
   UpdateBeneficiaryDto,
+  TFile,
+  Enums,
 } from '@rahat/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -38,6 +44,21 @@ export class BeneficiaryController {
     return this.client
       .send({ cmd: JOBS.BENEFICIARY.CREATE }, dto)
       .subscribe((d) => this.queue.add(JOBS.BENEFICIARY.CREATE, d));
+  }
+
+  @Post('bulk')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadBulk(@UploadedFile() file: TFile, @Req() req: Request) {
+    const docType: Enums.UploadFileType = req.body['doctype'];
+
+    if (docType !== Enums.UploadFileType.JSON)
+      throw new Error('Only json file is allowed.');
+    const jsonData = file.buffer.toString('utf8');
+    const benDataArray = JSON.parse(jsonData);
+    return this.client.send(
+      { cmd: JOBS.BENEFICIARY.CREATE_BULK },
+      benDataArray
+    );
   }
 
   @Post(':uuid')

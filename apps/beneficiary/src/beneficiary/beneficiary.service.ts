@@ -44,6 +44,12 @@ export class BeneficiaryService {
     });
   }
 
+  async createBulk(data: CreateBeneficiaryDto[]) {
+    return this.rsprisma.beneficiary.createMany({
+      data,
+    });
+  }
+
   async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
     const findUuid = await this.prisma.beneficiary.findUnique({
       where: {
