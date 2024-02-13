@@ -25,11 +25,13 @@
     "@rumsan/user": "^3.0.104",
     "axios": "^1.6.0",
     "bull": "^4.12.2",
+    "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "ioredis": "^5.3.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@nestjs/schematics": "^10.0.1",

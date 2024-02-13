@@ -25,6 +25,7 @@ import {
 } from '@rahat/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
+import { DocParser } from './parser';
 
 @Controller('beneficiaries')
 @ApiTags('Beneficiaries')
@@ -50,14 +51,13 @@ export class BeneficiaryController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadBulk(@UploadedFile() file: TFile, @Req() req: Request) {
     const docType: Enums.UploadFileType = req.body['doctype'];
+    const beneficiaries = await DocParser(docType, file.buffer);
 
     if (docType !== Enums.UploadFileType.JSON)
       throw new Error('Only json file is allowed.');
-    const jsonData = file.buffer.toString('utf8');
-    const benDataArray = JSON.parse(jsonData);
     return this.client.send(
       { cmd: JOBS.BENEFICIARY.CREATE_BULK },
-      benDataArray
+      beneficiaries
     );
   }
 
