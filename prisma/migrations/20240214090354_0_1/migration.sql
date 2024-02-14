@@ -169,6 +169,7 @@ CREATE TABLE "tbl_projects" (
     "id" SERIAL NOT NULL,
     "uuid" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "description" TEXT,
     "status" "ProjectStatus" NOT NULL DEFAULT 'NOT_READY',
     "type" TEXT NOT NULL,
     "contractAddress" TEXT,
@@ -178,6 +179,17 @@ CREATE TABLE "tbl_projects" (
     "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "tbl_projects_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tbl_stats" (
+    "name" TEXT NOT NULL,
+    "data" JSONB NOT NULL,
+    "group" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_stats_pkey" PRIMARY KEY ("name")
 );
 
 -- CreateIndex
@@ -212,6 +224,9 @@ CREATE UNIQUE INDEX "tbl_beneficiaries_uuid_key" ON "tbl_beneficiaries"("uuid");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_projects_uuid_key" ON "tbl_projects"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_stats_name_key" ON "tbl_stats"("name");
 
 -- AddForeignKey
 ALTER TABLE "tbl_auth_permissions" ADD CONSTRAINT "tbl_auth_permissions_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "tbl_auth_roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

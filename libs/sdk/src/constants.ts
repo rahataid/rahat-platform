@@ -2,15 +2,18 @@ export const JOBS = {
   BENEFICIARY: {
     CREATE: 'rahat.jobs.beneficiary.create',
     CREATE_BULK: 'rahat.jobs.beneficiary.create_bulk',
-    LIST: 'rahat.jobs.beneficiary.list',
     GET: 'rahat.jobs.beneficiary.get',
-    UPDATE: 'rahat.jobs.beneficiary.update',
+    LIST: 'rahat.jobs.beneficiary.list',
     REMOVE: 'rahat.jobs.beneficiary.remove',
+    STATS: 'rahat.jobs.beneficiary.stats',
+    UPDATE: 'rahat.jobs.beneficiary.update',
+    UPDATE_STATS: 'rahat.jobs.beneficiary.update_stats',
   },
 };
 
 export const BQUEUE = {
   RAHAT: 'RAHAT',
   RAHAT_PROJECT: 'RAHAT.PROJECT',
+  RAHAT_BENEFICIARY: 'RAHAT.BENEFICIARY',
   HOST: 'RAHAT.HOST',
 };

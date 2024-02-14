@@ -245,7 +245,7 @@ enum PhoneStatus {
 }
 
 // ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
-// ++++++++++++++++++ START: @rahat/projects - Projects +++++++++++++++++++++++
+// ++++++++++++++++++ START: @rahat/projects - Projects +++++++++++++++++++
 model Project {
   id              Int           @id @default(autoincrement())
   uuid            String        @unique @default(uuid())
@@ -269,4 +269,18 @@ enum ProjectStatus {
   CLOSED
 }
 
-// ++++++++++++++++++ END: Rahat - Projects +++++++++++++++++++++++
+// ++++++++++++++++++ END: Rahat - Projects +++++++++++++++++++++++++++++++
+// ++++++++++++++++++ START: @rahat/stats - Statistics ++++++++++++++++++++
+
+model Stats {
+  name      String    @id @unique
+  data      Json
+  group     String?
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+
+  @@map("tbl_stats")
+}
+
+// ++++++++++++++++++ END: @rahat/stats - Statistics +++++++++++++++++++++++

@@ -1,0 +1,24 @@
+{
+  "name": "stats",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/stats/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/stats",
+        "tsConfig": "libs/stats/tsconfig.lib.json",
+        "packageJson": "libs/stats/package.json",
+        "main": "libs/stats/src/index.ts",
+        "assets": ["libs/stats/*.md"]
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs stats {args.ver} {args.tag}",
+      "dependsOn": ["build"]
+    }
+  },
+  "tags": []
+}

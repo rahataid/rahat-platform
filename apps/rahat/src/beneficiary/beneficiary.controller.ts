@@ -17,11 +17,11 @@ import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   BQUEUE,
   CreateBeneficiaryDto,
-  ListBeneficiaryDto,
-  JOBS,
-  UpdateBeneficiaryDto,
-  TFile,
   Enums,
+  JOBS,
+  ListBeneficiaryDto,
+  TFile,
+  UpdateBeneficiaryDto,
 } from '@rahat/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -40,11 +40,14 @@ export class BeneficiaryController {
     return this.client.send({ cmd: JOBS.BENEFICIARY.LIST }, dto);
   }
 
+  @Get('stats')
+  async getStats() {
+    return this.client.send({ cmd: JOBS.BENEFICIARY.STATS }, {});
+  }
+
   @Post()
   async create(@Body() dto: CreateBeneficiaryDto) {
-    return this.client
-      .send({ cmd: JOBS.BENEFICIARY.CREATE }, dto)
-      .subscribe((d) => this.queue.add(JOBS.BENEFICIARY.CREATE, d));
+    return this.client.send({ cmd: JOBS.BENEFICIARY.CREATE }, dto);
   }
 
   @Post('bulk')

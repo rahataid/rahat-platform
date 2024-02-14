@@ -1,38 +1,45 @@
 import { Controller, Param } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { BeneficiaryService } from './beneficiary.service';
 import {
   CreateBeneficiaryDto,
-  Enums,
+  JOBS,
   ListBeneficiaryDto,
-  TFile,
   UpdateBeneficiaryDto,
 } from '@rahat/sdk';
-import { JOBS } from '@rahat/sdk';
 import { UUID } from 'crypto';
+import { BeneficiaryService } from './beneficiary.service';
+import { BeneficiaryStatService } from './beneficiaryStat.service';
 
 @Controller()
 export class BeneficiaryController {
-  constructor(private readonly beneficiaryService: BeneficiaryService) {}
+  constructor(
+    private readonly service: BeneficiaryService,
+    private readonly statsService: BeneficiaryStatService
+  ) {}
 
   @MessagePattern({ cmd: JOBS.BENEFICIARY.CREATE })
-  create(@Payload() createBeneficiaryDto: CreateBeneficiaryDto) {
-    return this.beneficiaryService.create(createBeneficiaryDto);
+  async create(@Payload() createBeneficiaryDto: CreateBeneficiaryDto) {
+    return this.service.create(createBeneficiaryDto);
   }
 
   @MessagePattern({ cmd: JOBS.BENEFICIARY.CREATE_BULK })
   uploadBulk(@Payload() data) {
-    return this.beneficiaryService.createBulk(data);
+    return this.service.createBulk(data);
   }
 
   @MessagePattern({ cmd: JOBS.BENEFICIARY.LIST })
   async list(dto: ListBeneficiaryDto) {
-    return this.beneficiaryService.list(dto);
+    return this.service.list(dto);
+  }
+
+  @MessagePattern({ cmd: JOBS.BENEFICIARY.STATS })
+  async stats() {
+    return this.statsService.getAllStats();
   }
 
   // @MessagePattern({ cmd: JOBS.BENEFICIARY.GET })
   // get(@Param('uuid') uuid: UUID) {
-  //   return this.beneficiaryService.get(uuid);
+  //   return this.service.get(uuid);
   // }
 
   @MessagePattern({ cmd: JOBS.BENEFICIARY.UPDATE })
@@ -40,11 +47,11 @@ export class BeneficiaryController {
     @Param('uuid') uuid: UUID,
     @Payload() updateBeneficiaryDto: UpdateBeneficiaryDto
   ) {
-    return this.beneficiaryService.update(uuid, updateBeneficiaryDto);
+    return this.service.update(uuid, updateBeneficiaryDto);
   }
 
   // @MessagePattern({ cmd: JOBS.BENEFICIARY.REMOVE })
   // remove(@Param('uuid') uuid: UUID) {
-  //   return this.beneficiaryService.remove(uuid);
+  //   return this.service.remove(uuid);
   // }
 }

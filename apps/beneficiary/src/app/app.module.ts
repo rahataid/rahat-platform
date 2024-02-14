@@ -1,13 +1,21 @@
+import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { BQUEUE } from '@rahat/sdk';
 
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
+import { ListenersModule } from '../listeners/listener.module';
+import { BeneficiaryProcessor } from '../processors/beneficiary.processor';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
-import { BullModule } from '@nestjs/bull';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot({
+      maxListeners: 10,
+      ignoreErrors: false,
+    }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -19,9 +27,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
       inject: [ConfigService],
     }),
+    BullModule.registerQueue({
+      name: BQUEUE.RAHAT_BENEFICIARY,
+    }),
     BeneficiaryModule,
+    ListenersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, BeneficiaryProcessor],
 })
 export class AppModule {}
