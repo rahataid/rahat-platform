@@ -65,13 +65,18 @@ export class BeneficiaryStatService {
     }));
   }
 
+  async totalBeneficiaries() {
+    return { count: await this.prisma.beneficiary.count() };
+  }
+
   async calculateAllStats() {
-    const [gender, bankedStatus, internetStatus, phoneStatus] =
+    const [gender, bankedStatus, internetStatus, phoneStatus, total] =
       await Promise.all([
         this.calculateGenderStats(),
         this.calculateBankedStatusStats(),
         this.calculateInternetStatusStats(),
         this.calculatePhoneStatusStats(),
+        this.totalBeneficiaries(),
       ]);
 
     return {
@@ -79,6 +84,7 @@ export class BeneficiaryStatService {
       bankedStatus,
       internetStatus,
       phoneStatus,
+      total,
     };
   }
 
@@ -90,10 +96,15 @@ export class BeneficiaryStatService {
   }
 
   async saveAllStats() {
-    const { gender, bankedStatus, internetStatus, phoneStatus } =
+    const { gender, bankedStatus, internetStatus, phoneStatus, total } =
       await this.calculateAllStats();
 
     await Promise.all([
+      this.statsService.save({
+        name: 'beneficiary_total',
+        data: total,
+        group: 'beneficiary',
+      }),
       this.statsService.save({
         name: 'beneficiary_gender',
         data: gender,
