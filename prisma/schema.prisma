@@ -201,26 +201,29 @@ model Beneficiary {
   id   Int    @id @default(autoincrement()) @db.Integer()
   uuid String @unique @default(uuid()) @db.Uuid()
 
-  firstName      String
-  lastName       String
-  gender         Gender         @default(UNKNOWN)
-  walletAddress  String?
-  birthDate      DateTime?
-  location       String?
-  latitude       Float?
-  longitude      Float?
-  phone          String?
-  email          String?
-  extras         Json?          @db.JsonB()
-  notes          String?
-  bankedStatus   BankedStatus   @default(UNKNOWN)
-  internetStatus InternetStatus @default(UNKNOWN)
-  phoneStatus    PhoneStatus    @default(UNKNOWN)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime?      @updatedAt()
-  deletedAt      DateTime?
+  phoneNumber           String           @unique
+  walletAddress         Bytes            @unique
+  fullName              String
+  gender                Gender           @default(UNKNOWN)
+  countryCode           String?
+  age                   Int?
+  address               String?
+  type                  BeneficiaryTypes @default(ENROLLED)
+  Project               Project?         @relation(fields: [projectId], references: [uuid])
+  projectId             String?
+  beneficiariesReferred Int?
+  referralVendor        String?
+  referralBeneficiary   String?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt()
+  deletedAt             DateTime?
 
   @@map("tbl_beneficiaries")
+}
+
+enum BeneficiaryTypes {
+  ENROLLED
+  REFERRED
 }
 
 enum BankedStatus {
@@ -256,9 +259,10 @@ model Project {
   contractAddress String?
   extras          Json?         @db.JsonB()
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt()
-  deletedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime?     @updatedAt()
+  deletedAt   DateTime?
+  Beneficiary Beneficiary[]
 
   @@map("tbl_projects")
 }

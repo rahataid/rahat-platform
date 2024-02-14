@@ -50,7 +50,7 @@ export class BeneficiaryService {
     });
   }
 
-  async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
+  async update(uuid: UUID, dto: any) {
     const findUuid = await this.prisma.beneficiary.findUnique({
       where: {
         uuid,
