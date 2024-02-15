@@ -74,6 +74,9 @@ dependencies:
   tslib:
     specifier: ^2.3.0
     version: 2.6.2
+  uuid:
+    specifier: ^9.0.1
+    version: 9.0.1
   xlsx:
     specifier: ^0.18.5
     version: 0.18.5

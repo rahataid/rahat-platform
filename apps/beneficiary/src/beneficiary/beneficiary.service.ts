@@ -9,6 +9,7 @@ import {
 } from '@rahat/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 import { EVENTS } from '../constants';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -43,20 +44,74 @@ export class BeneficiaryService {
     );
   }
 
-  async create(data: CreateBeneficiaryDto) {
+  async create(dto: CreateBeneficiaryDto) {
+    const { piiData, ...data } = dto;
     const rdata = await this.rsprisma.beneficiary.create({
       data,
     });
+    if (piiData) {
+      await this.prisma.beneficiaryPii.create({
+        data: {
+          beneficiaryId: rdata.id,
+          ...piiData,
+        },
+      });
+    }
     this.eventEmitter.emit(EVENTS.BENEFICIARY_CREATED);
     return rdata;
   }
 
-  async createBulk(data: CreateBeneficiaryDto[]) {
-    const rdata = await this.rsprisma.beneficiary.createMany({
-      data,
+  async createBulk(dtos: CreateBeneficiaryDto[]) {
+    // Pre-generate UUIDs for each beneficiary to use as a linking key
+    dtos.forEach((dto) => {
+      dto.uuid = dto.uuid || uuidv4(); // Assuming generateUuid() is a method that generates unique UUIDs
     });
+
+    // Separate PII data and prepare beneficiary data for bulk insertion
+    const beneficiariesData = dtos.map(({ piiData, ...data }) => data);
+    const piiDataList = dtos.map(({ uuid, piiData }) => ({
+      ...piiData,
+      uuid, // Temporarily store the uuid with PII data for linking
+    }));
+
+    // Insert beneficiaries in bulk
+    await this.prisma.beneficiary.createMany({
+      data: beneficiariesData,
+    });
+
+    // Assuming PII data includes a uuid field for linking purposes
+    // Retrieve all just inserted beneficiaries by their uuids to link them with their PII data
+    const insertedBeneficiaries = await this.prisma.beneficiary.findMany({
+      where: {
+        uuid: {
+          in: dtos.map((dto) => dto.uuid),
+        },
+      },
+    });
+
+    // Prepare PII data for bulk insertion with correct beneficiaryId
+    const piiBulkInsertData = piiDataList.map((piiData) => {
+      const beneficiary = insertedBeneficiaries.find(
+        (b) => b.uuid === piiData.uuid
+      );
+      return {
+        beneficiaryId: beneficiary.id,
+        ...piiData,
+        uuid: undefined, // Remove the temporary uuid field
+      };
+    });
+
+    // Insert PII data in bulk
+    if (piiBulkInsertData.length > 0) {
+      await this.prisma.beneficiaryPii.createMany({
+        data: piiBulkInsertData,
+      });
+    }
+
     this.eventEmitter.emit(EVENTS.BENEFICIARY_CREATED);
-    return rdata;
+
+    // Return some form of success indicator, as createMany does not return the records themselves
+    return { success: true, count: dtos.length };
   }
 
   async update(uuid: UUID, dto: UpdateBeneficiaryDto) {

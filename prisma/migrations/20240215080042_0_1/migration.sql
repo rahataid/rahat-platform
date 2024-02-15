@@ -142,16 +142,12 @@ CREATE TABLE "tbl_settings" (
 CREATE TABLE "tbl_beneficiaries" (
     "id" SERIAL NOT NULL,
     "uuid" UUID NOT NULL,
-    "firstName" TEXT NOT NULL,
-    "lastName" TEXT NOT NULL,
     "gender" "Gender" NOT NULL DEFAULT 'UNKNOWN',
     "walletAddress" TEXT,
     "birthDate" TIMESTAMP(3),
     "location" TEXT,
     "latitude" DOUBLE PRECISION,
     "longitude" DOUBLE PRECISION,
-    "phone" TEXT,
-    "email" TEXT,
     "extras" JSONB,
     "notes" TEXT,
     "bankedStatus" "BankedStatus" NOT NULL DEFAULT 'UNKNOWN',
@@ -162,6 +158,15 @@ CREATE TABLE "tbl_beneficiaries" (
     "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "tbl_beneficiaries_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tbl_beneficiaries_pii" (
+    "beneficiaryId" INTEGER NOT NULL,
+    "name" TEXT,
+    "phone" TEXT,
+    "email" TEXT,
+    "extras" JSONB
 );
 
 -- CreateTable
@@ -223,6 +228,9 @@ CREATE UNIQUE INDEX "tbl_settings_name_key" ON "tbl_settings"("name");
 CREATE UNIQUE INDEX "tbl_beneficiaries_uuid_key" ON "tbl_beneficiaries"("uuid");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "tbl_beneficiaries_pii_beneficiaryId_key" ON "tbl_beneficiaries_pii"("beneficiaryId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "tbl_projects_uuid_key" ON "tbl_projects"("uuid");
 
 -- CreateIndex
@@ -245,3 +253,6 @@ ALTER TABLE "tbl_auth_sessions" ADD CONSTRAINT "tbl_auth_sessions_authId_fkey" F
 
 -- AddForeignKey
 ALTER TABLE "tbl_users_signups" ADD CONSTRAINT "tbl_users_signups_approvedBy_fkey" FOREIGN KEY ("approvedBy") REFERENCES "tbl_users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_beneficiaries_pii" ADD CONSTRAINT "tbl_beneficiaries_pii_beneficiaryId_fkey" FOREIGN KEY ("beneficiaryId") REFERENCES "tbl_beneficiaries"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
