@@ -23,7 +23,7 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: JOBS.BENEFICIARY.CREATE_BULK })
-  uploadBulk(@Payload() data) {
+  createBulk(@Payload() data) {
     return this.service.createBulk(data);
   }
 
@@ -50,8 +50,8 @@ export class BeneficiaryController {
     return this.service.update(uuid, updateBeneficiaryDto);
   }
 
-  // @MessagePattern({ cmd: JOBS.BENEFICIARY.REMOVE })
-  // remove(@Param('uuid') uuid: UUID) {
-  //   return this.service.remove(uuid);
-  // }
+  @MessagePattern({ cmd: JOBS.BENEFICIARY.REMOVE })
+  remove(@Param('uuid') uuid: UUID) {
+    return this.service.remove(uuid);
+  }
 }

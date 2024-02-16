@@ -25,6 +25,7 @@ import {
 } from '@rahat/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
+import { catchError, of } from 'rxjs';
 import { DocParser } from './parser';
 
 @Controller('beneficiaries')
@@ -51,8 +52,19 @@ export class BeneficiaryController {
   }
 
   @Post('bulk')
+  async createBulk(@Body() dto: CreateBeneficiaryDto[]) {
+    const data = dto.map((b) => ({
+      ...b,
+      birthDate: new Date(b.birthDate),
+    }));
+    return this.client
+      .send({ cmd: JOBS.BENEFICIARY.CREATE_BULK }, data)
+      .pipe(catchError((val) => of({ error: val.message })));
+  }
+
+  @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadBulk(@UploadedFile() file: TFile, @Req() req: Request) {
+  async upload(@UploadedFile() file: TFile, @Req() req: Request) {
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const beneficiaries = await DocParser(docType, file.buffer);

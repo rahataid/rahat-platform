@@ -159,7 +159,7 @@ export class CreateBeneficiaryDto implements TBeneficiary {
 export class UpdateBeneficiaryDto extends PartialType(CreateBeneficiaryDto) {}
 
 export class ListBeneficiaryDto extends PaginationDto {
-  @IsIn(['createdAt', 'updatedAt', 'firstName', 'lastName', 'gender'])
+  @IsIn(['createdAt', 'updatedAt', 'gender'])
   override sort = 'createdAt';
   override order: 'asc' | 'desc' = 'desc';
 }

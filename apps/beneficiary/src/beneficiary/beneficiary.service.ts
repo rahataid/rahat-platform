@@ -24,6 +24,22 @@ export class BeneficiaryService {
     this.rsprisma = this.prisma.rsclient;
   }
 
+  // async get(uuid: UUID): TBeneficiary {
+  //   const beneficiary = await this.prisma.beneficiary.findUnique({
+  //     where: {
+  //       uuid,
+  //     },
+  //   });
+
+  //   const piiData: TPIIData = await this.prisma.beneficiaryPii.findUnique({
+  //     where: {
+  //       beneficiaryId: beneficiary.id,
+  //     },
+  //   });
+
+  //   return { piiData, ...beneficiary };
+  // }
+
   async list(
     dto: ListBeneficiaryDto
   ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
@@ -58,6 +74,46 @@ export class BeneficiaryService {
       });
     }
     this.eventEmitter.emit(EVENTS.BENEFICIARY_CREATED);
+    return rdata;
+  }
+
+  async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
+    const findUuid = await this.prisma.beneficiary.findUnique({
+      where: {
+        uuid,
+      },
+    });
+
+    if (!findUuid) throw new Error('Data not Found');
+
+    const rdata = await this.prisma.beneficiary.update({
+      where: {
+        uuid,
+      },
+      data: dto,
+    });
+    this.eventEmitter.emit(EVENTS.BENEFICIARY_UPDATED);
+    return rdata;
+  }
+
+  async remove(uuid: UUID) {
+    const findUuid = await this.prisma.beneficiary.findUnique({
+      where: {
+        uuid,
+      },
+    });
+
+    if (!findUuid) throw new Error('Data not Found');
+
+    const rdata = await this.prisma.beneficiary.update({
+      where: {
+        uuid,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+    this.eventEmitter.emit(EVENTS.BENEFICIARY_REMOVED);
     return rdata;
   }
 
@@ -112,24 +168,5 @@ export class BeneficiaryService {
 
     // Return some form of success indicator, as createMany does not return the records themselves
     return { success: true, count: dtos.length };
-  }
-
-  async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
-    const findUuid = await this.prisma.beneficiary.findUnique({
-      where: {
-        uuid,
-      },
-    });
-
-    if (!findUuid) throw new Error('Data not Found');
-
-    const rdata = await this.prisma.beneficiary.update({
-      where: {
-        uuid,
-      },
-      data: dto,
-    });
-    this.eventEmitter.emit(EVENTS.BENEFICIARY_UPDATED);
-    return rdata;
   }
 }

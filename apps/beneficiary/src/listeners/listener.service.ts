@@ -16,7 +16,7 @@ export class ListenersService {
 
   @OnEvent(EVENTS.BENEFICIARY_CREATED)
   @OnEvent(EVENTS.BENEFICIARY_UPDATED)
-  @OnEvent(EVENTS.BENEFICIARY_DELETED)
+  @OnEvent(EVENTS.BENEFICIARY_REMOVED)
   async onBeneficiaryChanged() {
     await this.benStats.saveAllStats();
   }
