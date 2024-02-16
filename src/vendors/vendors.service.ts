@@ -407,6 +407,7 @@ export class VendorsService {
       this.prisma.appSettings,
     );
     const isVendorApproved = await this.checkIsVendorApproved([walletAddress]);
+
     const [allowance, pendingTokens] = await multiFunctionCall(
       cvaProject,
       ['vendorAllowance', 'vendorAllowancePending'],
@@ -440,11 +441,31 @@ export class VendorsService {
     const [message, signedMessage] = params;
     const walletAddress = verifyMessage(JSON.stringify(message), signedMessage);
     const callData = this.mapCallData(message, walletAddress);
+
     const CVAProject = await createContractInstanceSign(
       await this.getContractByName('CVAProject'),
       this.prisma.appSettings,
     );
     return multiSend(CVAProject, 'sendBeneficiaryTokenToVendor', callData);
+  }
+
+  async executeMetaTxRequest(params: any) {
+    const [metaTxRequest] = params;
+    const forwarderContract = await createContractInstanceSign(
+      await this.getContractByName('ERC2771Forwarder'),
+      this.prisma.appSettings,
+    );
+    metaTxRequest.gas = BigInt(metaTxRequest.gas);
+    metaTxRequest.nonce = BigInt(metaTxRequest.nonce);
+    metaTxRequest.value = BigInt(metaTxRequest.value);
+
+    // const isVerified = await forwarderContract.verify(metaTxRequest);
+
+    const tx = await forwarderContract.execute(metaTxRequest);
+
+    const res = await tx.wait();
+
+    return res;
   }
 
   async blockchainCall(payload: BlockchainVendorDTO) {
@@ -476,6 +497,8 @@ export class VendorsService {
         return this.initiateTransactionForVendor(params);
       case 'processTransactionForVendor':
         return this.processTransactionForVendor(params);
+      case 'executeMetaTxRequest':
+        return this.executeMetaTxRequest(params);
       default:
         throw new Error(`${method} method doesn't exist`);
     }

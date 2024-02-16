@@ -18,6 +18,7 @@ export class CreateAppSettingDto {
       RahatToken: '0x422416b9203de06be4487D17DD1C76725c6049d7',
       RahatCommunity: '0x531e0540f4Ba3453C40EF1ef9D19dDa85e930aCc',
       CVAProject: '0x216EC842b77e424671219ABB817467fCEa991409',
+      ERC2771Forwarder: '0x830071a1c0e05b8BF20915A4A7cAD2dbbc42f891',
     },
   })
   @IsNotEmptyObject()
