@@ -109,7 +109,6 @@ export class ProjectService {
         },
         _count: {
           select: {
-            // @ts-ignore
             beneficiaries: {
               where: {
                 // deletedAt: null,
