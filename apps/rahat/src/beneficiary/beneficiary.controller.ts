@@ -46,6 +46,11 @@ export class BeneficiaryController {
       .subscribe((d) => this.queue.add(JOBS.BENEFICIARY.CREATE, d));
   }
 
+  @Post('refer')
+  async referBeneficiary(@Body() dto: CreateBeneficiaryDto) {
+    return this.client.send({ cmd: JOBS.BENEFICIARY.REFER }, dto);
+  }
+
   @Post('bulk')
   @UseInterceptors(FileInterceptor('file'))
   async uploadBulk(@UploadedFile() file: TFile, @Req() req: Request) {

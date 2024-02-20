@@ -205,6 +205,7 @@ model Beneficiary {
   walletAddress         Bytes            @unique
   fullName              String
   gender                Gender           @default(UNKNOWN)
+  email                 String?
   countryCode           String?
   age                   Int?
   address               String?
@@ -214,6 +215,7 @@ model Beneficiary {
   beneficiariesReferred Int?
   referralVendor        String?
   referralBeneficiary   String?
+  extras                Json?            @db.JsonB()
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt()
   deletedAt             DateTime?

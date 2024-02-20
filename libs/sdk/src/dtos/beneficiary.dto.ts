@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsDate,
   IsNumber,
   IsOptional,
   IsString,
@@ -8,40 +7,43 @@ import {
   Length,
   Matches,
   IsEmail,
+  IsObject,
 } from 'class-validator';
 import { PaginationDto } from '@rumsan/core';
-import { Gender } from '../enums';
+import { Gender, BeneficiaryType } from '../enums';
 import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateBeneficiaryDto {
   @ApiProperty({
+    type: 'object',
+    example: {
+      referrerBeneficiary: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d23',
+      referrerVendor: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d45',
+    },
+  })
+  @IsObject()
+  referral?: {
+    beneficiary: string;
+    vendor: string;
+  };
+  @ApiProperty({
     type: 'string',
-    example: 'Ram',
-    description: 'firstName',
+    example: 'Ram Dhakal',
+    description: 'fullName',
   })
   @IsString()
-  firstName: string;
+  fullName: string;
 
   @ApiProperty({
     type: 'string',
-    example: 'Sharma',
-    description: 'lastName',
+    example: BeneficiaryType.REFERRED,
   })
-  @IsString()
-  lastName: string;
-
-  @ApiProperty({
-    example: '1997-03-08',
-    description: 'Date of birth in the YYYY-MM-DD format.',
-  })
-  @IsDate()
   @IsOptional()
-  birthDate?: Date;
+  type: BeneficiaryType;
 
   @ApiProperty({
     type: 'string',
-    example: Gender.FEMALE,
-    description: 'Gender ',
+    example: Gender.MALE,
   })
   @IsString()
   @IsOptional()
@@ -50,51 +52,42 @@ export class CreateBeneficiaryDto {
   @ApiProperty({
     type: 'string',
     example: 'lalitpur',
-    description: 'location of the beneficiary',
   })
   @IsString()
   @IsOptional()
-  location?: string;
+  address?: string;
 
   @ApiProperty({
     type: 'number',
-    example: '26.24',
-    description: 'Latitude of community',
-    required: false,
+    example: '26',
   })
   @IsNumber()
   @IsOptional()
-  latitude?: number;
-
-  @ApiProperty({
-    type: 'number',
-    example: '86.24',
-    description: 'longitude of community',
-    required: false,
-  })
-  @IsNumber()
-  @IsOptional()
-  longitude?: number;
+  age?: number;
 
   @ApiProperty({
     type: 'string',
     example: '9785623749',
-    description: 'Phone number',
-    required: false,
   })
   @IsString()
   @IsOptional()
-  phone?: string;
+  phoneNumber?: string;
 
   @ApiProperty({
     type: 'string',
-    example: '9785623749',
-    description: 'Notes to remember',
-    required: false,
+    example: '977',
   })
   @IsString()
   @IsOptional()
-  notes?: string;
+  countryCode?: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12',
+  })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
 
   @ApiProperty({
     example: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
@@ -103,7 +96,6 @@ export class CreateBeneficiaryDto {
     minLength: 42,
     maxLength: 42,
   })
-  @IsOptional()
   @IsString()
   @Length(42, 42, {
     message: 'The Ethereum address must be 42 characters long',
@@ -112,13 +104,11 @@ export class CreateBeneficiaryDto {
     message:
       'Invalid Ethereum address format. It should start with "0x" and followed by 40 hexadecimal characters.',
   })
-  walletAddress?: string;
+  walletAddress?: any;
 
   @ApiProperty({
     type: 'string',
     example: 'ram@mailinator.com',
-    description: 'email',
-    required: false,
   })
   @IsString()
   @IsEmail()
@@ -141,7 +131,7 @@ export class CreateBeneficiaryDto {
 export class UpdateBeneficiaryDto extends PartialType(CreateBeneficiaryDto) {}
 
 export class ListBeneficiaryDto extends PaginationDto {
-  @IsIn(['createdAt', 'updatedAt', 'firstName', 'lastName', 'gender'])
+  @IsIn(['createdAt', 'updatedAt', 'fullName', 'gender'])
   override sort: string = 'createdAt';
   override order: 'asc' | 'desc' = 'desc';
 }

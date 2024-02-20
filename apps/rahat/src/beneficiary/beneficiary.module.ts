@@ -9,9 +9,11 @@ import { BQUEUE } from '@rahat/sdk';
     ClientsModule.register([
       {
         name: 'BEN_CLIENT',
-        transport: Transport.TCP,
+        transport: Transport.REDIS,
         options: {
-          port: +process.env.PORT_BEN,
+          host: process.env.REDIS_HOST,
+          port: +process.env.REDIS_PORT,
+          password: process.env.REDIS_PASSWORD,
         },
       },
     ]),

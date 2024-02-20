@@ -6,6 +6,7 @@ export const JOBS = {
     GET: 'rahat.jobs.beneficiary.get',
     UPDATE: 'rahat.jobs.beneficiary.update',
     REMOVE: 'rahat.jobs.beneficiary.remove',
+    REFER: 'rahat.jobs.beneficiary.refer',
   },
 };
 
