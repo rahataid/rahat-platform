@@ -3,14 +3,12 @@ import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import { BeneficiaryService } from './beneficiary.service';
 import {
   CreateBeneficiaryDto,
-  Enums,
   ListBeneficiaryDto,
   TFile,
   UpdateBeneficiaryDto,
 } from '@rahat/sdk';
 import { JOBS } from '@rahat/sdk';
 import { UUID } from 'crypto';
-import { BeneficiaryType } from 'libs/sdk/src/enums';
 
 @Controller()
 export class BeneficiaryController {
@@ -37,18 +35,7 @@ export class BeneficiaryController {
   // TODO: Update cmd constant
   @MessagePattern({ cmd: JOBS.BENEFICIARY.REFER })
   async referBeneficiary(dto: CreateBeneficiaryDto) {
-    dto.type = BeneficiaryType.REFERRED;
-    dto.walletAddress = Buffer.from(dto.walletAddress.slice(2), 'hex');
-    const { referral, ...rest } = dto;
-    const row = await this.beneficiaryService.create(rest);
-    const elPayload = {
-      ...referral,
-      uuid: row.uuid,
-      walletAddress: dto.walletAddress.toString('hex'),
-      extras: dto.extras || null,
-    };
-    return this.client.send({ cmd: 'ben-referred' }, elPayload);
-    // Send whatsapp message to the referred beneficiary
+    return this.beneficiaryService.referBeneficiary(dto);
   }
 
   @MessagePattern({ cmd: JOBS.BENEFICIARY.UPDATE })

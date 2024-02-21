@@ -8,6 +8,7 @@ import {
   Matches,
   IsEmail,
   IsObject,
+  IsUUID,
 } from 'class-validator';
 import { PaginationDto } from '@rumsan/core';
 import { Gender, BeneficiaryType } from '../enums';
@@ -15,17 +16,20 @@ import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateBeneficiaryDto {
   @ApiProperty({
-    type: 'object',
-    example: {
-      referrerBeneficiary: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d23',
-      referrerVendor: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d45',
-    },
+    type: 'string',
+    example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12',
   })
-  @IsObject()
-  referral?: {
-    beneficiary: string;
-    vendor: string;
-  };
+  @IsOptional()
+  @IsUUID()
+  referrerVendor?: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12',
+  })
+  @IsOptional()
+  @IsUUID()
+  referrerBeneficiary?: string;
   @ApiProperty({
     type: 'string',
     example: 'Ram Dhakal',
