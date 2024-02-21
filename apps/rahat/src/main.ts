@@ -27,6 +27,8 @@ async function bootstrap() {
     })
   );
   app.useGlobalFilters(new RsExceptionFilter());
+  //use cors
+  app.enableCors();
   //TODO this is preventing from file upload. need to find a way to handle this
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
