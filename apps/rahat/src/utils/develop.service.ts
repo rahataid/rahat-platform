@@ -1,15 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  ClientProxy,
-  ClientProxyFactory,
-  Transport,
-} from '@nestjs/microservices';
-import { AuthsService } from '@rumsan/user';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class DevService {
   constructor(
-    private authService: AuthsService,
     @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy
   ) {}
 
@@ -19,22 +13,16 @@ export class DevService {
   }
 
   async otp(data: any) {
+    console.log('otp', data);
     if (process.env.NODE_ENV === 'production') return;
-    const auth = await this.authService.loginByOtp(
-      {
-        challenge: data.challenge,
-        service: 'EMAIL',
-        otp: data.otp,
-      },
-      {
-        ip: '::1',
-        userAgent: 'na',
-      }
-    );
     this.rahatClient
       .send(
         { cmd: 'slack', dev: true },
-        `OTP: ${data.otp}\nToken: ${auth.accessToken}`
+        {
+          otp: data.otp,
+          challenge: data.challenge,
+          origin: data.requestInfo.origin,
+        }
       )
       .subscribe();
   }

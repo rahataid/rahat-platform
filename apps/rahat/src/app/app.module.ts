@@ -3,9 +3,13 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { StatsModule } from '@rahat/stats';
-import { PrismaModule } from '@rumsan/prisma';
 import { SettingsModule } from '@rumsan/settings';
-import { RumsanUsersModule } from '@rumsan/user';
+import {
+  AuthsModule,
+  RSUserModule,
+  RolesModule,
+  UsersModule,
+} from '@rumsan/user';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ListenersModule } from '../listeners/listeners.module';
 import { RahatProcessor } from '../processors';
@@ -30,9 +34,8 @@ import { AppService } from './app.service';
     }),
     EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false }),
     ListenersModule,
-    RumsanUsersModule,
+    RSUserModule.forRoot([AuthsModule, UsersModule, RolesModule]),
     SettingsModule,
-    PrismaModule,
     ProjectModule,
     StatsModule,
   ],

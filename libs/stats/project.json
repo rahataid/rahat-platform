@@ -12,7 +12,9 @@
         "tsConfig": "libs/stats/tsconfig.lib.json",
         "packageJson": "libs/stats/package.json",
         "main": "libs/stats/src/index.ts",
-        "assets": ["libs/stats/*.md"]
+        "assets": ["libs/stats/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true,
+        "buildableProjectDepsInPackageJsonType": "dependencies"
       }
     },
     "publish": {

@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { TResponse } from '../types/response.types';
+import { Response } from '../types/response.types';
 import { Beneficiary } from './beneficiary.service';
 
 class RahatClient {
@@ -26,7 +26,7 @@ export default RahatClient;
 export function formatResponse<T>(response: AxiosResponse) {
   return {
     data: <T>response.data.data,
-    response: <TResponse<T>>response.data,
+    response: <Response<T>>response.data,
     httpReponse: response,
   };
 }

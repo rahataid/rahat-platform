@@ -17,6 +17,7 @@ async function bootstrap() {
   //to get real ip from nginx
   app.set('trust proxy', true);
   const globalPrefix = 'v1';
+  app.enableCors();
 
   //must have this if you want to implicit conversion of string to number in dto
   app.useGlobalPipes(

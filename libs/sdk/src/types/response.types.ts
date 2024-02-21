@@ -1,4 +1,4 @@
-export type TResponse<T> = {
+export type Response<T> = {
   success: boolean;
   data: T;
   message?: string;
