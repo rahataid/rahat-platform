@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsNumber,
   IsOptional,
@@ -138,4 +138,19 @@ export class ListBeneficiaryDto extends PaginationDto {
   @IsIn(['createdAt', 'updatedAt', 'fullName', 'gender'])
   override sort: string = 'createdAt';
   override order: 'asc' | 'desc' = 'desc';
+
+  @ApiPropertyOptional({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
+
+  @ApiPropertyOptional({ example: 'MALE' })
+  @IsString()
+  @IsOptional()
+  gender?: string;
+
+  @ApiPropertyOptional({ example: 'REFERRED' })
+  @IsString()
+  @IsOptional()
+  type?: string;
 }

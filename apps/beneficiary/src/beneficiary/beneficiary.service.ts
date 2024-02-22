@@ -6,6 +6,7 @@ import { Beneficiary } from '@prisma/client';
 import { UUID } from 'crypto';
 import { BeneficiaryType } from 'libs/sdk/src/enums';
 import { ClientProxy } from '@nestjs/microservices';
+import { createListQuery } from './helpers';
 
 const REFERRAL_LIMIT = 3;
 
@@ -24,13 +25,14 @@ export class BeneficiaryService {
   async list(
     dto: ListBeneficiaryDto
   ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
+    const AND_QUERY = createListQuery(dto);
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
     return paginate(
       this.prisma.beneficiary,
       {
         where: {
-          //deletedAt: null,
+          AND: AND_QUERY,
         },
         orderBy,
       },
