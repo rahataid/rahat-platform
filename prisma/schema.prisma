@@ -212,7 +212,7 @@ model Beneficiary {
   type                  BeneficiaryTypes @default(ENROLLED)
   Project               Project?         @relation(fields: [projectId], references: [uuid])
   projectId             String?
-  beneficiariesReferred Int?
+  beneficiariesReferred Int?             @default(0)
   referrerVendor        String?          @db.Uuid()
   referrerBeneficiary   String?          @db.Uuid()
   extras                Json?            @db.JsonB()

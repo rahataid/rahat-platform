@@ -64,8 +64,8 @@ export class BeneficiaryService {
   }
 
   async referBeneficiary(dto: CreateBeneficiaryDto) {
-    const exist = await this.getByPhone(dto.phoneNumber);
-    if (exist) throw new Error('Beneficiary already referred!');
+    // const exist = await this.getByPhone(dto.phoneNumber);
+    // if (exist) throw new Error('Beneficiary already referred!');
     dto.type = BeneficiaryType.REFERRED;
     dto.walletAddress = Buffer.from(dto.walletAddress.slice(2), 'hex');
     // Check benefReferredCount by referrerBeneficiaryId: Must be less than 3
@@ -88,6 +88,7 @@ export class BeneficiaryService {
   }
 
   async incrementReferralCount(referrerUID: string) {
+    console.log('incrementReferralCount', referrerUID);
     const exist = await this.findOne(referrerUID);
     if (!exist) return null;
     return this.rsprisma.beneficiary.update({
