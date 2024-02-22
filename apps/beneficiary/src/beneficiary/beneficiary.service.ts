@@ -97,8 +97,15 @@ export class BeneficiaryService {
   }
 
   async createBulk(data: CreateBeneficiaryDto[]) {
+    if (!data.length) return;
+    const sanitized = data.map((d) => {
+      return {
+        ...d,
+        walletAddress: Buffer.from(d.walletAddress.slice(2), 'hex'),
+      };
+    });
     return this.rsprisma.beneficiary.createMany({
-      data,
+      data: sanitized,
     });
   }
 
