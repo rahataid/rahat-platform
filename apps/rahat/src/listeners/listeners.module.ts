@@ -5,6 +5,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE } from '@rahat/sdk';
 import { SettingsModule } from '@rumsan/settings';
 import { DevService } from '../utils/develop.service';
+import { EmailService } from './email.service';
 import { ListenersService } from './listeners.service';
 
 @Module({
@@ -34,6 +35,6 @@ import { ListenersService } from './listeners.service';
       },
     ]),
   ],
-  providers: [ListenersService, DevService],
+  providers: [ListenersService, DevService, EmailService],
 })
-export class ListenersModule {}
+export class ListenersModule { }
