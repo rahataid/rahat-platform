@@ -2,6 +2,7 @@ import { Controller, Inject, Param } from '@nestjs/common';
 import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import { BeneficiaryService } from './beneficiary.service';
 import {
+  AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   TFile,
@@ -36,6 +37,11 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: JOBS.BENEFICIARY.REFER })
   async referBeneficiary(dto: CreateBeneficiaryDto) {
     return this.beneficiaryService.referBeneficiary(dto);
+  }
+
+  @MessagePattern({ cmd: JOBS.BENEFICIARY.ADD_TO_PROJECT })
+  async addToProject(dto: AddToProjectDto) {
+    return this.beneficiaryService.addToProject(dto);
   }
 
   @MessagePattern({ cmd: JOBS.BENEFICIARY.UPDATE })

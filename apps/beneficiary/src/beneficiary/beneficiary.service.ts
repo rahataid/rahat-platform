@@ -1,6 +1,10 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { PaginatorTypes, paginator } from '@nodeteam/nestjs-prisma-pagination';
-import { CreateBeneficiaryDto, ListBeneficiaryDto } from '@rahat/sdk';
+import {
+  AddToProjectDto,
+  CreateBeneficiaryDto,
+  ListBeneficiaryDto,
+} from '@rahat/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { Beneficiary } from '@prisma/client';
 import { UUID } from 'crypto';
@@ -20,6 +24,12 @@ export class BeneficiaryService {
     @Inject('EL_PROJECT_CLIENT') private readonly client: ClientProxy
   ) {
     this.rsprisma = this.prisma.rsclient;
+  }
+
+  addToProject(dto: AddToProjectDto) {
+    return this.prisma.beneficiaryProject.create({
+      data: dto,
+    });
   }
 
   async list(

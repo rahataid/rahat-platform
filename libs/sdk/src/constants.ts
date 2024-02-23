@@ -7,6 +7,7 @@ export const JOBS = {
     UPDATE: 'rahat.jobs.beneficiary.update',
     REMOVE: 'rahat.jobs.beneficiary.remove',
     REFER: 'rahat.jobs.beneficiary.refer',
+    ADD_TO_PROJECT: 'rahat.jobs.beneficiary.add_to_project',
   },
 };
 

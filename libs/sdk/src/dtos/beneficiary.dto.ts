@@ -154,3 +154,13 @@ export class ListBeneficiaryDto extends PaginationDto {
   @IsOptional()
   type?: string;
 }
+
+export class AddToProjectDto {
+  @ApiProperty({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
+  @IsString()
+  projectId: string;
+
+  @ApiProperty({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
+  @IsString()
+  beneficiaryId: string;
+}

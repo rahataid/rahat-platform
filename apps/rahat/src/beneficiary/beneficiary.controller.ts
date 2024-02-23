@@ -22,6 +22,7 @@ import {
   UpdateBeneficiaryDto,
   TFile,
   Enums,
+  AddToProjectDto,
 } from '@rahat/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -49,6 +50,11 @@ export class BeneficiaryController {
   @Post('refer')
   async referBeneficiary(@Body() dto: CreateBeneficiaryDto) {
     return this.client.send({ cmd: JOBS.BENEFICIARY.REFER }, dto);
+  }
+
+  @Post('add-to-project')
+  async addToProject(@Body() dto: AddToProjectDto) {
+    return this.client.send({ cmd: JOBS.BENEFICIARY.ADD_TO_PROJECT }, dto);
   }
 
   @Post('bulk')

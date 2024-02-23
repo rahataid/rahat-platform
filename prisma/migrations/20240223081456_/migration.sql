@@ -11,6 +11,12 @@ CREATE TYPE "SignupStatus" AS ENUM ('PENDING', 'APPROVED', 'FAILED', 'REJECTED')
 CREATE TYPE "SettingDataType" AS ENUM ('STRING', 'NUMBER', 'BOOLEAN', 'OBJECT');
 
 -- CreateEnum
+CREATE TYPE "ProjectStatus" AS ENUM ('NOT_READY', 'ACTIVE', 'CLOSED');
+
+-- CreateEnum
+CREATE TYPE "BeneficiaryTypes" AS ENUM ('ENROLLED', 'REFERRED');
+
+-- CreateEnum
 CREATE TYPE "BankedStatus" AS ENUM ('UNKNOWN', 'UNBANKED', 'BANKED', 'UNDER_BANKED');
 
 -- CreateEnum
@@ -18,9 +24,6 @@ CREATE TYPE "InternetStatus" AS ENUM ('UNKNOWN', 'NO_INTERNET', 'HOME_INTERNET',
 
 -- CreateEnum
 CREATE TYPE "PhoneStatus" AS ENUM ('UNKNOWN', 'NO_PHONE', 'FEATURE_PHONE', 'SMART_PHONE');
-
--- CreateEnum
-CREATE TYPE "ProjectStatus" AS ENUM ('NOT_READY', 'ACTIVE', 'CLOSED');
 
 -- CreateTable
 CREATE TABLE "tbl_users" (
@@ -142,23 +145,22 @@ CREATE TABLE "tbl_settings" (
 CREATE TABLE "tbl_beneficiaries" (
     "id" SERIAL NOT NULL,
     "uuid" UUID NOT NULL,
-    "firstName" TEXT NOT NULL,
-    "lastName" TEXT NOT NULL,
+    "phoneNumber" TEXT NOT NULL,
+    "walletAddress" BYTEA NOT NULL,
+    "fullName" TEXT NOT NULL,
     "gender" "Gender" NOT NULL DEFAULT 'UNKNOWN',
-    "walletAddress" TEXT,
-    "birthDate" TIMESTAMP(3),
-    "location" TEXT,
-    "latitude" DOUBLE PRECISION,
-    "longitude" DOUBLE PRECISION,
-    "phone" TEXT,
     "email" TEXT,
+    "countryCode" TEXT,
+    "age" INTEGER,
+    "address" TEXT,
+    "type" "BeneficiaryTypes" NOT NULL DEFAULT 'ENROLLED',
+    "projectId" UUID,
+    "beneficiariesReferred" INTEGER DEFAULT 0,
+    "referrerVendor" UUID,
+    "referrerBeneficiary" UUID,
     "extras" JSONB,
-    "notes" TEXT,
-    "bankedStatus" "BankedStatus" NOT NULL DEFAULT 'UNKNOWN',
-    "internetStatus" "InternetStatus" NOT NULL DEFAULT 'UNKNOWN',
-    "phoneStatus" "PhoneStatus" NOT NULL DEFAULT 'UNKNOWN',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3),
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "tbl_beneficiaries_pkey" PRIMARY KEY ("id")
@@ -167,8 +169,9 @@ CREATE TABLE "tbl_beneficiaries" (
 -- CreateTable
 CREATE TABLE "tbl_projects" (
     "id" SERIAL NOT NULL,
-    "uuid" TEXT NOT NULL,
+    "uuid" UUID NOT NULL,
     "name" TEXT NOT NULL,
+    "description" TEXT,
     "status" "ProjectStatus" NOT NULL DEFAULT 'NOT_READY',
     "type" TEXT NOT NULL,
     "contractAddress" TEXT,
@@ -211,6 +214,12 @@ CREATE UNIQUE INDEX "tbl_settings_name_key" ON "tbl_settings"("name");
 CREATE UNIQUE INDEX "tbl_beneficiaries_uuid_key" ON "tbl_beneficiaries"("uuid");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "tbl_beneficiaries_phoneNumber_key" ON "tbl_beneficiaries"("phoneNumber");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_beneficiaries_walletAddress_key" ON "tbl_beneficiaries"("walletAddress");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "tbl_projects_uuid_key" ON "tbl_projects"("uuid");
 
 -- AddForeignKey
@@ -230,3 +239,6 @@ ALTER TABLE "tbl_auth_sessions" ADD CONSTRAINT "tbl_auth_sessions_authId_fkey" F
 
 -- AddForeignKey
 ALTER TABLE "tbl_users_signups" ADD CONSTRAINT "tbl_users_signups_approvedBy_fkey" FOREIGN KEY ("approvedBy") REFERENCES "tbl_users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_beneficiaries" ADD CONSTRAINT "tbl_beneficiaries_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "tbl_projects"("uuid") ON DELETE SET NULL ON UPDATE CASCADE;

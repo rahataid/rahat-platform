@@ -201,26 +201,72 @@ model Beneficiary {
   id   Int    @id @default(autoincrement()) @db.Integer()
   uuid String @unique @default(uuid()) @db.Uuid()
 
-  phoneNumber           String           @unique
-  walletAddress         Bytes            @unique
+  phoneNumber           String               @unique
+  walletAddress         Bytes                @unique
   fullName              String
-  gender                Gender           @default(UNKNOWN)
+  gender                Gender               @default(UNKNOWN)
   email                 String?
   countryCode           String?
   age                   Int?
   address               String?
-  type                  BeneficiaryTypes @default(ENROLLED)
-  Project               Project?         @relation(fields: [projectId], references: [uuid])
-  projectId             String?
-  beneficiariesReferred Int?             @default(0)
-  referrerVendor        String?          @db.Uuid()
-  referrerBeneficiary   String?          @db.Uuid()
-  extras                Json?            @db.JsonB()
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @updatedAt()
+  type                  BeneficiaryTypes     @default(ENROLLED)
+  Project               Project?             @relation(fields: [projectId], references: [uuid])
+  projectId             String?              @db.Uuid()
+  beneficiariesReferred Int?                 @default(0)
+  referrerVendor        String?              @db.Uuid()
+  referrerBeneficiary   String?              @db.Uuid()
+  extras                Json?                @db.JsonB()
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt()
   deletedAt             DateTime?
+  BeneficiaryProject    BeneficiaryProject[]
 
   @@map("tbl_beneficiaries")
+}
+
+model BeneficiaryProject {
+  id   Int    @id @default(autoincrement()) @db.Integer()
+  uuid String @unique @default(uuid()) @db.Uuid()
+
+  projectId String  @db.Uuid()
+  Project   Project @relation(fields: [projectId], references: [uuid])
+
+  beneficiaryId String      @db.Uuid()
+  Beneficiary   Beneficiary @relation(fields: [beneficiaryId], references: [uuid])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt()
+  deletedAt DateTime?
+
+  @@unique([projectId, beneficiaryId], name: "beneficiaryProjectIdentifier")
+  @@map("tbl_beneficiaries_projects")
+}
+
+// ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
+// ++++++++++++++++++ START: @rahat/projects - Projects +++++++++++++++++++++++
+model Project {
+  id              Int           @id @default(autoincrement())
+  uuid            String        @unique @default(uuid()) @db.Uuid()
+  name            String
+  description     String?
+  status          ProjectStatus @default(NOT_READY)
+  type            String
+  contractAddress String?
+  extras          Json?         @db.JsonB()
+
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime?            @updatedAt()
+  deletedAt          DateTime?
+  Beneficiary        Beneficiary[]
+  BeneficiaryProject BeneficiaryProject[]
+
+  @@map("tbl_projects")
+}
+
+enum ProjectStatus {
+  NOT_READY
+  ACTIVE
+  CLOSED
 }
 
 enum BeneficiaryTypes {
@@ -247,32 +293,6 @@ enum PhoneStatus {
   NO_PHONE
   FEATURE_PHONE
   SMART_PHONE
-}
-
-// ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
-// ++++++++++++++++++ START: @rahat/projects - Projects +++++++++++++++++++++++
-model Project {
-  id              Int           @id @default(autoincrement())
-  uuid            String        @unique @default(uuid())
-  name            String
-  description     String?
-  status          ProjectStatus @default(NOT_READY)
-  type            String
-  contractAddress String?
-  extras          Json?         @db.JsonB()
-
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime?     @updatedAt()
-  deletedAt   DateTime?
-  Beneficiary Beneficiary[]
-
-  @@map("tbl_projects")
-}
-
-enum ProjectStatus {
-  NOT_READY
-  ACTIVE
-  CLOSED
 }
 
 // ++++++++++++++++++ END: Rahat - Projects +++++++++++++++++++++++
