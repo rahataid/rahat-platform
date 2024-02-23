@@ -8,6 +8,7 @@ import { Queue } from 'bull';
 import { JOBS } from '../constants';
 import { EVENTS as APP_EVENTS } from '../constants/events';
 import { DevService } from '../utils/develop.service';
+import { EmailService } from './email.service';
 @Injectable()
 export class ListenersService {
   private otp: string;
@@ -16,14 +17,20 @@ export class ListenersService {
     @InjectQueue(BQUEUE.RAHAT) private readonly rahatQueue: Queue,
     @InjectQueue(BQUEUE.HOST) private readonly hostQueue: Queue,
     @InjectQueue(BQUEUE.RAHAT_PROJECT) private readonly projectQueue: Queue,
-    private readonly devService: DevService
-  ) {}
+    private readonly devService: DevService,
+    private emailService: EmailService,
+
+  ) { }
 
   @OnEvent(EVENTS.OTP_CREATED)
   async sendOTPEmail(data: any) {
     this.otp = data.otp;
-    this.projectQueue.add('beneficiary.sync', { otp: data.otp });
-    await this.rahatQueue.add(JOBS.EMAIL, { test: 'test' });
+    this.emailService.sendEmail(
+      data.address,
+      'OTP for login',
+      'OTP for login',
+      `<h1>OTP for login</h1><p>${data.otp}</p>`,
+    );
   }
 
   @OnEvent(EVENTS.CHALLENGE_CREATED)
