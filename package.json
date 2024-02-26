@@ -6,7 +6,9 @@
     "preinstall": "npx only-allow pnpm",
     "add:resource": "nx g @nx/nest:resource --directory=apps/$app/src --crud=true",
     "build:all": "nx run-many --target=build --all",
-    "migrate:dev": "npx prisma migrate dev"
+    "migrate:dev": "npx prisma migrate dev",
+    "clean": "rm -rf dist node_modules tmp",
+    "prisma:generate": "npx prisma generate"
   },
   "private": true,
   "dependencies": {

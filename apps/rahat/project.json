@@ -1,20 +1,19 @@
 {
   "name": "rahat",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/rahat/src",
+  "sourceRoot": "apps/rahat",
   "projectType": "application",
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "dependsOn": [
-        "build:prod"
-      ]
+      "dependsOn": ["mainBuild"],
+      "options": {
+        "commands": []
+      }
     },
-    "build:prod": {
+    "mainBuild": {
       "executor": "@nx/webpack:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "target": "node",
         "compiler": "tsc",
@@ -22,6 +21,7 @@
         "outputPath": "dist/apps/rahat",
         "main": "apps/rahat/src/main.ts",
         "tsConfig": "apps/rahat/tsconfig.app.json",
+        "assets": [],
         "isolatedConfig": true,
         "webpackConfig": "apps/rahat/webpack.config.js"
       },
@@ -33,10 +33,9 @@
     "serve": {
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
-      
+
       "options": {
-        "buildTarget": "rahat:build",
-        "generatePackageJson": true
+        "buildTarget": "rahat:build"
       },
       "configurations": {
         "development": {
@@ -48,5 +47,5 @@
       }
     }
   },
-  "tags": []
+  "tags": ["scope:rahat"]
 }
