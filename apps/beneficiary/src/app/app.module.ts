@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { VendorsModule } from '../vendors/vendors.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
     }),
     BeneficiaryModule,
+    VendorsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

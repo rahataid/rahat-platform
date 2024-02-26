@@ -11,6 +11,7 @@ import { ProjectModule } from '../projects/projects.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
+import { AppUsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
     }),
     EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false }),
     ListenersModule,
+    AppUsersModule,
     RumsanUsersModule,
     SettingsModule,
     PrismaModule,
