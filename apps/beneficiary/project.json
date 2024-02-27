@@ -10,7 +10,7 @@
       "options": {
         "commands": [
           {
-            "command": "cp -r prisma/ dist/apps/rahat/prisma"
+            "command": "cp -r prisma/ dist/apps/beneficiary/prisma"
           }
         ],
         "parallel": false
