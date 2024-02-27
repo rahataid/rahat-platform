@@ -43,3 +43,7 @@ testem.log
 Thumbs.db
 
 .nx/cache
+
+
+# Local
+docker-compose.yaml
