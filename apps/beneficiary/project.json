@@ -5,14 +5,12 @@
   "projectType": "application",
   "targets": {
     "build": {
+      "dependsOn": ["mainBuild"],
       "executor": "nx:run-commands",
       "options": {
         "commands": [
           {
-            "command": "nx run beneficiary:mainBuild"
-          },
-          {
-            "command": "cp -r prisma/ dist/apps/beneficiary/"
+            "command": "cp -r prisma/ dist/apps/rahat/"
           }
         ],
         "parallel": false
@@ -20,9 +18,7 @@
     },
     "mainBuild": {
       "executor": "@nx/webpack:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "target": "node",
         "compiler": "tsc",
