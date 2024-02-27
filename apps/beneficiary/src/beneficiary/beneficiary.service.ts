@@ -10,12 +10,10 @@ import {
 } from '@rahat/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
-import { BeneficiaryType } from 'libs/sdk/src/enums';
 import { v4 as uuidv4 } from 'uuid';
-import { EVENTS } from '../constants';
+import { APP, EVENTS } from '../constants';
+import { ReferBeneficiaryDto } from './dto/refer.beneficiary.dto';
 import { createListQuery } from './helpers';
-
-const REFERRAL_LIMIT = 3;
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -100,28 +98,19 @@ export class BeneficiaryService {
     return await this.rsprisma.beneficiary.findUnique({ where: { uuid } });
   }
 
-  async referBeneficiary(dto: CreateBeneficiaryDto) {
-    // const exist = await this.getByPhone(dto.phoneNumber);
-    // if (exist) throw new Error('Beneficiary already referred!');
-    dto.type = BeneficiaryType.REFERRED;
-    dto.walletAddress = Buffer.from(dto.walletAddress.slice(2), 'hex');
-    // Check benefReferredCount by referrerBeneficiaryId: Must be less than 3
-    const count = await this.getReferralCount(dto.referrerBeneficiary);
-    if (count >= REFERRAL_LIMIT) throw new Error('Referral limit exceeded');
-    // Create benefeciary
-    const row = await this.create(dto);
-    const updated = await this.incrementReferralCount(dto.referrerBeneficiary);
-    // Send back to projects MS
-    const elPayload = {
-      beneficiariesReferred: updated?.beneficiariesReferred || 0,
+  async referBeneficiary(dto: ReferBeneficiaryDto) {
+    const { referrerBeneficiary, referrerVendor, ...rest } = dto;
+    const row = await this.create(rest);
+    const projectPayload = {
       uuid: row.uuid,
-      referrerVendor: dto.referrerVendor || '',
-      referrerBeneficiary: dto.referrerBeneficiary || '',
-      walletAddress: dto.walletAddress.toString('hex'),
-      extras: dto.extras || null,
+      referrerVendor: referrerVendor || '',
+      referrerBeneficiary: referrerBeneficiary || '',
+      walletAddress: dto.walletAddress,
+      extras: dto?.extras || null,
+      type: APP.BENEFICIARY.TYPES.REFERRED,
     };
-    return this.client.send({ cmd: 'ben-referred' }, elPayload);
-    // Send whatsapp message to the referred beneficiary
+
+    return this.client.send({ cmd: 'ben-referred' }, projectPayload);
   }
 
   async incrementReferralCount(referrerUID: string) {

@@ -1,27 +1,39 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaginationDto } from '@rumsan/core';
+import { ApiProperty } from '@nestjs/swagger';
+import { CreateBeneficiaryDto, TPIIData } from '@rahat/sdk';
 import {
   IsDate,
   IsEnum,
-  IsIn,
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   Length,
   Matches,
 } from 'class-validator';
 import { UUID } from 'crypto';
-import { BankedStatus, Gender, InternetStatus, PhoneStatus } from '../enums';
-import { TBeneficiary, TPIIData } from '../types';
+import {
+  BankedStatus,
+  Gender,
+  InternetStatus,
+  PhoneStatus,
+} from 'libs/sdk/src/enums';
 
-export class CreateBeneficiaryDto implements TBeneficiary {
+export class ReferBeneficiaryDto implements CreateBeneficiaryDto {
   @ApiProperty({
     type: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
     description: 'UUID of the beneficiary',
   })
-  uuid?: UUID;
+  @IsUUID()
+  referrerBeneficiary: UUID;
+
+  @ApiProperty({
+    type: 'uuid',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'UUID of the vendor',
+  })
+  @IsUUID()
+  referrerVendor: UUID;
 
   @ApiProperty({
     example: '1997-03-08',
@@ -33,7 +45,7 @@ export class CreateBeneficiaryDto implements TBeneficiary {
 
   @ApiProperty({
     type: 'string',
-    example: Gender.FEMALE,
+    example: Gender.MALE,
     description: 'Gender ',
   })
   @IsString()
@@ -154,38 +166,4 @@ export class CreateBeneficiaryDto implements TBeneficiary {
   })
   @IsOptional()
   piiData?: TPIIData;
-}
-
-export class UpdateBeneficiaryDto extends PartialType(CreateBeneficiaryDto) {}
-
-export class ListBeneficiaryDto extends PaginationDto {
-  @IsIn(['createdAt', 'updatedAt', 'fullName', 'gender'])
-  override sort: string = 'createdAt';
-  @IsIn(['createdAt', 'updatedAt', 'gender'])
-  override order: 'asc' | 'desc' = 'desc';
-
-  @ApiPropertyOptional({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
-  @IsString()
-  @IsOptional()
-  projectId?: string;
-
-  @ApiPropertyOptional({ example: 'MALE' })
-  @IsString()
-  @IsOptional()
-  gender?: string;
-
-  @ApiPropertyOptional({ example: 'REFERRED' })
-  @IsString()
-  @IsOptional()
-  type?: string;
-}
-
-export class AddToProjectDto {
-  @ApiProperty({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
-  @IsString()
-  projectId: string;
-
-  @ApiProperty({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
-  @IsString()
-  beneficiaryId: string;
 }

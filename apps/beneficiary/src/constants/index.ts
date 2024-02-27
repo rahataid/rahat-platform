@@ -16,3 +16,12 @@ export enum ServiceType {
   LINKEDIN = 'LINKEDIN',
 }
 export * from './events';
+
+export const APP = {
+  BENEFICIARY: {
+    TYPES: {
+      REFERRED: 'REFERRED',
+      ENROLLED: 'ENROLLED',
+    },
+  },
+};

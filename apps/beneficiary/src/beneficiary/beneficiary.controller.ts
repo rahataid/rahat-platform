@@ -10,6 +10,7 @@ import {
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
+import { ReferBeneficiaryDto } from './dto/refer.beneficiary.dto';
 
 @Controller()
 export class BeneficiaryController {
@@ -42,7 +43,7 @@ export class BeneficiaryController {
 
   // TODO: Update cmd constant
   @MessagePattern({ cmd: JOBS.BENEFICIARY.REFER })
-  async referBeneficiary(dto: CreateBeneficiaryDto) {
+  async referBeneficiary(dto: ReferBeneficiaryDto) {
     return this.beneficiaryService.referBeneficiary(dto);
   }
 

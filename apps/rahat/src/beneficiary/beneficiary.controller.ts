@@ -27,6 +27,7 @@ import {
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, of } from 'rxjs';
+import { ReferBeneficiaryDto } from './dto/refer.beneficiary.dto';
 import { DocParser } from './parser';
 
 @Controller('beneficiaries')
@@ -53,7 +54,7 @@ export class BeneficiaryController {
   }
 
   @Post('refer')
-  async referBeneficiary(@Body() dto: CreateBeneficiaryDto) {
+  async referBeneficiary(@Body() dto: ReferBeneficiaryDto) {
     return this.client.send({ cmd: JOBS.BENEFICIARY.REFER }, dto);
   }
 
