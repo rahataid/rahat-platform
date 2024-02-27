@@ -3,22 +3,52 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/beneficiary/src",
   "projectType": "application",
-  "targets": {
-    "serve": {
-      "executor": "@nx/js:node",
-      "defaultConfiguration": "development",
-      "options": {
-        "buildTarget": "beneficiary:build"
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "beneficiary:build:development"
-        },
-        "production": {
-          "buildTarget": "beneficiary:build:production"
-        }
-      }
+"targets": {
+  "build": {
+    "executor": "nx:run-commands",
+    "dependsOn": [
+      "mainBuild"
+    ],
+    "options": {
+      "commands": []
     }
   },
+  "mainBuild": {
+    "executor": "@nx/webpack:webpack",
+    "outputs": [
+      "{options.outputPath}"
+    ],
+    "options": {
+      "target": "node",
+      "compiler": "tsc",
+      "generatePackageJson": true,
+      "outputPath": "dist/apps/beneficiary",
+      "main": "apps/beneficiary/src/main.ts",
+      "tsConfig": "apps/beneficiary/tsconfig.app.json",
+      "assets": [],
+      "isolatedConfig": true,
+      "webpackConfig": "apps/beneficiary/webpack.config.js"
+    },
+    "configurations": {
+      "development": {},
+      "production": {}
+    }
+  },
+  "serve": {
+    "executor": "@nx/js:node",
+    "defaultConfiguration": "development",
+    "options": {
+      "buildTarget": "beneficiary:build"
+    },
+    "configurations": {
+      "development": {
+        "buildTarget": "beneficiary:build:development"
+      },
+      "production": {
+        "buildTarget": "beneficiary:build:production"
+      }
+    }
+  }
+},
   "tags": []
 }
