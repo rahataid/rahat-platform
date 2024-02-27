@@ -1,28 +1,33 @@
-name: Dev Root CD/CD
+name: Dev Rahat CI/CD
 on:
   push:
     branches:
       - 'dev'
+    paths-ignore:
+      - 'apps/beneficiary'
+      - 'apps/beneficiary-e2e'
+
   pull_request:
     branches:
       - 'dev'
+    paths-ignore:
+      - 'apps/beneficiary'
+      - 'apps/beneficiary-e2e'
 
 env:
   CI: false
-  env_dev: ${{ secrets.ENV_DEV }}
-  BENEFICIARY_IMAGE_TAG: esatya/beneficiary:dev
-  RAHAT_IMAGE_TAG: esatya/rahat:dev
+  env_npmrc: ${{ secrets.ENV_NPMRC }}
 
 jobs:
   deploy:
     name: build && push image to Docker hub
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: import env file
         run: |
-          touch ./.env && echo "$env_dev" >> ./.env
+          touch ./.npmrc && echo "$env_npmrc" >> ./.env
 
       - uses: actions/setup-node@v3
         with:
@@ -32,28 +37,17 @@ jobs:
         run: |
           npm install -g pnpm
           pnpm install
-          pnpm run api:app:generate
-          pnpm run api:news:generate
-          pnpm build
+          prisma:generate
+          pnpm build:rahat
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: docker login
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # Beneficiary Image
-      - name: build && push beneficiary
-        id: build-push-beneficiary
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: Dockerfile.beneficiary
-          push: ${{ github.event_name == 'push' && 'true' || 'false' }}
-          tags: $BENEFICIARY_IMAGE_TAG
 
       # Rahat Image
       - name: build && push rahat
@@ -63,4 +57,4 @@ jobs:
           context: .
           file: Dockerfile.rahat
           push: ${{ github.event_name == 'push' && 'true' || 'false' }}
-          tags: $RAHAT_IMAGE_TAG
+          tags: esatya/rahat-platform-rahat:dev
