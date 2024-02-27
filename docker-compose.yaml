@@ -1,0 +1,41 @@
+version: '3.9'
+services:
+  nx_postgres:
+    image: postgres:14
+    restart: always
+    container_name: 'nx_postgres'
+    environment:
+      - POSTGRES_USER=${DOCKER_NAME}
+      - POSTGRES_PASSWORD=${DOCKER_PASSWORD}
+    # volumes:
+    # - ./volumes/postgres:/var/lib/postgresql/data
+    # - ./dropbox:/dropbox
+    ports:
+      - 5460:5432
+
+  nx_redis:
+    container_name: nx_redis
+    image: bitnami/redis:latest
+    restart: always
+    ports:
+      - 6381:6379
+    environment:
+      - REDIS_PASSWORD=${DOCKER_PASSWORD}
+    # volumes:
+    # - ./volumes/redis:/data
+
+  nx_bullboard:
+    container_name: nx_bullboard
+    image: deadly0/bull-board
+    restart: always
+    ports:
+      - '${DOCKER_BULLBOARD_PORT}:3000'
+    environment:
+      REDIS_HOST: nx_redis
+      REDIS_PASSWORD: ${DOCKER_PASSWORD}
+    depends_on:
+      - nx_redis
+
+networks:
+  default_network:
+    driver: bridge
