@@ -15,3 +15,4 @@ export enum ServiceType {
   GITHUB = 'GITHUB',
   LINKEDIN = 'LINKEDIN',
 }
+export * from './events';

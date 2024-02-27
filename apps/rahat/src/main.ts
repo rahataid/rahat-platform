@@ -17,6 +17,7 @@ async function bootstrap() {
   //to get real ip from nginx
   app.set('trust proxy', true);
   const globalPrefix = 'v1';
+  app.enableCors();
 
   //must have this if you want to implicit conversion of string to number in dto
   app.useGlobalPipes(
@@ -27,6 +28,8 @@ async function bootstrap() {
     })
   );
   app.useGlobalFilters(new RsExceptionFilter());
+  //use cors
+  app.enableCors();
   //TODO this is preventing from file upload. need to find a way to handle this
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);

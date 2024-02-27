@@ -1,24 +1,40 @@
+import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PaginationDto } from '@rumsan/core';
 import {
+  IsDate,
+  IsEnum,
+  IsIn,
   IsNumber,
   IsOptional,
   IsString,
-  IsIn,
+  IsUUID,
   Length,
   Matches,
-  IsEmail,
-  IsObject,
-  IsUUID,
 } from 'class-validator';
-import { PaginationDto } from '@rumsan/core';
-import { Gender, BeneficiaryType } from '../enums';
-import { PartialType } from '@nestjs/mapped-types';
+import { UUID } from 'crypto';
+import {
+  BankedStatus,
+  BeneficiaryType,
+  Gender,
+  InternetStatus,
+  PhoneStatus,
+} from '../enums';
+import { TBeneficiary, TPIIData } from '../types';
 
-export class CreateBeneficiaryDto {
+export class CreateBeneficiaryDto implements TBeneficiary {
   @ApiProperty({
-    type: 'string',
-    example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12',
+    type: 'uuid',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'UUID of the beneficiary',
   })
+  uuid?: UUID;
+
+  @ApiProperty({
+    example: '1997-03-08',
+    description: 'Date of birth in the YYYY-MM-DD format.',
+  })
+  @IsDate()
   @IsOptional()
   @IsUUID()
   referrerVendor?: string;
@@ -72,14 +88,8 @@ export class CreateBeneficiaryDto {
   @ApiProperty({
     type: 'string',
     example: '9785623749',
-  })
-  @IsString()
-  @IsOptional()
-  phoneNumber?: string;
-
-  @ApiProperty({
-    type: 'string',
-    example: '977',
+    description: 'Notes to remember',
+    required: false,
   })
   @IsString()
   @IsOptional()
@@ -111,15 +121,6 @@ export class CreateBeneficiaryDto {
   walletAddress?: any;
 
   @ApiProperty({
-    type: 'string',
-    example: 'ram@mailinator.com',
-  })
-  @IsString()
-  @IsEmail()
-  @IsOptional()
-  email?: string;
-
-  @ApiProperty({
     format: 'json',
     description: 'Additional JSON data',
     required: false,
@@ -130,6 +131,52 @@ export class CreateBeneficiaryDto {
   })
   @IsOptional()
   extras?: any;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'BANKED',
+    description: 'beneficiary bankin access',
+  })
+  @IsOptional()
+  @IsString()
+  @IsEnum(BankedStatus)
+  bankedStatus?: BankedStatus;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'HOME_INTERNET',
+    description: 'Beneficiary internet access',
+  })
+  @IsOptional()
+  @IsString()
+  @IsEnum(InternetStatus)
+  internetStatus?: InternetStatus;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'FEATURE_PHONE',
+    description: 'Beneficiary phone ownership',
+  })
+  @IsOptional()
+  @IsString()
+  @IsEnum(PhoneStatus)
+  phoneStatus?: PhoneStatus;
+
+  @ApiProperty({
+    format: 'json',
+    description: 'Optional PII data for specific use cases',
+    required: false,
+    example: {
+      name: 'Ram Shrestha',
+      phone: '98670023857',
+      extras: {
+        bank: 'Laxmi Bank',
+        account: '9872200001',
+      },
+    },
+  })
+  @IsOptional()
+  piiData?: TPIIData;
 }
 
 export class UpdateBeneficiaryDto extends PartialType(CreateBeneficiaryDto) {}
@@ -137,6 +184,7 @@ export class UpdateBeneficiaryDto extends PartialType(CreateBeneficiaryDto) {}
 export class ListBeneficiaryDto extends PaginationDto {
   @IsIn(['createdAt', 'updatedAt', 'fullName', 'gender'])
   override sort: string = 'createdAt';
+  @IsIn(['createdAt', 'updatedAt', 'gender'])
   override order: 'asc' | 'desc' = 'desc';
 
   @ApiPropertyOptional({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })

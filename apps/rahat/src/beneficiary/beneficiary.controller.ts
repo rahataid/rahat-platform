@@ -15,17 +15,19 @@ import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
+  AddToProjectDto,
   BQUEUE,
   CreateBeneficiaryDto,
-  ListBeneficiaryDto,
-  JOBS,
-  UpdateBeneficiaryDto,
-  TFile,
   Enums,
-  AddToProjectDto,
+  JOBS,
+  ListBeneficiaryDto,
+  TFile,
+  UpdateBeneficiaryDto,
 } from '@rahat/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
+import { catchError, of } from 'rxjs';
+import { DocParser } from './parser';
 
 @Controller('beneficiaries')
 @ApiTags('Beneficiaries')
@@ -40,11 +42,14 @@ export class BeneficiaryController {
     return this.client.send({ cmd: JOBS.BENEFICIARY.LIST }, dto);
   }
 
+  @Get('stats')
+  async getStats() {
+    return this.client.send({ cmd: JOBS.BENEFICIARY.STATS }, {});
+  }
+
   @Post()
   async create(@Body() dto: CreateBeneficiaryDto) {
-    return this.client
-      .send({ cmd: JOBS.BENEFICIARY.CREATE }, dto)
-      .subscribe((d) => this.queue.add(JOBS.BENEFICIARY.CREATE, d));
+    return this.client.send({ cmd: JOBS.BENEFICIARY.CREATE }, dto);
   }
 
   @Post('refer')
@@ -58,17 +63,25 @@ export class BeneficiaryController {
   }
 
   @Post('bulk')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadBulk(@UploadedFile() file: TFile, @Req() req: Request) {
-    const docType: Enums.UploadFileType = req.body['doctype'];
+  async createBulk(@Body() dto: CreateBeneficiaryDto[]) {
+    const data = dto.map((b) => ({
+      ...b,
+    }));
+    return this.client
+      .send({ cmd: JOBS.BENEFICIARY.CREATE_BULK }, data)
+      .pipe(catchError((val) => of({ error: val.message })));
+  }
 
-    if (docType !== Enums.UploadFileType.JSON)
-      throw new Error('Only json file is allowed.');
-    const jsonData = file.buffer.toString('utf8');
-    const benDataArray = JSON.parse(jsonData);
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async upload(@UploadedFile() file: TFile, @Req() req: Request) {
+    const docType: Enums.UploadFileType =
+      req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
+    const beneficiaries = await DocParser(docType, file.buffer);
+
     return this.client.send(
       { cmd: JOBS.BENEFICIARY.CREATE_BULK },
-      benDataArray
+      beneficiaries
     );
   }
 

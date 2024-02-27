@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@rahat/sdk": ["libs/sdk/src/index.ts"]
+      "@rahat/sdk": ["libs/sdk/src/index.ts"],
+      "@rahat/stats": ["libs/stats/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

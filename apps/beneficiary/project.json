@@ -4,6 +4,41 @@
   "sourceRoot": "apps/beneficiary/src",
   "projectType": "application",
   "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "nx run beneficiary:mainBuild"
+          },
+          {
+            "command": "cp -r prisma/ dist/apps/beneficiary/"
+          }
+        ],
+        "parallel": false
+      }
+    },
+    "mainBuild": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "generatePackageJson": true,
+        "outputPath": "dist/apps/beneficiary",
+        "main": "apps/beneficiary/src/main.ts",
+        "tsConfig": "apps/beneficiary/tsconfig.app.json",
+        "assets": [],
+        "isolatedConfig": true,
+        "webpackConfig": "apps/beneficiary/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
     "serve": {
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",

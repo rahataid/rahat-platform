@@ -1,10 +1,12 @@
-import { Module } from '@nestjs/common';
-import { BeneficiaryService } from './beneficiary.service';
-import { BeneficiaryController } from './beneficiary.controller';
-import { PrismaModule } from '@rumsan/prisma';
 import { BullModule } from '@nestjs/bull';
-import { BQUEUE } from '@rahat/sdk';
+import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { BQUEUE } from '@rahat/sdk';
+import { StatsModule } from '@rahat/stats';
+import { PrismaModule } from '@rumsan/prisma';
+import { BeneficiaryController } from './beneficiary.controller';
+import { BeneficiaryService } from './beneficiary.service';
+import { BeneficiaryStatService } from './beneficiaryStat.service';
 
 @Module({
   imports: [
@@ -20,11 +22,12 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       },
     ]),
     PrismaModule,
+    StatsModule,
     BullModule.registerQueue({
       name: BQUEUE.RAHAT,
     }),
   ],
   controllers: [BeneficiaryController],
-  providers: [BeneficiaryService],
+  providers: [BeneficiaryService, BeneficiaryStatService],
 })
 export class BeneficiaryModule {}

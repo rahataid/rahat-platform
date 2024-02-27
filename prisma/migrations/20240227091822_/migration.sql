@@ -145,25 +145,44 @@ CREATE TABLE "tbl_settings" (
 CREATE TABLE "tbl_beneficiaries" (
     "id" SERIAL NOT NULL,
     "uuid" UUID NOT NULL,
-    "phoneNumber" TEXT NOT NULL,
-    "walletAddress" BYTEA NOT NULL,
-    "fullName" TEXT NOT NULL,
     "gender" "Gender" NOT NULL DEFAULT 'UNKNOWN',
-    "email" TEXT,
-    "countryCode" TEXT,
-    "age" INTEGER,
-    "address" TEXT,
-    "type" "BeneficiaryTypes" NOT NULL DEFAULT 'ENROLLED',
-    "projectId" UUID,
-    "beneficiariesReferred" INTEGER DEFAULT 0,
-    "referrerVendor" UUID,
-    "referrerBeneficiary" UUID,
+    "walletAddress" TEXT,
+    "birthDate" TIMESTAMP(3),
+    "location" TEXT,
+    "latitude" DOUBLE PRECISION,
+    "longitude" DOUBLE PRECISION,
     "extras" JSONB,
+    "notes" TEXT,
+    "bankedStatus" "BankedStatus" NOT NULL DEFAULT 'UNKNOWN',
+    "internetStatus" "InternetStatus" NOT NULL DEFAULT 'UNKNOWN',
+    "phoneStatus" "PhoneStatus" NOT NULL DEFAULT 'UNKNOWN',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3),
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_beneficiaries_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tbl_beneficiaries_projects" (
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "projectId" UUID NOT NULL,
+    "beneficiaryId" UUID NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
 
-    CONSTRAINT "tbl_beneficiaries_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "tbl_beneficiaries_projects_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tbl_beneficiaries_pii" (
+    "beneficiaryId" INTEGER NOT NULL,
+    "name" TEXT,
+    "phone" TEXT,
+    "email" TEXT,
+    "extras" JSONB
 );
 
 -- CreateTable
@@ -181,6 +200,17 @@ CREATE TABLE "tbl_projects" (
     "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "tbl_projects_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tbl_stats" (
+    "name" TEXT NOT NULL,
+    "data" JSONB NOT NULL,
+    "group" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_stats_pkey" PRIMARY KEY ("name")
 );
 
 -- CreateIndex
@@ -214,13 +244,19 @@ CREATE UNIQUE INDEX "tbl_settings_name_key" ON "tbl_settings"("name");
 CREATE UNIQUE INDEX "tbl_beneficiaries_uuid_key" ON "tbl_beneficiaries"("uuid");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tbl_beneficiaries_phoneNumber_key" ON "tbl_beneficiaries"("phoneNumber");
+CREATE UNIQUE INDEX "tbl_beneficiaries_projects_uuid_key" ON "tbl_beneficiaries_projects"("uuid");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tbl_beneficiaries_walletAddress_key" ON "tbl_beneficiaries"("walletAddress");
+CREATE UNIQUE INDEX "tbl_beneficiaries_projects_projectId_beneficiaryId_key" ON "tbl_beneficiaries_projects"("projectId", "beneficiaryId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_beneficiaries_pii_beneficiaryId_key" ON "tbl_beneficiaries_pii"("beneficiaryId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_projects_uuid_key" ON "tbl_projects"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_stats_name_key" ON "tbl_stats"("name");
 
 -- AddForeignKey
 ALTER TABLE "tbl_auth_permissions" ADD CONSTRAINT "tbl_auth_permissions_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "tbl_auth_roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -241,4 +277,10 @@ ALTER TABLE "tbl_auth_sessions" ADD CONSTRAINT "tbl_auth_sessions_authId_fkey" F
 ALTER TABLE "tbl_users_signups" ADD CONSTRAINT "tbl_users_signups_approvedBy_fkey" FOREIGN KEY ("approvedBy") REFERENCES "tbl_users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tbl_beneficiaries" ADD CONSTRAINT "tbl_beneficiaries_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "tbl_projects"("uuid") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "tbl_beneficiaries_projects" ADD CONSTRAINT "tbl_beneficiaries_projects_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "tbl_projects"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_beneficiaries_projects" ADD CONSTRAINT "tbl_beneficiaries_projects_beneficiaryId_fkey" FOREIGN KEY ("beneficiaryId") REFERENCES "tbl_beneficiaries"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_beneficiaries_pii" ADD CONSTRAINT "tbl_beneficiaries_pii_beneficiaryId_fkey" FOREIGN KEY ("beneficiaryId") REFERENCES "tbl_beneficiaries"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -1,11 +1,6 @@
 {
   "name": "@rahat/sdk",
   "version": "0.0.1",
-  "dependencies": {
-    "@nestjs/swagger": "^7.1.17",
-    "class-validator": "^0.14.0",
-    "tslib": "^2.3.0"
-  },
   "type": "commonjs",
   "main": "./src/index.js",
   "typings": "./src/index.d.ts"

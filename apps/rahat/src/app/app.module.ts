@@ -2,16 +2,21 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { PrismaModule } from '@rumsan/prisma';
+import { StatsModule } from '@rahat/stats';
 import { SettingsModule } from '@rumsan/settings';
-import { RumsanUsersModule } from '@rumsan/user';
+import {
+  AuthsModule,
+  RSUserModule,
+  RolesModule,
+  UsersModule,
+} from '@rumsan/user';
+import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ListenersModule } from '../listeners/listeners.module';
 import { RahatProcessor } from '../processors';
 import { ProjectModule } from '../projects/projects.module';
+import { AppUsersModule } from '../users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
-import { AppUsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -31,10 +36,10 @@ import { AppUsersModule } from '../users/users.module';
     EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false }),
     ListenersModule,
     AppUsersModule,
-    RumsanUsersModule,
+    RSUserModule.forRoot([AuthsModule, UsersModule, RolesModule]),
     SettingsModule,
-    PrismaModule,
     ProjectModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [AppService, RahatProcessor],

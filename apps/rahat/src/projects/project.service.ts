@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '@rumsan/prisma';
+import { UUID } from 'crypto';
 import { EVENTS } from '../constants/events';
 import { CreateProjectDto, UpdateProjectDto } from './dto/create-project.dto';
-import { UUID } from 'crypto';
 @Injectable()
 export class ProjectService {
   constructor(

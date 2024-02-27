@@ -198,28 +198,25 @@ enum SettingDataType {
 // ++++++++++++++++++ START: @rahat/beneficiaries +++++++++++++++++++++++++++
 
 model Beneficiary {
-  id   Int    @id @default(autoincrement()) @db.Integer()
-  uuid String @unique @default(uuid()) @db.Uuid()
+  id             Int            @id @default(autoincrement()) @db.Integer()
+  uuid           String         @unique @default(uuid()) @db.Uuid()
+  gender         Gender         @default(UNKNOWN)
+  walletAddress  String?
+  birthDate      DateTime?
+  location       String?
+  latitude       Float?
+  longitude      Float?
+  extras         Json?          @db.JsonB()
+  notes          String?
+  bankedStatus   BankedStatus   @default(UNKNOWN)
+  internetStatus InternetStatus @default(UNKNOWN)
+  phoneStatus    PhoneStatus    @default(UNKNOWN)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime?      @updatedAt()
+  deletedAt      DateTime?
 
-  phoneNumber           String               @unique
-  walletAddress         Bytes                @unique
-  fullName              String
-  gender                Gender               @default(UNKNOWN)
-  email                 String?
-  countryCode           String?
-  age                   Int?
-  address               String?
-  type                  BeneficiaryTypes     @default(ENROLLED)
-  Project               Project?             @relation(fields: [projectId], references: [uuid])
-  projectId             String?              @db.Uuid()
-  beneficiariesReferred Int?                 @default(0)
-  referrerVendor        String?              @db.Uuid()
-  referrerBeneficiary   String?              @db.Uuid()
-  extras                Json?                @db.JsonB()
-  createdAt             DateTime             @default(now())
-  updatedAt             DateTime             @updatedAt()
-  deletedAt             DateTime?
-  BeneficiaryProject    BeneficiaryProject[]
+  pii                BeneficiaryPii?      @relation("BeneficiaryToPii")
+  BeneficiaryProject BeneficiaryProject[]
 
   @@map("tbl_beneficiaries")
 }
@@ -243,25 +240,6 @@ model BeneficiaryProject {
 }
 
 // ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
-// ++++++++++++++++++ START: @rahat/projects - Projects +++++++++++++++++++++++
-model Project {
-  id              Int           @id @default(autoincrement())
-  uuid            String        @unique @default(uuid()) @db.Uuid()
-  name            String
-  description     String?
-  status          ProjectStatus @default(NOT_READY)
-  type            String
-  contractAddress String?
-  extras          Json?         @db.JsonB()
-
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime?            @updatedAt()
-  deletedAt          DateTime?
-  Beneficiary        Beneficiary[]
-  BeneficiaryProject BeneficiaryProject[]
-
-  @@map("tbl_projects")
-}
 
 enum ProjectStatus {
   NOT_READY
@@ -272,6 +250,18 @@ enum ProjectStatus {
 enum BeneficiaryTypes {
   ENROLLED
   REFERRED
+}
+
+model BeneficiaryPii {
+  beneficiaryId Int     @unique
+  name          String?
+  phone         String?
+  email         String?
+  extras        Json?   @db.JsonB()
+
+  beneficiary Beneficiary @relation("BeneficiaryToPii", fields: [beneficiaryId], references: [id])
+
+  @@map("tbl_beneficiaries_pii")
 }
 
 enum BankedStatus {
@@ -296,3 +286,38 @@ enum PhoneStatus {
 }
 
 // ++++++++++++++++++ END: Rahat - Projects +++++++++++++++++++++++
+// ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
+// ++++++++++++++++++ START: @rahat/projects - Projects +++++++++++++++++++
+model Project {
+  id              Int           @id @default(autoincrement())
+  uuid            String        @unique @default(uuid()) @db.Uuid()
+  name            String
+  description     String?
+  status          ProjectStatus @default(NOT_READY)
+  type            String
+  contractAddress String?
+  extras          Json?         @db.JsonB()
+
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime?            @updatedAt()
+  deletedAt          DateTime?
+  BeneficiaryProject BeneficiaryProject[]
+
+  @@map("tbl_projects")
+}
+
+// ++++++++++++++++++ END: Rahat - Projects +++++++++++++++++++++++++++++++
+// ++++++++++++++++++ START: @rahat/stats - Statistics ++++++++++++++++++++
+
+model Stats {
+  name  String  @id @unique
+  data  Json
+  group String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+
+  @@map("tbl_stats")
+}
+
+// ++++++++++++++++++ END: @rahat/stats - Statistics +++++++++++++++++++++++
