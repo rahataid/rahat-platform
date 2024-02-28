@@ -15,6 +15,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@rahat/extensions/*": ["libs/extensions/src/*"],
+      "@rahat/extensions": ["libs/extensions/src/index.ts"],
+
       "@rahat/sdk": ["libs/sdk/src/index.ts"],
       "@rahat/stats": ["libs/stats/src/index.ts"]
     }

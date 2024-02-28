@@ -3,10 +3,10 @@ import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import {
   AddToProjectDto,
   CreateBeneficiaryDto,
-  JOBS,
   ListBeneficiaryDto,
   UpdateBeneficiaryDto,
-} from '@rahat/sdk';
+} from '@rahat/extensions';
+import { JOBS } from '@rahat/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';

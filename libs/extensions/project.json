@@ -1,0 +1,31 @@
+{
+  "name": "extensions",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/extensions/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/extensions",
+        "tsConfig": "libs/extensions/tsconfig.lib.json",
+        "packageJson": "libs/extensions/package.json",
+        "main": "libs/extensions/src/index.ts",
+        "assets": ["libs/extensions/*.md"]
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs extensions {args.ver} {args.tag}",
+      "dependsOn": ["build"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/extensions/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}

@@ -1,10 +1,8 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaginationDto } from '@rumsan/extensions/dtos';
+import { ApiProperty } from '@nestjs/swagger';
+import { Beneficiary, Enums, TPIIData } from '@rahat/sdk';
 import {
   IsDate,
   IsEnum,
-  IsIn,
   IsNumber,
   IsOptional,
   IsString,
@@ -12,10 +10,8 @@ import {
   Matches,
 } from 'class-validator';
 import { UUID } from 'crypto';
-import { BankedStatus, Gender, InternetStatus, PhoneStatus } from '../enums';
-import { TBeneficiary, TPIIData } from '../types';
 
-export class CreateBeneficiaryDto implements TBeneficiary {
+export class CreateBeneficiaryDto implements Beneficiary {
   @ApiProperty({
     type: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
@@ -33,12 +29,12 @@ export class CreateBeneficiaryDto implements TBeneficiary {
 
   @ApiProperty({
     type: 'string',
-    example: Gender.FEMALE,
+    example: Enums.Gender.FEMALE,
     description: 'Gender ',
   })
   @IsString()
   @IsOptional()
-  gender?: Gender;
+  gender?: Enums.Gender;
 
   @ApiProperty({
     type: 'string',
@@ -116,8 +112,8 @@ export class CreateBeneficiaryDto implements TBeneficiary {
   })
   @IsOptional()
   @IsString()
-  @IsEnum(BankedStatus)
-  bankedStatus?: BankedStatus;
+  @IsEnum(Enums.BankedStatus)
+  bankedStatus?: Enums.BankedStatus;
 
   @ApiProperty({
     type: 'string',
@@ -126,8 +122,8 @@ export class CreateBeneficiaryDto implements TBeneficiary {
   })
   @IsOptional()
   @IsString()
-  @IsEnum(InternetStatus)
-  internetStatus?: InternetStatus;
+  @IsEnum(Enums.InternetStatus)
+  internetStatus?: Enums.InternetStatus;
 
   @ApiProperty({
     type: 'string',
@@ -136,8 +132,8 @@ export class CreateBeneficiaryDto implements TBeneficiary {
   })
   @IsOptional()
   @IsString()
-  @IsEnum(PhoneStatus)
-  phoneStatus?: PhoneStatus;
+  @IsEnum(Enums.PhoneStatus)
+  phoneStatus?: Enums.PhoneStatus;
 
   @ApiProperty({
     format: 'json',
@@ -154,38 +150,4 @@ export class CreateBeneficiaryDto implements TBeneficiary {
   })
   @IsOptional()
   piiData?: TPIIData;
-}
-
-export class UpdateBeneficiaryDto extends PartialType(CreateBeneficiaryDto) {}
-
-export class ListBeneficiaryDto extends PaginationDto {
-  @IsIn(['createdAt', 'updatedAt', 'fullName', 'gender'])
-  override sort: string = 'createdAt';
-  @IsIn(['createdAt', 'updatedAt', 'gender'])
-  override order: 'asc' | 'desc' = 'desc';
-
-  @ApiPropertyOptional({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
-  @IsString()
-  @IsOptional()
-  projectId?: string;
-
-  @ApiPropertyOptional({ example: 'MALE' })
-  @IsString()
-  @IsOptional()
-  gender?: string;
-
-  @ApiPropertyOptional({ example: 'REFERRED' })
-  @IsString()
-  @IsOptional()
-  type?: string;
-}
-
-export class AddToProjectDto {
-  @ApiProperty({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
-  @IsString()
-  projectId: string;
-
-  @ApiProperty({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
-  @IsString()
-  beneficiaryId: string;
 }

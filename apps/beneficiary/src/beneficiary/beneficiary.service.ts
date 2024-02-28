@@ -7,7 +7,7 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-} from '@rahat/sdk';
+} from '@rahat/extensions';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
