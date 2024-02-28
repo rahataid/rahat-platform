@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
+    "preinstall": "only-allow pnpm",
+    "rahat": "npx nx serve rahat",
+    "beneficiary": "npx nx serve beneficiary",
     "add:resource": "nx g @nx/nest:resource --directory=apps/$app/src --crud=true",
     "build:all": "nx run-many --target=build --all",
     "build:rahat": "nx build rahat",
@@ -41,6 +43,7 @@
     "bull": "^4.12.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "dotenv-cli": "^7.3.0",
     "ioredis": "^5.3.2",
     "nodemailer": "^6.9.10",
     "reflect-metadata": "^0.1.13",

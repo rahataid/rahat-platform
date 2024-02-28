@@ -11,6 +11,12 @@ CREATE TYPE "SignupStatus" AS ENUM ('PENDING', 'APPROVED', 'FAILED', 'REJECTED')
 CREATE TYPE "SettingDataType" AS ENUM ('STRING', 'NUMBER', 'BOOLEAN', 'OBJECT');
 
 -- CreateEnum
+CREATE TYPE "ProjectStatus" AS ENUM ('NOT_READY', 'ACTIVE', 'CLOSED');
+
+-- CreateEnum
+CREATE TYPE "BeneficiaryTypes" AS ENUM ('ENROLLED', 'REFERRED');
+
+-- CreateEnum
 CREATE TYPE "BankedStatus" AS ENUM ('UNKNOWN', 'UNBANKED', 'BANKED', 'UNDER_BANKED');
 
 -- CreateEnum
@@ -18,9 +24,6 @@ CREATE TYPE "InternetStatus" AS ENUM ('UNKNOWN', 'NO_INTERNET', 'HOME_INTERNET',
 
 -- CreateEnum
 CREATE TYPE "PhoneStatus" AS ENUM ('UNKNOWN', 'NO_PHONE', 'FEATURE_PHONE', 'SMART_PHONE');
-
--- CreateEnum
-CREATE TYPE "ProjectStatus" AS ENUM ('NOT_READY', 'ACTIVE', 'CLOSED');
 
 -- CreateTable
 CREATE TABLE "tbl_users" (
@@ -161,6 +164,19 @@ CREATE TABLE "tbl_beneficiaries" (
 );
 
 -- CreateTable
+CREATE TABLE "tbl_beneficiaries_projects" (
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "projectId" UUID NOT NULL,
+    "beneficiaryId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_beneficiaries_projects_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "tbl_beneficiaries_pii" (
     "beneficiaryId" INTEGER NOT NULL,
     "name" TEXT,
@@ -172,7 +188,7 @@ CREATE TABLE "tbl_beneficiaries_pii" (
 -- CreateTable
 CREATE TABLE "tbl_projects" (
     "id" SERIAL NOT NULL,
-    "uuid" TEXT NOT NULL,
+    "uuid" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
     "status" "ProjectStatus" NOT NULL DEFAULT 'NOT_READY',
@@ -228,6 +244,12 @@ CREATE UNIQUE INDEX "tbl_settings_name_key" ON "tbl_settings"("name");
 CREATE UNIQUE INDEX "tbl_beneficiaries_uuid_key" ON "tbl_beneficiaries"("uuid");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "tbl_beneficiaries_projects_uuid_key" ON "tbl_beneficiaries_projects"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_beneficiaries_projects_projectId_beneficiaryId_key" ON "tbl_beneficiaries_projects"("projectId", "beneficiaryId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "tbl_beneficiaries_pii_beneficiaryId_key" ON "tbl_beneficiaries_pii"("beneficiaryId");
 
 -- CreateIndex
@@ -253,6 +275,12 @@ ALTER TABLE "tbl_auth_sessions" ADD CONSTRAINT "tbl_auth_sessions_authId_fkey" F
 
 -- AddForeignKey
 ALTER TABLE "tbl_users_signups" ADD CONSTRAINT "tbl_users_signups_approvedBy_fkey" FOREIGN KEY ("approvedBy") REFERENCES "tbl_users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_beneficiaries_projects" ADD CONSTRAINT "tbl_beneficiaries_projects_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "tbl_projects"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_beneficiaries_projects" ADD CONSTRAINT "tbl_beneficiaries_projects_beneficiaryId_fkey" FOREIGN KEY ("beneficiaryId") REFERENCES "tbl_beneficiaries"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "tbl_beneficiaries_pii" ADD CONSTRAINT "tbl_beneficiaries_pii_beneficiaryId_fkey" FOREIGN KEY ("beneficiaryId") REFERENCES "tbl_beneficiaries"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

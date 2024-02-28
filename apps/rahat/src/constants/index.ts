@@ -22,4 +22,19 @@ export const JOBS = {
   SLACK: 'slack',
   OTP: 'otp',
   PROJECT_CREATE: 'project_create',
+  VENDOR: {
+    REGISTER: 'jobs.vendor.register',
+  },
 };
+
+export enum ServiceType {
+  PHONE = 'PHONE',
+  EMAIL = 'EMAIL',
+  WALLET = 'WALLET',
+  GOOGLE = 'GOOGLE',
+  APPLE = 'APPLE',
+  FACEBOOK = 'FACEBOOK',
+  TWITTER = 'TWITTER',
+  GITHUB = 'GITHUB',
+  LINKEDIN = 'LINKEDIN',
+}

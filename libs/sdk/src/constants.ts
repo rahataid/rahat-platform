@@ -5,6 +5,8 @@ export const JOBS = {
     GET: 'rahat.jobs.beneficiary.get',
     LIST: 'rahat.jobs.beneficiary.list',
     REMOVE: 'rahat.jobs.beneficiary.remove',
+    REFER: 'rahat.jobs.beneficiary.refer',
+    ADD_TO_PROJECT: 'rahat.jobs.beneficiary.add_to_project',
     STATS: 'rahat.jobs.beneficiary.stats',
     UPDATE: 'rahat.jobs.beneficiary.update',
     UPDATE_STATS: 'rahat.jobs.beneficiary.update_stats',

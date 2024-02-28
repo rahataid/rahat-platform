@@ -1,5 +1,6 @@
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE } from '@rahat/sdk';
 import { StatsModule } from '@rahat/stats';
 import { PrismaModule } from '@rumsan/prisma';
@@ -9,6 +10,17 @@ import { BeneficiaryStatService } from './beneficiaryStat.service';
 
 @Module({
   imports: [
+    ClientsModule.register([
+      {
+        name: 'EL_PROJECT_CLIENT',
+        transport: Transport.REDIS,
+        options: {
+          host: process.env.REDIS_HOST,
+          port: +process.env.REDIS_PORT,
+          password: process.env.REDIS_PASSWORD,
+        },
+      },
+    ]),
     PrismaModule,
     StatsModule,
     BullModule.registerQueue({

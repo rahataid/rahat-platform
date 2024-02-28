@@ -14,6 +14,7 @@ import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ListenersModule } from '../listeners/listeners.module';
 import { RahatProcessor } from '../processors';
 import { ProjectModule } from '../projects/projects.module';
+import { AppUsersModule } from '../users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -34,6 +35,7 @@ import { AppService } from './app.service';
     }),
     EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false }),
     ListenersModule,
+    AppUsersModule,
     RSUserModule.forRoot([AuthsModule, UsersModule, RolesModule]),
     SettingsModule,
     ProjectModule,

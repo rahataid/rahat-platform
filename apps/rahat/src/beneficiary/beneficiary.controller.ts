@@ -15,6 +15,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
+  AddToProjectDto,
   BQUEUE,
   CreateBeneficiaryDto,
   Enums,
@@ -26,6 +27,7 @@ import {
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, of } from 'rxjs';
+import { ReferBeneficiaryDto } from './dto/refer.beneficiary.dto';
 import { DocParser } from './parser';
 
 @Controller('beneficiaries')
@@ -51,11 +53,20 @@ export class BeneficiaryController {
     return this.client.send({ cmd: JOBS.BENEFICIARY.CREATE }, dto);
   }
 
+  @Post('refer')
+  async referBeneficiary(@Body() dto: ReferBeneficiaryDto) {
+    return this.client.send({ cmd: JOBS.BENEFICIARY.REFER }, dto);
+  }
+
+  @Post('add-to-project')
+  async addToProject(@Body() dto: AddToProjectDto) {
+    return this.client.send({ cmd: JOBS.BENEFICIARY.ADD_TO_PROJECT }, dto);
+  }
+
   @Post('bulk')
   async createBulk(@Body() dto: CreateBeneficiaryDto[]) {
     const data = dto.map((b) => ({
       ...b,
-      birthDate: new Date(b.birthDate),
     }));
     return this.client
       .send({ cmd: JOBS.BENEFICIARY.CREATE_BULK }, data)

@@ -1,16 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ClientProxy } from '@nestjs/microservices';
 import { PaginatorTypes, paginator } from '@nodeteam/nestjs-prisma-pagination';
 import { Beneficiary } from '@prisma/client';
 import {
+  AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  UpdateBeneficiaryDto,
 } from '@rahat/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { EVENTS } from '../constants';
+import { APP, EVENTS } from '../constants';
+import { ReferBeneficiaryDto } from './dto/refer.beneficiary.dto';
+import { createListQuery } from './helpers';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -19,11 +22,17 @@ export class BeneficiaryService {
   private rsprisma;
   constructor(
     protected prisma: PrismaService,
+    @Inject('EL_PROJECT_CLIENT') private readonly client: ClientProxy,
     private eventEmitter: EventEmitter2
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
 
+  addToProject(dto: AddToProjectDto) {
+    return this.prisma.beneficiaryProject.create({
+      data: dto,
+    });
+  }
   // async get(uuid: UUID): TBeneficiary {
   //   const beneficiary = await this.prisma.beneficiary.findUnique({
   //     where: {
@@ -43,12 +52,14 @@ export class BeneficiaryService {
   async list(
     dto: ListBeneficiaryDto
   ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
+    const AND_QUERY = createListQuery(dto);
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
     return paginate(
       this.prisma.beneficiary,
       {
         where: {
+          AND: AND_QUERY,
           deletedAt: null,
         },
         orderBy,
@@ -77,7 +88,55 @@ export class BeneficiaryService {
     return rdata;
   }
 
-  async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
+  async getReferralCount(referrerBenef: string) {
+    const ben = await this.findOne(referrerBenef);
+    if (!ben) return 0;
+    return ben.beneficiariesReferred;
+  }
+
+  async findOne(uuid: string) {
+    return await this.rsprisma.beneficiary.findUnique({ where: { uuid } });
+  }
+
+  async referBeneficiary(dto: ReferBeneficiaryDto) {
+    const { referrerBeneficiary, referrerVendor, ...rest } = dto;
+    const row = await this.create(rest);
+    const projectPayload = {
+      uuid: row.uuid,
+      referrerVendor: referrerVendor || '',
+      referrerBeneficiary: referrerBeneficiary || '',
+      walletAddress: dto.walletAddress,
+      extras: dto?.extras || null,
+      type: APP.BENEFICIARY.TYPES.REFERRED,
+    };
+
+    return this.client.send({ cmd: 'ben-referred' }, projectPayload);
+  }
+
+  async incrementReferralCount(referrerUID: string) {
+    console.log('incrementReferralCount', referrerUID);
+    const exist = await this.findOne(referrerUID);
+    if (!exist) return null;
+    return this.rsprisma.beneficiary.update({
+      where: { uuid: referrerUID },
+      data: { beneficiariesReferred: { increment: 1 } },
+    });
+  }
+
+  // async createBulk(data: CreateBeneficiaryDto[]) {
+  //   if (!data.length) return;
+  //   const sanitized = data.map((d) => {
+  //     return {
+  //       ...d,
+  //       walletAddress: Buffer.from(d.walletAddress.slice(2), 'hex'),
+  //     };
+  //   });
+  //   return this.rsprisma.beneficiary.createMany({
+  //     data: sanitized,
+  //   });
+  // }
+
+  async update(uuid: UUID, dto: any) {
     const findUuid = await this.prisma.beneficiary.findUnique({
       where: {
         uuid,

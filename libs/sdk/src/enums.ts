@@ -5,6 +5,11 @@ export enum Gender {
   UKNOWN = 'UNKNOWN',
 }
 
+export enum BeneficiaryType {
+  REFERRED = 'REFERRED',
+  ENROLLED = 'ENROLLED',
+}
+
 export enum BankedStatus {
   UNKNOWN = 'UNKNOWN',
   UNBANKED = 'UNBANKED',

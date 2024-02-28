@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
-import { BeneficiaryController } from './beneficiary.controller';
+import { UsersController } from './users.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { BullModule } from '@nestjs/bull';
-import { BQUEUE } from '@rahat/sdk';
 
 @Module({
   imports: [
@@ -17,11 +15,7 @@ import { BQUEUE } from '@rahat/sdk';
         },
       },
     ]),
-    BullModule.registerQueue({
-      name: BQUEUE.RAHAT,
-    }),
   ],
-  controllers: [BeneficiaryController],
-  providers: [],
+  controllers: [UsersController],
 })
-export class BeneficiaryModule {}
+export class AppUsersModule {}

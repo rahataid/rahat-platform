@@ -1,6 +1,7 @@
-import { Controller, Param } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { Controller, Inject, Param } from '@nestjs/common';
+import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import {
+  AddToProjectDto,
   CreateBeneficiaryDto,
   JOBS,
   ListBeneficiaryDto,
@@ -9,10 +10,13 @@ import {
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
+import { ReferBeneficiaryDto } from './dto/refer.beneficiary.dto';
 
 @Controller()
 export class BeneficiaryController {
   constructor(
+    private readonly beneficiaryService: BeneficiaryService,
+    @Inject('EL_PROJECT_CLIENT') private readonly client: ClientProxy,
     private readonly service: BeneficiaryService,
     private readonly statsService: BeneficiaryStatService
   ) {}
@@ -37,6 +41,16 @@ export class BeneficiaryController {
     return this.statsService.getAllStats();
   }
 
+  // TODO: Update cmd constant
+  @MessagePattern({ cmd: JOBS.BENEFICIARY.REFER })
+  async referBeneficiary(dto: ReferBeneficiaryDto) {
+    return this.beneficiaryService.referBeneficiary(dto);
+  }
+
+  @MessagePattern({ cmd: JOBS.BENEFICIARY.ADD_TO_PROJECT })
+  async addToProject(dto: AddToProjectDto) {
+    return this.beneficiaryService.addToProject(dto);
+  }
   // @MessagePattern({ cmd: JOBS.BENEFICIARY.GET })
   // get(@Param('uuid') uuid: UUID) {
   //   return this.service.get(uuid);
