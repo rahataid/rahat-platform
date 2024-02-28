@@ -12,7 +12,7 @@ try {
   packageData.scripts = {
     ...packageData.scripts,
     start: 'node main.js',
-    'studio:app': 'prisma studio --schema prisma/application/schema.prisma',
+    [`studio:${appName}`]: 'prisma studio --schema prisma/schema.prisma',
     [`migrate:${appName}`]: `prisma migrate dev --name ${appName} --schema prisma/schema.prisma`,
     [`generate:${appName}`]: `prisma generate --schema prisma/schema.prisma`,
   };
