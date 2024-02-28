@@ -5,7 +5,6 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "dependsOn": ["mainBuild"],
       "executor": "nx:run-commands",
       "options": {
         "commands": [
@@ -21,7 +20,9 @@
     },
     "mainBuild": {
       "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "target": "node",
         "compiler": "tsc",
