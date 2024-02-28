@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaginationDto } from '@rumsan/core';
+import { PaginationDto } from '@rumsan/extensions/dtos';
 import {
   IsDate,
   IsEnum,

@@ -5,12 +5,14 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "dependsOn": ["mainBuild"],
       "executor": "nx:run-commands",
       "options": {
         "commands": [
           {
-            "command": "cp -r prisma/ dist/apps/rahat/prisma"
+            "command": "nx run rahat:mainBuild"
+          },
+          {
+            "command": "cp -r prisma/ dist/apps/rahat/"
           }
         ],
         "parallel": false
