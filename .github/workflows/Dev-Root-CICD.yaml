@@ -1,0 +1,67 @@
+name: Dev Root CI/CD
+on:
+  push:
+    branches:
+      - 'dev'
+    paths-ignore:
+      - 'apps/**'
+  pull_request:
+    branches:
+      - 'dev'
+    paths-ignore:
+      - 'apps/**'
+
+env:
+  CI: false
+  env_npmrc: ${{ secrets.ENV_NPMRC }}
+
+jobs:
+  deploy:
+    name: build && push image to Docker hub
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: import env file
+        run: |
+          touch ./.npmrc && echo "$env_npmrc" >> ./.npmrc
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: install dependencies and build apps
+        run: |
+          npm install -g pnpm
+          pnpm install
+          pnpm prisma:generate
+          pnpm build:all
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Beneficiary Image
+      - name: build && push beneficiary
+        id: build-push-beneficiary
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.beneficiary
+          push: ${{ github.event_name == 'push' && 'true' || 'false' }}
+          tags: esatya/rahat-platform-beneficiary:dev
+
+      # Rahat Image
+      - name: build && push rahat
+        id: build-push-rahat
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: Dockerfile.rahat
+          push: ${{ github.event_name == 'push' && 'true' || 'false' }}
+          tags: esatya/rahat-platform-rahat:dev
