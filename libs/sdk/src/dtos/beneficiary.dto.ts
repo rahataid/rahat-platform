@@ -160,8 +160,7 @@ export class UpdateBeneficiaryDto extends PartialType(CreateBeneficiaryDto) {}
 
 export class ListBeneficiaryDto extends PaginationDto {
   @IsIn(['createdAt', 'updatedAt', 'fullName', 'gender'])
-  override sort: string = 'createdAt';
-  @IsIn(['createdAt', 'updatedAt', 'gender'])
+  override sort = 'createdAt';
   override order: 'asc' | 'desc' = 'desc';
 
   @ApiPropertyOptional({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
