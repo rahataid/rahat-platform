@@ -88,12 +88,6 @@ export class BeneficiaryService {
     return rdata;
   }
 
-  async getReferralCount(referrerBenef: string) {
-    const ben = await this.findOne(referrerBenef);
-    if (!ben) return 0;
-    return ben.beneficiariesReferred;
-  }
-
   async findOne(uuid: string) {
     return await this.rsprisma.beneficiary.findUnique({ where: { uuid } });
   }
@@ -111,16 +105,6 @@ export class BeneficiaryService {
     };
 
     return this.client.send({ cmd: 'ben-referred' }, projectPayload);
-  }
-
-  async incrementReferralCount(referrerUID: string) {
-    console.log('incrementReferralCount', referrerUID);
-    const exist = await this.findOne(referrerUID);
-    if (!exist) return null;
-    return this.rsprisma.beneficiary.update({
-      where: { uuid: referrerUID },
-      data: { beneficiariesReferred: { increment: 1 } },
-    });
   }
 
   // async createBulk(data: CreateBeneficiaryDto[]) {

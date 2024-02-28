@@ -159,25 +159,14 @@ export class CreateBeneficiaryDto implements TBeneficiary {
 export class UpdateBeneficiaryDto extends PartialType(CreateBeneficiaryDto) {}
 
 export class ListBeneficiaryDto extends PaginationDto {
-  @IsIn(['createdAt', 'updatedAt', 'fullName', 'gender'])
-  override sort: string = 'createdAt';
   @IsIn(['createdAt', 'updatedAt', 'gender'])
+  override sort: string = 'createdAt';
   override order: 'asc' | 'desc' = 'desc';
-
-  @ApiPropertyOptional({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
-  @IsString()
-  @IsOptional()
-  projectId?: string;
 
   @ApiPropertyOptional({ example: 'MALE' })
   @IsString()
   @IsOptional()
   gender?: string;
-
-  @ApiPropertyOptional({ example: 'REFERRED' })
-  @IsString()
-  @IsOptional()
-  type?: string;
 }
 
 export class AddToProjectDto {
