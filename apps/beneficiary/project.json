@@ -11,6 +11,9 @@
         "commands": [
           {
             "command": "cp -r prisma/ dist/apps/beneficiary/prisma"
+          },
+          {
+            "command": "node apps/beneficiary/modify-package.js"
           }
         ],
         "parallel": false
