@@ -40,7 +40,6 @@ export class BeneficiaryController {
 
   @Get()
   async list(@Query() dto: ListBeneficiaryDto) {
-    console.log('Q=>', dto);
     return this.client.send({ cmd: JOBS.BENEFICIARY.LIST }, dto);
   }
 
@@ -68,6 +67,7 @@ export class BeneficiaryController {
   async createBulk(@Body() dto: CreateBeneficiaryDto[]) {
     const data = dto.map((b) => ({
       ...b,
+      birthDate: b.birthDate ? new Date(b.birthDate).toISOString() : null,
     }));
     return this.client
       .send({ cmd: JOBS.BENEFICIARY.CREATE_BULK }, data)
