@@ -202,8 +202,14 @@ export class BeneficiaryService {
 
     // Insert PII data in bulk
     if (piiBulkInsertData.length > 0) {
+      const sanitizedPiiBenef = piiBulkInsertData.map((b) => {
+        return {
+          ...b,
+          phone: b.phone ? b.phone.toString() : null,
+        };
+      });
       await this.prisma.beneficiaryPii.createMany({
-        data: piiBulkInsertData,
+        data: sanitizedPiiBenef,
       });
     }
 
