@@ -10,13 +10,9 @@
       "options": {
         "commands": [
           {
-            "command": "cp -r prisma/ dist/apps/beneficiary/prisma"
-          },
-          {
-            "command": "node apps/beneficiary/modify-package.js"
+            "command": "cp -r prisma/ dist/apps/beneficiary/prisma && node apps/beneficiary/modify-package.js"
           }
-        ],
-        "parallel": false
+        ]
       }
     },
     "mainBuild": {

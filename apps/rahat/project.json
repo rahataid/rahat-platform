@@ -5,32 +5,12 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
-      "defaultConfiguration": "production",
-      "options": {
-        "target": "node",
-        "compiler": "tsc",
-        "outputPath": "dist/apps/rahat",
-        "main": "apps/rahat/src/main.ts",
-        "tsConfig": "apps/rahat/tsconfig.app.json",
-        "assets": [
-          "apps/rahat/src/assets"
-        ],
-        "webpackConfig": "apps/rahat/webpack.config.js"
-      },
-      "configurations": {
-        "development": {},
-        "production": {}
-      }
+      "executor": "nx:noop",
+      "dependsOn": ["mainBuild"]
     },
     "mainBuild": {
       "executor": "@nx/webpack:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "target": "node",
         "compiler": "tsc",
