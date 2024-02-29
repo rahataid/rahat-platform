@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Beneficiary, Enums, TPIIData } from '@rahat/sdk';
+import { Beneficiary, Enums, TPIIData } from '@rahataid/sdk';
 import {
   IsDate,
   IsEnum,

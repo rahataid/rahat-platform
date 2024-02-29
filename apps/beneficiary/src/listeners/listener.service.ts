@@ -1,8 +1,8 @@
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { BQUEUE } from '@rahat/sdk';
 import { StatsService } from '@rahat/stats';
+import { BQUEUE } from '@rahataid/sdk';
 import { Queue } from 'bull';
 import { BeneficiaryStatService } from '../beneficiary/beneficiaryStat.service';
 import { EVENTS } from '../constants';

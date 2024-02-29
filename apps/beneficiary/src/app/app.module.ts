@@ -1,7 +1,7 @@
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { BQUEUE } from '@rahat/sdk';
+import { BQUEUE } from '@rahataid/sdk';
 
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';

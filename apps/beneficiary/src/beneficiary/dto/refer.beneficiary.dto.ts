@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CreateBeneficiaryDto, TPIIData } from '@rahat/sdk';
+import { CreateBeneficiaryDto } from '@rahataid/extensions';
+import { TPIIData } from '@rahataid/sdk';
 import {
   IsDate,
   IsEnum,

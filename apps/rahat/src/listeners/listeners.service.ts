@@ -2,7 +2,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Project } from '@prisma/client';
-import { BQUEUE } from '@rahat/sdk';
+import { BQUEUE } from '@rahataid/sdk';
 import { EVENTS } from '@rumsan/user';
 import { Queue } from 'bull';
 import { JOBS } from '../constants';
@@ -18,9 +18,8 @@ export class ListenersService {
     @InjectQueue(BQUEUE.HOST) private readonly hostQueue: Queue,
     @InjectQueue(BQUEUE.RAHAT_PROJECT) private readonly projectQueue: Queue,
     private readonly devService: DevService,
-    private emailService: EmailService,
-
-  ) { }
+    private emailService: EmailService
+  ) {}
 
   @OnEvent(EVENTS.OTP_CREATED)
   async sendOTPEmail(data: any) {
@@ -29,7 +28,7 @@ export class ListenersService {
       data.address,
       'OTP for login',
       'OTP for login',
-      `<h1>OTP for login</h1><p>${data.otp}</p>`,
+      `<h1>OTP for login</h1><p>${data.otp}</p>`
     );
   }
 

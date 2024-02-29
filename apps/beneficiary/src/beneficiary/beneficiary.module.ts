@@ -1,8 +1,8 @@
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { BQUEUE } from '@rahat/sdk';
 import { StatsModule } from '@rahat/stats';
+import { BQUEUE } from '@rahataid/sdk';
 import { PrismaModule } from '@rumsan/prisma';
 import { BeneficiaryController } from './beneficiary.controller';
 import { BeneficiaryService } from './beneficiary.service';

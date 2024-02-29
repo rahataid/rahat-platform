@@ -1,8 +1,8 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
+import { BQUEUE } from '@rahataid/sdk';
 import { Job } from 'bull';
 import { JOBS } from '../constants';
-import { BQUEUE } from '@rahat/sdk';
 
 @Processor(BQUEUE.RAHAT)
 export class RahatProcessor {

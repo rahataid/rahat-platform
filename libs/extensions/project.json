@@ -12,7 +12,10 @@
         "tsConfig": "libs/extensions/tsconfig.lib.json",
         "packageJson": "libs/extensions/package.json",
         "main": "libs/extensions/src/index.ts",
-        "assets": ["libs/extensions/*.md"]
+        "assets": ["libs/extensions/*.md"],
+        "rootDir": "libs/extensions/src",
+        "updateBuildableProjectDepsInPackageJson": true,
+        "buildableProjectDepsInPackageJsonType": "dependencies"
       }
     },
     "publish": {

@@ -5,8 +5,8 @@ import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   UpdateBeneficiaryDto,
-} from '@rahat/extensions';
-import { JOBS } from '@rahat/sdk';
+} from '@rahataid/extensions';
+import { JOBS } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';

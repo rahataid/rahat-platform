@@ -1,8 +1,9 @@
-import { CreateBeneficiaryDto, Enums } from '@rahat/sdk';
+import { CreateBeneficiaryDto } from '@rahataid/extensions';
+import { Enums } from '@rahataid/sdk';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
-import { JsonParser } from './json.parser';
 import { ExcelParser } from './excel.parser';
+import { JsonParser } from './json.parser';
 
 export async function DocParser(
   docType: Enums.UploadFileType,

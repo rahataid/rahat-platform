@@ -5,7 +5,7 @@ export type Response<T> = {
   meta?: Record<string, any>;
 };
 
-export type TStats = {
+export type Stats = {
   name: string;
   data: any;
 };

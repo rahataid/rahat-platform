@@ -16,14 +16,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   AddToProjectDto,
-  BQUEUE,
   CreateBeneficiaryDto,
-  Enums,
-  JOBS,
   ListBeneficiaryDto,
-  TFile,
   UpdateBeneficiaryDto,
-} from '@rahat/sdk';
+} from '@rahataid/extensions';
+import { BQUEUE, Enums, JOBS, TFile } from '@rahataid/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, of } from 'rxjs';

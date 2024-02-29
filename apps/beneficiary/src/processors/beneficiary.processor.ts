@@ -1,6 +1,6 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
-import { BQUEUE, JOBS } from '@rahat/sdk';
+import { BQUEUE, JOBS } from '@rahataid/sdk';
 import { Job } from 'bull';
 
 @Processor(BQUEUE.RAHAT_BENEFICIARY)

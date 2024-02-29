@@ -2,7 +2,7 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { BQUEUE } from '@rahat/sdk';
+import { BQUEUE } from '@rahataid/sdk';
 import { SettingsModule } from '@rumsan/settings';
 import { DevService } from '../utils/develop.service';
 import { EmailService } from './email.service';
@@ -37,4 +37,4 @@ import { ListenersService } from './listeners.service';
   ],
   providers: [ListenersService, DevService, EmailService],
 })
-export class ListenersModule { }
+export class ListenersModule {}

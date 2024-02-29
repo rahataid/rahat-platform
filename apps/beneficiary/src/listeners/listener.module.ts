@@ -1,7 +1,7 @@
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-import { BQUEUE } from '@rahat/sdk';
 import { StatsService } from '@rahat/stats';
+import { BQUEUE } from '@rahataid/sdk';
 import { BeneficiaryStatService } from '../beneficiary/beneficiaryStat.service';
 import { ListenersService } from './listener.service';
 
