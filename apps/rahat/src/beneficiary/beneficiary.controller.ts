@@ -40,6 +40,7 @@ export class BeneficiaryController {
 
   @Get()
   async list(@Query() dto: ListBeneficiaryDto) {
+    console.log('Q=>', dto);
     return this.client.send({ cmd: JOBS.BENEFICIARY.LIST }, dto);
   }
 
