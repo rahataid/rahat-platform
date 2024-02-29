@@ -5,25 +5,17 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
-      "defaultConfiguration": "production",
+      "executor": "nx:run-commands",
       "options": {
-        "target": "node",
-        "compiler": "tsc",
-        "outputPath": "dist/apps/rahat",
-        "main": "apps/rahat/src/main.ts",
-        "tsConfig": "apps/rahat/tsconfig.app.json",
-        "assets": [
-          "apps/rahat/src/assets"
+        "commands": [
+          {
+            "command": "cp -r prisma/ dist/apps/rahat/prisma"
+          },
+          {
+            "command": "node apps/rahat/modify-package.js"
+          }
         ],
-        "webpackConfig": "apps/rahat/webpack.config.js"
-      },
-      "configurations": {
-        "development": {},
-        "production": {}
+        "parallel": false
       }
     },
     "mainBuild": {
