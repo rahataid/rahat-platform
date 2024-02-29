@@ -59,7 +59,7 @@ export class BeneficiaryService {
       this.prisma.beneficiary,
       {
         where: {
-          AND: AND_QUERY,
+          //AND: AND_QUERY,
           deletedAt: null,
         },
         orderBy,

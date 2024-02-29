@@ -49,3 +49,5 @@ Thumbs.db
 
 # Local
 docker-compose.yaml
+combine.log
+error.log

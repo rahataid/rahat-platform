@@ -5,17 +5,22 @@
 
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { NestFastifyApplication } from '@nestjs/platform-fastify';
 
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ResponseTransformInterceptor, RsExceptionFilter } from '@rumsan/core';
+import { RsExceptionFilter } from '@rumsan/extensions/exceptions';
+import { ResponseTransformInterceptor } from '@rumsan/extensions/interceptors';
+import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app/app.module';
 import { APP } from './constants';
+import { loggerInstance } from './logger/winston.logger';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  //to get real ip from nginx
-  app.set('trust proxy', true);
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, {
+    logger: WinstonModule.createLogger({
+      instance: loggerInstance,
+    }),
+  });
   const globalPrefix = 'v1';
   app.enableCors();
 
@@ -28,9 +33,6 @@ async function bootstrap() {
     })
   );
   app.useGlobalFilters(new RsExceptionFilter());
-  //use cors
-  app.enableCors();
-  //TODO this is preventing from file upload. need to find a way to handle this
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
 
