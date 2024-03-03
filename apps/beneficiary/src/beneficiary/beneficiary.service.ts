@@ -7,12 +7,12 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
+  ReferBeneficiaryDto,
 } from '@rahataid/extensions';
+import { APP, BENEFICIARY_EVENTS } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { APP, EVENTS } from '../constants';
-import { ReferBeneficiaryDto } from './dto/refer.beneficiary.dto';
 import { createListQuery } from './helpers';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -84,7 +84,7 @@ export class BeneficiaryService {
         },
       });
     }
-    this.eventEmitter.emit(EVENTS.BENEFICIARY_CREATED);
+    this.eventEmitter.emit(BENEFICIARY_EVENTS.BENEFICIARY_CREATED);
     return rdata;
   }
 
@@ -135,7 +135,7 @@ export class BeneficiaryService {
       },
       data: dto,
     });
-    this.eventEmitter.emit(EVENTS.BENEFICIARY_UPDATED);
+    this.eventEmitter.emit(BENEFICIARY_EVENTS.BENEFICIARY_UPDATED);
     return rdata;
   }
 
@@ -156,7 +156,7 @@ export class BeneficiaryService {
         deletedAt: new Date(),
       },
     });
-    this.eventEmitter.emit(EVENTS.BENEFICIARY_REMOVED);
+    this.eventEmitter.emit(BENEFICIARY_EVENTS.BENEFICIARY_REMOVED);
     return rdata;
   }
 
@@ -213,7 +213,7 @@ export class BeneficiaryService {
       });
     }
 
-    this.eventEmitter.emit(EVENTS.BENEFICIARY_CREATED);
+    this.eventEmitter.emit(BENEFICIARY_EVENTS.BENEFICIARY_CREATED);
 
     // Return some form of success indicator, as createMany does not return the records themselves
     return { success: true, count: dtos.length };

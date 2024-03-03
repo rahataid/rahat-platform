@@ -4,13 +4,13 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
+  ReferBeneficiaryDto,
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
 import { JOBS } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
-import { ReferBeneficiaryDto } from './dto/refer.beneficiary.dto';
 
 @Controller()
 export class BeneficiaryController {

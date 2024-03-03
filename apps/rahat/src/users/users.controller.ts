@@ -1,16 +1,18 @@
 import { Body, Controller, Inject, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { VendorRegisterDto } from './dto/vendor-register.dto';
 import { ClientProxy } from '@nestjs/microservices';
-import { JOBS } from '../constants';
+import { ApiTags } from '@nestjs/swagger';
+import { VendorRegisterDto } from '@rahataid/extensions';
+import { BeneficiaryConstants, VendorJobs } from '@rahataid/sdk';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(@Inject('BEN_CLIENT') private readonly client: ClientProxy) {}
+  constructor(
+    @Inject(BeneficiaryConstants.Client) private readonly client: ClientProxy
+  ) {}
 
   @Post('vendors')
   registerVendor(@Body() dto: VendorRegisterDto) {
-    return this.client.send({ cmd: JOBS.VENDOR.REGISTER }, dto);
+    return this.client.send({ cmd: VendorJobs.REGISTER }, dto);
   }
 }

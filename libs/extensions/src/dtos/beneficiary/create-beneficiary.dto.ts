@@ -9,16 +9,8 @@ import {
   Length,
   Matches,
 } from 'class-validator';
-import { UUID } from 'crypto';
 
 export class CreateBeneficiaryDto implements Beneficiary {
-  @ApiProperty({
-    type: 'uuid',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    description: 'UUID of the beneficiary',
-  })
-  uuid?: UUID;
-
   @ApiProperty({
     example: '1997-03-08',
     description: 'Date of birth in the YYYY-MM-DD format.',

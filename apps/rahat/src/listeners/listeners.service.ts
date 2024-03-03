@@ -2,11 +2,9 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Project } from '@prisma/client';
-import { BQUEUE } from '@rahataid/sdk';
+import { BQUEUE, ProjectEvents, ProjectJobs } from '@rahataid/sdk';
 import { EVENTS } from '@rumsan/user';
 import { Queue } from 'bull';
-import { JOBS } from '../constants';
-import { EVENTS as APP_EVENTS } from '../constants/events';
 import { DevService } from '../utils/develop.service';
 import { EmailService } from './email.service';
 @Injectable()
@@ -42,9 +40,9 @@ export class ListenersService {
     });
   }
 
-  @OnEvent(APP_EVENTS.PROJECT_CREATED)
+  @OnEvent(ProjectEvents.PROJECT_CREATED)
   async onProjectCreated(data: Project) {
-    this.hostQueue.add(JOBS.PROJECT_CREATE, data, {
+    this.hostQueue.add(ProjectJobs.PROJECT_CREATE, data, {
       attempts: 3,
       removeOnComplete: true,
       backoff: {

@@ -1,6 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CreateBeneficiaryDto } from '@rahataid/extensions';
 import { TPIIData } from '@rahataid/sdk';
+import {
+  BankedStatus,
+  Gender,
+  InternetStatus,
+  PhoneStatus,
+} from '@rahataid/sdk/enums';
 import {
   IsDate,
   IsEnum,
@@ -12,12 +17,7 @@ import {
   Matches,
 } from 'class-validator';
 import { UUID } from 'crypto';
-import {
-  BankedStatus,
-  Gender,
-  InternetStatus,
-  PhoneStatus,
-} from 'libs/sdk/src/enums';
+import { CreateBeneficiaryDto } from './create-beneficiary.dto';
 
 export class ReferBeneficiaryDto implements CreateBeneficiaryDto {
   @ApiProperty({
@@ -26,7 +26,7 @@ export class ReferBeneficiaryDto implements CreateBeneficiaryDto {
     description: 'UUID of the beneficiary',
   })
   @IsUUID()
-  referrerBeneficiary: UUID;
+  referrerBeneficiary: UUID | undefined;
 
   @ApiProperty({
     type: 'uuid',
@@ -34,7 +34,7 @@ export class ReferBeneficiaryDto implements CreateBeneficiaryDto {
     description: 'UUID of the vendor',
   })
   @IsUUID()
-  referrerVendor: UUID;
+  referrerVendor: UUID | undefined;
 
   @ApiProperty({
     example: '1997-03-08',

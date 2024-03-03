@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { UsersController } from './users.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { BeneficiaryConstants } from '@rahataid/sdk';
+import { UsersController } from './users.controller';
 
 @Module({
   imports: [
     ClientsModule.register([
       {
-        name: 'BEN_CLIENT',
+        name: BeneficiaryConstants.Client,
         transport: Transport.REDIS,
         options: {
           host: process.env.REDIS_HOST,

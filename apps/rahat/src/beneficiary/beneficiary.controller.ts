@@ -18,13 +18,13 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
+  ReferBeneficiaryDto,
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
-import { BQUEUE, Enums, JOBS, TFile } from '@rahataid/sdk';
+import { BQUEUE, BeneficiaryJobs, Enums, TFile } from '@rahataid/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, of } from 'rxjs';
-import { ReferBeneficiaryDto } from './dto/refer.beneficiary.dto';
 import { DocParser } from './parser';
 
 @Controller('beneficiaries')
@@ -37,27 +37,27 @@ export class BeneficiaryController {
 
   @Get()
   async list(@Query() dto: ListBeneficiaryDto) {
-    return this.client.send({ cmd: JOBS.BENEFICIARY.LIST }, dto);
+    return this.client.send({ cmd: BeneficiaryJobs.LIST }, dto);
   }
 
   @Get('stats')
   async getStats() {
-    return this.client.send({ cmd: JOBS.BENEFICIARY.STATS }, {});
+    return this.client.send({ cmd: BeneficiaryJobs.STATS }, {});
   }
 
   @Post()
   async create(@Body() dto: CreateBeneficiaryDto) {
-    return this.client.send({ cmd: JOBS.BENEFICIARY.CREATE }, dto);
+    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
 
   @Post('refer')
   async referBeneficiary(@Body() dto: ReferBeneficiaryDto) {
-    return this.client.send({ cmd: JOBS.BENEFICIARY.REFER }, dto);
+    return this.client.send({ cmd: BeneficiaryJobs.REFER }, dto);
   }
 
   @Post('add-to-project')
   async addToProject(@Body() dto: AddToProjectDto) {
-    return this.client.send({ cmd: JOBS.BENEFICIARY.ADD_TO_PROJECT }, dto);
+    return this.client.send({ cmd: BeneficiaryJobs.ADD_TO_PROJECT }, dto);
   }
 
   @Post('bulk')
@@ -67,7 +67,7 @@ export class BeneficiaryController {
       birthDate: b.birthDate ? new Date(b.birthDate).toISOString() : null,
     }));
     return this.client
-      .send({ cmd: JOBS.BENEFICIARY.CREATE_BULK }, data)
+      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, data)
       .pipe(catchError((val) => of({ error: val.message })));
   }
 
@@ -79,7 +79,7 @@ export class BeneficiaryController {
     const beneficiaries = await DocParser(docType, file.buffer);
 
     return this.client.send(
-      { cmd: JOBS.BENEFICIARY.CREATE_BULK },
+      { cmd: BeneficiaryJobs.CREATE_BULK },
       beneficiaries
     );
   }
@@ -87,6 +87,6 @@ export class BeneficiaryController {
   @Post(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   async update(@Param('uuid') uuid: UUID, @Body() dto: UpdateBeneficiaryDto) {
-    return this.client.send({ cmd: JOBS.BENEFICIARY.UPDATE }, { uuid, dto });
+    return this.client.send({ cmd: BeneficiaryJobs.UPDATE }, { uuid, dto });
   }
 }
