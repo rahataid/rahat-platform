@@ -4,6 +4,12 @@ import { Service } from '@rumsan/sdk/enums/enums';
 import { IsEthereumAddress, IsOptional, IsString } from 'class-validator';
 
 export class VendorRegisterDto implements VendorCreateInput {
+  id?: number | undefined;
+  uuid: string;
+  location?: string | null | undefined;
+  createdAt?: Date | undefined;
+  updatedAt?: Date | null | undefined;
+  deletedAt?: Date | null | undefined;
   @ApiProperty({ example: Service.EMAIL })
   @IsString()
   service: Service;
@@ -24,9 +30,8 @@ export class VendorRegisterDto implements VendorCreateInput {
 
   @ApiProperty({ example: '0x000000000000000000000', required: false })
   @IsString()
-  @IsOptional()
   @IsEthereumAddress()
-  wallet?: string;
+  wallet: string;
 
   @ApiProperty({ example: { isVendor: true }, required: false })
   extras?: any;
