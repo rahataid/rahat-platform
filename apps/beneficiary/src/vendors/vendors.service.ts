@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { VendorRegisterDto } from './dto/vendor-register.dto';
+import { VendorRegisterDto } from '@rahataid/extensions';
+import { UserRoles } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
-import { UserRoles } from '../constants';
 
 @Injectable()
 export class VendorsService {

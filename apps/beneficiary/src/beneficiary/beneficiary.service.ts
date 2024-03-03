@@ -9,7 +9,11 @@ import {
   ListBeneficiaryDto,
   ReferBeneficiaryDto,
 } from '@rahataid/extensions';
-import { APP, BeneficiaryEvents, ProjectContants } from '@rahataid/sdk';
+import {
+  BeneficiaryConstants,
+  BeneficiaryEvents,
+  ProjectContants,
+} from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -101,7 +105,7 @@ export class BeneficiaryService {
       referrerBeneficiary: referrerBeneficiary || '',
       walletAddress: dto.walletAddress,
       extras: dto?.extras || null,
-      type: APP.BENEFICIARY.TYPES.REFERRED,
+      type: BeneficiaryConstants.Types.REFERRED,
     };
 
     return this.client.send({ cmd: 'ben-referred' }, projectPayload);

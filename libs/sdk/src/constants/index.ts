@@ -11,11 +11,10 @@ export const BQUEUE = {
   HOST: 'RAHAT.HOST',
 };
 
-export const APP = {
-  BENEFICIARY: {
-    TYPES: {
-      REFERRED: 'REFERRED',
-      ENROLLED: 'ENROLLED',
-    },
-  },
+
+
+export const UserRoles = {
+  ADMIN: 'Admin',
+  USER: 'User',
+  VENDOR: 'Vendor',
 };
