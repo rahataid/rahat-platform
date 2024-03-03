@@ -5,16 +5,16 @@ import { IsEthereumAddress, IsOptional, IsString } from 'class-validator';
 export class VendorRegisterDto {
   @ApiProperty({ example: Enums.ServiceType.EMAIL })
   @IsString()
-  service: Enums.ServiceType | undefined;
+  service: Enums.ServiceType;
 
   @ApiProperty({ example: 'John Doe' })
   @IsString()
-  name: string | undefined;
+  name: string;
 
   @ApiProperty({ example: Enums.Gender.MALE })
   @IsString()
   @IsOptional()
-  gender: Enums.Gender | undefined;
+  gender: Enums.Gender;
 
   @ApiProperty({ example: 'john@mailinator.com', required: false })
   @IsString()
