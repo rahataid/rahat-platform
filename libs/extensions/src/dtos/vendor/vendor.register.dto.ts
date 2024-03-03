@@ -1,20 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Enums } from '@rahataid/sdk';
+import { VendorCreateInput } from '@rahataid/sdk';
+import { Service } from '@rumsan/sdk/enums/enums';
 import { IsEthereumAddress, IsOptional, IsString } from 'class-validator';
 
-export class VendorRegisterDto {
-  @ApiProperty({ example: Enums.ServiceType.EMAIL })
+export class VendorRegisterDto implements VendorCreateInput {
+  @ApiProperty({ example: Service.EMAIL })
   @IsString()
-  service: Enums.ServiceType;
+  service: Service;
 
   @ApiProperty({ example: 'John Doe' })
   @IsString()
   name: string;
-
-  @ApiProperty({ example: Enums.Gender.MALE })
-  @IsString()
-  @IsOptional()
-  gender: Enums.Gender;
 
   @ApiProperty({ example: 'john@mailinator.com', required: false })
   @IsString()
