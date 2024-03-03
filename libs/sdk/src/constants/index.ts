@@ -1,7 +1,3 @@
-export * from './beneficiary';
-export * from './project';
-export * from './vendor';
-
 export const APP_JOBS = {
   EMAIL: 'email',
   SLACK: 'slack',

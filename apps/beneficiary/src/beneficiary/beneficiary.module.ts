@@ -2,7 +2,7 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { StatsModule } from '@rahat/stats';
-import { BQUEUE } from '@rahataid/sdk';
+import { BQUEUE, ProjectContants } from '@rahataid/sdk';
 import { PrismaModule } from '@rumsan/prisma';
 import { BeneficiaryController } from './beneficiary.controller';
 import { BeneficiaryService } from './beneficiary.service';
@@ -12,7 +12,7 @@ import { BeneficiaryStatService } from './beneficiaryStat.service';
   imports: [
     ClientsModule.register([
       {
-        name: 'EL_PROJECT_CLIENT',
+        name: ProjectContants.ELClient,
         transport: Transport.REDIS,
         options: {
           host: process.env.REDIS_HOST,

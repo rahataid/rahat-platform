@@ -9,7 +9,7 @@ import {
   ListBeneficiaryDto,
   ReferBeneficiaryDto,
 } from '@rahataid/extensions';
-import { APP, BENEFICIARY_EVENTS } from '@rahataid/sdk';
+import { APP, BeneficiaryEvents, ProjectContants } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,7 +22,7 @@ export class BeneficiaryService {
   private rsprisma;
   constructor(
     protected prisma: PrismaService,
-    @Inject('EL_PROJECT_CLIENT') private readonly client: ClientProxy,
+    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private eventEmitter: EventEmitter2
   ) {
     this.rsprisma = this.prisma.rsclient;
@@ -84,7 +84,7 @@ export class BeneficiaryService {
         },
       });
     }
-    this.eventEmitter.emit(BENEFICIARY_EVENTS.BENEFICIARY_CREATED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED);
     return rdata;
   }
 
@@ -135,7 +135,7 @@ export class BeneficiaryService {
       },
       data: dto,
     });
-    this.eventEmitter.emit(BENEFICIARY_EVENTS.BENEFICIARY_UPDATED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
     return rdata;
   }
 
@@ -156,7 +156,7 @@ export class BeneficiaryService {
         deletedAt: new Date(),
       },
     });
-    this.eventEmitter.emit(BENEFICIARY_EVENTS.BENEFICIARY_REMOVED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_REMOVED);
     return rdata;
   }
 
@@ -213,7 +213,7 @@ export class BeneficiaryService {
       });
     }
 
-    this.eventEmitter.emit(BENEFICIARY_EVENTS.BENEFICIARY_CREATED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED);
 
     // Return some form of success indicator, as createMany does not return the records themselves
     return { success: true, count: dtos.length };
