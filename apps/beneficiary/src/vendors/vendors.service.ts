@@ -23,7 +23,7 @@ export class VendorsService {
     await this.prisma.auth.create({
       data: {
         userId: +user.id,
-        service: dto.service,
+        service: dto.service as any,
         serviceId: dto[service.toLocaleLowerCase()],
         details: dto.extras,
       },

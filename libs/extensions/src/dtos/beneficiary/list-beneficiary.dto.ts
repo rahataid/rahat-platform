@@ -8,6 +8,11 @@ export class ListBeneficiaryDto {
 
   // override order: 'asc' | 'desc' = 'desc';
 
+  sort: string;
+  order: 'asc' | 'desc';
+  page: number;
+  perPage: number;
+
   @ApiPropertyOptional({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
   @IsString()
   @IsOptional()
