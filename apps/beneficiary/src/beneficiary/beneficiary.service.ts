@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
-import { PaginatorTypes, paginator } from '@nodeteam/nestjs-prisma-pagination';
 import { Beneficiary } from '@prisma/client';
 import {
   AddToProjectDto,
@@ -14,7 +13,7 @@ import {
   BeneficiaryEvents,
   ProjectContants,
 } from '@rahataid/sdk';
-import { PrismaService } from '@rumsan/prisma';
+import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { createListQuery } from './helpers';

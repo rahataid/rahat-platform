@@ -1,4 +1,4 @@
-import { Service } from '@rumsan/sdk/enums/enums';
+import { Service } from '@rumsan/sdk/enums';
 
 export interface Vendor {
   id: number;

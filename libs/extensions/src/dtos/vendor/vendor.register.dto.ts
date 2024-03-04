@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { VendorCreateInput } from '@rahataid/sdk';
-import { Service } from '@rumsan/sdk/enums/enums';
+import { Service } from '@rumsan/sdk/enums';
 import { IsEthereumAddress, IsOptional, IsString } from 'class-validator';
 
 export class VendorRegisterDto implements VendorCreateInput {
