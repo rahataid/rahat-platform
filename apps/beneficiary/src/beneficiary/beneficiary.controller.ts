@@ -16,7 +16,7 @@ import { ReferBeneficiaryDto } from './dto/refer.beneficiary.dto';
 export class BeneficiaryController {
   constructor(
     private readonly beneficiaryService: BeneficiaryService,
-    @Inject('EL_PROJECT_CLIENT') private readonly client: ClientProxy,
+    @Inject('PROJECT_CLIENT') private readonly client: ClientProxy,
     private readonly service: BeneficiaryService,
     private readonly statsService: BeneficiaryStatService
   ) {}

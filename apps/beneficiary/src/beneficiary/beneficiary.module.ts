@@ -12,7 +12,7 @@ import { BeneficiaryStatService } from './beneficiaryStat.service';
   imports: [
     ClientsModule.register([
       {
-        name: 'EL_PROJECT_CLIENT',
+        name: 'PROJECT_CLIENT',
         transport: Transport.REDIS,
         options: {
           host: process.env.REDIS_HOST,

@@ -22,6 +22,9 @@ export const JOBS = {
   SLACK: 'slack',
   OTP: 'otp',
   PROJECT_CREATE: 'project_create',
+  SETTINGS: {
+    CREATE: 'rahat.jobs.settings.create',
+  },
   VENDOR: {
     REGISTER: 'jobs.vendor.register',
   },

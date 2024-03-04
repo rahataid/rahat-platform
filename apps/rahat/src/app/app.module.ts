@@ -2,6 +2,7 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { StatsModule } from '@rahat/stats';
 import { SettingsModule } from '@rumsan/settings';
 import {
@@ -20,6 +21,17 @@ import { AppService } from './app.service';
 
 @Module({
   imports: [
+    ClientsModule.register([
+      {
+        name: 'PROJECT_CLIENT',
+        transport: Transport.REDIS,
+        options: {
+          host: process.env.REDIS_HOST,
+          port: +process.env.REDIS_PORT,
+          password: process.env.REDIS_PASSWORD,
+        },
+      },
+    ]),
     ConfigModule.forRoot({ isGlobal: true }),
     BeneficiaryModule,
     BullModule.forRootAsync({
