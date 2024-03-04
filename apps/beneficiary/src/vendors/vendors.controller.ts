@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
-import { VendorsService } from './vendors.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { VendorRegisterDto } from './dto/vendor-register.dto';
+import { VendorRegisterDto } from '@rahataid/extensions';
+import { VendorsService } from './vendors.service';
 
 @Controller('vendors')
 export class VendorsController {
