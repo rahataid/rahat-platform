@@ -7,12 +7,12 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { CreateProjectDto, UpdateProjectDto } from './dto/create-project.dto';
-import { ProjectService } from './project.service';
-import { UUID } from 'crypto';
 import { ClientProxy } from '@nestjs/microservices';
+import { ApiTags } from '@nestjs/swagger';
+import { CreateProjectDto, UpdateProjectDto } from '@rahataid/extensions';
+import { UUID } from 'crypto';
 import { timeout } from 'rxjs/operators';
+import { ProjectService } from './project.service';
 
 @Controller('projects')
 @ApiTags('Projects')

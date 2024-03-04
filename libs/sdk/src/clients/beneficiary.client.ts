@@ -2,7 +2,8 @@ import { Pagination } from '@rumsan/sdk/types';
 import { formatResponse } from '@rumsan/sdk/utils';
 import { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { UUID } from 'crypto';
-import { Beneficiary, BeneficiaryClient, Stats } from '../types';
+import { Beneficiary } from '../beneficiary';
+import { BeneficiaryClient, Stats } from '../types';
 
 export const getBeneficiaryClient = (
   client: AxiosInstance
