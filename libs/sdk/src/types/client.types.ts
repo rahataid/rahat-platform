@@ -25,4 +25,9 @@ export type BeneficiaryClient = {
     { uuid, data }: { uuid: UUID; data: Beneficiary },
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<Beneficiary>>;
+
+  get: (
+    uuid: UUID,
+    config?: AxiosRequestConfig
+  ) => Promise<FormattedResponse<Beneficiary>>;
 };

@@ -26,6 +26,11 @@ export class BeneficiaryController {
     return this.service.create(createBeneficiaryDto);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.GET })
+  async getBeneficiary(uuid: UUID) {
+    return this.service.findOne(uuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
   createBulk(@Payload() data) {
     return this.service.createBulk(data);
@@ -57,11 +62,9 @@ export class BeneficiaryController {
   // }
 
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
-  update(
-    @Param('uuid') uuid: UUID,
-    @Payload() updateBeneficiaryDto: UpdateBeneficiaryDto
-  ) {
-    return this.service.update(uuid, updateBeneficiaryDto);
+  update(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryDto) {
+    const benefUUID = uuid ? uuid : dto.uuid;
+    return this.service.update(benefUUID, dto);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.REMOVE })
