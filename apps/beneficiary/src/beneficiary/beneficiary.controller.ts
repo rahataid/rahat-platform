@@ -62,11 +62,9 @@ export class BeneficiaryController {
   // }
 
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
-  update(
-    @Param('uuid') uuid: UUID,
-    @Payload() updateBeneficiaryDto: UpdateBeneficiaryDto
-  ) {
-    return this.service.update(uuid, updateBeneficiaryDto);
+  update(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryDto) {
+    const benefUUID = uuid ? uuid : dto.uuid;
+    return this.service.update(benefUUID, dto);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.REMOVE })
