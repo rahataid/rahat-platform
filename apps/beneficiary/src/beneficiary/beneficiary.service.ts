@@ -1,16 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { PaginatorTypes, paginator } from '@nodeteam/nestjs-prisma-pagination';
+import { ClientProxy } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
+  AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  UpdateBeneficiaryDto,
-} from '@rahat/sdk';
-import { PrismaService } from '@rumsan/prisma';
+  ReferBeneficiaryDto,
+} from '@rahataid/extensions';
+import {
+  BeneficiaryConstants,
+  BeneficiaryEvents,
+  ProjectContants,
+} from '@rahataid/sdk';
+import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { EVENTS } from '../constants';
+import { createListQuery } from './helpers';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -19,11 +25,17 @@ export class BeneficiaryService {
   private rsprisma;
   constructor(
     protected prisma: PrismaService,
+    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private eventEmitter: EventEmitter2
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
 
+  addToProject(dto: AddToProjectDto) {
+    return this.prisma.beneficiaryProject.create({
+      data: dto,
+    });
+  }
   // async get(uuid: UUID): TBeneficiary {
   //   const beneficiary = await this.prisma.beneficiary.findUnique({
   //     where: {
@@ -43,12 +55,14 @@ export class BeneficiaryService {
   async list(
     dto: ListBeneficiaryDto
   ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
+    const AND_QUERY = createListQuery(dto);
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
     return paginate(
       this.prisma.beneficiary,
       {
         where: {
+          //AND: AND_QUERY,
           deletedAt: null,
         },
         orderBy,
@@ -73,11 +87,43 @@ export class BeneficiaryService {
         },
       });
     }
-    this.eventEmitter.emit(EVENTS.BENEFICIARY_CREATED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED);
     return rdata;
   }
 
-  async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
+  async findOne(uuid: string) {
+    return await this.rsprisma.beneficiary.findUnique({ where: { uuid } });
+  }
+
+  async referBeneficiary(dto: ReferBeneficiaryDto) {
+    const { referrerBeneficiary, referrerVendor, ...rest } = dto;
+    const row = await this.create(rest);
+    const projectPayload = {
+      uuid: row.uuid,
+      referrerVendor: referrerVendor || '',
+      referrerBeneficiary: referrerBeneficiary || '',
+      walletAddress: dto.walletAddress,
+      extras: dto?.extras || null,
+      type: BeneficiaryConstants.Types.REFERRED,
+    };
+
+    return this.client.send({ cmd: 'ben-referred' }, projectPayload);
+  }
+
+  // async createBulk(data: CreateBeneficiaryDto[]) {
+  //   if (!data.length) return;
+  //   const sanitized = data.map((d) => {
+  //     return {
+  //       ...d,
+  //       walletAddress: Buffer.from(d.walletAddress.slice(2), 'hex'),
+  //     };
+  //   });
+  //   return this.rsprisma.beneficiary.createMany({
+  //     data: sanitized,
+  //   });
+  // }
+
+  async update(uuid: UUID, dto: any) {
     const findUuid = await this.prisma.beneficiary.findUnique({
       where: {
         uuid,
@@ -92,7 +138,7 @@ export class BeneficiaryService {
       },
       data: dto,
     });
-    this.eventEmitter.emit(EVENTS.BENEFICIARY_UPDATED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
     return rdata;
   }
 
@@ -113,7 +159,7 @@ export class BeneficiaryService {
         deletedAt: new Date(),
       },
     });
-    this.eventEmitter.emit(EVENTS.BENEFICIARY_REMOVED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_REMOVED);
     return rdata;
   }
 
@@ -159,12 +205,18 @@ export class BeneficiaryService {
 
     // Insert PII data in bulk
     if (piiBulkInsertData.length > 0) {
+      const sanitizedPiiBenef = piiBulkInsertData.map((b) => {
+        return {
+          ...b,
+          phone: b.phone ? b.phone.toString() : null,
+        };
+      });
       await this.prisma.beneficiaryPii.createMany({
-        data: piiBulkInsertData,
+        data: sanitizedPiiBenef,
       });
     }
 
-    this.eventEmitter.emit(EVENTS.BENEFICIARY_CREATED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED);
 
     // Return some form of success indicator, as createMany does not return the records themselves
     return { success: true, count: dtos.length };

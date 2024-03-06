@@ -1,13 +1,16 @@
 {
   "name": "@rahat/stats",
   "version": "0.0.1",
-  "dependencies": {
-    "@prisma/client": "5.9.1",
-    "@rumsan/core": "^3.0.104",
-    "@rumsan/prisma": "^1.0.104",
-    "tslib": "^2.3.0"
-  },
-  "type": "commonjs",
-  "main": "./src/index.js",
+  "license": "AGPL-3.0",
+  "licenses": [
+    {
+      "type": "AGPL-3.0",
+      "url": "https://opensource.org/licenses/AGPL-3.0"
+    },
+    {
+      "type": "Commercial License",
+      "url": "https://www.rumsan.com"
+    }
+  ],
   "typings": "./src/index.d.ts"
 }

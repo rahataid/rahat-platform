@@ -1,12 +1,13 @@
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { BQUEUE } from '@rahat/sdk';
+import { BQUEUE } from '@rahataid/sdk';
 
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ListenersModule } from '../listeners/listener.module';
 import { BeneficiaryProcessor } from '../processors/beneficiary.processor';
+import { VendorsModule } from '../vendors/vendors.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -31,6 +32,7 @@ import { AppService } from './app.service';
       name: BQUEUE.RAHAT_BENEFICIARY,
     }),
     BeneficiaryModule,
+    VendorsModule,
     ListenersModule,
   ],
   controllers: [AppController],

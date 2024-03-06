@@ -1,6 +1,8 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 # rumsan
 .env
+.env.*
+!.env.example
 play
 .npmrc
 
@@ -43,3 +45,9 @@ testem.log
 Thumbs.db
 
 .nx/cache
+
+
+# Local
+docker-compose.yaml
+combine.log
+error.log

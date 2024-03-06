@@ -1,6 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "strictPropertyInitialization": false,
     "rootDir": ".",
     "sourceMap": true,
     "declaration": false,
@@ -15,7 +16,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@rahat/sdk": ["libs/sdk/src/index.ts"],
+      "@rahataid/extensions": ["libs/extensions/src/index.ts"],
+      "@rahataid/extensions/*": ["libs/extensions/src/*"],
+      "@rahataid/sdk": ["libs/sdk/src/index.ts"],
+      "@rahataid/sdk/*": ["libs/sdk/src/*"],
       "@rahat/stats": ["libs/stats/src/index.ts"]
     }
   },

@@ -1,12 +1,16 @@
 {
-  "name": "@rahat/sdk",
-  "version": "0.0.1",
-  "dependencies": {
-    "@nestjs/swagger": "^7.1.17",
-    "class-validator": "^0.14.0",
-    "tslib": "^2.3.0"
-  },
-  "type": "commonjs",
-  "main": "./src/index.js",
+  "name": "@rahataid/sdk",
+  "version": "0.0.12",
+  "license": "AGPL-3.0",
+  "licenses": [
+    {
+      "type": "AGPL-3.0",
+      "url": "https://opensource.org/licenses/AGPL-3.0"
+    },
+    {
+      "type": "Commercial License",
+      "url": "https://www.rumsan.com"
+    }
+  ],
   "typings": "./src/index.d.ts"
 }

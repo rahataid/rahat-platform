@@ -215,17 +215,49 @@ model Beneficiary {
   updatedAt      DateTime?      @updatedAt()
   deletedAt      DateTime?
 
-  pii BeneficiaryPii? @relation("BeneficiaryToPii")
+  pii                BeneficiaryPii?      @relation("BeneficiaryToPii")
+  BeneficiaryProject BeneficiaryProject[]
 
   @@map("tbl_beneficiaries")
 }
 
+model BeneficiaryProject {
+  id   Int    @id @default(autoincrement()) @db.Integer()
+  uuid String @unique @default(uuid()) @db.Uuid()
+
+  projectId String  @db.Uuid()
+  Project   Project @relation(fields: [projectId], references: [uuid])
+
+  beneficiaryId String      @db.Uuid()
+  Beneficiary   Beneficiary @relation(fields: [beneficiaryId], references: [uuid])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt()
+  deletedAt DateTime?
+
+  @@unique([projectId, beneficiaryId], name: "beneficiaryProjectIdentifier")
+  @@map("tbl_beneficiaries_projects")
+}
+
+// ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
+
+enum ProjectStatus {
+  NOT_READY
+  ACTIVE
+  CLOSED
+}
+
+enum BeneficiaryTypes {
+  ENROLLED
+  REFERRED
+}
+
 model BeneficiaryPii {
-  beneficiaryId Int    @unique
+  beneficiaryId Int     @unique
   name          String?
   phone         String?
   email         String?
-  extras        Json?  @db.JsonB()
+  extras        Json?   @db.JsonB()
 
   beneficiary Beneficiary @relation("BeneficiaryToPii", fields: [beneficiaryId], references: [id])
 
@@ -253,11 +285,12 @@ enum PhoneStatus {
   SMART_PHONE
 }
 
+// ++++++++++++++++++ END: Rahat - Projects +++++++++++++++++++++++
 // ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
 // ++++++++++++++++++ START: @rahat/projects - Projects +++++++++++++++++++
 model Project {
   id              Int           @id @default(autoincrement())
-  uuid            String        @unique @default(uuid())
+  uuid            String        @unique @default(uuid()) @db.Uuid()
   name            String
   description     String?
   status          ProjectStatus @default(NOT_READY)
@@ -265,17 +298,13 @@ model Project {
   contractAddress String?
   extras          Json?         @db.JsonB()
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt()
-  deletedAt DateTime?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime?            @updatedAt()
+  deletedAt          DateTime?
+  BeneficiaryProject BeneficiaryProject[]
+  ProjectVendors     ProjectVendors[]
 
   @@map("tbl_projects")
-}
-
-enum ProjectStatus {
-  NOT_READY
-  ACTIVE
-  CLOSED
 }
 
 // ++++++++++++++++++ END: Rahat - Projects +++++++++++++++++++++++++++++++
@@ -293,3 +322,66 @@ model Stats {
 }
 
 // ++++++++++++++++++ END: @rahat/stats - Statistics +++++++++++++++++++++++
+
+
+// ++++++++++++++++++ START: @rahat/transactions - Vendors ++++++++++++++++++++
+model Vendors {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid()) @db.Uuid()
+  name      String
+  email     String?
+  phone     String?
+  location  String?
+  wallet    String?
+  extras    Json?    @db.JsonB()
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
+
+  @@map("tbl_vendors")
+}
+
+model ProjectVendors {
+  id        Int      @id @default(autoincrement())
+  projectId String   @db.Uuid()
+  vendorId  String   @db.Uuid()
+  extras    Json?    @db.JsonB()
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  service   Service
+  deletedAt DateTime?
+  Project   Project  @relation(fields: [projectId], references: [uuid])
+
+  @@unique([projectId, vendorId], name: "projectVendorIdentifier")
+  @@map("tbl_projects_vendors")
+}
+
+// ++++++++++++++++++ END: @rahat/transactions - Vendors ++++++++++++++++++++++
+
+// ++++++++++++++++++ START: @rahat/transactions - Transactions ++++++++++++++++++++
+model Transactions {
+  id           Int      @id @default(autoincrement())
+  uuid         String   @unique @default(uuid()) @db.Uuid()
+  projectId    String   @db.Uuid()
+  beneficiaryId String  @db.Uuid()
+  vendorId     String   @db.Uuid()
+  amount       Float
+  currency     String
+  status       TransactionStatus @default(PENDING)
+  extras       Json?    @db.JsonB()
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime? @updatedAt()
+  deletedAt    DateTime?
+
+  @@map("tbl_transactions")
+}
+
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FAILED
+}
+
+// ++++++++++++++++++ END: @rahat/transactions - Transactions ++++++++++++++++++++++
+

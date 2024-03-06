@@ -1,17 +1,19 @@
-import { Module } from '@nestjs/common';
-import { BeneficiaryController } from './beneficiary.controller';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BullModule } from '@nestjs/bull';
-import { BQUEUE } from '@rahat/sdk';
+import { Module } from '@nestjs/common';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { BQUEUE, BeneficiaryConstants } from '@rahataid/sdk';
+import { BeneficiaryController } from './beneficiary.controller';
 
 @Module({
   imports: [
     ClientsModule.register([
       {
-        name: 'BEN_CLIENT',
-        transport: Transport.TCP,
+        name: BeneficiaryConstants.Client,
+        transport: Transport.REDIS,
         options: {
-          port: +process.env.PORT_BEN,
+          host: process.env.REDIS_HOST,
+          port: +process.env.REDIS_PORT,
+          password: process.env.REDIS_PASSWORD,
         },
       },
     ]),

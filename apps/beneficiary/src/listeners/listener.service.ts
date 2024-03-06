@@ -1,11 +1,10 @@
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { BQUEUE } from '@rahat/sdk';
 import { StatsService } from '@rahat/stats';
+import { BQUEUE, BeneficiaryEvents } from '@rahataid/sdk';
 import { Queue } from 'bull';
 import { BeneficiaryStatService } from '../beneficiary/beneficiaryStat.service';
-import { EVENTS } from '../constants';
 @Injectable()
 export class ListenersService {
   constructor(
@@ -14,9 +13,9 @@ export class ListenersService {
     private readonly statsService: StatsService
   ) {}
 
-  @OnEvent(EVENTS.BENEFICIARY_CREATED)
-  @OnEvent(EVENTS.BENEFICIARY_UPDATED)
-  @OnEvent(EVENTS.BENEFICIARY_REMOVED)
+  @OnEvent(BeneficiaryEvents.BENEFICIARY_CREATED)
+  @OnEvent(BeneficiaryEvents.BENEFICIARY_UPDATED)
+  @OnEvent(BeneficiaryEvents.BENEFICIARY_REMOVED)
   async onBeneficiaryChanged() {
     await this.benStats.saveAllStats();
   }

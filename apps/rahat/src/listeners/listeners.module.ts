@@ -1,15 +1,16 @@
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { AuthsModule } from '@rumsan/user';
-import { ListenersService } from './listeners.service';
-import { DevService } from '../utils/develop.service';
 import { ConfigService } from '@nestjs/config';
-import { BQUEUE } from '@rahat/sdk';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { BQUEUE } from '@rahataid/sdk';
+import { SettingsModule } from '@rumsan/settings';
+import { DevService } from '../utils/develop.service';
+import { EmailService } from './email.service';
+import { ListenersService } from './listeners.service';
 
 @Module({
   imports: [
-    AuthsModule,
+    SettingsModule,
     BullModule.registerQueue({
       name: BQUEUE.RAHAT,
     }),
@@ -34,6 +35,6 @@ import { BQUEUE } from '@rahat/sdk';
       },
     ]),
   ],
-  providers: [ListenersService, DevService],
+  providers: [ListenersService, DevService, EmailService],
 })
 export class ListenersModule {}
