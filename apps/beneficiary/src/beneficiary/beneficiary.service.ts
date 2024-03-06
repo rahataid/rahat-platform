@@ -91,8 +91,16 @@ export class BeneficiaryService {
     return rdata;
   }
 
-  async findOne(uuid: string) {
-    return await this.rsprisma.beneficiary.findUnique({ where: { uuid } });
+  async findOne(uuid: UUID) {
+    const row = await this.rsprisma.beneficiary.findUnique({
+      where: { uuid },
+    });
+    if (!row) return null;
+    const piiData = await this.rsprisma.beneficiaryPii.findUnique({
+      where: { beneficiaryId: row.id },
+    });
+    if (piiData) row.piiData = piiData;
+    return row;
   }
 
   async referBeneficiary(dto: ReferBeneficiaryDto) {

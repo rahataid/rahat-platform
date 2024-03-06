@@ -89,4 +89,10 @@ export class BeneficiaryController {
   async update(@Param('uuid') uuid: UUID, @Body() dto: UpdateBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.UPDATE }, { uuid, dto });
   }
+
+  @Get(':uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async getBeneficiary(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GET }, uuid);
+  }
 }

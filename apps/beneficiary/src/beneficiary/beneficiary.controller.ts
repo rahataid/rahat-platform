@@ -26,6 +26,11 @@ export class BeneficiaryController {
     return this.service.create(createBeneficiaryDto);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.GET })
+  async getBeneficiary(uuid: UUID) {
+    return this.service.findOne(uuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
   createBulk(@Payload() data) {
     return this.service.createBulk(data);
