@@ -6,6 +6,7 @@ export const EVENTS = {
 };
 
 export const JOBS = {
+  LIST_PII: 'rahat.jobs.beneficiary.list_pii',
   CREATE: 'rahat.jobs.beneficiary.create',
   CREATE_BULK: 'rahat.jobs.beneficiary.create_bulk',
   GET: 'rahat.jobs.beneficiary.get',
