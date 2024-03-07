@@ -41,6 +41,11 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.LIST }, dto);
   }
 
+  @Get('pii')
+  async listPiiData(@Query() dto: any) {
+    return this.client.send({ cmd: BeneficiaryJobs.LIST_PII }, dto);
+  }
+
   @Get('stats')
   async getStats() {
     return this.client.send({ cmd: BeneficiaryJobs.STATS }, {});

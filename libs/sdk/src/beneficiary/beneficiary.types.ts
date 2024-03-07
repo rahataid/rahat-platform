@@ -21,6 +21,7 @@ export type Beneficiary = {
 };
 
 export type TPIIData = {
+  beneficiaryId?: number;
   name?: string;
   phone?: string;
   email?: string;

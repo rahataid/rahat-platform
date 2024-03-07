@@ -39,21 +39,19 @@ export class BeneficiaryService {
       data: dto,
     });
   }
-  // async get(uuid: UUID): TBeneficiary {
-  //   const beneficiary = await this.prisma.beneficiary.findUnique({
-  //     where: {
-  //       uuid,
-  //     },
-  //   });
 
-  //   const piiData: TPIIData = await this.prisma.beneficiaryPii.findUnique({
-  //     where: {
-  //       beneficiaryId: beneficiary.id,
-  //     },
-  //   });
-
-  //   return { piiData, ...beneficiary };
-  // }
+  listPiiData(dto: any) {
+    return paginate(
+      this.rsprisma.beneficiaryPii,
+      {
+        where: {},
+      },
+      {
+        page: dto.page,
+        perPage: dto.perPage,
+      }
+    );
+  }
 
   async list(
     dto: ListBeneficiaryDto
@@ -62,7 +60,7 @@ export class BeneficiaryService {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
     return paginate(
-      this.prisma.beneficiary,
+      this.rsprisma.beneficiary,
       {
         where: {
           //AND: AND_QUERY,
