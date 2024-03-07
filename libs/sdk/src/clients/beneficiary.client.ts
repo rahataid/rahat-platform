@@ -32,6 +32,14 @@ export const getBeneficiaryClient = (
       return formatResponse<Beneficiary[]>(response);
     },
 
+    listPiiData: async (data?: Pagination, config?: AxiosRequestConfig) => {
+      const response = await client.get('/pii', {
+        params: data,
+        ...config,
+      });
+      return formatResponse<Beneficiary[]>(response);
+    },
+
     update: async (
       { uuid, data }: { uuid: UUID; data: Beneficiary },
       config?: AxiosRequestConfig

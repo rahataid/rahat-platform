@@ -21,6 +21,10 @@ export type BeneficiaryClient = {
     data?: Pagination,
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<Beneficiary[]>>;
+  listPiiData: (
+    data?: Pagination,
+    config?: AxiosRequestConfig
+  ) => Promise<FormattedResponse<Beneficiary[]>>;
   update: (
     { uuid, data }: { uuid: UUID; data: Beneficiary },
     config?: AxiosRequestConfig

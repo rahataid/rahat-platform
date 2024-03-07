@@ -41,6 +41,11 @@ export class BeneficiaryController {
     return this.service.list(dto);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_PII })
+  async listPiiData(dto: any) {
+    return this.service.listPiiData(dto);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.STATS })
   async stats() {
     return this.statsService.getAllStats();
