@@ -1,6 +1,6 @@
 import { formatResponse } from '@rumsan/sdk/utils';
 import { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { VendorClient } from '../types/vendor.typs';
+import { VendorClient } from '../types/vendor.types';
 import { Vendor } from '../vendor';
 
 export const getVendorClient = (client: AxiosInstance): VendorClient => {
