@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 // import { PaginationDto } from '@rumsan/extensions/dtos';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
@@ -11,9 +11,11 @@ export class ListBeneficiaryDto {
   sort: string;
   order: 'asc' | 'desc';
 
+  @ApiProperty({ example: 1 })
   @IsNumber()
   page: number;
 
+  @ApiProperty({ example: '10' })
   @IsNumber()
   perPage: number;
 

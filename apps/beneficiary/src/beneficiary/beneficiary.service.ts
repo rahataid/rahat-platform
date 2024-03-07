@@ -7,12 +7,15 @@ import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   ReferBeneficiaryDto,
+  UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
 import {
   BeneficiaryConstants,
   BeneficiaryEvents,
   ProjectContants,
+  TPIIData,
 } from '@rahataid/sdk';
+
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -36,21 +39,19 @@ export class BeneficiaryService {
       data: dto,
     });
   }
-  // async get(uuid: UUID): TBeneficiary {
-  //   const beneficiary = await this.prisma.beneficiary.findUnique({
-  //     where: {
-  //       uuid,
-  //     },
-  //   });
 
-  //   const piiData: TPIIData = await this.prisma.beneficiaryPii.findUnique({
-  //     where: {
-  //       beneficiaryId: beneficiary.id,
-  //     },
-  //   });
-
-  //   return { piiData, ...beneficiary };
-  // }
+  listPiiData(dto: any) {
+    return paginate(
+      this.rsprisma.beneficiaryPii,
+      {
+        where: {},
+      },
+      {
+        page: dto.page,
+        perPage: dto.perPage,
+      }
+    );
+  }
 
   async list(
     dto: ListBeneficiaryDto
@@ -59,7 +60,7 @@ export class BeneficiaryService {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
     return paginate(
-      this.prisma.beneficiary,
+      this.rsprisma.beneficiary,
       {
         where: {
           //AND: AND_QUERY,
@@ -91,8 +92,16 @@ export class BeneficiaryService {
     return rdata;
   }
 
-  async findOne(uuid: string) {
-    return await this.rsprisma.beneficiary.findUnique({ where: { uuid } });
+  async findOne(uuid: UUID) {
+    const row = await this.rsprisma.beneficiary.findUnique({
+      where: { uuid },
+    });
+    if (!row) return null;
+    const piiData = await this.rsprisma.beneficiaryPii.findUnique({
+      where: { beneficiaryId: row.id },
+    });
+    if (piiData) row.piiData = piiData;
+    return row;
   }
 
   async referBeneficiary(dto: ReferBeneficiaryDto) {
@@ -123,7 +132,7 @@ export class BeneficiaryService {
   //   });
   // }
 
-  async update(uuid: UUID, dto: any) {
+  async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
     const findUuid = await this.prisma.beneficiary.findUnique({
       where: {
         uuid,
@@ -131,15 +140,27 @@ export class BeneficiaryService {
     });
 
     if (!findUuid) throw new Error('Data not Found');
+    const { piiData, ...rest } = dto;
 
     const rdata = await this.prisma.beneficiary.update({
       where: {
         uuid,
       },
-      data: dto,
+      data: rest,
     });
+    if (dto.piiData) await this.updatePIIByBenefUUID(uuid, piiData);
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
     return rdata;
+  }
+
+  async updatePIIByBenefUUID(benefUUID: UUID, piiData: TPIIData) {
+    const beneficiary = await this.findOne(benefUUID);
+    if (beneficiary) {
+      return this.rsprisma.beneficiaryPii.update({
+        where: { beneficiaryId: beneficiary.id },
+        data: piiData,
+      });
+    }
   }
 
   async remove(uuid: UUID) {
