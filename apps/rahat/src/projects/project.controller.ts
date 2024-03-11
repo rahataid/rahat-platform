@@ -5,10 +5,11 @@ import {
   Get,
   Inject,
   Param,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { CreateProjectDto, UpdateProjectDto } from '@rahataid/extensions';
 import { UUID } from 'crypto';
 import { timeout } from 'rxjs/operators';
@@ -33,13 +34,13 @@ export class ProjectController {
   }
 
   @Get(':uuid')
+  @ApiParam({ name: 'uuid', required: true })
   findOne(@Param('uuid') uuid: UUID) {
-    return this.rahatClient
-      .send({ cmd: 'project_get', uuid }, {})
-      .pipe(timeout(5000));
+    return this.projectService.findOne(uuid);
   }
 
-  @Post(':uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  @Patch(':uuid')
   update(
     @Body() updateProjectDto: UpdateProjectDto,
     @Param('uuid') uuid: UUID
