@@ -3,15 +3,16 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
+  AddBenToProjectDto,
   AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  ReferBeneficiaryDto,
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
 import {
   BeneficiaryConstants,
   BeneficiaryEvents,
+  BeneficiaryJobs,
   ProjectContants,
   TPIIData,
 } from '@rahataid/sdk';
@@ -104,19 +105,39 @@ export class BeneficiaryService {
     return row;
   }
 
-  async referBeneficiary(dto: ReferBeneficiaryDto) {
-    const { referrerBeneficiary, referrerVendor, ...rest } = dto;
-    const row = await this.create(rest);
+  async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
+    const { type, referrerBeneficiary, referrerVendor, ...rest } = dto;
+    // 1. Create Beneficiary
+    const benef = await this.create(rest);
     const projectPayload = {
-      uuid: row.uuid,
+      uuid: benef.uuid,
       referrerVendor: referrerVendor || '',
       referrerBeneficiary: referrerBeneficiary || '',
       walletAddress: dto.walletAddress,
       extras: dto?.extras || null,
-      type: BeneficiaryConstants.Types.REFERRED,
+      type: type || BeneficiaryConstants.Types.ENROLLED,
     };
+    // Clear referrer fields if the beneficiary is ENROLLED
+    if (type === BeneficiaryConstants.Types.ENROLLED) {
+      delete projectPayload.referrerBeneficiary;
+      delete projectPayload.referrerVendor;
+    }
 
-    return this.client.send({ cmd: 'ben-referred' }, projectPayload);
+    // 2. Save Beneficiary to Project
+    await this.saveBeneficiaryToProject({
+      beneficiaryId: benef.uuid,
+      projectId: projectUid,
+    });
+
+    // 3. Sync beneficiary to project
+    return this.client.send(
+      { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUid },
+      projectPayload
+    );
+  }
+
+  async saveBeneficiaryToProject(dto: AddToProjectDto) {
+    return this.prisma.beneficiaryProject.create({ data: dto });
   }
 
   // async createBulk(data: CreateBeneficiaryDto[]) {

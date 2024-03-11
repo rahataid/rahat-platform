@@ -1,10 +1,8 @@
 import { Controller, Inject, Param } from '@nestjs/common';
 import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import {
-  AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  ReferBeneficiaryDto,
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
 import { BeneficiaryJobs, ProjectContants } from '@rahataid/sdk';
@@ -51,20 +49,11 @@ export class BeneficiaryController {
     return this.statsService.getAllStats();
   }
 
-  // TODO: Update cmd constant
-  @MessagePattern({ cmd: BeneficiaryJobs.REFER })
-  async referBeneficiary(dto: ReferBeneficiaryDto) {
-    return this.beneficiaryService.referBeneficiary(dto);
-  }
-
   @MessagePattern({ cmd: BeneficiaryJobs.ADD_TO_PROJECT })
-  async addToProject(dto: AddToProjectDto) {
-    return this.beneficiaryService.addToProject(dto);
+  async addToProject(payload: any) {
+    const { dto, projectUid } = payload;
+    return this.beneficiaryService.addBeneficiaryToProject(dto, projectUid);
   }
-  // @MessagePattern({ cmd: BeneficiaryJobs.GET })
-  // get(@Param('uuid') uuid: UUID) {
-  //   return this.service.get(uuid);
-  // }
 
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
   update(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryDto) {
