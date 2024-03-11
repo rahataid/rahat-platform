@@ -4,7 +4,6 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  ReferBeneficiaryDto,
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
 import { BeneficiaryJobs, ProjectContants } from '@rahataid/sdk';
@@ -53,8 +52,9 @@ export class BeneficiaryController {
 
   // TODO: Update cmd constant
   @MessagePattern({ cmd: BeneficiaryJobs.REFER })
-  async referBeneficiary(dto: ReferBeneficiaryDto) {
-    return this.beneficiaryService.referBeneficiary(dto);
+  async referBeneficiary(payload: any) {
+    const { dto, projectUid } = payload;
+    return this.beneficiaryService.referBeneficiary(dto, projectUid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ADD_TO_PROJECT })

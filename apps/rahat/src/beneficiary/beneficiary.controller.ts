@@ -16,7 +16,6 @@ import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
-  AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   ReferBeneficiaryDto,
@@ -56,14 +55,16 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
 
-  @Post('refer')
-  async referBeneficiary(@Body() dto: ReferBeneficiaryDto) {
-    return this.client.send({ cmd: BeneficiaryJobs.REFER }, dto);
-  }
-
-  @Post('add-to-project')
-  async addToProject(@Body() dto: AddToProjectDto) {
-    return this.client.send({ cmd: BeneficiaryJobs.ADD_TO_PROJECT }, dto);
+  @ApiParam({ name: 'projectUid', required: true })
+  @Post('refer/:projectUid')
+  async referBeneficiary(
+    @Param('projectUid') projectUid: UUID,
+    @Body() dto: ReferBeneficiaryDto
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.REFER },
+      { dto, projectUid: projectUid }
+    );
   }
 
   @Post('bulk')

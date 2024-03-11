@@ -12,6 +12,7 @@ import {
 import {
   BeneficiaryConstants,
   BeneficiaryEvents,
+  BeneficiaryJobs,
   ProjectContants,
   TPIIData,
 } from '@rahataid/sdk';
@@ -104,11 +105,12 @@ export class BeneficiaryService {
     return row;
   }
 
-  async referBeneficiary(dto: ReferBeneficiaryDto) {
+  async referBeneficiary(dto: ReferBeneficiaryDto, projectUid: UUID) {
     const { referrerBeneficiary, referrerVendor, ...rest } = dto;
-    const row = await this.create(rest);
+    // 1. Create Beneficiary
+    const benef = await this.create(rest);
     const projectPayload = {
-      uuid: row.uuid,
+      uuid: benef.uuid,
       referrerVendor: referrerVendor || '',
       referrerBeneficiary: referrerBeneficiary || '',
       walletAddress: dto.walletAddress,
@@ -116,7 +118,21 @@ export class BeneficiaryService {
       type: BeneficiaryConstants.Types.REFERRED,
     };
 
-    return this.client.send({ cmd: 'ben-referred' }, projectPayload);
+    // 2. Save Beneficiary to Project
+    await this.saveBeneficiaryToProject({
+      beneficiaryId: benef.uuid,
+      projectId: projectUid,
+    });
+
+    // 3. Sync beneficiary to project
+    return this.client.send(
+      { cmd: BeneficiaryJobs.REFER, uuid: projectUid },
+      projectPayload
+    );
+  }
+
+  async saveBeneficiaryToProject(dto: AddToProjectDto) {
+    return this.prisma.beneficiaryProject.create({ data: dto });
   }
 
   // async createBulk(data: CreateBeneficiaryDto[]) {
