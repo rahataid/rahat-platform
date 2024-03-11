@@ -16,9 +16,9 @@ import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
+  AddBenToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  ReferBeneficiaryDto,
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
 import { BQUEUE, BeneficiaryJobs, Enums, TFile } from '@rahataid/sdk';
@@ -55,15 +55,15 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
 
-  @ApiParam({ name: 'projectUid', required: true })
-  @Post('refer/:projectUid')
+  @ApiParam({ name: 'uuid', required: true })
+  @Post('projects/:uuid')
   async referBeneficiary(
-    @Param('projectUid') projectUid: UUID,
-    @Body() dto: ReferBeneficiaryDto
+    @Param('uuid') uuid: UUID,
+    @Body() dto: AddBenToProjectDto
   ) {
     return this.client.send(
-      { cmd: BeneficiaryJobs.REFER },
-      { dto, projectUid: projectUid }
+      { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
+      { dto, projectUid: uuid }
     );
   }
 

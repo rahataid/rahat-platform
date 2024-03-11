@@ -3,10 +3,10 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
+  AddBenToProjectDto,
   AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  ReferBeneficiaryDto,
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
 import {
@@ -105,8 +105,8 @@ export class BeneficiaryService {
     return row;
   }
 
-  async referBeneficiary(dto: ReferBeneficiaryDto, projectUid: UUID) {
-    const { referrerBeneficiary, referrerVendor, ...rest } = dto;
+  async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
+    const { type, referrerBeneficiary, referrerVendor, ...rest } = dto;
     // 1. Create Beneficiary
     const benef = await this.create(rest);
     const projectPayload = {
@@ -115,8 +115,13 @@ export class BeneficiaryService {
       referrerBeneficiary: referrerBeneficiary || '',
       walletAddress: dto.walletAddress,
       extras: dto?.extras || null,
-      type: BeneficiaryConstants.Types.REFERRED,
+      type: type || BeneficiaryConstants.Types.ENROLLED,
     };
+    // Clear referrer fields if the beneficiary is ENROLLED
+    if (type === BeneficiaryConstants.Types.ENROLLED) {
+      delete projectPayload.referrerBeneficiary;
+      delete projectPayload.referrerVendor;
+    }
 
     // 2. Save Beneficiary to Project
     await this.saveBeneficiaryToProject({
@@ -126,7 +131,7 @@ export class BeneficiaryService {
 
     // 3. Sync beneficiary to project
     return this.client.send(
-      { cmd: BeneficiaryJobs.REFER, uuid: projectUid },
+      { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUid },
       projectPayload
     );
   }
