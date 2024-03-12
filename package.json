@@ -41,6 +41,7 @@
     "@rumsan/sdk": "^0.0.41",
     "@rumsan/settings": "^0.0.108",
     "@rumsan/user": "^3.0.153",
+    "abitype": "^1.0.1",
     "axios": "^1.6.7",
     "bull": "^4.12.2",
     "class-transformer": "^0.5.1",
@@ -55,6 +56,7 @@
     "ts-node": "10.9.1",
     "tslib": "^2.6.2",
     "uuid": "^9.0.1",
+    "viem": "^2.8.4",
     "winston": "^3.11.0",
     "xlsx": "^0.18.5",
     "zlib": "^1.0.5"
