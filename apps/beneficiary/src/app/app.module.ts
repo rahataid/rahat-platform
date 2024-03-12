@@ -12,6 +12,7 @@ import { AppService } from './app.service';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot({
       maxListeners: 10,
       ignoreErrors: false,
@@ -37,4 +38,4 @@ import { AppService } from './app.service';
   controllers: [AppController],
   providers: [AppService, BeneficiaryProcessor],
 })
-export class AppModule { }
+export class AppModule {}

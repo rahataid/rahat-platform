@@ -34,7 +34,7 @@ export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue
-  ) { }
+  ) {}
 
   @Get()
   async list(@Query() dto: ListBeneficiaryDto) {

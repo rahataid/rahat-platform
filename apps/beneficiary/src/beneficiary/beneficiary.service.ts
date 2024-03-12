@@ -196,16 +196,20 @@ export class BeneficiaryService {
     const findUuid = await this.prisma.beneficiary.findUnique({
       where: { uuid },
       include: {
-        pii: true
-      }
+        pii: true,
+      },
     });
     if (!findUuid) throw new Error('Data not Found');
 
     const encrypted = this.encryption.encrypt(findUuid.walletAddress);
-    const email = findUuid.pii.email
-    const name = findUuid.pii.name
-    this.beneficiaryQueue.add(BeneficiaryJobs.GENERATE_LINK, { encrypted, email, name });
-    return encrypted
+    const email = findUuid.pii.email;
+    const name = findUuid.pii.name;
+    await this.beneficiaryQueue.add(BeneficiaryJobs.SEND_EMAIL, {
+      encrypted,
+      email,
+      name,
+    });
+    return 'Success';
   }
 
   async createBulk(dtos: CreateBeneficiaryDto[]) {

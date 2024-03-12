@@ -44,4 +44,4 @@ import { AppService } from './app.service';
   controllers: [AppController],
   providers: [AppService, RahatProcessor],
 })
-export class AppModule { }
+export class AppModule {}

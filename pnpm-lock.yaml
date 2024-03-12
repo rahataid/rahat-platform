@@ -45,8 +45,8 @@ dependencies:
     specifier: ^3.0.134
     version: 3.0.134
   '@rumsan/extensions':
-    specifier: ^0.0.15
-    version: 0.0.15(@nestjs/core@10.3.3)(prisma@5.10.2)(reflect-metadata@0.1.14)
+    specifier: ^0.0.16
+    version: 0.0.16(@nestjs/core@10.3.3)(prisma@5.10.2)(reflect-metadata@0.1.14)
   '@rumsan/prisma':
     specifier: ^1.0.126
     version: 1.0.126(class-transformer@0.5.1)(class-validator@0.14.1)(prisma@5.10.2)(reflect-metadata@0.1.14)(rxjs@7.8.1)
@@ -3992,6 +3992,16 @@ packages:
       tslib: 2.6.2
     dev: false
 
+  /@rumsan/core@3.0.135:
+    resolution:
+      {
+        integrity: sha512-BvftVMd4AcLMN7TyWSamFTS9aUzQnyBquPuSV23KBm9YtdvlGYPMSoRK4JQgtxQBtfbmei/pcS2juq3pSO04kQ==,
+        tarball: https://npm.pkg.github.com/download/@rumsan/core/3.0.135/d05dd9d33c1127a6c6f47c94103adee32297ef0c,
+      }
+    dependencies:
+      tslib: 2.6.2
+    dev: false
+
   /@rumsan/extensions@0.0.15(@nestjs/core@10.3.3)(prisma@5.10.2)(reflect-metadata@0.1.14):
     resolution:
       {
@@ -4005,6 +4015,32 @@ packages:
       '@rumsan/core': 3.0.134
       '@rumsan/prisma': 1.0.126(class-transformer@0.5.1)(class-validator@0.14.1)(prisma@5.10.2)(reflect-metadata@0.1.14)(rxjs@7.8.1)
       '@rumsan/sdk': 0.0.40
+      axios: 1.6.7
+      class-transformer: 0.5.1
+      class-validator: 0.14.1
+      rxjs: 7.8.1
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - '@fastify/static'
+      - '@nestjs/core'
+      - debug
+      - prisma
+      - reflect-metadata
+    dev: false
+
+  /@rumsan/extensions@0.0.16(@nestjs/core@10.3.3)(prisma@5.10.2)(reflect-metadata@0.1.14):
+    resolution:
+      {
+        integrity: sha512-iBpBaV3zJhsR9lUzXj1Q7HVIv4FYdeC+w+Rx4vQrd5G8o40q/kEfxU1O9zdBOlzzbUTTD2nfc2Z1/qEjrYwjag==,
+        tarball: https://npm.pkg.github.com/download/@rumsan/extensions/0.0.16/5f4cd619b47e5af7b1f94987c1056986610b92fd,
+      }
+    dependencies:
+      '@nestjs/common': 10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
+      '@nestjs/swagger': 7.3.0(@nestjs/common@10.3.3)(@nestjs/core@10.3.3)(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)
+      '@prisma/client': 5.10.2(prisma@5.10.2)
+      '@rumsan/core': 3.0.135
+      '@rumsan/prisma': 1.0.127(class-transformer@0.5.1)(class-validator@0.14.1)(prisma@5.10.2)(reflect-metadata@0.1.14)(rxjs@7.8.1)
+      '@rumsan/sdk': 0.0.41
       axios: 1.6.7
       class-transformer: 0.5.1
       class-validator: 0.14.1
@@ -4046,6 +4082,27 @@ packages:
       '@nestjs/common': 10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
       '@prisma/client': 5.10.2(prisma@5.10.2)
       '@rumsan/sdk': 0.0.40
+      axios: 1.6.7
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - class-transformer
+      - class-validator
+      - debug
+      - prisma
+      - reflect-metadata
+      - rxjs
+    dev: false
+
+  /@rumsan/prisma@1.0.127(class-transformer@0.5.1)(class-validator@0.14.1)(prisma@5.10.2)(reflect-metadata@0.1.14)(rxjs@7.8.1):
+    resolution:
+      {
+        integrity: sha512-ZTimhWiRcql/HQUFxODwQ3UFqLRrfDfcpAwi2NwgqT0aK6JtJYG1WUWR0gWznD6kaTA9044tqqJi4Ga+r3mtaQ==,
+        tarball: https://npm.pkg.github.com/download/@rumsan/prisma/1.0.127/49f181c8bcb782ef3c05148464fde5ba595e7ea2,
+      }
+    dependencies:
+      '@nestjs/common': 10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
+      '@prisma/client': 5.10.2(prisma@5.10.2)
+      '@rumsan/sdk': 0.0.41
       axios: 1.6.7
       tslib: 2.6.2
     transitivePeerDependencies:

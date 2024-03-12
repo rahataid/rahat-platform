@@ -7,9 +7,7 @@ import { Job } from 'bull';
 @Processor(BQUEUE.RAHAT_BENEFICIARY)
 export class BeneficiaryProcessor {
   private readonly logger = new Logger(BeneficiaryProcessor.name);
-  constructor(
-    private readonly mailerService: MailerService,
-  ) { }
+  constructor(private readonly mailerService: MailerService) {}
 
   @Process(BeneficiaryJobs.UPDATE_STATS)
   async sample(job: Job<any>) {
@@ -18,17 +16,19 @@ export class BeneficiaryProcessor {
 
   @Process(BeneficiaryJobs.GENERATE_LINK)
   async generateLink(job: Job<any>) {
-    console.log(job.data)
+    console.log(job.data);
     if (job.data) {
-      console.log('I am here')
-      return this.mailerService.sendMail({
+      await this.mailerService.sendMail({
         to: job.data.email,
-        from: "raghav.kattel@rumsan.net",
+        from: 'raghav.kattel@rumsan.net',
         subject: 'Wallet Verification Link',
         template: './wallet-verification',
         context: { encryptedData: job.data.encrypted, name: job.data.name },
       });
+      console.log('Email sent to', job.data.email);
+      return true;
     }
-    throw new BadRequestException()
+
+    throw new BadRequestException();
   }
 }
