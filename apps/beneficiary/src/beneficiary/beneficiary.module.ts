@@ -11,7 +11,7 @@ import { BeneficiaryConsumer } from '../consumers/beneficiary.consumer';
 import { BeneficiaryController } from './beneficiary.controller';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
-import { EncryptionService } from './encryption.service';
+import { VerificationService } from './verification.service';
 @Module({
   imports: [
     ClientsModule.register([
@@ -56,8 +56,8 @@ import { EncryptionService } from './encryption.service';
   providers: [
     BeneficiaryService,
     BeneficiaryStatService,
-    EncryptionService,
+    VerificationService,
     BeneficiaryConsumer,
   ],
 })
-export class BeneficiaryModule {}
+export class BeneficiaryModule { }

@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
@@ -13,10 +13,8 @@ import {
   BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
-  BeneficiaryJobs,
   ProjectContants,
-  TPIIData,
-  validateWallet,
+  TPIIData
 } from '@rahataid/sdk';
 
 import { InjectQueue } from '@nestjs/bull';
@@ -24,7 +22,6 @@ import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { EncryptionService } from './encryption.service';
 import { createListQuery } from './helpers';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -38,7 +35,6 @@ export class BeneficiaryService {
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
     private eventEmitter: EventEmitter2,
-    private encryption: EncryptionService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -193,35 +189,6 @@ export class BeneficiaryService {
     return rdata;
   }
 
-  async generateLink(uuid: UUID) {
-    const findUuid = await this.prisma.beneficiary.findUnique({
-      where: { uuid },
-      include: {
-        pii: true,
-      },
-    });
-    if (!findUuid) throw new Error('Data not Found');
-
-    const encrypted = this.encryption.encrypt(findUuid.walletAddress);
-    const email = findUuid.pii.email;
-    const name = findUuid.pii.name;
-    await this.beneficiaryQueue.add(BeneficiaryJobs.SEND_EMAIL, {
-      encrypted,
-      email,
-      name,
-    });
-    return 'Success';
-  }
-
-  async validateWallet(validationData: validateWallet) {
-    const { walletAddress, encryptedData } = validationData
-    const decrypted = this.encryption.decrypt(encryptedData);
-
-    if (decrypted === walletAddress.toString()) {
-      return "success"
-    }
-    throw new UnauthorizedException('Invalid wallet address')
-  }
 
   async createBulk(dtos: CreateBeneficiaryDto[]) {
     // Pre-generate UUIDs for each beneficiary to use as a linking key
