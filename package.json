@@ -56,7 +56,8 @@
     "tslib": "^2.6.2",
     "uuid": "^9.0.1",
     "winston": "^3.11.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zlib": "^1.0.5"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",

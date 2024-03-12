@@ -7,7 +7,7 @@ import {
   ReferBeneficiaryDto,
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
-import { BeneficiaryJobs, ProjectContants } from '@rahataid/sdk';
+import { BeneficiaryJobs, ProjectContants, validateWallet } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
@@ -19,7 +19,7 @@ export class BeneficiaryController {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly service: BeneficiaryService,
     private readonly statsService: BeneficiaryStatService
-  ) {}
+  ) { }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE })
   async create(@Payload() createBeneficiaryDto: CreateBeneficiaryDto) {
@@ -81,5 +81,11 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GENERATE_LINK })
   generateLink(uuid: UUID) {
     return this.service.generateLink(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.VALIDATE_WALLET })
+  validateWallet(validationData: validateWallet) {
+    console.log({ validationData })
+    return this.service.validateWallet(validationData);
   }
 }

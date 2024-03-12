@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
@@ -16,6 +16,7 @@ import {
   BeneficiaryJobs,
   ProjectContants,
   TPIIData,
+  validateWallet,
 } from '@rahataid/sdk';
 
 import { InjectQueue } from '@nestjs/bull';
@@ -210,6 +211,16 @@ export class BeneficiaryService {
       name,
     });
     return 'Success';
+  }
+
+  async validateWallet(validationData: validateWallet) {
+    const { walletAddress, encryptedData } = validationData
+    const decrypted = this.encryption.decrypt(encryptedData);
+
+    if (decrypted === walletAddress.toString()) {
+      return "success"
+    }
+    throw new UnauthorizedException('Invalid wallet address')
   }
 
   async createBulk(dtos: CreateBeneficiaryDto[]) {
