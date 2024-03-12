@@ -11,6 +11,7 @@ import { BeneficiaryJobs, ProjectContants, validateWallet } from '@rahataid/sdk'
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
+import { VerificationService } from './verification.service';
 
 @Controller()
 export class BeneficiaryController {
@@ -18,7 +19,8 @@ export class BeneficiaryController {
     private readonly beneficiaryService: BeneficiaryService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly service: BeneficiaryService,
-    private readonly statsService: BeneficiaryStatService
+    private readonly statsService: BeneficiaryStatService,
+    private readonly verificationService: VerificationService,
   ) { }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE })
@@ -80,12 +82,12 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.GENERATE_LINK })
   generateLink(uuid: UUID) {
-    return this.service.generateLink(uuid);
+    return this.verificationService.generateLink(uuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.VALIDATE_WALLET })
   validateWallet(validationData: validateWallet) {
     console.log({ validationData })
-    return this.service.validateWallet(validationData);
+    return this.verificationService.validateWallet(validationData);
   }
 }
