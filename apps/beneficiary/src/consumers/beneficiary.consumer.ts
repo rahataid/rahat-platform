@@ -24,7 +24,7 @@ export class BeneficiaryConsumer {
                 context: {
                     encryptedData: `${this.configService.get<string>(
                         'VERIFICATION_URL'
-                    )}${job.data.encrypted}`,
+                    )}?encrypted=${job.data.encrypted}`,
                     name: job.data.name,
                 },
             }); // Add closing parenthesis here
