@@ -7,6 +7,7 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
+  ListProjectBeneficiaryDto,
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
 import {
@@ -54,6 +55,22 @@ export class BeneficiaryService {
     );
   }
 
+  async listBenefByProject(dto: ListProjectBeneficiaryDto) {
+    return paginate(
+      this.rsprisma.beneficiaryProject,
+      {
+        where: {
+          projectId: dto.projectId,
+        },
+        include: { Beneficiary: true },
+      },
+      {
+        page: dto.page,
+        perPage: dto.perPage,
+      }
+    );
+  }
+
   async list(
     dto: ListBeneficiaryDto
   ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
@@ -78,6 +95,7 @@ export class BeneficiaryService {
 
   async create(dto: CreateBeneficiaryDto) {
     const { piiData, ...data } = dto;
+    if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const rdata = await this.rsprisma.beneficiary.create({
       data,
     });

@@ -7,10 +7,17 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
-import { CreateProjectDto, UpdateProjectDto } from '@rahataid/extensions';
+import {
+  CreateProjectDto,
+  ListProjectBeneficiaryDto,
+  ProjectCommunicationDto,
+  UpdateProjectDto,
+} from '@rahataid/extensions';
+import { BeneficiaryJobs } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { timeout } from 'rxjs/operators';
 import { ProjectService } from './project.service';
@@ -53,17 +60,20 @@ export class ProjectController {
     return this.projectService.remove(uuid);
   }
 
+  @ApiParam({ name: 'uuid', required: true })
   @Get(':uuid/beneficiaries')
-  listBeneficiaries(@Param('uuid') uuid: UUID) {
+  listBeneficiaries(@Query() dto: ListProjectBeneficiaryDto) {
     return this.rahatClient
-      .send({ cmd: 'rahat.projects.beneficiary.list' }, {})
+      .send({ cmd: BeneficiaryJobs.LIST_BY_PROJECT }, dto)
       .pipe(timeout(5000));
   }
 
+  @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
-  projectActions(@Param('uuid') uuid: UUID) {
-    return this.rahatClient
-      .send({ cmd: 'project_actions', uuid }, {})
-      .pipe(timeout(5000));
+  projectActions(
+    @Param('uuid') uuid: UUID,
+    @Body() data: ProjectCommunicationDto
+  ) {
+    return this.projectService.handleProjectActions({ uuid, ...data });
   }
 }

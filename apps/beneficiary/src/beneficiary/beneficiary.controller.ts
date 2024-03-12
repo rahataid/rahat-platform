@@ -3,6 +3,7 @@ import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
+  ListProjectBeneficiaryDto,
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
 import { BeneficiaryJobs, ProjectContants } from '@rahataid/sdk';
@@ -37,6 +38,11 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.LIST })
   async list(dto: ListBeneficiaryDto) {
     return this.service.list(dto);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_BY_PROJECT })
+  async listByProject(dto: ListProjectBeneficiaryDto) {
+    return this.service.listBenefByProject(dto);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_PII })
