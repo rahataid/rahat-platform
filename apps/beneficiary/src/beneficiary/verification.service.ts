@@ -3,10 +3,16 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BQUEUE, BeneficiaryJobs, validateWallet } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
+import type { Address } from 'abitype';
 import { Queue } from 'bull';
 import * as crypto from 'crypto'; // Import the crypto module
 import { UUID } from 'crypto';
+import { verifyMessage } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { Hex } from 'viem/types/misc';
+
 import * as zlib from 'zlib';
+
 
 @Injectable()
 export class VerificationService {
@@ -18,6 +24,7 @@ export class VerificationService {
     ) { }
     private readonly algorithm = 'aes-256-gcm'
     private readonly privateKey = this.configService.get('PRIVATE_KEY')
+    private wallet = privateKeyToAccount(this.privateKey)
 
     getSecret = () => {
         if (!this.privateKey) {
@@ -105,7 +112,13 @@ export class VerificationService {
         throw new UnauthorizedException('Invalid wallet address')
     }
 
-    async verifySignature(data: string, signature: string) {
+    async verifySignature(data: string, signature: Hex) {
+        const decryptedAddress = this.decrypt(data) as Address;
+
+        const isVerified = await verifyMessage({ address: decryptedAddress, signature, message: data });
+        if (!isVerified) {
+            throw new UnauthorizedException('Invalid Signature');
+        }
     }
 
 
