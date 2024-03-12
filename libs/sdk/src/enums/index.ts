@@ -43,4 +43,3 @@ export enum UploadFileType {
   API = 'API',
   KOBO = 'KOBO',
 }
-

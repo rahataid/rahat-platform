@@ -4,9 +4,9 @@ A Monorepo for EL applications
 
 ## Prerequisite
 
-- Postgres Database OR Docker compose 
+- Postgres Database OR Docker compose
 - Node.js v20.\* (Recommended)
-- NestJS/CLI Installed 
+- NestJS/CLI Installed
 - Redis Database Server OR Docker compose
 
 ## Run Locally

@@ -17,4 +17,5 @@ export const JOBS = {
   STATS: 'rahat.jobs.beneficiary.stats',
   UPDATE: 'rahat.jobs.beneficiary.update',
   UPDATE_STATS: 'rahat.jobs.beneficiary.update_stats',
+  GENERATE_LINK: 'rahat.jobs.beneficiary.generate_link',
 };

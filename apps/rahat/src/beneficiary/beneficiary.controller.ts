@@ -34,7 +34,7 @@ export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue
-  ) {}
+  ) { }
 
   @Get()
   async list(@Query() dto: ListBeneficiaryDto) {
@@ -99,6 +99,14 @@ export class BeneficiaryController {
   @Get(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   async getBeneficiary(@Param('uuid') uuid: UUID) {
+    console.log({ uuid });
     return this.client.send({ cmd: BeneficiaryJobs.GET }, uuid);
+  }
+
+  @Get('generate-link/:uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async generateLink(@Param('uuid') uuid: UUID) {
+    console.log({ uuid });
+    return this.client.send({ cmd: BeneficiaryJobs.GENERATE_LINK }, uuid);
   }
 }

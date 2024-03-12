@@ -69,11 +69,17 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
   update(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryDto) {
     const benefUUID = uuid ? uuid : dto.uuid;
+    console.log({ dto });
     return this.service.update(benefUUID, dto);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.REMOVE })
   remove(@Param('uuid') uuid: UUID) {
     return this.service.remove(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GENERATE_LINK })
+  generateLink(uuid: UUID) {
+    return this.service.generateLink(uuid);
   }
 }

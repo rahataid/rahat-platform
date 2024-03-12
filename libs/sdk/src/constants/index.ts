@@ -11,8 +11,6 @@ export const BQUEUE = {
   HOST: 'RAHAT.HOST',
 };
 
-
-
 export const UserRoles = {
   ADMIN: 'Admin',
   USER: 'User',
@@ -37,4 +35,3 @@ export const SUBJECTS = {
 export const APP = {
   JWT_BEARER: 'JWT',
 };
-

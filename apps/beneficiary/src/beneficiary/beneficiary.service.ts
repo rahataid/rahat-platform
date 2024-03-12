@@ -10,15 +10,20 @@ import {
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
 import {
+  BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
+  BeneficiaryJobs,
   ProjectContants,
   TPIIData,
 } from '@rahataid/sdk';
 
+import { InjectQueue } from '@nestjs/bull';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
+import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
+import { EncryptionService } from './encryption.service';
 import { createListQuery } from './helpers';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -29,7 +34,10 @@ export class BeneficiaryService {
   constructor(
     protected prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
-    private eventEmitter: EventEmitter2
+    @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
+    private readonly beneficiaryQueue: Queue,
+    private eventEmitter: EventEmitter2,
+    private encryption: EncryptionService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -182,6 +190,22 @@ export class BeneficiaryService {
     });
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_REMOVED);
     return rdata;
+  }
+
+  async generateLink(uuid: UUID) {
+    const findUuid = await this.prisma.beneficiary.findUnique({
+      where: { uuid },
+      include: {
+        pii: true
+      }
+    });
+    if (!findUuid) throw new Error('Data not Found');
+
+    const encrypted = this.encryption.encrypt(findUuid.walletAddress);
+    const email = findUuid.pii.email
+    const name = findUuid.pii.name
+    this.beneficiaryQueue.add(BeneficiaryJobs.GENERATE_LINK, { encrypted, email, name });
+    return encrypted
   }
 
   async createBulk(dtos: CreateBeneficiaryDto[]) {
