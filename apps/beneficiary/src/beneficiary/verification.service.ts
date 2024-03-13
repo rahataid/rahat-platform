@@ -6,10 +6,7 @@ import { PrismaService } from '@rumsan/prisma';
 import type { Address } from 'abitype';
 import { Queue } from 'bull';
 import * as crypto from 'crypto'; // Import the crypto module
-import { UUID } from 'crypto';
 import { recoverMessageAddress } from 'viem';
-
-
 
 @Injectable()
 export class VerificationService {
@@ -21,9 +18,7 @@ export class VerificationService {
     ) { }
     private readonly algorithm = 'aes-256-cbc'
     private readonly privateKey = this.configService.get('PRIVATE_KEY')
-    private iv = crypto.randomBytes(16)
-    // private wallet = privateKeyToAccount(this.privateKey)
-
+    private iv = Buffer.from('0123456789ABCDEF0123456789ABCDEF', 'hex')
 
     getSecret = () => {
         if (!this.privateKey) {
@@ -33,25 +28,23 @@ export class VerificationService {
         hash.update(this.privateKey);
         return hash.digest('hex').split('').slice(0, 32).join('');
     };
-
-    encrypt(data: string): string {
-        console.log(this.privateKey, this.iv, this.algorithm)
-        const cipher = crypto.createCipheriv(this.algorithm, Buffer.from(this.getSecret()), this.iv)
-        let encrypted = cipher.update(data)
-        encrypted = Buffer.concat([encrypted, cipher.final()])
-        return encrypted.toString('hex')
+    // Encryption function
+    encrypt(data) {
+        const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(this.getSecret()), this.iv);
+        let encryptedData = cipher.update(data, 'utf8', 'hex');
+        encryptedData += cipher.final('hex');
+        return encryptedData;
     }
 
-    decrypt(data: string): string {
-        const encryptedText = Buffer.from(data, 'hex')
-        const decipher = crypto.createDecipheriv(this.algorithm, Buffer.from(this.getSecret()), this.iv)
-        let decrypted = decipher.update(encryptedText)
-        decrypted = Buffer.concat([decrypted, decipher.final()])
-        return decrypted.toString('utf-8')
-
+    // Decryption function
+    decrypt(encryptedData) {
+        const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(this.getSecret()), this.iv);
+        let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+        return decrypted;
     }
 
-    async generateLink(uuid: UUID) {
+    async generateLink(uuid: crypto.UUID) {
         const findUuid = await this.prisma.beneficiary.findUnique({
             where: { uuid },
             include: {
