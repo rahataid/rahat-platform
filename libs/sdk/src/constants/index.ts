@@ -11,8 +11,6 @@ export const BQUEUE = {
   HOST: 'RAHAT.HOST',
 };
 
-
-
 export const UserRoles = {
   ADMIN: 'Admin',
   USER: 'User',
@@ -38,3 +36,18 @@ export const APP = {
   JWT_BEARER: 'JWT',
 };
 
+export const MS_ACTIONS = {
+  BENEFICIARY: {
+    CREATE: 'beneficiary.create',
+    LIST: 'beneficiary.list',
+    GET: 'beneficiary.get',
+    DELETE: 'beneficiary.delete',
+    ADD_TO_PROJECT: 'beneficiary.add_to_project',
+    LIST_BY_PROJECT: 'beneficiary.list_by_project',
+  },
+  VENDOR: {
+    REGISTER: 'vendor.register',
+  },
+  USER: {},
+  PROJECT: {},
+};
