@@ -20,7 +20,7 @@ export class VerificationService {
         private readonly beneficiaryQueue: Queue,
     ) { }
     private readonly algorithm = 'aes-256-cbc'
-    private readonly privateKey = crypto.randomBytes(32)
+    private readonly privateKey = this.configService.get('PRIVATE_KEY')
     private iv = crypto.randomBytes(16)
     // private wallet = privateKeyToAccount(this.privateKey)
 
@@ -35,7 +35,8 @@ export class VerificationService {
     };
 
     encrypt(data: string): string {
-        const cipher = crypto.createCipheriv(this.algorithm, Buffer.from(this.privateKey), this.iv)
+        console.log(this.privateKey, this.iv, this.algorithm)
+        const cipher = crypto.createCipheriv(this.algorithm, Buffer.from(this.getSecret()), this.iv)
         let encrypted = cipher.update(data)
         encrypted = Buffer.concat([encrypted, cipher.final()])
         return encrypted.toString('hex')
@@ -43,10 +44,10 @@ export class VerificationService {
 
     decrypt(data: string): string {
         const encryptedText = Buffer.from(data, 'hex')
-        const decipher = crypto.createDecipheriv(this.algorithm, Buffer.from(this.privateKey), this.iv)
+        const decipher = crypto.createDecipheriv(this.algorithm, Buffer.from(this.getSecret()), this.iv)
         let decrypted = decipher.update(encryptedText)
         decrypted = Buffer.concat([decrypted, decipher.final()])
-        return decrypted.toString()
+        return decrypted.toString('utf-8')
 
     }
 
@@ -88,7 +89,7 @@ export class VerificationService {
     async validateWallet(validationData: ValidateWallet) {
         const { walletAddress, encryptedData } = validationData
         const decrypted = this.decrypt(encryptedData);
-
+        console.log({ decrypted, walletAddress })
         if (decrypted === walletAddress.toString()) {
             this.setBeneficiaryAsVerified(walletAddress);
 
@@ -100,11 +101,12 @@ export class VerificationService {
 
     async verifySignature(verificationData: VerifySignature) {
         const decryptedAddress = this.decrypt(verificationData.encryptedData) as Address;
-
+        console.log({ decryptedAddress: decryptedAddress.toString() })
         const recoveredAddress = await recoverMessageAddress({
             message: verificationData.encryptedData,
             signature: verificationData.signature,
         })
+        console.log({ recoveredAddress })
         if (decryptedAddress === recoveredAddress) {
             this.setBeneficiaryAsVerified(decryptedAddress);
             return 'Success';
