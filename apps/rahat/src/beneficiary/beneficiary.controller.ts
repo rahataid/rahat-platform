@@ -22,6 +22,7 @@ import {
   ReferBeneficiaryDto,
   UpdateBeneficiaryDto,
   ValidateWalletDto,
+  VerifySignatureDto,
 } from '@rahataid/extensions';
 import { BQUEUE, BeneficiaryJobs, Enums, TFile } from '@rahataid/sdk';
 import { Queue } from 'bull';
@@ -112,5 +113,10 @@ export class BeneficiaryController {
   @Post('validate-wallet')
   async validateWallet(@Body() dto: ValidateWalletDto) {
     return this.client.send({ cmd: BeneficiaryJobs.VALIDATE_WALLET }, dto);
+  }
+
+  @Post('verify-signature')
+  async verifySignature(@Body() dto: VerifySignatureDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
   }
 }

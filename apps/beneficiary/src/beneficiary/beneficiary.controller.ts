@@ -7,7 +7,7 @@ import {
   ReferBeneficiaryDto,
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
-import { BeneficiaryJobs, ProjectContants, validateWallet } from '@rahataid/sdk';
+import { BeneficiaryJobs, ProjectContants, ValidateWallet, VerifySignature } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
@@ -86,8 +86,13 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.VALIDATE_WALLET })
-  validateWallet(validationData: validateWallet) {
+  validateWallet(validationData: ValidateWallet) {
     console.log({ validationData })
     return this.verificationService.validateWallet(validationData);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE })
+  verifySignature(verificationData: VerifySignature) {
+    return this.verificationService.verifySignature(verificationData);
   }
 }

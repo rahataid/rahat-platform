@@ -4,3 +4,4 @@ export * from './list-beneficiary.dto';
 export * from './refer.beneficiary.dto';
 export * from './update-beneficiary.dto';
 export * from './validate-wallet.dto';
+export * from './verify-signature.dto';

@@ -20,4 +20,5 @@ export const JOBS = {
   GENERATE_LINK: 'rahat.jobs.beneficiary.generate_link',
   SEND_EMAIL: 'rahat.jobs.beneficiary.send_email',
   VALIDATE_WALLET: 'rahat.jobs.beneficiary.validate_wallet',
+  VERIFY_SIGNATURE: 'rahat.jobs.beneficiary.verify_signature',
 };

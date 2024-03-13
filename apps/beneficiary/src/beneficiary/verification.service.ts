@@ -1,7 +1,7 @@
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BQUEUE, BeneficiaryJobs, validateWallet } from '@rahataid/sdk';
+import { BQUEUE, BeneficiaryJobs, ValidateWallet, VerifySignature } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import type { Address } from 'abitype';
 import { Queue } from 'bull';
@@ -9,7 +9,6 @@ import * as crypto from 'crypto'; // Import the crypto module
 import { UUID } from 'crypto';
 import { verifyMessage } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { Hex } from 'viem/types/misc';
 
 import * as zlib from 'zlib';
 
@@ -38,8 +37,8 @@ export class VerificationService {
     encrypt(data: string) {
         const iv = crypto.randomBytes(16);
         const cipher = crypto.createCipheriv(
-            this.algorithm,
-            this.getSecret(),
+            'aes-256-gcm',
+            'vOVH6sdmpNWjRRIqCc7rdxs01lwHzfr3',
             iv
         );
         let encrypted = cipher.update(data, 'utf-8');
@@ -62,13 +61,13 @@ export class VerificationService {
 
     decrypt(data: string) {
         const compressedData = Buffer.from(data, 'base64');
-        const decompressedData = zlib.inflateSync(compressedData).toString('utf-8');
 
+        const decompressedData = zlib.inflateSync(compressedData).toString('utf-8');
         const [ivHex, tagHex, encryptedTextHex] = decompressedData.split(':');
 
         const decipher = crypto.createDecipheriv(
-            this.algorithm,
-            this.getSecret(),
+            "aes-256-gcm",
+            "vOVH6sdmpNWjRRIqCc7rdxs01lwHzfr3",
             Buffer.from(ivHex, 'hex'),
         );
 
@@ -102,7 +101,7 @@ export class VerificationService {
         return 'Success';
     }
 
-    async validateWallet(validationData: validateWallet) {
+    async validateWallet(validationData: ValidateWallet) {
         const { walletAddress, encryptedData } = validationData
         const decrypted = this.decrypt(encryptedData);
 
@@ -112,10 +111,13 @@ export class VerificationService {
         throw new UnauthorizedException('Invalid wallet address')
     }
 
-    async verifySignature(data: string, signature: Hex) {
-        const decryptedAddress = this.decrypt(data) as Address;
+    async verifySignature(verificationData: VerifySignature) {
+        const { encryptedData, signature } = verificationData
+        const decryptedAddress = this.decrypt(encryptedData) as Address;
 
-        const isVerified = await verifyMessage({ address: decryptedAddress, signature, message: data });
+        console.log({ decryptedAddress })
+
+        const isVerified = await verifyMessage({ address: decryptedAddress, signature, message: encryptedData });
         if (!isVerified) {
             throw new UnauthorizedException('Invalid Signature');
         }
