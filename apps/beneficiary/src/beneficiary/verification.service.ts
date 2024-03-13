@@ -7,10 +7,9 @@ import type { Address } from 'abitype';
 import { Queue } from 'bull';
 import * as crypto from 'crypto'; // Import the crypto module
 import { UUID } from 'crypto';
-import { verifyMessage } from 'viem';
+import { recoverMessageAddress } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { Hex } from 'viem/types/misc';
-
 import * as zlib from 'zlib';
 
 
@@ -115,10 +114,14 @@ export class VerificationService {
     async verifySignature(data: string, signature: Hex) {
         const decryptedAddress = this.decrypt(data) as Address;
 
-        const isVerified = await verifyMessage({ address: decryptedAddress, signature, message: data });
-        if (!isVerified) {
-            throw new UnauthorizedException('Invalid Signature');
+        const recoveredAddress = await recoverMessageAddress({
+            message: data,
+            signature,
+        })
+        if (decryptedAddress === recoveredAddress) {
+            return 'Success';
         }
+        throw new UnauthorizedException('Wallet Not Verified');
     }
 
 
