@@ -7,7 +7,7 @@ import type { Address } from 'abitype';
 import { Queue } from 'bull';
 import * as crypto from 'crypto'; // Import the crypto module
 import { UUID } from 'crypto';
-import { verifyMessage } from 'viem';
+import { recoverMessageAddress } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 
 import * as zlib from 'zlib';
@@ -150,26 +150,46 @@ export class VerificationService {
         return 'Success';
     }
 
+    //set Beneficiary as verified based on walletAddress
+    async setBeneficiaryAsVerified(walletAddress: string) {
+        const ben = await this.prisma.beneficiary.findFirst({
+            where: { walletAddress },
+        });
+        if (!ben) throw new Error('Data not Found');
+
+        return this.prisma.beneficiary.update({
+            where: { uuid: ben.uuid },
+            data: {
+                isVerified: true,
+            },
+        });
+    }
+
     async validateWallet(validationData: ValidateWallet) {
         const { walletAddress, encryptedData } = validationData
         const decrypted = this.decrypt(encryptedData);
 
         if (decrypted === walletAddress.toString()) {
+            this.setBeneficiaryAsVerified(walletAddress);
+
             return "success"
         }
         throw new UnauthorizedException('Invalid wallet address')
     }
 
+
     async verifySignature(verificationData: VerifySignature) {
-        const { encryptedData, signature } = verificationData
-        const decryptedAddress = this.decrypt(encryptedData) as Address;
+        const decryptedAddress = this.decrypt(verificationData.encryptedData) as Address;
 
-        console.log({ decryptedAddress })
-
-        const isVerified = await verifyMessage({ address: decryptedAddress, signature, message: encryptedData });
-        if (!isVerified) {
-            throw new UnauthorizedException('Invalid Signature');
+        const recoveredAddress = await recoverMessageAddress({
+            message: verificationData.encryptedData,
+            signature: verificationData.signature,
+        })
+        if (decryptedAddress === recoveredAddress) {
+            this.setBeneficiaryAsVerified(decryptedAddress);
+            return 'Success';
         }
+        throw new UnauthorizedException('Wallet Not Verified');
     }
 
 
