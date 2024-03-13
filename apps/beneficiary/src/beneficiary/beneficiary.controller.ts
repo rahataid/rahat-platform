@@ -4,9 +4,9 @@ import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   ListProjectBeneficiaryDto,
-  UpdateBeneficiaryDto,
+  UpdateBeneficiaryDto
 } from '@rahataid/extensions';
-import { BeneficiaryJobs, ProjectContants, ValidateWallet, VerifySignature } from '@rahataid/sdk';
+import { BeneficiaryJobs, ProjectContants, ValidateWallet } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
@@ -87,7 +87,8 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE })
-  verifySignature(verificationData: VerifySignature) {
+  verifySignature(verificationData: any) {
+    console.log({ verificationData })
     return this.verificationService.verifySignature(verificationData);
   }
 }
