@@ -1,9 +1,18 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
-  <body style='font-family:Poppins,Helvetica,Arial,sans-serif;'>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallet Verification</title>
+</head>
+
+<body>
+  <div class="container">
     <p>Hi {{name}},</p>
-    <br />
-    <p>Link for the wallet verification: <a>{{encryptedData}}</a><b></b></p>
-  </body>
+    <p>Click the following link to verify your wallet:</p>
+    <p><a href="{{encryptedData}}">{{encryptedData}}</a></p>
+  </div>
+</body>
 
 </html>
