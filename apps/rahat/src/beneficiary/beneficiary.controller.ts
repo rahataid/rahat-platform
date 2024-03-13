@@ -16,10 +16,9 @@ import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
-  AddToProjectDto,
+  AddBenToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  ReferBeneficiaryDto,
   UpdateBeneficiaryDto,
   ValidateWalletDto,
 } from '@rahataid/extensions';
@@ -57,14 +56,16 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
 
-  @Post('refer')
-  async referBeneficiary(@Body() dto: ReferBeneficiaryDto) {
-    return this.client.send({ cmd: BeneficiaryJobs.REFER }, dto);
-  }
-
-  @Post('add-to-project')
-  async addToProject(@Body() dto: AddToProjectDto) {
-    return this.client.send({ cmd: BeneficiaryJobs.ADD_TO_PROJECT }, dto);
+  @ApiParam({ name: 'uuid', required: true })
+  @Post('projects/:uuid')
+  async referBeneficiary(
+    @Param('uuid') uuid: UUID,
+    @Body() dto: AddBenToProjectDto
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
+      { dto, projectUid: uuid }
+    );
   }
 
   @Post('bulk')

@@ -12,7 +12,6 @@ export const JOBS = {
   GET: 'rahat.jobs.beneficiary.get',
   LIST: 'rahat.jobs.beneficiary.list',
   REMOVE: 'rahat.jobs.beneficiary.remove',
-  REFER: 'rahat.jobs.beneficiary.refer',
   ADD_TO_PROJECT: 'rahat.jobs.beneficiary.add_to_project',
   STATS: 'rahat.jobs.beneficiary.stats',
   UPDATE: 'rahat.jobs.beneficiary.update',
@@ -20,4 +19,5 @@ export const JOBS = {
   GENERATE_LINK: 'rahat.jobs.beneficiary.generate_link',
   SEND_EMAIL: 'rahat.jobs.beneficiary.send_email',
   VALIDATE_WALLET: 'rahat.jobs.beneficiary.validate_wallet',
+  LIST_BY_PROJECT: 'rahat.jobs.beneficiary.list_by_project',
 };
