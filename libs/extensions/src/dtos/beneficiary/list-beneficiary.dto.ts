@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 // import { PaginationDto } from '@rumsan/extensions/dtos';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class ListBeneficiaryDto {
   // @IsIn(['createdAt', 'updatedAt', 'fullName', 'gender'])
@@ -33,4 +33,22 @@ export class ListBeneficiaryDto {
   @IsString()
   @IsOptional()
   type?: string;
+}
+
+export class ListProjectBeneficiaryDto {
+  sort: string;
+  order: 'asc' | 'desc';
+
+  @ApiProperty({ example: 1 })
+  @IsNumber()
+  page: number;
+
+  @ApiProperty({ example: 10 })
+  @IsNumber()
+  perPage: number;
+
+  @ApiProperty({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
+  @IsString()
+  @IsNotEmpty()
+  projectId: string;
 }

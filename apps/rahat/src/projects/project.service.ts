@@ -1,14 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ClientProxy } from '@nestjs/microservices';
 import { CreateProjectDto, UpdateProjectDto } from '@rahataid/extensions';
-import { ProjectEvents } from '@rahataid/sdk';
+import { BeneficiaryJobs, MS_ACTIONS, ProjectEvents } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
+import { timeout } from 'rxjs';
 @Injectable()
 export class ProjectService {
   constructor(
     private prisma: PrismaService,
-    private eventEmitter: EventEmitter2
+    private eventEmitter: EventEmitter2,
+    @Inject('RAHAT_CLIENT') private readonly client: ClientProxy
   ) {}
 
   async create(data: CreateProjectDto) {
@@ -49,5 +52,23 @@ export class ProjectService {
         uuid,
       },
     });
+  }
+
+  async handleProjectActions({ uuid, action, payload }) {
+    switch (action) {
+      case MS_ACTIONS.BENEFICIARY.LIST:
+        return 'Beneficiary List';
+
+      case MS_ACTIONS.BENEFICIARY.ADD_TO_PROJECT:
+        return this.client
+          .send(
+            { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
+            { dto: payload, projectUid: uuid }
+          )
+          .pipe(timeout(5000));
+
+      default:
+        throw new Error('Please provide a valid action!');
+    }
   }
 }
