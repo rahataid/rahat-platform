@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
 import { CreateProjectDto, UpdateProjectDto } from '@rahataid/extensions';
-import { BeneficiaryJobs, MS_ACTIONS, ProjectEvents } from '@rahataid/sdk';
+import { BeneficiaryJobs, MS_ACTIONS, ProjectEvents, ProjectJobs } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { timeout } from 'rxjs';
@@ -55,6 +55,7 @@ export class ProjectService {
   }
 
   async handleProjectActions({ uuid, action, payload }) {
+    console.log({uuid,action,payload})
     switch (action) {
       case MS_ACTIONS.BENEFICIARY.LIST:
         return 'Beneficiary List';
@@ -66,7 +67,15 @@ export class ProjectService {
             { dto: payload, projectUid: uuid }
           )
           .pipe(timeout(5000));
-
+      case MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER:
+        return this.client
+            .send(
+              {cmd: ProjectJobs.REDEEM_VOUCHER, uuid},
+              {dto:payload}
+            ).pipe(timeout(5000));
+            
+      case MS_ACTIONS.ELPROJECT.PROCESS_OTP:
+        return this.client.send({cmd:ProjectJobs.PROCESS_OTP,uuid},{dto:payload}).pipe(timeout(5000));
       default:
         throw new Error('Please provide a valid action!');
     }

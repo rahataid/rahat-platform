@@ -17,7 +17,8 @@ import {
   ProjectCommunicationDto,
   UpdateProjectDto,
 } from '@rahataid/extensions';
-import { BeneficiaryJobs } from '@rahataid/sdk';
+import { BeneficiaryJobs, ProjectJobs } from '@rahataid/sdk';
+import { CreateSettingDto } from '@rumsan/extensions/dtos';
 import { UUID } from 'crypto';
 import { timeout } from 'rxjs/operators';
 import { ProjectService } from './project.service';
@@ -67,6 +68,17 @@ export class ProjectController {
       .send({ cmd: BeneficiaryJobs.LIST_BY_PROJECT }, dto)
       .pipe(timeout(5000));
   }
+
+  @ApiParam({ name: 'uuid', required: true })
+  @Post(':uuid/settings')
+  addSettings(
+    @Param('uuid') uuid: UUID,
+    @Body() dto:CreateSettingDto) {
+    return this.rahatClient
+      .send({ cmd: ProjectJobs.PROJECT_SETTINGS,uuid}, dto)
+      .pipe(timeout(5000));
+  }
+  
 
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')

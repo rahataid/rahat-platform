@@ -49,5 +49,8 @@ export const MS_ACTIONS = {
     REGISTER: 'vendor.register',
   },
   USER: {},
-  PROJECT: {},
+  ELPROJECT: {
+    REDEEM_VOUCHER:'elProject.redeemVoucher',
+    PROCESS_OTP:'elProject.processOtp'
+  },
 };
