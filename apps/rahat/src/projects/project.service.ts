@@ -55,11 +55,14 @@ export class ProjectService {
   }
 
   async handleProjectActions({ uuid, action, payload }) {
-    console.log({uuid,action,payload})
     switch (action) {
-      case MS_ACTIONS.BENEFICIARY.LIST:
-        return 'Beneficiary List';
-
+      case MS_ACTIONS.SETTINGS.LIST:
+        return this.client
+          .send({cmd:ProjectJobs.PROJECT_SETTINGS_LIST,uuid},{}
+          );
+      case MS_ACTIONS.SETTINGS.GET:
+        return this.client
+          .send({cmd:ProjectJobs.PROJECT_SETTINGS_GET,uuid},payload);
       case MS_ACTIONS.BENEFICIARY.ADD_TO_PROJECT:
         return this.client
           .send(
@@ -71,11 +74,11 @@ export class ProjectService {
         return this.client
             .send(
               {cmd: ProjectJobs.REDEEM_VOUCHER, uuid},
-              {dto:payload}
+              payload
             ).pipe(timeout(5000));
             
       case MS_ACTIONS.ELPROJECT.PROCESS_OTP:
-        return this.client.send({cmd:ProjectJobs.PROCESS_OTP,uuid},{dto:payload}).pipe(timeout(5000));
+        return this.client.send({cmd:ProjectJobs.PROCESS_OTP,uuid},payload).pipe(timeout(5000));
       default:
         throw new Error('Please provide a valid action!');
     }

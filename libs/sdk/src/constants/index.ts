@@ -53,4 +53,8 @@ export const MS_ACTIONS = {
     REDEEM_VOUCHER:'elProject.redeemVoucher',
     PROCESS_OTP:'elProject.processOtp'
   },
+  SETTINGS:{
+    LIST:'settings.list',
+    GET:'settings.get'
+  }
 };

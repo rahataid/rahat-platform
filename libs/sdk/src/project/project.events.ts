@@ -10,6 +10,9 @@ export const JOBS = {
   PROJECT_DELETE: 'project.delete',
   PROJECT_SETTINGS:'rahat.jobs.settings.create',
   REDEEM_VOUCHER:'rahat.jobs.project.redeemVoucher',
-  PROCESS_OTP:'rahat.jobs.project.otpProcess'
+  PROCESS_OTP:'rahat.jobs.project.otpProcess',
+  PROJECT_SETTINGS_LIST:'rahat.jobs.settings.list',
+  PROJECT_SETTINGS_GET:'rahat.jobs.settings.get'
+
 
 };
