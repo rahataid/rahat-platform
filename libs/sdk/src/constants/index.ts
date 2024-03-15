@@ -43,6 +43,8 @@ export const MS_ACTIONS = {
     GET: 'beneficiary.get',
     DELETE: 'beneficiary.delete',
     ADD_TO_PROJECT: 'beneficiary.add_to_project',
+    ASSGIN_TO_PROJECT:'beneficiary.assign_to_project',
+    BULK_ASSIGN_TO_PROJECT:'beneficiary.bulk_assign',
     LIST_BY_PROJECT: 'beneficiary.list_by_project',
   },
   VENDOR: {

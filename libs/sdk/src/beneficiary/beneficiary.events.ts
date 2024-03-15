@@ -14,6 +14,7 @@ export const JOBS = {
   REMOVE: 'rahat.jobs.beneficiary.remove',
   ADD_TO_PROJECT: 'rahat.jobs.beneficiary.add_to_project',
   ASSIGN_TO_PROJECT:'rahat.jobs.beneficiary.assign_to_project',
+  BULK_ASSIGN_TO_PROJECT:'rahat.jobs.beneficiary.bulk_assign',
   STATS: 'rahat.jobs.beneficiary.stats',
   UPDATE: 'rahat.jobs.beneficiary.update',
   UPDATE_STATS: 'rahat.jobs.beneficiary.update_stats',

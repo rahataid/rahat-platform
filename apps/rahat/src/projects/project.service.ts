@@ -79,7 +79,6 @@ export class ProjectService {
               {cmd: ProjectJobs.REDEEM_VOUCHER, uuid},
               payload
             ).pipe(timeout(500000));
-            
       case MS_ACTIONS.ELPROJECT.PROCESS_OTP:
         return this.client
         .send(
@@ -91,7 +90,16 @@ export class ProjectService {
         .send(
           {cmd:ProjectJobs.ASSIGN_DISCOUNT_VOUCHER,uuid},
           payload
-          ).pipe(timeout(500000))
+          ).pipe(timeout(500000));
+      case MS_ACTIONS.BENEFICIARY.ASSGIN_TO_PROJECT:
+        return this.client
+        .send(
+          {cmd:BeneficiaryJobs.ASSIGN_TO_PROJECT},
+          {projectId:uuid,...payload})
+      case MS_ACTIONS.BENEFICIARY.BULK_ASSIGN_TO_PROJECT:
+        return this.client
+          .send({cmd:BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT},
+            {projectId:uuid,...payload})
       default:
         throw new Error('Please provide a valid action!');
     }
