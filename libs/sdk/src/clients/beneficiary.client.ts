@@ -2,7 +2,7 @@ import { Pagination } from '@rumsan/sdk/types';
 import { formatResponse } from '@rumsan/sdk/utils';
 import { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { UUID } from 'crypto';
-import { ASSIGNTOPROJECT, Beneficiary, TPIIData } from '../beneficiary';
+import { Beneficiary, TPIIData } from '../beneficiary';
 import { BeneficiaryClient, Stats } from '../types';
 
 export const getBeneficiaryClient = (
@@ -51,11 +51,6 @@ export const getBeneficiaryClient = (
     get: async (uuid: UUID, config?: AxiosRequestConfig) => {
       const response = await client.get(`/beneficiaries/${uuid}`, config);
       return formatResponse<Beneficiary>(response);
-    },
-
-    assignBeneficiary: async({uuid,data}: {uuid:UUID,data:ASSIGNTOPROJECT},config?: AxiosRequestConfig)=>{
-      const response = await client.post(`/beneficiaries/projects/assign/${uuid}`,data, config)
-      return formatResponse<Beneficiary>(response)
     }
   };
 };
