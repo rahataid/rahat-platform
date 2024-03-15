@@ -17,10 +17,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   AddBenToProjectDto,
-  AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  UpdateBeneficiaryDto,
+  UpdateBeneficiaryDto
 } from '@rahataid/extensions';
 import { BQUEUE, BeneficiaryJobs, Enums, TFile } from '@rahataid/sdk';
 import { Queue } from 'bull';
@@ -56,14 +55,6 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
 
-  @ApiParam({name:'uuid',required:true})
-  @Post('projects/assign/:uuid')
-  async assignBeneficiary(
-    @Param('uuid')uuid:UUID,
-    @Body()dto:AddToProjectDto
-  ){
-    return this.client.send({cmd:BeneficiaryJobs.ASSIGN_TO_PROJECT},dto)
-  }
 
 
   @ApiParam({ name: 'uuid', required: true })
