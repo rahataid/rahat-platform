@@ -2,7 +2,7 @@ import { Pagination } from '@rumsan/sdk/types';
 import { FormattedResponse } from '@rumsan/sdk/utils';
 import { AxiosRequestConfig } from 'axios';
 import { UUID } from 'crypto';
-import { Beneficiary, TPIIData } from '../beneficiary/beneficiary.types';
+import { ASSIGNTOPROJECT, Beneficiary, TPIIData } from '../beneficiary/beneficiary.types';
 import { Stats } from './response.types';
 
 export type BeneficiaryClient = {
@@ -34,4 +34,9 @@ export type BeneficiaryClient = {
     uuid: UUID,
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<Beneficiary>>;
+
+  assignBeneficiary:(
+    { uuid, data }:{ uuid: UUID; data: ASSIGNTOPROJECT},
+    config?:AxiosRequestConfig
+  )=>Promise<FormattedResponse<Beneficiary>>
 };

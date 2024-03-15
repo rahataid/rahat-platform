@@ -27,3 +27,8 @@ export type TPIIData = {
   email?: string;
   extras?: Record<string, any>;
 };
+
+export type ASSIGNTOPROJECT ={
+  projectId:string;
+  beneficiaryId:string;
+}
