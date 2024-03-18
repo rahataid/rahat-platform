@@ -100,6 +100,9 @@ export class ProjectService {
         return this.client
           .send({cmd:BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT},
             {projectId:uuid,...payload})
+      case MS_ACTIONS.BENEFICIARY.LIST_BY_PROJECT:
+        return this.client
+          .send({cmd:BeneficiaryJobs.LIST_BY_PROJECT},{projectId:uuid,...payload})
       case MS_ACTIONS.VENDOR.ASSIGN_TO_PROJECT:
         return this.client
           .send({cmd:VendorJobs.ASSIGN_PROJECT},payload)
