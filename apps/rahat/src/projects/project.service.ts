@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
 import { CreateProjectDto, UpdateProjectDto } from '@rahataid/extensions';
-import { BeneficiaryJobs, MS_ACTIONS, ProjectEvents, ProjectJobs } from '@rahataid/sdk';
+import { BeneficiaryJobs, MS_ACTIONS, ProjectEvents, ProjectJobs, VendorJobs } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { timeout } from 'rxjs';
@@ -100,6 +100,9 @@ export class ProjectService {
         return this.client
           .send({cmd:BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT},
             {projectId:uuid,...payload})
+      case MS_ACTIONS.VENDOR.ASSIGN_TO_PROJECT:
+        return this.client
+          .send({cmd:VendorJobs.ASSIGN_PROJECT},payload)
       default:
         throw new Error('Please provide a valid action!');
     }

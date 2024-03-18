@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { VendorRegisterDto } from '@rahataid/extensions';
+import { VendorAddToProjectDto, VendorRegisterDto } from '@rahataid/extensions';
 import { VendorJobs } from '@rahataid/sdk';
 import { VendorsService } from './vendors.service';
 
@@ -12,4 +12,10 @@ export class VendorsController {
   registerVendor(@Payload() dto: VendorRegisterDto) {
     return this.service.registerVendor(dto);
   }
+
+  @MessagePattern({cmd:VendorJobs.ASSIGN_PROJECT})
+  assignToProject(@Payload()dto:VendorAddToProjectDto){
+    return this.service.assignToProject(dto)
+  }
+
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { VendorRegisterDto } from '@rahataid/extensions';
+import { VendorAddToProjectDto, VendorRegisterDto } from '@rahataid/extensions';
 import { UserRoles } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 
@@ -29,5 +29,22 @@ export class VendorsService {
       },
     });
     return user;
+  }
+
+  async assignToProject(dto:VendorAddToProjectDto){
+    const {vendorUuid} = dto;
+    const vendorUser = await this.prisma.user.findUnique({where:{uuid:vendorUuid}});
+    const userRoles = await this.prisma.userRole.findMany({where:{userId:vendorUser.id},include:{
+      Role:{
+        select:{name:true}
+      }
+
+    }});
+    const isVendor = userRoles.some((userRole)=>userRole.Role.name === UserRoles.VENDOR)
+    const projectPayload ={
+      uuid:vendorUuid,
+      walletAddress:vendorUser.wallet
+    }
+    
   }
 }
