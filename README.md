@@ -1,6 +1,6 @@
 # EL Rumsan
 
-A Monorepo for EL applications
+A Monorepo for Rahat Core
 
 ## Prerequisite
 
@@ -24,38 +24,10 @@ Step 2: Go to the project directory and install dependencies
   pnpm install
 ```
 
-Step 3: Add following details to .env file inside project root directory.
+Step 3: Copy .env.example to .env and update the environment variables
 
 ```bash
-PORT=5501
-PORT_BEN=5502
-PRIVATE_KEY=
-
-# Jwt
-JWT_EXPIRATION_TIME=24h
-JWT_EXPIRATION_LONG_TIME=180000
-
-# OTP
-OTP_DURATION_IN_SECS=300
-
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
-
-
-# Postgres envioroment variables
-
-# Nest run in docker, change host to database container name
-# DB_HOST=postgres
-DB_HOST=localhost
-DB_PORT=5437
-DB_USERNAME=postgres
-DB_PASSWORD=root
-DB_NAME=db_el
-
-# Prisma database connection
-DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public
+  cp .env.example .env
 ```
 
 Step 4: Migrate and seed prisma db
