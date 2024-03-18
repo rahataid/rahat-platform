@@ -1,11 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { VendorAddToProjectDto, VendorRegisterDto } from '@rahataid/extensions';
-import { UserRoles } from '@rahataid/sdk';
+import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 
 @Injectable()
 export class VendorsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, @Inject(ProjectContants.ELClient) private readonly client: ClientProxy) {}
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
@@ -32,7 +33,7 @@ export class VendorsService {
   }
 
   async assignToProject(dto:VendorAddToProjectDto){
-    const {vendorUuid} = dto;
+    const {vendorUuid,projectId} = dto;
     const vendorUser = await this.prisma.user.findUnique({where:{uuid:vendorUuid}});
     const userRoles = await this.prisma.userRole.findMany({where:{userId:vendorUser.id},include:{
       Role:{
@@ -41,10 +42,47 @@ export class VendorsService {
 
     }});
     const isVendor = userRoles.some((userRole)=>userRole.Role.name === UserRoles.VENDOR)
+    if(!isVendor) throw new Error('Not a vendor')
     const projectPayload ={
       uuid:vendorUuid,
       walletAddress:vendorUser.wallet
     }
+
+    //2. Save vendor to project
+    await this.prisma.projectVendors.create({
+      data:{
+        projectId,
+        vendorId:vendorUuid
+      }
+
+    })
+
+    //3. sync vendor to Project
+    return this.client.send({
+      cmd:VendorJobs.ADD_TO_PROJECT,uuid:projectId
+    },projectPayload)
     
+  }
+
+  async listVendor(){
+    return this.prisma.userRole.findMany({where:{Role:{
+      name:UserRoles.VENDOR
+    }},include:{
+      User:{}
+    }})
+  }
+
+  async listProjectVendor(dto){
+    const {projectId} = dto;
+    return this.prisma.projectVendors.findMany({
+      where:{
+        projectId
+      },
+      include:{
+        Project:true,
+        User:true
+      }
+    })
+
   }
 }

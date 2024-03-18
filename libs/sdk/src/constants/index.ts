@@ -49,7 +49,9 @@ export const MS_ACTIONS = {
   },
   VENDOR: {
     REGISTER: 'vendor.register',
-    ASSIGN_TO_PROJECT:'vendor.assign_to_project'
+    ASSIGN_TO_PROJECT:'vendor.assign_to_project',
+    LIST_BY_PROJECT:'vendor.list_by_project',
+
   },
   USER: {},
   ELPROJECT: {

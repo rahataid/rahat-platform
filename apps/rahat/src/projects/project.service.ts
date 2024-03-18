@@ -102,10 +102,16 @@ export class ProjectService {
             {projectId:uuid,...payload})
       case MS_ACTIONS.BENEFICIARY.LIST_BY_PROJECT:
         return this.client
-          .send({cmd:BeneficiaryJobs.LIST_BY_PROJECT},{projectId:uuid,...payload})
+          .send({cmd:BeneficiaryJobs.LIST_BY_PROJECT},
+            {projectId:uuid,...payload})
       case MS_ACTIONS.VENDOR.ASSIGN_TO_PROJECT:
         return this.client
-          .send({cmd:VendorJobs.ASSIGN_PROJECT},payload)
+          .send({cmd:VendorJobs.ASSIGN_PROJECT},
+            {projectId:uuid,...payload})
+      case MS_ACTIONS.VENDOR.LIST_BY_PROJECT:
+        return this.client
+          .send({cmd:VendorJobs.LIST_BY_PROJECT},{projectId:uuid,...payload})
+            
       default:
         throw new Error('Please provide a valid action!');
     }

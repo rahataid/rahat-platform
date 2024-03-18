@@ -18,4 +18,14 @@ export class VendorsController {
     return this.service.assignToProject(dto)
   }
 
+  @MessagePattern({cmd:VendorJobs.LIST})
+  list(){
+    return this.service.listVendor();
+  }
+
+  @MessagePattern({cmd:VendorJobs.LIST_BY_PROJECT})
+  listByProject(dto){
+    return this.service.listProjectVendor(dto)
+  }
+
 }
