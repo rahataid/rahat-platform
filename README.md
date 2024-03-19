@@ -1,83 +1,49 @@
-# EL Rumsan
+# Rahat Platform
 
-A Monorepo for EL applications
+## Overview
+Rahat Platform serves as a monorepo specifically designed to streamline the management and advancement of Rahat Core. Rahat stands as the Aid Distribution platform powered by Blockchain Technology, revolutionizing the aid distribution process.
 
-## Prerequisite
+## Prerequisites
+Before getting started, ensure that your system meets the following prerequisites:
+- Postgres Database
+- Node.js version 20.* (Recommended)
+- NestJS/CLI Installed
+- Redis Database Server
 
-- Postgres Database OR Docker compose 
-- Node.js v20.\* (Recommended)
-- NestJS/CLI Installed 
-- Redis Database Server OR Docker compose
+## Getting Started
+To run the project locally, follow these steps:
 
-## Run Locally
-
-Setp 1: Clone the project
-
+### Step 1: Clone the Repository
 ```bash
-  git@github.com:el-rumsan/rahat-platform-nx.git
+git clone git@github.com:el-rumsan/rahat-platform-nx.git
 ```
 
-Step 2: Go to the project directory and install dependencies
-
+### Step 2: Install Dependencies
+Navigate to the project directory and install dependencies using PNPM:
 ```bash
-  cd my-project
-  pnpm install
+pnpm install
 ```
 
-Step 3: Add following details to .env file inside project root directory.
-
+### Step 3: Configure Environment
+Copy the provided `.env.example` file to `.env` and update the environment variables according to your configuration:
 ```bash
-PORT=5501
-PORT_BEN=5502
-PRIVATE_KEY=
-
-# Jwt
-JWT_EXPIRATION_TIME=24h
-JWT_EXPIRATION_LONG_TIME=180000
-
-# OTP
-OTP_DURATION_IN_SECS=300
-
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
-
-
-# Postgres envioroment variables
-
-# Nest run in docker, change host to database container name
-# DB_HOST=postgres
-DB_HOST=localhost
-DB_PORT=5437
-DB_USERNAME=postgres
-DB_PASSWORD=root
-DB_NAME=db_el
-
-# Prisma database connection
-DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public
+cp .env.example .env
 ```
 
-Step 4: Migrate and seed prisma db
-
+### Step 4: Migrate and Seed Database
+Execute the following command to migrate and seed the Prisma database:
 ```bash
-  npx prisma migrate dev
+pnpm migrate:dev
 ```
 
-Seed database with
-
+### Step 5: Run the Project
+Initiate the project by executing the following commands in separate terminals:
 ```bash
-  npx prisma db seed
+pnpm rahat
+pnpm beneficiary
 ```
 
-Step 5: Run project
+### Step 6: Access API Documentation
+Explore the API documentation at: [http://localhost:5501/swagger](http://localhost:5501/swagger)
 
-```bash
-  pnpm rahat
-```
-
-```bash
-  pnpm beneficiary
-```
-
-Step 6: Visit API docs at: http://localhost:5501/swagger
+Feel free to leverage and explore the functionalities provided by the project locally. Should you encounter any challenges, consult the troubleshooting section within the documentation or reach out to the project maintainers for assistance.

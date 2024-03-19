@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { TPIIData } from '@rahataid/sdk';
+import { BeneficiaryConstants, TPIIData } from '@rahataid/sdk';
 import {
   BankedStatus,
+  BeneficiaryType,
   Gender,
   InternetStatus,
   PhoneStatus,
@@ -19,7 +20,7 @@ import {
 import { UUID } from 'crypto';
 import { CreateBeneficiaryDto } from './create-beneficiary.dto';
 
-export class ReferBeneficiaryDto implements CreateBeneficiaryDto {
+export class AddBenToProjectDto implements CreateBeneficiaryDto {
   @ApiProperty({
     type: 'uuid',
     example: '123e4567-e89b-12d3-a456-426614174000',
@@ -52,6 +53,15 @@ export class ReferBeneficiaryDto implements CreateBeneficiaryDto {
   @IsString()
   @IsOptional()
   gender?: Gender;
+
+  @ApiProperty({
+    type: 'string',
+    example: BeneficiaryConstants.Types.ENROLLED,
+    description: 'Beneficiary type',
+  })
+  @IsString()
+  @IsOptional()
+  type?: BeneficiaryType;
 
   @ApiProperty({
     type: 'string',
