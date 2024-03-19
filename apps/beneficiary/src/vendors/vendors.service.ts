@@ -64,11 +64,21 @@ export class VendorsService {
     
   }
 
+  async getVendor(dto){
+    const {uuid} = dto
+    const data = await this.prisma.user.findUnique({where:{uuid}});
+    const projectData = await this.prisma.projectVendors.findMany({where:{vendorId:uuid},include:{
+      Project:true
+    }})
+    const projects = projectData.map((project)=> project.Project)
+    const userdata={...data,projects}
+    return userdata
+  }
   async listVendor(){
     return this.prisma.userRole.findMany({where:{Role:{
       name:UserRoles.VENDOR
     }},include:{
-      User:{}
+      User:true
     }})
   }
 
