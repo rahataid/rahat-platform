@@ -61,6 +61,16 @@ export class BeneficiaryController {
     return this.beneficiaryService.addBeneficiaryToProject(dto, projectUid);
   }
 
+  @MessagePattern({cmd:BeneficiaryJobs.ASSIGN_TO_PROJECT})
+  async assignToProject(payload:any){
+    return this.beneficiaryService.assignBeneficiaryToProject(payload)
+  }
+
+  @MessagePattern({cmd:BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT})
+  async bulkAssignToProject(payload:any){
+    return this.beneficiaryService.bulkAssignToProject(payload)
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
   update(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryDto) {
     const benefUUID = uuid ? uuid : dto.uuid;

@@ -51,6 +51,6 @@ export const getBeneficiaryClient = (
     get: async (uuid: UUID, config?: AxiosRequestConfig) => {
       const response = await client.get(`/beneficiaries/${uuid}`, config);
       return formatResponse<Beneficiary>(response);
-    },
+    }
   };
 };

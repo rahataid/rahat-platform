@@ -1,3 +1,4 @@
+import { Pagination } from '@rumsan/sdk/types';
 import { formatResponse } from '@rumsan/sdk/utils';
 import { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { VendorClient } from '../types/vendor.types';
@@ -9,5 +10,13 @@ export const getVendorClient = (client: AxiosInstance): VendorClient => {
       const response = await client.post('/users/vendors', data, config);
       return formatResponse<Vendor>(response);
     },
+    
+    list:async(data:Pagination,config?: AxiosRequestConfig) => {
+      const response = await client.get('/users/vendors',{
+        params:data,
+        ...config
+      });
+      return formatResponse<Vendor[]>(response)
+    }
   };
 };

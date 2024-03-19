@@ -19,7 +19,7 @@ import {
   AddBenToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  UpdateBeneficiaryDto,
+  UpdateBeneficiaryDto
 } from '@rahataid/extensions';
 import { BQUEUE, BeneficiaryJobs, Enums, TFile } from '@rahataid/sdk';
 import { Queue } from 'bull';
@@ -54,6 +54,8 @@ export class BeneficiaryController {
   async create(@Body() dto: CreateBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
+
+
 
   @ApiParam({ name: 'uuid', required: true })
   @Post('projects/:uuid')
