@@ -18,7 +18,7 @@ export class BeneficiaryConsumer {
         if (job.data) {
             return this.mailerService.sendMail({
                 to: job.data.email,
-                from: 'manjik.shrestha@rumsan.com',
+                from: this.configService.get<string>('SMTP_USER'),
                 subject: 'Wallet Verification Link',
                 template: './wallet-verification',
                 context: {

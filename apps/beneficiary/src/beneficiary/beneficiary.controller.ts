@@ -77,18 +77,16 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.GENERATE_LINK })
   generateLink(uuid: UUID) {
-    return this.verificationService.generateLink(uuid);
+        return this.verificationService.generateLink(uuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.VALIDATE_WALLET })
   validateWallet(validationData: ValidateWallet) {
-    console.log({ validationData })
     return this.verificationService.validateWallet(validationData);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE })
   verifySignature(verificationData: any) {
-    console.log({ verificationData })
     return this.verificationService.verifySignature(verificationData);
   }
 }

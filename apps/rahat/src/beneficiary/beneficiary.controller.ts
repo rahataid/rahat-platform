@@ -104,9 +104,9 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET }, uuid);
   }
 
-  @Get('generate-link/:uuid')
+  @Get('verification-link/:uuid')
   @ApiParam({ name: 'uuid', required: true })
-  async generateLink(@Param('uuid') uuid: UUID) {
+  async generateVerificationLink(@Param('uuid') uuid: UUID) {
     return this.client.send({ cmd: BeneficiaryJobs.GENERATE_LINK }, uuid);
   }
 
@@ -119,4 +119,5 @@ export class BeneficiaryController {
   async verifySignature(@Body() dto: any) {
     return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
   }
+  
 }

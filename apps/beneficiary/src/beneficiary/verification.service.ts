@@ -61,7 +61,7 @@ export class VerificationService {
             email,
             name,
         });
-        return 'Success';
+        return "Success";
     }
 
     //set Beneficiary as verified based on walletAddress
@@ -82,10 +82,8 @@ export class VerificationService {
     async validateWallet(validationData: ValidateWallet) {
         const { walletAddress, encryptedData } = validationData
         const decrypted = this.decrypt(encryptedData);
-        console.log({ decrypted, walletAddress })
         if (decrypted === walletAddress.toString()) {
             this.setBeneficiaryAsVerified(walletAddress);
-
             return "success"
         }
         throw new UnauthorizedException('Invalid wallet address')
@@ -95,13 +93,10 @@ export class VerificationService {
     async verifySignature(verificationData: VerifySignature) {
         const { encryptedData, signature } = verificationData;
         const decryptedAddress = this.decrypt(encryptedData) as Address;
-        console.log({ decryptedAddress: decryptedAddress.toString() })
-        console.log({ encryptedData, signature })
         const recoveredAddress = await recoverMessageAddress({
             message: encryptedData,
             signature: signature,
         })
-        console.log({ recoveredAddress })
         if (decryptedAddress === recoveredAddress) {
             this.setBeneficiaryAsVerified(decryptedAddress);
             return 'Success';

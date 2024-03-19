@@ -30,7 +30,7 @@ import { VerificationService } from './verification.service';
     BullModule.registerQueue({
       name: BQUEUE.RAHAT_BENEFICIARY,
     }),
-    MailerModule.forRootAsync({
+        MailerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
