@@ -28,4 +28,9 @@ export class VendorsController {
     return this.service.listProjectVendor(dto)
   }
 
+  @MessagePattern({cmd:VendorJobs.GET})
+  getVendor(uuid){
+    return this.service.getVendor(uuid)
+  }
+
 }

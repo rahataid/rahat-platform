@@ -44,3 +44,9 @@ export enum UploadFileType {
   KOBO = 'KOBO',
 }
 
+export enum ProjectStatus {
+  NOT_READY='NOT_READY',
+  ACTIVE='ACTIVE',
+  CLOSED='CLOSED'
+}
+
