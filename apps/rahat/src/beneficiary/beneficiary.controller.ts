@@ -19,8 +19,8 @@ import {
   AddBenToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  UpdateBeneficiaryDto
-} from '@rahataid/extensions';
+  UpdateBeneficiaryDto,
+  ValidateWalletDto } from '@rahataid/extensions';
 import { BQUEUE, BeneficiaryJobs, Enums, TFile } from '@rahataid/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -33,7 +33,7 @@ export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue
-  ) {}
+  ) { }
 
   @Get()
   async list(@Query() dto: ListBeneficiaryDto) {
@@ -104,4 +104,21 @@ export class BeneficiaryController {
   async getBeneficiary(@Param('uuid') uuid: UUID) {
     return this.client.send({ cmd: BeneficiaryJobs.GET }, uuid);
   }
+
+  @Get('verification-link/:uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async generateVerificationLink(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GENERATE_LINK }, uuid);
+  }
+
+  @Post('validate-wallet')
+  async validateWallet(@Body() dto: ValidateWalletDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.VALIDATE_WALLET }, dto);
+  }
+
+  @Post('verify-signature')
+  async verifySignature(@Body() dto: any) {
+    return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
+  }
+  
 }

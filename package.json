@@ -22,6 +22,7 @@
   },
   "private": true,
   "dependencies": {
+    "@nestjs-modules/mailer": "^1.11.2",
     "@nestjs/bull": "^10.1.0",
     "@nestjs/common": "^10.3.3",
     "@nestjs/config": "^3.2.0",
@@ -34,12 +35,13 @@
     "@nestjs/swagger": "^7.3.0",
     "@prisma/client": "5.10.2",
     "@rumsan/core": "^3.0.134",
-    "@rumsan/extensions": "^0.0.15",
+    "@rumsan/extensions": "^0.0.16",
     "@rumsan/prisma": "^1.0.126",
     "@rumsan/react-query": "^0.0.26",
     "@rumsan/sdk": "^0.0.41",
     "@rumsan/settings": "^0.0.108",
     "@rumsan/user": "^3.0.153",
+    "abitype": "^1.0.1",
     "axios": "^1.6.7",
     "bull": "^4.12.2",
     "class-transformer": "^0.5.1",
@@ -54,8 +56,10 @@
     "ts-node": "10.9.1",
     "tslib": "^2.6.2",
     "uuid": "^9.0.1",
+    "viem": "^2.8.4",
     "winston": "^3.11.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zlib": "^1.0.5"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",

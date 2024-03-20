@@ -11,14 +11,17 @@ import {
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
 import {
+  BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
   BeneficiaryJobs,
   ProjectContants,
-  TPIIData,
+  TPIIData
 } from '@rahataid/sdk';
 
+import { InjectQueue } from '@nestjs/bull';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
+import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { createListQuery } from './helpers';
@@ -31,7 +34,9 @@ export class BeneficiaryService {
   constructor(
     protected prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
-    private eventEmitter: EventEmitter2
+    @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
+    private readonly beneficiaryQueue: Queue,
+    private eventEmitter: EventEmitter2,
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -285,6 +290,7 @@ export class BeneficiaryService {
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_REMOVED);
     return rdata;
   }
+
 
   async createBulk(dtos: CreateBeneficiaryDto[]) {
     // Pre-generate UUIDs for each beneficiary to use as a linking key

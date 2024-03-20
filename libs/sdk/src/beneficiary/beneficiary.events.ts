@@ -18,5 +18,9 @@ export const JOBS = {
   STATS: 'rahat.jobs.beneficiary.stats',
   UPDATE: 'rahat.jobs.beneficiary.update',
   UPDATE_STATS: 'rahat.jobs.beneficiary.update_stats',
+  GENERATE_LINK: 'rahat.jobs.beneficiary.generate_link',
+  SEND_EMAIL: 'rahat.jobs.beneficiary.send_email',
+  VALIDATE_WALLET: 'rahat.jobs.beneficiary.validate_wallet',
+  VERIFY_SIGNATURE: 'rahat.jobs.beneficiary.verify_signature',
   LIST_BY_PROJECT: 'rahat.jobs.beneficiary.list_by_project',
 };
