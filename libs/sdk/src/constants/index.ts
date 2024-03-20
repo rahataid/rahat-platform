@@ -43,11 +43,24 @@ export const MS_ACTIONS = {
     GET: 'beneficiary.get',
     DELETE: 'beneficiary.delete',
     ADD_TO_PROJECT: 'beneficiary.add_to_project',
+    ASSGIN_TO_PROJECT:'beneficiary.assign_to_project',
+    BULK_ASSIGN_TO_PROJECT:'beneficiary.bulk_assign',
     LIST_BY_PROJECT: 'beneficiary.list_by_project',
   },
   VENDOR: {
     REGISTER: 'vendor.register',
+    ASSIGN_TO_PROJECT:'vendor.assign_to_project',
+    LIST_BY_PROJECT:'vendor.list_by_project',
+
   },
   USER: {},
-  PROJECT: {},
+  ELPROJECT: {
+    REDEEM_VOUCHER:'elProject.redeemVoucher',
+    PROCESS_OTP:'elProject.processOtp',
+    ASSIGN_DISCOUNT_VOUCHER:'elProject.discountVoucher'
+  },
+  SETTINGS:{
+    LIST:'settings.list',
+    GET:'settings.get'
+  }
 };

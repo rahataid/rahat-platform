@@ -163,6 +163,69 @@ export class BeneficiaryService {
     return this.prisma.beneficiaryProject.create({ data: dto });
   }
 
+  async bulkAssignToProject(dto){
+    const { beneficiaryIds,projectId }= dto;
+    const projectPayloads=[]
+    const benProjectData =[]
+
+    await Promise.all( beneficiaryIds.map( async ( beneficiaryId )=>{
+      const beneficiaryData = await this.rsprisma.beneficiary.findUnique({where:{uuid:beneficiaryId}});
+      const projectPayload = {
+        uuid:beneficiaryData.uuid,
+        walletAddress:beneficiaryData.walletAddress,
+        extras:beneficiaryData?.extras || null,
+        type:BeneficiaryConstants.Types.ENROLLED
+      }
+      benProjectData.push({
+        projectId,
+        beneficiaryId
+      })
+      projectPayloads.push(projectPayload);
+
+    }))
+
+    //2.Save beneficiary to project
+    await this.prisma.beneficiaryProject.createMany({
+      data:benProjectData
+    });
+      
+    //3. Sync beneficiary to project
+
+    return  this.client.send({
+       cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT,
+       uuid:projectId },
+       projectPayloads)
+
+  }
+
+  async assignBeneficiaryToProject(dto:AddToProjectDto){
+    const{beneficiaryId,projectId} = dto;
+    //1. Get beneficiary data
+    const beneficiaryData = await this.rsprisma.beneficiary.findUnique({where:{uuid:beneficiaryId}});
+    const projectPayload ={
+      uuid:beneficiaryData.uuid,
+      walletAddress:beneficiaryData.walletAddress,
+      extras:beneficiaryData?.extras || null,
+      type:BeneficiaryConstants.Types.ENROLLED
+    }
+
+    //2.Save beneficiary to project
+
+    await this.saveBeneficiaryToProject({
+      beneficiaryId:beneficiaryId,
+      projectId:projectId
+    })
+
+    //3. Sync beneficiary to project
+    return this.client.send(
+      { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
+      projectPayload
+    );
+
+
+
+  }
+
   // async createBulk(data: CreateBeneficiaryDto[]) {
   //   if (!data.length) return;
   //   const sanitized = data.map((d) => {

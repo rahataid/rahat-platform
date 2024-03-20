@@ -56,6 +56,7 @@ export const getBeneficiaryClient = (
     generateVerificationLink: async (uuid: UUID, config?: AxiosRequestConfig) => {
       const response = await client.get('/beneficiaries/verification-link/:uuid', config)
       return formatResponse<string>(response)
+
     }
   };
 };

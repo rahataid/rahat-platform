@@ -20,8 +20,7 @@ import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   UpdateBeneficiaryDto,
-  ValidateWalletDto
-} from '@rahataid/extensions';
+  ValidateWalletDto } from '@rahataid/extensions';
 import { BQUEUE, BeneficiaryJobs, Enums, TFile } from '@rahataid/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -55,6 +54,8 @@ export class BeneficiaryController {
   async create(@Body() dto: CreateBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
+
+
 
   @ApiParam({ name: 'uuid', required: true })
   @Post('projects/:uuid')
