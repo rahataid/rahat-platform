@@ -20,7 +20,8 @@ import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   UpdateBeneficiaryDto,
-  ValidateWalletDto } from '@rahataid/extensions';
+  ValidateWalletDto
+} from '@rahataid/extensions';
 import { BQUEUE, BeneficiaryJobs, Enums, TFile } from '@rahataid/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -105,6 +106,12 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET }, uuid);
   }
 
+  @Get('wallet/:wallet')
+  @ApiParam({ name: 'wallet', required: true })
+  async getBeneficiaryByWallet(@Param('wallet') wallet: string) {
+    return this.client.send({ cmd: BeneficiaryJobs.GET_BY_WALLET }, wallet);
+  }
+
   @Get('verification-link/:uuid')
   @ApiParam({ name: 'uuid', required: true })
   async generateVerificationLink(@Param('uuid') uuid: UUID) {
@@ -120,5 +127,5 @@ export class BeneficiaryController {
   async verifySignature(@Body() dto: any) {
     return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
   }
-  
+
 }
