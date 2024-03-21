@@ -32,6 +32,11 @@ export class BeneficiaryController {
     return this.service.findOne(uuid);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_WALLET })
+  async getBeneficiaryByWallet(wallet: string) {
+    return this.service.findOneByWallet(wallet);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
   createBulk(@Payload() data) {
     return this.service.createBulk(data);
@@ -63,13 +68,13 @@ export class BeneficiaryController {
     return this.beneficiaryService.addBeneficiaryToProject(dto, projectUid);
   }
 
-  @MessagePattern({cmd:BeneficiaryJobs.ASSIGN_TO_PROJECT})
-  async assignToProject(payload:any){
+  @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
+  async assignToProject(payload: any) {
     return this.beneficiaryService.assignBeneficiaryToProject(payload)
   }
 
-  @MessagePattern({cmd:BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT})
-  async bulkAssignToProject(payload:any){
+  @MessagePattern({ cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT })
+  async bulkAssignToProject(payload: any) {
     return this.beneficiaryService.bulkAssignToProject(payload)
   }
 
@@ -87,7 +92,7 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.GENERATE_LINK })
   generateLink(uuid: UUID) {
-        return this.verificationService.generateLink(uuid);
+    return this.verificationService.generateLink(uuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.VALIDATE_WALLET })

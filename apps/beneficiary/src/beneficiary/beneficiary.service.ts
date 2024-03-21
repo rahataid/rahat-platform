@@ -128,6 +128,18 @@ export class BeneficiaryService {
     return row;
   }
 
+  async findOneByWallet(walletAddress: string) {
+    const row = await this.rsprisma.beneficiary.findFirst({
+      where: { walletAddress },
+    });
+    if (!row) return null;
+    const piiData = await this.rsprisma.beneficiaryPii.findUnique({
+      where: { beneficiaryId: row.id },
+    });
+    if (piiData) row.piiData = piiData;
+    return row;
+  }
+
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
     const { type, referrerBeneficiary, referrerVendor, ...rest } = dto;
     // 1. Create Beneficiary
@@ -163,18 +175,18 @@ export class BeneficiaryService {
     return this.prisma.beneficiaryProject.create({ data: dto });
   }
 
-  async bulkAssignToProject(dto){
-    const { beneficiaryIds,projectId }= dto;
-    const projectPayloads=[]
-    const benProjectData =[]
+  async bulkAssignToProject(dto) {
+    const { beneficiaryIds, projectId } = dto;
+    const projectPayloads = []
+    const benProjectData = []
 
-    await Promise.all( beneficiaryIds.map( async ( beneficiaryId )=>{
-      const beneficiaryData = await this.rsprisma.beneficiary.findUnique({where:{uuid:beneficiaryId}});
+    await Promise.all(beneficiaryIds.map(async (beneficiaryId) => {
+      const beneficiaryData = await this.rsprisma.beneficiary.findUnique({ where: { uuid: beneficiaryId } });
       const projectPayload = {
-        uuid:beneficiaryData.uuid,
-        walletAddress:beneficiaryData.walletAddress,
-        extras:beneficiaryData?.extras || null,
-        type:BeneficiaryConstants.Types.ENROLLED
+        uuid: beneficiaryData.uuid,
+        walletAddress: beneficiaryData.walletAddress,
+        extras: beneficiaryData?.extras || null,
+        type: BeneficiaryConstants.Types.ENROLLED
       }
       benProjectData.push({
         projectId,
@@ -186,34 +198,35 @@ export class BeneficiaryService {
 
     //2.Save beneficiary to project
     await this.prisma.beneficiaryProject.createMany({
-      data:benProjectData
+      data: benProjectData
     });
-      
+
     //3. Sync beneficiary to project
 
-    return  this.client.send({
-       cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT,
-       uuid:projectId },
-       projectPayloads)
+    return this.client.send({
+      cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT,
+      uuid: projectId
+    },
+      projectPayloads)
 
   }
 
-  async assignBeneficiaryToProject(dto:AddToProjectDto){
-    const{beneficiaryId,projectId} = dto;
+  async assignBeneficiaryToProject(dto: AddToProjectDto) {
+    const { beneficiaryId, projectId } = dto;
     //1. Get beneficiary data
-    const beneficiaryData = await this.rsprisma.beneficiary.findUnique({where:{uuid:beneficiaryId}});
-    const projectPayload ={
-      uuid:beneficiaryData.uuid,
-      walletAddress:beneficiaryData.walletAddress,
-      extras:beneficiaryData?.extras || null,
-      type:BeneficiaryConstants.Types.ENROLLED
+    const beneficiaryData = await this.rsprisma.beneficiary.findUnique({ where: { uuid: beneficiaryId } });
+    const projectPayload = {
+      uuid: beneficiaryData.uuid,
+      walletAddress: beneficiaryData.walletAddress,
+      extras: beneficiaryData?.extras || null,
+      type: BeneficiaryConstants.Types.ENROLLED
     }
 
     //2.Save beneficiary to project
 
     await this.saveBeneficiaryToProject({
-      beneficiaryId:beneficiaryId,
-      projectId:projectId
+      beneficiaryId: beneficiaryId,
+      projectId: projectId
     })
 
     //3. Sync beneficiary to project
