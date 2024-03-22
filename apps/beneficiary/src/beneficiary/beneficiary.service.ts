@@ -56,7 +56,7 @@ export class BeneficiaryService {
   }
 
   async listBenefByProject(dto: ListProjectBeneficiaryDto) {
-    return paginate(
+    const data = await  paginate(
       this.rsprisma.beneficiaryProject,
       {
         where: {
@@ -69,6 +69,13 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+      // return data;
+    return this.client.send(
+      { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
+      data
+    );
+   
+
   }
 
   async list(
