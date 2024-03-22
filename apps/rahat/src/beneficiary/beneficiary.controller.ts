@@ -112,6 +112,12 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET_BY_WALLET }, wallet);
   }
 
+  @Get('phone/:phone')
+  @ApiParam({ name: 'phone', required: true })
+  async getBeneficiaryByPhone(@Param('phone') phone: string) {
+    return this.client.send({ cmd: BeneficiaryJobs.GET_BY_PHONE }, phone);
+  }
+
   @Get('verification-link/:uuid')
   @ApiParam({ name: 'uuid', required: true })
   async generateVerificationLink(@Param('uuid') uuid: UUID) {

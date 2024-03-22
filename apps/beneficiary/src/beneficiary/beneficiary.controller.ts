@@ -37,6 +37,12 @@ export class BeneficiaryController {
     return this.service.findOneByWallet(wallet);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_PHONE })
+  async getBeneficiaryByPhone(wallet: string) {
+    return this.service.findOneByPhone(wallet);
+  }
+
+
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
   createBulk(@Payload() data) {
     return this.service.createBulk(data);
