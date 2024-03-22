@@ -9,11 +9,11 @@ import {
   Length,
   Matches,
 } from 'class-validator';
-import { UUID } from 'crypto';
+import { UUID, randomUUID } from 'crypto';
 
 export class CreateBeneficiaryDto implements Beneficiary {
   @ApiProperty({
-    example: '0-0-0-0-0',
+    example: randomUUID().toString(),
     description: 'Beneficiary ID',
   })
   @IsString()
