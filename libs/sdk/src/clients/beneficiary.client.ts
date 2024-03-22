@@ -53,10 +53,23 @@ export const getBeneficiaryClient = (
       return formatResponse<Beneficiary>(response);
     },
 
-    generateVerificationLink: async (uuid: UUID, config?: AxiosRequestConfig) => {
-      const response = await client.get('/beneficiaries/verification-link/:uuid', config)
-      return formatResponse<string>(response)
-
-    }
+    generateVerificationLink: async (
+      uuid: UUID,
+      config?: AxiosRequestConfig
+    ) => {
+      const response = await client.get(
+        `/beneficiaries/verification-link/${uuid}`,
+        config
+      );
+      return formatResponse<string>(response);
+    },
+    upload: async (formData: FormData, config?: AxiosRequestConfig) => {
+      const response = await client.post(
+        '/beneficiaries/upload',
+        formData,
+        config
+      );
+      return formatResponse<any>(response);
+    },
   };
 };

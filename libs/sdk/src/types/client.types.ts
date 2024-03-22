@@ -39,4 +39,8 @@ export type BeneficiaryClient = {
     uuid: UUID,
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<string>>;
+  upload: (
+    formData: FormData,
+    config?: AxiosRequestConfig
+  ) => Promise<FormattedResponse<any>>;
 };
