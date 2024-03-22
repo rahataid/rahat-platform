@@ -70,6 +70,7 @@ export class VendorsService {
 
   async getVendor(dto) {
     const { id } = dto;
+
     const data = isAddress(id) ?
       await this.prisma.user.findFirst({ where: { wallet: id } }) :
       await this.prisma.user.findUnique({ where: { uuid: id } });

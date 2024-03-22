@@ -43,9 +43,9 @@ export const roles: Array<{ id?: number; name: string; isSystem?: boolean }> = [
     name: 'User',
   },
   {
-    id:4,
-    name:'Vendor'
-  }
+    id: 4,
+    name: 'Vendor',
+  },
 ];
 
 export const permissions: Array<{
