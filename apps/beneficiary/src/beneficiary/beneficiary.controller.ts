@@ -4,12 +4,13 @@ import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   ListProjectBeneficiaryDto,
-  UpdateBeneficiaryDto,
+  UpdateBeneficiaryDto
 } from '@rahataid/extensions';
-import { BeneficiaryJobs, ProjectContants } from '@rahataid/sdk';
+import { BeneficiaryJobs, ProjectContants, ValidateWallet } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
+import { VerificationService } from './verification.service';
 
 @Controller()
 export class BeneficiaryController {
@@ -17,8 +18,9 @@ export class BeneficiaryController {
     private readonly beneficiaryService: BeneficiaryService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly service: BeneficiaryService,
-    private readonly statsService: BeneficiaryStatService
-  ) {}
+    private readonly statsService: BeneficiaryStatService,
+    private readonly verificationService: VerificationService,
+  ) { }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE })
   async create(@Payload() createBeneficiaryDto: CreateBeneficiaryDto) {
@@ -29,6 +31,17 @@ export class BeneficiaryController {
   async getBeneficiary(uuid: UUID) {
     return this.service.findOne(uuid);
   }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_WALLET })
+  async getBeneficiaryByWallet(wallet: string) {
+    return this.service.findOneByWallet(wallet);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_PHONE })
+  async getBeneficiaryByPhone(wallet: string) {
+    return this.service.findOneByPhone(wallet);
+  }
+
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
   createBulk(@Payload() data) {
@@ -61,24 +74,40 @@ export class BeneficiaryController {
     return this.beneficiaryService.addBeneficiaryToProject(dto, projectUid);
   }
 
-  @MessagePattern({cmd:BeneficiaryJobs.ASSIGN_TO_PROJECT})
-  async assignToProject(payload:any){
+  @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
+  async assignToProject(payload: any) {
     return this.beneficiaryService.assignBeneficiaryToProject(payload)
   }
 
-  @MessagePattern({cmd:BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT})
-  async bulkAssignToProject(payload:any){
+  @MessagePattern({ cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT })
+  async bulkAssignToProject(payload: any) {
     return this.beneficiaryService.bulkAssignToProject(payload)
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
   update(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryDto) {
     const benefUUID = uuid ? uuid : dto.uuid;
+    console.log({ dto });
     return this.service.update(benefUUID, dto);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.REMOVE })
   remove(@Param('uuid') uuid: UUID) {
     return this.service.remove(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GENERATE_LINK })
+  generateLink(uuid: UUID) {
+    return this.verificationService.generateLink(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.VALIDATE_WALLET })
+  validateWallet(validationData: ValidateWallet) {
+    return this.verificationService.validateWallet(validationData);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE })
+  verifySignature(verificationData: any) {
+    return this.verificationService.verifySignature(verificationData);
   }
 }

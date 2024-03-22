@@ -51,6 +51,17 @@ export const getBeneficiaryClient = (
     get: async (uuid: UUID, config?: AxiosRequestConfig) => {
       const response = await client.get(`/beneficiaries/${uuid}`, config);
       return formatResponse<Beneficiary>(response);
+    },
+
+    getByPhone: async (phone: string, config?: AxiosRequestConfig) => {
+      const response = await client.get(`/beneficiaries/phone/${phone}`, config);
+      return formatResponse<Beneficiary>(response);
+    },
+
+    generateVerificationLink: async (uuid: UUID, config?: AxiosRequestConfig) => {
+      const response = await client.get('/beneficiaries/verification-link/:uuid', config)
+      return formatResponse<string>(response)
+
     }
   };
 };

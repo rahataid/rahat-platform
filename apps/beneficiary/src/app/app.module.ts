@@ -1,9 +1,9 @@
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { BQUEUE } from '@rahataid/sdk';
-
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { BQUEUE } from '@rahataid/sdk';
+import { SettingsModule } from '@rumsan/settings';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ListenersModule } from '../listeners/listener.module';
 import { BeneficiaryProcessor } from '../processors/beneficiary.processor';
@@ -13,6 +13,7 @@ import { AppService } from './app.service';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot({
       maxListeners: 10,
       ignoreErrors: false,
@@ -34,6 +35,7 @@ import { AppService } from './app.service';
     BeneficiaryModule,
     VendorsModule,
     ListenersModule,
+    SettingsModule
   ],
   controllers: [AppController],
   providers: [AppService, BeneficiaryProcessor],
