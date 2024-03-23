@@ -4,6 +4,7 @@ import { ClientProxy } from "@nestjs/microservices";
 import { Project } from "@prisma/client";
 import { BQUEUE, ProjectJobs } from "@rahataid/sdk";
 import { Job } from "bull";
+import { SettingsService } from "@rumsan/settings";
 
 @Processor(BQUEUE.RAHAT_PROJECT)
 export class ProjectProcessor {
@@ -15,51 +16,64 @@ export class ProjectProcessor {
 
     @Process(ProjectJobs.PROJECT_CREATE)
     async processProjectCreation(job: Job<Project>) {
-        this.logger.log("######## SENDING TASK TO WORKER ###########")
+        try {
+            this.logger.log("######## SENDING PROJECT CREATION TASK TO THE WORKER ###########")
 
-        const formattedProjectName = job.data.name.trim().split(/\s+/).join('_');
-        const dbName = `rahat_${formattedProjectName}`;
-        const deploymentRoot = process.env.DEPLOYMENT_ROOT;
+            const formattedProjectName = job.data.name.trim().split(/\s+/).join('_');
+            const dbName = `rahat_${formattedProjectName}`;
 
-        // fetch from db or assign responsibility to worker
-        const environmentVariables = {
-            PRIVATE_KEY: process.env.PRIVATE_KEY,
-            REDIS_HOST: process.env.REDIS_HOST,
-            REDIS_PORT: process.env.REDIS_PORT,
-            REDIS_PASSWORD: process.env.REDIS_PASSWORD,
-            DB_HOST: process.env.DB_HOST,
-            DB_PORT: process.env.DB_PORT,
-            DB_USERNAME: process.env.DB_USERNAME,
-            DB_PASSWORD: process.env.DB_PASSWORD,
-            DB_NAME: dbName,
-            PROJECT_ID: job.data.uuid,
-            DATABASE_URL: `postgresql://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${dbName}?schema=public`,
-            DEPLOYER_PRIVATE_KEY: process.env.DEPLOYER_PRIVATE_KEY,
-            ADMIN_PRIVATE_KEY: process.env.ADMIN_PRIVATE_KEY,
-            VENDOR_PRIVATE_KEY: process.env.VENDOR_PRIVATE_KEY,
-            RAHAT_ADMIN_PRIVATE_KEY: process.env.RAHAT_ADMIN_PRIVATE_KEY,
-            VENDOR_WALLET: process.env.VENDOR_WALLET,
-            ENROLLED_BENEFICIARY: process.env.ENROLLED_BENEFICIARY,
-            NETWORK_PROVIDER: process.env.NETWORK_PROVIDER,
-            NETWORK_ID: process.env.NETWORK_ID,
-            CHAIN_NAME: process.env.CHAIN_NAME,
-            CHAIN_ID: process.env.CHAIN_ID,
-            CURRENCY_NAME: process.env.CURRENCY_NAME,
-            CURRENCY_SYMBOL: process.env.CURRENCY_SYMBOL,
-        };
+            const env = this.getProjectVariables()
 
-        const dockerConfig = {
-            deploymentPath: `${deploymentRoot}/${job.data.uuid}`,
-            containerName: `${formattedProjectName}_container`,
-            serviceName: `${formattedProjectName}_service`,
-            imageName: "esatya/rahat-project-el:dev" //pull from db 
+            env['DB_NAME'] = dbName
+            env['DATABASE_URL'] = `postgresql://${env['DB_USERNAME']}:${env['DB_PASSWORD']}@${env['DB_HOST']}:${env['DB_PORT']}/${dbName}?schema=public`
+            env['PROJECT_ID'] = job.data.uuid
+
+            const dockerImage = env['DOCKER_IMAGE']
+
+            delete env['DOCKER_IMAGE']
+
+            const dockerConfig = {
+                projectId: job.data.uuid,
+                containerName: `${formattedProjectName}_container`,
+                serviceName: `${formattedProjectName}_service`,
+                imageName: dockerImage
+            }
+
+            const workerPayload = {
+                environmentVariables: env,
+                dockerConfig
+            }
+
+            return this.client.emit({ cmd: "project.create" }, workerPayload);
+        } catch (err) {
+            this.logger.error(err)
+            // emit ws message to connected client
         }
+    }
 
-        const workerPayload = {
-            environmentVariables,
-            dockerConfig
+    private getProjectVariables() {
+        return {
+            PRIVATE_KEY: SettingsService.get('EL.PRIVATE_KEY'),
+            REDIS_HOST: SettingsService.get('EL.REDIS_HOST'),
+            REDIS_PORT: SettingsService.get('EL.REDIS_PORT'),
+            REDIS_PASSWORD: SettingsService.get('EL.REDIS_PASSWORD'),
+            DB_HOST: SettingsService.get('EL.DB_HOST'),
+            DB_PORT: SettingsService.get('EL.DB_PORT'),
+            DB_USERNAME: SettingsService.get('EL.DB_USERNAME'),
+            DB_PASSWORD: SettingsService.get('EL.DB_PASSWORD'),
+            DEPLOYER_PRIVATE_KEY: SettingsService.get('EL.DEPLOYER_PRIVATE_KEY'),
+            ADMIN_PRIVATE_KEY: SettingsService.get('EL.ADMIN_PRIVATE_KEY'),
+            VENDOR_PRIVATE_KEY: SettingsService.get('EL.VENDOR_PRIVATE_KEY'),
+            RAHAT_ADMIN_PRIVATE_KEY: SettingsService.get('EL.RAHAT_ADMIN_PRIVATE_KEY'),
+            VENDOR_WALLET: SettingsService.get('EL.VENDOR_WALLET'),
+            ENROLLED_BENEFICIARY: SettingsService.get('EL.ENROLLED_BENEFICIARY'),
+            NETWORK_PROVIDER: SettingsService.get('EL.NETWORK_PROVIDER'),
+            NETWORK_ID: SettingsService.get('EL.NETWORK_ID'),
+            CHAIN_NAME: SettingsService.get('EL.CHAIN_NAME'),
+            CHAIN_ID: SettingsService.get('EL.CHAIN_ID'),
+            CURRENCY_NAME: SettingsService.get('EL.CURRENCY_NAME'),
+            CURRENCY_SYMBOL: SettingsService.get('EL.CURRENCY_SYMBOL'),
+            DOCKER_IMAGE: SettingsService.get('EL.DOCKER_IMAGE')
         }
-
-        return this.client.emit({ cmd: "project.create" }, workerPayload);
     }
 }
