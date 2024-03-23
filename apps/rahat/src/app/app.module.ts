@@ -12,11 +12,11 @@ import {
 } from '@rumsan/user';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ListenersModule } from '../listeners/listeners.module';
-import { RahatProcessor } from '../processors';
 import { ProjectModule } from '../projects/projects.module';
 import { AppUsersModule } from '../users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ProcessorsModule } from '../processors/processors.module';
 
 @Module({
   imports: [
@@ -40,8 +40,9 @@ import { AppService } from './app.service';
     SettingsModule,
     ProjectModule,
     StatsModule,
+    ProcessorsModule
   ],
   controllers: [AppController],
-  providers: [AppService, RahatProcessor],
+  providers: [AppService],
 })
 export class AppModule {}

@@ -42,7 +42,7 @@ export class ListenersService {
 
   @OnEvent(ProjectEvents.PROJECT_CREATED)
   async onProjectCreated(data: Project) {
-    this.hostQueue.add(ProjectJobs.PROJECT_CREATE, data, {
+    this.projectQueue.add(ProjectJobs.PROJECT_CREATE, data, {
       attempts: 3,
       removeOnComplete: true,
       backoff: {
