@@ -45,6 +45,7 @@ export class ProjectProcessor {
             }
 
             return this.client.emit({ cmd: "project.create" }, workerPayload);
+            // remaining setup scripts
         } catch (err) {
             this.logger.error(err)
             // emit ws message to connected client
