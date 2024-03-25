@@ -11,6 +11,7 @@ export const JOBS = {
   CREATE_BULK: 'rahat.jobs.beneficiary.create_bulk',
   GET: 'rahat.jobs.beneficiary.get',
   GET_BY_WALLET: 'rahat.jobs.beneficiary.get_by_wallet',
+  GET_BY_PHONE: 'rahat.jobs.beneficiary.get_by_phone',
   LIST: 'rahat.jobs.beneficiary.list',
   REMOVE: 'rahat.jobs.beneficiary.remove',
   ADD_TO_PROJECT: 'rahat.jobs.beneficiary.add_to_project',

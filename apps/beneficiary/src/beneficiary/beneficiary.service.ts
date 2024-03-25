@@ -140,6 +140,19 @@ export class BeneficiaryService {
     return row;
   }
 
+  async findOneByPhone(phone: string) {
+    const piiData = await this.rsprisma.beneficiaryPii.findFirst({
+      where: { phone },
+    });
+    if (!piiData) return null;
+    const beneficiary = await this.rsprisma.beneficiary.findUnique({
+      where: { id: piiData.beneficiaryId },
+    });
+    if (!beneficiary) return null;
+    beneficiary.piiData = piiData;
+    return beneficiary;
+  }
+
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
     const { type, referrerBeneficiary, referrerVendor, ...rest } = dto;
     // 1. Create Beneficiary
