@@ -11,7 +11,7 @@ Before getting started, ensure that your system meets the following prerequisite
 - Redis Database Server
 
 ## Getting Started
-To run the project locally, follow these steps: 
+To run the project locally, follow these steps:  
 
 ### Step 1: Clone the Repository
 ```bash
