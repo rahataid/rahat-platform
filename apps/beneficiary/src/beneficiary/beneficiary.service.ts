@@ -61,7 +61,7 @@ export class BeneficiaryService {
   }
 
   async listBenefByProject(dto: ListProjectBeneficiaryDto) {
-    return paginate(
+    const data = await  paginate(
       this.rsprisma.beneficiaryProject,
       {
         where: {
@@ -74,20 +74,34 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+      // return data;
+    return this.client.send(
+      { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
+      data
+    );
+   
+
   }
 
   async list(
     dto: ListBeneficiaryDto
-  ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
+  ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>>  {
     const AND_QUERY = createListQuery(dto);
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
-    return paginate(
+    return  paginate(
       this.rsprisma.beneficiary,
       {
         where: {
           //AND: AND_QUERY,
           deletedAt: null,
+        },
+        include:{
+          BeneficiaryProject:{
+            include:{
+              Project:true
+            }
+          }
         },
         orderBy,
       },
@@ -96,7 +110,7 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
-  }
+    }
 
   async create(dto: CreateBeneficiaryDto) {
     const { piiData, ...data } = dto;
