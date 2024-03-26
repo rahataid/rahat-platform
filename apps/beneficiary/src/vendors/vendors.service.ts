@@ -2,8 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { VendorAddToProjectDto, VendorRegisterDto } from '@rahataid/extensions';
 import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
-import { PrismaService } from '@rumsan/prisma';
+import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { isAddress } from 'viem';
+
+const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
 
 @Injectable()
@@ -75,7 +77,7 @@ export class VendorsService {
       await this.prisma.user.findFirst({ where: { wallet: id } }) :
       await this.prisma.user.findUnique({ where: { uuid: id } });
     const projectData = await this.prisma.projectVendors.findMany({
-      where: { vendorId: id }, include: {
+      where: { vendorId: data.uuid }, include: {
         Project: true
       }
     })
@@ -83,16 +85,42 @@ export class VendorsService {
     const userdata = { ...data, projects }
     return userdata
   }
+
+
   async listVendor() {
-    return this.prisma.userRole.findMany({
-      where: {
-        Role: {
-          name: UserRoles.VENDOR
+    const vendorList = await this.prisma.userRole.findMany({
+      where:{
+        Role:{
+          name:UserRoles.VENDOR
         }
-      }, include: {
-        User: true
+      },
+      include:{
+        User:true
       }
     })
+    const projectVendor = await this.prisma.projectVendors.findMany({include:{Project:true}});
+
+    const combined = vendorList.map(vendor=>{
+      const matchedCombined = projectVendor.find(vendorData => vendorData.vendorId ===vendor.User.uuid)
+      return {
+        ...vendor,
+        Project:{
+          ...matchedCombined?.Project
+        }
+      }
+    });
+    return combined
+
+  //   console.log(combined)
+  //   return this.prisma.userRole.findMany({
+  //     where: {
+  //       Role: {
+  //         name: UserRoles.VENDOR
+  //       }
+  //     }, include: {
+  //       User: true
+  //     }
+  //   })
   }
 
   async listProjectVendor(dto) {
