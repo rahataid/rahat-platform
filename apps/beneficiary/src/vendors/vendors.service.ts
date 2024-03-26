@@ -88,39 +88,24 @@ export class VendorsService {
 
 
   async listVendor() {
-    const vendorList = await this.prisma.userRole.findMany({
+    return paginate(this.prisma.userRole,{
       where:{
         Role:{
           name:UserRoles.VENDOR
         }
       },
       include:{
-        User:true
-      }
-    })
-    const projectVendor = await this.prisma.projectVendors.findMany({include:{Project:true}});
-
-    const combined = vendorList.map(vendor=>{
-      const matchedCombined = projectVendor.find(vendorData => vendorData.vendorId ===vendor.User.uuid)
-      return {
-        ...vendor,
-        Project:{
-          ...matchedCombined?.Project
+        User:{
+          include:{
+            VendorProject:{
+              include:{
+                Project:true
+              }
+            }
+          }
         }
       }
-    });
-    return combined
-
-  //   console.log(combined)
-  //   return this.prisma.userRole.findMany({
-  //     where: {
-  //       Role: {
-  //         name: UserRoles.VENDOR
-  //       }
-  //     }, include: {
-  //       User: true
-  //     }
-  //   })
+    })
   }
 
   async listProjectVendor(dto) {
