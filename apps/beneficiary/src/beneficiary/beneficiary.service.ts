@@ -79,10 +79,11 @@ export class BeneficiaryService {
   async list(
     dto: ListBeneficiaryDto
   ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
+    let result = null as any;
     const AND_QUERY = createListQuery(dto);
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
-    return paginate(
+    result = await paginate(
       this.rsprisma.beneficiary,
       {
         where: {
@@ -96,6 +97,23 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+    if (result.data.length > 0) {
+      const mergedData = await this.mergePIIData(result.data);
+      result.data = mergedData;
+    }
+    return result;
+  }
+
+  async mergePIIData(data: any) {
+    let mergedData = [];
+    for (let d of data) {
+      const piiData = await this.rsprisma.beneficiaryPii.findUnique({
+        where: { beneficiaryId: d.id },
+      });
+      if (piiData) d.piiData = piiData;
+      mergedData.push(d);
+    }
+    return mergedData;
   }
 
   async create(dto: CreateBeneficiaryDto) {
