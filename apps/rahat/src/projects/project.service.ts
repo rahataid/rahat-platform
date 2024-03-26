@@ -2,7 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
 import { CreateProjectDto, UpdateProjectDto } from '@rahataid/extensions';
-import { BeneficiaryJobs, MS_ACTIONS, ProjectEvents, ProjectJobs, VendorJobs } from '@rahataid/sdk';
+import {
+  AAJobs,
+  BeneficiaryJobs,
+  MS_ACTIONS,
+  ProjectEvents,
+  ProjectJobs,
+  VendorJobs,
+} from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { timeout } from 'rxjs';
@@ -58,14 +65,12 @@ export class ProjectService {
     switch (action) {
       case MS_ACTIONS.SETTINGS.LIST:
         return this.client
-          .send({cmd:ProjectJobs.PROJECT_SETTINGS_LIST,uuid},{}
-          ).pipe(timeout(5000));
+          .send({ cmd: ProjectJobs.PROJECT_SETTINGS_LIST, uuid }, {})
+          .pipe(timeout(5000));
       case MS_ACTIONS.SETTINGS.GET:
         return this.client
-          .send(
-            {cmd:ProjectJobs.PROJECT_SETTINGS_GET,uuid},
-            payload
-            ).pipe(timeout(5000));
+          .send({ cmd: ProjectJobs.PROJECT_SETTINGS_GET, uuid }, payload)
+          .pipe(timeout(5000));
       case MS_ACTIONS.BENEFICIARY.ADD_TO_PROJECT:
         return this.client
           .send(
@@ -75,43 +80,43 @@ export class ProjectService {
           .pipe(timeout(500000));
       case MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER:
         return this.client
-            .send(
-              {cmd: ProjectJobs.REDEEM_VOUCHER, uuid},
-              payload
-            ).pipe(timeout(500000));
+          .send({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, payload)
+          .pipe(timeout(500000));
       case MS_ACTIONS.ELPROJECT.PROCESS_OTP:
         return this.client
-        .send(
-          {cmd:ProjectJobs.PROCESS_OTP,uuid},
-          payload
-          ).pipe(timeout(500000));
+          .send({ cmd: ProjectJobs.PROCESS_OTP, uuid }, payload)
+          .pipe(timeout(500000));
       case MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER:
         return this.client
-        .send(
-          {cmd:ProjectJobs.ASSIGN_DISCOUNT_VOUCHER,uuid},
-          payload
-          ).pipe(timeout(500000));
+          .send({ cmd: ProjectJobs.ASSIGN_DISCOUNT_VOUCHER, uuid }, payload)
+          .pipe(timeout(500000));
       case MS_ACTIONS.BENEFICIARY.ASSGIN_TO_PROJECT:
-        return this.client
-        .send(
-          {cmd:BeneficiaryJobs.ASSIGN_TO_PROJECT},
-          {projectId:uuid,...payload})
+        return this.client.send(
+          { cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT },
+          { projectId: uuid, ...payload }
+        );
       case MS_ACTIONS.BENEFICIARY.BULK_ASSIGN_TO_PROJECT:
-        return this.client
-          .send({cmd:BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT},
-            {projectId:uuid,...payload})
+        return this.client.send(
+          { cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT },
+          { projectId: uuid, ...payload }
+        );
       case MS_ACTIONS.BENEFICIARY.LIST_BY_PROJECT:
-        return this.client
-          .send({cmd:BeneficiaryJobs.LIST_BY_PROJECT},
-            {projectId:uuid,...payload})
+        return this.client.send(
+          { cmd: BeneficiaryJobs.LIST_BY_PROJECT },
+          { projectId: uuid, ...payload }
+        );
       case MS_ACTIONS.VENDOR.ASSIGN_TO_PROJECT:
-        return this.client
-          .send({cmd:VendorJobs.ASSIGN_PROJECT},
-            {projectId:uuid,...payload})
+        return this.client.send(
+          { cmd: VendorJobs.ASSIGN_PROJECT },
+          { projectId: uuid, ...payload }
+        );
       case MS_ACTIONS.VENDOR.LIST_BY_PROJECT:
-        return this.client
-          .send({cmd:VendorJobs.LIST_BY_PROJECT},{projectId:uuid,...payload})
-            
+        return this.client.send(
+          { cmd: VendorJobs.LIST_BY_PROJECT },
+          { projectId: uuid, ...payload }
+        );
+      case MS_ACTIONS.AAPROJECT.SCHEDULE.ADD:
+        return this.client.send({ cmd: AAJobs.SCHEDULE.ADD, uuid }, payload);
       default:
         throw new Error('Please provide a valid action!');
     }

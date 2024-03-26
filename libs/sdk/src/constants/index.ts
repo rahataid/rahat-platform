@@ -59,6 +59,13 @@ export const MS_ACTIONS = {
     PROCESS_OTP:'elProject.processOtp',
     ASSIGN_DISCOUNT_VOUCHER:'elProject.discountVoucher'
   },
+  AAPROJECT: {
+    SCHEDULE: {
+      GET_ALL: 'aaProject.schedule.getAll',
+      ADD: 'aaProject.schedule.add',
+      DELETE: 'aaProject.schedule.delete'
+    }
+  },
   SETTINGS:{
     LIST:'settings.list',
     GET:'settings.get'
