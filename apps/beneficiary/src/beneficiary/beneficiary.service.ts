@@ -61,7 +61,7 @@ export class BeneficiaryService {
   }
 
   async listBenefByProject(dto: ListProjectBeneficiaryDto) {
-    return paginate(
+    const data = await paginate(
       this.rsprisma.beneficiaryProject,
       {
         where: {
@@ -73,6 +73,11 @@ export class BeneficiaryService {
         page: dto.page,
         perPage: dto.perPage,
       }
+    );
+    // return data;
+    return this.client.send(
+      { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
+      data
     );
   }
 
@@ -89,6 +94,13 @@ export class BeneficiaryService {
         where: {
           //AND: AND_QUERY,
           deletedAt: null,
+        },
+        include: {
+          BeneficiaryProject: {
+            include: {
+              Project: true,
+            },
+          },
         },
         orderBy,
       },
