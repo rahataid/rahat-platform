@@ -111,7 +111,30 @@ export class ProjectService {
       case MS_ACTIONS.VENDOR.LIST_BY_PROJECT:
         return this.client
           .send({cmd:VendorJobs.LIST_BY_PROJECT},{projectId:uuid,...payload})
-            
+      case MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION:
+        return this.client
+            .send(
+              {cmd:ProjectJobs.REQUEST_REDEMPTION,uuid},
+              payload
+              ).pipe(timeout(500000))
+      case MS_ACTIONS.ELPROJECT.UPDATE_REDEMPTION:
+        return this.client
+            .send(
+              {cmd:ProjectJobs.UPDATE_REDEMPTION,uuid},
+              payload
+              ).pipe(timeout(500000))
+      case MS_ACTIONS.ELPROJECT.LIST_REDEMPTION:
+        return this.client
+            .send(
+              {cmd:ProjectJobs.LIST_REDEMPTION,uuid},
+              payload
+              ).pipe(timeout(500000))
+      case MS_ACTIONS.ELPROJECT.GET_VENDOR_REDEMPTION:
+        return this.client
+            .send(
+              {cmd:ProjectJobs.GET_VENDOR_REDEMPTION,uuid},
+              payload
+              ).pipe(timeout(500000))
       default:
         throw new Error('Please provide a valid action!');
     }

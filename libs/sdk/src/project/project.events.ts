@@ -13,5 +13,10 @@ export const JOBS = {
   PROCESS_OTP:'rahat.jobs.project.otpProcess',
   ASSIGN_DISCOUNT_VOUCHER:'rahat.jobs.project.discountVoucher',
   PROJECT_SETTINGS_LIST:'rahat.jobs.settings.list',
-  PROJECT_SETTINGS_GET:'rahat.jobs.settings.get'
+  PROJECT_SETTINGS_GET:'rahat.jobs.settings.get',
+  REQUEST_REDEMPTION:'rahat.jobs.project.request_redemption',
+  UPDATE_REDEMPTION:'rahat.jobs.project.update_redemption',
+  LIST_REDEMPTION:'rahat.jobs.project.list_redemption',
+  GET_VENDOR_REDEMPTION:'rahat.jobs.project.get_redemption_vendor',
+
 };

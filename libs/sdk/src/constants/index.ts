@@ -57,7 +57,11 @@ export const MS_ACTIONS = {
   ELPROJECT: {
     REDEEM_VOUCHER:'elProject.redeemVoucher',
     PROCESS_OTP:'elProject.processOtp',
-    ASSIGN_DISCOUNT_VOUCHER:'elProject.discountVoucher'
+    ASSIGN_DISCOUNT_VOUCHER:'elProject.discountVoucher',
+    REQUEST_REDEMPTION:'elProject.requestRedemption',
+    UPDATE_REDEMPTION:'elProject.updateRedemption',
+    LIST_REDEMPTION:'elProject.listRedemption',
+    GET_VENDOR_REDEMPTION:'elProject.vendorRedemption'
   },
   SETTINGS:{
     LIST:'settings.list',
