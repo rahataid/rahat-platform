@@ -26,6 +26,17 @@ remove_existing_images() {
     docker rmi beneficiary_local_image --force
 }
 
+remove_existing_el_image() {
+    echo "Removing existing EL project image."
+    docker rmi el_local_image --force
+}
+
+build_new_el_image() {
+    echo "Building new EL project docker image."
+    docker build -t el_local_image -f "$EL_PROJECT_DIR/Dockerfile.dev" $EL_PROJECT_DIR
+    echo "Build complete."
+}
+
 build_new_images() {
     echo "Building new docker images."
     docker compose build

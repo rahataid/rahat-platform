@@ -48,4 +48,19 @@ if [ -n $IS_DB_RESET ]; then
     run_rahat_migration_seed
 fi
 
-echo "Rahat core setup complete"
+echo "Rahat core setup complete."
+
+while true; do
+    read -p "Do you want to build EL project image as well? [y/n]: " yn
+    case $yn in
+    [Yy]*)
+        remove_existing_el_image
+        build_new_el_image
+        break
+        ;;
+    [Nn]*) break ;;
+    *) echo "Please answer with y or n." ;;
+    esac
+done
+
+echo "EL project docker build complete."
