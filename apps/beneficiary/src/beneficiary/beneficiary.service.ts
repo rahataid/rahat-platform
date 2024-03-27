@@ -1,6 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
   AddBenToProjectDto,
@@ -352,9 +352,15 @@ export class BeneficiaryService {
 
   async createBulk(dtos: CreateBeneficiaryDto[]) {
     const hasPhone = dtos.every((dto) => dto.piiData.phone);
-    if (!hasPhone) throw new Error('Phone is required');
+    if (!hasPhone)
+      throw new RpcException(
+        new BadRequestException('Phone number is required!')
+      );
     const hasWallet = dtos.every((dto) => dto.walletAddress);
-    if (!hasWallet) throw new Error('Wallet Address is required');
+    if (!hasWallet)
+      throw new RpcException(
+        new BadRequestException('Wallet address is required!')
+      );
     // Pre-generate UUIDs for each beneficiary to use as a linking key
     dtos.forEach((dto) => {
       dto.uuid = dto.uuid || uuidv4(); // Assuming generateUuid() is a method that generates unique UUIDs
