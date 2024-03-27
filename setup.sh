@@ -1,7 +1,7 @@
 #! /bin/bash
 
-source ./scripts/prompts.sh
-source ./scripts/utils.sh
+source ./tools/docker-scripts/prompts.sh
+source ./tools/docker-scripts/utils.sh
 
 export_env_variables
 
@@ -46,5 +46,4 @@ compose_up
 
 if [ -n $IS_DB_RESET ]; then
     run_rahat_migration_seed
-    compose_restart_containers
 fi

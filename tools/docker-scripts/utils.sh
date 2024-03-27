@@ -1,6 +1,6 @@
 export_env_variables() {
     echo "Exporting env variables."
-    export $(grep -v '^#' .env.script | xargs -d '\n')
+    export $(grep -v '^#' .env | xargs -d '\n')
     echo "Export complete."
 }
 
@@ -67,7 +67,7 @@ rahat_images_exists() {
 
 run_rahat_migration_seed() {
     CONTAINER_NAME=rahat_local
-    docker exec -i "$CONTAINER_NAME" /bin/sh -c "cd /usr/src/app && sh migration.sh"
+    docker exec -i "$CONTAINER_NAME" /bin/sh -c "cd /usr/src/app && sh ./tools/docker-scripts/migration.sh"
     echo "Sleeping for 5 seconds."
     sleep 5
 }
