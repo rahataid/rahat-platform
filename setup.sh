@@ -47,3 +47,5 @@ compose_up
 if [ -n $IS_DB_RESET ]; then
     run_rahat_migration_seed
 fi
+
+echo "Rahat core setup complete"
