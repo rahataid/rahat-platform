@@ -3,8 +3,10 @@
 source ./tools/docker-scripts/prompts.sh
 source ./tools/docker-scripts/utils.sh
 
+configure_env_variables
 export_env_variables
 
+network_create
 compose_down
 
 if rahat_images_exists; then
@@ -50,17 +52,23 @@ fi
 
 echo "Rahat core setup complete."
 
-while true; do
-    read -p "Do you want to build EL project image as well? [y/n]: " yn
-    case $yn in
-    [Yy]*)
-        remove_existing_el_image
-        build_new_el_image
-        break
-        ;;
-    [Nn]*) break ;;
-    *) echo "Please answer with y or n." ;;
-    esac
-done
+if el_image_exists; then
+    echo "Existing EL project image found."
+    while true; do
+        read -p "Do you want to build EL project image as well? [y/n]: " yn
+        case $yn in
+        [Yy]*)
+            remove_existing_el_image
+            build_new_el_image
+            break
+            ;;
+        [Nn]*) break ;;
+        *) echo "Please answer with y or n." ;;
+        esac
+    done
+else
+    echo "Existing EL project image not found."
+    build_new_el_image
+fi
 
 echo "EL project docker build complete."

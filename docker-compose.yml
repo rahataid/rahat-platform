@@ -11,8 +11,6 @@ services:
       POSTGRES_PASSWORD: admin
     volumes:
       - pg_volume:/var/lib/postgresql/data
-    networks:
-      - rahat_nw
 
   redis_local:
     image: redis:6.2-alpine
@@ -23,8 +21,6 @@ services:
     command: redis-server --save 20 1 --loglevel warning
     volumes: 
       - redis_volume:/data
-    networks:
-      - rahat_nw
 
   rahat_local:
     depends_on:
@@ -45,8 +41,6 @@ services:
       - 5500:5500
     restart: always
     entrypoint: sh ./tools/docker-scripts/init-rahat.sh
-    networks:
-      - rahat_nw
 
   beneficiary_local:
     depends_on:
@@ -66,14 +60,13 @@ services:
       - .env
     restart: always
     entrypoint: sh ./tools/docker-scripts/init-beneficiary.sh
-    networks:
-      - rahat_nw
 
 volumes:
   pg_volume:
   redis_volume:
 
 networks:
-  rahat_nw:
-    driver: bridge
+  default:
+    name: rahat_network
+    external: true
     
