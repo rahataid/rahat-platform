@@ -3,6 +3,10 @@
 source ./tools/docker-scripts/prompts.sh
 source ./tools/docker-scripts/utils.sh
 
+if [ "$(uname)" == "Darwin" ]; then
+    alias sed='gsed'
+fi
+
 configure_env_variables
 export_env_variables
 
