@@ -5,7 +5,7 @@ services:
     restart: always
     image: postgres:13.1
     ports:
-      - "5432:5432"
+      - "2345:5432"
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -17,7 +17,7 @@ services:
     container_name: redis_local
     restart: always
     ports:
-      - '6379:6379'
+      - '9736:6379'
     command: redis-server --save 20 1 --loglevel warning
     volumes: 
       - redis_volume:/data
