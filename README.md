@@ -76,7 +76,7 @@ bash setup.sh
 ### Step 2
 
 Go to your rahat deployment worker's directory.
-Ensure that for configurations, `REDIS_PORT` is set to `9763` in .env file.
+Ensure that for configurations, `REDIS_PORT` is set to `9736` in .env file.
 
 Example:
 ```text
