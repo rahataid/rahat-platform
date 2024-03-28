@@ -120,7 +120,9 @@ export class ProjectService {
 
       case MS_ACTIONS.VENDOR.LIST_BY_PROJECT:
         return this.client
-          .send({cmd:VendorJobs.LIST_BY_PROJECT},{projectId:uuid,...payload})
+          .send(
+            {cmd:VendorJobs.LIST_BY_PROJECT},
+            {projectId:uuid,...payload})
       case MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION:
         return this.client
             .send(
