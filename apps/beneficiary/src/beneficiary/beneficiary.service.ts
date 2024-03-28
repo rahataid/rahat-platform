@@ -1,6 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
   AddBenToProjectDto,
@@ -61,7 +61,7 @@ export class BeneficiaryService {
   }
 
   async listBenefByProject(dto: ListProjectBeneficiaryDto) {
-    const data = await  paginate(
+    const data = await paginate(
       this.rsprisma.beneficiaryProject,
       {
         where: {
@@ -80,29 +80,28 @@ export class BeneficiaryService {
       { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
      projectPayload
     );
-   
-
   }
 
   async list(
     dto: ListBeneficiaryDto
-  ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>>  {
+  ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
+    let result = null as any;
     const AND_QUERY = createListQuery(dto);
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
-    return  paginate(
+    result = await paginate(
       this.rsprisma.beneficiary,
       {
         where: {
           //AND: AND_QUERY,
           deletedAt: null,
         },
-        include:{
-          BeneficiaryProject:{
-            include:{
-              Project:true
-            }
-          }
+        include: {
+          BeneficiaryProject: {
+            include: {
+              Project: true,
+            },
+          },
         },
         orderBy,
       },
@@ -111,7 +110,24 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+    if (result.data.length > 0) {
+      const mergedData = await this.mergePIIData(result.data);
+      result.data = mergedData;
     }
+    return result;
+  }
+
+  async mergePIIData(data: any) {
+    let mergedData = [];
+    for (let d of data) {
+      const piiData = await this.rsprisma.beneficiaryPii.findUnique({
+        where: { beneficiaryId: d.id },
+      });
+      if (piiData) d.piiData = piiData;
+      mergedData.push(d);
+    }
+    return mergedData;
+  }
 
   async create(dto: CreateBeneficiaryDto) {
     const { piiData, ...data } = dto;
@@ -337,9 +353,15 @@ export class BeneficiaryService {
 
   async createBulk(dtos: CreateBeneficiaryDto[]) {
     const hasPhone = dtos.every((dto) => dto.piiData.phone);
-    if (!hasPhone) throw new Error('Phone is required');
+    if (!hasPhone)
+      throw new RpcException(
+        new BadRequestException('Phone number is required!')
+      );
     const hasWallet = dtos.every((dto) => dto.walletAddress);
-    if (!hasWallet) throw new Error('Wallet Address is required');
+    if (!hasWallet)
+      throw new RpcException(
+        new BadRequestException('Wallet address is required!')
+      );
     // Pre-generate UUIDs for each beneficiary to use as a linking key
     dtos.forEach((dto) => {
       dto.uuid = dto.uuid || uuidv4(); // Assuming generateUuid() is a method that generates unique UUIDs
