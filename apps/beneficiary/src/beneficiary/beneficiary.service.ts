@@ -74,10 +74,11 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+    const projectPayload ={...data,status:dto.status}
       // return data;
     return this.client.send(
       { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
-      data
+     projectPayload
     );
    
 
