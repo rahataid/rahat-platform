@@ -5,11 +5,11 @@ source ./tools/docker-scripts/utils.sh
 
 if [ "$(uname)" == "Darwin" ]; then
     configure_env_variables_macos
+    export_env_variables_macos
 else
     configure_env_variables
+    export_env_variables
 fi
-
-export_env_variables
 
 network_create
 compose_down

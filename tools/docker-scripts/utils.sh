@@ -4,6 +4,12 @@ export_env_variables() {
     echo "Export complete."
 }
 
+export_env_variables_macos() {
+    echo "Exporting env variables."
+    export $(grep -v '^#' .env | gxargs -d '\n')
+    echo "Export complete."
+}
+
 configure_env_variables_macos() {
     ENV_FILE='.env'
 

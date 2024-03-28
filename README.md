@@ -52,6 +52,8 @@ Feel free to leverage and explore the functionalities provided by the project lo
 
 Follow the following steps to run rahat on a local docker development environment.
 
+> **Note** : If you are using a MacOS environment, make sure to install `findutils` and `gnu-sed` using `brew`.
+
 ### Step 1
 
 Ensure that you have the following key-value pairs in your .env file.
