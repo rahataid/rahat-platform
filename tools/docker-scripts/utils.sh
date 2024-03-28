@@ -68,7 +68,7 @@ drop_pg_database() {
     CONTAINER_NAME=postgres_local
     DB_NAME=$1
     echo "Dropping database $DB_NAME."
-    docker exec -i "$CONTAINER_NAME" psql -U "$DB_USERNAME" -c "DROP DATABASE $DB_NAME WITH (FORCE);"
+    docker exec -i "$CONTAINER_NAME" psql -U "$DB_USERNAME" -c "DROP DATABASE \"$DB_NAME\" WITH (FORCE);"
     echo "Database dropped."
 }
 
@@ -76,7 +76,7 @@ create_pg_database() {
     CONTAINER_NAME=postgres_local
     DB_NAME=$1
     echo "Creating new database with name $DB_NAME."
-    docker exec -i "$CONTAINER_NAME" psql -U "$DB_USERNAME" -c "CREATE DATABASE $DB_NAME;"
+    docker exec -i "$CONTAINER_NAME" psql -U "$DB_USERNAME" -c "CREATE DATABASE \"$DB_NAME\";"
     echo "Database created."
 }
 
