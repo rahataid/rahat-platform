@@ -81,7 +81,7 @@ Ensure that for configurations, `REDIS_PORT` is set to `9763` in .env file.
 Example:
 ```text
 REDIS_HOST=localhost
-REDIS_PORT=9763
+REDIS_PORT=9736
 REDIS_PASSWORD=
 ```
 
