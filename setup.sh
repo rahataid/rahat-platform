@@ -71,4 +71,4 @@ else
     build_new_el_image
 fi
 
-echo "EL project docker build complete."
+echo "Done."

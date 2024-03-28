@@ -119,7 +119,7 @@ el_image_exists() {
 
 run_rahat_migration_seed() {
     CONTAINER_NAME=rahat_local
-    docker exec -i "$CONTAINER_NAME" /bin/sh -c "cd /usr/src/app && sh ./tools/docker-scripts/migration.sh"
+    docker exec -i "$CONTAINER_NAME" /bin/sh -c "cd /usr/src/app && sh ./tools/docker-scripts/migrate-seed.sh"
     echo "Sleeping for 5 seconds."
     sleep 5
 }
