@@ -5,30 +5,22 @@ services:
     restart: always
     image: postgres:13.1
     ports:
-      - "5432:5432"
+      - "2345:5432"
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-    expose:
-      - 5432
     volumes:
       - pg_volume:/var/lib/postgresql/data
-    networks:
-      - rahat_nw
-
 
   redis_local:
     image: redis:6.2-alpine
     container_name: redis_local
     restart: always
-    # ports:
-    #   - '6379:6379'
+    ports:
+      - '9736:6379'
     command: redis-server --save 20 1 --loglevel warning
     volumes: 
       - redis_volume:/data
-    networks:
-      - rahat_nw
-
 
   rahat_local:
     depends_on:
@@ -48,14 +40,13 @@ services:
     ports:
       - 5500:5500
     restart: always
-    entrypoint: sh ./scripts/init-rahat.sh
-    networks:
-      - rahat_nw
+    entrypoint: sh ./tools/docker-scripts/init-rahat.sh
 
   beneficiary_local:
     depends_on:
       - postgres_local
       - redis_local
+      - rahat_local
     container_name: beneficiary_local
     image: beneficiary_local_image
     build:
@@ -67,19 +58,15 @@ services:
       - /usr/src/app/.nx
     env_file:
       - .env
-    ports:
-      - 5501:5501
     restart: always
-    entrypoint: sh ./scripts/init-beneficiary.sh
-    networks:
-      - rahat_nw
-
+    entrypoint: sh ./tools/docker-scripts/init-beneficiary.sh
 
 volumes:
   pg_volume:
   redis_volume:
 
 networks:
-  rahat_nw:
-    driver: bridge
+  default:
+    name: rahat_network
+    external: true
     

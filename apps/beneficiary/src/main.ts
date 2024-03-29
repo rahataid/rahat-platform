@@ -21,6 +21,6 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new ExceptionFilter());
   await app.listen();
-  Logger.log(`🚀 Microservice is running on: http://localhost:${PORT}`);
+  Logger.log(`🚀 Microservice is running on: http://localhost`);
 }
 bootstrap();
