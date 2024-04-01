@@ -156,3 +156,9 @@ run_rahat_migration_seed() {
     echo "Sleeping for 5 seconds."
     sleep 5
 }
+
+run_rahat_ui() {
+    echo $RAHAT_UI_DIR
+    echo "Starting rahat UI."
+    pnpm -C $RAHAT_UI_DIR install && pnpm -C $RAHAT_UI_DIR nx:reset && pnpm -C $RAHAT_UI_DIR run rahat-ui
+}
