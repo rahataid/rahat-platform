@@ -238,11 +238,9 @@ CREATE TABLE "tbl_vendors" (
 CREATE TABLE "tbl_projects_vendors" (
     "id" SERIAL NOT NULL,
     "projectId" UUID NOT NULL,
-    "vendorId" UUID NOT NULL,
-    "extras" JSONB,
+    "vendorId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
-    "service" "Service" NOT NULL,
     "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "tbl_projects_vendors_pkey" PRIMARY KEY ("id")
@@ -349,3 +347,6 @@ ALTER TABLE "tbl_beneficiaries_pii" ADD CONSTRAINT "tbl_beneficiaries_pii_benefi
 
 -- AddForeignKey
 ALTER TABLE "tbl_projects_vendors" ADD CONSTRAINT "tbl_projects_vendors_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "tbl_projects"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_projects_vendors" ADD CONSTRAINT "tbl_projects_vendors_vendorId_fkey" FOREIGN KEY ("vendorId") REFERENCES "tbl_users"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
