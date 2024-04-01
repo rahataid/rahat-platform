@@ -1,5 +1,6 @@
 import { InjectQueue } from '@nestjs/bull';
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -101,7 +102,7 @@ export class BeneficiaryController {
       .send({ cmd: BeneficiaryJobs.CREATE_BULK }, beneficiaries)
       .pipe(
         catchError((error) =>
-          throwError(() => new RpcException(error.response))
+          throwError(() => new BadRequestException(error.response))
         )
       )
       .pipe(timeout(MS_TIMEOUT));
@@ -116,7 +117,7 @@ export class BeneficiaryController {
   @Get(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   async getBeneficiary(@Param('uuid') uuid: UUID) {
-    return this.client.send({ cmd: BeneficiaryJobs.GET }, uuid);
+    return this.client.send({ cmd: BeneficiaryJobs.GET }, uuid).pipe(catchError((error) => throwError(() => new RpcException(error.response))));
   }
 
   @Get('wallet/:wallet')

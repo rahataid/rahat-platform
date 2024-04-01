@@ -1,5 +1,5 @@
 import { Controller, Inject, Param } from '@nestjs/common';
-import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
+import { ClientProxy, MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
@@ -29,7 +29,10 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET })
   async getBeneficiary(uuid: UUID) {
+  if (uuid){
     return this.service.findOne(uuid);
+  }
+  throw new RpcException('UUID is required')
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_WALLET })
