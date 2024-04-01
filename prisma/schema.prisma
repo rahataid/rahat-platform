@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -26,6 +27,7 @@ model User {
   Auth     Auth[]
   UserRole UserRole[]
   Signup   Signup[]
+  VendorProject ProjectVendors[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -240,6 +242,8 @@ model BeneficiaryProject {
   @@map("tbl_beneficiaries_projects")
 }
 
+
+
 // ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
 
 enum ProjectStatus {
@@ -344,13 +348,14 @@ model Vendors {
 model ProjectVendors {
   id        Int       @id @default(autoincrement())
   projectId String    @db.Uuid()
-  vendorId  String    @db.Uuid()
-  extras    Json?     @db.JsonB()
+  Project   Project   @relation(fields:[projectId], references:[uuid])
+
+  vendorId  String    
+  User      User      @relation(fields:[vendorId],references:[uuid])
+
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
-  service   Service
   deletedAt DateTime?
-  Project   Project   @relation(fields: [projectId], references: [uuid])
 
   @@unique([projectId, vendorId], name: "projectVendorIdentifier")
   @@map("tbl_projects_vendors")

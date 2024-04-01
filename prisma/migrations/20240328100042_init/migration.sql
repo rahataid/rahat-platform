@@ -25,6 +25,9 @@ CREATE TYPE "InternetStatus" AS ENUM ('UNKNOWN', 'NO_INTERNET', 'HOME_INTERNET',
 -- CreateEnum
 CREATE TYPE "PhoneStatus" AS ENUM ('UNKNOWN', 'NO_PHONE', 'FEATURE_PHONE', 'SMART_PHONE');
 
+-- CreateEnum
+CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'FAILED');
+
 -- CreateTable
 CREATE TABLE "tbl_users" (
     "id" SERIAL NOT NULL,
@@ -159,6 +162,7 @@ CREATE TABLE "tbl_beneficiaries" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
     "deletedAt" TIMESTAMP(3),
+    "isVerified" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "tbl_beneficiaries_pkey" PRIMARY KEY ("id")
 );
@@ -213,6 +217,53 @@ CREATE TABLE "tbl_stats" (
     CONSTRAINT "tbl_stats_pkey" PRIMARY KEY ("name")
 );
 
+-- CreateTable
+CREATE TABLE "tbl_vendors" (
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT,
+    "phone" TEXT,
+    "location" TEXT,
+    "wallet" TEXT,
+    "extras" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3),
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_vendors_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tbl_projects_vendors" (
+    "id" SERIAL NOT NULL,
+    "projectId" UUID NOT NULL,
+    "vendorId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3),
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_projects_vendors_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tbl_transactions" (
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "projectId" UUID NOT NULL,
+    "beneficiaryId" UUID NOT NULL,
+    "vendorId" UUID NOT NULL,
+    "amount" DOUBLE PRECISION NOT NULL,
+    "currency" TEXT NOT NULL,
+    "status" "TransactionStatus" NOT NULL DEFAULT 'PENDING',
+    "extras" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3),
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_transactions_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_users_uuid_key" ON "tbl_users"("uuid");
 
@@ -258,6 +309,15 @@ CREATE UNIQUE INDEX "tbl_projects_uuid_key" ON "tbl_projects"("uuid");
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_stats_name_key" ON "tbl_stats"("name");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_vendors_uuid_key" ON "tbl_vendors"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_projects_vendors_projectId_vendorId_key" ON "tbl_projects_vendors"("projectId", "vendorId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_transactions_uuid_key" ON "tbl_transactions"("uuid");
+
 -- AddForeignKey
 ALTER TABLE "tbl_auth_permissions" ADD CONSTRAINT "tbl_auth_permissions_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "tbl_auth_roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -284,3 +344,9 @@ ALTER TABLE "tbl_beneficiaries_projects" ADD CONSTRAINT "tbl_beneficiaries_proje
 
 -- AddForeignKey
 ALTER TABLE "tbl_beneficiaries_pii" ADD CONSTRAINT "tbl_beneficiaries_pii_beneficiaryId_fkey" FOREIGN KEY ("beneficiaryId") REFERENCES "tbl_beneficiaries"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_projects_vendors" ADD CONSTRAINT "tbl_projects_vendors_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "tbl_projects"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_projects_vendors" ADD CONSTRAINT "tbl_projects_vendors_vendorId_fkey" FOREIGN KEY ("vendorId") REFERENCES "tbl_users"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;

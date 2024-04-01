@@ -12,7 +12,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
@@ -20,11 +20,18 @@ import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   UpdateBeneficiaryDto,
+  ValidateWalletDto,
 } from '@rahataid/extensions';
-import { BQUEUE, BeneficiaryJobs, Enums, TFile } from '@rahataid/sdk';
+import {
+  BQUEUE,
+  BeneficiaryJobs,
+  Enums,
+  MS_TIMEOUT,
+  TFile,
+} from '@rahataid/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { catchError, of } from 'rxjs';
+import { catchError, throwError, timeout } from 'rxjs';
 import { DocParser } from './parser';
 
 @Controller('beneficiaries')
@@ -75,7 +82,12 @@ export class BeneficiaryController {
     }));
     return this.client
       .send({ cmd: BeneficiaryJobs.CREATE_BULK }, data)
-      .pipe(catchError((val) => of({ error: val.message })));
+      .pipe(
+        catchError((error) =>
+          throwError(() => new RpcException(error.response))
+        )
+      )
+      .pipe(timeout(MS_TIMEOUT));
   }
 
   @Post('upload')
@@ -85,10 +97,14 @@ export class BeneficiaryController {
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const beneficiaries = await DocParser(docType, file.buffer);
 
-    return this.client.send(
-      { cmd: BeneficiaryJobs.CREATE_BULK },
-      beneficiaries
-    );
+    return this.client
+      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, beneficiaries)
+      .pipe(
+        catchError((error) =>
+          throwError(() => new RpcException(error.response))
+        )
+      )
+      .pipe(timeout(MS_TIMEOUT));
   }
 
   @Patch(':uuid')
@@ -101,5 +117,33 @@ export class BeneficiaryController {
   @ApiParam({ name: 'uuid', required: true })
   async getBeneficiary(@Param('uuid') uuid: UUID) {
     return this.client.send({ cmd: BeneficiaryJobs.GET }, uuid);
+  }
+
+  @Get('wallet/:wallet')
+  @ApiParam({ name: 'wallet', required: true })
+  async getBeneficiaryByWallet(@Param('wallet') wallet: string) {
+    return this.client.send({ cmd: BeneficiaryJobs.GET_BY_WALLET }, wallet);
+  }
+
+  @Get('phone/:phone')
+  @ApiParam({ name: 'phone', required: true })
+  async getBeneficiaryByPhone(@Param('phone') phone: string) {
+    return this.client.send({ cmd: BeneficiaryJobs.GET_BY_PHONE }, phone);
+  }
+
+  @Get('verification-link/:uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async generateVerificationLink(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GENERATE_LINK }, uuid);
+  }
+
+  @Post('validate-wallet')
+  async validateWallet(@Body() dto: ValidateWalletDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.VALIDATE_WALLET }, dto);
+  }
+
+  @Post('verify-signature')
+  async verifySignature(@Body() dto: any) {
+    return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
   }
 }

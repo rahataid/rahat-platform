@@ -34,4 +34,14 @@ export type BeneficiaryClient = {
     uuid: UUID,
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<Beneficiary>>;
+
+  getByPhone: (
+    phone: string,
+    config?: AxiosRequestConfig
+  ) => Promise<FormattedResponse<Beneficiary>>;
+
+  generateVerificationLink: (
+    uuid: UUID,
+    config?: AxiosRequestConfig
+  ) => Promise<FormattedResponse<string>>;
 };
