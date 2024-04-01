@@ -109,7 +109,13 @@ export class ProjectService {
 
 
       case MS_ACTIONS.AAPROJECT.SCHEDULE.ADD:
-        return this.client.send({ cmd: AAJobs.SCHEDULE.ADD, uuid }, payload);
+        return this.client.send({ cmd: AAJobs.SCHEDULE.ADD, uuid }, payload)
+          .pipe(
+            catchError((error) =>
+              throwError(() => new RpcException(error.response))
+            )
+          )
+          .pipe(timeout(MS_TIMEOUT));
       case MS_ACTIONS.VENDOR.ASSIGN_TO_PROJECT:
         return this.client
           .send(
