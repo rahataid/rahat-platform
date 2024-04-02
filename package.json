@@ -11,6 +11,8 @@
     "build:rahat": "nx build rahat",
     "build:beneficiary": "nx build beneficiary",
     "clean": "rm -rf dist node_modules tmp",
+    "format": "nx format:write --uncommitted",
+    "seed": "ts-node prisma/seed.user.ts",
     "migrate:dev": "prisma migrate dev --preview-feature",
     "migrate:dev:create": "prisma migrate dev --create-only --preview-feature",
     "migrate:reset": "prisma migrate reset --preview-feature",

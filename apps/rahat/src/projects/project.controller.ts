@@ -71,21 +71,22 @@ export class ProjectController {
 
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/settings')
-  addSettings(
-    @Param('uuid') uuid: UUID,
-    @Body() dto:CreateSettingDto) {
+  addSettings(@Param('uuid') uuid: UUID, @Body() dto: CreateSettingDto) {
     return this.rahatClient
-      .send({ cmd: ProjectJobs.PROJECT_SETTINGS,uuid}, dto)
+      .send({ cmd: ProjectJobs.PROJECT_SETTINGS, uuid }, dto)
       .pipe(timeout(5000));
   }
-  
 
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
-  projectActions(
+  async projectActions(
     @Param('uuid') uuid: UUID,
     @Body() data: ProjectCommunicationDto
   ) {
-    return this.projectService.handleProjectActions({ uuid, ...data });
+    const response = await this.projectService.handleProjectActions({
+      uuid,
+      ...data,
+    });
+    return response;
   }
 }

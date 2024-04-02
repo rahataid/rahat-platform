@@ -4,6 +4,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Project } from '@prisma/client';
 import { BQUEUE, ProjectEvents, ProjectJobs } from '@rahataid/sdk';
 import { EVENTS } from '@rumsan/user';
+import axios from 'axios';
 import { Queue } from 'bull';
 import { DevService } from '../utils/develop.service';
 import { EmailService } from './email.service';
@@ -15,6 +16,7 @@ export class ListenersService {
     @InjectQueue(BQUEUE.RAHAT) private readonly rahatQueue: Queue,
     @InjectQueue(BQUEUE.HOST) private readonly hostQueue: Queue,
     @InjectQueue(BQUEUE.RAHAT_PROJECT) private readonly projectQueue: Queue,
+
     private readonly devService: DevService,
     private emailService: EmailService
   ) {}
@@ -42,7 +44,7 @@ export class ListenersService {
 
   @OnEvent(ProjectEvents.PROJECT_CREATED)
   async onProjectCreated(data: Project) {
-    this.hostQueue.add(ProjectJobs.PROJECT_CREATE, data, {
+    this.projectQueue.add(ProjectJobs.PROJECT_CREATE, data, {
       attempts: 3,
       removeOnComplete: true,
       backoff: {
@@ -50,5 +52,22 @@ export class ListenersService {
         delay: 1000,
       },
     });
+  }
+  @OnEvent(ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT)
+  async onProjectAddedToBen(data) {
+    const url = process.env.MESSAGE_SENDER_API;
+    const TEMP_SID = 'HX838c4ef75d3f82ff232b10265123d9c8';
+    const payload = {
+      phone: data.piiData.phone,
+      type: 'WHATSAPP',
+      contentSid: TEMP_SID,
+    };
+
+    axios
+      .post(url, payload)
+      .then((response) => {})
+      .catch((error) => {
+        // Handle error
+      });
   }
 }

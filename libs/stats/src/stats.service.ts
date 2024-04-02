@@ -6,12 +6,26 @@ import { StatDto } from './dto/stat.dto';
 export class StatsService {
   constructor(private prismaService: PrismaService) {}
   save(data: StatDto) {
-    data.name = data.name.toUpperCase();
-    return this.prismaService.stats.upsert({
-      where: { name: data.name },
-      update: data,
-      create: data,
-    });
+    // this.prismaService.stats.findMany({
+    //   where: { name: data.name },
+    // });
+    // let whereClause;
+    // if (data.projectUuid) {
+    //   whereClause = {
+    //     name: data.name,
+    //     projectUuid: data.projectUuid,
+    //   };
+    // } else {
+    //   whereClause = {
+    //     name: data.name,
+    //   };
+    // }
+    // data.name = data.name.toUpperCase();
+    // return this.prismaService.stats.upsert({
+    //   where: whereClause,
+    //   update: data,
+    //   create: data,
+    // });
   }
 
   getByGroup(
@@ -30,13 +44,13 @@ export class StatsService {
 
   findOne(name: string) {
     return this.prismaService.stats.findUnique({
-      where: { name },
+      where: { id: 1 },
     });
   }
 
   remove(name: string) {
     return this.prismaService.stats.delete({
-      where: { name },
+      where: { id: 1 },
     });
   }
 }

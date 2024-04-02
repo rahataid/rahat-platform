@@ -71,5 +71,12 @@ export const getBeneficiaryClient = (
       );
       return formatResponse<any>(response);
     },
+    getByPhone: async (phone: string, config?: AxiosRequestConfig) => {
+      const response = await client.get(
+        `/beneficiaries/phone/${phone}`,
+        config
+      );
+      return formatResponse<Beneficiary>(response);
+    },
   };
 };

@@ -9,12 +9,24 @@ export class BeneficiaryStatService {
     private readonly statsService: StatsService
   ) {}
 
-  async calculateGenderStats() {
+  async calculateGenderStats(projectUuid?: string) {
+    let filter = {};
+
+    // Add filter if projectUuid is provided
+    if (projectUuid) {
+      filter = {
+        projectUuid: {
+          equals: projectUuid,
+        },
+      };
+    }
+
     const genderStats = await this.prisma.beneficiary.groupBy({
       by: ['gender'],
       _count: {
         gender: true,
       },
+      where: filter,
     });
 
     return genderStats.map((stat) => ({
@@ -69,10 +81,10 @@ export class BeneficiaryStatService {
     return { count: await this.prisma.beneficiary.count() };
   }
 
-  async calculateAllStats() {
+  async calculateAllStats(projectUuid?: string) {
     const [gender, bankedStatus, internetStatus, phoneStatus, total] =
       await Promise.all([
-        this.calculateGenderStats(),
+        this.calculateGenderStats(projectUuid),
         this.calculateBankedStatusStats(),
         this.calculateInternetStatusStats(),
         this.calculatePhoneStatusStats(),
@@ -95,9 +107,9 @@ export class BeneficiaryStatService {
     });
   }
 
-  async saveAllStats() {
+  async saveAllStats(projectUuid?: string) {
     const { gender, bankedStatus, internetStatus, phoneStatus, total } =
-      await this.calculateAllStats();
+      await this.calculateAllStats(projectUuid);
 
     await Promise.all([
       this.statsService.save({
@@ -109,6 +121,7 @@ export class BeneficiaryStatService {
         name: 'beneficiary_gender',
         data: gender,
         group: 'beneficiary',
+        projectUuid,
       }),
       this.statsService.save({
         name: 'beneficiary_bankedStatus',

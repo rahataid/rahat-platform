@@ -3,13 +3,10 @@ on:
   push:
     branches:
       - 'dev'
-    paths-ignore:
-      - 'apps/**'
   pull_request:
     branches:
       - 'dev'
-    paths-ignore:
-      - 'apps/**'
+  workflow_dispatch:
 
 env:
   CI: false
@@ -19,6 +16,8 @@ jobs:
   deploy:
     name: build && push image to Docker hub
     runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, 'action') || contains(github.event.pull_request.title, 'action') || github.event_name == 'workflow_dispatch'
+
     steps:
       - uses: actions/checkout@v4
 
@@ -53,7 +52,8 @@ jobs:
         with:
           context: .
           file: Dockerfile.beneficiary
-          push: ${{ github.event_name == 'push' && 'true' || 'false' }}
+          # push: ${{ github.event_name == 'push' && 'true' || 'false' }}
+          push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
           tags: esatya/rahat-platform-beneficiary:dev
 
       # Rahat Image
@@ -63,5 +63,6 @@ jobs:
         with:
           context: .
           file: Dockerfile.rahat
-          push: ${{ github.event_name == 'push' && 'true' || 'false' }}
+          # push: ${{ github.event_name == 'push' && 'true' || 'false' }}
+          push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
           tags: esatya/rahat-platform-rahat:dev

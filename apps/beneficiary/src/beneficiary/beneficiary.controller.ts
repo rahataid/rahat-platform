@@ -4,9 +4,13 @@ import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   ListProjectBeneficiaryDto,
-  UpdateBeneficiaryDto
+  UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
-import { BeneficiaryJobs, ProjectContants, ValidateWallet } from '@rahataid/sdk';
+import {
+  BeneficiaryJobs,
+  ProjectContants,
+  ValidateWallet,
+} from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
@@ -19,8 +23,8 @@ export class BeneficiaryController {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly service: BeneficiaryService,
     private readonly statsService: BeneficiaryStatService,
-    private readonly verificationService: VerificationService,
-  ) { }
+    private readonly verificationService: VerificationService
+  ) {}
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE })
   async create(@Payload() createBeneficiaryDto: CreateBeneficiaryDto) {
@@ -30,6 +34,16 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GET })
   async getBeneficiary(uuid: UUID) {
     return this.service.findOne(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_WALLET })
+  async getBeneficiaryByWallet(wallet: string) {
+    return this.service.findOneByWallet(wallet);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_PHONE })
+  async getBeneficiaryByPhone(wallet: string) {
+    return this.service.findOneByPhone(wallet);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
@@ -60,17 +74,22 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.ADD_TO_PROJECT })
   async addToProject(payload: any) {
     const { dto, projectUid } = payload;
-    return this.beneficiaryService.addBeneficiaryToProject(dto, projectUid);
+    const response = await this.beneficiaryService.addBeneficiaryToProject(
+      dto,
+      projectUid
+    );
+
+    return response;
   }
 
-  @MessagePattern({cmd:BeneficiaryJobs.ASSIGN_TO_PROJECT})
-  async assignToProject(payload:any){
-    return this.beneficiaryService.assignBeneficiaryToProject(payload)
+  @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
+  async assignToProject(payload: any) {
+    return this.beneficiaryService.assignBeneficiaryToProject(payload);
   }
 
-  @MessagePattern({cmd:BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT})
-  async bulkAssignToProject(payload:any){
-    return this.beneficiaryService.bulkAssignToProject(payload)
+  @MessagePattern({ cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT })
+  async bulkAssignToProject(payload: any) {
+    return this.beneficiaryService.bulkAssignToProject(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
@@ -87,7 +106,7 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.GENERATE_LINK })
   generateLink(uuid: UUID) {
-        return this.verificationService.generateLink(uuid);
+    return this.verificationService.generateLink(uuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.VALIDATE_WALLET })

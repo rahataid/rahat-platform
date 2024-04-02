@@ -3,9 +3,8 @@ import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class DevService {
-  constructor(
-    @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy
-  ) {}
+  constructor() {}
+  @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy;
 
   log(cmd: string, data: any) {
     if (process.env.NODE_ENV === 'production') return;

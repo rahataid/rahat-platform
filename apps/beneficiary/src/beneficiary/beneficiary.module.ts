@@ -24,13 +24,22 @@ import { VerificationService } from './verification.service';
           password: process.env.REDIS_PASSWORD,
         },
       },
+      {
+        name: 'BEN_CLIENT',
+        transport: Transport.REDIS,
+        options: {
+          host: process.env.REDIS_HOST,
+          port: +process.env.REDIS_PORT,
+          password: process.env.REDIS_PASSWORD,
+        },
+      },
     ]),
     PrismaModule,
     StatsModule,
     BullModule.registerQueue({
       name: BQUEUE.RAHAT_BENEFICIARY,
     }),
-        MailerModule.forRootAsync({
+    MailerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
@@ -60,4 +69,4 @@ import { VerificationService } from './verification.service';
     BeneficiaryConsumer,
   ],
 })
-export class BeneficiaryModule { }
+export class BeneficiaryModule {}

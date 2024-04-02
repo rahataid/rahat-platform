@@ -28,4 +28,11 @@ export class StatDto {
   @IsOptional()
   @IsString()
   group?: string;
+
+  @ApiProperty({
+    example: '123456789',
+  })
+  @IsOptional()
+  @IsString()
+  projectUuid?: string;
 }
