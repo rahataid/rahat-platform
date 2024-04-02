@@ -14,7 +14,7 @@ import { ResponseTransformInterceptor } from '@rumsan/extensions/interceptors';
 import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app/app.module';
 import { loggerInstance } from './logger/winston.logger';
-import { CustomExceptionFilter } from './utils/exceptions/exception.filter';
+import { GlobalExceptionFilter } from './utils/exceptions/rpcException.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, {
@@ -33,7 +33,7 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     })
   );
-  app.useGlobalFilters(new CustomExceptionFilter());
+  app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
 

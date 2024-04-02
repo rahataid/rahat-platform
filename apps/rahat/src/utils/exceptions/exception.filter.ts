@@ -4,9 +4,9 @@ import { ExceptionResponse } from "@rahataid/sdk/types";
 import { Observable, throwError } from "rxjs";
 
 @Catch(RpcException, HttpException)
-export class CustomExceptionFilter  extends BaseRpcExceptionFilter implements PipeTransform<any>, ExceptionFilter{
-    transform(value: string, {metatype}: ArgumentMetadata) {
-        console.log({value})
+export class CustomExceptionFilter extends BaseRpcExceptionFilter implements PipeTransform<any>, ExceptionFilter {
+    transform(value: string, { metatype }: ArgumentMetadata) {
+        console.log({ value })
         return value;
     }
     catch(exception: any, host: ArgumentsHost): Observable<any> {
@@ -14,31 +14,31 @@ export class CustomExceptionFilter  extends BaseRpcExceptionFilter implements Pi
         const response = ctx?.getResponse();
         const request = ctx?.getRequest()
 
-        console.log({ctx})
+        console.log({ ctx })
 
         const responseData: ExceptionResponse = {
-            name: 'DEFAULT',    
+            name: 'DEFAULT',
             success: false,
-        meta: {},
-        group: '',
-        message:
-        'Our server is not happy. It threw an error. Please try again or contact support.' ||
-        '',
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        sourceModule: null,
-        type: 'ERROR',
-        timestamp: new Date().getTime(),
-        path: request?.url,
+            meta: {},
+            group: '',
+            message:
+                'Our server is not happy. It threw an error. Please try again or contact support.' ||
+                '',
+            statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+            sourceModule: null,
+            type: 'ERROR',
+            timestamp: new Date().getTime(),
+            path: request?.url,
         }
 
 
         if (exception instanceof RpcException) {
-                  console.log(`first`)
-                } else if (exception instanceof HttpException) {
-                  console.log(`Second`)
-                } 
-              
-   
+            console.log(`first`)
+        } else if (exception instanceof HttpException) {
+            console.log(`Second`)
+        }
+
+
         response.status(responseData?.statusCode).send(responseData);
 
         return throwError(() => exception.getError());

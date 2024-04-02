@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { AppModule } from './app/app.module';
-import { ExceptionFilter } from './exception.filter';
+import { ExceptionFilter } from './exceptions/exception.filter';
 
 async function bootstrap() {
   const PORT: number = +process.env.PORT_BEN;
