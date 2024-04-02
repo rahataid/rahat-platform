@@ -73,7 +73,7 @@ export const MS_ACTIONS = {
     SCHEDULE: {
       GET_ALL: 'aaProject.schedule.getAll',
       ADD: 'aaProject.schedule.add',
-      DELETE: 'aaProject.schedule.delete'
+      REMOVE: 'aaProject.schedule.remove'
     }
   }
 };

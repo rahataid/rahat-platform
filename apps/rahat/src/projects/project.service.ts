@@ -107,15 +107,15 @@ export class ProjectService {
           { projectId: uuid, ...payload }
         );
 
-
       case MS_ACTIONS.AAPROJECT.SCHEDULE.ADD:
-        return this.client.send({ cmd: AAJobs.SCHEDULE.ADD, uuid }, payload)
-          .pipe(
-            catchError((error) =>
-              throwError(() => new RpcException(error.response))
-            )
-          )
-          .pipe(timeout(MS_TIMEOUT));
+        return this.client.send({ cmd: AAJobs.SCHEDULE.ADD, uuid }, payload);
+
+      case MS_ACTIONS.AAPROJECT.SCHEDULE.REMOVE:
+        return this.client.send({ cmd: AAJobs.SCHEDULE.REMOVE, uuid }, payload);
+
+      case MS_ACTIONS.AAPROJECT.SCHEDULE.GET_ALL:
+        return this.client.send({ cmd: AAJobs.SCHEDULE.GET_ALL, uuid }, {});
+
       case MS_ACTIONS.VENDOR.ASSIGN_TO_PROJECT:
         return this.client
           .send(
