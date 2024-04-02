@@ -48,6 +48,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "dotenv-cli": "^7.3.0",
+    "http-status-codes": "^2.3.0",
     "ioredis": "^5.3.2",
     "nest-winston": "^1.9.4",
     "nodemailer": "^6.9.11",

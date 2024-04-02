@@ -29,10 +29,10 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET })
   async getBeneficiary(uuid: UUID) {
-  if (uuid){
-    return this.service.findOne(uuid);
-  }
-  throw new RpcException('UUID is required')
+    if (uuid) {
+      return this.service.findOne(uuid);
+    }
+    throw new RpcException('UUID is required')
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_WALLET })

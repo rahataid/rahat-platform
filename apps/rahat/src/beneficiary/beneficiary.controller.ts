@@ -11,7 +11,7 @@ import {
   Query,
   Req,
   UploadedFile,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -41,7 +41,7 @@ export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue
-  ) {}
+  ) { }
 
   @Get()
   async list(@Query() dto: ListBeneficiaryDto) {
@@ -117,7 +117,7 @@ export class BeneficiaryController {
   @Get(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   async getBeneficiary(@Param('uuid') uuid: UUID) {
-    return this.client.send({ cmd: BeneficiaryJobs.GET }, uuid).pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    return this.client.send({ cmd: BeneficiaryJobs.GET }, uuid);
   }
 
   @Get('wallet/:wallet')
