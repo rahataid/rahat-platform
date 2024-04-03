@@ -3,20 +3,20 @@
  * This is only a minimal backend to get started.
  */
 
-import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
-import { NestApplication, NestFactory } from '@nestjs/core';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { APP } from '@rahataid/sdk';
 // import { RsExceptionFilter } from '@rumsan/extensions/exceptions';
 import { RpcExceptionFilter } from '@rahataid/extensions';
+import { APP } from '@rahataid/sdk';
 import { ResponseTransformInterceptor } from '@rumsan/extensions/interceptors';
 import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app/app.module';
 import { loggerInstance } from './logger/winston.logger';
 
 async function bootstrap() {
-  const app: NestApplication = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, {
     logger: WinstonModule.createLogger({
       instance: loggerInstance,
     }),
@@ -34,11 +34,7 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new RpcExceptionFilter());
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
-  // app.setGlobalPrefix(globalPrefix);
-  app.setGlobalPrefix('api').enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1',
-  });
+  app.setGlobalPrefix(globalPrefix);
 
   const port = process.env.PORT || 3333;
 
@@ -54,19 +50,6 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
-
-  // Create microservice instance
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.REDIS,
-    options: {
-      host: process.env.REDIS_HOST,
-      port: +process.env.REDIS_PORT,
-      password: process.env.REDIS_PASSWORD,
-    },
-  });
-
-  // Start microservice
-  await app.startAllMicroservices();
 
   await app.listen(port);
   Logger.log(

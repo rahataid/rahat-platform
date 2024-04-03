@@ -138,8 +138,7 @@ export class BeneficiaryService {
       await this.prisma.beneficiaryPii.create({
         data: {
           beneficiaryId: rdata.id,
-          // phone: piiData.phone ? piiData.phone.toString() : null,
-
+          phone: piiData.phone ? piiData.phone.toString() : null,
           ...piiData,
         },
       });

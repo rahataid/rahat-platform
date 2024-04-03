@@ -79,12 +79,7 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.ADD_TO_PROJECT })
   async addToProject(payload: any) {
     const { dto, projectUid } = payload;
-    const response = await this.beneficiaryService.addBeneficiaryToProject(
-      dto,
-      projectUid
-    );
-
-    return response;
+    return this.beneficiaryService.addBeneficiaryToProject(dto, projectUid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
