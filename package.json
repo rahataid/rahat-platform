@@ -5,6 +5,7 @@
   "scripts": {
     "rahat": "npx nx serve rahat",
     "beneficiary": "npx nx serve beneficiary",
+    "serve:apps": "nx run-many -p rahat beneficiary --targets=serve",
     "add:resource": "nx g @nx/nest:resource --directory=apps/$app/src --crud=true",
     "build:all": "nx run-many --target=build --all",
     "build:rahat": "nx build rahat",
