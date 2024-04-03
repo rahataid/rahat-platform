@@ -1,4 +1,4 @@
-import { ArgumentsHost, Catch, RpcExceptionFilter } from '@nestjs/common';
+import { ArgumentsHost, Catch, HttpException, RpcExceptionFilter } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
 import { Observable, throwError } from 'rxjs';
@@ -20,6 +20,10 @@ export class ExceptionFilter implements RpcExceptionFilter<RpcException> {
 
     if (exception instanceof RpcException) {
       return throwError(() => new RpcException(exception.message));
+    }
+
+    if (exception instanceof HttpException) {
+      return throwError(() => new HttpException(exception.message, exception.getStatus()));
     }
 
     return throwError(() => new RpcException('Internal server error'));

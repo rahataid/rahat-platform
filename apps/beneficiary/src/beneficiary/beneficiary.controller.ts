@@ -1,12 +1,16 @@
 import { Controller, Inject, Param } from '@nestjs/common';
-import { ClientProxy, MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   ListProjectBeneficiaryDto,
-  UpdateBeneficiaryDto
+  UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
-import { BeneficiaryJobs, ProjectContants, ValidateWallet } from '@rahataid/sdk';
+import {
+  BeneficiaryJobs,
+  ProjectContants,
+  ValidateWallet,
+} from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
@@ -19,8 +23,8 @@ export class BeneficiaryController {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly service: BeneficiaryService,
     private readonly statsService: BeneficiaryStatService,
-    private readonly verificationService: VerificationService,
-  ) { }
+    private readonly verificationService: VerificationService
+  ) {}
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE })
   async create(@Payload() createBeneficiaryDto: CreateBeneficiaryDto) {
@@ -29,10 +33,7 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET })
   async getBeneficiary(uuid: UUID) {
-    if (uuid) {
-      return this.service.findOne(uuid);
-    }
-    throw new RpcException('UUID is required')
+    return this.service.findOne(uuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_WALLET })
@@ -44,7 +45,6 @@ export class BeneficiaryController {
   async getBeneficiaryByPhone(wallet: string) {
     return this.service.findOneByPhone(wallet);
   }
-
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
   createBulk(@Payload() data) {
@@ -79,12 +79,12 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
   async assignToProject(payload: any) {
-    return this.beneficiaryService.assignBeneficiaryToProject(payload)
+    return this.beneficiaryService.assignBeneficiaryToProject(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT })
   async bulkAssignToProject(payload: any) {
-    return this.beneficiaryService.bulkAssignToProject(payload)
+    return this.beneficiaryService.bulkAssignToProject(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
