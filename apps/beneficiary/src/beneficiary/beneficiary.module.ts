@@ -24,15 +24,6 @@ import { VerificationService } from './verification.service';
           password: process.env.REDIS_PASSWORD,
         },
       },
-      {
-        name: 'BEN_CLIENT',
-        transport: Transport.REDIS,
-        options: {
-          host: process.env.REDIS_HOST,
-          port: +process.env.REDIS_PORT,
-          password: process.env.REDIS_PASSWORD,
-        },
-      },
     ]),
     PrismaModule,
     StatsModule,

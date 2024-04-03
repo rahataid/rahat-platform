@@ -5,27 +5,39 @@ import { StatDto } from './dto/stat.dto';
 @Injectable()
 export class StatsService {
   constructor(private prismaService: PrismaService) {}
-  save(data: StatDto) {
-    // this.prismaService.stats.findMany({
-    //   where: { name: data.name },
+  async save(data: StatDto) {
+    console.log(data);
+
+    data.name = data.name.toUpperCase();
+    // let whereFilter = { name: data.name, group: 'beneficiary' };
+    if (data.group !== 'beneficiary') {
+      // whereFilter.group = data.group || '';
+      data.name = data.name + data.group;
+    }
+    // console.log(whereFilter);
+    // const stats = await this.prismaService.stats.findMany({
+    //   where: whereFilter,
     // });
-    // let whereClause;
-    // if (data.projectUuid) {
-    //   whereClause = {
-    //     name: data.name,
-    //     projectUuid: data.projectUuid,
-    //   };
+    // console.log(stats);
+
+    // if (stats.length > 0) {
+    //   //update the record
+    //   return await this.prismaService.stats.updateMany({
+    //     data,
+    //     where: whereFilter,
+    //   });
     // } else {
-    //   whereClause = {
-    //     name: data.name,
-    //   };
+    //   //insert the record
+    //   return await this.prismaService.stats.create({
+    //     data,
+    //   });
     // }
-    // data.name = data.name.toUpperCase();
-    // return this.prismaService.stats.upsert({
-    //   where: whereClause,
-    //   update: data,
-    //   create: data,
-    // });
+
+    return this.prismaService.stats.upsert({
+      where: { name: data.name },
+      update: data,
+      create: data,
+    });
   }
 
   getByGroup(
@@ -44,13 +56,13 @@ export class StatsService {
 
   findOne(name: string) {
     return this.prismaService.stats.findUnique({
-      where: { id: 1 },
+      where: { name },
     });
   }
 
   remove(name: string) {
     return this.prismaService.stats.delete({
-      where: { id: 1 },
+      where: { name },
     });
   }
 }

@@ -22,7 +22,6 @@ import {
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { map } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { createListQuery } from './helpers';
 
@@ -34,7 +33,6 @@ export class BeneficiaryService {
   constructor(
     protected prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
-    @Inject('BEN_CLIENT') private readonly benClient: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
     private eventEmitter: EventEmitter2
@@ -208,19 +206,16 @@ export class BeneficiaryService {
     }
 
     // 2. Save Beneficiary to Project
-    const response = await this.saveBeneficiaryToProject({
+    await this.saveBeneficiaryToProject({
       beneficiaryId: benef.uuid,
       projectId: projectUid,
     });
 
     // 3. Sync beneficiary to project
-    this.client
-      .send(
-        { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUid },
-        projectPayload
-      )
-      .pipe(map((response) => console.log(response.data)));
-    return response;
+    return this.client.send(
+      { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUid },
+      projectPayload
+    );
   }
 
   async saveBeneficiaryToProject(dto: AddToProjectDto) {

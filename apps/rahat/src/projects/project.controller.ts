@@ -28,7 +28,8 @@ import { ProjectService } from './project.service';
 export class ProjectController {
   constructor(
     private readonly projectService: ProjectService,
-    @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy
+    @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy,
+    @Inject('BEN_CLIENT') private readonly benClient: ClientProxy
   ) {}
 
   @Post()
@@ -79,14 +80,22 @@ export class ProjectController {
 
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
-  async projectActions(
+  projectActions(
     @Param('uuid') uuid: UUID,
     @Body() data: ProjectCommunicationDto
   ) {
-    const response = await this.projectService.handleProjectActions({
+    const response = this.projectService.handleProjectActions({
       uuid,
       ...data,
     });
     return response;
+  }
+  //list project specific stats
+  @ApiParam({ name: 'uuid', required: true })
+  @Get(':uuid/stats')
+  projectStats(@Param('uuid') uuid: UUID) {
+    return this.benClient
+      .send({ cmd: BeneficiaryJobs.PROJECT_STATS }, uuid)
+      .pipe(timeout(5000));
   }
 }

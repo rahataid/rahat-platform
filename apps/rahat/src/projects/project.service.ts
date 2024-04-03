@@ -10,9 +10,10 @@ import {
   ProjectJobs,
   VendorJobs,
 } from '@rahataid/sdk';
+import { BeneficiaryType } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
-import { timeout } from 'rxjs';
+import { tap, timeout } from 'rxjs';
 @Injectable()
 export class ProjectService {
   constructor(
@@ -62,7 +63,22 @@ export class ProjectService {
   }
 
   async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT) {
-    return this.client.send(cmd, payload).pipe(timeout(timeoutValue));
+    return this.client.send(cmd, payload).pipe(
+      timeout(timeoutValue),
+      tap((response) => {
+        //send whatsapp message after added referal beneficiary to project
+        if (
+          response?.id &&
+          cmd.cmd === BeneficiaryJobs.ADD_TO_PROJECT &&
+          payload.dto.type === BeneficiaryType.REFERRED
+        ) {
+          this.eventEmitter.emit(
+            ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT,
+            payload.dto
+          );
+        }
+      })
+    );
   }
 
   async handleProjectActions({ uuid, action, payload }) {
@@ -114,15 +130,7 @@ export class ProjectService {
         this.sendCommand(
           { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
           { dto: payload, projectUid: uuid }
-        ).then((data) => {
-          if (data) {
-            this.eventEmitter.emit(
-              ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT,
-              payload
-            );
-          }
-          return data;
-        }),
+        ),
 
       [MS_ACTIONS.BENEFICIARY.ASSGIN_TO_PROJECT]: () =>
         this.sendCommand(

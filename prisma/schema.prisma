@@ -316,13 +316,9 @@ model Project {
 // ++++++++++++++++++ START: @rahat/stats - Statistics ++++++++++++++++++++
 
 model Stats {
-  id              Int           @id @default(autoincrement())
-  uuid           String         @unique @default(uuid()) @db.Uuid()
-  name  String  
+  name  String  @id @unique
   data  Json
   group String?
-  projectUuid String?
-
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()

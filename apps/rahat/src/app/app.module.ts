@@ -6,17 +6,17 @@ import { StatsModule } from '@rahat/stats';
 import { SettingsModule } from '@rumsan/settings';
 import {
   AuthsModule,
-  RSUserModule,
   RolesModule,
+  RSUserModule,
   UsersModule,
 } from '@rumsan/user';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ListenersModule } from '../listeners/listeners.module';
+import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
 import { AppUsersModule } from '../users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ProcessorsModule } from '../processors/processors.module';
 
 @Module({
   imports: [
@@ -40,7 +40,7 @@ import { ProcessorsModule } from '../processors/processors.module';
     SettingsModule,
     ProjectModule,
     StatsModule,
-    ProcessorsModule
+    ProcessorsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

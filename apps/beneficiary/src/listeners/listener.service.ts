@@ -19,6 +19,6 @@ export class ListenersService {
   async onBeneficiaryChanged(eventObject) {
     console.log(eventObject);
 
-    await this.benStats.saveAllStats();
+    await this.benStats.saveAllStats(eventObject.projectUuid);
   }
 }
