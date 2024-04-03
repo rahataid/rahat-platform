@@ -118,7 +118,7 @@ export class AddBenToProjectDto implements CreateBeneficiaryDto {
     message:
       'Invalid Ethereum address format. It should start with "0x" and followed by 40 hexadecimal characters.',
   })
-  walletAddress?: string;
+  walletAddress: string;
 
   @ApiProperty({
     format: 'json',

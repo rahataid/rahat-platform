@@ -29,6 +29,14 @@ export class CreateBeneficiaryDto implements Beneficiary {
   birthDate?: Date;
 
   @ApiProperty({
+    example: '20-30',
+    description: 'Age range.',
+  })
+  @IsString()
+  @IsOptional()
+  ageRange?: string;
+
+  @ApiProperty({
     type: 'string',
     example: Enums.Gender.FEMALE,
     description: 'Gender ',
@@ -92,7 +100,7 @@ export class CreateBeneficiaryDto implements Beneficiary {
     message:
       'Invalid Ethereum address format. It should start with "0x" and followed by 40 hexadecimal characters.',
   })
-  walletAddress?: string;
+  walletAddress: string;
 
   @ApiProperty({
     format: 'json',
