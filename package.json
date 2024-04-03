@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "rahat": "npx nx serve rahat",
     "beneficiary": "npx nx serve beneficiary",
     "serve:apps": "nx run-many -p rahat beneficiary --targets=serve",
