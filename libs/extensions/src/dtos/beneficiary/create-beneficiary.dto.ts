@@ -27,6 +27,14 @@ export class CreateBeneficiaryDto implements Beneficiary {
   birthDate?: Date;
 
   @ApiProperty({
+    example: '20-30',
+    description: 'Age range.',
+  })
+  @IsString()
+  @IsOptional()
+  ageRange?: string;
+
+  @ApiProperty({
     type: 'string',
     example: Enums.Gender.FEMALE,
     description: 'Gender ',
@@ -82,7 +90,7 @@ export class CreateBeneficiaryDto implements Beneficiary {
   // @IsEthereumAddress({
   //  always: false,
   // })
-  walletAddress?: string;
+  walletAddress: string;
 
   @ApiProperty({
     format: 'json',
