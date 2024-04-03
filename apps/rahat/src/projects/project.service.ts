@@ -131,7 +131,6 @@ export class ProjectService {
           { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
           { dto: payload, projectUid: uuid }
         ),
-
       [MS_ACTIONS.BENEFICIARY.ASSGIN_TO_PROJECT]: () =>
         this.sendCommand(
           { cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT },

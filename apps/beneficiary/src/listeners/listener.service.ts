@@ -17,8 +17,6 @@ export class ListenersService {
   @OnEvent(BeneficiaryEvents.BENEFICIARY_UPDATED)
   @OnEvent(BeneficiaryEvents.BENEFICIARY_REMOVED)
   async onBeneficiaryChanged(eventObject) {
-    console.log(eventObject);
-
     await this.benStats.saveAllStats(eventObject.projectUuid);
   }
 }

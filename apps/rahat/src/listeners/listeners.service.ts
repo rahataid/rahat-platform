@@ -65,11 +65,8 @@ export class ListenersService {
       contentSid: CONTENT_SID,
     };
 
-    axios
-      .post(url, payload)
-      .then((response) => {})
-      .catch((error) => {
-        console.log(error);
-      });
+    axios.post(url, payload).catch((error) => {
+      console.error(error);
+    });
   }
 }

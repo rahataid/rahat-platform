@@ -17,7 +17,7 @@ import {
   ProjectCommunicationDto,
   UpdateProjectDto,
 } from '@rahataid/extensions';
-import { BeneficiaryJobs, ProjectJobs } from '@rahataid/sdk';
+import { BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
 import { UUID } from 'crypto';
 import { timeout } from 'rxjs/operators';
@@ -96,6 +96,6 @@ export class ProjectController {
   projectStats(@Param('uuid') uuid: UUID) {
     return this.benClient
       .send({ cmd: BeneficiaryJobs.PROJECT_STATS }, uuid)
-      .pipe(timeout(5000));
+      .pipe(timeout(MS_TIMEOUT));
   }
 }
