@@ -12,7 +12,7 @@
         "main": "libs/sdk/src/index.ts",
         "tsConfig": "libs/sdk/tsconfig.lib.json",
         "assets": ["libs/sdk/*.md"],
-        "rootDir": "libs/sdk/src",
+        "rootDir": "libs/sdk",
         "updateBuildableProjectDepsInPackageJson": true,
         "buildableProjectDepsInPackageJsonType": "dependencies"
       }
