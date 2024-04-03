@@ -63,6 +63,9 @@ export class ListenersService {
       phone: data.piiData.phone,
       type: 'WHATSAPP',
       contentSid: CONTENT_SID,
+      contentVariables: {
+        name: data.piiData.name,
+      },
     };
 
     axios.post(url, payload).catch((error) => {
