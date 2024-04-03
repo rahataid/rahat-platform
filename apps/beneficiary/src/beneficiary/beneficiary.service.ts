@@ -17,6 +17,7 @@ import {
   BeneficiaryJobs,
   ProjectContants,
   TPIIData,
+  generateWallet,
 } from '@rahataid/sdk';
 
 import { InjectQueue } from '@nestjs/bull';
@@ -74,11 +75,11 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
-    const projectPayload ={...data,status:dto.status}
-      // return data;
+    const projectPayload = { ...data, status: dto.status };
+    // return data;
     return this.client.send(
       { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
-     projectPayload
+      projectPayload
     );
   }
 
@@ -131,6 +132,10 @@ export class BeneficiaryService {
 
   async create(dto: CreateBeneficiaryDto) {
     const { piiData, ...data } = dto;
+    if (!data.walletAddress) {
+      const wallet = await generateWallet(piiData.phone);
+      data.walletAddress = wallet.address;
+    }
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const rdata = await this.rsprisma.beneficiary.create({
       data,
