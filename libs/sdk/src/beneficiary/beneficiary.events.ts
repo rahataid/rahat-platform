@@ -27,4 +27,5 @@ export const JOBS = {
   VERIFY_SIGNATURE: 'rahat.jobs.beneficiary.verify_signature',
   LIST_BY_PROJECT: 'rahat.jobs.beneficiary.list_by_project',
   VENDOR_REFERRAL: 'rahat.jobs.beneficiary.get_referred',
+  LIST_REFERRAL: 'rahat.jobs.beneficiary.list_referred',
 };

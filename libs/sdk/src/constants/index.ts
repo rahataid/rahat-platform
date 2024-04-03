@@ -4,7 +4,7 @@ export const APP_JOBS = {
   OTP: 'otp',
 };
 
-export const MS_TIMEOUT = 10000;
+export const MS_TIMEOUT = 500000;
 
 export const BQUEUE = {
   RAHAT: 'RAHAT',

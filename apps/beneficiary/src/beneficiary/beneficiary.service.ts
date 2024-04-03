@@ -73,6 +73,11 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+
+    if (data.data.length > 0) {
+      const mergedData = await this.mergeProjectPIIData(data.data);
+      data.data = mergedData;
+    }
     const projectPayload = { ...data, status: dto.status };
     // return data;
     return this.client.send(
@@ -114,6 +119,18 @@ export class BeneficiaryService {
       result.data = mergedData;
     }
     return result;
+  }
+
+  async mergeProjectPIIData(data: any) {
+    let mergedData = [];
+    for (let d of data) {
+      const piiData = await this.rsprisma.beneficiaryPii.findUnique({
+        where: { beneficiaryId: d.Beneficiary.id },
+      });
+      if (piiData) d.piiData = piiData;
+      mergedData.push(d);
+    }
+    return mergedData;
   }
 
   async mergePIIData(data: any) {
@@ -420,5 +437,23 @@ export class BeneficiaryService {
 
     // Return some form of success indicator, as createMany does not return the records themselves
     return { success: true, count: dtos.length };
+  }
+
+  async listReferredBen({ bendata }) {
+    const uuids = bendata.data.map((item) => item.uuid);
+    let result = {};
+    const newdata = await this.prisma.beneficiary.findMany({
+      where: {
+        uuid: {
+          in: uuids,
+        },
+      },
+    });
+    if (newdata.length > 0) {
+      const mergedData = await this.mergePIIData(newdata);
+      result = mergedData;
+    }
+
+    return { result, meta: bendata.meta };
   }
 }

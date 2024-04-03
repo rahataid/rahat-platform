@@ -118,4 +118,9 @@ export class BeneficiaryController {
   verifySignature(verificationData: any) {
     return this.verificationService.verifySignature(verificationData);
   }
+
+  @MessagePattern({cmd:BeneficiaryJobs.LIST_REFERRAL})
+  listVendorReferral(data){
+    return this.beneficiaryService.listReferredBen(data);
+  }
 }
