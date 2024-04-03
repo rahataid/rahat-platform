@@ -18,7 +18,6 @@ import {
   ProjectContants,
   TPIIData,
   generateRandomWallet,
-  generateWallet,
 } from '@rahataid/sdk';
 
 import { InjectQueue } from '@nestjs/bull';
@@ -134,8 +133,7 @@ export class BeneficiaryService {
   async create(dto: CreateBeneficiaryDto) {
     const { piiData, ...data } = dto;
     if (!data.walletAddress) {
-      const wallet = await generateWallet(piiData.phone);
-      data.walletAddress = wallet.address;
+      data.walletAddress = generateRandomWallet().address;
     }
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const rdata = await this.rsprisma.beneficiary.create({
