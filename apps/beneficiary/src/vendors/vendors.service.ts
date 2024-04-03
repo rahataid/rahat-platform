@@ -39,9 +39,9 @@ export class VendorsService {
   }
 
   async assignToProject(dto: VendorAddToProjectDto) {
-    const { vendorUuid, projectId } = dto;
+    const { vendorId, projectId } = dto;
     const vendorUser = await this.prisma.user.findUnique({
-      where: { uuid: vendorUuid },
+      where: { uuid: vendorId },
     });
     const userRoles = await this.prisma.userRole.findMany({
       where: { userId: vendorUser.id },
@@ -56,14 +56,11 @@ export class VendorsService {
     );
     if (!isVendor) throw new Error('Not a vendor');
     const projectPayload = {
-      uuid: vendorUuid,
+      uuid: vendorId,
       walletAddress: vendorUser.wallet,
     };
 
-    const assigned = await this.getVendorAssignedToProject(
-      vendorUuid,
-      projectId
-    );
+    const assigned = await this.getVendorAssignedToProject(vendorId, projectId);
     if (assigned)
       throw new RpcException(
         new BadRequestException('Vendor already assigned to the project!')
@@ -72,7 +69,7 @@ export class VendorsService {
     await this.prisma.projectVendors.create({
       data: {
         projectId,
-        vendorId: vendorUuid,
+        vendorId: vendorId,
       },
     });
 

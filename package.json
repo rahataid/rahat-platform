@@ -5,11 +5,13 @@
   "scripts": {
     "rahat": "npx nx serve rahat",
     "beneficiary": "npx nx serve beneficiary",
+    "serve:apps": "nx run-many -p rahat beneficiary --targets=serve",
     "add:resource": "nx g @nx/nest:resource --directory=apps/$app/src --crud=true",
     "build:all": "nx run-many --target=build --all",
     "build:rahat": "nx build rahat",
     "build:beneficiary": "nx build beneficiary",
     "clean": "rm -rf dist node_modules tmp",
+    "format": "nx format:write --uncommitted",
     "seed": "ts-node prisma/seed.user.ts",
     "migrate:dev": "prisma migrate dev --preview-feature",
     "migrate:dev:create": "prisma migrate dev --create-only --preview-feature",
