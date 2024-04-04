@@ -190,7 +190,25 @@ export class BeneficiaryStatService {
     return { count: await this.prisma.beneficiary.count({ where: filter }) };
   }
 
-  async calculateAllStats(projectUuid?: string) {
+  async calculateAllStats() {
+    const [gender, bankedStatus, internetStatus, phoneStatus, total] =
+      await Promise.all([
+        this.calculateGenderStats(),
+        this.calculateBankedStatusStats(),
+        this.calculateInternetStatusStats(),
+        this.calculatePhoneStatusStats(),
+        this.totalBeneficiaries(),
+      ]);
+
+    return {
+      gender,
+      bankedStatus,
+      internetStatus,
+      phoneStatus,
+      total,
+    };
+  }
+  async calculateProjectStats(projectUuid: string) {
     const [gender, bankedStatus, internetStatus, phoneStatus, total] =
       await Promise.all([
         this.calculateGenderStats(projectUuid),
@@ -218,35 +236,67 @@ export class BeneficiaryStatService {
 
   async saveAllStats(projectUuid?: string) {
     const { gender, bankedStatus, internetStatus, phoneStatus, total } =
-      await this.calculateAllStats(projectUuid);
+      await this.calculateAllStats();
 
     await Promise.all([
       this.statsService.save({
         name: 'beneficiary_total',
         data: total,
-        group: projectUuid ? projectUuid : 'beneficiary',
+        group: 'beneficiary',
       }),
       this.statsService.save({
         name: 'beneficiary_gender',
         data: gender,
-        group: projectUuid ? projectUuid : 'beneficiary',
+        group: 'beneficiary',
       }),
       this.statsService.save({
         name: 'beneficiary_bankedStatus',
         data: bankedStatus,
-        group: projectUuid ? projectUuid : 'beneficiary',
+        group: 'beneficiary',
       }),
       this.statsService.save({
         name: 'beneficiary_internetStatus',
         data: internetStatus,
-        group: projectUuid ? projectUuid : 'beneficiary',
+        group: 'beneficiary',
       }),
       this.statsService.save({
         name: 'beneficiary_phoneStatus',
         data: phoneStatus,
-        group: projectUuid ? projectUuid : 'beneficiary',
+        group: 'beneficiary',
       }),
     ]);
+    if (projectUuid) {
+      const { gender, bankedStatus, internetStatus, phoneStatus, total } =
+        await this.calculateProjectStats(projectUuid);
+      await Promise.all([
+        this.statsService.save({
+          name: 'beneficiary_total',
+          data: total,
+          group: projectUuid,
+        }),
+        this.statsService.save({
+          name: 'beneficiary_gender',
+          data: gender,
+          group: projectUuid,
+        }),
+        this.statsService.save({
+          name: 'beneficiary_bankedStatus',
+          data: bankedStatus,
+          group: projectUuid,
+        }),
+        this.statsService.save({
+          name: 'beneficiary_internetStatus',
+          data: internetStatus,
+          group: projectUuid,
+        }),
+        this.statsService.save({
+          name: 'beneficiary_phoneStatus',
+          data: phoneStatus,
+          group: projectUuid,
+        }),
+      ]);
+    }
+
     return { gender, bankedStatus, internetStatus, phoneStatus };
   }
 }
