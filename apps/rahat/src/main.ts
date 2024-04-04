@@ -8,13 +8,13 @@ import { NestFactory } from '@nestjs/core';
 import { NestFastifyApplication } from '@nestjs/platform-fastify';
 
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { GlobalCustomExceptionFilter } from '@rahataid/extensions/utils';
 import { APP } from '@rahataid/sdk';
-// import { RsExceptionFilter } from '@rumsan/extensions/exceptions';
-import { RpcExceptionFilter } from '@rahataid/extensions';
 import { ResponseTransformInterceptor } from '@rumsan/extensions/interceptors';
 import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app/app.module';
 import { loggerInstance } from './logger/winston.logger';
+// import { GlobalExceptionFilter } from './utils/exceptions/rpcException.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, {
@@ -33,7 +33,7 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     })
   );
-  app.useGlobalFilters(new RpcExceptionFilter());
+  app.useGlobalFilters(new GlobalCustomExceptionFilter());
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
 
