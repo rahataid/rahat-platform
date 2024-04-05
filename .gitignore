@@ -10,6 +10,7 @@ play
 dist
 tmp
 /out-tsc
+/tools/dev-tools/data
 
 # dependencies
 node_modules
