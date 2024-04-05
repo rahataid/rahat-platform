@@ -79,14 +79,14 @@ export class ProjectService {
     const tx = await forwarderContract.execute(metaTxRequest);
     const res = await tx.wait(); 
     console.log('res', res);
-    return {txHash: res.hash,...res};
+    return {txHash: res.hash,status:res.status};
   }
 
   async redeemVoucher (params:any,uuid:string){
     const {metaTxRequest} = params;
     const res = await this.executeMetaTxRequest({metaTxRequest});
     if(res.status === 1)  this.sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, params);
-    return res.txHash;
+    return {txHash:res.txHash,status:res.status};
 
   }
 
@@ -98,7 +98,7 @@ export class ProjectService {
       params,
       500000
     );
-    return res.txHash;
+    return {txHash:res.txHash,status:res.status};
 
   }
 
