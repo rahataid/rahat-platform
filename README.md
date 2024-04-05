@@ -72,14 +72,16 @@ Follow the following steps to run rahat on a local docker development environmen
 
 Ensure that you have the following key-value pairs in your .env file.
 ```text
-EL_PROJECT_DIR=<path-to-your-el-project-codebase>
 ENVIRONMENT=local
+RAHAT_UI_DIR=<path-to-your-rahat-ui-codebase>
+EL_PROJECT_DIR=<path-to-your-el-project-codebase>
 ```
 
 Example:
 ```text
-EL_PROJECT_DIR=/home/user/rumsan/projects/rahat/rahat-projects
 ENVIRONMENT=local
+RAHAT_UI_DIR=/home/user/rumsan/projects/rahat/rahat-ui
+EL_PROJECT_DIR=/home/user/rumsan/projects/rahat/rahat-projects
 ```
 
 
