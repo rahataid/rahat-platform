@@ -56,19 +56,27 @@ export const MS_ACTIONS = {
   },
   USER: {},
   ELPROJECT: {
-    REDEEM_VOUCHER:'elProject.redeemVoucher',
-    UPDATE_STATUS:'elProject.updateStatus',
-    PROCESS_OTP:'elProject.processOtp',
-    ASSIGN_DISCOUNT_VOUCHER:'elProject.discountVoucher',
-    REQUEST_REDEMPTION:'elProject.requestRedemption',
-    REQUEST_REDEMPTION_BE:'elProject.requestRedemption_be',
-    UPDATE_REDEMPTION:'elProject.updateRedemption',
-    LIST_REDEMPTION:'elProject.listRedemption',
-    GET_VENDOR_REDEMPTION:'elProject.vendorRedemption',
-    GET_VENDOR_REFERRER:'elProject.beneficiaryReferred'
+    REDEEM_VOUCHER: 'elProject.redeemVoucher',
+    UPDATE_STATUS: 'elProject.updateStatus',
+    PROCESS_OTP: 'elProject.processOtp',
+    ASSIGN_DISCOUNT_VOUCHER: 'elProject.discountVoucher',
+    REQUEST_REDEMPTION: 'elProject.requestRedemption',
+    REQUEST_REDEMPTION_BE: 'elProject.requestRedemption_be',
+    UPDATE_REDEMPTION: 'elProject.updateRedemption',
+    LIST_REDEMPTION: 'elProject.listRedemption',
+    GET_VENDOR_REDEMPTION: 'elProject.vendorRedemption',
+    GET_VENDOR_REFERRER: 'elProject.beneficiaryReferred'
   },
   SETTINGS: {
     LIST: 'settings.list',
     GET: 'settings.get',
   },
+  AAPROJECT: {
+    SCHEDULE: {
+      DEV_ONLY: 'aaProject.schedule.devOnly',
+      GET_ALL: 'aaProject.schedule.getAll',
+      ADD: 'aaProject.schedule.add',
+      REMOVE: 'aaProject.schedule.remove'
+    }
+  }
 };
