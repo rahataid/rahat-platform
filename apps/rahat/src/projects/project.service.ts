@@ -79,7 +79,27 @@ export class ProjectService {
     const tx = await forwarderContract.execute(metaTxRequest);
     const res = await tx.wait(); 
     console.log('res', res);
-    return {txHash: res.hash};
+    return {txHash: res.hash,...res};
+  }
+
+  async redeemVoucher (params:any,uuid:string){
+    const {metaTxRequest} = params;
+    const res = await this.executeMetaTxRequest({metaTxRequest});
+    if(res.status === 1)  this.sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, params);
+    return res.txHash;
+
+  }
+
+  async requestRedemption (params:any,uuid:string){
+    const {metaTxRequest} = params;
+    const res = await this.executeMetaTxRequest({metaTxRequest});
+    if(res.status === 1)  this.sendCommand(
+      { cmd: ProjectJobs.REQUEST_REDEMPTION, uuid },
+      params,
+      500000
+    );
+    return res.txHash;
+
   }
 
   async handleProjectActions({ uuid, action, payload }) {
@@ -95,28 +115,31 @@ export class ProjectService {
 
 
       //     [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: () =>
-      //   this.sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, payload),
+        // this.sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, payload),
       // [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: () =>
       //   this.sendCommand({ cmd: ProjectJobs.PROCESS_OTP, uuid }, payload),
 
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () =>
-        await this.executeMetaTxRequest(payload),
+        await this.redeemVoucher(payload,uuid),
        
       [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () =>
         await this.executeMetaTxRequest(payload),
 
 
-      [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: () =>
-        this.sendCommand(
-          { cmd: ProjectJobs.ASSIGN_DISCOUNT_VOUCHER, uuid },
-          payload
-        ),
-      [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: () =>
-        this.sendCommand(
-          { cmd: ProjectJobs.REQUEST_REDEMPTION, uuid },
-          payload,
-          500000
-        ),
+      [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () => 
+        await this.executeMetaTxRequest(payload),
+        // this.sendCommand(
+        //   { cmd: ProjectJobs.ASSIGN_DISCOUNT_VOUCHER, uuid },
+        //   payload
+        // ),
+      [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async() => 
+        await this.redeemVoucher(payload,uuid),
+
+        // this.sendCommand(
+        //   { cmd: ProjectJobs.REQUEST_REDEMPTION, uuid },
+        //   payload,
+        //   500000
+        // ),
       [MS_ACTIONS.ELPROJECT.UPDATE_REDEMPTION]: () =>
         this.sendCommand(
           { cmd: ProjectJobs.UPDATE_REDEMPTION, uuid },
