@@ -12,8 +12,10 @@ import {
   VendorJobs,
 } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
+import { SettingsService } from '@rumsan/settings';
 import { UUID } from 'crypto';
 import { catchError, throwError, timeout } from 'rxjs';
+// import SE
 @Injectable()
 export class ProjectService {
   constructor(
@@ -23,6 +25,22 @@ export class ProjectService {
   ) { }
 
   async create(data: CreateProjectDto) {
+
+    // TODO: refactor to proper validator
+    switch (data.type) {
+      case 'AA':
+        SettingsService.get('AA')
+        break;
+      case 'CVA':
+        SettingsService.get('CVA')
+        break;
+      case 'EL':
+        SettingsService.get('EL')
+        break;
+      default:
+        throw new Error('Invalid project type.')
+    }
+
     const project = await this.prisma.project.create({
       data,
     });
