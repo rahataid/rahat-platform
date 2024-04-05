@@ -79,7 +79,7 @@ export class ProjectService {
     const tx = await forwarderContract.execute(metaTxRequest);
     const res = await tx.wait(); 
     console.log('res', res);
-    return res;
+    return {txHash: res.hash};
   }
 
   async handleProjectActions({ uuid, action, payload }) {
@@ -101,6 +101,7 @@ export class ProjectService {
 
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () =>
         await this.executeMetaTxRequest(payload),
+       
       [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () =>
         await this.executeMetaTxRequest(payload),
 
