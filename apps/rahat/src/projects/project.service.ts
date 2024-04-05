@@ -82,25 +82,25 @@ export class ProjectService {
     return {txHash: res.hash,status:res.status};
   }
 
-  async redeemVoucher (params:any,uuid:string){
-    const {metaTxRequest} = params;
-    const res = await this.executeMetaTxRequest({metaTxRequest});
-    if(res.status === 1)  this.sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, params);
-    return {txHash:res.txHash,status:res.status};
+  // async redeemVoucher (params:any,uuid:string){
+  //   const {metaTxRequest} = params;
+  //   const res = await this.executeMetaTxRequest({metaTxRequest});
+  //   if(res.status === 1)   this.sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, params);
+  //   return {txHash:res.txHash,status:res.status};
 
-  }
+  // }
 
-  async requestRedemption (params:any,uuid:string){
-    const {metaTxRequest} = params;
-    const res = await this.executeMetaTxRequest({metaTxRequest});
-    if(res.status === 1)  this.sendCommand(
-      { cmd: ProjectJobs.REQUEST_REDEMPTION, uuid },
-      params,
-      500000
-    );
-    return {txHash:res.txHash,status:res.status};
+  // async requestRedemption (params:any,uuid:string){
+  //   const {metaTxRequest} = params;
+  //   const res = await this.executeMetaTxRequest({metaTxRequest});
+  //   if(res.status === 1)  this.sendCommand(
+  //     { cmd: ProjectJobs.REQUEST_REDEMPTION, uuid },
+  //     params,
+  //     500000
+  //   );
+  //   return {txHash:res.txHash,status:res.status};
 
-  }
+  // }
 
   async handleProjectActions({ uuid, action, payload }) {
     console.log({ uuid, action, payload })
@@ -120,7 +120,7 @@ export class ProjectService {
       //   this.sendCommand({ cmd: ProjectJobs.PROCESS_OTP, uuid }, payload),
 
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () =>
-        await this.redeemVoucher(payload,uuid),
+        await this.executeMetaTxRequest(payload),
        
       [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () =>
         await this.executeMetaTxRequest(payload),
@@ -132,14 +132,27 @@ export class ProjectService {
         //   { cmd: ProjectJobs.ASSIGN_DISCOUNT_VOUCHER, uuid },
         //   payload
         // ),
+      [MS_ACTIONS.ELPROJECT.UPDATE_STATUS]: () =>
+      this.sendCommand(
+        { cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, 
+        payload),
+      
       [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async() => 
-        await this.redeemVoucher(payload,uuid),
+        await this.executeMetaTxRequest(payload),
+
+      [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION_BE]: async() => 
+      this.sendCommand(
+        { cmd: ProjectJobs.REQUEST_REDEMPTION, uuid },
+        payload,
+        500000
+      ),
 
         // this.sendCommand(
         //   { cmd: ProjectJobs.REQUEST_REDEMPTION, uuid },
         //   payload,
         //   500000
         // ),
+      
       [MS_ACTIONS.ELPROJECT.UPDATE_REDEMPTION]: () =>
         this.sendCommand(
           { cmd: ProjectJobs.UPDATE_REDEMPTION, uuid },
