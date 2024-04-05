@@ -83,6 +83,7 @@ export class ProjectService {
   }
 
   async handleProjectActions({ uuid, action, payload }) {
+    console.log({ uuid, action, payload })
     const projectActions = {
       [MS_ACTIONS.SETTINGS.LIST]: () =>
         this.sendCommand({ cmd: ProjectJobs.PROJECT_SETTINGS_LIST, uuid }, {}),
@@ -92,6 +93,11 @@ export class ProjectService {
           payload
         ),
 
+
+      //     [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: () =>
+      //   this.sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, payload),
+      // [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: () =>
+      //   this.sendCommand({ cmd: ProjectJobs.PROCESS_OTP, uuid }, payload),
 
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () =>
         await this.executeMetaTxRequest(payload),
