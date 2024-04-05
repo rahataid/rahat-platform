@@ -107,6 +107,13 @@ export class ProjectService {
           { projectId: uuid, ...payload }
         );
 
+      /***********************
+      * Development Only
+      *************************/
+      case MS_ACTIONS.AAPROJECT.SCHEDULE.DEV_ONLY:
+        return this.client.send({ cmd: AAJobs.SCHEDULE.DEV_ONLY, uuid }, payload);
+      /************************/
+
       case MS_ACTIONS.AAPROJECT.SCHEDULE.ADD:
         return this.client.send({ cmd: AAJobs.SCHEDULE.ADD, uuid }, payload);
 

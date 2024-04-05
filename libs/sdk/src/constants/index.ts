@@ -71,6 +71,7 @@ export const MS_ACTIONS = {
   },
   AAPROJECT: {
     SCHEDULE: {
+      DEV_ONLY: 'aaProject.schedule.devOnly',
       GET_ALL: 'aaProject.schedule.getAll',
       ADD: 'aaProject.schedule.add',
       REMOVE: 'aaProject.schedule.remove'
