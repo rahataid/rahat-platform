@@ -13,6 +13,8 @@ import {
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { timeout } from 'rxjs';
+import { ERC2771FORWARDER } from '../utils/contracts';
+import { createContractSigner } from '../utils/web3';
 @Injectable()
 export class ProjectService {
   constructor(
@@ -65,7 +67,23 @@ export class ProjectService {
     return this.client.send(cmd, payload).pipe(timeout(timeoutValue));
   }
 
+
+  async executeMetaTxRequest(params: any) {
+    const { metaTxRequest } = params;
+    console.log('metaTxRequest', metaTxRequest)
+    const forwarderContract = await createContractSigner(ERC2771FORWARDER, process.env.ERC2771_FORWARDER_ADDRESS);
+
+    metaTxRequest.gas = BigInt(metaTxRequest.gas);
+    metaTxRequest.nonce = BigInt(metaTxRequest.nonce);
+    metaTxRequest.value = BigInt(metaTxRequest.value);
+    const tx = await forwarderContract.execute(metaTxRequest);
+    const res = await tx.wait(); 
+    console.log('res', res);
+    return {txHash: res.hash};
+  }
+
   async handleProjectActions({ uuid, action, payload }) {
+    console.log({ uuid, action, payload })
     const projectActions = {
       [MS_ACTIONS.SETTINGS.LIST]: () =>
         this.sendCommand({ cmd: ProjectJobs.PROJECT_SETTINGS_LIST, uuid }, {}),
@@ -74,10 +92,20 @@ export class ProjectService {
           { cmd: ProjectJobs.PROJECT_SETTINGS_GET, uuid },
           payload
         ),
-      [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: () =>
-        this.sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, payload),
-      [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: () =>
-        this.sendCommand({ cmd: ProjectJobs.PROCESS_OTP, uuid }, payload),
+
+
+      //     [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: () =>
+      //   this.sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, payload),
+      // [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: () =>
+      //   this.sendCommand({ cmd: ProjectJobs.PROCESS_OTP, uuid }, payload),
+
+      [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () =>
+        await this.executeMetaTxRequest(payload),
+       
+      [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () =>
+        await this.executeMetaTxRequest(payload),
+
+
       [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: () =>
         this.sendCommand(
           { cmd: ProjectJobs.ASSIGN_DISCOUNT_VOUCHER, uuid },
@@ -161,6 +189,6 @@ export class ProjectService {
     if (!actionFunc) {
       throw new Error('Please provide a valid action!');
     }
-    return actionFunc();
+    return await actionFunc();
   }
 }
