@@ -17,6 +17,7 @@ import {
   BeneficiaryJobs,
   ProjectContants,
   TPIIData,
+  generateRandomWallet,
 } from '@rahataid/sdk';
 
 import { InjectQueue } from '@nestjs/bull';
@@ -74,11 +75,17 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
-    const projectPayload ={...data,status:dto.status}
-      // return data;
+    // return data;
+
+    if (data.data.length > 0) {
+      const mergedData = await this.mergeProjectPIIData(data.data);
+      data.data = mergedData;
+    }
+    const projectPayload = { ...data, status: dto.status };
+    // return data;
     return this.client.send(
       { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
-     projectPayload
+      projectPayload
     );
   }
 
@@ -117,6 +124,18 @@ export class BeneficiaryService {
     return result;
   }
 
+  async mergeProjectPIIData(data: any) {
+    let mergedData = [];
+    for (let d of data) {
+      const piiData = await this.rsprisma.beneficiaryPii.findUnique({
+        where: { beneficiaryId: d.Beneficiary.id },
+      });
+      if (piiData) d.piiData = piiData;
+      mergedData.push(d);
+    }
+    return mergedData;
+  }
+
   async mergePIIData(data: any) {
     let mergedData = [];
     for (let d of data) {
@@ -131,6 +150,9 @@ export class BeneficiaryService {
 
   async create(dto: CreateBeneficiaryDto) {
     const { piiData, ...data } = dto;
+    if (!data.walletAddress) {
+      data.walletAddress = generateRandomWallet().address;
+    }
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const rdata = await this.rsprisma.beneficiary.create({
       data,
@@ -359,13 +381,11 @@ export class BeneficiaryService {
       );
     const hasWallet = dtos.every((dto) => dto.walletAddress);
     if (!hasWallet)
-      throw new RpcException(
-        new BadRequestException('Wallet address is required!')
-      );
-    // Pre-generate UUIDs for each beneficiary to use as a linking key
-    dtos.forEach((dto) => {
-      dto.uuid = dto.uuid || uuidv4(); // Assuming generateUuid() is a method that generates unique UUIDs
-    });
+      // Pre-generate UUIDs for each beneficiary to use as a linking key
+      dtos.forEach((dto) => {
+        dto.uuid = dto.uuid || uuidv4(); // Assuming generateUuid() is a method that generates unique UUIDs
+        dto.walletAddress = dto.walletAddress || generateRandomWallet().address;
+      });
 
     // Separate PII data and prepare beneficiary data for bulk insertion
     const beneficiariesData = dtos.map(({ piiData, ...data }) => data);
@@ -418,5 +438,23 @@ export class BeneficiaryService {
 
     // Return some form of success indicator, as createMany does not return the records themselves
     return { success: true, count: dtos.length };
+  }
+
+  async listReferredBen({ bendata }) {
+    const uuids = bendata.data.map((item) => item.uuid);
+    let result = {};
+    const newdata = await this.prisma.beneficiary.findMany({
+      where: {
+        uuid: {
+          in: uuids,
+        },
+      },
+    });
+    if (newdata.length > 0) {
+      const mergedData = await this.mergePIIData(newdata);
+      result = mergedData;
+    }
+
+    return { result, meta: bendata.meta };
   }
 }
