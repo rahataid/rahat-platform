@@ -14,6 +14,14 @@ create_env() {
     done
 }
 
+generate_mnemonic() {
+    pnpm generate:mnemonic $current_dir
+}
+
+migrate() {
+    pnpm migrate:dev
+}
+
 create_rahat_volumes() {
     docker volume create rahat_pg_data &&
         docker volume create rahat_pg_admin_data &&
@@ -30,9 +38,38 @@ start_dev_tools() {
     )
 
     for project in "${composeDirs[@]}"; do
-
         compose_file="$project/docker-compose.yml"
-        echo $compose_file
         docker compose -f $compose_file up -d
     done
+}
+
+stop_dev_tools() {
+    declare -a composeDirs=(
+        "$current_dir/tools/docker-compose/dev-tools"
+        "$current_dir/tools/docker-compose/graph"
+    )
+
+    for project in "${composeDirs[@]}"; do
+        compose_file="$project/docker-compose.yml"
+        docker compose -f $compose_file down
+    done
+}
+
+remove_rahat_volumes() {
+    docker volume rm rahat_pg_data &&
+        docker volume rm rahat_pg_admin_data &&
+        docker volume rm rahat_ganache_data &&
+        docker volume rm rahat_redis_data &&
+        docker volume rm rahat_pg_graph_data &&
+        docker volume rm rahat_ipfs_data
+}
+
+rm_modules() {
+    rm -rf dist node_modules tmp
+}
+
+reset() {
+    stop_dev_tools
+    remove_rahat_volumes
+    rm_modules
 }
