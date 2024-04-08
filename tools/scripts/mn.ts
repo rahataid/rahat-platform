@@ -1,7 +1,7 @@
 import * as bip39 from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english';
 import { ethers } from 'ethers';
-const fs = require('fs').promises;
+import * as fs from 'fs/promises';
 
 const mn = bip39.generateMnemonic(wordlist);
 const mnemonicWallet = ethers.Wallet.fromPhrase(mn);

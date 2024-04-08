@@ -18,8 +18,9 @@ generate_mnemonic() {
     pnpm generate:mnemonic $current_dir
 }
 
-migrate() {
+migrate_seed() {
     pnpm migrate:dev
+    pnpm seed:devsettings
 }
 
 create_rahat_volumes() {
