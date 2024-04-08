@@ -6,7 +6,7 @@ export class CreateProjectDto {
   @ApiProperty({
     type: 'string',
     required: true,
-    example: 'Blood Bank',
+    example: 'Cash Distribution',
   })
   @IsString()
   name: string;
@@ -14,7 +14,7 @@ export class CreateProjectDto {
   @ApiProperty({
     type: 'string',
     required: false,
-    example: 'A project about blood donation',
+    example: 'Cash Distribution for the flood victims',
   })
   @IsString()
   @IsOptional()
@@ -23,7 +23,7 @@ export class CreateProjectDto {
   @ApiProperty({
     type: 'string',
     required: false,
-    example: 'anticipatory-action',
+    example: 'el',
   })
   @IsString()
   type: string;
@@ -31,19 +31,12 @@ export class CreateProjectDto {
   @ApiProperty({
     type: 'string',
     required: false,
-    example: 'Some extra information',
+    example: 'Some extra Descriptions',
   })
   @IsString()
   @IsOptional()
   extras?: object;
 
-  @ApiProperty({
-    required: true,
-    example: '0x1234567890123456789012345678901234567890',
-  })
-  @IsOptional()
-  @IsString()
-  contractAddress?: string;
 }
 
 export class UpdateProjectDto extends OmitType(PartialType(CreateProjectDto), [
@@ -81,12 +74,4 @@ export class UpdateProjectDto extends OmitType(PartialType(CreateProjectDto), [
   @IsString()
   @IsOptional()
   override extras?: object;
-
-  @ApiProperty({
-    required: true,
-    example: '0x1234567890123456789012345678901234567890',
-  })
-  @IsOptional()
-  @IsString()
-  override contractAddress?: string;
 }
