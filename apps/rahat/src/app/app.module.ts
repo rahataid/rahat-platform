@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { StatsModule } from '@rahat/stats';
+import { PrismaService } from '@rumsan/prisma';
 import { SettingsModule } from '@rumsan/settings';
 import {
   AuthsModule,
@@ -12,11 +13,11 @@ import {
 } from '@rumsan/user';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ListenersModule } from '../listeners/listeners.module';
+import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
 import { AppUsersModule } from '../users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ProcessorsModule } from '../processors/processors.module';
 
 @Module({
   imports: [
@@ -40,9 +41,9 @@ import { ProcessorsModule } from '../processors/processors.module';
     SettingsModule,
     ProjectModule,
     StatsModule,
-    ProcessorsModule
+    ProcessorsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, PrismaService],
 })
-export class AppModule {}
+export class AppModule { }

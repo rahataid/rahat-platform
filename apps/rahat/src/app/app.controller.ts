@@ -1,18 +1,21 @@
-import { BadRequestException, Controller, Get } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 
+import { ApiTags } from '@nestjs/swagger';
+import { CreateSettingDto } from '@rumsan/extensions/dtos';
 import { AppService } from './app.service';
 
 @Controller('app')
+@ApiTags('app')
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppService,
 
-  @Get()
-  getData() {
-    return this.appService.getData();
+  ) { }
+
+
+
+  @Post('settings')
+  create(@Body() createSettingDto: CreateSettingDto) {
+    return this.appService.createRahatAppSettings(createSettingDto)
   }
 
-  @Get('test')
-  getTest(){
-    throw new BadRequestException('This is a test exception');
-  }
 }
