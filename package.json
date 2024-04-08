@@ -10,6 +10,8 @@
     "build:all": "nx run-many --target=build --all",
     "build:rahat": "nx build rahat",
     "build:beneficiary": "nx build beneficiary",
+    "bootstrap": "bash ./tools/scripts/bootstrap.sh",
+    "reset": "bash ./tools/scripts/reset.sh",
     "clean": "rm -rf dist node_modules tmp",
     "format": "nx format:write --uncommitted",
     "seed": "ts-node prisma/seed.user.ts",
@@ -22,7 +24,7 @@
     "prisma:studio": "npx prisma studio",
     "prisma:generate": "npx prisma generate",
     "prisma:generate:watch": "npx prisma generate --watch",
-    "bootstrap": "bash ./tools/scripts/bootstrap.sh"
+    "generate:mnemonic": "ts-node ./tools/scripts/mn.ts"
   },
   "private": true,
   "dependencies": {
@@ -80,6 +82,7 @@
     "@nx/web": "18.0.1",
     "@nx/webpack": "18.0.1",
     "@nx/workspace": "18.0.1",
+    "@scure/bip39": "^1.3.0",
     "@swc-node/register": "~1.6.8",
     "@swc/core": "~1.3.107",
     "@swc/helpers": "~0.5.6",
