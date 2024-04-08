@@ -47,7 +47,28 @@ export class BeneficiaryService {
     });
   }
 
-  listPiiData(dto: any) {
+  async listPiiData(dto: any) {
+    if (dto.projectId) {
+      const data = await paginate(
+        this.rsprisma.beneficiaryProject,
+        {
+          where: {
+            projectId: dto.projectId,
+          },
+          include: { Beneficiary: true },
+        },
+        {
+          page: dto.page,
+          perPage: dto.perPage,
+        }
+      );
+
+      if (data.data.length > 0) {
+        const mergedData = await this.projectPIIData(data.data);
+        data.data = mergedData;
+      }
+      return data;
+    }
     return paginate(
       this.rsprisma.beneficiaryPii,
       {
@@ -133,6 +154,16 @@ export class BeneficiaryService {
       mergedData.push(d);
     }
     return mergedData;
+  }
+  async projectPIIData(data: any) {
+    let projectPiiData = [];
+    for (let d of data) {
+      const piiData = await this.rsprisma.beneficiaryPii.findUnique({
+        where: { beneficiaryId: d.Beneficiary.id },
+      });
+      if (piiData) projectPiiData.push(piiData);
+    }
+    return projectPiiData;
   }
 
   async mergePIIData(data: any) {
