@@ -71,6 +71,11 @@ export class BeneficiaryController {
     return this.statsService.getAllStats();
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.PROJECT_STATS })
+  async projectStats(uuid: string) {
+    return this.statsService.getAllStats(uuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.ADD_TO_PROJECT })
   async addToProject(payload: any) {
     const { dto, projectUid } = payload;

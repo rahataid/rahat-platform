@@ -53,15 +53,31 @@ export const getBeneficiaryClient = (
       return formatResponse<Beneficiary>(response);
     },
 
-    getByPhone: async (phone: string, config?: AxiosRequestConfig) => {
-      const response = await client.get(`/beneficiaries/phone/${phone}`, config);
-      return formatResponse<Beneficiary>(response);
+    generateVerificationLink: async (
+      uuid: UUID,
+      config?: AxiosRequestConfig
+    ) => {
+      const response = await client.get(
+        `/beneficiaries/verification-link/${uuid}`,
+        config
+      );
+      return formatResponse<string>(response);
+    },
+    upload: async (formData: FormData, config?: AxiosRequestConfig) => {
+      const response = await client.post(
+        '/beneficiaries/upload',
+        formData,
+        config
+      );
+      return formatResponse<any>(response);
     },
 
-    generateVerificationLink: async (uuid: UUID, config?: AxiosRequestConfig) => {
-      const response = await client.get('/beneficiaries/verification-link/:uuid', config)
-      return formatResponse<string>(response)
-
-    }
+    getByPhone: async (phone: string, config?: AxiosRequestConfig) => {
+      const response = await client.get(
+        `/beneficiaries/phone/${phone}`,
+        config
+      );
+      return formatResponse<Beneficiary>(response);
+    },
   };
 };

@@ -9,12 +9,13 @@ import {
   MS_TIMEOUT,
   ProjectEvents,
   ProjectJobs,
-  VendorJobs,
+  VendorJobs
 } from '@rahataid/sdk';
+import { BeneficiaryType } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
 import { SettingsService } from '@rumsan/settings';
 import { UUID } from 'crypto';
-import { timeout } from 'rxjs';
+import { tap, timeout } from 'rxjs';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { createContractSigner } from '../utils/web3';
 @Injectable()
@@ -81,7 +82,22 @@ export class ProjectService {
   }
 
   async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT) {
-    return this.client.send(cmd, payload).pipe(timeout(timeoutValue));
+    return this.client.send(cmd, payload).pipe(
+      timeout(timeoutValue),
+      tap((response) => {
+        //send whatsapp message after added referal beneficiary to project
+        if (
+          response?.id &&
+          cmd.cmd === BeneficiaryJobs.ADD_TO_PROJECT &&
+          payload.dto.type === BeneficiaryType.REFERRED
+        ) {
+          this.eventEmitter.emit(
+            ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT,
+            payload.dto
+          );
+        }
+      })
+    );
   }
 
 

@@ -5,8 +5,12 @@ import { StatDto } from './dto/stat.dto';
 @Injectable()
 export class StatsService {
   constructor(private prismaService: PrismaService) {}
-  save(data: StatDto) {
+  async save(data: StatDto) {
     data.name = data.name.toUpperCase();
+    if (data.group !== 'beneficiary') {
+      data.name = data.name + data.group;
+    }
+
     return this.prismaService.stats.upsert({
       where: { name: data.name },
       update: data,

@@ -2,7 +2,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { StatsService } from '@rahat/stats';
-import { BQUEUE, BeneficiaryEvents } from '@rahataid/sdk';
+import { BeneficiaryEvents, BQUEUE } from '@rahataid/sdk';
 import { Queue } from 'bull';
 import { BeneficiaryStatService } from '../beneficiary/beneficiaryStat.service';
 @Injectable()
@@ -16,7 +16,7 @@ export class ListenersService {
   @OnEvent(BeneficiaryEvents.BENEFICIARY_CREATED)
   @OnEvent(BeneficiaryEvents.BENEFICIARY_UPDATED)
   @OnEvent(BeneficiaryEvents.BENEFICIARY_REMOVED)
-  async onBeneficiaryChanged() {
-    await this.benStats.saveAllStats();
+  async onBeneficiaryChanged(eventObject) {
+    await this.benStats.saveAllStats(eventObject.projectUuid);
   }
 }

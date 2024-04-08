@@ -18,6 +18,7 @@ export const JOBS = {
   ASSIGN_TO_PROJECT: 'rahat.jobs.beneficiary.assign_to_project',
   BULK_ASSIGN_TO_PROJECT: 'rahat.jobs.beneficiary.bulk_assign',
   STATS: 'rahat.jobs.beneficiary.stats',
+  PROJECT_STATS: 'rahat.jobs.beneficiary.project.stats',
   UPDATE: 'rahat.jobs.beneficiary.update',
   UPDATE_STATS: 'rahat.jobs.beneficiary.update_stats',
   GENERATE_LINK: 'rahat.jobs.beneficiary.generate_link',
@@ -28,5 +29,4 @@ export const JOBS = {
   VENDOR_REFERRAL: 'rahat.jobs.beneficiary.get_referred',
   LIST_REFERRAL: 'rahat.jobs.beneficiary.list_referred',
   LIST_BEN_VENDOR_COUNT: 'rahat.jobs.beneficiary.count_ben_vendor',
-
 };

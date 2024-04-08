@@ -9,12 +9,37 @@ export class BeneficiaryStatService {
     private readonly statsService: StatsService
   ) {}
 
-  async calculateGenderStats() {
+  async calculateGenderStats(projectUuid?: string) {
+    let filter = {};
+
+    // Add filter if projectUuid is provided
+    if (projectUuid) {
+      const beneficiaryId = await this.prisma.beneficiaryProject
+        .findMany({
+          where: {
+            projectId: projectUuid,
+          },
+          select: {
+            beneficiaryId: true,
+          },
+        })
+        .then((projectBen) =>
+          projectBen.map((data: any) => data?.beneficiaryId)
+        );
+
+      filter = {
+        uuid: {
+          in: beneficiaryId || [],
+        },
+      };
+    }
+
     const genderStats = await this.prisma.beneficiary.groupBy({
       by: ['gender'],
       _count: {
         gender: true,
       },
+      where: filter,
     });
 
     return genderStats.map((stat) => ({
@@ -23,12 +48,36 @@ export class BeneficiaryStatService {
     }));
   }
 
-  async calculateBankedStatusStats() {
+  async calculateBankedStatusStats(projectUuid?: string) {
+    let filter = {};
+
+    // Add filter if projectUuid is provided
+    if (projectUuid) {
+      const beneficiaryId = await this.prisma.beneficiaryProject
+        .findMany({
+          where: {
+            projectId: projectUuid,
+          },
+          select: {
+            beneficiaryId: true,
+          },
+        })
+        .then((projectBen) =>
+          projectBen.map((data: any) => data?.beneficiaryId)
+        );
+
+      filter = {
+        uuid: {
+          in: beneficiaryId || [],
+        },
+      };
+    }
     const bankedStatusStats = await this.prisma.beneficiary.groupBy({
       by: ['bankedStatus'],
       _count: {
         bankedStatus: true,
       },
+      where: filter,
     });
 
     return bankedStatusStats.map((stat) => ({
@@ -37,12 +86,37 @@ export class BeneficiaryStatService {
     }));
   }
 
-  async calculateInternetStatusStats() {
+  async calculateInternetStatusStats(projectUuid?: string) {
+    let filter = {};
+
+    // Add filter if projectUuid is provided
+    if (projectUuid) {
+      const beneficiaryId = await this.prisma.beneficiaryProject
+        .findMany({
+          where: {
+            projectId: projectUuid,
+          },
+          select: {
+            beneficiaryId: true,
+          },
+        })
+        .then((projectBen) =>
+          projectBen.map((data: any) => data?.beneficiaryId)
+        );
+
+      filter = {
+        uuid: {
+          in: beneficiaryId || [],
+        },
+      };
+    }
+
     const internetStatusStats = await this.prisma.beneficiary.groupBy({
       by: ['internetStatus'],
       _count: {
         internetStatus: true,
       },
+      where: filter,
     });
 
     return internetStatusStats.map((stat) => ({
@@ -51,12 +125,36 @@ export class BeneficiaryStatService {
     }));
   }
 
-  async calculatePhoneStatusStats() {
+  async calculatePhoneStatusStats(projectUuid?: string) {
+    let filter = {};
+
+    // Add filter if projectUuid is provided
+    if (projectUuid) {
+      const beneficiaryId = await this.prisma.beneficiaryProject
+        .findMany({
+          where: {
+            projectId: projectUuid,
+          },
+          select: {
+            beneficiaryId: true,
+          },
+        })
+        .then((projectBen) =>
+          projectBen.map((data: any) => data?.beneficiaryId)
+        );
+
+      filter = {
+        uuid: {
+          in: beneficiaryId || [],
+        },
+      };
+    }
     const phoneStatusStats = await this.prisma.beneficiary.groupBy({
       by: ['phoneStatus'],
       _count: {
         phoneStatus: true,
       },
+      where: filter,
     });
 
     return phoneStatusStats.map((stat) => ({
@@ -65,8 +163,31 @@ export class BeneficiaryStatService {
     }));
   }
 
-  async totalBeneficiaries() {
-    return { count: await this.prisma.beneficiary.count() };
+  async totalBeneficiaries(projectUuid?: string) {
+    let filter = {};
+
+    // Add filter if projectUuid is provided
+    if (projectUuid) {
+      const beneficiaryId = await this.prisma.beneficiaryProject
+        .findMany({
+          where: {
+            projectId: projectUuid,
+          },
+          select: {
+            beneficiaryId: true,
+          },
+        })
+        .then((projectBen) =>
+          projectBen.map((data: any) => data?.beneficiaryId)
+        );
+
+      filter = {
+        uuid: {
+          in: beneficiaryId || [],
+        },
+      };
+    }
+    return { count: await this.prisma.beneficiary.count({ where: filter }) };
   }
 
   async calculateAllStats() {
@@ -87,15 +208,33 @@ export class BeneficiaryStatService {
       total,
     };
   }
+  async calculateProjectStats(projectUuid: string) {
+    const [gender, bankedStatus, internetStatus, phoneStatus, total] =
+      await Promise.all([
+        this.calculateGenderStats(projectUuid),
+        this.calculateBankedStatusStats(projectUuid),
+        this.calculateInternetStatusStats(projectUuid),
+        this.calculatePhoneStatusStats(projectUuid),
+        this.totalBeneficiaries(projectUuid),
+      ]);
 
-  async getAllStats() {
-    return this.statsService.getByGroup('beneficiary', {
+    return {
+      gender,
+      bankedStatus,
+      internetStatus,
+      phoneStatus,
+      total,
+    };
+  }
+
+  async getAllStats(group = 'beneficiary') {
+    return this.statsService.getByGroup(group, {
       name: true,
       data: true,
     });
   }
 
-  async saveAllStats() {
+  async saveAllStats(projectUuid?: string) {
     const { gender, bankedStatus, internetStatus, phoneStatus, total } =
       await this.calculateAllStats();
 
@@ -126,6 +265,38 @@ export class BeneficiaryStatService {
         group: 'beneficiary',
       }),
     ]);
+    if (projectUuid) {
+      const { gender, bankedStatus, internetStatus, phoneStatus, total } =
+        await this.calculateProjectStats(projectUuid);
+      await Promise.all([
+        this.statsService.save({
+          name: 'beneficiary_total',
+          data: total,
+          group: projectUuid,
+        }),
+        this.statsService.save({
+          name: 'beneficiary_gender',
+          data: gender,
+          group: projectUuid,
+        }),
+        this.statsService.save({
+          name: 'beneficiary_bankedStatus',
+          data: bankedStatus,
+          group: projectUuid,
+        }),
+        this.statsService.save({
+          name: 'beneficiary_internetStatus',
+          data: internetStatus,
+          group: projectUuid,
+        }),
+        this.statsService.save({
+          name: 'beneficiary_phoneStatus',
+          data: phoneStatus,
+          group: projectUuid,
+        }),
+      ]);
+    }
+
     return { gender, bankedStatus, internetStatus, phoneStatus };
   }
 }

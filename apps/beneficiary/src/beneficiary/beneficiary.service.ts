@@ -1,3 +1,4 @@
+import { InjectQueue } from '@nestjs/bull';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
@@ -11,17 +12,15 @@ import {
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
 import {
-  BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
   BeneficiaryJobs,
+  BQUEUE,
   ProjectContants,
   TPIIData,
   generateRandomWallet,
 } from '@rahataid/sdk';
-
-import { InjectQueue } from '@nestjs/bull';
-import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
+import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -148,7 +147,7 @@ export class BeneficiaryService {
     return mergedData;
   }
 
-  async create(dto: CreateBeneficiaryDto) {
+  async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
     const { piiData, ...data } = dto;
     if (!data.walletAddress) {
       data.walletAddress = generateRandomWallet().address;
@@ -161,11 +160,14 @@ export class BeneficiaryService {
       await this.prisma.beneficiaryPii.create({
         data: {
           beneficiaryId: rdata.id,
+          phone: piiData.phone ? piiData.phone.toString() : null,
           ...piiData,
         },
       });
     }
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
+      projectUuid,
+    });
     return rdata;
   }
 
@@ -209,7 +211,7 @@ export class BeneficiaryService {
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
     const { type, referrerBeneficiary, referrerVendor, ...rest } = dto;
     // 1. Create Beneficiary
-    const benef = await this.create(rest);
+    const benef = await this.create(rest, projectUid);
     const projectPayload = {
       uuid: benef.uuid,
       referrerVendor: referrerVendor || '',

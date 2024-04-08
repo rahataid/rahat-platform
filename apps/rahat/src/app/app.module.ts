@@ -7,8 +7,8 @@ import { PrismaService } from '@rumsan/prisma';
 import { SettingsModule } from '@rumsan/settings';
 import {
   AuthsModule,
-  RSUserModule,
   RolesModule,
+  RSUserModule,
   UsersModule,
 } from '@rumsan/user';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
