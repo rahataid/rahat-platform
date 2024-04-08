@@ -24,7 +24,7 @@ export class BeneficiaryController {
     private readonly service: BeneficiaryService,
     private readonly statsService: BeneficiaryStatService,
     private readonly verificationService: VerificationService
-  ) {}
+  ) { }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE })
   async create(@Payload() createBeneficiaryDto: CreateBeneficiaryDto) {
@@ -119,8 +119,13 @@ export class BeneficiaryController {
     return this.verificationService.verifySignature(verificationData);
   }
 
-  @MessagePattern({cmd:BeneficiaryJobs.LIST_REFERRAL})
-  listVendorReferral(data){
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_REFERRAL })
+  listVendorReferral(data) {
     return this.beneficiaryService.listReferredBen(data);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_BEN_VENDOR_COUNT })
+  getTotalCount(data) {
+    return this.beneficiaryService.getTotalCount(data)
   }
 }

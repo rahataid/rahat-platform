@@ -459,4 +459,19 @@ export class BeneficiaryService {
 
     return { result, meta: bendata.meta };
   }
+
+  async getTotalCount({ projectId }) {
+    const benTotal = await this.prisma.beneficiaryProject.count({
+      where: {
+        projectId
+      }
+    });
+
+    const vendorTotal = await this.prisma.projectVendors.count({
+      where: {
+        projectId
+      }
+    })
+    return { benTotal, vendorTotal }
+  }
 }
