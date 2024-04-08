@@ -94,6 +94,8 @@ export class ProjectService {
     metaTxRequest.value = BigInt(metaTxRequest.value);
     const tx = await forwarderContract.execute(metaTxRequest);
     const res = await tx.wait();
+
+    console.log('res', res);
     return { txHash: res.hash, status: res.status };
   }
 
