@@ -1,4 +1,5 @@
 export * from './client.types';
+export * from './exceptionResponse.types';
 export * from './file.types';
 export * from './project.types';
 export * from './response.types';

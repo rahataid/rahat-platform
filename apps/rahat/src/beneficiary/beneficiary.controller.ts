@@ -1,5 +1,6 @@
 import { InjectQueue } from '@nestjs/bull';
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -10,7 +11,7 @@ import {
   Query,
   Req,
   UploadedFile,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -40,7 +41,7 @@ export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue
-  ) {}
+  ) { }
 
   @Get()
   async list(@Query() dto: ListBeneficiaryDto) {
@@ -101,7 +102,7 @@ export class BeneficiaryController {
       .send({ cmd: BeneficiaryJobs.CREATE_BULK }, beneficiaries)
       .pipe(
         catchError((error) =>
-          throwError(() => new RpcException(error.response))
+          throwError(() => new BadRequestException(error.response))
         )
       )
       .pipe(timeout(MS_TIMEOUT));

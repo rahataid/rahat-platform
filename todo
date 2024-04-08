@@ -5,3 +5,7 @@
 - Send created beneficiary UUID to EL-Projects via API endpoint with ACTION & PAYLOAD
 - Save beneficiary and referral details inside EL-Projects
 - Send SMS to beneficiary
+
+
+# AA
+- DNF: remove dev only AA microservice action

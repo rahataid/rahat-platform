@@ -203,8 +203,9 @@ model Beneficiary {
   id             Int            @id @default(autoincrement()) @db.Integer()
   uuid           String         @unique @default(uuid()) @db.Uuid()
   gender         Gender         @default(UNKNOWN)
-  walletAddress  String?
+  walletAddress  String         @unique
   birthDate      DateTime?
+  ageRange       String?
   location       String?
   latitude       Float?
   longitude      Float?
@@ -260,7 +261,7 @@ enum BeneficiaryTypes {
 model BeneficiaryPii {
   beneficiaryId Int     @unique
   name          String?
-  phone         String?
+  phone         String   @unique
   email         String?
   extras        Json?   @db.JsonB()
 
