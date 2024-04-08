@@ -56,7 +56,6 @@ export class ProjectService {
   }
 
   async findOne(uuid: UUID) {
-    console.log('uuid', uuid);
     return this.prisma.project.findUnique({
       where: {
         uuid,
@@ -88,7 +87,6 @@ export class ProjectService {
 
   async executeMetaTxRequest(params: any) {
     const { metaTxRequest } = params;
-    console.log('metaTxRequest', metaTxRequest)
     const forwarderContract = await createContractSigner(ERC2771FORWARDER, process.env.ERC2771_FORWARDER_ADDRESS);
 
     metaTxRequest.gas = BigInt(metaTxRequest.gas);
@@ -96,6 +94,7 @@ export class ProjectService {
     metaTxRequest.value = BigInt(metaTxRequest.value);
     const tx = await forwarderContract.execute(metaTxRequest);
     const res = await tx.wait();
+
     console.log('res', res);
     return { txHash: res.hash, status: res.status };
   }
@@ -121,7 +120,6 @@ export class ProjectService {
   // }
 
   async handleProjectActions({ uuid, action, payload }) {
-    console.log({ uuid, action, payload })
     const projectActions = {
       [MS_ACTIONS.SETTINGS.LIST]: () =>
         this.sendCommand({ cmd: ProjectJobs.PROJECT_SETTINGS_LIST, uuid }, {}),
@@ -130,8 +128,6 @@ export class ProjectService {
           { cmd: ProjectJobs.PROJECT_SETTINGS_GET, uuid },
           payload
         ),
-
-
       //     [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: () =>
       // this.sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, payload),
       // [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: () =>
@@ -187,6 +183,13 @@ export class ProjectService {
         this.sendCommand(
           { cmd: ProjectJobs.GET_VENDOR_REDEMPTION, uuid },
           payload,
+          500000
+        ),
+
+      [MS_ACTIONS.ELPROJECT.LIST_BEN_VENDOR_COUNT]: () =>
+        this.sendCommand(
+          { cmd: BeneficiaryJobs.LIST_BEN_VENDOR_COUNT },
+          { projectId: uuid },
           500000
         ),
       /***********************
