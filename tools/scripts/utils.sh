@@ -18,6 +18,10 @@ generate_mnemonic() {
     pnpm generate:mnemonic $current_dir
 }
 
+migrate() {
+    pnpm migrate:dev
+}
+
 create_rahat_volumes() {
     docker volume create rahat_pg_data &&
         docker volume create rahat_pg_admin_data &&
