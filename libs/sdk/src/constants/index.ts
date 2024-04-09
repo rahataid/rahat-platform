@@ -48,6 +48,7 @@ export const MS_ACTIONS = {
     ASSGIN_TO_PROJECT: 'beneficiary.assign_to_project',
     BULK_ASSIGN_TO_PROJECT: 'beneficiary.bulk_assign',
     LIST_BY_PROJECT: 'beneficiary.list_by_project',
+    GET_PROJECT_SPECIFIC: 'beneficiary.project_specific'
   },
   VENDOR: {
     REGISTER: 'vendor.register',

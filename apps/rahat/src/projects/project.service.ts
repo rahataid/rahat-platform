@@ -247,6 +247,11 @@ export class ProjectService {
           { cmd: BeneficiaryJobs.LIST_BY_PROJECT },
           { projectId: uuid, ...payload }
         ),
+      [MS_ACTIONS.BENEFICIARY.GET_PROJECT_SPECIFIC]: () =>
+        this.sendCommand(
+          { cmd: BeneficiaryJobs.GET_PROJECT_SPECIFIC },
+          { projectId: uuid, ...payload }
+        ),
       [MS_ACTIONS.ELPROJECT.GET_VENDOR_REFERRER]: () =>
         this.sendCommand(
           { cmd: BeneficiaryJobs.VENDOR_REFERRAL, uuid },

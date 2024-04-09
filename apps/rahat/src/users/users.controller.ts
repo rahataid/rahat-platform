@@ -19,8 +19,8 @@ export class UsersController {
   }
 
   @Get('vendors')
-  listVendor() {
-    return this.client.send({ cmd: VendorJobs.LIST }, {});
+  listVendor(dto) {
+    return this.client.send({ cmd: VendorJobs.LIST }, dto);
   }
 
   @ApiParam({ name: 'id', required: true })

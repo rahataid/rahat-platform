@@ -128,4 +128,9 @@ export class BeneficiaryController {
   getTotalCount(data) {
     return this.beneficiaryService.getTotalCount(data)
   }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_PROJECT_SPECIFIC })
+  getProjectSpecific(data) {
+    return this.beneficiaryService.getProjectSpecificData(data)
+  }
 }
