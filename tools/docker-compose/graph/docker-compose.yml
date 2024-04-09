@@ -1,7 +1,13 @@
-version: '3'
+volumes:
+  rahat_pg_graph_data:
+    external: true
+  rahat_ipfs_data:
+    external: true
+
 services:
   graph-node:
     image: graphprotocol/graph-node
+    container_name: graph-node
     ports:
       - '8000:8000'
       - '8001:8001'
@@ -19,16 +25,18 @@ services:
       postgres_pass: let-me-in
       postgres_db: graph-node
       ipfs: 'ipfs:5001'
-      ethereum: 'mainnet:http://host.docker.internal:1444'
+      ethereum: 'mainnet:http://host.docker.internal:8888'
       GRAPH_LOG: info
   ipfs:
     image: ipfs/kubo:v0.17.0
+    container_name: ipfs
     ports:
       - '5001:5001'
     volumes:
-      - ../data/graph/ipfs:/data/ipfs
+      - rahat_ipfs_data:/data/ipfs
   postgres:
     image: postgres:14
+    container_name: graph-pg
     ports:
       - '2345:5432'
     command:
@@ -47,4 +55,4 @@ services:
       PGDATA: "/var/lib/postgresql/data"
       POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
     volumes:
-      - ../data/graph/postgres:/var/lib/postgresql/data
+      - rahat_pg_graph_data:/var/lib/postgresql/data
