@@ -12,7 +12,7 @@ export class VendorsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
-  ) {}
+  ) { }
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
@@ -106,7 +106,7 @@ export class VendorsService {
     return userdata;
   }
 
-  async listVendor() {
+  async listVendor(dto) {
     return paginate(this.prisma.userRole, {
       where: {
         Role: {
@@ -123,8 +123,13 @@ export class VendorsService {
             },
           },
         },
-      },
-    });
+      }
+    },
+      {
+        page: dto.page,
+        perPage: dto.perPage
+      }
+    );
   }
 
   async listProjectVendor(dto) {

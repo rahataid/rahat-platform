@@ -19,8 +19,8 @@ export class VendorsController {
   }
 
   @MessagePattern({ cmd: VendorJobs.LIST })
-  list() {
-    return this.service.listVendor();
+  list(dto) {
+    return this.service.listVendor(dto);
   }
 
   @MessagePattern({ cmd: VendorJobs.LIST_BY_PROJECT })

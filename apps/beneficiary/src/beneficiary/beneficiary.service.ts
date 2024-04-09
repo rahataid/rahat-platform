@@ -82,6 +82,8 @@ export class BeneficiaryService {
   }
 
   async listBenefByProject(dto: ListProjectBeneficiaryDto) {
+    const orderBy: Record<string, 'asc' | 'desc'> = {};
+    orderBy[dto.sort] = dto.order;
     const data = await paginate(
       this.rsprisma.beneficiaryProject,
       {
@@ -89,6 +91,7 @@ export class BeneficiaryService {
           projectId: dto.projectId,
         },
         include: { Beneficiary: true },
+        orderBy
       },
       {
         page: dto.page,
@@ -155,6 +158,7 @@ export class BeneficiaryService {
     }
     return mergedData;
   }
+
   async projectPIIData(data: any) {
     let projectPiiData = [];
     for (let d of data) {
@@ -230,6 +234,13 @@ export class BeneficiaryService {
     if (!row) return null;
     const piiData = await this.rsprisma.beneficiaryPii.findUnique({
       where: { beneficiaryId: row.id },
+      include: {
+        BeneficiaryProject: {
+          include: {
+            Project: true
+          }
+        }
+      }
     });
     if (piiData) row.piiData = piiData;
     return row;
@@ -242,6 +253,13 @@ export class BeneficiaryService {
     if (!piiData) return null;
     const beneficiary = await this.rsprisma.beneficiary.findUnique({
       where: { id: piiData.beneficiaryId },
+      include: {
+        BeneficiaryProject: {
+          include: {
+            Project: true
+          }
+        }
+      }
     });
     if (!beneficiary) return null;
     beneficiary.piiData = piiData;
@@ -513,5 +531,12 @@ export class BeneficiaryService {
       }
     })
     return { benTotal, vendorTotal }
+  }
+
+  async getProjectSpecificData(data) {
+    const { benId, projectId } = data;
+    const benData = await this.findOne(benId);
+    if (benData) return this.client.send({ cmd: BeneficiaryJobs.GET, uuid: projectId }, { uuid: benId, data: benData });
+    return benData
   }
 }

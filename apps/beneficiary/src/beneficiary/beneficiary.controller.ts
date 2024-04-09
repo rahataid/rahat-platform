@@ -95,7 +95,6 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
   update(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryDto) {
     const benefUUID = uuid ? uuid : dto.uuid;
-    console.log({ dto });
     return this.service.update(benefUUID, dto);
   }
 
@@ -127,5 +126,10 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_BEN_VENDOR_COUNT })
   getTotalCount(data) {
     return this.beneficiaryService.getTotalCount(data)
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_PROJECT_SPECIFIC })
+  getProjectSpecific(data) {
+    return this.beneficiaryService.getProjectSpecificData(data)
   }
 }
