@@ -53,7 +53,6 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST })
   async list(dto: ListBeneficiaryDto) {
-    console.log(dto)
     return this.service.list(dto);
   }
 
@@ -96,7 +95,6 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
   update(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryDto) {
     const benefUUID = uuid ? uuid : dto.uuid;
-    console.log({ dto });
     return this.service.update(benefUUID, dto);
   }
 
