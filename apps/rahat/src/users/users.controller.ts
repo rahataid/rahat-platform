@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Param, Post, Query } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { VendorRegisterDto } from '@rahataid/extensions';
@@ -19,7 +19,7 @@ export class UsersController {
   }
 
   @Get('vendors')
-  listVendor(dto) {
+  listVendor(@Query() dto) {
     return this.client.send({ cmd: VendorJobs.LIST }, dto);
   }
 
