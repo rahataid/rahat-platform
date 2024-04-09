@@ -163,6 +163,9 @@ devDependencies:
   '@nx/workspace':
     specifier: 18.0.1
     version: 18.0.1(@swc-node/register@1.6.8)(@swc/core@1.3.107)
+  '@scure/bip39':
+    specifier: ^1.3.0
+    version: 1.3.0
   '@swc-node/register':
     specifier: ~1.6.8
     version: 1.6.8(@swc/core@1.3.107)(@swc/types@0.1.6)(typescript@5.3.3)
@@ -3191,6 +3194,11 @@ packages:
     engines: { node: '>= 16' }
     dev: false
 
+  /@noble/hashes@1.4.0:
+    resolution: {integrity: sha512-V1JJ1WTRUqHHrOSh597hURcMqVKVGL/ea3kv0gSnEdsEZ0/+VyPghM1lMNGc00z7CIQorSvbKpuJkxvuHbvdbg==}
+    engines: {node: '>= 16'}
+    dev: true
+
   /@nodelib/fs.scandir@2.1.5:
     resolution:
       {
@@ -4373,6 +4381,10 @@ packages:
       }
     dev: false
 
+  /@scure/base@1.1.6:
+    resolution: {integrity: sha512-ok9AWwhcgYuGG3Zfhyqg+zwl+Wn5uE+dwC0NV/2qQkx4dABbb/bx96vWu8NSj+BNjjSjno+JRYRjle1jV08k3g==}
+    dev: true
+
   /@scure/bip32@1.3.2:
     resolution:
       {
@@ -4393,6 +4405,13 @@ packages:
       '@noble/hashes': 1.3.2
       '@scure/base': 1.1.6
     dev: false
+
+  /@scure/bip39@1.3.0:
+    resolution: {integrity: sha512-disdg7gHuTDZtY+ZdkmLpPCk7fxZSu3gBiEGuoC1XYxv9cGx3Z6cpTggCgW6odSOOIXCiDjuGejW+aJKCY/pIQ==}
+    dependencies:
+      '@noble/hashes': 1.4.0
+      '@scure/base': 1.1.6
+    dev: true
 
   /@selderee/plugin-htmlparser2@0.11.0:
     resolution:
