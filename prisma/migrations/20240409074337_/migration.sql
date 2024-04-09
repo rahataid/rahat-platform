@@ -149,8 +149,9 @@ CREATE TABLE "tbl_beneficiaries" (
     "id" SERIAL NOT NULL,
     "uuid" UUID NOT NULL,
     "gender" "Gender" NOT NULL DEFAULT 'UNKNOWN',
-    "walletAddress" TEXT,
+    "walletAddress" TEXT NOT NULL,
     "birthDate" TIMESTAMP(3),
+    "ageRange" TEXT,
     "location" TEXT,
     "latitude" DOUBLE PRECISION,
     "longitude" DOUBLE PRECISION,
@@ -184,7 +185,7 @@ CREATE TABLE "tbl_beneficiaries_projects" (
 CREATE TABLE "tbl_beneficiaries_pii" (
     "beneficiaryId" INTEGER NOT NULL,
     "name" TEXT,
-    "phone" TEXT,
+    "phone" TEXT NOT NULL,
     "email" TEXT,
     "extras" JSONB
 );
@@ -295,6 +296,9 @@ CREATE UNIQUE INDEX "tbl_settings_name_key" ON "tbl_settings"("name");
 CREATE UNIQUE INDEX "tbl_beneficiaries_uuid_key" ON "tbl_beneficiaries"("uuid");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "tbl_beneficiaries_walletAddress_key" ON "tbl_beneficiaries"("walletAddress");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "tbl_beneficiaries_projects_uuid_key" ON "tbl_beneficiaries_projects"("uuid");
 
 -- CreateIndex
@@ -302,6 +306,9 @@ CREATE UNIQUE INDEX "tbl_beneficiaries_projects_projectId_beneficiaryId_key" ON 
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_beneficiaries_pii_beneficiaryId_key" ON "tbl_beneficiaries_pii"("beneficiaryId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_beneficiaries_pii_phone_key" ON "tbl_beneficiaries_pii"("phone");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_projects_uuid_key" ON "tbl_projects"("uuid");

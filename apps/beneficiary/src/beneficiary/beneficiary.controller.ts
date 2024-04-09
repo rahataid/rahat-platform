@@ -53,6 +53,7 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST })
   async list(dto: ListBeneficiaryDto) {
+    console.log(dto)
     return this.service.list(dto);
   }
 

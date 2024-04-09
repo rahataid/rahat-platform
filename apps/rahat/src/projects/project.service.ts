@@ -13,7 +13,6 @@ import {
 } from '@rahataid/sdk';
 import { BeneficiaryType } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
-import { SettingsService } from '@rumsan/settings';
 import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { ERC2771FORWARDER } from '../utils/contracts';
@@ -29,19 +28,19 @@ export class ProjectService {
   async create(data: CreateProjectDto) {
 
     // TODO: refactor to proper validator
-    switch (data.type) {
-      case 'AA':
-        SettingsService.get('AA')
-        break;
-      case 'CVA':
-        SettingsService.get('CVA')
-        break;
-      case 'EL':
-        SettingsService.get('EL')
-        break;
-      default:
-        throw new Error('Invalid project type.')
-    }
+    // switch (data.type) {
+    //   case 'AA':
+    //     SettingsService.get('AA')
+    //     break;
+    //   case 'CVA':
+    //     SettingsService.get('CVA')
+    //     break;
+    //   case 'EL':
+    //     SettingsService.get('EL')
+    //     break;
+    //   default:
+    //     throw new Error('Invalid project type.')
+    // }
 
     const project = await this.prisma.project.create({
       data,

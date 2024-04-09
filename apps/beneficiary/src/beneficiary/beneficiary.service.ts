@@ -82,6 +82,8 @@ export class BeneficiaryService {
   }
 
   async listBenefByProject(dto: ListProjectBeneficiaryDto) {
+    const orderBy: Record<string, 'asc' | 'desc'> = {};
+    orderBy[dto.sort] = dto.order;
     const data = await paginate(
       this.rsprisma.beneficiaryProject,
       {
@@ -89,6 +91,7 @@ export class BeneficiaryService {
           projectId: dto.projectId,
         },
         include: { Beneficiary: true },
+        orderBy
       },
       {
         page: dto.page,

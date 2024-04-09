@@ -8,7 +8,14 @@ export class ListBeneficiaryDto {
 
   // override order: 'asc' | 'desc' = 'desc';
 
+  @ApiProperty({ example: 1 })
+  @IsString()
+  @IsOptional()
   sort: string;
+
+  @ApiProperty({ example: 1 })
+  @IsString()
+  @IsOptional()
   order: 'asc' | 'desc';
 
   @ApiProperty({ example: 1 })
@@ -36,7 +43,15 @@ export class ListBeneficiaryDto {
 }
 
 export class ListProjectBeneficiaryDto {
+
+  @ApiProperty({ example: "ENROLLED" })
+  @IsString()
+  @IsOptional()
   sort: string;
+
+  @ApiProperty({ example: "ENROLLED" })
+  @IsString()
+  @IsOptional()
   order: 'asc' | 'desc';
 
   @ApiProperty({ example: 1 })
