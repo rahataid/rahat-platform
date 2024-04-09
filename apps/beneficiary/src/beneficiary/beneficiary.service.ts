@@ -12,15 +12,15 @@ import {
   UpdateBeneficiaryDto,
 } from '@rahataid/extensions';
 import {
+  BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
   BeneficiaryJobs,
-  BQUEUE,
   ProjectContants,
   TPIIData,
   generateRandomWallet,
 } from '@rahataid/sdk';
-import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
+import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -174,6 +174,15 @@ export class BeneficiaryService {
   async findOne(uuid: UUID) {
     const row = await this.rsprisma.beneficiary.findUnique({
       where: { uuid },
+      include: {
+        BeneficiaryProject: {
+          include: {
+            Project: true
+          }
+        }
+      }
+
+
     });
     if (!row) return null;
     const piiData = await this.rsprisma.beneficiaryPii.findUnique({
