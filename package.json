@@ -42,7 +42,7 @@
     "@nestjs/swagger": "^7.3.0",
     "@prisma/client": "5.10.2",
     "@rumsan/core": "^3.0.134",
-    "@rumsan/extensions": "^0.0.21",
+    "@rumsan/extensions": "^0.0.22",
     "@rumsan/prisma": "^1.0.126",
     "@rumsan/react-query": "^0.0.26",
     "@rumsan/sdk": "^0.0.44",
