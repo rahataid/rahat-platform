@@ -24,7 +24,8 @@ get_ganache_accounts() {
 
 migrate_seed() {
     pnpm migrate:dev
-    pnpm seed:devsettings $current_dir
+    pnpm seed:eldevsettings $current_dir
+    pnpm seed:chainsettings
 }
 
 create_rahat_volumes() {

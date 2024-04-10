@@ -14,27 +14,30 @@ async function main() {
 
     await modifyRootEnv(pvtKey[0])
 
-    const settings: Setting = {
+    /*********** el dev settings  **************** */
+    const elDevSettings: Setting = {
         value: {
             privateKey: pvtKey[0],
             adminAccounts: adminAccounts
         } as Prisma.JsonValue,
         isPrivate: true,
         isReadOnly: true,
-        name: 'DEV',
+        name: 'EL_DEV',
         requiredFields: ['privateKey', 'adminAccounts'],
         dataType: SettingDataType.OBJECT,
     }
 
     await prisma.setting.upsert({
         where: {
-            name: 'DEV'
+            name: 'EL_DEV'
         },
         // @ts-ignore
-        create: settings,
+        create: elDevSettings,
         // @ts-ignore
-        update: settings
+        update: elDevSettings
     });
+    /*********** el dev settings end  **************** */
+
 }
 
 main()
