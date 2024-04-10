@@ -24,8 +24,8 @@ import {
   ValidateWalletDto,
 } from '@rahataid/extensions';
 import {
-  BeneficiaryJobs,
   BQUEUE,
+  BeneficiaryJobs,
   Enums,
   MS_TIMEOUT,
   TFile,
