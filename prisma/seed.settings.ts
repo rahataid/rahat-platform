@@ -5,16 +5,16 @@ const prisma = new PrismaClient();
 const settings: Setting[] = [
   {
     value: {
-      host: 'smtp.gmail.com',
-      Port: 465,
-      secure: true,
-      username: process.env.SMTP_USER,
-      password: process.env.SMTP_PASSWORD,
+      HOST: 'smtp.gmail.com',
+      PORT: 465,
+      SECURE: true,
+      USERNAME: process.env.SMTP_USER,
+      PASSWORD: process.env.SMTP_PASSWORD,
     } as Prisma.JsonValue,
     isPrivate: true,
     isReadOnly: true,
     name: 'SMTP',
-    requiredFields: ['host', 'port', 'secure', 'username', 'password'],
+    requiredFields: ['HOST', 'PORT', 'SECURE', 'USERNAME', 'PASSWORD'],
     dataType: SettingDataType.OBJECT,
   },
 ];
