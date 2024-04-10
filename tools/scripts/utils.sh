@@ -18,9 +18,13 @@ generate_mnemonic() {
     pnpm generate:mnemonic $current_dir
 }
 
+get_ganache_accounts() {
+    docker cp ganache:/db/accounts ./accounts.json
+}
+
 migrate_seed() {
     pnpm migrate:dev
-    pnpm seed:devsettings
+    pnpm seed:devsettings $current_dir
 }
 
 create_rahat_volumes() {

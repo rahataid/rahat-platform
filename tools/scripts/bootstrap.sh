@@ -12,4 +12,6 @@ create_rahat_volumes
 
 start_dev_tools
 
+get_ganache_accounts
+
 migrate_seed

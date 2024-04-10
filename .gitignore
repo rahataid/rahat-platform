@@ -47,8 +47,9 @@ Thumbs.db
 
 .nx/cache
 
-
 # Local
 docker-compose.yaml
 combine.log
 error.log
+
+accounts.json
