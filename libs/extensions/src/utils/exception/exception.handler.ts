@@ -50,7 +50,7 @@ export class ExceptionHandler {
     responseData.name = 'Microservice';
     responseData.message = exception.message;
     responseData.group = 'Microservice';
-    responseData.statusCode = exception?.error?.statusCode;
+    responseData.statusCode = 400;
   }
 
   static handleGenericError(
