@@ -187,6 +187,13 @@ export class BeneficiaryService {
     if (!data.walletAddress) {
       data.walletAddress = generateRandomWallet().address;
     }
+    if (!piiData.phone) throw new RpcException('Phone number is required')
+    const benData = await this.rsprisma.beneficiaryPii.findUnique({
+      where: {
+        phone: piiData.phone
+      }
+    });
+    if (benData) throw new RpcException('Phone number should be unique')
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const rdata = await this.rsprisma.beneficiary.create({
       data,
@@ -230,10 +237,6 @@ export class BeneficiaryService {
   async findOneByWallet(walletAddress: string) {
     const row = await this.rsprisma.beneficiary.findFirst({
       where: { walletAddress },
-    });
-    if (!row) return null;
-    const piiData = await this.rsprisma.beneficiaryPii.findUnique({
-      where: { beneficiaryId: row.id },
       include: {
         BeneficiaryProject: {
           include: {
@@ -241,6 +244,10 @@ export class BeneficiaryService {
           }
         }
       }
+    });
+    if (!row) return null;
+    const piiData = await this.rsprisma.beneficiaryPii.findUnique({
+      where: { beneficiaryId: row.id },
     });
     if (piiData) row.piiData = piiData;
     return row;
