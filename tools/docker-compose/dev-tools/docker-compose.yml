@@ -39,7 +39,7 @@ services:
     image: trufflesuite/ganache
     platform: linux/amd64
     container_name: ganache
-    command: --accounts 20 -m "${MNEMONIC}" --database.dbPath "/db" --logging.file /db/ganache.log --miner.blockTime 2 --chain.networkId "${GANACHE_PORT}" --chain.chainId "${GANACHE_PORT}" --chain.asyncRequestProcessing true
+    command: --accounts 20 -m "${MNEMONIC}" --wallet.accountKeysPath /db/accounts --database.dbPath "/db" --logging.file /db/ganache.log --miner.blockTime 2 --chain.networkId "${GANACHE_PORT}" --chain.chainId "${GANACHE_PORT}" --chain.asyncRequestProcessing true
     restart: always
     ports:
       - "${GANACHE_PORT}:8545"
