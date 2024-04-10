@@ -2,62 +2,59 @@
 
 ## Overview 
 
-Rahat Platform serves as a monorepo specifically designed to streamline the management and advancement of Rahat Core. Rahat stands as the Aid Distribution platform powered by Blockchain Technology, revolutionizing the aid distribution process.
-
-## Prerequisites
-
-Before getting started, ensure that your system meets the following prerequisites:
-
-- Postgres Database
-- Node.js version 20.\* (Recommended)
-- NestJS/CLI Installed
-- Redis Database Server
+Welcome to the Rahat Platform, a monorepo designed to streamline the management and advancement of Rahat Core. Rahat is an innovative aid distribution platform powered by Blockchain Technology, aiming to revolutionize the aid distribution process.
 
 ## Getting Started
 
-To run the project locally, follow these steps:
+Follow the steps below to set up and run the project in a development environment:
 
-### Step 1: Clone the Repository
+### Prerequisites
 
-```bash
-git clone git@github.com:el-rumsan/rahat-platform-nx.git
-```
+Before you begin, ensure your system has the following dependencies installed:
 
-### Step 2: Install Dependencies
+- Docker:  Version 20.10.7 or higher
+- Node.js: Version 20.10.0 or higher
+- pnpm (Package Manager): Version 6.16.1 or higher
 
-Navigate to the project directory and install dependencies using PNPM:
+### Setup
 
-```bash
-pnpm install
-```
+1. **Clone the Repository**
 
-### Step 3: Configure Environment
+    Use the following command to clone the repository:
 
-Copy the provided `.env.example` file to `.env` and update the environment variables according to your configuration:
+    ```bash
+    git clone git@github.com:el-rumsan/rahat-platform-nx.git
+    ```
 
-```bash
-cp .env.example .env
-```
+2. **Bootstrap Rahat Core Services**
 
-### Step 4: Migrate and Seed Database
+    This step installs the dependencies and runs all necessary services in Docker, as well as scripts to set up the project:
 
-Execute the following command to migrate and seed the Prisma database:
+    ```bash
+    pnpm bootstrap
+    ```
 
-```bash
-pnpm migrate:dev
-```
+3. **Clone the Desired Project**
 
-### Step 5: Run the Project
+    Rahat currently supports the following projects:
+     - [rahat-project-el](https://github.com/rahataid/rahat-project-el) 
 
-Initiate the project by executing the following commands in separate terminals:
+    Clone the project you want to run and follow the instructions in its README.md file.
 
-```bash
-pnpm rahat
-pnpm beneficiary
-```
+4. **Run the Rahat Project**
 
-### Step 6: Access API Documentation
+    Initiate the rahat-core by executing the following commands in separate terminals:
 
-Explore the API documentation at: [http://localhost:5501/swagger](http://localhost:5501/swagger)
+    ```bash
+    pnpm rahat
+    ```
 
-Feel free to leverage and explore the functionalities provided by the project locally. Should you encounter any challenges, consult the troubleshooting section within the documentation or reach out to the project maintainers for assistance.
+    ```bash
+    pnpm beneficiary
+    ```
+
+5. **Access API Documentation**
+
+    You can explore the API documentation at: [http://localhost:5501/swagger](http://localhost:5501/swagger)
+
+Explore the functionalities provided by the Rahat Platform locally. If you encounter any issues, refer to the troubleshooting section within the documentation or contact the project maintainers for assistance.
