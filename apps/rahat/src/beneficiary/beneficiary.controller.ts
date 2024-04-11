@@ -145,8 +145,10 @@ export class BeneficiaryController {
     return this.client
       .send({ cmd: BeneficiaryJobs.CREATE_BULK }, beneficiariesMapped)
       .pipe(
-        catchError((error) =>
-          throwError(() => new BadRequestException(error.response))
+        catchError((error) => {
+          console.log('error', error)
+          return throwError(() => new BadRequestException(error.message))
+        }
         )
       )
       .pipe(timeout(MS_TIMEOUT));
