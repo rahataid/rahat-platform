@@ -47,6 +47,9 @@ start_dev_tools() {
         compose_file="$project/docker-compose.yml"
         docker compose -f $compose_file up -d
     done
+
+    echo "Waiting for dev tools to start..."
+    sleep 10
 }
 
 stop_dev_tools() {
