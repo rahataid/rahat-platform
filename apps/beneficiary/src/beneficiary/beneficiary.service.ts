@@ -441,6 +441,7 @@ export class BeneficiaryService {
   }
 
   async createBulk(dtos: CreateBeneficiaryDto[]) {
+    console.log('dtos', dtos)
     const hasPhone = dtos.every((dto) => dto.piiData.phone);
     if (!hasPhone)
       throw new RpcException(
@@ -461,10 +462,20 @@ export class BeneficiaryService {
       uuid, // Temporarily store the uuid with PII data for linking
     }));
 
+
+    try {
+      const created = await this.prisma.beneficiary.createMany({
+        data: beneficiariesData,
+      });
+
+
+
+    } catch (e) {
+      throw new RpcException(
+        new BadRequestException('Error in creating beneficiaries')
+      )
+    }
     // Insert beneficiaries in bulk
-    await this.prisma.beneficiary.createMany({
-      data: beneficiariesData,
-    });
 
     // Assuming PII data includes a uuid field for linking purposes
     // Retrieve all just inserted beneficiaries by their uuids to link them with their PII data
@@ -475,6 +486,8 @@ export class BeneficiaryService {
         },
       },
     });
+
+    console.log('insertedBeneficiaries', insertedBeneficiaries)
 
     // Prepare PII data for bulk insertion with correct beneficiaryId
     const piiBulkInsertData = piiDataList.map((piiData) => {
