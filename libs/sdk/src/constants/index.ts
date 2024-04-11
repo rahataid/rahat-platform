@@ -74,6 +74,9 @@ export const MS_ACTIONS = {
     GET: 'settings.get',
   },
   AAPROJECT: {
+    RIVER_STATIONS: {
+      GET_DHM: 'aaProject.riverStations.getDhm'
+    },
     SCHEDULE: {
       DEV_ONLY: 'aaProject.schedule.devOnly',
       GET_ALL: 'aaProject.schedule.getAll',

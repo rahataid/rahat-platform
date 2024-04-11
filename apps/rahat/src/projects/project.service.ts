@@ -222,6 +222,9 @@ export class ProjectService {
       [MS_ACTIONS.AAPROJECT.SCHEDULE.GET_ALL]: () =>
         this.sendCommand({ cmd: AAJobs.SCHEDULE.GET_ALL, uuid }, {}),
 
+      [MS_ACTIONS.AAPROJECT.RIVER_STATIONS.GET_DHM]: () =>
+        this.sendCommand({ cmd: AAJobs.RIVER_STATIONS.GET_DHM, uuid }, {}),
+
     };
 
     const beneficiaryActions = {
