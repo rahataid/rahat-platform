@@ -1,6 +1,5 @@
 import { InjectQueue } from '@nestjs/bull';
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -24,8 +23,8 @@ import {
   ValidateWalletDto,
 } from '@rahataid/extensions';
 import {
-  BeneficiaryJobs,
   BQUEUE,
+  BeneficiaryJobs,
   Enums,
   MS_TIMEOUT,
   TFile,
@@ -97,14 +96,13 @@ export class BeneficiaryController {
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const beneficiaries = await DocParser(docType, file.buffer);
-
     return this.client
       .send({ cmd: BeneficiaryJobs.CREATE_BULK }, beneficiaries)
-      .pipe(
-        catchError((error) =>
-          throwError(() => new BadRequestException(error.response))
-        )
-      )
+      // .pipe(
+      //   // catchError((error) =>
+      //   //   throwError(() => new BadRequestException(error.response))
+      //   // )
+      // )
       .pipe(timeout(MS_TIMEOUT));
   }
 

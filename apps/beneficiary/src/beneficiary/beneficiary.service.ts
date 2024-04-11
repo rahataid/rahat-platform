@@ -1,5 +1,5 @@
 import { InjectQueue } from '@nestjs/bull';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
@@ -24,6 +24,7 @@ import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
+import { isAddress } from 'viem';
 import { createListQuery } from './helpers';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -187,6 +188,17 @@ export class BeneficiaryService {
     if (!data.walletAddress) {
       data.walletAddress = generateRandomWallet().address;
     }
+    if (data.walletAddress) {
+      const ben = await this.prisma.beneficiary.findUnique({
+        where: {
+          walletAddress: data.walletAddress
+        }
+      })
+      if (ben) throw new RpcException('Wallet should be unique');
+      const isWallet = isAddress(data.walletAddress)
+      if (!isWallet) throw new RpcException('Wallet should be valid Ethereum address')
+
+    }
     if (!piiData.phone) throw new RpcException('Phone number is required')
     const benData = await this.rsprisma.beneficiaryPii.findUnique({
       where: {
@@ -281,7 +293,7 @@ export class BeneficiaryService {
       uuid: benef.uuid,
       referrerVendor: referrerVendor || '',
       referrerBeneficiary: referrerBeneficiary || '',
-      walletAddress: dto.walletAddress,
+      walletAddress: dto.walletAddress || benef?.walletAddress,
       extras: dto?.extras || null,
       type: type || BeneficiaryConstants.Types.ENROLLED,
     };
@@ -441,12 +453,27 @@ export class BeneficiaryService {
   }
 
   async createBulk(dtos: CreateBeneficiaryDto[]) {
+
+    //check whether every data has phone number or not
     const hasPhone = dtos.every((dto) => dto.piiData.phone);
     if (!hasPhone)
-      throw new RpcException(
-        new BadRequestException('Phone number is required!')
-      );
+      throw new RpcException('Phone number is required')
+
+    //check if phone number is unique or not
+    const ben = await this.checkPhoneNumber(dtos);
+    if (ben.length > 0) throw new RpcException('Phone number should be unique')
+
     const hasWallet = dtos.every((dto) => dto.walletAddress);
+    if (hasWallet) {
+      //check uniquness of wallet address
+      const ben = await this.checkWalletAddress(dtos);
+      if (ben.length > 0) throw new RpcException('Wallet should be unique')
+
+      // Pre-generate UUIDs for each beneficiary to use as a linking key
+      dtos.forEach((dto) => {
+        dto.uuid = dto.uuid || uuidv4(); // Assuming generateUuid() is a method that generates unique UUIDs
+      });
+    }
     if (!hasWallet)
       // Pre-generate UUIDs for each beneficiary to use as a linking key
       dtos.forEach((dto) => {
@@ -505,6 +532,29 @@ export class BeneficiaryService {
 
     // Return some form of success indicator, as createMany does not return the records themselves
     return { success: true, count: dtos.length };
+  }
+
+  async checkWalletAddress(dtos) {
+    const wallets = dtos.map(dto => dto.walletAddress)
+    const ben = await this.prisma.beneficiary.findMany({
+      where: {
+        walletAddress: {
+          in: wallets
+        }
+      }
+    })
+    return ben;
+  }
+
+  async checkPhoneNumber(dtos) {
+    const phoneNumber = dtos.map(dto => dto.piiData.phone.toString())
+    return this.prisma.beneficiaryPii.findMany({
+      where: {
+        phone: {
+          in: phoneNumber
+        }
+      }
+    })
   }
 
   async listReferredBen({ bendata }) {
