@@ -17,6 +17,7 @@
     "seed": "ts-node prisma/seed.user.ts",
     "seed:eldevsettings": "ts-node prisma/seed.eldevsettings.ts",
     "seed:chainsettings": "ts-node prisma/seed.chainsettings.ts",
+    "geteth": "ts-node tools/scripts/geteth.ts",
     "migrate:dev": "prisma migrate dev --preview-feature",
     "migrate:dev:create": "prisma migrate dev --create-only --preview-feature",
     "migrate:reset": "prisma migrate reset --preview-feature",
