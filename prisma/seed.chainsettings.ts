@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 const chainSettings: Setting = {
   name: "CHAIN_SETTINGS",
   value: {
-    id: 8888,
+    id: process.env.CHAIN_ID,
     name: process.env.CHAIN_NAME,
     nativeCurrency: { name: process.env.CURRENCY_NAME, symbol: process.env.CURRENCY_SYMBOL, decimals: 18 },
     rpcUrls: {
