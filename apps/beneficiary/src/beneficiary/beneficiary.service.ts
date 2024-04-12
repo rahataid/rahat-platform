@@ -290,6 +290,7 @@ export class BeneficiaryService {
       projectId: projectUid,
     });
 
+
     // 3. Sync beneficiary to project
     return this.client.send(
       { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUid },
@@ -330,6 +331,10 @@ export class BeneficiaryService {
       data: benProjectData,
     });
 
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
+      projectUuid: projectId,
+    });
+
     //3. Sync beneficiary to project
 
     return this.client.send(
@@ -359,6 +364,10 @@ export class BeneficiaryService {
     await this.saveBeneficiaryToProject({
       beneficiaryId: beneficiaryId,
       projectId: projectId,
+    });
+
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
+      projectUuid: projectId,
     });
 
     //3. Sync beneficiary to project

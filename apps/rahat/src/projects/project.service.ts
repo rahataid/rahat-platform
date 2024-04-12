@@ -171,7 +171,7 @@ export class ProjectService {
 
       [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION_BE]: async () =>
         this.sendCommand(
-          { cmd: ProjectJobs.REQUEST_REDEMPTION, uuid },
+          { cmd: 'rahat.jobs.reporting.list', uuid },
           payload,
           500000
         ),
