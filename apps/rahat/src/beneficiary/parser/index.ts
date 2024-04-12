@@ -19,14 +19,13 @@ export async function DocParser(
       ? JsonParser(buffer)
       : ExcelParser(buffer);
 
+  console.log('parsedData', parsedData)
   const validationErrors = [];
   const beneficiaries = [];
 
   // Validate each row
   for (const row of parsedData) {
-    if (row.birthDate) {
-      row.birthDate = new Date(row.birthDate);
-    }
+
     const beneficiaryDto = plainToClass(CreateBeneficiaryDto, row);
 
     const errors = await validate(beneficiaryDto);

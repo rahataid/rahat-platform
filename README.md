@@ -53,6 +53,13 @@ Before you begin, ensure your system has the following dependencies installed:
     pnpm beneficiary
     ```
 
+    Note: If you require an ETH in your metamask account you can use the following command to get some test ETH:
+    you will be asked to enter the wallet address to which you want to send the test ETH.
+
+    ```bash
+    pnpm getEth
+    ```
+
 5. **Access API Documentation**
 
     You can explore the API documentation at: [http://localhost:5501/swagger](http://localhost:5501/swagger)

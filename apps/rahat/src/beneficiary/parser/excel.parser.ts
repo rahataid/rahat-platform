@@ -2,7 +2,13 @@ import xlsx from 'xlsx';
 
 export function ExcelParser(buffer: Buffer) {
   // Read the Excel workbook from the buffer
-  const workbook = xlsx.read(buffer, { type: 'buffer' });
+  const workbook = xlsx.read(buffer, {
+    type: 'buffer',
+    cellDates: true,
+    cellNF: false,
+    cellText: true,
+
+  });
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
 

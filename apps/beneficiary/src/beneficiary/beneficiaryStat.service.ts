@@ -9,6 +9,10 @@ export class BeneficiaryStatService {
     private readonly statsService: StatsService
   ) { }
 
+  async getTableStats() {
+    return await this.prisma.stats.findMany({});
+  }
+
   async calculateGenderStats(projectUuid?: string) {
     let filter = {};
 

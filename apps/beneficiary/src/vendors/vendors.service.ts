@@ -144,4 +144,28 @@ export class VendorsService {
       },
     });
   }
+
+  async listRedemptionVendor(data) {
+    const uuids = data.data.map((item) => item.vendorId);
+    const vendorData = await this.prisma.user.findMany({
+      where: {
+        uuid: {
+          in: uuids
+        }
+      }
+    });
+    const combinedData = data.data.map(item => {
+      const matchedData = vendorData.find(vendor => vendor.uuid === item.vendorId);
+      return {
+        ...item,
+        Vendor:
+        {
+          ...item.Vendor,
+          ...matchedData
+        }
+      }
+    });
+    return { data: combinedData, meta: data.meta }
+
+  }
 }
