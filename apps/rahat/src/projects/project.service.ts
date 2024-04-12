@@ -225,6 +225,9 @@ export class ProjectService {
       [MS_ACTIONS.AAPROJECT.RIVER_STATIONS.GET_DHM]: () =>
         this.sendCommand({ cmd: AAJobs.RIVER_STATIONS.GET_DHM, uuid }, {}),
 
+      [MS_ACTIONS.AAPROJECT.WATER_LEVELS.GET_DHM]: () =>
+        this.sendCommand({ cmd: AAJobs.WATER_LEVELS.GET_DHM, uuid }, {}),
+
     };
 
     const beneficiaryActions = {

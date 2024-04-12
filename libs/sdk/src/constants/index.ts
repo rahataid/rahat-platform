@@ -77,6 +77,9 @@ export const MS_ACTIONS = {
     RIVER_STATIONS: {
       GET_DHM: 'aaProject.riverStations.getDhm'
     },
+    WATER_LEVELS: {
+      GET_DHM: 'aaProject.waterLevels.getDhm'
+    },
     SCHEDULE: {
       DEV_ONLY: 'aaProject.schedule.devOnly',
       GET_ALL: 'aaProject.schedule.getAll',
