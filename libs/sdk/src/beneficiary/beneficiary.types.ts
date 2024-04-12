@@ -6,6 +6,7 @@ export type Beneficiary = {
   gender?: Gender;
   walletAddress?: string;
   birthDate?: Date;
+  age?: number
   location?: string;
   latitude?: number;
   longitude?: number;
@@ -28,7 +29,7 @@ export type TPIIData = {
   extras?: Record<string, any>;
 };
 
-export type ASSIGNTOPROJECT ={
-  projectId:string;
-  beneficiaryId:string;
+export type ASSIGNTOPROJECT = {
+  projectId: string;
+  beneficiaryId: string;
 }

@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -24,9 +24,9 @@ model User {
   wallet String?
   extras Json?   @db.JsonB()
 
-  Auth     Auth[]
-  UserRole UserRole[]
-  Signup   Signup[]
+  Auth          Auth[]
+  UserRole      UserRole[]
+  Signup        Signup[]
   VendorProject ProjectVendors[]
 
   createdAt DateTime  @default(now())
@@ -205,7 +205,7 @@ model Beneficiary {
   gender         Gender         @default(UNKNOWN)
   walletAddress  String         @unique
   birthDate      DateTime?
-  ageRange       String?
+  age            Float?
   location       String?
   latitude       Float?
   longitude      Float?
@@ -243,8 +243,6 @@ model BeneficiaryProject {
   @@map("tbl_beneficiaries_projects")
 }
 
-
-
 // ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
 
 enum ProjectStatus {
@@ -259,13 +257,12 @@ enum BeneficiaryTypes {
 }
 
 model BeneficiaryPii {
-  beneficiaryId Int     @unique
+  beneficiaryId Int         @unique
   name          String?
-  phone         String   @unique
+  phone         String      @unique
   email         String?
-  extras        Json?   @db.JsonB()
-
-  beneficiary Beneficiary @relation("BeneficiaryToPii", fields: [beneficiaryId], references: [id])
+  extras        Json?       @db.JsonB()
+  beneficiary   Beneficiary @relation("BeneficiaryToPii", fields: [beneficiaryId], references: [id])
 
   @@map("tbl_beneficiaries_pii")
 }
@@ -347,12 +344,12 @@ model Vendors {
 }
 
 model ProjectVendors {
-  id        Int       @id @default(autoincrement())
-  projectId String    @db.Uuid()
-  Project   Project   @relation(fields:[projectId], references:[uuid])
+  id        Int     @id @default(autoincrement())
+  projectId String  @db.Uuid()
+  Project   Project @relation(fields: [projectId], references: [uuid])
 
-  vendorId  String    
-  User      User      @relation(fields:[vendorId],references:[uuid])
+  vendorId String
+  User     User   @relation(fields: [vendorId], references: [uuid])
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
