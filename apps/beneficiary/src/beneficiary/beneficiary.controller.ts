@@ -20,6 +20,7 @@ import { VerificationService } from './verification.service';
 export class BeneficiaryController {
   constructor(
     private readonly beneficiaryService: BeneficiaryService,
+    private readonly beneficiaryStatsService: BeneficiaryStatService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly service: BeneficiaryService,
     private readonly statsService: BeneficiaryStatService,
@@ -131,5 +132,10 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GET_PROJECT_SPECIFIC })
   getProjectSpecific(data) {
     return this.beneficiaryService.getProjectSpecificData(data)
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_TABLE_STATS })
+  getTableStats() {
+    return this.beneficiaryStatsService.getTableStats()
   }
 }
