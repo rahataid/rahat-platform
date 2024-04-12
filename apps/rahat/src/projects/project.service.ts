@@ -168,6 +168,11 @@ export class ProjectService {
       [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () =>
         await this.executeMetaTxRequest(payload),
 
+      [MS_ACTIONS.ELPROJECT.GET_ALL_STATS]: () =>
+        this.sendCommand(
+          { cmd: ProjectJobs.GET_ALL_STATS, uuid },
+          payload),
+
       [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION_BE]: async () =>
         this.sendCommand(
           { cmd: 'rahat.jobs.reporting.list', uuid },

@@ -145,8 +145,6 @@ export class BeneficiaryController {
       },
     }));
 
-    console.log('beneficiariesMapped', beneficiariesMapped)
-
     return this.client
       .send({ cmd: BeneficiaryJobs.CREATE_BULK }, beneficiariesMapped)
       .pipe(

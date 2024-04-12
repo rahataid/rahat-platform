@@ -67,6 +67,7 @@ export const MS_ACTIONS = {
     LIST_REDEMPTION: 'elProject.listRedemption',
     GET_VENDOR_REDEMPTION: 'elProject.vendorRedemption',
     GET_VENDOR_REFERRER: 'elProject.beneficiaryReferred',
+    GET_ALL_STATS: 'elProject.getAllStats',
     LIST_BEN_VENDOR_COUNT: 'elProject.count_ben_vendor',
   },
   SETTINGS: {
