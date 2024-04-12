@@ -27,12 +27,13 @@ export class CreateBeneficiaryDto implements Beneficiary {
   birthDate?: Date;
 
   @ApiProperty({
-    example: '20-30',
-    description: 'Age range.',
+    example: '20',
+    description: 'Age of the beneficiary.',
   })
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  ageRange?: string;
+  age?: number;
+
 
   @ApiProperty({
     type: 'string',

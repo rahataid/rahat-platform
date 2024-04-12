@@ -115,27 +115,25 @@ export class BeneficiaryController {
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const beneficiaries = await DocParser(docType, file.buffer);
-    console.log('beneficiaries', beneficiaries)
 
     const beneficiariesMapped = beneficiaries.map((b) => ({
-      birthDate: new Date(b['Birth Date'],).toISOString(),
+      birthDate: new Date(b['Birth Date'],).toISOString() || null,
       internetStatus: b['Internet Status*'],
       bankedStatus: b['Bank Status*'],
       location: b['Location'],
       phoneStatus: b['Phone Status*'],
-      ageRange: b['Age Range*'],
       notes: b['Notes'],
       gender: b["Gender*"],
       latitude: b['Latitude'],
       longitude: b['Longitude'],
+      age: b['Age'] || null,
       walletAddress: b['Wallet Address'],
       piiData: {
         name: b['Name*'],
         phone: b['Whatsapp Number*'],
         extras: {
-          isAdult: getDateInfo(b['Birth Date'])?.isAdult,
+          isAdult: getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age']) > 18,
           governmentId: b['Government ID'],
-          age: getDateInfo(b['Birth Date'])?.age,
         },
       },
     }));
