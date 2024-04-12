@@ -1,5 +1,6 @@
 import { InjectQueue } from '@nestjs/bull';
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -33,6 +34,24 @@ import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, throwError, timeout } from 'rxjs';
 import { DocParser } from './parser';
+
+function getDateInfo(dateString) {
+  try {
+    // const [day, month, year] = dateString.split("/");
+    const date = new Date(dateString);
+    return {
+      date: date.toISOString(),
+      year: date.getFullYear(),
+      month: date.getMonth(),
+      day: date.getDate(),
+      age: new Date().getFullYear() - date.getFullYear(),
+      isAdult: new Date().getFullYear() - date.getFullYear() > 18,
+    }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
 
 @Controller('beneficiaries')
 @ApiTags('Beneficiaries')
@@ -96,13 +115,42 @@ export class BeneficiaryController {
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const beneficiaries = await DocParser(docType, file.buffer);
+    console.log('beneficiaries', beneficiaries)
+
+    const beneficiariesMapped = beneficiaries.map((b) => ({
+      birthDate: new Date(b['Birth Date'],).toISOString(),
+      internetStatus: b['Internet Status*'],
+      bankedStatus: b['Bank Status*'],
+      location: b['Location'],
+      phoneStatus: b['Phone Status*'],
+      ageRange: b['Age Range*'],
+      notes: b['Notes'],
+      gender: b["Gender*"],
+      latitude: b['Latitude'],
+      longitude: b['Longitude'],
+      walletAddress: b['Wallet Address'],
+      piiData: {
+        name: b['Name*'],
+        phone: b['Whatsapp Number*'],
+        extras: {
+          isAdult: getDateInfo(b['Birth Date'])?.isAdult,
+          governmentId: b['Government ID'],
+          age: getDateInfo(b['Birth Date'])?.age,
+        },
+      },
+    }));
+
+    console.log('beneficiariesMapped', beneficiariesMapped)
+
     return this.client
-      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, beneficiaries)
-      // .pipe(
-      //   // catchError((error) =>
-      //   //   throwError(() => new BadRequestException(error.response))
-      //   // )
-      // )
+      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, beneficiariesMapped)
+      .pipe(
+        catchError((error) => {
+          console.log('error', error)
+          return throwError(() => new BadRequestException(error.message))
+        }
+        )
+      )
       .pipe(timeout(MS_TIMEOUT));
   }
 

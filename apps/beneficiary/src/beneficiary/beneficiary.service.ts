@@ -1,5 +1,5 @@
 import { InjectQueue } from '@nestjs/bull';
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
@@ -92,7 +92,7 @@ export class BeneficiaryService {
           projectId: dto.projectId,
         },
         include: { Beneficiary: true },
-        orderBy
+        orderBy,
       },
       {
         page: dto.page,
@@ -191,21 +191,21 @@ export class BeneficiaryService {
     if (data.walletAddress) {
       const ben = await this.prisma.beneficiary.findUnique({
         where: {
-          walletAddress: data.walletAddress
-        }
-      })
+          walletAddress: data.walletAddress,
+        },
+      });
       if (ben) throw new RpcException('Wallet should be unique');
-      const isWallet = isAddress(data.walletAddress)
-      if (!isWallet) throw new RpcException('Wallet should be valid Ethereum address')
-
+      const isWallet = isAddress(data.walletAddress);
+      if (!isWallet)
+        throw new RpcException('Wallet should be valid Ethereum address');
     }
-    if (!piiData.phone) throw new RpcException('Phone number is required')
+    if (!piiData.phone) throw new RpcException('Phone number is required');
     const benData = await this.rsprisma.beneficiaryPii.findUnique({
       where: {
-        phone: piiData.phone
-      }
+        phone: piiData.phone,
+      },
     });
-    if (benData) throw new RpcException('Phone number should be unique')
+    if (benData) throw new RpcException('Phone number should be unique');
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const rdata = await this.rsprisma.beneficiary.create({
       data,
@@ -231,12 +231,10 @@ export class BeneficiaryService {
       include: {
         BeneficiaryProject: {
           include: {
-            Project: true
-          }
-        }
-      }
-
-
+            Project: true,
+          },
+        },
+      },
     });
     if (!row) return null;
     const piiData = await this.rsprisma.beneficiaryPii.findUnique({
@@ -252,10 +250,10 @@ export class BeneficiaryService {
       include: {
         BeneficiaryProject: {
           include: {
-            Project: true
-          }
-        }
-      }
+            Project: true,
+          },
+        },
+      },
     });
     if (!row) return null;
     const piiData = await this.rsprisma.beneficiaryPii.findUnique({
@@ -275,10 +273,10 @@ export class BeneficiaryService {
       include: {
         BeneficiaryProject: {
           include: {
-            Project: true
-          }
-        }
-      }
+            Project: true,
+          },
+        },
+      },
     });
     if (!beneficiary) return null;
     beneficiary.piiData = piiData;
@@ -453,21 +451,19 @@ export class BeneficiaryService {
   }
 
   async createBulk(dtos: CreateBeneficiaryDto[]) {
-
-    //check whether every data has phone number or not
+    console.log('dtos', dtos);
     const hasPhone = dtos.every((dto) => dto.piiData.phone);
-    if (!hasPhone)
-      throw new RpcException('Phone number is required')
+    if (!hasPhone) throw new RpcException('Phone number is required');
 
     //check if phone number is unique or not
     const ben = await this.checkPhoneNumber(dtos);
-    if (ben.length > 0) throw new RpcException('Phone number should be unique')
+    if (ben.length > 0) throw new RpcException('Phone number should be unique');
 
     const hasWallet = dtos.every((dto) => dto.walletAddress);
     if (hasWallet) {
       //check uniquness of wallet address
       const ben = await this.checkWalletAddress(dtos);
-      if (ben.length > 0) throw new RpcException('Wallet should be unique')
+      if (ben.length > 0) throw new RpcException('Wallet should be unique');
 
       // Pre-generate UUIDs for each beneficiary to use as a linking key
       dtos.forEach((dto) => {
@@ -488,10 +484,17 @@ export class BeneficiaryService {
       uuid, // Temporarily store the uuid with PII data for linking
     }));
 
+    try {
+      await this.prisma.beneficiary.createMany({
+        data: beneficiariesData,
+      });
+    } catch (e) {
+      console.log('e', e);
+      throw new RpcException(
+        new BadRequestException('Error in creating beneficiaries')
+      );
+    }
     // Insert beneficiaries in bulk
-    await this.prisma.beneficiary.createMany({
-      data: beneficiariesData,
-    });
 
     // Assuming PII data includes a uuid field for linking purposes
     // Retrieve all just inserted beneficiaries by their uuids to link them with their PII data
@@ -502,6 +505,8 @@ export class BeneficiaryService {
         },
       },
     });
+
+    console.log('insertedBeneficiaries', insertedBeneficiaries);
 
     // Prepare PII data for bulk insertion with correct beneficiaryId
     const piiBulkInsertData = piiDataList.map((piiData) => {
@@ -535,26 +540,26 @@ export class BeneficiaryService {
   }
 
   async checkWalletAddress(dtos) {
-    const wallets = dtos.map(dto => dto.walletAddress)
+    const wallets = dtos.map((dto) => dto.walletAddress);
     const ben = await this.prisma.beneficiary.findMany({
       where: {
         walletAddress: {
-          in: wallets
-        }
-      }
-    })
+          in: wallets,
+        },
+      },
+    });
     return ben;
   }
 
   async checkPhoneNumber(dtos) {
-    const phoneNumber = dtos.map(dto => dto.piiData.phone.toString())
+    const phoneNumber = dtos.map((dto) => dto.piiData.phone.toString());
     return this.prisma.beneficiaryPii.findMany({
       where: {
         phone: {
-          in: phoneNumber
-        }
-      }
-    })
+          in: phoneNumber,
+        },
+      },
+    });
   }
 
   async listReferredBen({ bendata }) {
@@ -578,22 +583,26 @@ export class BeneficiaryService {
   async getTotalCount({ projectId }) {
     const benTotal = await this.prisma.beneficiaryProject.count({
       where: {
-        projectId
-      }
+        projectId,
+      },
     });
 
     const vendorTotal = await this.prisma.projectVendors.count({
       where: {
-        projectId
-      }
-    })
-    return { benTotal, vendorTotal }
+        projectId,
+      },
+    });
+    return { benTotal, vendorTotal };
   }
 
   async getProjectSpecificData(data) {
     const { benId, projectId } = data;
     const benData = await this.findOne(benId);
-    if (benData) return this.client.send({ cmd: BeneficiaryJobs.GET, uuid: projectId }, { uuid: benId, data: benData });
-    return benData
+    if (benData)
+      return this.client.send(
+        { cmd: BeneficiaryJobs.GET, uuid: projectId },
+        { uuid: benId, data: benData }
+      );
+    return benData;
   }
 }
