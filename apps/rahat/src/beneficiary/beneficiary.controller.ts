@@ -76,6 +76,11 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.STATS }, {});
   }
 
+  @Get('table-stats')
+  async getTableStats() {
+    return this.client.send({ cmd: BeneficiaryJobs.GET_TABLE_STATS }, {});
+  }
+
   @Post()
   async create(@Body() dto: CreateBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
@@ -193,4 +198,6 @@ export class BeneficiaryController {
   async verifySignature(@Body() dto: any) {
     return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
   }
+
+
 }

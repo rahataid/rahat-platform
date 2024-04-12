@@ -30,7 +30,7 @@ export class ProjectController {
     private readonly projectService: ProjectService,
     @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy,
     @Inject('BEN_CLIENT') private readonly benClient: ClientProxy
-  ) {}
+  ) { }
 
   @Post()
   create(@Body() createProjectDto: CreateProjectDto) {
