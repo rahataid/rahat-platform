@@ -32,4 +32,5 @@ export const JOBS = {
   VENDOR_REFERRAL: 'rahat.jobs.beneficiary.get_referred',
   LIST_REFERRAL: 'rahat.jobs.beneficiary.list_referred',
   LIST_BEN_VENDOR_COUNT: 'rahat.jobs.beneficiary.count_ben_vendor',
+  LIST_BENEFICIARY_COUNT: 'rahat.jobs.beneficiary.count_beneficiary',
 };
