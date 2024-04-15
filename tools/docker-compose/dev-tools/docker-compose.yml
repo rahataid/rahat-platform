@@ -12,7 +12,7 @@ services:
   postgres:
     image: postgres:14
     restart: always
-    container_name: postgres
+    container_name: postgres_rahat
     environment:
       - POSTGRES_USER=${PG_USER}
       - POSTGRES_PASSWORD=${PG_PASS}
@@ -24,7 +24,7 @@ services:
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: always
-    container_name: pgadmin
+    container_name: pgadmin_rahat
     volumes:
       - rahat_pg_admin_data:/var/lib/pgadmin
     environment:
@@ -38,7 +38,7 @@ services:
   ganache:
     image: trufflesuite/ganache
     platform: linux/amd64
-    container_name: ganache
+    container_name: ganache_rahat
     command: --accounts 20 -m "${MNEMONIC}" --wallet.accountKeysPath /db/accounts --database.dbPath "/db" --logging.file /db/ganache.log --miner.blockTime 2 --chain.networkId "${GANACHE_PORT}" --chain.chainId "${GANACHE_PORT}" --chain.asyncRequestProcessing true
     restart: always
     ports:
@@ -47,7 +47,7 @@ services:
       - rahat_ganache_data:/db
 
   redis:
-    container_name: redis
+    container_name: redis_rahat
     image: bitnami/redis:latest
     restart: always
     ports:
@@ -58,7 +58,7 @@ services:
       - rahat_redis_data:/data
 
   bullboard:
-    container_name: bullboard
+    container_name: bullboard_rahat
     platform: linux/amd64
     image: deadly0/bull-board
     restart: always
