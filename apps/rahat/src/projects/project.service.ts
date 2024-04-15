@@ -135,29 +135,10 @@ export class ProjectService {
   async handleProjectActions({ uuid, action, payload }) {
     //Note: This is a temporary solution to handle metaTx actions
     const metaTxActions = {
-      [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async (
-        uuid,
-        payload,
-        executeMetaTxRequest
-      ) => await executeMetaTxRequest(payload),
-
-      [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async (
-        uuid,
-        payload,
-        executeMetaTxRequest
-      ) => await executeMetaTxRequest(payload),
-
-      [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async (
-        uuid,
-        payload,
-        executeMetaTxRequest
-      ) => await executeMetaTxRequest(payload),
-
-      [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async (
-        uuid,
-        payload,
-        executeMetaTxRequest
-      ) => await executeMetaTxRequest(payload),
+      [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
+      [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () => await this.executeMetaTxRequest(payload),
+      [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
+      [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () => await this.executeMetaTxRequest(payload),
     };
 
     const actions = {

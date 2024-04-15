@@ -3,6 +3,7 @@ export const EVENTS = {
   BENEFICIARY_CREATED: 'beneficiary.created',
   BENEFICIARY_REMOVED: 'beneficiary.removed',
   BENEFICIARY_UPDATED: 'beneficiary.updated',
+  BENEFICIARY_ASSIGNED_TO_PROJECT: 'beneficiary.projectAssigned',
 };
 
 export const JOBS = {
@@ -13,6 +14,7 @@ export const JOBS = {
   GET_PROJECT_SPECIFIC: 'rahat.jobs.beneficiary.get_project_specific',
   GET_BY_WALLET: 'rahat.jobs.beneficiary.get_by_wallet',
   GET_BY_PHONE: 'rahat.jobs.beneficiary.get_by_phone',
+  GET_TABLE_STATS: 'rahat.jobs.beneficiary.get_from_stats_table',
   LIST: 'rahat.jobs.beneficiary.list',
   REMOVE: 'rahat.jobs.beneficiary.remove',
   ADD_TO_PROJECT: 'rahat.jobs.beneficiary.add_to_project',
