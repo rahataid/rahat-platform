@@ -21,14 +21,14 @@ import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   UpdateBeneficiaryDto,
-  ValidateWalletDto,
+  ValidateWalletDto
 } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
   BQUEUE,
   Enums,
   MS_TIMEOUT,
-  TFile,
+  TFile
 } from '@rahataid/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -49,7 +49,7 @@ export class BeneficiaryController {
   }
 
   @Get('pii')
-  async listPiiData(@Query() dto: any) {
+  async listPiiData(@Query() dto: ListBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.LIST_PII }, dto);
   }
 
