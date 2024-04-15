@@ -23,6 +23,7 @@ export const JOBS = {
   STATS: 'rahat.jobs.beneficiary.stats',
   PROJECT_STATS: 'rahat.jobs.beneficiary.project.stats',
   UPDATE: 'rahat.jobs.beneficiary.update',
+  DELETE: 'rahat.jobs.beneficiary.dekete',
   UPDATE_STATS: 'rahat.jobs.beneficiary.update_stats',
   GENERATE_LINK: 'rahat.jobs.beneficiary.generate_link',
   SEND_EMAIL: 'rahat.jobs.beneficiary.send_email',

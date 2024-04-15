@@ -78,16 +78,16 @@ export class BeneficiaryStatService {
     }
 
     const ageStats = await this.prisma.beneficiary.groupBy({
-      by: ['ageRange'],
+      by: ['age'],
       _count: {
-        gender: true,
+        age: true,
       },
       where: filter,
     });
 
     return ageStats.map((stat) => ({
-      id: stat.ageRange,
-      count: stat._count.gender,
+      id: stat.age,
+      count: stat._count.age,
     }));
   }
 
@@ -282,24 +282,25 @@ export class BeneficiaryStatService {
   }
 
   async calculateAgeRange(ages) {
+    console.log(ages)
     let range = {
-      r0_20: 0,
-      r20_40: 0,
-      r40_60: 0,
-      r60_above: 0
+      "0-20": 0,
+      "20-40": 0,
+      "40-60": 0,
+      "60+": 0
     }
     ages.map((age) => {
       if (age.id > 0 && age.id < 20) {
-        range.r0_20++;
+        range["0-20"]++;
       }
       if (age.id > 20 && age.id < 40) {
-        range.r20_40++;
+        range["20-40"]++;
       }
       if (age.id > 40 && age.id < 60) {
-        range.r40_60++;
+        range["40-60"]++;
       }
       if (age.id > 60) {
-        range.r60_above++;
+        range["60+"]++;
       }
     })
 
@@ -339,7 +340,7 @@ export class BeneficiaryStatService {
         group: 'beneficiary',
       }),
       this.statsService.save({
-        name: 'beneficiary_age',
+        name: 'beneficiary_age_range',
         data: rangedAge,
         group: 'beneficiary',
       }),

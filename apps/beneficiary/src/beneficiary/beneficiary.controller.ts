@@ -99,9 +99,16 @@ export class BeneficiaryController {
     return this.service.update(benefUUID, dto);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.DELETE })
+  delete(payload: any) {
+    return this.service.delete(payload.uuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.REMOVE })
-  remove(@Param('uuid') uuid: UUID) {
-    return this.service.remove(uuid);
+  remove(payload: any) {
+    // const uuid = payload.uuid;
+    // console.log("uuid", payload);
+    return this.service.remove(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GENERATE_LINK })

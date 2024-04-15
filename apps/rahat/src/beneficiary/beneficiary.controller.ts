@@ -3,6 +3,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -161,6 +162,18 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.UPDATE }, { uuid, ...dto });
   }
 
+  @Patch('remove/:uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async remove(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.REMOVE }, { uuid });
+  }
+
+  @Delete(':uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async delete(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.DELETE }, { uuid });
+  }
+
   @Get(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   async getBeneficiary(@Param('uuid') uuid: UUID) {
@@ -194,6 +207,5 @@ export class BeneficiaryController {
   async verifySignature(@Body() dto: any) {
     return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
   }
-
 
 }

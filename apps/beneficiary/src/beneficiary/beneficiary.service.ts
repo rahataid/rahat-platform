@@ -438,7 +438,7 @@ export class BeneficiaryService {
     }
   }
 
-  async remove(uuid: UUID) {
+  async delete(uuid: UUID) {
     const findUuid = await this.prisma.beneficiary.findUnique({
       where: {
         uuid,
@@ -447,16 +447,51 @@ export class BeneficiaryService {
 
     if (!findUuid) throw new Error('Data not Found');
 
-    const rdata = await this.prisma.beneficiary.update({
+    await this.deletePIIByBenefUUID(uuid);
+
+    const rdata = await this.prisma.beneficiary.delete({
       where: {
         uuid,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
+      }
     });
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_REMOVED);
+
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
     return rdata;
+  }
+
+  async deletePIIByBenefUUID(benefUUID: UUID) {
+
+    const beneficiary = await this.findOne(benefUUID);
+
+    const beneficiaryId = beneficiary.piiData.beneficiaryId;
+
+    if (beneficiary) {
+      return this.rsprisma.beneficiaryPii.delete({
+        where: { beneficiaryId },
+      });
+    }
+  }
+
+  async remove(uuid: any) {
+    console.log(uuid)
+    // const findUuid = await this.prisma.beneficiary.findUnique({
+    //   where: {
+    //     uuid,
+    //   },
+    // });
+
+    // if (!findUuid) throw new Error('Data not Found');
+
+    // const rdata = await this.prisma.beneficiary.update({
+    //   where: {
+    //     uuid,
+    //   },
+    //   data: {
+    //     deletedAt: new Date(),
+    //   },
+    // });
+    // this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_REMOVED);
+    // return rdata;
   }
 
   async createBulk(dtos: CreateBeneficiaryDto[]) {

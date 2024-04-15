@@ -205,7 +205,7 @@ model Beneficiary {
   gender         Gender         @default(UNKNOWN)
   walletAddress  String         @unique
   birthDate      DateTime?
-  age            Float?
+  age            Int?
   location       String?
   latitude       Float?
   longitude      Float?
