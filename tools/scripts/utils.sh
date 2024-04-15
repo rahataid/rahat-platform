@@ -19,12 +19,13 @@ generate_mnemonic() {
 }
 
 get_ganache_accounts() {
-    docker cp ganache:/db/accounts ./accounts.json
+    docker cp ganache_rahat:/db/accounts ./accounts.json
 }
 
 migrate_seed() {
     pnpm migrate:dev
     pnpm seed:eldevsettings $current_dir
+    pnpm seed:c2cdevsettings $current_dir
     pnpm seed:chainsettings
 }
 
