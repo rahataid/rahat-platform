@@ -261,7 +261,7 @@ export class BeneficiaryStatService {
         this.calculateInternetStatusStats(projectUuid),
         this.calculatePhoneStatusStats(projectUuid),
         this.totalBeneficiaries(projectUuid),
-        this.calculateAgeRange(projectUuid),
+        this.calculateAgeStats(projectUuid),
       ]);
 
     return {
@@ -281,26 +281,25 @@ export class BeneficiaryStatService {
     });
   }
 
-  async calculateAgeRange(ages) {
-    console.log(ages)
+  async calculateRangedAge(ages: any) {
     let range = {
-      "0-20": 0,
-      "20-40": 0,
-      "40-60": 0,
-      "60+": 0
+      "0-20": { count: 0 },
+      "20-40": { count: 0 },
+      "40-60": { count: 0 },
+      "60+": { count: 0 }
     }
     ages.map((age) => {
       if (age.id > 0 && age.id < 20) {
-        range["0-20"]++;
+        range["0-20"].count++;
       }
       if (age.id > 20 && age.id < 40) {
-        range["20-40"]++;
+        range["20-40"].count++;
       }
       if (age.id > 40 && age.id < 60) {
-        range["40-60"]++;
+        range["40-60"].count++;
       }
       if (age.id > 60) {
-        range["60+"]++;
+        range["60+"].count++;
       }
     })
 
@@ -311,7 +310,7 @@ export class BeneficiaryStatService {
     const { gender, bankedStatus, internetStatus, phoneStatus, total, age } =
       await this.calculateAllStats();
 
-    const rangedAge = await this.calculateAgeRange(age);
+    const rangedAge = await this.calculateRangedAge(age);
 
     await Promise.all([
       this.statsService.save({
@@ -348,7 +347,7 @@ export class BeneficiaryStatService {
     if (projectUuid) {
       const { gender, bankedStatus, internetStatus, phoneStatus, total, age } =
         await this.calculateProjectStats(projectUuid);
-      const rangedAge = await this.calculateAgeRange(age)
+      const rangedAge = await this.calculateRangedAge(age)
       await Promise.all([
         this.statsService.save({
           name: 'beneficiary_total',

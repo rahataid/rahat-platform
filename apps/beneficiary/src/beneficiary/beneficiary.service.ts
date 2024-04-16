@@ -472,26 +472,29 @@ export class BeneficiaryService {
     }
   }
 
-  async remove(uuid: any) {
-    console.log(uuid)
-    // const findUuid = await this.prisma.beneficiary.findUnique({
-    //   where: {
-    //     uuid,
-    //   },
-    // });
+  async remove(payload: any) {
+    const uuid = payload.uuid;
+    const findUuid = await this.prisma.beneficiary.findUnique({
+      where: {
+        uuid,
+      },
+    });
 
-    // if (!findUuid) throw new Error('Data not Found');
+    if (!findUuid) throw new Error('Data not Found');
 
-    // const rdata = await this.prisma.beneficiary.update({
-    //   where: {
-    //     uuid,
-    //   },
-    //   data: {
-    //     deletedAt: new Date(),
-    //   },
-    // });
-    // this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_REMOVED);
-    // return rdata;
+    const rdata = await this.prisma.beneficiary.update({
+      where: {
+        uuid,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_REMOVED, {
+      projectUuid: uuid
+    });
+
+    return rdata;
   }
 
   async createBulk(dtos: CreateBeneficiaryDto[]) {

@@ -105,9 +105,7 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.REMOVE })
-  remove(payload: any) {
-    // const uuid = payload.uuid;
-    // console.log("uuid", payload);
+  async remove(payload: any) {
     return this.service.remove(payload);
   }
 
