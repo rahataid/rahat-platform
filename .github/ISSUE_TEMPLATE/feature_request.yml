@@ -18,7 +18,7 @@ body:
     id: solution
     attributes:
       label: Motivation
-      description: Outline your motivation for the proposal. How will it make Giga NFT 2.0 better?
+      description: Outline your motivation for the proposal. How will it make Rahat better?
     validations:
       required: true
   - type: textarea
@@ -33,7 +33,7 @@ body:
     attributes:
       label: Pitch
       description: |
-        Why does this feature belong in Giga NFT 2.0 platform?
+        Why does this feature belong in Rahat platform?
     validations:
       required: true
   - type: markdown
