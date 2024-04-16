@@ -9,18 +9,15 @@ import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   ListProjectBeneficiaryDto,
-  UpdateBeneficiaryDto,
+  UpdateBeneficiaryDto
 } from '@rahataid/extensions';
 import {
-  BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
-  BeneficiaryJobs,
-  ProjectContants,
-  TPIIData,
-  generateRandomWallet,
+  BeneficiaryJobs, BQUEUE, generateRandomWallet, ProjectContants,
+  TPIIData
 } from '@rahataid/sdk';
-import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
+import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -49,6 +46,7 @@ export class BeneficiaryService {
   }
 
   async listPiiData(dto: any) {
+    // return project based piiData
     if (dto.projectId) {
       const data = await paginate(
         this.rsprisma.beneficiaryProject,
@@ -65,12 +63,17 @@ export class BeneficiaryService {
       );
 
       if (data.data.length > 0) {
-        const mergedData = await this.projectPIIData(data.data);
+        const mergedData = await this.mergeProjectPIIData(data.data);
         data.data = mergedData;
       }
-      return data;
+      const projectPayload = { ...data, status: dto.type };
+      return this.client.send(
+        { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
+        projectPayload
+      );
     }
-    return paginate(
+    //return all beneficiary
+    const data = await paginate(
       this.rsprisma.beneficiaryPii,
       {
         where: {},
@@ -80,6 +83,13 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+
+    data.data = await Promise.all(data.data.map((piiData) => {
+
+      return { piiData }
+    }))
+
+    return data
   }
 
   async listBenefByProject(dto: ListProjectBeneficiaryDto) {
@@ -158,17 +168,6 @@ export class BeneficiaryService {
       mergedData.push(d);
     }
     return mergedData;
-  }
-
-  async projectPIIData(data: any) {
-    let projectPiiData = [];
-    for (let d of data) {
-      const piiData = await this.rsprisma.beneficiaryPii.findUnique({
-        where: { beneficiaryId: d.Beneficiary.id },
-      });
-      if (piiData) projectPiiData.push(piiData);
-    }
-    return projectPiiData;
   }
 
   async mergePIIData(data: any) {
