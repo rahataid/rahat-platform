@@ -45,8 +45,8 @@ dependencies:
     specifier: ^3.0.134
     version: 3.0.140
   '@rumsan/extensions':
-    specifier: ^0.0.21
-    version: 0.0.21(@nestjs/core@10.3.3)(ioredis@5.3.2)(prisma@5.10.2)(reflect-metadata@0.1.14)
+    specifier: ^0.0.22
+    version: 0.0.22(@nestjs/core@10.3.7)(ioredis@5.3.2)(prisma@5.10.2)(reflect-metadata@0.1.14)
   '@rumsan/prisma':
     specifier: ^1.0.126
     version: 1.0.130(class-transformer@0.5.1)(class-validator@0.14.1)(prisma@5.10.2)(reflect-metadata@0.1.14)(rxjs@7.8.1)
@@ -82,7 +82,7 @@ dependencies:
     version: 16.4.5
   dotenv-cli:
     specifier: ^7.3.0
-    version: 7.3.0
+    version: 7.4.1
   ethers:
     specifier: 6.11.1
     version: 6.11.1
@@ -1806,7 +1806,7 @@ packages:
     dependencies:
       '@fastify/error': 3.4.1
       fastify-plugin: 4.5.1
-      path-to-regexp: 6.2.1
+      path-to-regexp: 6.2.2
       reusify: 1.0.4
     dev: false
 
@@ -3279,14 +3279,14 @@ packages:
   /@rumsan/extensions@0.0.22(@nestjs/core@10.3.7)(ioredis@5.3.2)(prisma@5.10.2)(reflect-metadata@0.1.14):
     resolution: {integrity: sha512-bH6J7jEKNJ0SWokUCiMb5vA8SiQTOv4KASqXeiuxZ2pd3D1mKSd6wzB5fqoZx8ER3Y2Xj4Z8Ab3h1C+HSvHCww==, tarball: https://npm.pkg.github.com/download/@rumsan/extensions/0.0.22/ebd7586323d34b004a9de028c88ff97b76db7f43}
     dependencies:
-      '@nestjs/common': 10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
-      '@nestjs/microservices': 10.3.5(@nestjs/common@10.3.3)(@nestjs/core@10.3.3)(ioredis@5.3.2)(reflect-metadata@0.1.14)(rxjs@7.8.1)
-      '@nestjs/swagger': 7.3.0(@nestjs/common@10.3.3)(@nestjs/core@10.3.3)(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)
+      '@nestjs/common': 10.3.7(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
+      '@nestjs/microservices': 10.3.7(@nestjs/common@10.3.7)(@nestjs/core@10.3.7)(ioredis@5.3.2)(reflect-metadata@0.1.14)(rxjs@7.8.1)
+      '@nestjs/swagger': 7.3.1(@nestjs/common@10.3.7)(@nestjs/core@10.3.7)(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)
       '@prisma/client': 5.10.2(prisma@5.10.2)
       '@rumsan/core': 3.0.140
       '@rumsan/prisma': 1.0.130(class-transformer@0.5.1)(class-validator@0.14.1)(prisma@5.10.2)(reflect-metadata@0.1.14)(rxjs@7.8.1)
       '@rumsan/sdk': 0.0.44
-      axios: 1.6.7
+      axios: 1.6.8
       class-transformer: 0.5.1
       class-validator: 0.14.1
       http-status-codes: 2.3.0
@@ -3329,7 +3329,7 @@ packages:
       '@nestjs/common': 10.3.7(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
       '@prisma/client': 5.10.2(prisma@5.10.2)
       '@rumsan/sdk': 0.0.42
-      axios: 1.6.7
+      axios: 1.6.8
       tslib: 2.6.2
     transitivePeerDependencies:
       - class-transformer
@@ -3389,7 +3389,16 @@ packages:
   /@rumsan/sdk@0.0.42:
     resolution: {integrity: sha512-/u9Oj9UtyZxMqpQoYZijoVq2mdO/ejxUYB2Bevxc5jAySo5Qb9rwmIraki2vNhXoZTnNwD8asaV46621o+1ZxQ==, tarball: https://npm.pkg.github.com/download/@rumsan/sdk/0.0.42/88f1ecdcfbe72064f64782ae015c94178c35a1a7}
     dependencies:
-      axios: 1.6.7
+      axios: 1.6.8
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /@rumsan/sdk@0.0.43:
+    resolution: {integrity: sha512-p+SlGBC70VVxlRACfpiAwIR/MTJCAQNG0eKwyM5pa/fRvIn1gkKV+k4czg3hyrup7tEBTUDeB0SUli+Q5VwVFQ==, tarball: https://npm.pkg.github.com/download/@rumsan/sdk/0.0.43/7203e57ded302577c92395b09a8fd3d6051c4071}
+    dependencies:
+      axios: 1.6.8
       tslib: 2.6.2
     transitivePeerDependencies:
       - debug
@@ -3398,7 +3407,7 @@ packages:
   /@rumsan/sdk@0.0.44:
     resolution: {integrity: sha512-KJdQ6VA+qKcQhWFhvAllvbM2mbolFAeEAYGoRB5xIp6/OPtTajgtpFWekv2Ztqk+Cw8sTX1iAM1UUKroQgr2ow==, tarball: https://npm.pkg.github.com/download/@rumsan/sdk/0.0.44/3db62bce92a0c845c668a4b97203bfeaf33604e0}
     dependencies:
-      axios: 1.6.7
+      axios: 1.6.8
       http-status-codes: 2.3.0
       tslib: 2.6.2
     transitivePeerDependencies:
@@ -3472,7 +3481,6 @@ packages:
 
   /@scure/base@1.1.6:
     resolution: {integrity: sha512-ok9AWwhcgYuGG3Zfhyqg+zwl+Wn5uE+dwC0NV/2qQkx4dABbb/bx96vWu8NSj+BNjjSjno+JRYRjle1jV08k3g==}
-    dev: true
 
   /@scure/bip32@1.3.2:
     resolution: {integrity: sha512-N1ZhksgwD3OBlwTv3R6KFEcPojl/W4ElJOeCZdi+vuI5QmTFwLq3OFf2zd2ROpKvxFdgZ6hUpb0dx9bVNEwYCA==}
@@ -3749,7 +3757,7 @@ packages:
   /@types/connect-history-api-fallback@1.5.4:
     resolution: {integrity: sha512-n6Cr2xS1h4uAulPRdlw6Jl6s1oG8KrVilPN2yUITEs+K48EzMJJ3W1xy8K5eWuFvjp3R74AOIGSmp2UfBJ8HFw==}
     dependencies:
-      '@types/express-serve-static-core': 4.17.43
+      '@types/express-serve-static-core': 4.19.0
       '@types/node': 18.16.20
     dev: true
 
@@ -6220,12 +6228,6 @@ packages:
 
   /envinfo@7.11.1:
     resolution: {integrity: sha512-8PiZgZNIB4q/Lw4AhOvAfB/ityHAd2bli3lESSWmWSzSsl5dKpy5N1d1Rfkd2teq/g9xN90lc6o98DOjMeYHpg==}
-    engines: {node: '>=4'}
-    hasBin: true
-    dev: true
-
-  /envinfo@7.12.0:
-    resolution: {integrity: sha512-Iw9rQJBGpJRd3rwXm9ft/JiGoAZmLxxJZELYDQoPRZ4USVhkKtIcNBPw6U+/K2mBpaqM25JSV6Yl4Az9vO2wJg==}
     engines: {node: '>=4'}
     hasBin: true
     dev: true
@@ -11145,13 +11147,6 @@ packages:
     resolution: {integrity: sha512-ybz6OYOUjoQQCQ/i4LU8kaToD8ACtYP+Cj5qd2AO36bwbdewxWJ3ArmJ2cr6AvxlL2o0PqnCcPGUgkILbfkaCA==}
     dependencies:
       atomic-sleep: 1.0.0
-    dev: true
-
-  /sonic-boom@3.8.1:
-    resolution: {integrity: sha512-y4Z8LCDBuum+PBP3lSV7RHrXscqksve/bi0as7mhwVnBW+/wUqKT/2Kb7um8yqcFy0duYbbPxzt89Zy2nOCaxg==}
-    dependencies:
-      atomic-sleep: 1.0.0
-    dev: false
 
   /source-map-js@1.2.0:
     resolution: {integrity: sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==}
@@ -11937,7 +11932,7 @@ packages:
     resolution: {integrity: sha512-YuKoXDAhBYxY7SfOKxHBDoSyENFeW5VvIIQp2TGQuit8gpK6MnWaQelBKxso72DoxTZfZdcP3W90LqpSkgPzLQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
-      builtins: 5.0.1
+      builtins: 5.1.0
     dev: true
 
   /validator@13.11.0:
@@ -12172,7 +12167,7 @@ packages:
       '@types/connect-history-api-fallback': 1.5.4
       '@types/express': 4.17.21
       '@types/serve-index': 1.9.4
-      '@types/serve-static': 1.15.5
+      '@types/serve-static': 1.15.7
       '@types/sockjs': 0.3.36
       '@types/ws': 8.5.10
       ansi-html-community: 0.0.8
