@@ -49,39 +49,38 @@ export class BeneficiaryService {
   }
 
   async listPiiData(dto: any) {
-    if (dto.projectId) {
-      const data = await paginate(
-        this.rsprisma.beneficiaryProject,
-        {
-          where: {
-            projectId: dto.projectId,
-          },
-          include: { Beneficiary: true },
-        },
-        {
-          page: dto.page,
-          perPage: dto.perPage,
-        }
-      );
+    const repository = dto.projectId ? this.rsprisma.beneficiaryProject : this.rsprisma.beneficiaryPii;
+    const include = dto.projectId ? { Beneficiary: true } : {};
+    const where = dto.projectId ? { projectId: dto.projectId } : {};
 
-      if (data.data.length > 0) {
-        const mergedData = await this.projectPIIData(data.data);
-        data.data = mergedData;
-      }
-      return data;
-    }
-    return paginate(
-      this.rsprisma.beneficiaryPii,
+    const data = await paginate(
+      repository,
       {
-        where: {},
+        where: where,
+        include: include,
       },
       {
         page: dto.page,
         perPage: dto.perPage,
       }
     );
-  }
 
+    if (dto.projectId && data.data.length > 0) {
+      const mergedData = await this.mergeProjectPIIData(data.data);
+      data.data = mergedData;
+      const projectPayload = { ...data, status: dto.type };
+      return this.client.send(
+        { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
+        projectPayload
+      );
+    }
+
+    if (!dto.projectId) {
+      data.data = data?.data?.map((piiData) => ({ piiData }));
+    }
+
+    return data;
+  }
   async listBenefByProject(dto: ListProjectBeneficiaryDto) {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
@@ -149,8 +148,8 @@ export class BeneficiaryService {
   }
 
   async mergeProjectPIIData(data: any) {
-    let mergedData = [];
-    for (let d of data) {
+    const mergedData = [];
+    for (const d of data) {
       const piiData = await this.rsprisma.beneficiaryPii.findUnique({
         where: { beneficiaryId: d.Beneficiary.id },
       });
@@ -160,19 +159,8 @@ export class BeneficiaryService {
     return mergedData;
   }
 
-  async projectPIIData(data: any) {
-    let projectPiiData = [];
-    for (let d of data) {
-      const piiData = await this.rsprisma.beneficiaryPii.findUnique({
-        where: { beneficiaryId: d.Beneficiary.id },
-      });
-      if (piiData) projectPiiData.push(piiData);
-    }
-    return projectPiiData;
-  }
-
   async mergePIIData(data: any) {
-    let mergedData = [];
+    const mergedData = [];
     for (let d of data) {
       const piiData = await this.rsprisma.beneficiaryPii.findUnique({
         where: { beneficiaryId: d.id },
@@ -306,7 +294,6 @@ export class BeneficiaryService {
       beneficiaryId: benef.uuid,
       projectId: projectUid,
     });
-
 
     // 3. Sync beneficiary to project
     return this.client.send(
