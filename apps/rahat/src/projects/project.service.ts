@@ -228,6 +228,29 @@ export class ProjectService {
       [MS_ACTIONS.AAPROJECT.WATER_LEVELS.GET_DHM]: () =>
         this.sendCommand({ cmd: AAJobs.WATER_LEVELS.GET_DHM, uuid }, {}),
 
+      [MS_ACTIONS.AAPROJECT.ACTIVITIES.ADD]: () =>
+        this.sendCommand({ cmd: AAJobs.ACTIVITIES.ADD, uuid }, payload),
+
+      [MS_ACTIONS.AAPROJECT.ACTIVITIES.REMOVE]: () =>
+        this.sendCommand({ cmd: AAJobs.ACTIVITIES.REMOVE, uuid }, payload),
+
+      [MS_ACTIONS.AAPROJECT.ACTIVITIES.GET_ALL]: () =>
+        this.sendCommand({ cmd: AAJobs.ACTIVITIES.GET_ALL, uuid }, payload),
+
+      [MS_ACTIONS.AAPROJECT.ACTIVITY_CATEGORIES.GET_ALL]: () =>
+        this.sendCommand({ cmd: AAJobs.ACTIVITY_CATEGORIES.GET_ALL, uuid }, payload),
+
+      [MS_ACTIONS.AAPROJECT.ACTIVITY_CATEGORIES.ADD]: () =>
+        this.sendCommand({ cmd: AAJobs.ACTIVITY_CATEGORIES.ADD, uuid }, payload),
+
+      [MS_ACTIONS.AAPROJECT.ACTIVITY_CATEGORIES.REMOVE]: () =>
+        this.sendCommand({ cmd: AAJobs.ACTIVITY_CATEGORIES.REMOVE, uuid }, payload),
+
+      [MS_ACTIONS.AAPROJECT.HAZARD_TYPES.GET_ALL]: () =>
+        this.sendCommand({ cmd: AAJobs.HAZARD_TYPES.GET_ALL, uuid }, {}),
+
+      [MS_ACTIONS.AAPROJECT.PHASES.GET_ALL]: () =>
+        this.sendCommand({ cmd: AAJobs.PHASES.GET_ALL, uuid }, {}),
     };
 
     const beneficiaryActions = {

@@ -85,6 +85,22 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.schedule.getAll',
       ADD: 'aaProject.schedule.add',
       REMOVE: 'aaProject.schedule.remove'
-    }
+    },
+    ACTIVITIES: {
+      GET_ALL: 'aaProject.activities.getAll',
+      ADD: 'aaProject.activities.add',
+      REMOVE: 'aaProject.activities.remove'
+    },
+    ACTIVITY_CATEGORIES: {
+      GET_ALL: 'aaProject.activityCategories.getAll',
+      ADD: 'aaProject.activityCategories.add',
+      REMOVE: 'aaProject.activityCategories.remove'
+    },
+    HAZARD_TYPES: {
+      GET_ALL: 'aaProject.hazardTypes.getAll',
+    },
+    PHASES: {
+      GET_ALL: 'aaProject.phases.getAll',
+    },
   }
 };
