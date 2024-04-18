@@ -45,9 +45,10 @@ services:
       - "${GANACHE_PORT}:8545"
     volumes:
       - rahat_ganache_data:/db
-
+      
   redis-rahat:
     container_name: redis-rahat
+
     image: bitnami/redis:latest
     restart: always
     ports:
@@ -59,6 +60,7 @@ services:
 
   bullboard-rahat:
     container_name: bullboard-rahat
+
     platform: linux/amd64
     image: deadly0/bull-board
     restart: always
