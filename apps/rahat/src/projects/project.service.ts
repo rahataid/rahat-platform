@@ -77,8 +77,9 @@ export class ProjectService {
     });
   }
 
-  async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT) {
-    return this.client.send(cmd, payload).pipe(
+  async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy) {
+
+    return client.send(cmd, payload).pipe(
       timeout(timeoutValue),
       tap((response) => {
         //send whatsapp message after added referal beneficiary to project
@@ -154,6 +155,6 @@ export class ProjectService {
     if (!actionFunc) {
       throw new Error('Please provide a valid action!');
     }
-    return await actionFunc(uuid, payload, this.sendCommand);
+    return await actionFunc(uuid, payload, (...args) => this.sendCommand(args[0], args[1], args[2], this.client));
   }
 }
