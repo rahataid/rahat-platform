@@ -81,5 +81,9 @@ export const MS_ACTIONS = {
       ADD: 'aaProject.schedule.add',
       REMOVE: 'aaProject.schedule.remove'
     }
+  },
+  C2CProject: {
+    UPDATE_STATUS: 'c2cProject.updateStatus',
+    LIST_BEN_COUNT: 'c2cProject.count_ben',
   }
 };
