@@ -7,6 +7,7 @@ import {
   MS_ACTIONS,
   MS_TIMEOUT,
   ProjectEvents,
+  ProjectJobs,
 } from '@rahataid/sdk';
 import { BeneficiaryType } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
