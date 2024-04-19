@@ -51,7 +51,7 @@
     "@rumsan/react-query": "^0.0.26",
     "@rumsan/sdk": "^0.0.44",
     "@rumsan/settings": "^0.0.108",
-    "@rumsan/user": "^3.0.153",
+    "@rumsan/user": "^3.0.157",
     "abitype": "^1.0.1",
     "axios": "^1.6.7",
     "bull": "^4.12.2",
