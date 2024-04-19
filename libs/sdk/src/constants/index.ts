@@ -103,5 +103,9 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.phases.getAll',
       GET_STATS: 'aaProject.phases.getStats'
     },
+  },
+  C2CProject: {
+    UPDATE_STATUS: 'c2cProject.updateStatus',
+    LIST_BEN_COUNT: 'c2cProject.count_ben',
   }
 };

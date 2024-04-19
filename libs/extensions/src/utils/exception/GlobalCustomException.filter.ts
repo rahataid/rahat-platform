@@ -16,8 +16,7 @@ import { ExceptionHandler } from './exception.handler';
 
 @Catch()
 export class GlobalCustomExceptionFilter
-  implements PipeTransform<any>, ExceptionFilter
-{
+  implements PipeTransform<any>, ExceptionFilter {
   async transform(value: string, { metatype }: ArgumentMetadata) {
     if (!metatype || !this.toValidate(metatype)) {
       return value;
@@ -73,7 +72,6 @@ export class GlobalCustomExceptionFilter
       path: request?.url,
     };
     console.log({ exception });
-    console.log(typeof exception);
 
     if (exception instanceof HttpException) {
       ExceptionHandler?.handleHttpException(exception, responseData, response);
