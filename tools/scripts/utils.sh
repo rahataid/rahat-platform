@@ -19,7 +19,8 @@ generate_mnemonic() {
 }
 
 get_ganache_accounts() {
-    docker cp ganache:/db/accounts ./accounts.json
+    docker cp ganache-rahat:/db/accounts ./accounts.json
+
 }
 
 migrate_seed() {
