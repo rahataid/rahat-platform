@@ -101,6 +101,7 @@ export const MS_ACTIONS = {
     },
     PHASES: {
       GET_ALL: 'aaProject.phases.getAll',
+      GET_STATS: 'aaProject.phases.getStats'
     },
   }
 };

@@ -26,5 +26,6 @@ export const JOBS = {
   },
   PHASES: {
     GET_ALL: 'aa.jobs.phases.getAll',
+    GET_STATS: 'aa.jobs.phases.getStats'
   },
 };

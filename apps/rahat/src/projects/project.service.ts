@@ -251,6 +251,9 @@ export class ProjectService {
 
       [MS_ACTIONS.AAPROJECT.PHASES.GET_ALL]: () =>
         this.sendCommand({ cmd: AAJobs.PHASES.GET_ALL, uuid }, {}),
+
+      [MS_ACTIONS.AAPROJECT.PHASES.GET_STATS]: () =>
+        this.sendCommand({ cmd: AAJobs.PHASES.GET_STATS, uuid }, {}),
     };
 
     const beneficiaryActions = {
