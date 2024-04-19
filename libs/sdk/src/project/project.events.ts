@@ -3,6 +3,7 @@ export const EVENTS = {
   PROJECT_UPDATED: 'project.updated',
   PROJECT_DELETED: 'project.deleted',
   BENEFICIARY_ADDED_TO_PROJECT: 'beneficiary.added.to.project',
+  REQUEST_REDEMPTION: 'request.redemption'
 };
 
 export const JOBS = {

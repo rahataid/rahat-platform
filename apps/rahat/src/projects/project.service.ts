@@ -7,6 +7,7 @@ import {
   MS_ACTIONS,
   MS_TIMEOUT,
   ProjectEvents,
+  ProjectJobs,
 } from '@rahataid/sdk';
 import { BeneficiaryType } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
@@ -82,6 +83,8 @@ export class ProjectService {
     return client.send(cmd, payload).pipe(
       timeout(timeoutValue),
       tap((response) => {
+        console.log(response);
+
         //send whatsapp message after added referal beneficiary to project
         if (
           response?.id &&
@@ -91,6 +94,15 @@ export class ProjectService {
           this.eventEmitter.emit(
             ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT,
             payload.dto
+          );
+        }
+        //send message to all admin
+        if (
+          response?.id &&
+          cmd.cmd === ProjectJobs.REQUEST_REDEMPTION
+        ) {
+          this.eventEmitter.emit(
+            ProjectEvents.REQUEST_REDEMPTION,
           );
         }
       })
