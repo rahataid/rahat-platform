@@ -83,8 +83,6 @@ export class ProjectService {
     return client.send(cmd, payload).pipe(
       timeout(timeoutValue),
       tap((response) => {
-        console.log(response);
-
         //send whatsapp message after added referal beneficiary to project
         if (
           response?.id &&

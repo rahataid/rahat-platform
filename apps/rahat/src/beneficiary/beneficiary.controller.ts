@@ -3,6 +3,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -120,32 +121,28 @@ export class BeneficiaryController {
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const beneficiaries = await DocParser(docType, file.buffer);
-    console.log('beneficiaries', beneficiaries)
 
     const beneficiariesMapped = beneficiaries.map((b) => ({
-      birthDate: new Date(b['Birth Date'],).toISOString(),
+      birthDate: new Date(b['Birth Date'],).toISOString() || null,
       internetStatus: b['Internet Status*'],
       bankedStatus: b['Bank Status*'],
       location: b['Location'],
       phoneStatus: b['Phone Status*'],
-      ageRange: b['Age Range*'],
       notes: b['Notes'],
       gender: b["Gender*"],
       latitude: b['Latitude'],
       longitude: b['Longitude'],
+      age: b['Age'] || null,
       walletAddress: b['Wallet Address'],
       piiData: {
         name: b['Name*'],
         phone: b['Whatsapp Number*'],
         extras: {
-          isAdult: getDateInfo(b['Birth Date'])?.isAdult,
+          isAdult: getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age']) > 18,
           governmentId: b['Government ID'],
-          age: getDateInfo(b['Birth Date'])?.age,
         },
       },
     }));
-
-    console.log('beneficiariesMapped', beneficiariesMapped)
 
     return this.client
       .send({ cmd: BeneficiaryJobs.CREATE_BULK }, beneficiariesMapped)
@@ -163,6 +160,18 @@ export class BeneficiaryController {
   @ApiParam({ name: 'uuid', required: true })
   async update(@Param('uuid') uuid: UUID, @Body() dto: UpdateBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.UPDATE }, { uuid, ...dto });
+  }
+
+  @Patch('remove/:uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async remove(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.REMOVE }, { uuid });
+  }
+
+  @Delete(':uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async delete(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.DELETE }, { uuid });
   }
 
   @Get(':uuid')
@@ -198,6 +207,5 @@ export class BeneficiaryController {
   async verifySignature(@Body() dto: any) {
     return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
   }
-
 
 }

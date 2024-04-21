@@ -425,7 +425,42 @@ export class BeneficiaryService {
     }
   }
 
-  async remove(uuid: UUID) {
+  async delete(uuid: UUID) {
+    const findUuid = await this.prisma.beneficiary.findUnique({
+      where: {
+        uuid,
+      },
+    });
+
+    if (!findUuid) throw new Error('Data not Found');
+
+    await this.deletePIIByBenefUUID(uuid);
+
+    const rdata = await this.prisma.beneficiary.delete({
+      where: {
+        uuid,
+      }
+    });
+
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
+    return rdata;
+  }
+
+  async deletePIIByBenefUUID(benefUUID: UUID) {
+
+    const beneficiary = await this.findOne(benefUUID);
+
+    const beneficiaryId = beneficiary.piiData.beneficiaryId;
+
+    if (beneficiary) {
+      return this.rsprisma.beneficiaryPii.delete({
+        where: { beneficiaryId },
+      });
+    }
+  }
+
+  async remove(payload: any) {
+    const uuid = payload.uuid;
     const findUuid = await this.prisma.beneficiary.findUnique({
       where: {
         uuid,
@@ -442,7 +477,10 @@ export class BeneficiaryService {
         deletedAt: new Date(),
       },
     });
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_REMOVED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_REMOVED, {
+      projectUuid: uuid
+    });
+
     return rdata;
   }
 
