@@ -626,7 +626,12 @@ export class BeneficiaryService {
         projectId,
       },
     });
-    return { benTotal, vendorTotal };
+
+    return this.client.send(
+      { cmd: "rahat.jobs.project.redemption_stats", uuid: projectId },
+      { benTotal, vendorTotal })
+
+    // return { benTotal, vendorTotal };
   }
 
   async getProjectSpecificData(data) {
