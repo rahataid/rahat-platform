@@ -26,7 +26,6 @@
         "main": "apps/beneficiary/src/main.ts",
         "tsConfig": "apps/beneficiary/tsconfig.app.json",
         "assets": [],
-        "isolatedConfig": true,
         "webpackConfig": "apps/beneficiary/webpack.config.js"
       },
       "configurations": {
