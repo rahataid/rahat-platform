@@ -7,7 +7,7 @@
     "beneficiary": "npx nx serve beneficiary",
     "serve:apps": "nx run-many -p rahat beneficiary --targets=serve",
     "add:resource": "nx g @nx/nest:resource --directory=apps/$app/src --crud=true",
-    "build:all": "nx run-many --target=build --all",
+    "build:all": "nx run-many --target=build --all --parallel=true --verbose",
     "build:rahat": "nx build rahat",
     "build:beneficiary": "nx build beneficiary",
     "setup:devtools": "bash ./tools/scripts/setupDevTools.sh",
