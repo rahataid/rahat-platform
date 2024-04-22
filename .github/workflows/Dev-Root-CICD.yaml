@@ -27,12 +27,13 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20.10.0
 
       - name: install dependencies and build apps
         run: |
-          npm install -g pnpm
+          npm install -g pnpm npx
           pnpm install
+          npx nx reset
           pnpm prisma:generate
           pnpm build:all
 
