@@ -67,4 +67,10 @@ export const elActions: ProjectActionFunc = {
       { projectId: uuid },
       500000
     ),
+
+  [MS_ACTIONS.ELPROJECT.GET_ALL_STATS]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.GET_ALL_STATS, uuid },
+      500000
+    ),
 };
