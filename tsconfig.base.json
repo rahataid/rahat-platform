@@ -8,6 +8,7 @@
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
     "lib": ["es2020", "dom"],
@@ -20,7 +21,6 @@
       "@rahataid/sdk": ["libs/sdk/src/index.ts"],
       "@rahataid/sdk/*": ["libs/sdk/src/*"],
       "@rahat/stats": ["libs/stats/src/index.ts"]
-      // "tslib": ["node_modules/tslib/tslib.d.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
