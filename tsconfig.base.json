@@ -21,7 +21,8 @@
       "@rahataid/sdk": ["libs/sdk/src/index.ts"],
       "@rahataid/sdk/*": ["libs/sdk/src/*"],
       "@rahat/stats": ["libs/stats/src/index.ts"]
-    }
+    },
+    "types": ["node", "tslib"]
   },
   "exclude": ["node_modules", "tmp"]
 }
