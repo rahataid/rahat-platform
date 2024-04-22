@@ -69,11 +69,11 @@
     "reflect-metadata": "^0.1.14",
     "rxjs": "^7.8.1",
     "ts-node": "10.9.1",
-    "tslib": "2.6.2",
     "uuid": "^9.0.1",
     "viem": "^2.8.4",
     "winston": "^3.11.0",
     "xlsx": "^0.18.5",
+    "tslib": "2.6.2",
     "zlib": "^1.0.5"
   },
   "devDependencies": {
@@ -105,9 +105,10 @@
     "nx": "18.0.1",
     "prettier": "^2.8.8",
     "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.1",
+    "tslib": "2.6.2",
     "typescript": "5.3.3",
     "verdaccio": "^5.29.2",
-    "ts-node": "^10.9.1",
     "webpack-cli": "^5.1.4"
   },
   "nx": {
