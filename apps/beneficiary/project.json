@@ -6,14 +6,7 @@
   "targets": {
     "build": {
       "dependsOn": ["mainBuild"],
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": [
-          {
-            "command": "cp -r prisma/ dist/apps/beneficiary/prisma && cp -r apps/beneficiary/src/assets dist/apps/beneficiary/assets/ && node apps/beneficiary/modify-package.js"
-          }
-        ]
-      }
+      "executor": "nx:noop"
     },
     "mainBuild": {
       "executor": "@nx/webpack:webpack",
