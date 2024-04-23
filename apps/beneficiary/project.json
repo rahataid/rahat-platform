@@ -10,7 +10,7 @@
       "options": {
         "commands": [
           {
-            "command": "cp -r prisma/ dist/apps/beneficiary/prisma && cp -r apps/beneficiary/src/assets dist/apps/beneficiary/assets/ && node apps/beneficiary/modify-package.js"
+            "command": "cp -r prisma/ dist/apps/beneficiary/prisma && node apps/beneficiary/modify-package.js"
           }
         ]
       }
