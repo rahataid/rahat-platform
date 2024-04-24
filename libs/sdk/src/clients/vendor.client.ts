@@ -8,20 +8,20 @@ import { Vendor } from '../vendor';
 export const getVendorClient = (client: AxiosInstance): VendorClient => {
   return {
     signup: async (data: Vendor, config?: AxiosRequestConfig) => {
-      const response = await client.post('/users/vendors', data, config);
+      const response = await client.post('/vendors', data, config);
       return formatResponse<Vendor>(response);
     },
-    
-    list:async(data:Pagination,config?: AxiosRequestConfig) => {
-      const response = await client.get('/users/vendors',{
-        params:data,
+
+    list: async (data: Pagination, config?: AxiosRequestConfig) => {
+      const response = await client.get('/vendors', {
+        params: data,
         ...config
       });
       return formatResponse<Vendor[]>(response)
     },
 
-    get: async(uuid:UUID,config?: AxiosRequestConfig) =>{
-      const response = await client.get(`/users/vendors/${uuid}`,config);
+    get: async (uuid: UUID, config?: AxiosRequestConfig) => {
+      const response = await client.get(`/vendors/${uuid}`, config);
       return formatResponse<Vendor>(response)
     }
   };

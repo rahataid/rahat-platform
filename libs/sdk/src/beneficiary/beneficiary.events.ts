@@ -3,7 +3,7 @@ export const EVENTS = {
   BENEFICIARY_CREATED: 'beneficiary.created',
   BENEFICIARY_REMOVED: 'beneficiary.removed',
   BENEFICIARY_UPDATED: 'beneficiary.updated',
-  BENEFICIARY_ASSIGNED_TO_PROJECT: 'beneficiary.projectAssigned',
+  BENEFICIARY_ASSIGNED_TO_PROJECT: 'beneficiary.projectAssigned'
 };
 
 export const JOBS = {
@@ -23,6 +23,7 @@ export const JOBS = {
   STATS: 'rahat.jobs.beneficiary.stats',
   PROJECT_STATS: 'rahat.jobs.beneficiary.project.stats',
   UPDATE: 'rahat.jobs.beneficiary.update',
+  DELETE: 'rahat.jobs.beneficiary.dekete',
   UPDATE_STATS: 'rahat.jobs.beneficiary.update_stats',
   GENERATE_LINK: 'rahat.jobs.beneficiary.generate_link',
   SEND_EMAIL: 'rahat.jobs.beneficiary.send_email',
@@ -32,4 +33,5 @@ export const JOBS = {
   VENDOR_REFERRAL: 'rahat.jobs.beneficiary.get_referred',
   LIST_REFERRAL: 'rahat.jobs.beneficiary.list_referred',
   LIST_BEN_VENDOR_COUNT: 'rahat.jobs.beneficiary.count_ben_vendor',
+  LIST_BENEFICIARY_COUNT: 'rahat.jobs.beneficiary.count_beneficiary',
 };

@@ -67,6 +67,7 @@ export const MS_ACTIONS = {
     LIST_REDEMPTION: 'elProject.listRedemption',
     GET_VENDOR_REDEMPTION: 'elProject.vendorRedemption',
     GET_VENDOR_REFERRER: 'elProject.beneficiaryReferred',
+    GET_ALL_STATS: 'elProject.getAllStats',
     LIST_BEN_VENDOR_COUNT: 'elProject.count_ben_vendor',
   },
   SETTINGS: {
@@ -74,11 +75,38 @@ export const MS_ACTIONS = {
     GET: 'settings.get',
   },
   AAPROJECT: {
+    RIVER_STATIONS: {
+      GET_DHM: 'aaProject.riverStations.getDhm'
+    },
+    WATER_LEVELS: {
+      GET_DHM: 'aaProject.waterLevels.getDhm'
+    },
     SCHEDULE: {
       DEV_ONLY: 'aaProject.schedule.devOnly',
       GET_ALL: 'aaProject.schedule.getAll',
       ADD: 'aaProject.schedule.add',
       REMOVE: 'aaProject.schedule.remove'
-    }
+    },
+    ACTIVITIES: {
+      GET_ALL: 'aaProject.activities.getAll',
+      ADD: 'aaProject.activities.add',
+      REMOVE: 'aaProject.activities.remove'
+    },
+    ACTIVITY_CATEGORIES: {
+      GET_ALL: 'aaProject.activityCategories.getAll',
+      ADD: 'aaProject.activityCategories.add',
+      REMOVE: 'aaProject.activityCategories.remove'
+    },
+    HAZARD_TYPES: {
+      GET_ALL: 'aaProject.hazardTypes.getAll',
+    },
+    PHASES: {
+      GET_ALL: 'aaProject.phases.getAll',
+      GET_STATS: 'aaProject.phases.getStats'
+    },
+  },
+  C2CProject: {
+    UPDATE_STATUS: 'c2cProject.updateStatus',
+    LIST_BEN_COUNT: 'c2cProject.count_ben',
   }
 };
