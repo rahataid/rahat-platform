@@ -1,6 +1,6 @@
 import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsObject, IsOptional, IsString } from 'class-validator';
 
 export class CreateProjectDto {
   @ApiProperty({
@@ -29,12 +29,11 @@ export class CreateProjectDto {
   type: string;
 
   @ApiProperty({
-    type: 'string',
     required: false,
     example: 'Some extra Descriptions',
   })
-  @IsString()
   @IsOptional()
+  @IsObject()
   extras?: object;
 
 }
