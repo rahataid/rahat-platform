@@ -26,7 +26,6 @@
         "main": "apps/rahat/src/main.ts",
         "tsConfig": "apps/rahat/tsconfig.app.json",
         "assets": [],
-        "isolatedConfig": true,
         "webpackConfig": "apps/rahat/webpack.config.js"
       },
       "configurations": {
