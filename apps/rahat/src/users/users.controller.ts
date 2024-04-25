@@ -6,25 +6,26 @@ import { BeneficiaryConstants, VendorJobs } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
 
-@ApiTags('Users')
-@Controller('users')
+@ApiTags('Vendors')
+@Controller('vendors')
 export class UsersController {
   constructor(
     @Inject(BeneficiaryConstants.Client) private readonly client: ClientProxy
   ) { }
 
-  @Post('vendors')
+  @Post('')
   registerVendor(@Body() dto: VendorRegisterDto) {
     return this.client.send({ cmd: VendorJobs.REGISTER }, dto);
   }
 
-  @Get('vendors')
+  @Get('')
   listVendor(@Query() dto) {
+    console.log('listing', { dto })
     return this.client.send({ cmd: VendorJobs.LIST }, dto);
   }
 
   @ApiParam({ name: 'id', required: true })
-  @Get('vendors/:id')
+  @Get('/:id')
   getVendor(@Param('id') id: UUID | Address) {
     return this.client.send({ cmd: VendorJobs.GET }, { id })
   }
