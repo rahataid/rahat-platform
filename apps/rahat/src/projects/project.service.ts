@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateProjectDto, UpdateProjectDto } from '@rahataid/extensions';
+import { CreateProjectDto, UpdateProjectDto, UpdateProjectStatusDto } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
   MS_ACTIONS,
@@ -67,6 +67,15 @@ export class ProjectService {
         uuid,
       },
       data,
+    });
+  }
+
+  async updateStatus(uuid: UUID, data: UpdateProjectStatusDto) {
+    return this.prisma.project.update({
+      where: {
+        uuid,
+      },
+      data
     });
   }
 

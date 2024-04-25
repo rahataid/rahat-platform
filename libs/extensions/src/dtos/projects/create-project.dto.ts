@@ -1,5 +1,6 @@
 import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
+import { ProjectStatus } from '@rahataid/sdk/enums';
 import { IsOptional, IsString } from 'class-validator';
 
 export class CreateProjectDto {
@@ -74,4 +75,16 @@ export class UpdateProjectDto extends OmitType(PartialType(CreateProjectDto), [
   @IsString()
   @IsOptional()
   override extras?: object;
+}
+
+export class UpdateProjectStatusDto {
+
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    example: 'Some extra information',
+  })
+  @IsString()
+  @IsOptional()
+  status?: ProjectStatus;
 }
