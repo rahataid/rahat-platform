@@ -71,7 +71,6 @@ export class GlobalCustomExceptionFilter
       timestamp: new Date().getTime(),
       path: request?.url,
     };
-    console.log({ exception });
 
     if (exception instanceof HttpException) {
       ExceptionHandler?.handleHttpException(exception, responseData, response);
