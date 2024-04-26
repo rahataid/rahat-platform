@@ -16,6 +16,7 @@ import {
   ListProjectBeneficiaryDto,
   ProjectCommunicationDto,
   UpdateProjectDto,
+  UpdateProjectStatusDto,
 } from '@rahataid/extensions';
 import { BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
@@ -55,6 +56,15 @@ export class ProjectController {
     @Param('uuid') uuid: UUID
   ) {
     return this.projectService.update(uuid, updateProjectDto);
+  }
+
+  @ApiParam({ name: 'uuid', required: true })
+  @Patch(':uuid/status')
+  updateStatus(
+    @Body() data: UpdateProjectStatusDto,
+    @Param('uuid') uuid: UUID
+  ) {
+    return this.projectService.updateStatus(uuid, data);
   }
 
   @Delete(':uuid')

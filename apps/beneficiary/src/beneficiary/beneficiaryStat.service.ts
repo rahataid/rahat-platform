@@ -78,16 +78,16 @@ export class BeneficiaryStatService {
     }
 
     const ageStats = await this.prisma.beneficiary.groupBy({
-      by: ['ageRange'],
+      by: ['age'],
       _count: {
-        gender: true,
+        age: true,
       },
       where: filter,
     });
 
     return ageStats.map((stat) => ({
-      id: stat.ageRange,
-      count: stat._count.gender,
+      id: stat.age,
+      count: stat._count.age,
     }));
   }
 
@@ -261,7 +261,7 @@ export class BeneficiaryStatService {
         this.calculateInternetStatusStats(projectUuid),
         this.calculatePhoneStatusStats(projectUuid),
         this.totalBeneficiaries(projectUuid),
-        this.calculateAgeRange(projectUuid),
+        this.calculateAgeStats(projectUuid),
       ]);
 
     return {
@@ -281,25 +281,25 @@ export class BeneficiaryStatService {
     });
   }
 
-  async calculateAgeRange(ages) {
-    let range = {
-      r0_20: 0,
-      r20_40: 0,
-      r40_60: 0,
-      r60_above: 0
-    }
+  async calculateRangedAge(ages: any) {
+    let range = [
+      { id: "0-20", count: 0 },
+      { id: "20-40", count: 0 },
+      { id: "40-60", count: 0 },
+      { id: "60+", count: 0 },
+    ]
     ages.map((age) => {
-      if (age.id > 0 && age.id < 20) {
-        range.r0_20++;
+      if (age.id >= 0 && age.id <= 20) {
+        range[0].count = range[0].count + age.count;
       }
-      if (age.id > 20 && age.id < 40) {
-        range.r20_40++;
+      if (age.id > 20 && age.id <= 40) {
+        range[1].count = range[1].count + age.count;
       }
-      if (age.id > 40 && age.id < 60) {
-        range.r40_60++;
+      if (age.id > 40 && age.id <= 60) {
+        range[2].count = range[2].count + age.count;
       }
       if (age.id > 60) {
-        range.r60_above++;
+        range[3].count = range[3].count + age.count;
       }
     })
 
@@ -310,7 +310,7 @@ export class BeneficiaryStatService {
     const { gender, bankedStatus, internetStatus, phoneStatus, total, age } =
       await this.calculateAllStats();
 
-    const rangedAge = await this.calculateAgeRange(age);
+    const rangedAge = await this.calculateRangedAge(age);
 
     await Promise.all([
       this.statsService.save({
@@ -339,7 +339,7 @@ export class BeneficiaryStatService {
         group: 'beneficiary',
       }),
       this.statsService.save({
-        name: 'beneficiary_age',
+        name: 'beneficiary_age_range',
         data: rangedAge,
         group: 'beneficiary',
       }),
@@ -347,7 +347,7 @@ export class BeneficiaryStatService {
     if (projectUuid) {
       const { gender, bankedStatus, internetStatus, phoneStatus, total, age } =
         await this.calculateProjectStats(projectUuid);
-      const rangedAge = await this.calculateAgeRange(age)
+      const rangedAge = await this.calculateRangedAge(age)
       await Promise.all([
         this.statsService.save({
           name: 'beneficiary_total',
@@ -375,7 +375,7 @@ export class BeneficiaryStatService {
           group: projectUuid,
         }),
         this.statsService.save({
-          name: 'beneficiary_age',
+          name: 'beneficiary_age_range',
           data: rangedAge,
           group: projectUuid,
         }),

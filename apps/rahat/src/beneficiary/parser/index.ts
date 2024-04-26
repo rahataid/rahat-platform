@@ -19,7 +19,6 @@ export async function DocParser(
       ? JsonParser(buffer)
       : ExcelParser(buffer);
 
-  console.log('parsedData', parsedData)
   const validationErrors = [];
   const beneficiaries = [];
 
