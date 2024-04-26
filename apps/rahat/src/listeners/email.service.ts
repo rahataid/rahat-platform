@@ -8,7 +8,7 @@ import * as nodemailer from 'nodemailer';
 export class EmailService {
   private transporter;
 
-  constructor() {}
+  constructor() { }
 
   initialize() {
     if (!this.transporter) {
@@ -30,7 +30,7 @@ export class EmailService {
     to: string,
     subject: string,
     text: string,
-    html: string
+    html?: string
   ): Promise<void> {
     this.initialize();
     const mailOptions = {

@@ -60,7 +60,7 @@ dependencies:
     specifier: ^0.0.108
     version: 0.0.108(@nestjs/core@10.3.8)(prisma@5.10.2)(reflect-metadata@0.1.14)
   '@rumsan/user':
-    specifier: ^3.0.153
+    specifier: ^3.0.157
     version: 3.0.157(@nestjs/platform-express@10.3.8)(ioredis@5.4.1)(passport@0.7.0)(prisma@5.10.2)(reflect-metadata@0.1.14)(typescript@5.3.3)
   abitype:
     specifier: ^1.0.1
@@ -12386,6 +12386,7 @@ packages:
 
   /wordwrap@1.0.0:
     resolution: {integrity: sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==}
+    requiresBuild: true
 
   /wrap-ansi@7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}
