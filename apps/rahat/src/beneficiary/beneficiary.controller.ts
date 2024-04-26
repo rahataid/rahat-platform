@@ -25,9 +25,7 @@ import {
   ValidateWalletDto
 } from '@rahataid/extensions';
 import {
-  BQUEUE,
-  BeneficiaryJobs,
-  Enums,
+  BeneficiaryJobs, BQUEUE, Enums,
   MS_TIMEOUT,
   TFile
 } from '@rahataid/sdk';
@@ -68,7 +66,7 @@ export class BeneficiaryController {
   }
 
   @Get('pii')
-  async listPiiData(@Query() dto: ListBeneficiaryDto) {
+  async listPiiData(@Query() dto: any) {
     return this.client.send({ cmd: BeneficiaryJobs.LIST_PII }, dto);
   }
 
