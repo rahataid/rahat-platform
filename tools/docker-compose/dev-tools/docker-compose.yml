@@ -45,7 +45,7 @@ services:
       - "${GANACHE_PORT}:8545"
     volumes:
       - rahat_ganache_data:/db
-      
+
   redis-rahat:
     container_name: redis-rahat
 
@@ -67,7 +67,7 @@ services:
     ports:
       - "${BULLBOARD_PORT}:3000"
     environment:
-      REDIS_HOST: redis
+      REDIS_HOST: redis-rahat
       REDIS_PASSWORD: ${REDIS_PASS}
     depends_on:
       - redis-rahat
