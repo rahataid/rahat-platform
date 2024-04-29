@@ -26,7 +26,7 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.RIVER_STATIONS.GET_DHM, uuid }, {}),
 
   [MS_ACTIONS.AAPROJECT.WATER_LEVELS.GET_DHM]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.WATER_LEVELS.GET_DHM, uuid }, {}),
+    sendCommand({ cmd: AAJobs.WATER_LEVELS.GET_DHM, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.ACTIVITIES.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.ACTIVITIES.ADD, uuid }, payload),
