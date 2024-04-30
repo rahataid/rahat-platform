@@ -2,8 +2,8 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
-import { Project } from '@prisma/client';
 import { BQUEUE, ProjectEvents, ProjectJobs } from '@rahataid/sdk';
+import { Project } from '@rahataid/sdk/project/project.types';
 import { PrismaService } from '@rumsan/prisma';
 import { EVENTS } from '@rumsan/user';
 import { Queue } from 'bull';
@@ -35,6 +35,14 @@ export class ListenersService {
       'OTP for login',
       'OTP for login',
       `<h1>OTP for login</h1><p>${data.otp}</p>`
+    );
+  }
+  @OnEvent(EVENTS.USER_CREATED)
+  async sendUserCreatedEmail(data: any) {
+    this.emailService.sendEmail(
+      data.address,
+      'You has been added to rahat.',
+      `You has been successfully added to rahat. Please follow the link "${this.configService.get('FRONTEND_URL')}" to join.`
     );
   }
 

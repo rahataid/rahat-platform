@@ -362,6 +362,14 @@ export class BeneficiaryService {
 
   async assignBeneficiaryToProject(dto: AddToProjectDto) {
     const { beneficiaryId, projectId } = dto;
+
+    // get project info
+    const project = await this.prisma.project.findUnique({
+      where: {
+        uuid: projectId
+      }
+    })
+
     //1. Get beneficiary data
     const beneficiaryData = await this.rsprisma.beneficiary.findUnique({
       where: { uuid: beneficiaryId },
@@ -372,6 +380,13 @@ export class BeneficiaryService {
       extras: beneficiaryData?.extras || null,
       type: BeneficiaryConstants.Types.ENROLLED,
     };
+
+    // if project type if aa, remove type
+    if (project.type.toLowerCase() === 'aa') {
+      delete projectPayload.type
+    }
+
+    console.log(projectPayload)
 
     //2.Save beneficiary to project
 
