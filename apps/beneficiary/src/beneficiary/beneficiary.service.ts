@@ -119,12 +119,19 @@ export class BeneficiaryService {
     const AND_QUERY = createListQuery(dto);
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
+    const projectUUID = dto.projectId;
+
     result = await paginate(
       this.rsprisma.beneficiary,
       {
         where: {
           //AND: AND_QUERY,
           deletedAt: null,
+          BeneficiaryProject: {
+            some: {
+              projectId: projectUUID
+            }
+          }
         },
         include: {
           BeneficiaryProject: {
@@ -140,6 +147,9 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+
+    console.log(result)
+
     if (result.data.length > 0) {
       const mergedData = await this.mergePIIData(result.data);
       result.data = mergedData;
