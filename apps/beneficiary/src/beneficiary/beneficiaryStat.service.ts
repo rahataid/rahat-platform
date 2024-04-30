@@ -282,17 +282,14 @@ export class BeneficiaryStatService {
   }
 
   async calculateRangedAge(ages: any) {
-    console.log(ages)
     let range = [
       { id: "0-20", count: 0 },
       { id: "20-40", count: 0 },
       { id: "40-60", count: 0 },
       { id: "60+", count: 0 },
     ]
-    console.log(ages)
     ages.map((age) => {
       if (age.id >= 0 && age.id <= 20) {
-        console.log("first range count", range[0].count)
         range[0].count = range[0].count + age.count;
       }
       if (age.id > 20 && age.id <= 40) {

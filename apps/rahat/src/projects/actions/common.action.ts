@@ -15,6 +15,7 @@ export const beneficiaryActions: ProjectActionFunc = {
     return sendCommand(
       { cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT },
       { projectId: uuid, ...payload }
+
     )
   },
   [MS_ACTIONS.BENEFICIARY.BULK_ASSIGN_TO_PROJECT]: (uuid, payload, sendCommand) =>
