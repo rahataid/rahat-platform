@@ -5,11 +5,11 @@ export const JOBS = {
   WATER_LEVELS: {
     GET_DHM: 'aa.jobs.waterLevels.getDhm'
   },
-  SCHEDULE: {
-    DEV_ONLY: 'aa.jobs.schedule.devOnly',
-    GET_ALL: 'aa.jobs.schedule.getAll',
-    ADD: 'aa.jobs.schedule.add',
-    REMOVE: 'aa.jobs.schedule.remove'
+  TRIGGERS: {
+    DEV_ONLY: 'aa.jobs.triggers.devOnly',
+    GET_ALL: 'aa.jobs.triggers.getAll',
+    ADD: 'aa.jobs.triggers.add',
+    REMOVE: 'aa.jobs.triggers.remove'
   },
   ACTIVITIES: {
     GET_ALL: 'aa.jobs.activities.getAll',

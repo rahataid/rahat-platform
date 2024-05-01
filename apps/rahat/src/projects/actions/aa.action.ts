@@ -9,18 +9,18 @@ export const aaActions: ProjectActionFunc = {
   /***********************
    * Development Only
   *************************/
-  [MS_ACTIONS.AAPROJECT.SCHEDULE.DEV_ONLY]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.SCHEDULE.DEV_ONLY, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.TRIGGERS.DEV_ONLY]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.TRIGGERS.DEV_ONLY, uuid }, payload),
   /************************/
 
-  [MS_ACTIONS.AAPROJECT.SCHEDULE.ADD]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.SCHEDULE.ADD, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.TRIGGERS.ADD]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.TRIGGERS.ADD, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.SCHEDULE.REMOVE]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.SCHEDULE.REMOVE, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.TRIGGERS.REMOVE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.TRIGGERS.REMOVE, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.SCHEDULE.GET_ALL]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.SCHEDULE.GET_ALL, uuid }, {}),
+  [MS_ACTIONS.AAPROJECT.TRIGGERS.GET_ALL]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.TRIGGERS.GET_ALL, uuid }, {}),
 
   [MS_ACTIONS.AAPROJECT.RIVER_STATIONS.GET_DHM]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.RIVER_STATIONS.GET_DHM, uuid }, {}),

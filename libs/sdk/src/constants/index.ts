@@ -81,11 +81,11 @@ export const MS_ACTIONS = {
     WATER_LEVELS: {
       GET_DHM: 'aaProject.waterLevels.getDhm'
     },
-    SCHEDULE: {
-      DEV_ONLY: 'aaProject.schedule.devOnly',
-      GET_ALL: 'aaProject.schedule.getAll',
-      ADD: 'aaProject.schedule.add',
-      REMOVE: 'aaProject.schedule.remove'
+    TRIGGERS: {
+      DEV_ONLY: 'aaProject.triggers.devOnly',
+      GET_ALL: 'aaProject.triggers.getAll',
+      ADD: 'aaProject.triggers.add',
+      REMOVE: 'aaProject.triggers.remove'
     },
     ACTIVITIES: {
       GET_ALL: 'aaProject.activities.getAll',
