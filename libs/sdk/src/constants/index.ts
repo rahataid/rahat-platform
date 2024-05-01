@@ -104,6 +104,17 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.phases.getAll',
       GET_STATS: 'aaProject.phases.getStats'
     },
+    STAKEHOLDERS: {
+      GET_ALL: 'aaProject.stakeholders.getAll',
+      ADD: 'aaProject.stakeholders.add',
+      REMOVE: 'aaProject.stakeholders.remove',
+      UPDATE: 'aaProject.stakeholders.update',
+      GET_GROUP: 'aaProject.stakeholders.getGroup',
+      GET_ALL_GROUPS: 'aaProject.stakeholders.getAllGroups',
+      ADD_GROUP: 'aaProject.stakeholders.addGroup',
+      UPDATE_GROUP: 'aaProject.stakeholders.updateGroup',
+      DELETE_GROUP: 'aaProject.stakeholders.deleteGroup',
+    },
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',

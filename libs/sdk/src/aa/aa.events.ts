@@ -28,4 +28,15 @@ export const JOBS = {
     GET_ALL: 'aa.jobs.phases.getAll',
     GET_STATS: 'aa.jobs.phases.getStats'
   },
+  STAKEHOLDERS: {
+    GET_ALL: 'aa.jobs.stakeholders.getAll',
+    ADD: 'aa.jobs.stakeholders.add',
+    REMOVE: 'aa.jobs.stakeholders.remove',
+    UPDATE: 'aa.jobs.stakeholders.update',
+    GET_GROUP: 'aa.jobs.stakeholders.getGroup',
+    GET_ALL_GROUPS: 'aa.jobs.stakeholders.getAllGroups',
+    ADD_GROUP: 'aa.jobs.stakeholders.addGroup',
+    UPDATE_GROUP: 'aa.jobs.stakeholders.updateGroup',
+    DELETE_GROUP: 'aa.jobs.stakeholders.deleteGroup'
+  },
 };
