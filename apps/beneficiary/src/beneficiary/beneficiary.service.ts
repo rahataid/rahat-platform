@@ -127,11 +127,11 @@ export class BeneficiaryService {
         where: {
           //AND: AND_QUERY,
           deletedAt: null,
-          BeneficiaryProject: {
+          BeneficiaryProject: projectUUID ? {
             some: {
               projectId: projectUUID
             }
-          }
+          } : {}
         },
         include: {
           BeneficiaryProject: {
@@ -147,8 +147,6 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
-
-    console.log(result)
 
     if (result.data.length > 0) {
       const mergedData = await this.mergePIIData(result.data);
@@ -386,8 +384,6 @@ export class BeneficiaryService {
       delete projectPayload.type
     }
 
-    console.log(projectPayload)
-
     //2.Save beneficiary to project
 
     await this.saveBeneficiaryToProject({
@@ -564,8 +560,6 @@ export class BeneficiaryService {
         },
       },
     });
-
-    console.log('insertedBeneficiaries', insertedBeneficiaries);
 
     // Prepare PII data for bulk insertion with correct beneficiaryId
     const piiBulkInsertData = piiDataList.map((piiData) => {
