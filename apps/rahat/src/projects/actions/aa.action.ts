@@ -49,6 +49,11 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.HAZARD_TYPES.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.HAZARD_TYPES.GET_ALL, uuid }, {}),
 
+  // communication
+  [MS_ACTIONS.AAPROJECT.COMMUNICATION.ADD]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.COMMUNICATION.ADD, uuid }, payload),
+  // communication
+
   // **** phases ******//
   [MS_ACTIONS.AAPROJECT.PHASES.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PHASES.GET_ALL, uuid }, {}),

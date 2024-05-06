@@ -92,6 +92,9 @@ export const MS_ACTIONS = {
       ADD: 'aaProject.activities.add',
       REMOVE: 'aaProject.activities.remove'
     },
+    COMMUNICATION: {
+      ADD: 'aaProject.activities.communication.add',
+    },
     ACTIVITY_CATEGORIES: {
       GET_ALL: 'aaProject.activityCategories.getAll',
       ADD: 'aaProject.activityCategories.add',

@@ -21,6 +21,9 @@ export const JOBS = {
     ADD: 'aa.jobs.activityCategories.add',
     REMOVE: 'aa.jobs.activityCategories.remove'
   },
+  COMMUNICATION: {
+    ADD: 'aa.jobs.activity.communication.add'
+  },
   HAZARD_TYPES: {
     GET_ALL: 'aa.jobs.hazardTypes.getAll',
   },
