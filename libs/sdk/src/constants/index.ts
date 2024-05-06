@@ -94,6 +94,8 @@ export const MS_ACTIONS = {
     },
     COMMUNICATION: {
       ADD: 'aaProject.activities.communication.add',
+      TRIGGER: 'aaProject.activities.communication.trigger',
+
     },
     ACTIVITY_CATEGORIES: {
       GET_ALL: 'aaProject.activityCategories.getAll',
