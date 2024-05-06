@@ -314,6 +314,49 @@ export class BeneficiaryService {
     return this.prisma.beneficiaryProject.create({ data: dto });
   }
 
+  async addBulkBeneficiaryToProject(dto) {
+    const { beneficiaries, projectId } = dto;
+    const projectPayloads = [];
+    const benProjectData = [];
+
+    const { beneficiariesData } = await this.createBulk(beneficiaries);
+
+    await Promise.all(
+      beneficiariesData.map(async (ben) => {
+        const projectPayload = {
+          uuid: ben.uuid,
+          walletAddress: ben.walletAddress,
+          extras: ben?.extras || null,
+          type: BeneficiaryConstants.Types.REFERRED,
+        }
+        benProjectData.push({
+          projectId,
+          beneficiaryId: ben.uuid
+        });
+        projectPayloads.push(projectPayload);
+
+      })
+    )
+
+    //2.Save beneficiary to project
+
+    await this.prisma.beneficiaryProject.createMany({
+      data: benProjectData
+    })
+
+    //3. Sync beneficiary to project
+
+    return this.client.send(
+      {
+        cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT,
+        uuid: projectId,
+      },
+      projectPayloads
+    );
+
+
+  }
+
   async bulkAssignToProject(dto) {
     const { beneficiaryIds, projectId } = dto;
     const projectPayloads = [];
@@ -506,7 +549,6 @@ export class BeneficiaryService {
   }
 
   async createBulk(dtos: CreateBeneficiaryDto[]) {
-    console.log('dtos', dtos);
     const hasPhone = dtos.every((dto) => dto.piiData.phone);
     if (!hasPhone) throw new RpcException('Phone number is required');
 
@@ -589,7 +631,7 @@ export class BeneficiaryService {
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED);
 
     // Return some form of success indicator, as createMany does not return the records themselves
-    return { success: true, count: dtos.length };
+    return { success: true, count: dtos.length, beneficiariesData: insertedBeneficiaries };
   }
 
   async checkWalletAddress(dtos) {

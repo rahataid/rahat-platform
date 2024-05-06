@@ -83,6 +83,11 @@ export class BeneficiaryController {
     return this.beneficiaryService.addBeneficiaryToProject(dto, projectUid);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.BULK_ADD_TO_PROJECT })
+  async bulkaddToProject(payload: any) {
+    return this.beneficiaryService.addBulkBeneficiaryToProject(payload);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
   async assignToProject(payload: any) {
     return this.beneficiaryService.assignBeneficiaryToProject(payload);
