@@ -315,7 +315,7 @@ export class BeneficiaryService {
   }
 
   async addBulkBeneficiaryToProject(dto) {
-    const { beneficiaries, projectId } = dto;
+    const { beneficiaries, projectId, referrerBeneficiary, referrerVendor, type } = dto;
     const projectPayloads = [];
     const benProjectData = [];
 
@@ -327,7 +327,9 @@ export class BeneficiaryService {
           uuid: ben.uuid,
           walletAddress: ben.walletAddress,
           extras: ben?.extras || null,
-          type: BeneficiaryConstants.Types.REFERRED,
+          type: type,
+          referrerBeneficiary,
+          referrerVendor
         }
         benProjectData.push({
           projectId,
@@ -633,6 +635,8 @@ export class BeneficiaryService {
     // Return some form of success indicator, as createMany does not return the records themselves
     return { success: true, count: dtos.length, beneficiariesData: insertedBeneficiaries };
   }
+
+
 
   async checkWalletAddress(dtos) {
     const wallets = dtos.map((dto) => dto.walletAddress);
