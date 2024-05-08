@@ -5,6 +5,7 @@ import {
   ListBeneficiaryDto,
   ListProjectBeneficiaryDto,
   UpdateBeneficiaryDto,
+  addBulkBeneficiaryToProject,
 } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
@@ -84,7 +85,7 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.BULK_ADD_TO_PROJECT })
-  async bulkaddToProject(payload: any) {
+  async bulkaddToProject(payload: addBulkBeneficiaryToProject) {
     return this.beneficiaryService.addBulkBeneficiaryToProject(payload);
   }
 

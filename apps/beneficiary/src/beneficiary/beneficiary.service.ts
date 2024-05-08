@@ -10,6 +10,7 @@ import {
   ListBeneficiaryDto,
   ListProjectBeneficiaryDto,
   UpdateBeneficiaryDto,
+  addBulkBeneficiaryToProject,
 } from '@rahataid/extensions';
 import {
   BQUEUE,
@@ -314,8 +315,8 @@ export class BeneficiaryService {
     return this.prisma.beneficiaryProject.create({ data: dto });
   }
 
-  async addBulkBeneficiaryToProject(dto) {
-    const { beneficiaries, projectId, referrerBeneficiary, referrerVendor, type } = dto;
+  async addBulkBeneficiaryToProject(dto: addBulkBeneficiaryToProject) {
+    const { beneficiaries, referrerBeneficiary, referrerVendor, type, projectUuid } = dto;
     const projectPayloads = [];
     const benProjectData = [];
 
@@ -332,7 +333,7 @@ export class BeneficiaryService {
           referrerVendor
         }
         benProjectData.push({
-          projectId,
+          projectId: projectUuid,
           beneficiaryId: ben.uuid
         });
         projectPayloads.push(projectPayload);
@@ -351,7 +352,7 @@ export class BeneficiaryService {
     return this.client.send(
       {
         cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT,
-        uuid: projectId,
+        uuid: projectUuid,
       },
       projectPayloads
     );
@@ -550,7 +551,7 @@ export class BeneficiaryService {
     return rdata;
   }
 
-  async createBulk(dtos: CreateBeneficiaryDto[]) {
+  async createBulk(dtos: CreateBeneficiaryDto[], projectUuid?: string) {
     const hasPhone = dtos.every((dto) => dto.piiData.phone);
     if (!hasPhone) throw new RpcException('Phone number is required');
 
@@ -630,7 +631,7 @@ export class BeneficiaryService {
       });
     }
 
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, { projectUuid });
 
     // Return some form of success indicator, as createMany does not return the records themselves
     return { success: true, count: dtos.length, beneficiariesData: insertedBeneficiaries };
