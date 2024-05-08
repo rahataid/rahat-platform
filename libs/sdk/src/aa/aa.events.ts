@@ -8,10 +8,12 @@ export const JOBS = {
   TRIGGERS: {
     DEV_ONLY: 'aa.jobs.triggers.devOnly',
     GET_ALL: 'aa.jobs.triggers.getAll',
+    GET_ONE: 'aa.jobs.triggers.getOne',
     ADD: 'aa.jobs.triggers.add',
     REMOVE: 'aa.jobs.triggers.remove'
   },
   ACTIVITIES: {
+    GET_ONE: 'aa.jobs.activities.getOne',
     GET_ALL: 'aa.jobs.activities.getAll',
     ADD: 'aa.jobs.activities.add',
     REMOVE: 'aa.jobs.activities.remove'
