@@ -8,8 +8,7 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  ListProjectBeneficiaryDto,
-  UpdateBeneficiaryDto,
+  UpdateBeneficiaryDto
 } from '@rahataid/extensions';
 import {
   BQUEUE,
@@ -81,35 +80,20 @@ export class BeneficiaryService {
 
     return data;
   }
-  async listBenefByProject(dto: ListProjectBeneficiaryDto) {
-    const orderBy: Record<string, 'asc' | 'desc'> = {};
-    orderBy[dto.sort] = dto.order;
-    const data = await paginate(
-      this.rsprisma.beneficiaryProject,
-      {
-        where: {
-          projectId: dto.projectId,
-        },
-        include: { Beneficiary: true },
-        orderBy,
-      },
-      {
-        page: dto.page,
-        perPage: dto.perPage,
-      }
-    );
-    // return data;
-
-    if (data.data.length > 0) {
-      const mergedData = await this.mergeProjectPIIData(data.data);
-      data.data = mergedData;
+  async listBenefByProject(data: any) {
+    if (data?.data.length > 0) {
+      const mergedProjectData = await this.mergeProjectData(data.data)
+      console.log(mergedProjectData)
+      data.data = mergedProjectData;
     }
-    const projectPayload = { ...data, status: dto.status };
-    // return data;
-    return this.client.send(
-      { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
-      projectPayload
-    );
+
+    return data;
+    // if (data.data.length > 0) {
+    //   const mergedData = await this.mergeProjectPIIData(data.data);
+    //   data.data = mergedData;
+    // }
+    // const projectPayload = { ...data, status: dto.status };
+
   }
 
   async list(
@@ -153,6 +137,24 @@ export class BeneficiaryService {
       result.data = mergedData;
     }
     return result;
+  }
+
+  async mergeProjectData(data: any) {
+    const mergedData = [];
+    for (const d of data) {
+      const projectData = await this.prisma.beneficiary.findUnique({
+        where: { uuid: d.uuid }
+      })
+      const piiData = await this.prisma.beneficiaryPii.findUnique({
+        where: { beneficiaryId: d.id },
+      });
+      if (projectData) {
+        d.projectData = projectData
+        d.piiData = piiData;
+      };
+      mergedData.push(d)
+    }
+    return mergedData;
   }
 
   async mergeProjectPIIData(data: any) {

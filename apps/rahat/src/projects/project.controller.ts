@@ -76,7 +76,7 @@ export class ProjectController {
   @Get(':uuid/beneficiaries')
   listBeneficiaries(@Query() dto: ListProjectBeneficiaryDto) {
     return this.rahatClient
-      .send({ cmd: BeneficiaryJobs.LIST_BY_PROJECT }, dto)
+      .send({ cmd: BeneficiaryJobs.LIST }, dto)
       .pipe(timeout(5000));
   }
 

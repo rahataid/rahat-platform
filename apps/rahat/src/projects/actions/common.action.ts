@@ -25,7 +25,7 @@ export const beneficiaryActions: ProjectActionFunc = {
     ),
   [MS_ACTIONS.BENEFICIARY.LIST_BY_PROJECT]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: BeneficiaryJobs.LIST_BY_PROJECT },
+      { cmd: BeneficiaryJobs.LIST, uuid },
       { projectId: uuid, ...payload }
     ),
   [MS_ACTIONS.BENEFICIARY.GET_PROJECT_SPECIFIC]: (uuid, payload, sendCommand) =>
