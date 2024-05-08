@@ -556,8 +556,8 @@ export class BeneficiaryService {
     if (!hasPhone) throw new RpcException('Phone number is required');
 
     //check if phone number is unique or not
-    const ben = await this.checkPhoneNumber(dtos);
-    if (ben.length > 0) throw new RpcException('Phone number should be unique');
+    const benPhone = await this.checkPhoneNumber(dtos);
+    if (benPhone.length > 0) throw new RpcException(`${benPhone} Phone number should be unique`);
 
     const hasWallet = dtos.every((dto) => dto.walletAddress);
     if (hasWallet) {
@@ -653,13 +653,15 @@ export class BeneficiaryService {
 
   async checkPhoneNumber(dtos) {
     const phoneNumber = dtos.map((dto) => dto.piiData.phone.toString());
-    return this.prisma.beneficiaryPii.findMany({
+    const ben = await this.prisma.beneficiaryPii.findMany({
       where: {
         phone: {
           in: phoneNumber,
         },
       },
     });
+
+    return ben ? ben.map(p => p.phone) : []
   }
 
   async listReferredBen({ bendata }) {
