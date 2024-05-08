@@ -8,7 +8,8 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  UpdateBeneficiaryDto
+  UpdateBeneficiaryDto,
+  addBulkBeneficiaryToProject,
 } from '@rahataid/extensions';
 import {
   BQUEUE,
@@ -316,6 +317,52 @@ export class BeneficiaryService {
     return this.prisma.beneficiaryProject.create({ data: dto });
   }
 
+  async addBulkBeneficiaryToProject(dto: addBulkBeneficiaryToProject) {
+    const { dto: { beneficiaries, referrerBeneficiary, referrerVendor, type, projectUuid }
+    } = dto;
+    const projectPayloads = [];
+    const benProjectData = [];
+
+    const { beneficiariesData } = await this.createBulk(beneficiaries);
+
+    await Promise.all(
+      beneficiariesData.map(async (ben) => {
+        const projectPayload = {
+          uuid: ben.uuid,
+          walletAddress: ben.walletAddress,
+          extras: ben?.extras || null,
+          type: type,
+          referrerBeneficiary,
+          referrerVendor
+        }
+        benProjectData.push({
+          projectId: projectUuid,
+          beneficiaryId: ben.uuid
+        });
+        projectPayloads.push(projectPayload);
+
+      })
+    )
+
+    //2.Save beneficiary to project
+
+    await this.prisma.beneficiaryProject.createMany({
+      data: benProjectData
+    })
+
+    //3. Sync beneficiary to project
+
+    return this.client.send(
+      {
+        cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT,
+        uuid: projectUuid,
+      },
+      projectPayloads
+    );
+
+
+  }
+
   async bulkAssignToProject(dto) {
     const { beneficiaryIds, projectId } = dto;
     const projectPayloads = [];
@@ -507,14 +554,13 @@ export class BeneficiaryService {
     return rdata;
   }
 
-  async createBulk(dtos: CreateBeneficiaryDto[]) {
-    console.log('dtos', dtos);
+  async createBulk(dtos: CreateBeneficiaryDto[], projectUuid?: string) {
     const hasPhone = dtos.every((dto) => dto.piiData.phone);
     if (!hasPhone) throw new RpcException('Phone number is required');
 
     //check if phone number is unique or not
-    const ben = await this.checkPhoneNumber(dtos);
-    if (ben.length > 0) throw new RpcException('Phone number should be unique');
+    const benPhone = await this.checkPhoneNumber(dtos);
+    if (benPhone.length > 0) throw new RpcException(`${benPhone} Phone number should be unique`);
 
     const hasWallet = dtos.every((dto) => dto.walletAddress);
     if (hasWallet) {
@@ -588,11 +634,13 @@ export class BeneficiaryService {
       });
     }
 
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, { projectUuid });
 
     // Return some form of success indicator, as createMany does not return the records themselves
-    return { success: true, count: dtos.length };
+    return { success: true, count: dtos.length, beneficiariesData: insertedBeneficiaries };
   }
+
+
 
   async checkWalletAddress(dtos) {
     const wallets = dtos.map((dto) => dto.walletAddress);
@@ -608,13 +656,15 @@ export class BeneficiaryService {
 
   async checkPhoneNumber(dtos) {
     const phoneNumber = dtos.map((dto) => dto.piiData.phone.toString());
-    return this.prisma.beneficiaryPii.findMany({
+    const ben = await this.prisma.beneficiaryPii.findMany({
       where: {
         phone: {
           in: phoneNumber,
         },
       },
     });
+
+    return ben ? ben.map(p => p.phone) : []
   }
 
   async listReferredBen({ bendata }) {

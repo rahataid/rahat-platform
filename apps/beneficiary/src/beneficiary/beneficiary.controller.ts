@@ -3,7 +3,8 @@ import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  UpdateBeneficiaryDto
+  UpdateBeneficiaryDto,
+  addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
@@ -80,6 +81,11 @@ export class BeneficiaryController {
   async addToProject(payload: any) {
     const { dto, projectUid } = payload;
     return this.beneficiaryService.addBeneficiaryToProject(dto, projectUid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.BULK_ADD_TO_PROJECT })
+  async bulkaddToProject(payload: addBulkBeneficiaryToProject) {
+    return this.beneficiaryService.addBulkBeneficiaryToProject(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
