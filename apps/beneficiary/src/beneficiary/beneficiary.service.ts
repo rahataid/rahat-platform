@@ -316,7 +316,8 @@ export class BeneficiaryService {
   }
 
   async addBulkBeneficiaryToProject(dto: addBulkBeneficiaryToProject) {
-    const { beneficiaries, referrerBeneficiary, referrerVendor, type, projectUuid } = dto;
+    const { dto: { beneficiaries, referrerBeneficiary, referrerVendor, type, projectUuid }
+    } = dto;
     const projectPayloads = [];
     const benProjectData = [];
 
