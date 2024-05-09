@@ -67,6 +67,11 @@ export class ListProjectBeneficiaryDto {
   @IsOptional()
   status: string;
 
+  @ApiProperty({ example: "NOT_ASSIGNED" })
+  @IsString()
+  @IsOptional()
+  type: string;
+
   @ApiProperty({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
   @IsString()
   @IsNotEmpty()
