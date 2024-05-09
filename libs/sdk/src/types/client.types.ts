@@ -5,6 +5,7 @@ import { UUID } from 'crypto';
 import { Beneficiary, TPIIData } from '../beneficiary/beneficiary.types';
 import { Stats } from './response.types';
 
+type OptionalPagination = Partial<Pagination>;
 export type BeneficiaryClient = {
   create: (
     data: Beneficiary,
@@ -22,7 +23,7 @@ export type BeneficiaryClient = {
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<Beneficiary[]>>;
   listPiiData: (
-    data?: Pagination,
+    data?: OptionalPagination,
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<TPIIData[]>>;
   update: (

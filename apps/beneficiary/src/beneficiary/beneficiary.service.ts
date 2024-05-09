@@ -9,18 +9,15 @@ import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
   ListProjectBeneficiaryDto,
-  UpdateBeneficiaryDto,
+  UpdateBeneficiaryDto
 } from '@rahataid/extensions';
 import {
-  BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
-  BeneficiaryJobs,
-  ProjectContants,
-  TPIIData,
-  generateRandomWallet,
+  BeneficiaryJobs, BQUEUE, generateRandomWallet, ProjectContants,
+  TPIIData
 } from '@rahataid/sdk';
-import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
+import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -52,6 +49,8 @@ export class BeneficiaryService {
     const repository = dto.projectId ? this.rsprisma.beneficiaryProject : this.rsprisma.beneficiaryPii;
     const include = dto.projectId ? { Beneficiary: true } : {};
     const where = dto.projectId ? { projectId: dto.projectId } : {};
+    //TODO: change in library to make pagination optional
+    const perPage = await repository.count()
 
     const data = await paginate(
       repository,
@@ -61,7 +60,7 @@ export class BeneficiaryService {
       },
       {
         page: dto.page,
-        perPage: dto.perPage,
+        perPage: perPage,
       }
     );
 
@@ -74,7 +73,6 @@ export class BeneficiaryService {
         projectPayload
       );
     }
-
     if (!dto.projectId) {
       data.data = data?.data?.map((piiData) => ({ piiData }));
     }
@@ -119,12 +117,19 @@ export class BeneficiaryService {
     const AND_QUERY = createListQuery(dto);
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
+    const projectUUID = dto.projectId;
+
     result = await paginate(
       this.rsprisma.beneficiary,
       {
         where: {
           //AND: AND_QUERY,
           deletedAt: null,
+          BeneficiaryProject: projectUUID ? {
+            some: {
+              projectId: projectUUID
+            }
+          } : {}
         },
         include: {
           BeneficiaryProject: {
@@ -140,6 +145,7 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+
     if (result.data.length > 0) {
       const mergedData = await this.mergePIIData(result.data);
       result.data = mergedData;
@@ -352,6 +358,14 @@ export class BeneficiaryService {
 
   async assignBeneficiaryToProject(dto: AddToProjectDto) {
     const { beneficiaryId, projectId } = dto;
+
+    // get project info
+    const project = await this.prisma.project.findUnique({
+      where: {
+        uuid: projectId
+      }
+    })
+
     //1. Get beneficiary data
     const beneficiaryData = await this.rsprisma.beneficiary.findUnique({
       where: { uuid: beneficiaryId },
@@ -362,6 +376,11 @@ export class BeneficiaryService {
       extras: beneficiaryData?.extras || null,
       type: BeneficiaryConstants.Types.ENROLLED,
     };
+
+    // if project type if aa, remove type
+    if (project.type.toLowerCase() === 'aa') {
+      delete projectPayload.type
+    }
 
     //2.Save beneficiary to project
 
@@ -539,8 +558,6 @@ export class BeneficiaryService {
         },
       },
     });
-
-    console.log('insertedBeneficiaries', insertedBeneficiaries);
 
     // Prepare PII data for bulk insertion with correct beneficiaryId
     const piiBulkInsertData = piiDataList.map((piiData) => {

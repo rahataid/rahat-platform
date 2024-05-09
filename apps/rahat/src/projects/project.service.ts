@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateProjectDto, UpdateProjectDto } from '@rahataid/extensions';
+import { CreateProjectDto, UpdateProjectDto, UpdateProjectStatusDto } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
   MS_ACTIONS,
   MS_TIMEOUT,
   ProjectEvents,
-  ProjectJobs,
+  ProjectJobs
 } from '@rahataid/sdk';
 import { BeneficiaryType } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
@@ -15,7 +15,7 @@ import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { createContractSigner } from '../utils/web3';
-import { aaActions, beneficiaryActions, c2cActions, elActions, vendorActions } from './actions';
+import { aaActions, beneficiaryActions, c2cActions, elActions, settingActions, vendorActions } from './actions';
 @Injectable()
 export class ProjectService {
   constructor(
@@ -67,6 +67,15 @@ export class ProjectService {
         uuid,
       },
       data,
+    });
+  }
+
+  async updateStatus(uuid: UUID, data: UpdateProjectStatusDto) {
+    return this.prisma.project.update({
+      where: {
+        uuid,
+      },
+      data
     });
   }
 
@@ -157,6 +166,7 @@ export class ProjectService {
       ...aaActions,
       ...beneficiaryActions,
       ...vendorActions,
+      ...settingActions,
       ...metaTxActions,
       ...c2cActions
     };
