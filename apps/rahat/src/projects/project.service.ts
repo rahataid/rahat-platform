@@ -15,7 +15,7 @@ import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { createContractSigner } from '../utils/web3';
-import { aaActions, beneficiaryActions, c2cActions, elActions, vendorActions } from './actions';
+import { aaActions, beneficiaryActions, c2cActions, elActions, settingActions, vendorActions } from './actions';
 @Injectable()
 export class ProjectService {
   constructor(
@@ -166,6 +166,7 @@ export class ProjectService {
       ...aaActions,
       ...beneficiaryActions,
       ...vendorActions,
+      ...settingActions,
       ...metaTxActions,
       ...c2cActions
     };
