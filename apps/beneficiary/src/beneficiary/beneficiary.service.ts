@@ -84,17 +84,10 @@ export class BeneficiaryService {
   async listBenefByProject(data: any) {
     if (data?.data.length > 0) {
       const mergedProjectData = await this.mergeProjectData(data.data)
-      console.log(mergedProjectData)
       data.data = mergedProjectData;
     }
 
     return data;
-    // if (data.data.length > 0) {
-    //   const mergedData = await this.mergeProjectPIIData(data.data);
-    //   data.data = mergedData;
-    // }
-    // const projectPayload = { ...data, status: dto.status };
-
   }
 
   async list(
