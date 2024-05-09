@@ -18,7 +18,7 @@ import {
   BeneficiaryJobs,
   ProjectContants,
   TPIIData,
-  generateRandomWallet,
+  generateRandomWallet
 } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { Queue } from 'bull';
@@ -52,6 +52,8 @@ export class BeneficiaryService {
     const repository = dto.projectId ? this.rsprisma.beneficiaryProject : this.rsprisma.beneficiaryPii;
     const include = dto.projectId ? { Beneficiary: true } : {};
     const where = dto.projectId ? { projectId: dto.projectId } : {};
+    //TODO: change in library to make pagination optional
+    const perPage = await repository.count()
 
     const data = await paginate(
       repository,
@@ -61,7 +63,7 @@ export class BeneficiaryService {
       },
       {
         page: dto.page,
-        perPage: dto.perPage,
+        perPage: perPage,
       }
     );
 
@@ -74,7 +76,6 @@ export class BeneficiaryService {
         projectPayload
       );
     }
-
     if (!dto.projectId) {
       data.data = data?.data?.map((piiData) => ({ piiData }));
     }

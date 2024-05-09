@@ -82,16 +82,21 @@ export const MS_ACTIONS = {
     WATER_LEVELS: {
       GET_DHM: 'aaProject.waterLevels.getDhm'
     },
-    SCHEDULE: {
-      DEV_ONLY: 'aaProject.schedule.devOnly',
-      GET_ALL: 'aaProject.schedule.getAll',
-      ADD: 'aaProject.schedule.add',
-      REMOVE: 'aaProject.schedule.remove'
+    TRIGGERS: {
+      DEV_ONLY: 'aaProject.triggers.devOnly',
+      GET_ALL: 'aaProject.triggers.getAll',
+      ADD: 'aaProject.triggers.add',
+      REMOVE: 'aaProject.triggers.remove'
     },
     ACTIVITIES: {
       GET_ALL: 'aaProject.activities.getAll',
       ADD: 'aaProject.activities.add',
       REMOVE: 'aaProject.activities.remove'
+    },
+    COMMUNICATION: {
+      ADD: 'aaProject.activities.communication.add',
+      TRIGGER: 'aaProject.activities.communication.trigger',
+
     },
     ACTIVITY_CATEGORIES: {
       GET_ALL: 'aaProject.activityCategories.getAll',
@@ -104,6 +109,17 @@ export const MS_ACTIONS = {
     PHASES: {
       GET_ALL: 'aaProject.phases.getAll',
       GET_STATS: 'aaProject.phases.getStats'
+    },
+    STAKEHOLDERS: {
+      GET_ALL: 'aaProject.stakeholders.getAll',
+      ADD: 'aaProject.stakeholders.add',
+      REMOVE: 'aaProject.stakeholders.remove',
+      UPDATE: 'aaProject.stakeholders.update',
+      GET_GROUP: 'aaProject.stakeholders.getGroup',
+      GET_ALL_GROUPS: 'aaProject.stakeholders.getAllGroups',
+      ADD_GROUP: 'aaProject.stakeholders.addGroup',
+      UPDATE_GROUP: 'aaProject.stakeholders.updateGroup',
+      DELETE_GROUP: 'aaProject.stakeholders.deleteGroup',
     },
   },
   C2CProject: {

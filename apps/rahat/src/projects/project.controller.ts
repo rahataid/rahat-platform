@@ -7,16 +7,15 @@ import {
   Param,
   Patch,
   Post,
-  Query,
+  Query
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
-  CreateProjectDto,
   ListProjectBeneficiaryDto,
   ProjectCommunicationDto,
   UpdateProjectDto,
-  UpdateProjectStatusDto,
+  UpdateProjectStatusDto
 } from '@rahataid/extensions';
 import { BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
@@ -34,7 +33,7 @@ export class ProjectController {
   ) { }
 
   @Post()
-  create(@Body() createProjectDto: CreateProjectDto) {
+  create(@Body() createProjectDto: any) {
     return this.projectService.create(createProjectDto);
   }
 
