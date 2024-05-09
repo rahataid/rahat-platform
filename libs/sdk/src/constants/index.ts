@@ -84,10 +84,12 @@ export const MS_ACTIONS = {
     TRIGGERS: {
       DEV_ONLY: 'aaProject.triggers.devOnly',
       GET_ALL: 'aaProject.triggers.getAll',
+      GET_ONE: 'aaProject.triggers.getOne',
       ADD: 'aaProject.triggers.add',
       REMOVE: 'aaProject.triggers.remove'
     },
     ACTIVITIES: {
+      GET_ONE: 'aaProject.activities.getOne',
       GET_ALL: 'aaProject.activities.getAll',
       ADD: 'aaProject.activities.add',
       REMOVE: 'aaProject.activities.remove'

@@ -7,13 +7,6 @@ import {
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
 
 export const elActions: ProjectActionFunc = {
-  [MS_ACTIONS.SETTINGS.LIST]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: ProjectJobs.PROJECT_SETTINGS_LIST, uuid }, {}),
-  [MS_ACTIONS.SETTINGS.GET]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: ProjectJobs.PROJECT_SETTINGS_GET, uuid },
-      payload
-    ),
   //  [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: () =>
   // this.sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, payload),
   // [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: () =>
