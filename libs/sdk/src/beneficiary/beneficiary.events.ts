@@ -21,6 +21,7 @@ export const JOBS = {
   BULK_ADD_TO_PROJECT: 'rahat.jobs.beneficiary.bulk_add_to_project',
   ASSIGN_TO_PROJECT: 'rahat.jobs.beneficiary.assign_to_project',
   BULK_ASSIGN_TO_PROJECT: 'rahat.jobs.beneficiary.bulk_assign',
+  BULK_REFER_TO_PROJECT: 'rahat.jobs.beneficiary.bulk_refer_to_project',
   STATS: 'rahat.jobs.beneficiary.stats',
   PROJECT_STATS: 'rahat.jobs.beneficiary.project.stats',
   UPDATE: 'rahat.jobs.beneficiary.update',
