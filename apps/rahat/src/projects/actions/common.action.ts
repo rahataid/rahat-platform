@@ -12,6 +12,12 @@ export const beneficiaryActions: ProjectActionFunc = {
       { dto: payload, projectUid: uuid }
     )
   },
+  [MS_ACTIONS.BENEFICIARY.BULK_ADD_TO_PROJECT]: (uuid, payload, sendCommand) => {
+    return sendCommand(
+      { cmd: BeneficiaryJobs.BULK_ADD_TO_PROJECT },
+      { dto: payload, projectUid: uuid }
+    )
+  },
   [MS_ACTIONS.BENEFICIARY.ASSGIN_TO_PROJECT]: (uuid, payload, sendCommand) => {
     return sendCommand(
       { cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT },
@@ -26,7 +32,7 @@ export const beneficiaryActions: ProjectActionFunc = {
     ),
   [MS_ACTIONS.BENEFICIARY.LIST_BY_PROJECT]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: BeneficiaryJobs.LIST_BY_PROJECT },
+      { cmd: BeneficiaryJobs.LIST, uuid },
       { projectId: uuid, ...payload }
     ),
   [MS_ACTIONS.BENEFICIARY.GET_PROJECT_SPECIFIC]: (uuid, payload, sendCommand) =>

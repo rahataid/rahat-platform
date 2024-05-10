@@ -12,6 +12,7 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
+  CreateProjectDto,
   ListProjectBeneficiaryDto,
   ProjectCommunicationDto,
   UpdateProjectDto,
@@ -33,7 +34,7 @@ export class ProjectController {
   ) { }
 
   @Post()
-  create(@Body() createProjectDto: any) {
+  create(@Body() createProjectDto: CreateProjectDto) {
     return this.projectService.create(createProjectDto);
   }
 
@@ -75,7 +76,7 @@ export class ProjectController {
   @Get(':uuid/beneficiaries')
   listBeneficiaries(@Query() dto: ListProjectBeneficiaryDto) {
     return this.rahatClient
-      .send({ cmd: BeneficiaryJobs.LIST_BY_PROJECT }, dto)
+      .send({ cmd: BeneficiaryJobs.LIST }, dto)
       .pipe(timeout(5000));
   }
 
