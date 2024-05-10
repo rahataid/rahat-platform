@@ -100,18 +100,23 @@ export class BeneficiaryService {
     orderBy[dto.sort] = dto.order;
     const projectUUID = dto.projectId;
 
+    const where = projectUUID ? {
+      deletedAt: null,
+      BeneficiaryProject: projectUUID === 'NOT_ASSGNED' ? {
+        none: {}
+      } : {
+        some: {
+          projectId: projectUUID
+        }
+      }
+    } : {
+      deletedAt: null
+    }
+
     result = await paginate(
       this.rsprisma.beneficiary,
       {
-        where: {
-          //AND: AND_QUERY,
-          deletedAt: null,
-          BeneficiaryProject: projectUUID ? {
-            some: {
-              projectId: projectUUID
-            }
-          } : {}
-        },
+        where,
         include: {
           BeneficiaryProject: {
             include: {
