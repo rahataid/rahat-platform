@@ -45,6 +45,7 @@ export const MS_ACTIONS = {
     GET: 'beneficiary.get',
     DELETE: 'beneficiary.delete',
     ADD_TO_PROJECT: 'beneficiary.add_to_project',
+    BULK_ADD_TO_PROJECT: 'beneficiary.bulk_add_to_project',
     ASSGIN_TO_PROJECT: 'beneficiary.assign_to_project',
     BULK_ASSIGN_TO_PROJECT: 'beneficiary.bulk_assign',
     LIST_BY_PROJECT: 'beneficiary.list_by_project',
@@ -67,6 +68,7 @@ export const MS_ACTIONS = {
     LIST_REDEMPTION: 'elProject.listRedemption',
     GET_VENDOR_REDEMPTION: 'elProject.vendorRedemption',
     GET_VENDOR_REFERRER: 'elProject.beneficiaryReferred',
+    GET_ALL_STATS: 'elProject.getAllStats',
     LIST_BEN_VENDOR_COUNT: 'elProject.count_ben_vendor',
   },
   SETTINGS: {
@@ -74,11 +76,55 @@ export const MS_ACTIONS = {
     GET: 'settings.get',
   },
   AAPROJECT: {
-    SCHEDULE: {
-      DEV_ONLY: 'aaProject.schedule.devOnly',
-      GET_ALL: 'aaProject.schedule.getAll',
-      ADD: 'aaProject.schedule.add',
-      REMOVE: 'aaProject.schedule.remove'
-    }
+    RIVER_STATIONS: {
+      GET_DHM: 'aaProject.riverStations.getDhm'
+    },
+    WATER_LEVELS: {
+      GET_DHM: 'aaProject.waterLevels.getDhm'
+    },
+    TRIGGERS: {
+      DEV_ONLY: 'aaProject.triggers.devOnly',
+      GET_ALL: 'aaProject.triggers.getAll',
+      GET_ONE: 'aaProject.triggers.getOne',
+      ADD: 'aaProject.triggers.add',
+      REMOVE: 'aaProject.triggers.remove'
+    },
+    ACTIVITIES: {
+      GET_ONE: 'aaProject.activities.getOne',
+      GET_ALL: 'aaProject.activities.getAll',
+      ADD: 'aaProject.activities.add',
+      REMOVE: 'aaProject.activities.remove'
+    },
+    COMMUNICATION: {
+      ADD: 'aaProject.activities.communication.add',
+      TRIGGER: 'aaProject.activities.communication.trigger',
+    },
+    ACTIVITY_CATEGORIES: {
+      GET_ALL: 'aaProject.activityCategories.getAll',
+      ADD: 'aaProject.activityCategories.add',
+      REMOVE: 'aaProject.activityCategories.remove'
+    },
+    HAZARD_TYPES: {
+      GET_ALL: 'aaProject.hazardTypes.getAll',
+    },
+    PHASES: {
+      GET_ALL: 'aaProject.phases.getAll',
+      GET_STATS: 'aaProject.phases.getStats'
+    },
+    STAKEHOLDERS: {
+      GET_ALL: 'aaProject.stakeholders.getAll',
+      ADD: 'aaProject.stakeholders.add',
+      REMOVE: 'aaProject.stakeholders.remove',
+      UPDATE: 'aaProject.stakeholders.update',
+      GET_GROUP: 'aaProject.stakeholders.getGroup',
+      GET_ALL_GROUPS: 'aaProject.stakeholders.getAllGroups',
+      ADD_GROUP: 'aaProject.stakeholders.addGroup',
+      UPDATE_GROUP: 'aaProject.stakeholders.updateGroup',
+      DELETE_GROUP: 'aaProject.stakeholders.deleteGroup',
+    },
+  },
+  C2CProject: {
+    UPDATE_STATUS: 'c2cProject.updateStatus',
+    LIST_BEN_COUNT: 'c2cProject.count_ben',
   }
 };

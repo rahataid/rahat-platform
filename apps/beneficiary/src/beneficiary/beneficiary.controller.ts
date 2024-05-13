@@ -3,8 +3,8 @@ import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import {
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  ListProjectBeneficiaryDto,
   UpdateBeneficiaryDto,
+  addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
@@ -20,6 +20,7 @@ import { VerificationService } from './verification.service';
 export class BeneficiaryController {
   constructor(
     private readonly beneficiaryService: BeneficiaryService,
+    private readonly beneficiaryStatsService: BeneficiaryStatService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly service: BeneficiaryService,
     private readonly statsService: BeneficiaryStatService,
@@ -57,8 +58,8 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_BY_PROJECT })
-  async listByProject(dto: ListProjectBeneficiaryDto) {
-    return this.service.listBenefByProject(dto);
+  async listByProject(data: any) {
+    return this.service.listBenefByProject(data);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_PII })
@@ -82,6 +83,11 @@ export class BeneficiaryController {
     return this.beneficiaryService.addBeneficiaryToProject(dto, projectUid);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.BULK_ADD_TO_PROJECT })
+  async bulkaddToProject(payload: addBulkBeneficiaryToProject) {
+    return this.beneficiaryService.addBulkBeneficiaryToProject(payload);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
   async assignToProject(payload: any) {
     return this.beneficiaryService.assignBeneficiaryToProject(payload);
@@ -98,9 +104,14 @@ export class BeneficiaryController {
     return this.service.update(benefUUID, dto);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.DELETE })
+  delete(payload: any) {
+    return this.service.delete(payload.uuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.REMOVE })
-  remove(@Param('uuid') uuid: UUID) {
-    return this.service.remove(uuid);
+  async remove(payload: any) {
+    return this.service.remove(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GENERATE_LINK })
@@ -131,5 +142,10 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GET_PROJECT_SPECIFIC })
   getProjectSpecific(data) {
     return this.beneficiaryService.getProjectSpecificData(data)
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_TABLE_STATS })
+  getTableStats() {
+    return this.beneficiaryStatsService.getTableStats()
   }
 }

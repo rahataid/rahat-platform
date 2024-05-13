@@ -35,6 +35,9 @@ export enum ProjectTypes {
   CVA = 'CVA',
   EL = 'EL',
   ANTICIPATORY_ACTION = 'ANTICIPATORY_ACTION',
+  C2C = 'C2C',
+  PI = "PARAMETRIC INSURANCE",
+
 }
 
 export enum UploadFileType {
@@ -45,8 +48,8 @@ export enum UploadFileType {
 }
 
 export enum ProjectStatus {
-  NOT_READY='NOT_READY',
-  ACTIVE='ACTIVE',
-  CLOSED='CLOSED'
+  NOT_READY = 'NOT_READY',
+  ACTIVE = 'ACTIVE',
+  CLOSED = 'CLOSED'
 }
 

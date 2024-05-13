@@ -178,3 +178,12 @@ export class AddBenToProjectDto implements CreateBeneficiaryDto {
   @IsOptional()
   piiData?: TPIIData;
 }
+
+export type referrerBeneficiary = UUID | undefined
+
+export type referrerVendor = UUID | undefined
+
+export type projectUuid = UUID
+export type type = BeneficiaryType
+
+export type addBulkBeneficiaryToProject = CreateBeneficiaryDto[] & referrerBeneficiary & referrerVendor & type & projectUuid

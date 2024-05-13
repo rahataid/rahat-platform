@@ -151,7 +151,7 @@ CREATE TABLE "tbl_beneficiaries" (
     "gender" "Gender" NOT NULL DEFAULT 'UNKNOWN',
     "walletAddress" TEXT NOT NULL,
     "birthDate" TIMESTAMP(3),
-    "ageRange" TEXT,
+    "age" INTEGER,
     "location" TEXT,
     "latitude" DOUBLE PRECISION,
     "longitude" DOUBLE PRECISION,

@@ -4,11 +4,11 @@ import { StatDto } from './dto/stat.dto';
 
 @Injectable()
 export class StatsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private prismaService: PrismaService) { }
   async save(data: StatDto) {
     data.name = data.name.toUpperCase();
     if (data.group !== 'beneficiary') {
-      data.name = data.name + data.group;
+      data.name = data.name + '_ID_' + data.group;
     }
 
     return this.prismaService.stats.upsert({

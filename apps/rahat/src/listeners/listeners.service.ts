@@ -2,13 +2,14 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
-import { Project } from '@prisma/client';
 import { BQUEUE, ProjectEvents, ProjectJobs } from '@rahataid/sdk';
+import { Project } from '@rahataid/sdk/project/project.types';
+import { PrismaService } from '@rumsan/prisma';
 import { EVENTS } from '@rumsan/user';
-import axios from 'axios';
 import { Queue } from 'bull';
 import { DevService } from '../utils/develop.service';
 import { EmailService } from './email.service';
+import { MessageSenderService } from './messageSender.service';
 @Injectable()
 export class ListenersService {
   private otp: string;
@@ -18,10 +19,13 @@ export class ListenersService {
     @InjectQueue(BQUEUE.HOST) private readonly hostQueue: Queue,
     @InjectQueue(BQUEUE.RAHAT_PROJECT) private readonly projectQueue: Queue,
     private readonly configService: ConfigService,
+    protected prisma: PrismaService,
 
     private readonly devService: DevService,
-    private emailService: EmailService
-  ) {}
+    private emailService: EmailService,
+    private messageSenderService: MessageSenderService,
+
+  ) { }
 
   @OnEvent(EVENTS.OTP_CREATED)
   async sendOTPEmail(data: any) {
@@ -31,6 +35,14 @@ export class ListenersService {
       'OTP for login',
       'OTP for login',
       `<h1>OTP for login</h1><p>${data.otp}</p>`
+    );
+  }
+  @OnEvent(EVENTS.USER_CREATED)
+  async sendUserCreatedEmail(data: any) {
+    this.emailService.sendEmail(
+      data.address,
+      'You has been added to rahat.',
+      `You has been successfully added to rahat. Please follow the link "${this.configService.get('FRONTEND_URL')}" to join.`
     );
   }
 
@@ -57,7 +69,6 @@ export class ListenersService {
   }
   @OnEvent(ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT)
   async onProjectAddedToBen(data) {
-    const url = this.configService.get('MESSAGE_SENDER_API');
     const CONTENT_SID = this.configService.get('REFERRED_VOUCHER_ASSIGNED_SID');
     const payload = {
       phone: data.piiData.phone,
@@ -68,8 +79,32 @@ export class ListenersService {
       },
     };
 
-    axios.post(url, payload).catch((error) => {
-      console.error(error);
+    this.messageSenderService.sendWhatappMessage(payload)
+  }
+  @OnEvent(ProjectEvents.REQUEST_REDEMPTION)
+  async onRequestRedemption() {
+    const admins = await this.prisma.user.findMany({
+      where: {
+        UserRole: {
+          some: {
+            Role: {
+              name: 'Admin',
+            },
+          },
+        },
+      },
     });
+    admins.map((admin) => {
+      const CONTENT_SID = this.configService.get('REDEMPTION_REQUEST_SID');
+      const payload = {
+        phone: admin.phone,
+        type: 'WHATSAPP',
+        contentSid: CONTENT_SID,
+
+      };
+      this.messageSenderService.sendWhatappMessage(payload)
+
+    })
+
   }
 }

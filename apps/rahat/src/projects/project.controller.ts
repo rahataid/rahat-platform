@@ -7,7 +7,7 @@ import {
   Param,
   Patch,
   Post,
-  Query,
+  Query
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
@@ -16,6 +16,7 @@ import {
   ListProjectBeneficiaryDto,
   ProjectCommunicationDto,
   UpdateProjectDto,
+  UpdateProjectStatusDto
 } from '@rahataid/extensions';
 import { BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
@@ -30,7 +31,7 @@ export class ProjectController {
     private readonly projectService: ProjectService,
     @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy,
     @Inject('BEN_CLIENT') private readonly benClient: ClientProxy
-  ) {}
+  ) { }
 
   @Post()
   create(@Body() createProjectDto: CreateProjectDto) {
@@ -57,6 +58,15 @@ export class ProjectController {
     return this.projectService.update(uuid, updateProjectDto);
   }
 
+  @ApiParam({ name: 'uuid', required: true })
+  @Patch(':uuid/status')
+  updateStatus(
+    @Body() data: UpdateProjectStatusDto,
+    @Param('uuid') uuid: UUID
+  ) {
+    return this.projectService.updateStatus(uuid, data);
+  }
+
   @Delete(':uuid')
   remove(@Param('uuid') uuid: UUID) {
     return this.projectService.remove(uuid);
@@ -66,7 +76,7 @@ export class ProjectController {
   @Get(':uuid/beneficiaries')
   listBeneficiaries(@Query() dto: ListProjectBeneficiaryDto) {
     return this.rahatClient
-      .send({ cmd: BeneficiaryJobs.LIST_BY_PROJECT }, dto)
+      .send({ cmd: BeneficiaryJobs.LIST }, dto)
       .pipe(timeout(5000));
   }
 
