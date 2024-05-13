@@ -353,7 +353,7 @@ export class BeneficiaryService {
 
     return this.client.send(
       {
-        cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT,
+        cmd: BeneficiaryJobs.BULK_REFER_TO_PROJECT,
         uuid: projectUuid,
       },
       projectPayloads

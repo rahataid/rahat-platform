@@ -13,6 +13,9 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.TRIGGERS.DEV_ONLY, uuid }, payload),
   /************************/
 
+
+  // **** triggers start ******//
+
   [MS_ACTIONS.AAPROJECT.TRIGGERS.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.TRIGGERS.ADD, uuid }, payload),
 
@@ -20,14 +23,20 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.TRIGGERS.REMOVE, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.TRIGGERS.GET_ALL]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.TRIGGERS.GET_ALL, uuid }, {}),
+    sendCommand({ cmd: AAJobs.TRIGGERS.GET_ALL, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.TRIGGERS.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.TRIGGERS.GET_ONE, uuid }, payload),
+  // **** triggers end ******//
+
 
   [MS_ACTIONS.AAPROJECT.RIVER_STATIONS.GET_DHM]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.RIVER_STATIONS.GET_DHM, uuid }, {}),
+    sendCommand({ cmd: AAJobs.RIVER_STATIONS.GET_DHM, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.WATER_LEVELS.GET_DHM]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.WATER_LEVELS.GET_DHM, uuid }, payload),
 
+  // **** activities ******//
   [MS_ACTIONS.AAPROJECT.ACTIVITIES.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.ACTIVITIES.ADD, uuid }, payload),
 
@@ -36,6 +45,11 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.ACTIVITIES.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.ACTIVITIES.GET_ALL, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.ACTIVITIES.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.ACTIVITIES.GET_ONE, uuid }, payload),
+  // **** activities end ******//
+
 
   [MS_ACTIONS.AAPROJECT.ACTIVITY_CATEGORIES.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.ACTIVITY_CATEGORIES.GET_ALL, uuid }, payload),
@@ -52,9 +66,11 @@ export const aaActions: ProjectActionFunc = {
   // communication
   [MS_ACTIONS.AAPROJECT.COMMUNICATION.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.COMMUNICATION.ADD, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.COMMUNICATION.TRIGGER]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.COMMUNICATION.TRIGGER, uuid }, payload),
   // communication
+
   // **** phases ******//
   [MS_ACTIONS.AAPROJECT.PHASES.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PHASES.GET_ALL, uuid }, {}),

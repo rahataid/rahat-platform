@@ -15,7 +15,7 @@ import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { createContractSigner } from '../utils/web3';
-import { aaActions, beneficiaryActions, c2cActions, elActions, vendorActions } from './actions';
+import { aaActions, beneficiaryActions, c2cActions, elActions, settingActions, vendorActions } from './actions';
 @Injectable()
 export class ProjectService {
   constructor(
@@ -95,7 +95,7 @@ export class ProjectService {
         //send whatsapp message after added referal beneficiary to project
         if (
           response?.id &&
-          cmd.cmd === BeneficiaryJobs.ADD_TO_PROJECT &&
+          cmd.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT &&
           payload.dto.type === BeneficiaryType.REFERRED
         ) {
           this.eventEmitter.emit(
@@ -166,6 +166,7 @@ export class ProjectService {
       ...aaActions,
       ...beneficiaryActions,
       ...vendorActions,
+      ...settingActions,
       ...metaTxActions,
       ...c2cActions
     };
