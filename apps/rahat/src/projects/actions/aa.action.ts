@@ -46,8 +46,8 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.ACTIVITIES.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.ACTIVITIES.GET_ALL, uuid }, payload),
 
-  // [MS_ACTIONS.AAPROJECT.ACTIVITIES.GET_ONE]: (uuid, payload, sendCommand) =>
-  //   sendCommand({ cmd: AAJobs.ACTIVITIES.GET_ONE, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.ACTIVITIES.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.ACTIVITIES.GET_ONE, uuid }, payload),
   // **** activities end ******//
 
 
