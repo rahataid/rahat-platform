@@ -2,11 +2,11 @@
 FROM node:20-alpine3.19 AS deps
 WORKDIR /usr/src/app
 COPY ./dist/apps/rahat/package.json .npmrc ./
-RUN npm install -g pnpm && pnpm install
+RUN npm install -g pnpm@8.14.1 && pnpm install
 
 FROM node:20-alpine3.19 AS builder
 WORKDIR /usr/src/app
 COPY ./dist/apps/rahat/ ./
 COPY --from=deps /usr/src/app/node_modules ./node_modules
-RUN npm install -g pnpm && pnpx prisma generate
+RUN npm install -g pnpnpm@8.14.1pm && pnpx prisma generate
 CMD [ "node", "main.js" ]
