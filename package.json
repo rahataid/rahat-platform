@@ -67,13 +67,14 @@
     "nodemailer": "^6.9.11",
     "prisma": "5.10.2",
     "reflect-metadata": "^0.1.14",
+    "rs-asset-uploader": "^1.0.5",
     "rxjs": "^7.8.1",
     "ts-node": "10.9.1",
+    "tslib": "2.6.2",
     "uuid": "^9.0.1",
     "viem": "^2.8.4",
     "winston": "^3.11.0",
     "xlsx": "^0.18.5",
-    "tslib": "2.6.2",
     "zlib": "^1.0.5"
   },
   "devDependencies": {
