@@ -94,8 +94,8 @@ export class ProjectService {
       tap((response) => {
         //send whatsapp message after added referal beneficiary to project
         if (
-          response?.id &&
-          cmd.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT &&
+          response?.insertedData?.some((res) => res?.walletAddress) &&
+          response?.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT &&
           payload.dto.type === BeneficiaryType.REFERRED
         ) {
           this.eventEmitter.emit(
