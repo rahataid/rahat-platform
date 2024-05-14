@@ -140,13 +140,14 @@ export class BeneficiaryService {
   }
 
   async mergeProjectData(data: any) {
+    console.log(data)
     const mergedData = [];
     for (const d of data) {
       const projectData = await this.prisma.beneficiary.findUnique({
         where: { uuid: d.uuid }
       })
       const piiData = await this.prisma.beneficiaryPii.findUnique({
-        where: { beneficiaryId: d.id },
+        where: { beneficiaryId: projectData.id },
       });
       if (projectData) {
         d.projectData = projectData
