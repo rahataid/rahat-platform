@@ -10,7 +10,8 @@ export const JOBS = {
     GET_ALL: 'aa.jobs.triggers.getAll',
     GET_ONE: 'aa.jobs.triggers.getOne',
     ADD: 'aa.jobs.triggers.add',
-    REMOVE: 'aa.jobs.triggers.remove'
+    REMOVE: 'aa.jobs.triggers.remove',
+    ACTIVATE: 'aa.jobs.triggers.activate',
   },
   ACTIVITIES: {
     GET_ONE: 'aa.jobs.activities.getOne',

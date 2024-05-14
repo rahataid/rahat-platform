@@ -27,6 +27,9 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.TRIGGERS.GET_ONE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.TRIGGERS.GET_ONE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.TRIGGERS.ACTIVATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.TRIGGERS.ACTIVATE, uuid }, payload),
   // **** triggers end ******//
 
 
@@ -66,13 +69,13 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.HAZARD_TYPES.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.HAZARD_TYPES.GET_ALL, uuid }, {}),
 
-  // communication
+  // **** communication **** //
   [MS_ACTIONS.AAPROJECT.COMMUNICATION.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.COMMUNICATION.ADD, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.COMMUNICATION.TRIGGER]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.COMMUNICATION.TRIGGER, uuid }, payload),
-  // communication
+  // **** communication **** //
 
   // **** phases ******//
   [MS_ACTIONS.AAPROJECT.PHASES.GET_ALL]: (uuid, payload, sendCommand) =>
@@ -95,7 +98,6 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STAKEHOLDERS.GET_ALL, uuid }, payload),
-
   // **** stakeholders end ******//
 
 
