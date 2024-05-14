@@ -4,23 +4,17 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
-  AddBenToProjectDto,
-  AddToProjectDto,
+  AddBenToProjectDto, addBulkBeneficiaryToProject, AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  UpdateBeneficiaryDto,
-  addBulkBeneficiaryToProject,
+  UpdateBeneficiaryDto
 } from '@rahataid/extensions';
 import {
-  BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
-  BeneficiaryJobs,
-  ProjectContants,
-  TPIIData,
-  generateRandomWallet
+  BeneficiaryJobs, BQUEUE, generateRandomWallet, ProjectContants, TPIIData
 } from '@rahataid/sdk';
-import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
+import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -70,9 +64,9 @@ export class BeneficiaryService {
     if (dto.projectId && data.data.length > 0) {
       const mergedData = await this.mergeProjectPIIData(data.data);
       data.data = mergedData;
-      const projectPayload = { ...data, status: dto.type };
+      const projectPayload = { ...data, status: dto?.type };
       return this.client.send(
-        { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
+        { cmd: BeneficiaryJobs.LIST_PROJECT_PII, uuid: dto.projectId },
         projectPayload
       );
     }
@@ -344,7 +338,6 @@ export class BeneficiaryService {
 
       })
     )
-
     //2.Save beneficiary to project
 
     await this.prisma.beneficiaryProject.createMany({
