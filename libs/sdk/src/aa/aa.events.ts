@@ -16,7 +16,9 @@ export const JOBS = {
     GET_ONE: 'aa.jobs.activities.getOne',
     GET_ALL: 'aa.jobs.activities.getAll',
     ADD: 'aa.jobs.activities.add',
-    REMOVE: 'aa.jobs.activities.remove'
+    REMOVE: 'aa.jobs.activities.remove',
+    UPDATE: 'aa.jobs.activities.update',
+    UPDATE_STATUS: 'aa.jobs.activities.updateStatus',
   },
   ACTIVITY_CATEGORIES: {
     GET_ALL: 'aa.jobs.activityCategories.getAll',

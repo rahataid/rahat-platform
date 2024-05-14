@@ -93,7 +93,9 @@ export const MS_ACTIONS = {
       GET_ONE: 'aaProject.activities.getOne',
       GET_ALL: 'aaProject.activities.getAll',
       ADD: 'aaProject.activities.add',
-      REMOVE: 'aaProject.activities.remove'
+      REMOVE: 'aaProject.activities.remove',
+      UPDATE: 'aaProject.activities.update',
+      UPDATE_STATUS: 'aaProject.activities.updateStatus',
     },
     COMMUNICATION: {
       ADD: 'aaProject.activities.communication.add',
