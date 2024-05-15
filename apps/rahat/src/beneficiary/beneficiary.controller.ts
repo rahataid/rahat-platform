@@ -25,7 +25,9 @@ import {
   ValidateWalletDto
 } from '@rahataid/extensions';
 import {
-  BeneficiaryJobs, BQUEUE, Enums,
+  BQUEUE,
+  BeneficiaryJobs,
+  Enums,
   MS_TIMEOUT,
   TFile
 } from '@rahataid/sdk';
@@ -136,7 +138,7 @@ export class BeneficiaryController {
         name: b['Name*'],
         phone: b['Whatsapp Number*'],
         extras: {
-          isAdult: getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age']) > 18,
+          isAdult: getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age*']) > 18,
           governmentId: b['Government ID'],
         },
       },
