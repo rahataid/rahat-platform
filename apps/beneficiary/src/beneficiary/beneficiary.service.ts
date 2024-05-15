@@ -4,23 +4,17 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
-  AddBenToProjectDto,
-  AddToProjectDto,
+  AddBenToProjectDto, addBulkBeneficiaryToProject, AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  UpdateBeneficiaryDto,
-  addBulkBeneficiaryToProject,
+  UpdateBeneficiaryDto
 } from '@rahataid/extensions';
 import {
-  BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
-  BeneficiaryJobs,
-  ProjectContants,
-  TPIIData,
-  generateRandomWallet
+  BeneficiaryJobs, BQUEUE, generateRandomWallet, ProjectContants, TPIIData
 } from '@rahataid/sdk';
-import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
+import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -70,9 +64,9 @@ export class BeneficiaryService {
     if (dto.projectId && data.data.length > 0) {
       const mergedData = await this.mergeProjectPIIData(data.data);
       data.data = mergedData;
-      const projectPayload = { ...data, status: dto.type };
+      const projectPayload = { ...data, status: dto?.type };
       return this.client.send(
-        { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
+        { cmd: BeneficiaryJobs.LIST_PROJECT_PII, uuid: dto.projectId },
         projectPayload
       );
     }
@@ -85,17 +79,10 @@ export class BeneficiaryService {
   async listBenefByProject(data: any) {
     if (data?.data.length > 0) {
       const mergedProjectData = await this.mergeProjectData(data.data)
-      console.log(mergedProjectData)
       data.data = mergedProjectData;
     }
 
     return data;
-    // if (data.data.length > 0) {
-    //   const mergedData = await this.mergeProjectPIIData(data.data);
-    //   data.data = mergedData;
-    // }
-    // const projectPayload = { ...data, status: dto.status };
-
   }
 
   async list(
@@ -107,18 +94,23 @@ export class BeneficiaryService {
     orderBy[dto.sort] = dto.order;
     const projectUUID = dto.projectId;
 
+    const where = projectUUID ? {
+      deletedAt: null,
+      BeneficiaryProject: projectUUID === 'NOT_ASSGNED' ? {
+        none: {}
+      } : {
+        some: {
+          projectId: projectUUID
+        }
+      }
+    } : {
+      deletedAt: null
+    }
+
     result = await paginate(
       this.rsprisma.beneficiary,
       {
-        where: {
-          //AND: AND_QUERY,
-          deletedAt: null,
-          BeneficiaryProject: projectUUID ? {
-            some: {
-              projectId: projectUUID
-            }
-          } : {}
-        },
+        where,
         include: {
           BeneficiaryProject: {
             include: {
@@ -142,13 +134,14 @@ export class BeneficiaryService {
   }
 
   async mergeProjectData(data: any) {
+    console.log(data)
     const mergedData = [];
     for (const d of data) {
       const projectData = await this.prisma.beneficiary.findUnique({
         where: { uuid: d.uuid }
       })
       const piiData = await this.prisma.beneficiaryPii.findUnique({
-        where: { beneficiaryId: d.id },
+        where: { beneficiaryId: projectData.id },
       });
       if (projectData) {
         d.projectData = projectData
@@ -344,7 +337,6 @@ export class BeneficiaryService {
 
       })
     )
-
     //2.Save beneficiary to project
 
     await this.prisma.beneficiaryProject.createMany({

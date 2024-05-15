@@ -87,13 +87,16 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.triggers.getAll',
       GET_ONE: 'aaProject.triggers.getOne',
       ADD: 'aaProject.triggers.add',
-      REMOVE: 'aaProject.triggers.remove'
+      REMOVE: 'aaProject.triggers.remove',
+      ACTIVATE: 'aaProject.triggers.activate',
     },
     ACTIVITIES: {
       GET_ONE: 'aaProject.activities.getOne',
       GET_ALL: 'aaProject.activities.getAll',
       ADD: 'aaProject.activities.add',
-      REMOVE: 'aaProject.activities.remove'
+      REMOVE: 'aaProject.activities.remove',
+      UPDATE: 'aaProject.activities.update',
+      UPDATE_STATUS: 'aaProject.activities.updateStatus',
     },
     COMMUNICATION: {
       ADD: 'aaProject.activities.communication.add',

@@ -16,6 +16,7 @@ export const JOBS = {
   GET_BY_PHONE: 'rahat.jobs.beneficiary.get_by_phone',
   GET_TABLE_STATS: 'rahat.jobs.beneficiary.get_from_stats_table',
   LIST: 'rahat.jobs.beneficiary.list',
+  LIST_PROJECT_PII: 'rahat.jobs.beneficiary.list_project_pii',
   REMOVE: 'rahat.jobs.beneficiary.remove',
   ADD_TO_PROJECT: 'rahat.jobs.beneficiary.add_to_project',
   BULK_ADD_TO_PROJECT: 'rahat.jobs.beneficiary.bulk_add_to_project',

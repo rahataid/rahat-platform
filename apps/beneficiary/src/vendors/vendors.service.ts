@@ -134,7 +134,7 @@ export class VendorsService {
 
   async listProjectVendor(dto) {
     const { projectId } = dto;
-    return this.prisma.projectVendors.findMany({
+    const venData = await this.prisma.projectVendors.findMany({
       where: {
         projectId,
       },
@@ -143,6 +143,11 @@ export class VendorsService {
         User: true,
       },
     });
+    return this.client.send({
+      cmd: VendorJobs.LIST,
+      uuid: projectId
+    },
+      venData)
   }
 
   async listRedemptionVendor(data) {
