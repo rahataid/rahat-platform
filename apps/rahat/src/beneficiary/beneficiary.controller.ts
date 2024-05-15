@@ -132,7 +132,7 @@ export class BeneficiaryController {
       gender: b["Gender*"],
       latitude: b['Latitude'],
       longitude: b['Longitude'],
-      age: b['Age'] || null,
+      age: b['Age*'] || null,
       walletAddress: b['Wallet Address'],
       piiData: {
         name: b['Name*'],
