@@ -70,4 +70,5 @@ export const settingActions: ProjectActionFunc = {
       { cmd: ProjectJobs.PROJECT_SETTINGS_GET, uuid },
       payload
     ),
+
 }

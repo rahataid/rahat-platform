@@ -72,6 +72,7 @@ export class GlobalCustomExceptionFilter
       path: request?.url,
     };
 
+
     if (exception instanceof HttpException) {
       ExceptionHandler?.handleHttpException(exception, responseData, response);
     } else if (exception instanceof RpcException) {
@@ -83,6 +84,8 @@ export class GlobalCustomExceptionFilter
     } else if (typeof exception === 'string') {
       responseData.message = exception;
     }
+
+
 
     response.status(responseData?.statusCode).send(responseData);
   }
