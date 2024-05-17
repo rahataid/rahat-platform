@@ -32,8 +32,8 @@ export class ListenersService {
     this.otp = data.otp;
     this.emailService.sendEmail(
       data.address,
-      'OTP for login',
-      'OTP for login',
+      'Login OTP',
+      'Login OTP',
       `
         <div style="max-width:800px;max-height: 600px;overflow:auto;line-height:2;background: #333333;">
           <div style="margin:50px auto;width:70%;padding:40px 40px; border: 1px solid #fff; border-radius: 12px;">
