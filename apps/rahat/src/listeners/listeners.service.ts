@@ -68,12 +68,13 @@ export class ListenersService {
   async sendUserCreatedEmail(data: any) {
     this.emailService.sendEmail(
       data.address,
-      'You have been added to rahat.',
+      'Welcome to Rahat.',
       `
       Hi,
       
       We're thrilled to have you on board! You've been successfully added to Rahat dashboard.
-      Just click the link below to access the Rahat dashboard: "${this.configService.get('FRONTEND_URL')}".
+      
+      Click the link to access the Rahat dashboard: <span style="font-size: 24px">"${this.configService.get('FRONTEND_URL')}"</span>.
       
       Best regards,
       Rahat Team  
