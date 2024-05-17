@@ -74,6 +74,7 @@ export const MS_ACTIONS = {
   SETTINGS: {
     LIST: 'settings.list',
     GET: 'settings.get',
+    ADD: 'settings.add',
   },
   AAPROJECT: {
     RIVER_STATIONS: {
