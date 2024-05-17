@@ -74,7 +74,7 @@ export class ListenersService {
       
       We're thrilled to have you on board! You've been successfully added to Rahat dashboard.
       
-      Click the link to access the Rahat dashboard: <span style="font-size: 24px">"${this.configService.get('FRONTEND_URL')}"</span>.
+      Click the link to access the Rahat dashboard: ${this.configService.get('FRONTEND_URL')}.
       
       Best regards,
       Rahat Team  
