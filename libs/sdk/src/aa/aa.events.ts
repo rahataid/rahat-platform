@@ -34,8 +34,10 @@ export const JOBS = {
     GET_ALL: 'aa.jobs.hazardTypes.getAll',
   },
   PHASES: {
+    GET_ONE: 'aa.jobs.phases.getOne',
     GET_ALL: 'aa.jobs.phases.getAll',
-    GET_STATS: 'aa.jobs.phases.getStats'
+    GET_STATS: 'aa.jobs.phases.getStats',
+    ADD_TRIGGERS: 'aa.jobs.phases.addTriggers',
   },
   STAKEHOLDERS: {
     GET_ALL: 'aa.jobs.stakeholders.getAll',

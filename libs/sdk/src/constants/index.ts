@@ -111,8 +111,10 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.hazardTypes.getAll',
     },
     PHASES: {
+      GET_ONE: 'aaProject.phases.getOne',
       GET_ALL: 'aaProject.phases.getAll',
-      GET_STATS: 'aaProject.phases.getStats'
+      GET_STATS: 'aaProject.phases.getStats',
+      ADD_TRIGGERS: 'aaProject.phases.addTriggers',
     },
     STAKEHOLDERS: {
       GET_ALL: 'aaProject.stakeholders.getAll',
