@@ -15,7 +15,6 @@ export const aaActions: ProjectActionFunc = {
 
 
   // **** triggers start ******//
-
   [MS_ACTIONS.AAPROJECT.TRIGGERS.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.TRIGGERS.ADD, uuid }, payload),
 
@@ -33,13 +32,17 @@ export const aaActions: ProjectActionFunc = {
   // **** triggers end ******//
 
 
+
+  // **** river stations start ******//
   [MS_ACTIONS.AAPROJECT.RIVER_STATIONS.GET_DHM]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.RIVER_STATIONS.GET_DHM, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.WATER_LEVELS.GET_DHM]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.WATER_LEVELS.GET_DHM, uuid }, payload),
+  // **** river stations end ******//
 
-  // **** activities ******//
+
+  // **** activities start ******//
   [MS_ACTIONS.AAPROJECT.ACTIVITIES.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.ACTIVITIES.ADD, uuid }, payload),
 
@@ -59,7 +62,7 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.ACTIVITIES.UPDATE, uuid }, payload),
   // **** activities end ******//
 
-
+  // **** activity categories start ******//
   [MS_ACTIONS.AAPROJECT.ACTIVITY_CATEGORIES.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.ACTIVITY_CATEGORIES.GET_ALL, uuid }, payload),
 
@@ -70,22 +73,30 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.ACTIVITY_CATEGORIES.REMOVE, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.HAZARD_TYPES.GET_ALL]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.HAZARD_TYPES.GET_ALL, uuid }, {}),
+    sendCommand({ cmd: AAJobs.HAZARD_TYPES.GET_ALL, uuid }, payload),
+  // **** activity categories end ******//
 
-  // **** communication **** //
+
+  // **** communication start **** //
   [MS_ACTIONS.AAPROJECT.COMMUNICATION.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.COMMUNICATION.ADD, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.COMMUNICATION.TRIGGER]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.COMMUNICATION.TRIGGER, uuid }, payload),
-  // **** communication **** //
+  // **** communication end **** //
 
-  // **** phases ******//
+  // **** phases start ******//
+  [MS_ACTIONS.AAPROJECT.PHASES.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PHASES.GET_ONE, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.PHASES.GET_ALL]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.PHASES.GET_ALL, uuid }, {}),
+    sendCommand({ cmd: AAJobs.PHASES.GET_ALL, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.PHASES.GET_STATS]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.PHASES.GET_STATS, uuid }, {}),
+    sendCommand({ cmd: AAJobs.PHASES.GET_STATS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PHASES.ADD_TRIGGERS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PHASES.ADD_TRIGGERS, uuid }, payload),
   // **** phases end ******//
 
 
