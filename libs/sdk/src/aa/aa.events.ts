@@ -45,4 +45,11 @@ export const JOBS = {
     UPDATE_GROUP: 'aa.jobs.stakeholders.updateGroup',
     DELETE_GROUP: 'aa.jobs.stakeholders.deleteGroup'
   },
+  BENEFICIARY: {
+    ADD_GROUP: 'aa.jobs.beneficiary.addGroup',
+    ASSIGN_TOKEN_TO_GROUP: 'aa.jobs.beneficiary.assign_token_to_group'
+  },
+  CONTRACT: {
+    INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget'
+  }
 };

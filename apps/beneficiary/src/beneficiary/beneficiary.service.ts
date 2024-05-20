@@ -134,7 +134,6 @@ export class BeneficiaryService {
   }
 
   async mergeProjectData(data: any) {
-    console.log(data)
     const mergedData = [];
     for (const d of data) {
       const projectData = await this.prisma.beneficiary.findUnique({
