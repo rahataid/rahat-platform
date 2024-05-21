@@ -16,6 +16,7 @@ export const JOBS = {
   ASSIGN_DISCOUNT_VOUCHER: 'rahat.jobs.project.discountVoucher',
   PROJECT_SETTINGS_LIST: 'rahat.jobs.settings.list',
   PROJECT_SETTINGS_GET: 'rahat.jobs.settings.get',
+  PROJECT_SETTINGS_ADD: 'rahat.jobs.settings.add',
   REQUEST_REDEMPTION: 'rahat.jobs.project.request_redemption',
   UPDATE_REDEMPTION: 'rahat.jobs.project.update_redemption',
   LIST_REDEMPTION: 'rahat.jobs.project.list_redemption',

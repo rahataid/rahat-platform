@@ -7,7 +7,7 @@ import {
   Param,
   Patch,
   Post,
-  Query,
+  Query
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
@@ -16,7 +16,7 @@ import {
   ListProjectBeneficiaryDto,
   ProjectCommunicationDto,
   UpdateProjectDto,
-  UpdateProjectStatusDto,
+  UpdateProjectStatusDto
 } from '@rahataid/extensions';
 import { BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
@@ -76,7 +76,7 @@ export class ProjectController {
   @Get(':uuid/beneficiaries')
   listBeneficiaries(@Query() dto: ListProjectBeneficiaryDto) {
     return this.rahatClient
-      .send({ cmd: BeneficiaryJobs.LIST_BY_PROJECT }, dto)
+      .send({ cmd: BeneficiaryJobs.LIST }, dto)
       .pipe(timeout(5000));
   }
 

@@ -8,17 +8,16 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  ListProjectBeneficiaryDto,
   UpdateBeneficiaryDto,
+  addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
 import {
   BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
   BeneficiaryJobs,
-  ProjectContants,
-  TPIIData,
-  generateRandomWallet,
+  ProjectContants, TPIIData,
+  generateRandomWallet
 } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { Queue } from 'bull';
@@ -52,6 +51,8 @@ export class BeneficiaryService {
     const repository = dto.projectId ? this.rsprisma.beneficiaryProject : this.rsprisma.beneficiaryPii;
     const include = dto.projectId ? { Beneficiary: true } : {};
     const where = dto.projectId ? { projectId: dto.projectId } : {};
+    //TODO: change in library to make pagination optional
+    const perPage = await repository.count()
 
     const data = await paginate(
       repository,
@@ -61,55 +62,32 @@ export class BeneficiaryService {
       },
       {
         page: dto.page,
-        perPage: dto.perPage,
+        perPage: perPage,
       }
     );
 
     if (dto.projectId && data.data.length > 0) {
       const mergedData = await this.mergeProjectPIIData(data.data);
       data.data = mergedData;
-      const projectPayload = { ...data, status: dto.type };
+      const projectPayload = { ...data, status: dto?.type };
       return this.client.send(
-        { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
+        { cmd: BeneficiaryJobs.LIST_PROJECT_PII, uuid: dto.projectId },
         projectPayload
       );
     }
-
     if (!dto.projectId) {
       data.data = data?.data?.map((piiData) => ({ piiData }));
     }
 
     return data;
   }
-  async listBenefByProject(dto: ListProjectBeneficiaryDto) {
-    const orderBy: Record<string, 'asc' | 'desc'> = {};
-    orderBy[dto.sort] = dto.order;
-    const data = await paginate(
-      this.rsprisma.beneficiaryProject,
-      {
-        where: {
-          projectId: dto.projectId,
-        },
-        include: { Beneficiary: true },
-        orderBy,
-      },
-      {
-        page: dto.page,
-        perPage: dto.perPage,
-      }
-    );
-    // return data;
-
-    if (data.data.length > 0) {
-      const mergedData = await this.mergeProjectPIIData(data.data);
-      data.data = mergedData;
+  async listBenefByProject(data: any) {
+    if (data?.data.length > 0) {
+      const mergedProjectData = await this.mergeProjectData(data.data)
+      data.data = mergedProjectData;
     }
-    const projectPayload = { ...data, status: dto.status };
-    // return data;
-    return this.client.send(
-      { cmd: BeneficiaryJobs.LIST, uuid: dto.projectId },
-      projectPayload
-    );
+
+    return data;
   }
 
   async list(
@@ -121,18 +99,23 @@ export class BeneficiaryService {
     orderBy[dto.sort] = dto.order;
     const projectUUID = dto.projectId;
 
+    const where = projectUUID ? {
+      deletedAt: null,
+      BeneficiaryProject: projectUUID === 'NOT_ASSGNED' ? {
+        none: {}
+      } : {
+        some: {
+          projectId: projectUUID
+        }
+      }
+    } : {
+      deletedAt: null
+    }
+
     result = await paginate(
       this.rsprisma.beneficiary,
       {
-        where: {
-          //AND: AND_QUERY,
-          deletedAt: null,
-          BeneficiaryProject: projectUUID ? {
-            some: {
-              projectId: projectUUID
-            }
-          } : {}
-        },
+        where,
         include: {
           BeneficiaryProject: {
             include: {
@@ -153,6 +136,25 @@ export class BeneficiaryService {
       result.data = mergedData;
     }
     return result;
+  }
+
+  async mergeProjectData(data: any) {
+    console.log(data)
+    const mergedData = [];
+    for (const d of data) {
+      const projectData = await this.prisma.beneficiary.findUnique({
+        where: { uuid: d.uuid }
+      })
+      const piiData = await this.prisma.beneficiaryPii.findUnique({
+        where: { beneficiaryId: projectData.id },
+      });
+      if (projectData) {
+        d.projectData = projectData
+        d.piiData = piiData;
+      };
+      mergedData.push(d)
+    }
+    return mergedData;
   }
 
   async mergeProjectPIIData(data: any) {
@@ -312,6 +314,51 @@ export class BeneficiaryService {
 
   async saveBeneficiaryToProject(dto: AddToProjectDto) {
     return this.prisma.beneficiaryProject.create({ data: dto });
+  }
+
+  async addBulkBeneficiaryToProject(dto: addBulkBeneficiaryToProject) {
+    const { dto: { beneficiaries, referrerBeneficiary, referrerVendor, type, projectUuid }
+    } = dto;
+    const projectPayloads = [];
+    const benProjectData = [];
+
+    const { beneficiariesData } = await this.createBulk(beneficiaries);
+
+    await Promise.all(
+      beneficiariesData.map(async (ben) => {
+        const projectPayload = {
+          uuid: ben.uuid,
+          walletAddress: ben.walletAddress,
+          extras: ben?.extras || null,
+          type: type,
+          referrerBeneficiary,
+          referrerVendor
+        }
+        benProjectData.push({
+          projectId: projectUuid,
+          beneficiaryId: ben.uuid
+        });
+        projectPayloads.push(projectPayload);
+
+      })
+    )
+    //2.Save beneficiary to project
+
+    await this.prisma.beneficiaryProject.createMany({
+      data: benProjectData
+    })
+
+    //3. Sync beneficiary to project
+
+    return this.client.send(
+      {
+        cmd: BeneficiaryJobs.BULK_REFER_TO_PROJECT,
+        uuid: projectUuid,
+      },
+      projectPayloads
+    );
+
+
   }
 
   async bulkAssignToProject(dto) {
@@ -505,14 +552,13 @@ export class BeneficiaryService {
     return rdata;
   }
 
-  async createBulk(dtos: CreateBeneficiaryDto[]) {
-    console.log('dtos', dtos);
+  async createBulk(dtos: CreateBeneficiaryDto[], projectUuid?: string) {
     const hasPhone = dtos.every((dto) => dto.piiData.phone);
     if (!hasPhone) throw new RpcException('Phone number is required');
 
     //check if phone number is unique or not
-    const ben = await this.checkPhoneNumber(dtos);
-    if (ben.length > 0) throw new RpcException('Phone number should be unique');
+    const benPhone = await this.checkPhoneNumber(dtos);
+    if (benPhone.length > 0) throw new RpcException(`${benPhone} Phone number should be unique`);
 
     const hasWallet = dtos.every((dto) => dto.walletAddress);
     if (hasWallet) {
@@ -586,11 +632,13 @@ export class BeneficiaryService {
       });
     }
 
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, { projectUuid });
 
     // Return some form of success indicator, as createMany does not return the records themselves
-    return { success: true, count: dtos.length };
+    return { success: true, count: dtos.length, beneficiariesData: insertedBeneficiaries };
   }
+
+
 
   async checkWalletAddress(dtos) {
     const wallets = dtos.map((dto) => dto.walletAddress);
@@ -606,13 +654,15 @@ export class BeneficiaryService {
 
   async checkPhoneNumber(dtos) {
     const phoneNumber = dtos.map((dto) => dto.piiData.phone.toString());
-    return this.prisma.beneficiaryPii.findMany({
+    const ben = await this.prisma.beneficiaryPii.findMany({
       where: {
         phone: {
           in: phoneNumber,
         },
       },
     });
+
+    return ben ? ben.map(p => p.phone) : []
   }
 
   async listReferredBen({ bendata }) {

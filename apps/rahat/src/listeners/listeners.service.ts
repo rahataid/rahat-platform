@@ -70,16 +70,19 @@ export class ListenersService {
   @OnEvent(ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT)
   async onProjectAddedToBen(data) {
     const CONTENT_SID = this.configService.get('REFERRED_VOUCHER_ASSIGNED_SID');
-    const payload = {
-      phone: data.piiData.phone,
-      type: 'WHATSAPP',
-      contentSid: CONTENT_SID,
-      contentVariables: {
-        name: data.piiData.name,
-      },
-    };
+    for (const beneficiary of data.beneficiaries) {
+      const payload = {
+        phone: beneficiary.piiData.phone,
+        type: 'WHATSAPP',
+        contentSid: CONTENT_SID,
+        contentVariables: {
+          name: beneficiary.piiData.name,
+        },
+      };
 
-    this.messageSenderService.sendWhatappMessage(payload)
+      this.messageSenderService.sendWhatappMessage(payload)
+    }
+
   }
   @OnEvent(ProjectEvents.REQUEST_REDEMPTION)
   async onRequestRedemption() {

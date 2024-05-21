@@ -1,6 +1,7 @@
 import {
   BeneficiaryJobs,
   MS_ACTIONS,
+  ProjectJobs,
   VendorJobs
 } from '@rahataid/sdk';
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
@@ -8,6 +9,12 @@ export const beneficiaryActions: ProjectActionFunc = {
   [MS_ACTIONS.BENEFICIARY.ADD_TO_PROJECT]: (uuid, payload, sendCommand) => {
     return sendCommand(
       { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
+      { dto: payload, projectUid: uuid }
+    )
+  },
+  [MS_ACTIONS.BENEFICIARY.BULK_ADD_TO_PROJECT]: (uuid, payload, sendCommand) => {
+    return sendCommand(
+      { cmd: BeneficiaryJobs.BULK_ADD_TO_PROJECT },
       { dto: payload, projectUid: uuid }
     )
   },
@@ -25,7 +32,7 @@ export const beneficiaryActions: ProjectActionFunc = {
     ),
   [MS_ACTIONS.BENEFICIARY.LIST_BY_PROJECT]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: BeneficiaryJobs.LIST_BY_PROJECT },
+      { cmd: BeneficiaryJobs.LIST, uuid },
       { projectId: uuid, ...payload }
     ),
   [MS_ACTIONS.BENEFICIARY.GET_PROJECT_SPECIFIC]: (uuid, payload, sendCommand) =>
@@ -53,3 +60,15 @@ export const vendorActions: ProjectActionFunc = {
       { projectId: uuid, ...payload }
     ),
 };
+
+export const settingActions: ProjectActionFunc = {
+  [MS_ACTIONS.SETTINGS.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.PROJECT_SETTINGS_LIST, uuid }, payload),
+
+  [MS_ACTIONS.SETTINGS.GET]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.PROJECT_SETTINGS_GET, uuid },
+      payload
+    ),
+
+}
