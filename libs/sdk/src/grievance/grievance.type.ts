@@ -1,3 +1,4 @@
+
 export enum GrievanceStatus {
   NEW = 'NEW',
   UNDER_REVIEW = 'UNDER_REVIEW',
@@ -22,4 +23,14 @@ export type Grievance = {
   status: GrievanceStatus;
   createdAt?: Date;
   updatedAt?: Date;
+  project?: {
+    name: string;
+    uuid: string;
+  };
+  reportedBy?: {
+    name: string;
+    uuid: string;
+    id: number;
+  };
+
 }
