@@ -35,6 +35,8 @@ model User {
   createdBy Int?
   updatedBy Int?
 
+  grievances Grievance[] @relation("UserGrievances")
+
   @@map("tbl_users")
 }
 
@@ -307,6 +309,8 @@ model Project {
   BeneficiaryProject BeneficiaryProject[]
   ProjectVendors     ProjectVendors[]
 
+  Grievance Grievance[]
+
   @@map("tbl_projects")
 }
 
@@ -387,3 +391,38 @@ enum TransactionStatus {
 }
 
 // ++++++++++++++++++ END: @rahat/transactions - Transactions ++++++++++++++++++++++
+
+// ++++++++++++++++++ START: @rahat/grievances - Grievances ++++++++++++++++++++
+
+enum GrievanceStatus {
+  //  'New', 'Under Review', 'Resolved', 'Closed
+  NEW
+  UNDER_REVIEW
+  RESOLVED
+  CLOSED
+}
+
+enum GrievanceType {
+  TECHNICAL
+  NON_TECHNICAL
+  OTHER
+}
+
+model Grievance {
+  id              Int             @id @default(autoincrement())
+  reportedById    Int
+  reportedBy      User            @relation("UserGrievances", fields: [reportedById], references: [id])
+  reporterContact String
+  title           String
+  type            GrievanceType
+  projectId       String          @db.Uuid()
+  project         Project         @relation(fields: [projectId], references: [uuid])
+  description     String
+  status          GrievanceStatus @default(NEW)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@map("tbl_grievances")
+}
+
+//  ++++++++++++++++++ END: @rahat/grievances - Grievances ++++++++++++++++++++++

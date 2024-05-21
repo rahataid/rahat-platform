@@ -12,6 +12,7 @@ import {
   UsersModule,
 } from '@rumsan/user';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
+import { GrievanceModule } from '../grievance/grievance.module';
 import { ListenersModule } from '../listeners/listeners.module';
 import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
@@ -43,7 +44,8 @@ import { AppService } from './app.service';
     ProjectModule,
     StatsModule,
     ProcessorsModule,
-    UploadModule
+    UploadModule,
+    GrievanceModule
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
