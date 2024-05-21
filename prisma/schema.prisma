@@ -410,6 +410,7 @@ enum GrievanceType {
 
 model Grievance {
   id              Int             @id @default(autoincrement())
+  uuid            String          @unique @default(uuid()) @db.Uuid()
   reportedById    Int
   reportedBy      User            @relation("UserGrievances", fields: [reportedById], references: [id])
   reporterContact String
@@ -421,6 +422,7 @@ model Grievance {
   status          GrievanceStatus @default(NEW)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
 
   @@map("tbl_grievances")
 }

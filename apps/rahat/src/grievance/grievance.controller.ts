@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Post, Query, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { CreateGrievanceDTO, ListGrievanceDTO } from "@rahataid/extensions";
+import { ChangeGrievanceStatusDTO, CreateGrievanceDTO, ListGrievanceDTO } from "@rahataid/extensions";
 import { ACTIONS, APP } from "@rahataid/sdk";
 import { AbilitiesGuard, CheckAbilities, JwtGuard, SUBJECTS } from "@rumsan/user";
 import { GrievanceService } from "./grievance.service";
@@ -40,5 +40,22 @@ export class GrievanceController {
     return this.grievanceService.findAll(query);
   }
 
+
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Patch(':uuid/change-status')
+  async changeStatus(
+    @Param('uuid') uuid: string,
+    @Body() data: ChangeGrievanceStatusDTO
+  ) {
+    return this.grievanceService.changeStatus(uuid, data);
+  }
+
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Delete(':uuid')
+  async softDelete(
+    @Param('uuid') uuid: string
+  ) {
+    return this.grievanceService.softDelete(uuid);
+  }
 
 }

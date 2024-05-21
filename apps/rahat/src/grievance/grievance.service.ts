@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
-import { CreateGrievanceDTO, ListGrievanceDTO } from "@rahataid/extensions";
+import { ChangeGrievanceStatusDTO, CreateGrievanceDTO, ListGrievanceDTO } from "@rahataid/extensions";
 import { GrievanceStatus } from "@rahataid/sdk";
 import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
 
@@ -15,7 +15,6 @@ export class GrievanceService {
   ) { }
 
   async createGrievance(data: CreateGrievanceDTO, userId: number) {
-    console.log('data', data)
     const { projectId, ...rest } = data;
     return this.prisma.grievance.create({
       data: {
@@ -52,7 +51,7 @@ export class GrievanceService {
       }
     }
     const where: Prisma.GrievanceWhereInput = {
-
+      deletedAt: null
     }
 
     if (query.projectId) {
@@ -68,6 +67,52 @@ export class GrievanceService {
       page: query.page,
       perPage: query.perPage,
     });
+  }
+
+  async changeStatus(uuid: string, data: ChangeGrievanceStatusDTO) {
+    const { status } = data;
+    return this.prisma.grievance.update({
+      where: {
+        uuid
+      },
+      data: {
+        status
+      }
+    })
+  }
+
+  async getGrievance(uuid: string) {
+    return this.prisma.grievance.findUnique({
+      where: {
+        uuid
+      },
+      include: {
+        project: {
+          select: {
+            name: true,
+            uuid: true
+          }
+        },
+        reportedBy: {
+          select: {
+            name: true,
+            uuid: true,
+            id: true
+          }
+        }
+      }
+    })
+  }
+
+  async softDelete(uuid: string) {
+    return this.prisma.grievance.update({
+      where: {
+        uuid
+      },
+      data: {
+        deletedAt: new Date()
+      }
+    })
   }
 
 }
