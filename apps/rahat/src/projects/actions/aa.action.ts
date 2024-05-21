@@ -115,7 +115,7 @@ export const aaActions: ProjectActionFunc = {
   // **** stakeholders end ******//
 
 
-  // **** stakeholders gtoups ******//
+  // **** Stakeholders groups ******//
   [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.GET_ALL_GROUPS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STAKEHOLDERS.GET_ALL_GROUPS, uuid }, payload),
 
@@ -127,7 +127,17 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.DELETE_GROUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STAKEHOLDERS.DELETE_GROUP, uuid }, payload),
-  // **** stakeholders groups end ******//
+  // **** Stakeholders groups end ******//
 
+  // **** Contract Interactions ****//
+  [MS_ACTIONS.AAPROJECT.CONTRACT.INCREASE_BUDEGET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.HAZARD_TYPES.GET_ALL, uuid }, payload),
 
+  // **** Beneficiary Groups **** //
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.ADD_GROUP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.BENEFICIARY.ADD_GROUP, uuid }, payload),
+
+  // **** Assign tokens to beneficiary groups ****//
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.ASSIGN_TOKEN_TO_GROUP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.BENEFICIARY.ASSIGN_TOKEN_TO_GROUP, uuid }, payload),
 };
