@@ -133,6 +133,7 @@ export const MS_ACTIONS = {
     },
     BENEFICIARY: {
       ADD_GROUP: 'aaProject.beneficiary.addGroup',
+      GET_ALL_GROUPS: 'aaProject.beneficiary.getAllGroups',
       ASSIGN_TOKEN_TO_GROUP: 'aaProject.beneficiary.assign_token_to_group'
     }
   },
