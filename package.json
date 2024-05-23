@@ -18,6 +18,7 @@
     "seed": "ts-node prisma/seed.user.ts",
     "seed:eldevsettings": "ts-node prisma/seed.eldevsettings.ts",
     "seed:c2cdevsettings": "ts-node prisma/seed.c2cdevsettings.ts",
+    "seed:cvadevsettings": "ts-node prisma/seed.cvadevsettings.ts",
     "seed:chainsettings": "ts-node prisma/seed.chainsettings.ts",
     "seed:setup": "ts-node prisma/seed.settings.ts",
     "geteth": "ts-node tools/scripts/geteth.ts",

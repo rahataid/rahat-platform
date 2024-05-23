@@ -25,6 +25,7 @@ import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import { createListQuery } from './helpers';
+import { VerificationService } from './verification.service';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -36,7 +37,8 @@ export class BeneficiaryService {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
-    private eventEmitter: EventEmitter2
+    private eventEmitter: EventEmitter2,
+    private readonly verificationService: VerificationService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -298,17 +300,20 @@ export class BeneficiaryService {
       delete projectPayload.referrerVendor;
     }
 
+
     // 2. Save Beneficiary to Project
     await this.saveBeneficiaryToProject({
       beneficiaryId: benef.uuid,
       projectId: projectUid,
     });
 
+
     // 3. Sync beneficiary to project
     return this.client.send(
       { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUid },
       projectPayload
     );
+
   }
 
   async saveBeneficiaryToProject(dto: AddToProjectDto) {
@@ -423,12 +428,20 @@ export class BeneficiaryService {
       walletAddress: beneficiaryData.walletAddress,
       extras: beneficiaryData?.extras || null,
       type: BeneficiaryConstants.Types.ENROLLED,
+      isVerfied: beneficiaryData?.isVerfied
     };
+
 
     // if project type if aa, remove type
     if (project.type.toLowerCase() === 'aa') {
       delete projectPayload.type
     }
+
+
+    // if project type is c2c, send verficition mail
+    // if (project.type.toLowerCase() === 'c2c' && !beneficiaryData.isVerfied) {
+    //   await this.verificationService.generateLink(beneficiaryId)
+    // }
 
     //2.Save beneficiary to project
 
@@ -440,6 +453,7 @@ export class BeneficiaryService {
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
       projectUuid: projectId,
     });
+
 
     //3. Sync beneficiary to project
     return this.client.send(

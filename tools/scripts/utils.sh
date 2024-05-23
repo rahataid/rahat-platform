@@ -27,6 +27,7 @@ migrate_seed() {
     pnpm migrate:dev
     pnpm seed:eldevsettings $current_dir
     pnpm seed:c2cdevsettings $current_dir
+    pnpm seed:cvadevsettings $current_dir
     pnpm seed:chainsettings
 }
 
