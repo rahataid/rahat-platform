@@ -96,7 +96,7 @@ export class ProjectService {
         if (
           response?.insertedData?.some((res) => res?.walletAddress) &&
           response?.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT &&
-          payload.dto.type === BeneficiaryType.REFERRED
+          payload?.dto?.type === BeneficiaryType.REFERRED
         ) {
           this.eventEmitter.emit(
             ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT,
@@ -113,8 +113,8 @@ export class ProjectService {
           );
         }
         if (
-          response?.vendordata.length > 0 &&
-          cmd.cmd === ProjectJobs.UPDATE_REDEMPTION
+          response?.vendordata?.length > 0 &&
+          cmd?.cmd === ProjectJobs.UPDATE_REDEMPTION
         ) {
           this.eventEmitter.emit(
             ProjectEvents.UPDATE_REDEMPTION,
