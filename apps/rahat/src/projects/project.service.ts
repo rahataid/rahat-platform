@@ -106,10 +106,20 @@ export class ProjectService {
         //send message to all admin
         if (
           response?.id &&
-          cmd.cmd === ProjectJobs.REQUEST_REDEMPTION
+          response?.cmd === ProjectJobs.REQUEST_REDEMPTION
         ) {
           this.eventEmitter.emit(
-            ProjectEvents.REQUEST_REDEMPTION,
+            ProjectEvents.REQUEST_REDEMPTION
+          );
+        }
+        if (
+          response?.vendordata.length > 0 &&
+          cmd.cmd === ProjectJobs.UPDATE_REDEMPTION
+        ) {
+          this.eventEmitter.emit(
+            ProjectEvents.UPDATE_REDEMPTION,
+            response.vendordata
+
           );
         }
       })
