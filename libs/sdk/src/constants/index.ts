@@ -124,6 +124,7 @@ export const MS_ACTIONS = {
       UPDATE: 'aaProject.stakeholders.update',
       GET_GROUP: 'aaProject.stakeholders.getGroup',
       GET_ALL_GROUPS: 'aaProject.stakeholders.getAllGroups',
+      GET_ONE_GROUP: 'aaProject.stakeholders.getOneGroup',
       ADD_GROUP: 'aaProject.stakeholders.addGroup',
       UPDATE_GROUP: 'aaProject.stakeholders.updateGroup',
       DELETE_GROUP: 'aaProject.stakeholders.deleteGroup',
