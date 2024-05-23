@@ -4,6 +4,7 @@ import {
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ListBeneficiaryDto,
+  ListBeneficiaryGroupDto,
   UpdateBeneficiaryDto,
   addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
@@ -20,8 +21,6 @@ import { VerificationService } from './verification.service';
 @Controller()
 export class BeneficiaryController {
   constructor(
-    private readonly beneficiaryService: BeneficiaryService,
-    private readonly beneficiaryStatsService: BeneficiaryStatService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly service: BeneficiaryService,
     private readonly statsService: BeneficiaryStatService,
@@ -81,22 +80,22 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.ADD_TO_PROJECT })
   async addToProject(payload: any) {
     const { dto, projectUid } = payload;
-    return this.beneficiaryService.addBeneficiaryToProject(dto, projectUid);
+    return this.service.addBeneficiaryToProject(dto, projectUid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.BULK_ADD_TO_PROJECT })
   async bulkaddToProject(payload: addBulkBeneficiaryToProject) {
-    return this.beneficiaryService.addBulkBeneficiaryToProject(payload);
+    return this.service.addBulkBeneficiaryToProject(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
   async assignToProject(payload: any) {
-    return this.beneficiaryService.assignBeneficiaryToProject(payload);
+    return this.service.assignBeneficiaryToProject(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT })
   async bulkAssignToProject(payload: any) {
-    return this.beneficiaryService.bulkAssignToProject(payload);
+    return this.service.bulkAssignToProject(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
@@ -132,31 +131,36 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_REFERRAL })
   listVendorReferral(data) {
-    return this.beneficiaryService.listReferredBen(data);
+    return this.service.listReferredBen(data);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_BEN_VENDOR_COUNT })
   getTotalCount(data) {
-    return this.beneficiaryService.getTotalCount(data)
+    return this.service.getTotalCount(data)
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_PROJECT_SPECIFIC })
   getProjectSpecific(data) {
-    return this.beneficiaryService.getProjectSpecificData(data)
+    return this.service.getProjectSpecificData(data)
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_TABLE_STATS })
   getTableStats() {
-    return this.beneficiaryStatsService.getTableStats()
+    return this.statsService.getTableStats()
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ADD_GROUP })
   addGroup(payload: CreateBeneficiaryGroupsDto) {
-    return this.beneficiaryService.addGroup(payload)
+    return this.service.addGroup(payload)
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP })
   getGroup(uuid: string) {
-    return this.beneficiaryService.getOneGroup(uuid)
+    return this.service.getOneGroup(uuid)
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_GROUPS })
+  getAllGroups(dto: ListBeneficiaryGroupDto) {
+    return this.service.getAllGroups(dto)
   }
 }

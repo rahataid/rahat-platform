@@ -9,6 +9,7 @@ import {
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ListBeneficiaryDto,
+  ListBeneficiaryGroupDto,
   UpdateBeneficiaryDto,
   addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
@@ -549,6 +550,17 @@ export class BeneficiaryService {
       projectUuid: uuid
     });
 
+    const res = await this.prisma.groupedBeneficiaries.updateMany({
+      where: {
+        beneficiaryId: findUuid.uuid
+      },
+      data: {
+        deletedAt: new Date()
+      }
+    })
+
+    console.log(res);
+
     return rdata;
   }
 
@@ -738,6 +750,9 @@ export class BeneficiaryService {
       },
       include: {
         groupedBeneficiaries: {
+          where: {
+            deletedAt: null
+          },
           include: {
             Beneficiary: {
               include: {
@@ -748,5 +763,32 @@ export class BeneficiaryService {
         }
       }
     })
+  }
+
+  async getAllGroups(dto: ListBeneficiaryGroupDto) {
+    const orderBy: Record<string, 'asc' | 'desc'> = {};
+    orderBy[dto.sort] = dto.order;
+
+    return await paginate(
+      this.prisma.beneficiaryGroup,
+      {
+        include: {
+          _count: {
+            select: {
+              groupedBeneficiaries: {
+                where: {
+                  deletedAt: null
+                }
+              }
+            }
+          }
+        },
+        orderBy,
+      },
+      {
+        page: dto.page,
+        perPage: dto.perPage,
+      }
+    );
   }
 }

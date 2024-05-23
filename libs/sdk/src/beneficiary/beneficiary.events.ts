@@ -39,4 +39,5 @@ export const JOBS = {
   LIST_BENEFICIARY_COUNT: 'rahat.jobs.beneficiary.count_beneficiary',
   ADD_GROUP: 'rahat.jobs.beneficiary.add_group',
   GET_ONE_GROUP: 'rahat.jobs.beneficiary.get_one_group',
+  GET_ALL_GROUPS: 'rahat.jobs.beneficiary.get_all_groups',
 };
