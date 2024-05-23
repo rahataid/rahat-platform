@@ -219,10 +219,44 @@ model Beneficiary {
   deletedAt      DateTime?
   isVerified     Boolean        @default(false)
 
-  pii                BeneficiaryPii?      @relation("BeneficiaryToPii")
-  BeneficiaryProject BeneficiaryProject[]
+  pii                  BeneficiaryPii?        @relation("BeneficiaryToPii")
+  BeneficiaryProject   BeneficiaryProject[]
+  groupedBeneficiaries GroupedBeneficiaries[]
 
   @@map("tbl_beneficiaries")
+}
+
+model GroupedBeneficiaries {
+  id   Int    @id @default(autoincrement()) @db.Integer()
+  uuid String @unique @default(uuid()) @db.Uuid()
+
+  beneficiaryGroupId String           @db.Uuid()
+  beneficiaryGroup   BeneficiaryGroup @relation(fields: [beneficiaryGroupId], references: [uuid])
+
+  beneficiaryId String      @db.Uuid()
+  Beneficiary   Beneficiary @relation(fields: [beneficiaryId], references: [uuid])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt()
+  deletedAt DateTime?
+
+  @@unique([beneficiaryGroupId, beneficiaryId], name: "beneficiaryGroupIdentifier")
+  @@map("tbl_grouped_beneficiaries")
+}
+
+model BeneficiaryGroup {
+  id   Int    @id @default(autoincrement())
+  uuid String @unique @default(uuid()) @db.Uuid()
+
+  name String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
+
+  groupedBeneficiaries GroupedBeneficiaries[]
+
+  @@map("tbl_beneficiaries_group")
 }
 
 model BeneficiaryProject {

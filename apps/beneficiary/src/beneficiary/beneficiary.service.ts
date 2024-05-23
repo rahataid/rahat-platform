@@ -7,6 +7,7 @@ import {
   AddBenToProjectDto,
   AddToProjectDto,
   CreateBeneficiaryDto,
+  CreateBeneficiaryGroupsDto,
   ListBeneficiaryDto,
   UpdateBeneficiaryDto,
   addBulkBeneficiaryToProject
@@ -712,5 +713,40 @@ export class BeneficiaryService {
         { uuid: benId, data: benData }
       );
     return benData;
+  }
+
+  async addGroup(dto: CreateBeneficiaryGroupsDto) {
+    const group = await this.prisma.beneficiaryGroup.create({
+      data: {
+        name: dto.name
+      }
+    })
+    const createPayload = dto.beneficiaries.map((d) => ({
+      beneficiaryGroupId: group.uuid,
+      beneficiaryId: d.uuid
+    }))
+
+    return await this.prisma.groupedBeneficiaries.createMany({
+      data: createPayload
+    })
+  }
+
+  async getOneGroup(uuid: string) {
+    return this.prisma.beneficiaryGroup.findUnique({
+      where: {
+        uuid: uuid
+      },
+      include: {
+        groupedBeneficiaries: {
+          include: {
+            Beneficiary: {
+              include: {
+                pii: true
+              }
+            }
+          }
+        }
+      }
+    })
   }
 }

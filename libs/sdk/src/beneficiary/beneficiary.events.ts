@@ -37,4 +37,6 @@ export const JOBS = {
   LIST_REFERRAL: 'rahat.jobs.beneficiary.list_referred',
   LIST_BEN_VENDOR_COUNT: 'rahat.jobs.beneficiary.count_ben_vendor',
   LIST_BENEFICIARY_COUNT: 'rahat.jobs.beneficiary.count_beneficiary',
+  ADD_GROUP: 'rahat.jobs.beneficiary.add_group',
+  GET_ONE_GROUP: 'rahat.jobs.beneficiary.get_one_group',
 };

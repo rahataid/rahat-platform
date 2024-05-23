@@ -2,6 +2,7 @@ import { Controller, Inject, Param } from '@nestjs/common';
 import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import {
   CreateBeneficiaryDto,
+  CreateBeneficiaryGroupsDto,
   ListBeneficiaryDto,
   UpdateBeneficiaryDto,
   addBulkBeneficiaryToProject
@@ -147,5 +148,15 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GET_TABLE_STATS })
   getTableStats() {
     return this.beneficiaryStatsService.getTableStats()
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.ADD_GROUP })
+  addGroup(payload: CreateBeneficiaryGroupsDto) {
+    return this.beneficiaryService.addGroup(payload)
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP })
+  getGroup(uuid: string) {
+    return this.beneficiaryService.getOneGroup(uuid)
   }
 }
