@@ -34,8 +34,10 @@ export const JOBS = {
     GET_ALL: 'aa.jobs.hazardTypes.getAll',
   },
   PHASES: {
+    GET_ONE: 'aa.jobs.phases.getOne',
     GET_ALL: 'aa.jobs.phases.getAll',
-    GET_STATS: 'aa.jobs.phases.getStats'
+    GET_STATS: 'aa.jobs.phases.getStats',
+    ADD_TRIGGERS: 'aa.jobs.phases.addTriggers',
   },
   STAKEHOLDERS: {
     GET_ALL: 'aa.jobs.stakeholders.getAll',
@@ -48,4 +50,12 @@ export const JOBS = {
     UPDATE_GROUP: 'aa.jobs.stakeholders.updateGroup',
     DELETE_GROUP: 'aa.jobs.stakeholders.deleteGroup'
   },
+  BENEFICIARY: {
+    ADD_GROUP: 'aa.jobs.beneficiary.addGroup',
+    ASSIGN_TOKEN_TO_GROUP: 'aa.jobs.beneficiary.assign_token_to_group',
+    GET_ALL_GROUPS: 'aa.jobs.beneficiary.getAllGroups'
+  },
+  CONTRACT: {
+    INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget'
+  }
 };

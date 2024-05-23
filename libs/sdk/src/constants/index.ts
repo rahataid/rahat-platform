@@ -49,7 +49,7 @@ export const MS_ACTIONS = {
     ASSGIN_TO_PROJECT: 'beneficiary.assign_to_project',
     BULK_ASSIGN_TO_PROJECT: 'beneficiary.bulk_assign',
     LIST_BY_PROJECT: 'beneficiary.list_by_project',
-    GET_PROJECT_SPECIFIC: 'beneficiary.project_specific'
+    GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',
   },
   VENDOR: {
     REGISTER: 'vendor.register',
@@ -112,8 +112,10 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.hazardTypes.getAll',
     },
     PHASES: {
+      GET_ONE: 'aaProject.phases.getOne',
       GET_ALL: 'aaProject.phases.getAll',
-      GET_STATS: 'aaProject.phases.getStats'
+      GET_STATS: 'aaProject.phases.getStats',
+      ADD_TRIGGERS: 'aaProject.phases.addTriggers',
     },
     STAKEHOLDERS: {
       GET_ALL: 'aaProject.stakeholders.getAll',
@@ -126,6 +128,14 @@ export const MS_ACTIONS = {
       UPDATE_GROUP: 'aaProject.stakeholders.updateGroup',
       DELETE_GROUP: 'aaProject.stakeholders.deleteGroup',
     },
+    CONTRACT: {
+      INCREASE_BUDEGET: 'aaProject.contract.increase_budget'
+    },
+    BENEFICIARY: {
+      ADD_GROUP: 'aaProject.beneficiary.addGroup',
+      GET_ALL_GROUPS: 'aaProject.beneficiary.getAllGroups',
+      ASSIGN_TOKEN_TO_GROUP: 'aaProject.beneficiary.assign_token_to_group'
+    }
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',
