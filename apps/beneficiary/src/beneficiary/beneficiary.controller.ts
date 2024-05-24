@@ -163,4 +163,9 @@ export class BeneficiaryController {
   getAllGroups(dto: ListBeneficiaryGroupDto) {
     return this.service.getAllGroups(dto)
   }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT })
+  async assignGroupToProject(payload: any) {
+    return this.service.assignBeneficiaryGroupToProject(payload);
+  }
 }

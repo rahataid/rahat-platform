@@ -47,6 +47,7 @@ export const MS_ACTIONS = {
     ADD_TO_PROJECT: 'beneficiary.add_to_project',
     BULK_ADD_TO_PROJECT: 'beneficiary.bulk_add_to_project',
     ASSGIN_TO_PROJECT: 'beneficiary.assign_to_project',
+    ASSGIN_GROUP_TO_PROJECT: 'beneficiary.assign_group_to_project',
     BULK_ASSIGN_TO_PROJECT: 'beneficiary.bulk_assign',
     LIST_BY_PROJECT: 'beneficiary.list_by_project',
     GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',

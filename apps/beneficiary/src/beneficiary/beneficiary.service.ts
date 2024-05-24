@@ -5,6 +5,7 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
   AddBenToProjectDto,
+  AddBenfGroupToProjectDto,
   AddToProjectDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
@@ -805,5 +806,55 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+  }
+
+  async saveBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
+    return this.prisma.beneficiaryGroupProject.create({
+      data: {
+        beneficiaryGroupId: dto.beneficiaryGroupId,
+        projectId: dto.projectId
+      }
+    })
+    // return this.prisma.beneficiaryProject.create({ data: dto });
+  }
+
+  async assignBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
+    try {
+      const { beneficiaryGroupId, projectId } = dto;
+
+      // get project info
+      const project = await this.prisma.project.findUnique({
+        where: {
+          uuid: projectId
+        }
+      })
+
+      //1. Get beneficiary group data
+      const beneficiaryGroupData = await this.prisma.beneficiaryGroup.findUnique({
+        where: {
+          uuid: beneficiaryGroupId
+        }
+      })
+
+      // add as required by project specifics
+      const projectPayload = {
+        beneficiaryGroupData
+      }
+
+      //2.Save beneficiary group to project
+      await this.saveBeneficiaryGroupToProject(dto);
+
+      // this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
+      //   projectUuid: projectId,
+      // });
+
+      //3. Sync beneficiary to project
+      return this.client.send(
+        { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
+        projectPayload
+      );
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
