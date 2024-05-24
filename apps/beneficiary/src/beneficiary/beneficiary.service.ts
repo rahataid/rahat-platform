@@ -93,6 +93,41 @@ export class BeneficiaryService {
     return data;
   }
 
+
+  async listBenefGroupByProject(data: any) {
+    if (data?.data.length > 0) {
+      const groupData = await this.processBenfGroups(data.data)
+      // return groupData
+      data.data = groupData;
+    }
+
+    return data;
+  }
+
+  async processBenfGroups(data: any) {
+    const groups = []
+    for (const d of data) {
+
+      const data = await this.prisma.beneficiaryGroup.findUnique({
+        where: {
+          uuid: d?.uuid
+        },
+        include: {
+          groupedBeneficiaries: {
+            where: {
+              deletedAt: null
+            },
+            include: {
+              Beneficiary: true
+            }
+          }
+        }
+      })
+      groups.push(data)
+    }
+    return groups
+  }
+
   async list(
     dto: ListBeneficiaryDto
   ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
@@ -158,6 +193,7 @@ export class BeneficiaryService {
     }
     return mergedData;
   }
+  9841255290
 
   async mergeProjectPIIData(data: any) {
     const mergedData = [];
