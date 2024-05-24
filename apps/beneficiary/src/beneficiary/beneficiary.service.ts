@@ -797,6 +797,14 @@ export class BeneficiaryService {
                 }
               }
             }
+          },
+          beneficiaryGroupProject: {
+            include: {
+              Project: true
+            },
+            where: {
+              deletedAt: null
+            }
           }
         },
         orderBy,
