@@ -158,45 +158,45 @@ export class ProjectService {
       timeout(timeoutValue),
       tap((response) => {
 
-        if (
-          response?.insertedData?.some((res) => res?.walletAddress) &&
-          response?.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT
-        ) {
-          // axios.post(process.env.MESSAGE_SENDER_API + '/send-qr', response)
-          //   .then((data) => {
-          //     console.log("SUCCESS", data)
-          //   })
-          //   .catch((error) => {
-          //     console.error(error);
-          //   });
-          //generate qr code
-          // response?.insertedData?.map(async (res) => {
-          //   const buffer = await generateQRCode(res?.walletAddress)
-          //   console.log(buffer)
-          //   const config = {
-          //     file: buffer,
-          //     mimeType: 'png',
-          //     fileName: res?.walletAddress + '.png',
-          //     folderName: process.env.AWS_FOLDER_NAME,
-          //     rootFolder: process.env.AWS_ROOT_FOLDER_NAME,
-          //   };
-          //   const url = await uploadFileToS3(
-          //     config.file,
-          //     config.mimeType,
-          //     config.folderName,
-          //     config.fileName,
-          //     config.rootFolder
-          //   )
-          //   const mediaUrl = `https://${process.env.AWS_BUCKET}.s3.us-east-1.amazonaws.com/${config.rootFolder}/${config.fileName}/${url.fileNameHash}`;
-          //   ;
-          //   this.createTemplate({
-          //     name: `qr${res?.walletAddress.slice(1, 7)}`,
-          //     media: mediaUrl
-          //   })
+        // if (
+        //   response?.insertedData?.some((res) => res?.walletAddress) &&
+        //   response?.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT
+        // ) {
+        // axios.post(process.env.MESSAGE_SENDER_API + '/send-qr', response)
+        //   .then((data) => {
+        //     console.log("SUCCESS", data)
+        //   })
+        //   .catch((error) => {
+        //     console.error(error);
+        //   });
+        //generate qr code
+        // response?.insertedData?.map(async (res) => {
+        //   const buffer = await generateQRCode(res?.walletAddress)
+        //   console.log(buffer)
+        //   const config = {
+        //     file: buffer,
+        //     mimeType: 'png',
+        //     fileName: res?.walletAddress + '.png',
+        //     folderName: process.env.AWS_FOLDER_NAME,
+        //     rootFolder: process.env.AWS_ROOT_FOLDER_NAME,
+        //   };
+        //   const url = await uploadFileToS3(
+        //     config.file,
+        //     config.mimeType,
+        //     config.folderName,
+        //     config.fileName,
+        //     config.rootFolder
+        //   )
+        //   const mediaUrl = `https://${process.env.AWS_BUCKET}.s3.us-east-1.amazonaws.com/${config.rootFolder}/${config.fileName}/${url.fileNameHash}`;
+        //   ;
+        //   this.createTemplate({
+        //     name: `qr${res?.walletAddress.slice(1, 7)}`,
+        //     media: mediaUrl
+        //   })
 
-          // })
+        // })
 
-        }
+        // }
         // send whatsapp message after added referal beneficiary to project
         if (
           response?.insertedData?.some((res) => res?.walletAddress) &&
