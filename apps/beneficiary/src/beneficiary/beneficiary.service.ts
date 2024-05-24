@@ -4,22 +4,17 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
-  AddBenToProjectDto,
-  AddToProjectDto,
+  AddBenToProjectDto, addBulkBeneficiaryToProject, AddToProjectDto,
   CreateBeneficiaryDto,
   ListBeneficiaryDto,
-  UpdateBeneficiaryDto,
-  addBulkBeneficiaryToProject
+  UpdateBeneficiaryDto
 } from '@rahataid/extensions';
 import {
-  BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
-  BeneficiaryJobs,
-  ProjectContants, TPIIData,
-  generateRandomWallet
+  BeneficiaryJobs, BQUEUE, generateRandomWallet, ProjectContants, TPIIData
 } from '@rahataid/sdk';
-import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
+import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -324,14 +319,15 @@ export class BeneficiaryService {
     const { beneficiariesData } = await this.createBulk(beneficiaries);
 
     await Promise.all(
-      beneficiariesData.map(async (ben) => {
+      beneficiariesData.map(async (ben: any) => {
         const projectPayload = {
           uuid: ben.uuid,
           walletAddress: ben.walletAddress,
           extras: ben?.extras || null,
           type: type,
           referrerBeneficiary,
-          referrerVendor
+          referrerVendor,
+          piiData: ben?.pii
         }
         benProjectData.push({
           projectId: projectUuid,
@@ -630,11 +626,21 @@ export class BeneficiaryService {
         data: sanitizedPiiBenef,
       });
     }
+    const insertedBeneficiarieWithPii = await this.prisma.beneficiary.findMany({
+      where: {
+        uuid: {
+          in: dtos.map((dto) => dto.uuid),
+        },
+      },
+      include: {
+        pii: true,
+      },
+    });
 
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, { projectUuid });
 
     // Return some form of success indicator, as createMany does not return the records themselves
-    return { success: true, count: dtos.length, beneficiariesData: insertedBeneficiaries };
+    return { success: true, count: dtos.length, beneficiariesData: insertedBeneficiarieWithPii };
   }
 
 
