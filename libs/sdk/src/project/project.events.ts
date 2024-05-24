@@ -22,5 +22,6 @@ export const JOBS = {
   UPDATE_REDEMPTION: 'rahat.jobs.project.update_redemption',
   LIST_REDEMPTION: 'rahat.jobs.project.list_redemption',
   GET_VENDOR_REDEMPTION: 'rahat.jobs.project.get_redemption_vendor',
-  GET_ALL_STATS: 'rahat.jobs.project.get_all_stats'
+  GET_ALL_STATS: 'rahat.jobs.project.get_all_stats',
+  REQUEST_CLAIM: 'rahat.jobs.project.request_claim',
 };
