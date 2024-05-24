@@ -1,13 +1,13 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class ListBeneficiaryGroupDto {
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ example: 'createdAt' })
   @IsString()
   @IsOptional()
   sort: string;
 
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ example: 'asc' })
   @IsString()
   @IsOptional()
   order: 'asc' | 'desc';
@@ -20,10 +20,10 @@ export class ListBeneficiaryGroupDto {
   @IsNumber()
   perPage: number;
 
-  // @ApiPropertyOptional({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
-  // @IsString()
-  // @IsOptional()
-  // projectId?: string;
+  @ApiPropertyOptional({ example: 'd8f61ebb-ae83-4a8b-8f36-ed756aa27d12' })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
 }
 
 // export class ListProjectBeneficiaryDto {

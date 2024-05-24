@@ -768,10 +768,25 @@ export class BeneficiaryService {
   async getAllGroups(dto: ListBeneficiaryGroupDto) {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
+    const projectUUID = dto.projectId;
+
+    const where = projectUUID ? {
+      deletedAt: null,
+      beneficiaryGroupProject: projectUUID === 'NOT_ASSGNED' ? {
+        none: {}
+      } : {
+        some: {
+          projectId: projectUUID
+        }
+      }
+    } : {
+      deletedAt: null
+    }
 
     return await paginate(
       this.prisma.beneficiaryGroup,
       {
+        where,
         include: {
           _count: {
             select: {

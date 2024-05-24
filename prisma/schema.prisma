@@ -254,9 +254,28 @@ model BeneficiaryGroup {
   updatedAt DateTime? @updatedAt()
   deletedAt DateTime?
 
-  groupedBeneficiaries GroupedBeneficiaries[]
+  groupedBeneficiaries    GroupedBeneficiaries[]
+  beneficiaryGroupProject BeneficiaryGroupProject[]
 
   @@map("tbl_beneficiaries_group")
+}
+
+model BeneficiaryGroupProject {
+  id   Int    @id @default(autoincrement()) @db.Integer()
+  uuid String @unique @default(uuid()) @db.Uuid()
+
+  projectId String  @db.Uuid()
+  Project   Project @relation(fields: [projectId], references: [uuid])
+
+  beneficiaryGroupId String           @db.Uuid()
+  beneficiaryGroup   BeneficiaryGroup @relation(fields: [beneficiaryGroupId], references: [uuid])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt()
+  deletedAt DateTime?
+
+  @@unique([projectId, beneficiaryGroupId], name: "beneficiaryGroupProjectIdentifier")
+  @@map("tbl_beneficiaries_gorup_projects")
 }
 
 model BeneficiaryProject {
@@ -335,11 +354,12 @@ model Project {
   contractAddress String?
   extras          Json?         @db.JsonB()
 
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime?            @updatedAt()
-  deletedAt          DateTime?
-  BeneficiaryProject BeneficiaryProject[]
-  ProjectVendors     ProjectVendors[]
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime?                 @updatedAt()
+  deletedAt               DateTime?
+  BeneficiaryProject      BeneficiaryProject[]
+  ProjectVendors          ProjectVendors[]
+  beneficiaryGroupProject BeneficiaryGroupProject[]
 
   @@map("tbl_projects")
 }
