@@ -327,14 +327,15 @@ export class BeneficiaryService {
     const { beneficiariesData } = await this.createBulk(beneficiaries);
 
     await Promise.all(
-      beneficiariesData.map(async (ben) => {
+      beneficiariesData.map(async (ben: any) => {
         const projectPayload = {
           uuid: ben.uuid,
           walletAddress: ben.walletAddress,
           extras: ben?.extras || null,
           type: type,
           referrerBeneficiary,
-          referrerVendor
+          referrerVendor,
+          piiData: ben?.pii
         }
         benProjectData.push({
           projectId: projectUuid,
@@ -644,11 +645,21 @@ export class BeneficiaryService {
         data: sanitizedPiiBenef,
       });
     }
+    const insertedBeneficiarieWithPii = await this.prisma.beneficiary.findMany({
+      where: {
+        uuid: {
+          in: dtos.map((dto) => dto.uuid),
+        },
+      },
+      include: {
+        pii: true,
+      },
+    });
 
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, { projectUuid });
 
     // Return some form of success indicator, as createMany does not return the records themselves
-    return { success: true, count: dtos.length, beneficiariesData: insertedBeneficiaries };
+    return { success: true, count: dtos.length, beneficiariesData: insertedBeneficiarieWithPii };
   }
 
 
