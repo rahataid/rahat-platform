@@ -4,17 +4,25 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
-  AddBenToProjectDto, addBulkBeneficiaryToProject, AddToProjectDto,
+  AddBenToProjectDto,
+  AddBenfGroupToProjectDto,
+  AddToProjectDto,
   CreateBeneficiaryDto,
+  CreateBeneficiaryGroupsDto,
   ListBeneficiaryDto,
-  UpdateBeneficiaryDto
+  ListBeneficiaryGroupDto,
+  UpdateBeneficiaryDto,
+  addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
 import {
+  BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
-  BeneficiaryJobs, BQUEUE, generateRandomWallet, ProjectContants, TPIIData
+  BeneficiaryJobs,
+  ProjectContants, TPIIData,
+  generateRandomWallet
 } from '@rahataid/sdk';
-import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
+import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -544,6 +552,17 @@ export class BeneficiaryService {
       projectUuid: uuid
     });
 
+    const res = await this.prisma.groupedBeneficiaries.updateMany({
+      where: {
+        beneficiaryId: findUuid.uuid
+      },
+      data: {
+        deletedAt: new Date()
+      }
+    })
+
+    console.log(res);
+
     return rdata;
   }
 
@@ -718,5 +737,143 @@ export class BeneficiaryService {
         { uuid: benId, data: benData }
       );
     return benData;
+  }
+
+  async addGroup(dto: CreateBeneficiaryGroupsDto) {
+    const group = await this.prisma.beneficiaryGroup.create({
+      data: {
+        name: dto.name
+      }
+    })
+    const createPayload = dto.beneficiaries.map((d) => ({
+      beneficiaryGroupId: group.uuid,
+      beneficiaryId: d.uuid
+    }))
+
+    return await this.prisma.groupedBeneficiaries.createMany({
+      data: createPayload
+    })
+  }
+
+  async getOneGroup(uuid: string) {
+    return this.prisma.beneficiaryGroup.findUnique({
+      where: {
+        uuid: uuid
+      },
+      include: {
+        groupedBeneficiaries: {
+          where: {
+            deletedAt: null
+          },
+          include: {
+            Beneficiary: {
+              include: {
+                pii: true
+              }
+            }
+          }
+        }
+      }
+    })
+  }
+
+  async getAllGroups(dto: ListBeneficiaryGroupDto) {
+    const orderBy: Record<string, 'asc' | 'desc'> = {};
+    orderBy[dto.sort] = dto.order;
+    const projectUUID = dto.projectId;
+
+    const where = projectUUID ? {
+      deletedAt: null,
+      beneficiaryGroupProject: projectUUID === 'NOT_ASSGNED' ? {
+        none: {}
+      } : {
+        some: {
+          projectId: projectUUID
+        }
+      }
+    } : {
+      deletedAt: null
+    }
+
+    return await paginate(
+      this.prisma.beneficiaryGroup,
+      {
+        where,
+        include: {
+          _count: {
+            select: {
+              groupedBeneficiaries: {
+                where: {
+                  deletedAt: null
+                }
+              }
+            }
+          },
+          beneficiaryGroupProject: {
+            include: {
+              Project: true
+            },
+            where: {
+              deletedAt: null
+            }
+          }
+        },
+        orderBy,
+      },
+      {
+        page: dto.page,
+        perPage: dto.perPage,
+      }
+    );
+  }
+
+  async saveBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
+    return this.prisma.beneficiaryGroupProject.create({
+      data: {
+        beneficiaryGroupId: dto.beneficiaryGroupId,
+        projectId: dto.projectId
+      }
+    })
+    // return this.prisma.beneficiaryProject.create({ data: dto });
+  }
+
+  async assignBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
+    try {
+      const { beneficiaryGroupId, projectId } = dto;
+
+      // get project info
+      const project = await this.prisma.project.findUnique({
+        where: {
+          uuid: projectId
+        }
+      })
+
+      //1. Get beneficiary group data
+      const beneficiaryGroupData = await this.prisma.beneficiaryGroup.findUnique({
+        where: {
+          uuid: beneficiaryGroupId
+        }
+      })
+
+      // add as required by project specifics
+      const projectPayload = {
+        beneficiaryGroupData
+      }
+
+      //2.Save beneficiary group to project
+      await this.saveBeneficiaryGroupToProject(dto);
+
+      // this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
+      //   projectUuid: projectId,
+      // });
+
+      //3. Sync beneficiary to project
+      return this.client.send(
+        { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
+        projectPayload
+      );
+    } catch (err) {
+      console.log(err);
+    }
   }
 }

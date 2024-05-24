@@ -21,6 +21,7 @@ export const JOBS = {
   ADD_TO_PROJECT: 'rahat.jobs.beneficiary.add_to_project',
   BULK_ADD_TO_PROJECT: 'rahat.jobs.beneficiary.bulk_add_to_project',
   ASSIGN_TO_PROJECT: 'rahat.jobs.beneficiary.assign_to_project',
+  ASSIGN_GROUP_TO_PROJECT: 'rahat.jobs.beneficiary.assign_group_to_project',
   BULK_ASSIGN_TO_PROJECT: 'rahat.jobs.beneficiary.bulk_assign',
   BULK_REFER_TO_PROJECT: 'rahat.jobs.beneficiary.bulk_refer_to_project',
   STATS: 'rahat.jobs.beneficiary.stats',
@@ -37,4 +38,8 @@ export const JOBS = {
   LIST_REFERRAL: 'rahat.jobs.beneficiary.list_referred',
   LIST_BEN_VENDOR_COUNT: 'rahat.jobs.beneficiary.count_ben_vendor',
   LIST_BENEFICIARY_COUNT: 'rahat.jobs.beneficiary.count_beneficiary',
+  ADD_GROUP: 'rahat.jobs.beneficiary.add_group',
+  GET_ONE_GROUP: 'rahat.jobs.beneficiary.get_one_group',
+  GET_ALL_GROUPS: 'rahat.jobs.beneficiary.get_all_groups',
+  ADD_GROUP_TO_PROJECT: 'rahat.jobs.beneficiary.add_group_to_project'
 };
