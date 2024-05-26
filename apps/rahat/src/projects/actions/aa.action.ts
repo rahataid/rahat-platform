@@ -144,6 +144,6 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.BENEFICIARY.GET_ALL_GROUPS, uuid }, payload),
 
   // **** Assign tokens to beneficiary groups ****//
-  [MS_ACTIONS.AAPROJECT.BENEFICIARY.ASSIGN_TOKEN_TO_GROUP]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.BENEFICIARY.ASSIGN_TOKEN_TO_GROUP, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.RESERVE_TOKEN_TO_GROUP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.BENEFICIARY.RESERVE_TOKEN_TO_GROUP, uuid }, payload),
 };
