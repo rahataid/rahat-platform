@@ -135,6 +135,8 @@ export const aaActions: ProjectActionFunc = {
   // **** Contract Interactions ****//
   [MS_ACTIONS.AAPROJECT.CONTRACT.INCREASE_BUDEGET]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.HAZARD_TYPES.GET_ALL, uuid }, payload),
+  // **** Contract Interactions  end ****//
+
 
   // **** Beneficiary Groups **** //
   [MS_ACTIONS.AAPROJECT.BENEFICIARY.ADD_GROUP]: (uuid, payload, sendCommand) =>
@@ -142,8 +144,15 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_ALL_GROUPS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.BENEFICIARY.GET_ALL_GROUPS, uuid }, payload),
+  // **** Beneficiary Groups end **** //
 
-  // **** Assign tokens to beneficiary groups ****//
+
+  // **** fund mgmt ****//
   [MS_ACTIONS.AAPROJECT.BENEFICIARY.RESERVE_TOKEN_TO_GROUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.BENEFICIARY.RESERVE_TOKEN_TO_GROUP, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_ALL_TOKEN_RESERVATION]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.BENEFICIARY.GET_ALL_TOKEN_RESERVATION, uuid }, payload),
+
+  // **** fund mgmt end ****//
 };
