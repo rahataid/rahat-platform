@@ -211,7 +211,7 @@ export class ProjectService {
         //send message to all admin
         if (
           response?.id &&
-          response?.cmd === ProjectJobs.REQUEST_REDEMPTION
+          cmd?.cmd === ProjectJobs.REQUEST_REDEMPTION
         ) {
           this.eventEmitter.emit(
             ProjectEvents.REQUEST_REDEMPTION
