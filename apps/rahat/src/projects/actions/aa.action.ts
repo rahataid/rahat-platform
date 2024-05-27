@@ -154,5 +154,8 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_ALL_TOKEN_RESERVATION]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.BENEFICIARY.GET_ALL_TOKEN_RESERVATION, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_ONE_TOKEN_RESERVATION]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.BENEFICIARY.GET_ONE_TOKEN_RESERVATION, uuid }, payload),
+
   // **** fund mgmt end ****//
 };

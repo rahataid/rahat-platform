@@ -56,7 +56,8 @@ export const JOBS = {
     RESERVE_TOKEN_TO_GROUP: 'aa.jobs.beneficiary.reserve_token_to_group',
     ASSIGN_TOKEN_TO_GROUP: 'aa.jobs.beneficiary.assign_token_to_group',
     GET_ALL_GROUPS: 'aa.jobs.beneficiary.getAllGroups',
-    GET_ALL_TOKEN_RESERVATION: 'aa.jobs.beneficiary.getAllTokenReservation'
+    GET_ALL_TOKEN_RESERVATION: 'aa.jobs.beneficiary.getAllTokenReservation',
+    GET_ONE_TOKEN_RESERVATION: 'aa.jobs.beneficiary.getOneTokenReservation'
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget'
