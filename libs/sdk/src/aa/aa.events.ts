@@ -46,6 +46,7 @@ export const JOBS = {
     UPDATE: 'aa.jobs.stakeholders.update',
     GET_GROUP: 'aa.jobs.stakeholders.getGroup',
     GET_ALL_GROUPS: 'aa.jobs.stakeholders.getAllGroups',
+    GET_ONE_GROUP: 'aa.jobs.stakeholders.getOneGroup',
     ADD_GROUP: 'aa.jobs.stakeholders.addGroup',
     UPDATE_GROUP: 'aa.jobs.stakeholders.updateGroup',
     DELETE_GROUP: 'aa.jobs.stakeholders.deleteGroup'
