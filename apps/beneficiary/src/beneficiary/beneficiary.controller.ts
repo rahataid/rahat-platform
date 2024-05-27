@@ -168,4 +168,9 @@ export class BeneficiaryController {
   async assignGroupToProject(payload: any) {
     return this.service.assignBeneficiaryGroupToProject(payload);
   }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_GROUP_BY_PROJECT })
+  async listGroupByProject(data: any) {
+    return this.service.listBenefGroupByProject(data);
+  }
 }
