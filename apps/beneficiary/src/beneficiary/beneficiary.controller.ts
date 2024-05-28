@@ -173,4 +173,9 @@ export class BeneficiaryController {
   async listGroupByProject(data: any) {
     return this.service.listBenefGroupByProject(data);
   }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP_BY_PROJECT })
+  async getOneGroupByProject(uuid: UUID) {
+    return this.service.getOneGroupByProject(uuid);
+  }
 }
