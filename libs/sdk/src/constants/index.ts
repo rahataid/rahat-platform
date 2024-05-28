@@ -140,6 +140,7 @@ export const MS_ACTIONS = {
       RESERVE_TOKEN_TO_GROUP: 'aaProject.beneficiary.reserve_token_to_group',
       GET_ALL_TOKEN_RESERVATION: 'aaProject.beneficiary.get_all_token_reservation',
       GET_ONE_TOKEN_RESERVATION: 'aaProject.beneficiary.get_one_token_reservation',
+      GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats'
     }
   },
   C2CProject: {
