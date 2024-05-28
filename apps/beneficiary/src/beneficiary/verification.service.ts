@@ -1,7 +1,8 @@
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BQUEUE, BeneficiaryJobs, ValidateWallet, VerifySignature } from '@rahataid/sdk';
+import { ClientProxy } from '@nestjs/microservices';
+import { BQUEUE, BeneficiaryJobs, ProjectContants, ValidateWallet, VerifySignature } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import type { Address } from 'abitype';
 import { Queue } from 'bull';
@@ -15,6 +16,7 @@ export class VerificationService {
         protected prisma: PrismaService,
         @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
         private readonly beneficiaryQueue: Queue,
+        @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
     ) { }
     private readonly algorithm = 'aes-256-cbc'
     private readonly privateKey = this.configService.get('PRIVATE_KEY')

@@ -169,6 +169,31 @@ CREATE TABLE "tbl_beneficiaries" (
 );
 
 -- CreateTable
+CREATE TABLE "tbl_grouped_beneficiaries" (
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "beneficiaryGroupId" UUID NOT NULL,
+    "beneficiaryId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_grouped_beneficiaries_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tbl_beneficiaries_group" (
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3),
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_beneficiaries_group_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "tbl_beneficiaries_projects" (
     "id" SERIAL NOT NULL,
     "uuid" UUID NOT NULL,
@@ -299,6 +324,15 @@ CREATE UNIQUE INDEX "tbl_beneficiaries_uuid_key" ON "tbl_beneficiaries"("uuid");
 CREATE UNIQUE INDEX "tbl_beneficiaries_walletAddress_key" ON "tbl_beneficiaries"("walletAddress");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "tbl_grouped_beneficiaries_uuid_key" ON "tbl_grouped_beneficiaries"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_grouped_beneficiaries_beneficiaryGroupId_beneficiaryId_key" ON "tbl_grouped_beneficiaries"("beneficiaryGroupId", "beneficiaryId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_beneficiaries_group_uuid_key" ON "tbl_beneficiaries_group"("uuid");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "tbl_beneficiaries_projects_uuid_key" ON "tbl_beneficiaries_projects"("uuid");
 
 -- CreateIndex
@@ -342,6 +376,12 @@ ALTER TABLE "tbl_auth_sessions" ADD CONSTRAINT "tbl_auth_sessions_authId_fkey" F
 
 -- AddForeignKey
 ALTER TABLE "tbl_users_signups" ADD CONSTRAINT "tbl_users_signups_approvedBy_fkey" FOREIGN KEY ("approvedBy") REFERENCES "tbl_users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_grouped_beneficiaries" ADD CONSTRAINT "tbl_grouped_beneficiaries_beneficiaryGroupId_fkey" FOREIGN KEY ("beneficiaryGroupId") REFERENCES "tbl_beneficiaries_group"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_grouped_beneficiaries" ADD CONSTRAINT "tbl_grouped_beneficiaries_beneficiaryId_fkey" FOREIGN KEY ("beneficiaryId") REFERENCES "tbl_beneficiaries"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "tbl_beneficiaries_projects" ADD CONSTRAINT "tbl_beneficiaries_projects_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "tbl_projects"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;

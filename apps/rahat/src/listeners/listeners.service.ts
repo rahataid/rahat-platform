@@ -146,4 +146,25 @@ export class ListenersService {
     })
 
   }
+
+
+  @OnEvent(ProjectEvents.UPDATE_REDEMPTION)
+  async onUpdateRedemption(data) {
+    const CONTENT_SID = this.configService.get('REDEMPTION_APPROVED_SUCESS_SID');
+    const vendors = await this.prisma.user.findMany({
+      where: {
+        uuid: {
+          in: data
+        }
+      }
+    })
+    vendors.map((vendor) => {
+      const payload = {
+        phone: vendor.phone,
+        type: 'WHATSAPP',
+        contentSid: CONTENT_SID,
+      };
+      this.messageSenderService.sendWhatappMessage(payload)
+    })
+  }
 }

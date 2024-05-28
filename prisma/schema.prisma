@@ -221,10 +221,63 @@ model Beneficiary {
   deletedAt      DateTime?
   isVerified     Boolean        @default(false)
 
-  pii                BeneficiaryPii?      @relation("BeneficiaryToPii")
-  BeneficiaryProject BeneficiaryProject[]
+  pii                  BeneficiaryPii?        @relation("BeneficiaryToPii")
+  BeneficiaryProject   BeneficiaryProject[]
+  groupedBeneficiaries GroupedBeneficiaries[]
 
   @@map("tbl_beneficiaries")
+}
+
+model GroupedBeneficiaries {
+  id   Int    @id @default(autoincrement()) @db.Integer()
+  uuid String @unique @default(uuid()) @db.Uuid()
+
+  beneficiaryGroupId String           @db.Uuid()
+  beneficiaryGroup   BeneficiaryGroup @relation(fields: [beneficiaryGroupId], references: [uuid])
+
+  beneficiaryId String      @db.Uuid()
+  Beneficiary   Beneficiary @relation(fields: [beneficiaryId], references: [uuid])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt()
+  deletedAt DateTime?
+
+  @@unique([beneficiaryGroupId, beneficiaryId], name: "beneficiaryGroupIdentifier")
+  @@map("tbl_grouped_beneficiaries")
+}
+
+model BeneficiaryGroup {
+  id   Int    @id @default(autoincrement())
+  uuid String @unique @default(uuid()) @db.Uuid()
+
+  name String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
+
+  groupedBeneficiaries    GroupedBeneficiaries[]
+  beneficiaryGroupProject BeneficiaryGroupProject[]
+
+  @@map("tbl_beneficiaries_group")
+}
+
+model BeneficiaryGroupProject {
+  id   Int    @id @default(autoincrement()) @db.Integer()
+  uuid String @unique @default(uuid()) @db.Uuid()
+
+  projectId String  @db.Uuid()
+  Project   Project @relation(fields: [projectId], references: [uuid])
+
+  beneficiaryGroupId String           @db.Uuid()
+  beneficiaryGroup   BeneficiaryGroup @relation(fields: [beneficiaryGroupId], references: [uuid])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt()
+  deletedAt DateTime?
+
+  @@unique([projectId, beneficiaryGroupId], name: "beneficiaryGroupProjectIdentifier")
+  @@map("tbl_beneficiaries_gorup_projects")
 }
 
 model BeneficiaryProject {
@@ -303,11 +356,12 @@ model Project {
   contractAddress String?
   extras          Json?         @db.JsonB()
 
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime?            @updatedAt()
-  deletedAt          DateTime?
-  BeneficiaryProject BeneficiaryProject[]
-  ProjectVendors     ProjectVendors[]
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime?                 @updatedAt()
+  deletedAt               DateTime?
+  BeneficiaryProject      BeneficiaryProject[]
+  ProjectVendors          ProjectVendors[]
+  beneficiaryGroupProject BeneficiaryGroupProject[]
 
   Grievance Grievance[]
 

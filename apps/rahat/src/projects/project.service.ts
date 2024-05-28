@@ -11,6 +11,7 @@ import {
 } from '@rahataid/sdk';
 import { BeneficiaryType } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
+import axios from 'axios';
 import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { ERC2771FORWARDER } from '../utils/contracts';
@@ -87,16 +88,120 @@ export class ProjectService {
     });
   }
 
+  async createTemplate(template: { name: string, media: string }) {
+    try {
+      const twilioContentApi = `https://content.twilio.com/v1/Content`;
+      const templateData = {
+        friendly_name: template.name,
+        language: 'en',
+        types: {
+          'twilio/media': {
+            body: "Use qr code for walletaddress:",
+            media: [template.media]
+
+          },
+        },
+      };
+
+      const response = await axios.post(twilioContentApi, templateData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        auth: {
+          username: process.env.TWILIO_SID || '',
+          password: process.env.TWILIO_SECRET,
+        },
+      });
+
+      if (response.status === 201) {
+        await this.sendTemplateApprovalRequest({
+          sid: response.data.sid,
+          name: template.name,
+        });
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async sendTemplateApprovalRequest(template: { sid: string; name: string }) {
+    try {
+      const twilioContentApi = `https://content.twilio.com/v1/Content/${template.sid}/ApprovalRequests/whatsapp`;
+      const requestData = {
+        name: template.name.toLowerCase().replace(/\s+/g, '_'),
+        category: 'UTILITY',
+      };
+
+      const response = await axios.post(twilioContentApi, requestData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        auth: {
+          username: process.env.TWILIO_SID,
+          password: process.env.TWILIO_SECRET,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
   async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy) {
 
     return client.send(cmd, payload).pipe(
       timeout(timeoutValue),
       tap((response) => {
-        //send whatsapp message after added referal beneficiary to project
+
+        // if (
+        //   response?.insertedData?.some((res) => res?.walletAddress) &&
+        //   response?.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT
+        // ) {
+        // axios.post(process.env.MESSAGE_SENDER_API + '/send-qr', response)
+        //   .then((data) => {
+        //     console.log("SUCCESS", data)
+        //   })
+        //   .catch((error) => {
+        //     console.error(error);
+        //   });
+        //generate qr code
+        // response?.insertedData?.map(async (res) => {
+        //   const buffer = await generateQRCode(res?.walletAddress)
+        //   console.log(buffer)
+        //   const config = {
+        //     file: buffer,
+        //     mimeType: 'png',
+        //     fileName: res?.walletAddress + '.png',
+        //     folderName: process.env.AWS_FOLDER_NAME,
+        //     rootFolder: process.env.AWS_ROOT_FOLDER_NAME,
+        //   };
+        //   const url = await uploadFileToS3(
+        //     config.file,
+        //     config.mimeType,
+        //     config.folderName,
+        //     config.fileName,
+        //     config.rootFolder
+        //   )
+        //   const mediaUrl = `https://${process.env.AWS_BUCKET}.s3.us-east-1.amazonaws.com/${config.rootFolder}/${config.fileName}/${url.fileNameHash}`;
+        //   ;
+        //   this.createTemplate({
+        //     name: `qr${res?.walletAddress.slice(1, 7)}`,
+        //     media: mediaUrl
+        //   })
+
+        // })
+
+        // }
+        // send whatsapp message after added referal beneficiary to project
         if (
           response?.insertedData?.some((res) => res?.walletAddress) &&
           response?.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT &&
-          payload.dto.type === BeneficiaryType.REFERRED
+          payload?.dto?.type === BeneficiaryType.REFERRED
         ) {
           this.eventEmitter.emit(
             ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT,
@@ -106,10 +211,20 @@ export class ProjectService {
         //send message to all admin
         if (
           response?.id &&
-          cmd.cmd === ProjectJobs.REQUEST_REDEMPTION
+          cmd?.cmd === ProjectJobs.REQUEST_REDEMPTION
         ) {
           this.eventEmitter.emit(
-            ProjectEvents.REQUEST_REDEMPTION,
+            ProjectEvents.REQUEST_REDEMPTION
+          );
+        }
+        if (
+          response?.vendordata?.length > 0 &&
+          cmd?.cmd === ProjectJobs.UPDATE_REDEMPTION
+        ) {
+          this.eventEmitter.emit(
+            ProjectEvents.UPDATE_REDEMPTION,
+            response.vendordata
+
           );
         }
       })
