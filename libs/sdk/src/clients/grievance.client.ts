@@ -1,10 +1,9 @@
 
-import { GrievanceStatus } from "@prisma/client";
 import { Pagination } from "@rumsan/sdk/types";
 import { FormattedResponse, formatResponse } from "@rumsan/sdk/utils";
 import { AxiosInstance, AxiosRequestConfig } from "axios";
 import { UUID } from "crypto";
-import { Grievance } from "../grievance";
+import { Grievance, GrievanceStatus } from "../grievance";
 
 
 type OptionalPagination = Partial<Pagination>;
@@ -47,7 +46,7 @@ export const getGrievanceClient = (
     },
 
     changeStatus: async (
-      { uuid, data }: { uuid: UUID; data: GrievanceStatus },
+      { uuid, data },
       config?: AxiosRequestConfig
     ) => {
       const response = await client.patch(`/grievances/${uuid}/change-status`, data, config);
