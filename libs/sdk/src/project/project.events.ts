@@ -4,7 +4,8 @@ export const EVENTS = {
   PROJECT_DELETED: 'project.deleted',
   BENEFICIARY_ADDED_TO_PROJECT: 'beneficiary.added.to.project',
   REQUEST_REDEMPTION: 'request.redemption',
-  UPDATE_REDEMPTION: 'update.redemption'
+  UPDATE_REDEMPTION: 'update.redemption',
+  REDEEM_VOUCHER: 'beneficiary.redeemVoucher'
 };
 
 export const JOBS = {
