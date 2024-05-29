@@ -167,4 +167,28 @@ export class ListenersService {
       this.messageSenderService.sendWhatappMessage(payload)
     })
   }
+
+  @OnEvent(ProjectEvents.REDEEM_VOUCHER)
+  async onRedeemVoucher(data) {
+    const ben = await this.prisma.beneficiary.findUnique({
+      where: {
+        uuid: data.uuid
+      }
+
+    });
+
+    const benPii = await this.prisma.beneficiaryPii.findUnique({
+      where: {
+        beneficiaryId: ben.id
+      }
+    })
+
+    const CONTENT_SID = this.configService.get('VOUCHER_REDEMPTION_SUCCESS_SID')
+    const payload = {
+      phone: benPii.phone,
+      type: 'WHATSAPP',
+      contentSid: CONTENT_SID
+    };
+    this.messageSenderService.sendWhatappMessage(payload)
+  }
 }
