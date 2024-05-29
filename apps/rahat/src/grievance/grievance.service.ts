@@ -24,7 +24,7 @@ export class GrievanceService {
             uuid: projectId
           }
         },
-        reportedBy: {
+        reporterUser: {
           connect: {
             id: userId
           }
@@ -42,7 +42,7 @@ export class GrievanceService {
           uuid: true
         }
       },
-      reportedBy: {
+      reporterUser: {
         select: {
           name: true,
           uuid: true,
@@ -93,7 +93,7 @@ export class GrievanceService {
             uuid: true
           }
         },
-        reportedBy: {
+        reporterUser: {
           select: {
             name: true,
             uuid: true,

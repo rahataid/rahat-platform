@@ -14,7 +14,8 @@ export enum GrievanceType {
 
 export type Grievance = {
   id?: number;
-  reportedById?: number;
+  reportedBy: string;
+  reporterUserId?: number;
   reporterContact: string;
   title: string;
   type: GrievanceType;
@@ -27,7 +28,7 @@ export type Grievance = {
     name: string;
     uuid: string;
   };
-  reportedBy?: {
+  reporterUser?: {
     name: string;
     uuid: string;
     id: number;

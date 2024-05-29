@@ -16,7 +16,7 @@ import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { createContractSigner } from '../utils/web3';
-import { aaActions, beneficiaryActions, c2cActions, elActions, settingActions, vendorActions } from './actions';
+import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, settingActions, vendorActions } from './actions';
 @Injectable()
 export class ProjectService {
   constructor(
@@ -158,45 +158,6 @@ export class ProjectService {
       timeout(timeoutValue),
       tap((response) => {
 
-        // if (
-        //   response?.insertedData?.some((res) => res?.walletAddress) &&
-        //   response?.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT
-        // ) {
-        // axios.post(process.env.MESSAGE_SENDER_API + '/send-qr', response)
-        //   .then((data) => {
-        //     console.log("SUCCESS", data)
-        //   })
-        //   .catch((error) => {
-        //     console.error(error);
-        //   });
-        //generate qr code
-        // response?.insertedData?.map(async (res) => {
-        //   const buffer = await generateQRCode(res?.walletAddress)
-        //   console.log(buffer)
-        //   const config = {
-        //     file: buffer,
-        //     mimeType: 'png',
-        //     fileName: res?.walletAddress + '.png',
-        //     folderName: process.env.AWS_FOLDER_NAME,
-        //     rootFolder: process.env.AWS_ROOT_FOLDER_NAME,
-        //   };
-        //   const url = await uploadFileToS3(
-        //     config.file,
-        //     config.mimeType,
-        //     config.folderName,
-        //     config.fileName,
-        //     config.rootFolder
-        //   )
-        //   const mediaUrl = `https://${process.env.AWS_BUCKET}.s3.us-east-1.amazonaws.com/${config.rootFolder}/${config.fileName}/${url.fileNameHash}`;
-        //   ;
-        //   this.createTemplate({
-        //     name: `qr${res?.walletAddress.slice(1, 7)}`,
-        //     media: mediaUrl
-        //   })
-
-        // })
-
-        // }
         // send whatsapp message after added referal beneficiary to project
         if (
           response?.insertedData?.some((res) => res?.walletAddress) &&
@@ -208,6 +169,14 @@ export class ProjectService {
             payload.dto
           );
         }
+        //send the whatsapp message after successfully redeming voucher
+        if (response?.data && response?.cmd === ProjectJobs.REDEEM_VOUCHER) {
+          this.eventEmitter.emit(
+            ProjectEvents.REDEEM_VOUCHER,
+            response.data
+          )
+        }
+
         //send message to all admin
         if (
           response?.id &&
@@ -283,7 +252,8 @@ export class ProjectService {
       ...vendorActions,
       ...settingActions,
       ...metaTxActions,
-      ...c2cActions
+      ...c2cActions,
+      ...cvaActions
     };
 
     const actionFunc = actions[action];
