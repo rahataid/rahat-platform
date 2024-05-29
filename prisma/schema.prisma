@@ -465,8 +465,9 @@ enum GrievanceType {
 model Grievance {
   id              Int             @id @default(autoincrement())
   uuid            String          @unique @default(uuid()) @db.Uuid()
-  reportedById    Int
-  reportedBy      User            @relation("UserGrievances", fields: [reportedById], references: [id])
+  reportedBy      String
+  reporterUserId  Int
+  reporterUser    User            @relation("UserGrievances", fields: [reporterUserId], references: [id])
   reporterContact String
   title           String
   type            GrievanceType

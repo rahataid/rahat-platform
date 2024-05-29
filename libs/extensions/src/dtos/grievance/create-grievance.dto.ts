@@ -49,4 +49,11 @@ export class CreateGrievanceDTO implements Grievance {
   @IsEnum(GrievanceStatus)
   status: GrievanceStatus;
 
+  @ApiProperty({
+    example: "Sarvesh Karki",
+
+  })
+  @IsString()
+  reportedBy: string;
+
 }
