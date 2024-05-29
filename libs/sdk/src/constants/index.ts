@@ -146,5 +146,15 @@ export const MS_ACTIONS = {
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',
     LIST_BEN_COUNT: 'c2cProject.count_ben',
-  }
+  },
+  CVAProject: {
+    UPDATE_STATUS: 'cvaProject.updateStatus',
+    REQUEST_TOKEN: 'cvaProject.requestToken',
+    REQUEST_CLAIM: 'cvaProject.requestClaim',
+    UPDATE_CLAIM: 'cvaProject.updateClaim',
+    LIST_CLAIM: 'cvaProject.listClaim',
+    GET_CLAIM: 'cvaProject.getClaim',
+    PROCESS_OTP: 'cvaProject.processOtp',
+
+  },
 };
