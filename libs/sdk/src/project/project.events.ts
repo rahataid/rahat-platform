@@ -4,7 +4,8 @@ export const EVENTS = {
   PROJECT_DELETED: 'project.deleted',
   BENEFICIARY_ADDED_TO_PROJECT: 'beneficiary.added.to.project',
   REQUEST_REDEMPTION: 'request.redemption',
-  UPDATE_REDEMPTION: 'update.redemption'
+  UPDATE_REDEMPTION: 'update.redemption',
+  REDEEM_VOUCHER: 'beneficiary.redeemVoucher'
 };
 
 export const JOBS = {
@@ -22,5 +23,6 @@ export const JOBS = {
   UPDATE_REDEMPTION: 'rahat.jobs.project.update_redemption',
   LIST_REDEMPTION: 'rahat.jobs.project.list_redemption',
   GET_VENDOR_REDEMPTION: 'rahat.jobs.project.get_redemption_vendor',
-  GET_ALL_STATS: 'rahat.jobs.project.get_all_stats'
+  GET_ALL_STATS: 'rahat.jobs.project.get_all_stats',
+  REQUEST_CLAIM: 'rahat.jobs.project.request_claim',
 };

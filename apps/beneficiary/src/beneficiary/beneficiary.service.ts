@@ -25,9 +25,11 @@ import {
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
+import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import { createListQuery } from './helpers';
+import { VerificationService } from './verification.service';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -39,7 +41,8 @@ export class BeneficiaryService {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
-    private eventEmitter: EventEmitter2
+    private eventEmitter: EventEmitter2,
+    private readonly verificationService: VerificationService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -104,10 +107,31 @@ export class BeneficiaryService {
     return data;
   }
 
+  async getOneGroupByProject(uuid: UUID) {
+    return await this.prisma.beneficiaryGroup.findUnique({
+      where: {
+        uuid: uuid
+      },
+      include: {
+        groupedBeneficiaries: {
+          where: {
+            deletedAt: null
+          },
+          include: {
+            Beneficiary: {
+              include: {
+                pii: true
+              }
+            },
+          }
+        }
+      }
+    })
+  }
+
   async processBenfGroups(data: any) {
     const groups = []
     for (const d of data) {
-
       const data = await this.prisma.beneficiaryGroup.findUnique({
         where: {
           uuid: d?.uuid
@@ -118,7 +142,11 @@ export class BeneficiaryService {
               deletedAt: null
             },
             include: {
-              Beneficiary: true
+              Beneficiary: {
+                include: {
+                  pii: true
+                }
+              },
             }
           }
         }
@@ -193,7 +221,6 @@ export class BeneficiaryService {
     }
     return mergedData;
   }
-  9841255290
 
   async mergeProjectPIIData(data: any) {
     const mergedData = [];
@@ -337,17 +364,20 @@ export class BeneficiaryService {
       delete projectPayload.referrerVendor;
     }
 
+
     // 2. Save Beneficiary to Project
     await this.saveBeneficiaryToProject({
       beneficiaryId: benef.uuid,
       projectId: projectUid,
     });
 
+
     // 3. Sync beneficiary to project
     return this.client.send(
       { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUid },
       projectPayload
     );
+
   }
 
   async saveBeneficiaryToProject(dto: AddToProjectDto) {
@@ -463,12 +493,20 @@ export class BeneficiaryService {
       walletAddress: beneficiaryData.walletAddress,
       extras: beneficiaryData?.extras || null,
       type: BeneficiaryConstants.Types.ENROLLED,
+      isVerfied: beneficiaryData?.isVerfied
     };
+
 
     // if project type if aa, remove type
     if (project.type.toLowerCase() === 'aa') {
       delete projectPayload.type
     }
+
+
+    // if project type is c2c, send verficition mail
+    // if (project.type.toLowerCase() === 'c2c' && !beneficiaryData.isVerfied) {
+    //   await this.verificationService.generateLink(beneficiaryId)
+    // }
 
     //2.Save beneficiary to project
 
@@ -481,25 +519,19 @@ export class BeneficiaryService {
       projectUuid: projectId,
     });
 
-    //3. Sync beneficiary to project
-    return this.client.send(
-      { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
-      projectPayload
-    );
-  }
 
-  // async createBulk(data: CreateBeneficiaryDto[]) {
-  //   if (!data.length) return;
-  //   const sanitized = data.map((d) => {
-  //     return {
-  //       ...d,
-  //       walletAddress: Buffer.from(d.walletAddress.slice(2), 'hex'),
-  //     };
-  //   });
-  //   return this.rsprisma.beneficiary.createMany({
-  //     data: sanitized,
-  //   });
-  // }
+    //3. Sync beneficiary to project
+    return lastValueFrom(
+      this.client.send(
+        { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
+        projectPayload
+      )
+    )
+    // return this.client.send(
+    //   { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
+    //   projectPayload
+    // );
+  }
 
   async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
     const findUuid = await this.prisma.beneficiary.findUnique({
@@ -887,9 +919,42 @@ export class BeneficiaryService {
       //1. Get beneficiary group data
       const beneficiaryGroupData = await this.prisma.beneficiaryGroup.findUnique({
         where: {
-          uuid: beneficiaryGroupId
+          uuid: beneficiaryGroupId,
+        },
+        include: {
+          groupedBeneficiaries: true
         }
       })
+
+      const benfsInGroup = beneficiaryGroupData.groupedBeneficiaries?.map((d) => d.beneficiaryId)
+
+      // get beneficiaries from the group not assigned to selected project
+      const unassignedBenfs = await this.prisma.beneficiary.findMany({
+        where: {
+          AND: [
+            {
+              uuid: {
+                in: benfsInGroup
+              }
+            },
+            {
+              BeneficiaryProject: {
+                none: {
+                  projectId: project.uuid
+                }
+              }
+            },
+          ],
+          deletedAt: null
+        }
+      });
+
+      // bulk assign unassigned beneficiaries from group
+      if (unassignedBenfs?.length) {
+        for (const unassignedBenf of unassignedBenfs) {
+          await this.assignBeneficiaryToProject({ beneficiaryId: unassignedBenf.uuid, projectId: project.uuid })
+        }
+      }
 
       // add as required by project specifics
       const projectPayload = {
@@ -898,10 +963,6 @@ export class BeneficiaryService {
 
       //2.Save beneficiary group to project
       await this.saveBeneficiaryGroupToProject(dto);
-
-      // this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
-      //   projectUuid: projectId,
-      // });
 
       //3. Sync beneficiary to project
       return this.client.send(
