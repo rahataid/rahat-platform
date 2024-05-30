@@ -28,6 +28,12 @@ CREATE TYPE "PhoneStatus" AS ENUM ('UNKNOWN', 'NO_PHONE', 'FEATURE_PHONE', 'SMAR
 -- CreateEnum
 CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'FAILED');
 
+-- CreateEnum
+CREATE TYPE "GrievanceStatus" AS ENUM ('NEW', 'UNDER_REVIEW', 'RESOLVED', 'CLOSED');
+
+-- CreateEnum
+CREATE TYPE "GrievanceType" AS ENUM ('TECHNICAL', 'NON_TECHNICAL', 'OTHER');
+
 -- CreateTable
 CREATE TABLE "tbl_users" (
     "id" SERIAL NOT NULL,
@@ -169,6 +175,44 @@ CREATE TABLE "tbl_beneficiaries" (
 );
 
 -- CreateTable
+CREATE TABLE "tbl_grouped_beneficiaries" (
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "beneficiaryGroupId" UUID NOT NULL,
+    "beneficiaryId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_grouped_beneficiaries_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tbl_beneficiaries_group" (
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3),
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_beneficiaries_group_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tbl_beneficiaries_gorup_projects" (
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "projectId" UUID NOT NULL,
+    "beneficiaryGroupId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_beneficiaries_gorup_projects_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "tbl_beneficiaries_projects" (
     "id" SERIAL NOT NULL,
     "uuid" UUID NOT NULL,
@@ -265,6 +309,24 @@ CREATE TABLE "tbl_transactions" (
     CONSTRAINT "tbl_transactions_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "tbl_grievances" (
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "reportedById" INTEGER NOT NULL,
+    "reporterContact" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "type" "GrievanceType" NOT NULL,
+    "projectId" UUID NOT NULL,
+    "description" TEXT NOT NULL,
+    "status" "GrievanceStatus" NOT NULL DEFAULT 'NEW',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tbl_grievances_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_users_uuid_key" ON "tbl_users"("uuid");
 
@@ -299,6 +361,21 @@ CREATE UNIQUE INDEX "tbl_beneficiaries_uuid_key" ON "tbl_beneficiaries"("uuid");
 CREATE UNIQUE INDEX "tbl_beneficiaries_walletAddress_key" ON "tbl_beneficiaries"("walletAddress");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "tbl_grouped_beneficiaries_uuid_key" ON "tbl_grouped_beneficiaries"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_grouped_beneficiaries_beneficiaryGroupId_beneficiaryId_key" ON "tbl_grouped_beneficiaries"("beneficiaryGroupId", "beneficiaryId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_beneficiaries_group_uuid_key" ON "tbl_beneficiaries_group"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_beneficiaries_gorup_projects_uuid_key" ON "tbl_beneficiaries_gorup_projects"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_beneficiaries_gorup_projects_projectId_beneficiaryGroup_key" ON "tbl_beneficiaries_gorup_projects"("projectId", "beneficiaryGroupId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "tbl_beneficiaries_projects_uuid_key" ON "tbl_beneficiaries_projects"("uuid");
 
 -- CreateIndex
@@ -325,6 +402,9 @@ CREATE UNIQUE INDEX "tbl_projects_vendors_projectId_vendorId_key" ON "tbl_projec
 -- CreateIndex
 CREATE UNIQUE INDEX "tbl_transactions_uuid_key" ON "tbl_transactions"("uuid");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "tbl_grievances_uuid_key" ON "tbl_grievances"("uuid");
+
 -- AddForeignKey
 ALTER TABLE "tbl_auth_permissions" ADD CONSTRAINT "tbl_auth_permissions_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "tbl_auth_roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -344,6 +424,18 @@ ALTER TABLE "tbl_auth_sessions" ADD CONSTRAINT "tbl_auth_sessions_authId_fkey" F
 ALTER TABLE "tbl_users_signups" ADD CONSTRAINT "tbl_users_signups_approvedBy_fkey" FOREIGN KEY ("approvedBy") REFERENCES "tbl_users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "tbl_grouped_beneficiaries" ADD CONSTRAINT "tbl_grouped_beneficiaries_beneficiaryGroupId_fkey" FOREIGN KEY ("beneficiaryGroupId") REFERENCES "tbl_beneficiaries_group"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_grouped_beneficiaries" ADD CONSTRAINT "tbl_grouped_beneficiaries_beneficiaryId_fkey" FOREIGN KEY ("beneficiaryId") REFERENCES "tbl_beneficiaries"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_beneficiaries_gorup_projects" ADD CONSTRAINT "tbl_beneficiaries_gorup_projects_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "tbl_projects"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_beneficiaries_gorup_projects" ADD CONSTRAINT "tbl_beneficiaries_gorup_projects_beneficiaryGroupId_fkey" FOREIGN KEY ("beneficiaryGroupId") REFERENCES "tbl_beneficiaries_group"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "tbl_beneficiaries_projects" ADD CONSTRAINT "tbl_beneficiaries_projects_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "tbl_projects"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -357,3 +449,9 @@ ALTER TABLE "tbl_projects_vendors" ADD CONSTRAINT "tbl_projects_vendors_projectI
 
 -- AddForeignKey
 ALTER TABLE "tbl_projects_vendors" ADD CONSTRAINT "tbl_projects_vendors_vendorId_fkey" FOREIGN KEY ("vendorId") REFERENCES "tbl_users"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_grievances" ADD CONSTRAINT "tbl_grievances_reportedById_fkey" FOREIGN KEY ("reportedById") REFERENCES "tbl_users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tbl_grievances" ADD CONSTRAINT "tbl_grievances_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "tbl_projects"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;

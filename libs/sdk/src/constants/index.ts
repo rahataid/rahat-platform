@@ -47,6 +47,7 @@ export const MS_ACTIONS = {
     ADD_TO_PROJECT: 'beneficiary.add_to_project',
     BULK_ADD_TO_PROJECT: 'beneficiary.bulk_add_to_project',
     ASSGIN_TO_PROJECT: 'beneficiary.assign_to_project',
+    ASSGIN_GROUP_TO_PROJECT: 'beneficiary.assign_group_to_project',
     BULK_ASSIGN_TO_PROJECT: 'beneficiary.bulk_assign',
     LIST_BY_PROJECT: 'beneficiary.list_by_project',
     GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',
@@ -124,6 +125,7 @@ export const MS_ACTIONS = {
       UPDATE: 'aaProject.stakeholders.update',
       GET_GROUP: 'aaProject.stakeholders.getGroup',
       GET_ALL_GROUPS: 'aaProject.stakeholders.getAllGroups',
+      GET_ONE_GROUP: 'aaProject.stakeholders.getOneGroup',
       ADD_GROUP: 'aaProject.stakeholders.addGroup',
       UPDATE_GROUP: 'aaProject.stakeholders.updateGroup',
       DELETE_GROUP: 'aaProject.stakeholders.deleteGroup',
@@ -134,11 +136,25 @@ export const MS_ACTIONS = {
     BENEFICIARY: {
       ADD_GROUP: 'aaProject.beneficiary.addGroup',
       GET_ALL_GROUPS: 'aaProject.beneficiary.getAllGroups',
-      ASSIGN_TOKEN_TO_GROUP: 'aaProject.beneficiary.assign_token_to_group'
+      ASSIGN_TOKEN_TO_GROUP: 'aaProject.beneficiary.assign_token_to_group',
+      RESERVE_TOKEN_TO_GROUP: 'aaProject.beneficiary.reserve_token_to_group',
+      GET_ALL_TOKEN_RESERVATION: 'aaProject.beneficiary.get_all_token_reservation',
+      GET_ONE_TOKEN_RESERVATION: 'aaProject.beneficiary.get_one_token_reservation',
+      GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats'
     }
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',
     LIST_BEN_COUNT: 'c2cProject.count_ben',
-  }
+  },
+  CVAProject: {
+    UPDATE_STATUS: 'cvaProject.updateStatus',
+    REQUEST_TOKEN: 'cvaProject.requestToken',
+    REQUEST_CLAIM: 'cvaProject.requestClaim',
+    UPDATE_CLAIM: 'cvaProject.updateClaim',
+    LIST_CLAIM: 'cvaProject.listClaim',
+    GET_CLAIM: 'cvaProject.getClaim',
+    PROCESS_OTP: 'cvaProject.processOtp',
+
+  },
 };

@@ -20,7 +20,9 @@ import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   AddBenToProjectDto,
   CreateBeneficiaryDto,
+  CreateBeneficiaryGroupsDto,
   ListBeneficiaryDto,
+  ListBeneficiaryGroupDto,
   UpdateBeneficiaryDto,
   ValidateWalletDto
 } from '@rahataid/extensions';
@@ -208,4 +210,19 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
   }
 
+  @Post('groups')
+  async createGroup(@Body() dto: CreateBeneficiaryGroupsDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.ADD_GROUP }, dto);
+  }
+
+  @Get('groups/all')
+  async getAllGroups(@Query() dto: ListBeneficiaryGroupDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.GET_ALL_GROUPS }, dto);
+  }
+
+  @Get('groups/:uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async getOneGroup(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GET_ONE_GROUP }, uuid);
+  }
 }

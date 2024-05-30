@@ -11,11 +11,12 @@ import {
 } from '@rahataid/sdk';
 import { BeneficiaryType } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
+import axios from 'axios';
 import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { createContractSigner } from '../utils/web3';
-import { aaActions, beneficiaryActions, c2cActions, elActions, settingActions, vendorActions } from './actions';
+import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, settingActions, vendorActions } from './actions';
 @Injectable()
 export class ProjectService {
   constructor(
@@ -87,12 +88,77 @@ export class ProjectService {
     });
   }
 
+  async createTemplate(template: { name: string, media: string }) {
+    try {
+      const twilioContentApi = `https://content.twilio.com/v1/Content`;
+      const templateData = {
+        friendly_name: template.name,
+        language: 'en',
+        types: {
+          'twilio/media': {
+            body: "Use qr code for walletaddress:",
+            media: [template.media]
+
+          },
+        },
+      };
+
+      const response = await axios.post(twilioContentApi, templateData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        auth: {
+          username: process.env.TWILIO_SID || '',
+          password: process.env.TWILIO_SECRET,
+        },
+      });
+
+      if (response.status === 201) {
+        await this.sendTemplateApprovalRequest({
+          sid: response.data.sid,
+          name: template.name,
+        });
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async sendTemplateApprovalRequest(template: { sid: string; name: string }) {
+    try {
+      const twilioContentApi = `https://content.twilio.com/v1/Content/${template.sid}/ApprovalRequests/whatsapp`;
+      const requestData = {
+        name: template.name.toLowerCase().replace(/\s+/g, '_'),
+        category: 'UTILITY',
+      };
+
+      const response = await axios.post(twilioContentApi, requestData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        auth: {
+          username: process.env.TWILIO_SID,
+          password: process.env.TWILIO_SECRET,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
   async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy) {
 
     return client.send(cmd, payload).pipe(
       timeout(timeoutValue),
       tap((response) => {
-        //send whatsapp message after added referal beneficiary to project
+
+        // send whatsapp message after added referal beneficiary to project
         if (
           response?.insertedData?.some((res) => res?.walletAddress) &&
           response?.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT &&
@@ -103,10 +169,18 @@ export class ProjectService {
             payload.dto
           );
         }
+        //send the whatsapp message after successfully redeming voucher
+        if (response?.data && response?.cmd === ProjectJobs.REDEEM_VOUCHER) {
+          this.eventEmitter.emit(
+            ProjectEvents.REDEEM_VOUCHER,
+            response.data
+          )
+        }
+
         //send message to all admin
         if (
           response?.id &&
-          response?.cmd === ProjectJobs.REQUEST_REDEMPTION
+          cmd?.cmd === ProjectJobs.REQUEST_REDEMPTION
         ) {
           this.eventEmitter.emit(
             ProjectEvents.REQUEST_REDEMPTION
@@ -178,7 +252,8 @@ export class ProjectService {
       ...vendorActions,
       ...settingActions,
       ...metaTxActions,
-      ...c2cActions
+      ...c2cActions,
+      ...cvaActions
     };
 
     const actionFunc = actions[action];
