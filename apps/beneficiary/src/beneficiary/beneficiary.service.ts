@@ -9,6 +9,7 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  ImportBeneficiaryFromToolDTO,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   UpdateBeneficiaryDto,
@@ -972,5 +973,32 @@ export class BeneficiaryService {
     } catch (err) {
       console.log(err);
     }
+  }
+
+
+  async importBeneficiariesFromTool(data: ImportBeneficiaryFromToolDTO) {
+    const { beneficiaries, ...rest } = data
+    const dataFromBuffer = Buffer.from(beneficiaries)
+    const benBufferToString = dataFromBuffer.toString('utf-8')
+    const benJson = JSON.parse(benBufferToString) || {}
+
+    const beneficiaryData = benJson.map((d: Beneficiary) => {
+      return {
+        ...d,
+        groupName: rest.groupName ? rest.groupName : null,
+        targetUUID: rest.targetUUID ? rest.targetUUID : null,
+      }
+    })
+    return this.prisma.pendingBeneficiary.createMany({
+      data: beneficiaryData
+    })
+  }
+
+  async confirmImportedBeneficiaries(data: any) {
+    // has group
+    // does not have group
+    // has group but NOT in the groups table
+
+    return data
   }
 }

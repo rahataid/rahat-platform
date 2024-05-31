@@ -483,3 +483,32 @@ model Grievance {
 }
 
 //  ++++++++++++++++++ END: @rahat/grievances - Grievances ++++++++++++++++++++++
+
+model PendingBeneficiary {
+  id           Int     @id @default(autoincrement())
+  uuid         String  @unique @default(uuid()) @db.Uuid()
+  firstName    String
+  lastName     String
+  govtIDNumber String?
+  gender        Gender    @default(UNKNOWN)
+  birthDate     DateTime?
+  walletAddress String?
+  phone         String?
+  email         String?
+  archived      Boolean   @default(false)
+  location      String?
+  latitude      Float?
+  longitude     Float?
+  notes          String?
+  bankedStatus   BankedStatus   @default(UNKNOWN)
+  internetStatus InternetStatus @default(UNKNOWN)
+  phoneStatus    PhoneStatus    @default(UNKNOWN)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime?      @updatedAt()
+  extras         Json?          @db.JsonB()
+  deletedAt      DateTime?
+  targetUUID     String?
+  groupName      String?
+
+  @@map("tbl_pending_beneficiaries")
+}
