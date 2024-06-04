@@ -194,9 +194,8 @@ export class ProjectService {
     return { txHash: res.hash, status: res.status };
   }
 
-  async processElOtp(payload) {
+  async sendSucessMessage(payload) {
     const { benId } = payload
-    await this.executeMetaTxRequest(payload);
     this.eventEmitter.emit(
       ProjectEvents.REDEEM_VOUCHER,
       benId
@@ -207,7 +206,8 @@ export class ProjectService {
     //Note: This is a temporary solution to handle metaTx actions
     const metaTxActions = {
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
-      [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () => await this.processElOtp(payload),
+      [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () => await this.executeMetaTxRequest(payload),
+      [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () => await this.sendSucessMessage(payload),
       [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
       [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () => await this.executeMetaTxRequest(payload),
     };
