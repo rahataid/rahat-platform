@@ -1,6 +1,7 @@
 import { Controller, Inject, Param } from '@nestjs/common';
 import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import {
+  ConfirmPendingBeneficiariesDTO,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ListBeneficiaryDto,
@@ -177,5 +178,16 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP_BY_PROJECT })
   async getOneGroupByProject(uuid: UUID) {
     return this.service.getOneGroupByProject(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL })
+  async importBeneficiariesFromTool(data: any) {
+    return this.service.importBeneficiariesFromTool(data);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.CONFIRM_PENDING_BENEFICIARIES })
+  async confirmPendingBeneficiaries(data: ConfirmPendingBeneficiariesDTO) {
+
+    return this.service.confirmImportedBeneficiaries(data);
   }
 }

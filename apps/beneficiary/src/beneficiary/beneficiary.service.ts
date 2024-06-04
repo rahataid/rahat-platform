@@ -973,4 +973,47 @@ export class BeneficiaryService {
       console.log(err);
     }
   }
+
+
+  async importBeneficiariesFromTool(data: any) {
+    const dataFromBuffer = Buffer.from(data);
+    const bufferString = dataFromBuffer.toString('utf-8');
+    const jsonData = JSON.parse(bufferString) || null;
+    if (!jsonData) return null;
+    const { groupName, targetUUID, beneficiaries } = jsonData;
+    const beneficiaryData = beneficiaries.map((d: any) => {
+      return {
+        firstName: d.firstName,
+        lastName: d.lastName,
+        targetUUID: targetUUID,
+        walletAddress: d.walletAddress,
+        govtIDNumber: d.govtIDNumber,
+        gender: d.gender,
+        bankedStatus: d.bankedStatus,
+        phoneStatus: d.phoneStatus,
+        internetStatus: d.internetStatus,
+        email: d.email || null,
+        phone: d.phone || null,
+        birthDate: d.birthDate || null,
+        location: d.location || null,
+        latitude: d.latitude || null,
+        longitude: d.longitude || null,
+        notes: d.notes || null,
+        groupName: groupName || null,
+        extras: d.extras || null,
+      }
+    })
+    return this.prisma.tempBeneficiary.createMany({
+      data: beneficiaryData,
+      skipDuplicates: true
+    })
+  }
+
+  async confirmImportedBeneficiaries(data: any) {
+    // has group
+    // does not have group
+    // has group but NOT in the groups table
+
+    return data
+  }
 }
