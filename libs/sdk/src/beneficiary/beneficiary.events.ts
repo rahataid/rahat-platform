@@ -43,5 +43,7 @@ export const JOBS = {
   ADD_GROUP: 'rahat.jobs.beneficiary.add_group',
   GET_ONE_GROUP: 'rahat.jobs.beneficiary.get_one_group',
   GET_ALL_GROUPS: 'rahat.jobs.beneficiary.get_all_groups',
-  ADD_GROUP_TO_PROJECT: 'rahat.jobs.beneficiary.add_group_to_project'
+  ADD_GROUP_TO_PROJECT: 'rahat.jobs.beneficiary.add_group_to_project',
+  IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL: 'rahat.jobs.beneficiary.import_beneficiaries_from_community_tool',
+  CONFIRM_PENDING_BENEFICIARIES: 'rahat.jobs.beneficiary.confirm_pending_beneficiaries',
 };

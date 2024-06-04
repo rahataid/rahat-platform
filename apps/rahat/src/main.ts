@@ -2,6 +2,7 @@
  * This is not a production server yet!
  * This is only a minimal backend to get started.
  */
+import * as bodyParser from 'body-parser';
 
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -23,6 +24,9 @@ async function bootstrap() {
   });
   const globalPrefix = 'v1';
   app.enableCors();
+
+  app.use(bodyParser.raw({ type: 'application/octet-stream' }));
+
 
   //must have this if you want to implicit conversion of string to number in dto
   app.useGlobalPipes(

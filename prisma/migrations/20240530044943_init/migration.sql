@@ -313,7 +313,8 @@ CREATE TABLE "tbl_transactions" (
 CREATE TABLE "tbl_grievances" (
     "id" SERIAL NOT NULL,
     "uuid" UUID NOT NULL,
-    "reportedById" INTEGER NOT NULL,
+    "reportedBy" TEXT NOT NULL,
+    "reporterUserId" INTEGER NOT NULL,
     "reporterContact" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "type" "GrievanceType" NOT NULL,
@@ -451,7 +452,7 @@ ALTER TABLE "tbl_projects_vendors" ADD CONSTRAINT "tbl_projects_vendors_projectI
 ALTER TABLE "tbl_projects_vendors" ADD CONSTRAINT "tbl_projects_vendors_vendorId_fkey" FOREIGN KEY ("vendorId") REFERENCES "tbl_users"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tbl_grievances" ADD CONSTRAINT "tbl_grievances_reportedById_fkey" FOREIGN KEY ("reportedById") REFERENCES "tbl_users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "tbl_grievances" ADD CONSTRAINT "tbl_grievances_reporterUserId_fkey" FOREIGN KEY ("reporterUserId") REFERENCES "tbl_users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "tbl_grievances" ADD CONSTRAINT "tbl_grievances_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "tbl_projects"("uuid") ON DELETE RESTRICT ON UPDATE CASCADE;

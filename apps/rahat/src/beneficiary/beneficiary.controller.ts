@@ -12,13 +12,14 @@ import {
   Query,
   Req,
   UploadedFile,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   AddBenToProjectDto,
+  ConfirmPendingBeneficiariesDTO,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ListBeneficiaryDto,
@@ -31,7 +32,7 @@ import {
   BeneficiaryJobs,
   Enums,
   MS_TIMEOUT,
-  TFile
+  TFile,
 } from '@rahataid/sdk';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -49,7 +50,7 @@ function getDateInfo(dateString) {
       day: date.getDate(),
       age: new Date().getFullYear() - date.getFullYear(),
       isAdult: new Date().getFullYear() - date.getFullYear() > 18,
-    }
+    };
   } catch (error) {
     console.error(error);
     return null;
@@ -125,13 +126,13 @@ export class BeneficiaryController {
     const beneficiaries = await DocParser(docType, file.buffer);
 
     const beneficiariesMapped = beneficiaries.map((b) => ({
-      birthDate: new Date(b['Birth Date'],).toISOString() || null,
+      birthDate: new Date(b['Birth Date']).toISOString() || null,
       internetStatus: b['Internet Status*'],
       bankedStatus: b['Bank Status*'],
       location: b['Location'],
       phoneStatus: b['Phone Status*'],
       notes: b['Notes'],
-      gender: b["Gender*"],
+      gender: b['Gender*'],
       latitude: b['Latitude'],
       longitude: b['Longitude'],
       age: b['Age*'] || null,
@@ -140,7 +141,8 @@ export class BeneficiaryController {
         name: b['Name*'],
         phone: b['Whatsapp Number*'],
         extras: {
-          isAdult: getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age*']) > 18,
+          isAdult:
+            getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age*']) > 18,
           governmentId: b['Government ID'],
         },
       },
@@ -150,10 +152,9 @@ export class BeneficiaryController {
       .send({ cmd: BeneficiaryJobs.CREATE_BULK }, beneficiariesMapped)
       .pipe(
         catchError((error) => {
-          console.log('error', error)
-          return throwError(() => new BadRequestException(error.message))
-        }
-        )
+          console.log('error', error);
+          return throwError(() => new BadRequestException(error.message));
+        })
       )
       .pipe(timeout(MS_TIMEOUT));
   }
@@ -224,5 +225,20 @@ export class BeneficiaryController {
   @ApiParam({ name: 'uuid', required: true })
   async getOneGroup(@Param('uuid') uuid: UUID) {
     return this.client.send({ cmd: BeneficiaryJobs.GET_ONE_GROUP }, uuid);
+  }
+
+  @Post('import-tools')
+  async importBeneficiariesFromTool(@Req() req: Request) {
+    return this.client.send(
+      {
+        cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL,
+      },
+      req.body
+    );
+  }
+
+  @Post('confirm-pending')
+  async confirmPendingBeneficiaries(@Body() dto: ConfirmPendingBeneficiariesDTO) {
+    return this.client.send({ cmd: BeneficiaryJobs.CONFIRM_PENDING_BENEFICIARIES }, dto);
   }
 }
