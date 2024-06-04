@@ -4,7 +4,6 @@ import {
   ConfirmPendingBeneficiariesDTO,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
-  ImportBeneficiaryFromToolDTO,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   UpdateBeneficiaryDto,
@@ -182,7 +181,7 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL })
-  async importBeneficiariesFromTool(data: ImportBeneficiaryFromToolDTO) {
+  async importBeneficiariesFromTool(data: any) {
     return this.service.importBeneficiariesFromTool(data);
   }
 

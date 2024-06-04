@@ -22,11 +22,10 @@ import {
   ConfirmPendingBeneficiariesDTO,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
-  ImportBeneficiaryFromToolDTO,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   UpdateBeneficiaryDto,
-  ValidateWalletDto,
+  ValidateWalletDto
 } from '@rahataid/extensions';
 import {
   BQUEUE,
@@ -229,12 +228,12 @@ export class BeneficiaryController {
   }
 
   @Post('import-tools')
-  async importBeneficiariesFromTool(@Body() dto: ImportBeneficiaryFromToolDTO) {
+  async importBeneficiariesFromTool(@Req() req: Request) {
     return this.client.send(
       {
         cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL,
       },
-      dto
+      req.body
     );
   }
 
