@@ -982,7 +982,7 @@ export class BeneficiaryService {
     if (query.firstName) {
       filter.firstName = { contains: query.firstName, mode: 'insensitive' };
     }
-    if (query.groupName) filter.groupName = { contains: query.groupName, mode: 'insensitive' }
+    if (query.groupName) filter.groupName = { equals: query.groupName, mode: 'insensitive' }
     return paginate(
       this.prisma.tempBeneficiary,
       {
@@ -996,6 +996,19 @@ export class BeneficiaryService {
     );
   }
 
+  listTempGroupNames() {
+    return this.prisma.tempBeneficiary.findMany({
+      where: {
+        groupName: {
+          not: null,
+        },
+      },
+      select: {
+        groupName: true,
+      },
+      distinct: ['groupName'],
+    });
+  }
 
   async importBeneficiariesFromTool(data: any) {
     const dataFromBuffer = Buffer.from(data);
