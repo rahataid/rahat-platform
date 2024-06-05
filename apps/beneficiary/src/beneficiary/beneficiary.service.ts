@@ -979,6 +979,9 @@ export class BeneficiaryService {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy['createdAt'] = query.order;
     let filter = {} as any;
+    if (query.firstName) {
+      filter.firstName = { contains: query.firstName, mode: 'insensitive' };
+    }
     if (query.groupName) filter.groupName = { contains: query.groupName, mode: 'insensitive' }
     return paginate(
       this.prisma.tempBeneficiary,

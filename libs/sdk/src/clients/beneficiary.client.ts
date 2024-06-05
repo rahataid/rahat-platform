@@ -2,7 +2,7 @@ import { Pagination } from '@rumsan/sdk/types';
 import { formatResponse } from '@rumsan/sdk/utils';
 import { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { UUID } from 'crypto';
-import { Beneficiary, TPIIData } from '../beneficiary';
+import { Beneficiary, TPIIData, TempBeneficiary } from '../beneficiary';
 import { BeneficiaryClient, Stats } from '../types';
 
 export const getBeneficiaryClient = (
@@ -22,6 +22,14 @@ export const getBeneficiaryClient = (
     getStats: async (config?: AxiosRequestConfig) => {
       const response = await client.get('/beneficiaries/stats', config);
       return formatResponse<Stats[]>(response);
+    },
+
+    listTempBeneficiary: async (data?: Pagination, config?: AxiosRequestConfig) => {
+      const response = await client.get('/beneficiaries/temp', {
+        params: data,
+        ...config,
+      });
+      return formatResponse<TempBeneficiary[]>(response);
     },
 
     list: async (data?: Pagination, config?: AxiosRequestConfig) => {
