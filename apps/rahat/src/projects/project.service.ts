@@ -199,7 +199,8 @@ export class ProjectService {
     this.eventEmitter.emit(
       ProjectEvents.REDEEM_VOUCHER,
       benId
-    )
+    );
+    return true;
   }
 
   async handleProjectActions({ uuid, action, payload }) {
