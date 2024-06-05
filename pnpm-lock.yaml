@@ -71,6 +71,9 @@ importers:
       axios:
         specifier: ^1.6.7
         version: 1.6.8
+      body-parser:
+        specifier: ^1.20.2
+        version: 1.20.2
       bull:
         specifier: ^4.12.2
         version: 4.12.2
@@ -89,6 +92,9 @@ importers:
       ethers:
         specifier: 6.11.1
         version: 6.11.1
+      express:
+        specifier: ^4.19.2
+        version: 4.19.2
       http-status-codes:
         specifier: ^2.3.0
         version: 2.3.0

@@ -38,7 +38,7 @@ export class ListenersService {
         <div style="max-width:800px;max-height: 600px;overflow:auto;line-height:2;background: #333333;">
           <div style="margin:50px auto;width:70%;padding:40px 40px; border: 1px solid #fff; border-radius: 12px;">
             <div style="text-align: center;">
-              <img src='https://unicef.xa.rahat.io/logo/rahat-logo-white.png' width="250" title="stage4all" alt="stage4all">
+              <img src='https://assets.rumsan.net/rumsan-group/rahat-logo-white.png' width="250" title="stage4all" alt="stage4all">
             </div>
             <div style="color:#fff; text-align: center;">
               <h4 style="font-size:1.3em;">Your Rahat system login code</h4>
@@ -112,9 +112,11 @@ export class ListenersService {
         type: 'WHATSAPP',
         contentSid: CONTENT_SID,
         contentVariables: {
-          name: beneficiary.piiData.name,
+          1: beneficiary.piiData.name,
         },
       };
+
+      console.log(payload)
 
       this.messageSenderService.sendWhatappMessage(payload)
     }
@@ -172,7 +174,7 @@ export class ListenersService {
   async onRedeemVoucher(data) {
     const ben = await this.prisma.beneficiary.findUnique({
       where: {
-        uuid: data.uuid
+        uuid: data
       }
 
     });
