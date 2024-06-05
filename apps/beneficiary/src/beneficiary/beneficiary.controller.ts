@@ -6,6 +6,7 @@ import {
   CreateBeneficiaryGroupsDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
+  ListTempBeneficiaryDto,
   UpdateBeneficiaryDto,
   addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
@@ -73,6 +74,8 @@ export class BeneficiaryController {
     return this.statsService.getAllStats();
   }
 
+
+
   @MessagePattern({ cmd: BeneficiaryJobs.PROJECT_STATS })
   async projectStats(uuid: string) {
     return this.statsService.getAllStats(uuid);
@@ -93,6 +96,8 @@ export class BeneficiaryController {
   async assignToProject(payload: any) {
     return this.service.assignBeneficiaryToProject(payload);
   }
+
+
 
   @MessagePattern({ cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT })
   async bulkAssignToProject(payload: any) {
@@ -183,6 +188,11 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL })
   async importBeneficiariesFromTool(data: any) {
     return this.service.importBeneficiariesFromTool(data);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY })
+  async listTempBeneficiaries(query: ListTempBeneficiaryDto) {
+    return this.service.listTempBeneficiaries(query);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CONFIRM_PENDING_BENEFICIARIES })

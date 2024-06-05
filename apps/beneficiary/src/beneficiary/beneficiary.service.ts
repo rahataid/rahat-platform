@@ -11,6 +11,7 @@ import {
   CreateBeneficiaryGroupsDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
+  ListTempBeneficiaryDto,
   UpdateBeneficiaryDto,
   addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
@@ -972,6 +973,24 @@ export class BeneficiaryService {
     } catch (err) {
       console.log(err);
     }
+  }
+
+  listTempBeneficiaries(query: ListTempBeneficiaryDto) {
+    const orderBy: Record<string, 'asc' | 'desc'> = {};
+    orderBy['createdAt'] = query.order;
+    let filter = {} as any;
+    if (query.groupName) filter.groupName = { contains: query.groupName, mode: 'insensitive' }
+    return paginate(
+      this.prisma.tempBeneficiary,
+      {
+        where: filter,
+        orderBy
+      },
+      {
+        page: query.page,
+        perPage: query.perPage,
+      }
+    );
   }
 
 
