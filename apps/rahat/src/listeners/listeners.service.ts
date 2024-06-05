@@ -172,7 +172,7 @@ export class ListenersService {
   async onRedeemVoucher(data) {
     const ben = await this.prisma.beneficiary.findUnique({
       where: {
-        uuid: data.uuid
+        uuid: data
       }
 
     });

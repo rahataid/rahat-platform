@@ -62,6 +62,7 @@ export const MS_ACTIONS = {
     REDEEM_VOUCHER: 'elProject.redeemVoucher',
     UPDATE_STATUS: 'elProject.updateStatus',
     PROCESS_OTP: 'elProject.processOtp',
+    SEND_SUCCESS_MESSAGE: 'elProject.successMessage',
     ASSIGN_DISCOUNT_VOUCHER: 'elProject.discountVoucher',
     REQUEST_REDEMPTION: 'elProject.requestRedemption',
     REQUEST_REDEMPTION_BE: 'elProject.requestRedemption_be',

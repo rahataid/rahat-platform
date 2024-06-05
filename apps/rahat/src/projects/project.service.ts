@@ -11,7 +11,6 @@ import {
 } from '@rahataid/sdk';
 import { BeneficiaryType } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
-import axios from 'axios';
 import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { ERC2771FORWARDER } from '../utils/contracts';
@@ -88,68 +87,46 @@ export class ProjectService {
     });
   }
 
-  async createTemplate(template: { name: string, media: string }) {
-    try {
-      const twilioContentApi = `https://content.twilio.com/v1/Content`;
-      const templateData = {
-        friendly_name: template.name,
-        language: 'en',
-        types: {
-          'twilio/media': {
-            body: "Use qr code for walletaddress:",
-            media: [template.media]
-
-          },
-        },
-      };
-
-      const response = await axios.post(twilioContentApi, templateData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        auth: {
-          username: process.env.TWILIO_SID || '',
-          password: process.env.TWILIO_SECRET,
-        },
-      });
-
-      if (response.status === 201) {
-        await this.sendTemplateApprovalRequest({
-          sid: response.data.sid,
-          name: template.name,
-        });
-      }
-
-      return response.data;
-    } catch (error) {
-      console.error(error);
-      throw error;
+  async sendWhatsAppMsg(response, cmd, payload) {
+    // send whatsapp message after added referal beneficiary to project
+    if (
+      response?.insertedData?.some((res) => res?.walletAddress) &&
+      response?.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT &&
+      payload?.dto?.type === BeneficiaryType.REFERRED
+    ) {
+      this.eventEmitter.emit(
+        ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT,
+        payload.dto
+      );
     }
-  }
+    //send the whatsapp message after successfully redeming voucher
+    // if (response?.data && cmd?.cmd === MS_ACTIONS.ELPROJECT.PROCESS_OTP) {
+    // this.eventEmitter.emit(
+    //   ProjectEvents.REDEEM_VOUCHER,
+    //   response.data
+    // )
+    // }
 
-  async sendTemplateApprovalRequest(template: { sid: string; name: string }) {
-    try {
-      const twilioContentApi = `https://content.twilio.com/v1/Content/${template.sid}/ApprovalRequests/whatsapp`;
-      const requestData = {
-        name: template.name.toLowerCase().replace(/\s+/g, '_'),
-        category: 'UTILITY',
-      };
-
-      const response = await axios.post(twilioContentApi, requestData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        auth: {
-          username: process.env.TWILIO_SID,
-          password: process.env.TWILIO_SECRET,
-        },
-      });
-
-      return response.data;
-    } catch (error) {
-      console.error(error);
-      throw error;
+    //send message to all admin
+    if (
+      response?.id &&
+      cmd?.cmd === ProjectJobs.REQUEST_REDEMPTION
+    ) {
+      this.eventEmitter.emit(
+        ProjectEvents.REQUEST_REDEMPTION
+      );
     }
+    if (
+      response?.vendordata?.length > 0 &&
+      cmd?.cmd === ProjectJobs.UPDATE_REDEMPTION
+    ) {
+      this.eventEmitter.emit(
+        ProjectEvents.UPDATE_REDEMPTION,
+        response.vendordata
+
+      );
+    }
+
   }
 
   async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy) {
@@ -157,45 +134,46 @@ export class ProjectService {
     return client.send(cmd, payload).pipe(
       timeout(timeoutValue),
       tap((response) => {
+        this.sendWhatsAppMsg(response, cmd, payload)
 
-        // send whatsapp message after added referal beneficiary to project
-        if (
-          response?.insertedData?.some((res) => res?.walletAddress) &&
-          response?.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT &&
-          payload?.dto?.type === BeneficiaryType.REFERRED
-        ) {
-          this.eventEmitter.emit(
-            ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT,
-            payload.dto
-          );
-        }
-        //send the whatsapp message after successfully redeming voucher
-        if (response?.data && response?.cmd === ProjectJobs.REDEEM_VOUCHER) {
-          this.eventEmitter.emit(
-            ProjectEvents.REDEEM_VOUCHER,
-            response.data
-          )
-        }
+        // // send whatsapp message after added referal beneficiary to project
+        // if (
+        //   response?.insertedData?.some((res) => res?.walletAddress) &&
+        //   response?.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT &&
+        //   payload?.dto?.type === BeneficiaryType.REFERRED
+        // ) {
+        //   this.eventEmitter.emit(
+        //     ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT,
+        //     payload.dto
+        //   );
+        // }
+        // //send the whatsapp message after successfully redeming voucher
+        // if (response?.data && response?.cmd === ProjectJobs.REDEEM_VOUCHER) {
+        //   this.eventEmitter.emit(
+        //     ProjectEvents.REDEEM_VOUCHER,
+        //     response.data
+        //   )
+        // }
 
-        //send message to all admin
-        if (
-          response?.id &&
-          cmd?.cmd === ProjectJobs.REQUEST_REDEMPTION
-        ) {
-          this.eventEmitter.emit(
-            ProjectEvents.REQUEST_REDEMPTION
-          );
-        }
-        if (
-          response?.vendordata?.length > 0 &&
-          cmd?.cmd === ProjectJobs.UPDATE_REDEMPTION
-        ) {
-          this.eventEmitter.emit(
-            ProjectEvents.UPDATE_REDEMPTION,
-            response.vendordata
+        // //send message to all admin
+        // if (
+        //   response?.id &&
+        //   cmd?.cmd === ProjectJobs.REQUEST_REDEMPTION
+        // ) {
+        //   this.eventEmitter.emit(
+        //     ProjectEvents.REQUEST_REDEMPTION
+        //   );
+        // }
+        // if (
+        //   response?.vendordata?.length > 0 &&
+        //   cmd?.cmd === ProjectJobs.UPDATE_REDEMPTION
+        // ) {
+        //   this.eventEmitter.emit(
+        //     ProjectEvents.UPDATE_REDEMPTION,
+        //     response.vendordata
 
-          );
-        }
+        //   );
+        // }
       })
     );
   }
@@ -216,31 +194,20 @@ export class ProjectService {
     return { txHash: res.hash, status: res.status };
   }
 
-  // async redeemVoucher (params:any,uuid:string){
-  //   const {metaTxRequest} = params;
-  //   const res = await this.executeMetaTxRequest({metaTxRequest});
-  //   if(res.status === 1)   this.sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, params);
-  //   return {txHash:res.txHash,status:res.status};
-
-  // }
-
-  // async requestRedemption (params:any,uuid:string){
-  //   const {metaTxRequest} = params;
-  //   const res = await this.executeMetaTxRequest({metaTxRequest});
-  //   if(res.status === 1)  this.sendCommand(
-  //     { cmd: ProjectJobs.REQUEST_REDEMPTION, uuid },
-  //     params,
-  //     500000
-  //   );
-  //   return {txHash:res.txHash,status:res.status};
-
-  // }
+  async sendSucessMessage(payload) {
+    const { benId } = payload
+    this.eventEmitter.emit(
+      ProjectEvents.REDEEM_VOUCHER,
+      benId
+    )
+  }
 
   async handleProjectActions({ uuid, action, payload }) {
     //Note: This is a temporary solution to handle metaTx actions
     const metaTxActions = {
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
       [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () => await this.executeMetaTxRequest(payload),
+      [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () => await this.sendSucessMessage(payload),
       [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
       [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () => await this.executeMetaTxRequest(payload),
     };
