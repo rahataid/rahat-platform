@@ -112,9 +112,11 @@ export class ListenersService {
         type: 'WHATSAPP',
         contentSid: CONTENT_SID,
         contentVariables: {
-          name: beneficiary.piiData.name,
+          1: beneficiary.piiData.name,
         },
       };
+
+      console.log(payload)
 
       this.messageSenderService.sendWhatappMessage(payload)
     }
