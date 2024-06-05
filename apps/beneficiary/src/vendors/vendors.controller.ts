@@ -33,6 +33,11 @@ export class VendorsController {
     return this.service.getVendor(id)
   }
 
+  @MessagePattern({ cmd: VendorJobs.GET_COUNT })
+  getVendorCount() {
+    return this.service.getVendorCount()
+  }
+
   @MessagePattern({ cmd: VendorJobs.GET_REDEMPTION_VENDORS })
   listRedemptionVendors(data) {
     return this.service.listRedemptionVendor(data)
