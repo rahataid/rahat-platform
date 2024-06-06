@@ -60,4 +60,4 @@ import { VerificationService } from './verification.service';
     BeneficiaryConsumer,
   ],
 })
-export class BeneficiaryModule {}
+export class BeneficiaryModule { }

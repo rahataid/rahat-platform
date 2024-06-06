@@ -1,9 +1,9 @@
 import { Controller, Inject, Param } from '@nestjs/common';
 import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import {
-  ConfirmPendingBeneficiariesDTO,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   ListTempBeneficiaryDto,
@@ -200,9 +200,8 @@ export class BeneficiaryController {
     return this.service.listTempGroups();
   }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.CONFIRM_PENDING_BENEFICIARIES })
-  async confirmPendingBeneficiaries(data: ConfirmPendingBeneficiariesDTO) {
-
-    return this.service.confirmImportedBeneficiaries(data);
+  @MessagePattern({ cmd: BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES })
+  async importTempBeneficiary(data: ImportTempBenefDto) {
+    return this.service.importTempBeneficiaries(data);
   }
 }
