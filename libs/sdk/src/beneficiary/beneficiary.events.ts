@@ -7,6 +7,8 @@ export const EVENTS = {
 };
 
 export const JOBS = {
+  LIST_TEMP_GROUPS: 'rahat.jobs.beneficiary.list_temp_groups',
+  LIST_TEMP_BENEFICIARY: 'rahat.jobs.beneficiary.list_temp_beneficiary',
   LIST_PII: 'rahat.jobs.beneficiary.list_pii',
   CREATE: 'rahat.jobs.beneficiary.create',
   CREATE_BULK: 'rahat.jobs.beneficiary.create_bulk',
