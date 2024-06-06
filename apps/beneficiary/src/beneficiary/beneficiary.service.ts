@@ -1046,11 +1046,7 @@ export class BeneficiaryService {
   }
 
   async importTempBeneficiaries(dto: ImportTempBenefDto) {
-    console.log("DTO", dto)
-    // has group
-    // does not have group
-    // has group but NOT in the groups table
-
-    return dto
+    this.beneficiaryQueue.add(BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES, dto)
+    return { message: "Beneficiaries added to the queue!" }
   }
 }
