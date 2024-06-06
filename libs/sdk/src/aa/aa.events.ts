@@ -3,7 +3,8 @@ export const JOBS = {
     GET_DHM: 'aa.jobs.riverStations.getDhm'
   },
   WATER_LEVELS: {
-    GET_DHM: 'aa.jobs.waterLevels.getDhm'
+    GET_DHM: 'aa.jobs.waterLevels.getDhm',
+    GET_GLOFAS: 'aa.jobs.waterLevels.getGlofas',
   },
   TRIGGERS: {
     DEV_ONLY: 'aa.jobs.triggers.devOnly',
