@@ -1,6 +1,11 @@
 import { UUID } from 'crypto';
 import { BankedStatus, Gender, InternetStatus, PhoneStatus } from '../enums';
 
+export type ImportTempBeneficiary = {
+  groupName: string;
+  beneficiaries: []
+}
+
 export type TempBeneficiary = {
   uuid?: UUID;
   firstName: string;

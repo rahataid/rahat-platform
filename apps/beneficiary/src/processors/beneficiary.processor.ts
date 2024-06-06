@@ -49,7 +49,6 @@ export class BeneficiaryProcessor {
   }
 }
 
-
 //===========Import helper txns=====================
 async function upsertGroup(txn: any, name: string) {
   return txn.beneficiaryGroup.upsert({
@@ -72,9 +71,8 @@ async function upsertBeneficiaryAndPII(txn: any, beneficiaries: [], groupUID: UU
       const newBenef = await upsertBeneficiary(txn, nonPii);
       const piiDataPayload = { ...piiData, beneficiaryId: newBenef.id };
       await upsertPiiData(txn, piiDataPayload);
-      const benefGroup = await addBenefToGroup(txn, groupUID, newBenef.uuid);
-      console.log("BenefGroup=>", benefGroup);
-      await removeBenefFromTemp(txn, uuid)
+      await addBenefToGroup(txn, groupUID, newBenef.uuid);
+      await removeTempBeneficiary(txn, uuid)
     }
   }
 }
@@ -88,19 +86,19 @@ async function upsertBeneficiary(txn: any, data: any) {
 }
 
 async function upsertPiiData(txn: any, data: any) {
-  return txn.beneficiaryPii.upsert({
+  await txn.beneficiaryPii.upsert({
     where: { beneficiaryId: data.beneficiaryId },
     update: data,
     create: data
   });
 }
 
-async function addBenefToGroup(txn: any, benefUID: UUID, groupUID: UUID) {
+async function addBenefToGroup(txn: any, groupUID: UUID, benefUID: UUID) {
   const payload = {
     beneficiaryGroupId: groupUID,
     beneficiaryId: benefUID
   }
-  return txn.groupedBeneficiaries.upsert({
+  await txn.groupedBeneficiaries.upsert({
     where: {
       beneficiaryGroupIdentifier: payload
     },
@@ -109,10 +107,9 @@ async function addBenefToGroup(txn: any, benefUID: UUID, groupUID: UUID) {
   })
 };
 
-async function removeBenefFromTemp(txn: any, uuid: UUID) {
-  return txn.tempBeneficiary.delete({ where: { uuid } })
+async function removeTempBeneficiary(txn: any, uuid: UUID) {
+  await txn.tempBeneficiary.delete({ where: { uuid } })
 }
-
 //=========== // End Import helper txns=====================
 
 
