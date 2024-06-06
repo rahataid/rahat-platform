@@ -9,6 +9,7 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   ListTempBeneficiaryDto,
@@ -1044,11 +1045,12 @@ export class BeneficiaryService {
     })
   }
 
-  async confirmImportedBeneficiaries(data: any) {
+  async importTempBeneficiaries(dto: ImportTempBenefDto) {
+    console.log("DTO", dto)
     // has group
     // does not have group
     // has group but NOT in the groups table
 
-    return data
+    return dto
   }
 }
