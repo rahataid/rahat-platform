@@ -77,8 +77,8 @@ export class BeneficiaryController {
   }
 
   @Get('temp-groups')
-  async listTempGroupNames() {
-    return this.client.send({ cmd: BeneficiaryJobs.LIST_TEMP_GROUP_NAME }, {});
+  async listTempGroups() {
+    return this.client.send({ cmd: BeneficiaryJobs.LIST_TEMP_GROUPS }, {});
   }
 
   @Get('pii')

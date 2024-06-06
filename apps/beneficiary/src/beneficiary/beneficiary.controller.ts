@@ -195,9 +195,9 @@ export class BeneficiaryController {
     return this.service.listTempBeneficiaries(query);
   }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.LIST_TEMP_GROUP_NAME })
-  async listTempGroupName() {
-    return this.service.listTempGroupNames();
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_TEMP_GROUPS })
+  async listTempGroups() {
+    return this.service.listTempGroups();
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CONFIRM_PENDING_BENEFICIARIES })

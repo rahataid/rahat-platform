@@ -996,7 +996,7 @@ export class BeneficiaryService {
     );
   }
 
-  listTempGroupNames() {
+  listTempGroups() {
     return this.prisma.tempBeneficiary.findMany({
       where: {
         groupName: {

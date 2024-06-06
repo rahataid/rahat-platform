@@ -32,6 +32,13 @@ export const getBeneficiaryClient = (
       return formatResponse<TempBeneficiary[]>(response);
     },
 
+    listTempGroups: async (config?: AxiosRequestConfig) => {
+      const response = await client.get('/beneficiaries/temp-groups', {
+        ...config,
+      });
+      return formatResponse<TempBeneficiary[]>(response);
+    },
+
     list: async (data?: Pagination, config?: AxiosRequestConfig) => {
       const response = await client.get('/beneficiaries', {
         params: data,
