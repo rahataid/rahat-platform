@@ -2,7 +2,7 @@ import { Pagination } from '@rumsan/sdk/types';
 import { formatResponse } from '@rumsan/sdk/utils';
 import { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { UUID } from 'crypto';
-import { Beneficiary, TPIIData } from '../beneficiary';
+import { Beneficiary, ImportTempBeneficiary, TPIIData, TempBeneficiary } from '../beneficiary';
 import { BeneficiaryClient, Stats } from '../types';
 
 export const getBeneficiaryClient = (
@@ -19,9 +19,29 @@ export const getBeneficiaryClient = (
       return formatResponse<any>(response);
     },
 
+    importTempBeneficiaries: async (data: ImportTempBeneficiary, config?: AxiosRequestConfig) => {
+      const response = await client.post('/beneficiaries/import-temp', data, config);
+      return formatResponse<any>(response);
+    },
+
     getStats: async (config?: AxiosRequestConfig) => {
       const response = await client.get('/beneficiaries/stats', config);
       return formatResponse<Stats[]>(response);
+    },
+
+    listTempBeneficiary: async (data?: Pagination, config?: AxiosRequestConfig) => {
+      const response = await client.get('/beneficiaries/temp', {
+        params: data,
+        ...config,
+      });
+      return formatResponse<TempBeneficiary[]>(response);
+    },
+
+    listTempGroups: async (config?: AxiosRequestConfig) => {
+      const response = await client.get('/beneficiaries/temp-groups', {
+        ...config,
+      });
+      return formatResponse<TempBeneficiary[]>(response);
     },
 
     list: async (data?: Pagination, config?: AxiosRequestConfig) => {

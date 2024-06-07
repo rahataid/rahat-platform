@@ -13,4 +13,4 @@ import { ListenersService } from './listener.service';
   ],
   providers: [ListenersService, StatsService, BeneficiaryStatService],
 })
-export class ListenersModule {}
+export class ListenersModule { }

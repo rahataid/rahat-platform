@@ -83,7 +83,8 @@ export const MS_ACTIONS = {
       GET_DHM: 'aaProject.riverStations.getDhm'
     },
     WATER_LEVELS: {
-      GET_DHM: 'aaProject.waterLevels.getDhm'
+      GET_DHM: 'aaProject.waterLevels.getDhm',
+      GET_GLOFAS: 'aaProject.waterLevels.getGlofas',
     },
     TRIGGERS: {
       DEV_ONLY: 'aaProject.triggers.devOnly',

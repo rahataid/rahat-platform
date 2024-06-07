@@ -2,7 +2,7 @@ import { Pagination } from '@rumsan/sdk/types';
 import { FormattedResponse } from '@rumsan/sdk/utils';
 import { AxiosRequestConfig } from 'axios';
 import { UUID } from 'crypto';
-import { Beneficiary, TPIIData } from '../beneficiary/beneficiary.types';
+import { Beneficiary, ImportTempBeneficiary, TPIIData, TempBeneficiary } from '../beneficiary/beneficiary.types';
 import { Stats } from './response.types';
 
 type OptionalPagination = Partial<Pagination>;
@@ -15,9 +15,20 @@ export type BeneficiaryClient = {
     data: Beneficiary[],
     config?: AxiosRequestConfig
   ) => Promise<any>;
+  importTempBeneficiaries: (
+    data: ImportTempBeneficiary,
+    config?: AxiosRequestConfig
+  ) => Promise<any>;
   getStats: (
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<Stats[]>>;
+  listTempBeneficiary: (
+    data?: Pagination,
+    config?: AxiosRequestConfig
+  ) => Promise<FormattedResponse<TempBeneficiary[]>>;
+  listTempGroups: (
+    config?: AxiosRequestConfig
+  ) => Promise<FormattedResponse<any>>;
   list: (
     data?: Pagination,
     config?: AxiosRequestConfig

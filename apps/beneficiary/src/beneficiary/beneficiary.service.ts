@@ -9,8 +9,10 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
+  ListTempBeneficiaryDto,
   UpdateBeneficiaryDto,
   addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
@@ -974,6 +976,40 @@ export class BeneficiaryService {
     }
   }
 
+  listTempBeneficiaries(query: ListTempBeneficiaryDto) {
+    const orderBy: Record<string, 'asc' | 'desc'> = {};
+    orderBy['createdAt'] = query.order;
+    let filter = {} as any;
+    if (query.firstName) {
+      filter.firstName = { contains: query.firstName, mode: 'insensitive' };
+    }
+    if (query.groupName) filter.groupName = { equals: query.groupName, mode: 'insensitive' }
+    return paginate(
+      this.prisma.tempBeneficiary,
+      {
+        where: filter,
+        orderBy
+      },
+      {
+        page: query.page,
+        perPage: query.perPage,
+      }
+    );
+  }
+
+  listTempGroups() {
+    return this.prisma.tempBeneficiary.findMany({
+      where: {
+        groupName: {
+          not: null,
+        },
+      },
+      select: {
+        groupName: true,
+      },
+      distinct: ['groupName'],
+    });
+  }
 
   async importBeneficiariesFromTool(data: any) {
     const dataFromBuffer = Buffer.from(data);
@@ -1009,11 +1045,8 @@ export class BeneficiaryService {
     })
   }
 
-  async confirmImportedBeneficiaries(data: any) {
-    // has group
-    // does not have group
-    // has group but NOT in the groups table
-
-    return data
+  async importTempBeneficiaries(dto: ImportTempBenefDto) {
+    this.beneficiaryQueue.add(BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES, dto)
+    return { message: "Beneficiaries added to the queue!" }
   }
 }

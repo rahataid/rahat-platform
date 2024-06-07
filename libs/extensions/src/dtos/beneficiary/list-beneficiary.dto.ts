@@ -77,3 +77,29 @@ export class ListProjectBeneficiaryDto {
   @IsNotEmpty()
   projectId: string;
 }
+
+
+export class ListTempBeneficiaryDto {
+  @ApiProperty({ example: 'desc' })
+  @IsString()
+  @IsOptional()
+  order: 'asc' | 'desc';
+
+  @ApiProperty({ example: 1 })
+  @IsNumber()
+  page: number;
+
+  @ApiProperty({ example: '10' })
+  @IsNumber()
+  perPage: number;
+
+  @ApiPropertyOptional({ example: 'John Doe' })
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+
+  @ApiPropertyOptional({ example: 'Demo' })
+  @IsString()
+  @IsOptional()
+  groupName?: string;
+}

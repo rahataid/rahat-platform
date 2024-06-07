@@ -19,11 +19,12 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   AddBenToProjectDto,
-  ConfirmPendingBeneficiariesDTO,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
+  ListTempBeneficiaryDto,
   UpdateBeneficiaryDto,
   ValidateWalletDto
 } from '@rahataid/extensions';
@@ -68,6 +69,16 @@ export class BeneficiaryController {
   @Get()
   async list(@Query() dto: ListBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.LIST }, dto);
+  }
+
+  @Get('temp')
+  async listTempBenef(@Query() query: ListTempBeneficiaryDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY }, query);
+  }
+
+  @Get('temp-groups')
+  async listTempGroups() {
+    return this.client.send({ cmd: BeneficiaryJobs.LIST_TEMP_GROUPS }, {});
   }
 
   @Get('pii')
@@ -221,11 +232,13 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET_ALL_GROUPS }, dto);
   }
 
+
   @Get('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
   async getOneGroup(@Param('uuid') uuid: UUID) {
     return this.client.send({ cmd: BeneficiaryJobs.GET_ONE_GROUP }, uuid);
   }
+
 
   @Post('import-tools')
   async importBeneficiariesFromTool(@Req() req: Request) {
@@ -237,8 +250,8 @@ export class BeneficiaryController {
     );
   }
 
-  @Post('confirm-pending')
-  async confirmPendingBeneficiaries(@Body() dto: ConfirmPendingBeneficiariesDTO) {
-    return this.client.send({ cmd: BeneficiaryJobs.CONFIRM_PENDING_BENEFICIARIES }, dto);
+  @Post('import-temp')
+  async importTempBeneficiaries(@Body() dto: ImportTempBenefDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES }, dto);
   }
 }
