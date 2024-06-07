@@ -250,7 +250,7 @@ model BeneficiaryGroup {
   id   Int    @id @default(autoincrement())
   uuid String @unique @default(uuid()) @db.Uuid()
 
-  name String
+  name String @unique
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()

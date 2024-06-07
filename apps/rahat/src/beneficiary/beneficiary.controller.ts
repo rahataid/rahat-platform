@@ -19,9 +19,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   AddBenToProjectDto,
-  ConfirmPendingBeneficiariesDTO,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   ListTempBeneficiaryDto,
@@ -250,8 +250,8 @@ export class BeneficiaryController {
     );
   }
 
-  @Post('confirm-pending')
-  async confirmPendingBeneficiaries(@Body() dto: ConfirmPendingBeneficiariesDTO) {
-    return this.client.send({ cmd: BeneficiaryJobs.CONFIRM_PENDING_BENEFICIARIES }, dto);
+  @Post('import-temp')
+  async importTempBeneficiaries(@Body() dto: ImportTempBenefDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES }, dto);
   }
 }
