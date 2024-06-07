@@ -9,6 +9,7 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   ListTempBeneficiaryDto,
@@ -1044,11 +1045,8 @@ export class BeneficiaryService {
     })
   }
 
-  async confirmImportedBeneficiaries(data: any) {
-    // has group
-    // does not have group
-    // has group but NOT in the groups table
-
-    return data
+  async importTempBeneficiaries(dto: ImportTempBenefDto) {
+    this.beneficiaryQueue.add(BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES, dto)
+    return { message: "Beneficiaries added to the queue!" }
   }
 }

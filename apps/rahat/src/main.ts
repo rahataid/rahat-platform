@@ -42,18 +42,20 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3333;
 
-  const config = new DocumentBuilder()
-    .setTitle('Rahat Core')
-    .setDescription('API service for Rahat Core')
-    .setVersion('1.0')
-    .addBearerAuth(
-      { type: 'http', scheme: 'bearer', bearerFormat: APP.JWT_BEARER },
-      APP.JWT_BEARER
-    )
-    .build();
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Rahat Core')
+      .setDescription('API service for Rahat Core')
+      .setVersion('1.0')
+      .addBearerAuth(
+        { type: 'http', scheme: 'bearer', bearerFormat: APP.JWT_BEARER },
+        APP.JWT_BEARER
+      )
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document);
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('swagger', app, document);
+  }
 
   await app.listen(port);
   Logger.log(
