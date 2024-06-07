@@ -1,7 +1,7 @@
 import { AssetUploader } from 'rs-asset-uploader';
 import {
   AssetAvailableUploaders,
-  UploadAssetParams,
+  UploadAssetParams
 } from 'rs-asset-uploader/dist/types';
 
 const awsConfig = {

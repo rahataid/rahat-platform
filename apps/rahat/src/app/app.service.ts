@@ -4,7 +4,6 @@ import { PrismaService } from '@rumsan/prisma';
 import { SettingDataType } from '@rumsan/sdk/enums';
 
 
-
 function getDataType(
   value: string | number | boolean | object,
 ): SettingDataType {

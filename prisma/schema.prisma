@@ -35,6 +35,8 @@ model User {
   createdBy Int?
   updatedBy Int?
 
+  grievances Grievance[] @relation("UserGrievances")
+
   @@map("tbl_users")
 }
 
@@ -219,10 +221,63 @@ model Beneficiary {
   deletedAt      DateTime?
   isVerified     Boolean        @default(false)
 
-  pii                BeneficiaryPii?      @relation("BeneficiaryToPii")
-  BeneficiaryProject BeneficiaryProject[]
+  pii                  BeneficiaryPii?        @relation("BeneficiaryToPii")
+  BeneficiaryProject   BeneficiaryProject[]
+  groupedBeneficiaries GroupedBeneficiaries[]
 
   @@map("tbl_beneficiaries")
+}
+
+model GroupedBeneficiaries {
+  id   Int    @id @default(autoincrement()) @db.Integer()
+  uuid String @unique @default(uuid()) @db.Uuid()
+
+  beneficiaryGroupId String           @db.Uuid()
+  beneficiaryGroup   BeneficiaryGroup @relation(fields: [beneficiaryGroupId], references: [uuid])
+
+  beneficiaryId String      @db.Uuid()
+  Beneficiary   Beneficiary @relation(fields: [beneficiaryId], references: [uuid])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt()
+  deletedAt DateTime?
+
+  @@unique([beneficiaryGroupId, beneficiaryId], name: "beneficiaryGroupIdentifier")
+  @@map("tbl_grouped_beneficiaries")
+}
+
+model BeneficiaryGroup {
+  id   Int    @id @default(autoincrement())
+  uuid String @unique @default(uuid()) @db.Uuid()
+
+  name String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
+
+  groupedBeneficiaries    GroupedBeneficiaries[]
+  beneficiaryGroupProject BeneficiaryGroupProject[]
+
+  @@map("tbl_beneficiaries_group")
+}
+
+model BeneficiaryGroupProject {
+  id   Int    @id @default(autoincrement()) @db.Integer()
+  uuid String @unique @default(uuid()) @db.Uuid()
+
+  projectId String  @db.Uuid()
+  Project   Project @relation(fields: [projectId], references: [uuid])
+
+  beneficiaryGroupId String           @db.Uuid()
+  beneficiaryGroup   BeneficiaryGroup @relation(fields: [beneficiaryGroupId], references: [uuid])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt()
+  deletedAt DateTime?
+
+  @@unique([projectId, beneficiaryGroupId], name: "beneficiaryGroupProjectIdentifier")
+  @@map("tbl_beneficiaries_gorup_projects")
 }
 
 model BeneficiaryProject {
@@ -301,11 +356,14 @@ model Project {
   contractAddress String?
   extras          Json?         @db.JsonB()
 
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime?            @updatedAt()
-  deletedAt          DateTime?
-  BeneficiaryProject BeneficiaryProject[]
-  ProjectVendors     ProjectVendors[]
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime?                 @updatedAt()
+  deletedAt               DateTime?
+  BeneficiaryProject      BeneficiaryProject[]
+  ProjectVendors          ProjectVendors[]
+  beneficiaryGroupProject BeneficiaryGroupProject[]
+
+  Grievance Grievance[]
 
   @@map("tbl_projects")
 }
@@ -387,3 +445,70 @@ enum TransactionStatus {
 }
 
 // ++++++++++++++++++ END: @rahat/transactions - Transactions ++++++++++++++++++++++
+
+// ++++++++++++++++++ START: @rahat/grievances - Grievances ++++++++++++++++++++
+
+enum GrievanceStatus {
+  //  'New', 'Under Review', 'Resolved', 'Closed
+  NEW
+  UNDER_REVIEW
+  RESOLVED
+  CLOSED
+}
+
+enum GrievanceType {
+  TECHNICAL
+  NON_TECHNICAL
+  OTHER
+}
+
+model Grievance {
+  id              Int             @id @default(autoincrement())
+  uuid            String          @unique @default(uuid()) @db.Uuid()
+  reportedBy      String
+  reporterUserId  Int
+  reporterUser    User            @relation("UserGrievances", fields: [reporterUserId], references: [id])
+  reporterContact String
+  title           String
+  type            GrievanceType
+  projectId       String          @db.Uuid()
+  project         Project         @relation(fields: [projectId], references: [uuid])
+  description     String
+  status          GrievanceStatus @default(NEW)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
+
+  @@map("tbl_grievances")
+}
+
+//  ++++++++++++++++++ END: @rahat/grievances - Grievances ++++++++++++++++++++++
+
+model TempBeneficiary {
+  id             Int            @id @default(autoincrement())
+  uuid           String         @unique @default(uuid()) @db.Uuid()
+  targetUUID     String         @db.Uuid()
+  firstName      String
+  lastName       String
+  govtIDNumber   String?
+  gender         Gender         @default(UNKNOWN)
+  birthDate      DateTime?
+  walletAddress  String
+  phone          String?
+  email          String?
+  archived       Boolean        @default(false)
+  location       String?
+  latitude       Float?
+  longitude      Float?
+  notes          String?
+  bankedStatus   BankedStatus   @default(UNKNOWN)
+  internetStatus InternetStatus @default(UNKNOWN)
+  phoneStatus    PhoneStatus    @default(UNKNOWN)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime?      @updatedAt()
+  extras         Json?          @db.JsonB()
+  deletedAt      DateTime?
+  groupName      String?
+
+  @@map("tbl_temp_beneficiaries")
+}

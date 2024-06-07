@@ -5,5 +5,6 @@ export const JOBS = {
   LIST: 'rahat.jobs.vendor.list',
   LIST_BY_PROJECT: 'rahat.jobs.vendor.list_by_project',
   GET: 'rahat.jobs.vendor.get.uuid',
-  GET_REDEMPTION_VENDORS: 'rahat.jobs.vendor.redemption_vendor'
+  GET_REDEMPTION_VENDORS: 'rahat.jobs.vendor.redemption_vendor',
+  GET_COUNT: 'rahat.jobs.vendor.count',
 };

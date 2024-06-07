@@ -3,7 +3,8 @@ export const JOBS = {
     GET_DHM: 'aa.jobs.riverStations.getDhm'
   },
   WATER_LEVELS: {
-    GET_DHM: 'aa.jobs.waterLevels.getDhm'
+    GET_DHM: 'aa.jobs.waterLevels.getDhm',
+    GET_GLOFAS: 'aa.jobs.waterLevels.getGlofas',
   },
   TRIGGERS: {
     DEV_ONLY: 'aa.jobs.triggers.devOnly',
@@ -34,8 +35,10 @@ export const JOBS = {
     GET_ALL: 'aa.jobs.hazardTypes.getAll',
   },
   PHASES: {
+    GET_ONE: 'aa.jobs.phases.getOne',
     GET_ALL: 'aa.jobs.phases.getAll',
-    GET_STATS: 'aa.jobs.phases.getStats'
+    GET_STATS: 'aa.jobs.phases.getStats',
+    ADD_TRIGGERS: 'aa.jobs.phases.addTriggers',
   },
   STAKEHOLDERS: {
     GET_ALL: 'aa.jobs.stakeholders.getAll',
@@ -44,8 +47,21 @@ export const JOBS = {
     UPDATE: 'aa.jobs.stakeholders.update',
     GET_GROUP: 'aa.jobs.stakeholders.getGroup',
     GET_ALL_GROUPS: 'aa.jobs.stakeholders.getAllGroups',
+    GET_ONE_GROUP: 'aa.jobs.stakeholders.getOneGroup',
     ADD_GROUP: 'aa.jobs.stakeholders.addGroup',
     UPDATE_GROUP: 'aa.jobs.stakeholders.updateGroup',
     DELETE_GROUP: 'aa.jobs.stakeholders.deleteGroup'
   },
+  BENEFICIARY: {
+    ADD_GROUP: 'aa.jobs.beneficiary.addGroup',
+    RESERVE_TOKEN_TO_GROUP: 'aa.jobs.beneficiary.reserve_token_to_group',
+    ASSIGN_TOKEN_TO_GROUP: 'aa.jobs.beneficiary.assign_token_to_group',
+    GET_ALL_GROUPS: 'aa.jobs.beneficiary.getAllGroups',
+    GET_ALL_TOKEN_RESERVATION: 'aa.jobs.beneficiary.getAllTokenReservation',
+    GET_ONE_TOKEN_RESERVATION: 'aa.jobs.beneficiary.getOneTokenReservation',
+    GET_RESERVATION_STATS: 'aa.jobs.beneficiary.getReservationStats'
+  },
+  CONTRACT: {
+    INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget'
+  }
 };

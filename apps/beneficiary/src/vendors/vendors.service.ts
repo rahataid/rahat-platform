@@ -89,6 +89,16 @@ export class VendorsService {
     });
   }
 
+  async getVendorCount() {
+    return this.prisma.userRole.count({
+      where: {
+        Role: {
+          name: UserRoles.VENDOR,
+        },
+      }
+    })
+  }
+
   async getVendor(dto) {
     const { id } = dto;
 

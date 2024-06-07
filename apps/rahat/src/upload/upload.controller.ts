@@ -8,25 +8,25 @@ import { UploadService } from "./upload.service";
 @Injectable()
 export class UploadController {
 
-    constructor(
-        private readonly uploadService: UploadService
-    ) { }
+  constructor(
+    private readonly uploadService: UploadService
+  ) { }
 
-    @ApiConsumes('multipart/form-data')
-    @ApiBody({
-        description: 'Upload file',
-        type: FileUploadDto,
-    })
-    @Post('file')
-    @UseInterceptors(FileInterceptor('file'))
-    async uploadFile(@UploadedFile() file: any) {
-        const buffer = file.buffer;
-        const mimeType = file.mimetype;
-        const fileName = file.originalname.replace(/\s/g, "-");
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Upload file',
+    type: FileUploadDto,
+  })
+  @Post('file')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(@UploadedFile() file: any) {
+    const buffer = file.buffer;
+    const mimeType = file.mimetype;
+    const fileName = file.originalname.replace(/\s/g, "-");
 
-        const folderName = "dev"
-        const rootFolderName = "aa"
+    const folderName = "dev"
+    const rootFolderName = "aa"
 
-        return await this.uploadService.uploadFile(buffer, mimeType, fileName, folderName, rootFolderName);
-    }
+    return await this.uploadService.uploadFile(buffer, mimeType, fileName, folderName, rootFolderName);
+  }
 }

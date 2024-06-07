@@ -4,22 +4,33 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
-  AddBenToProjectDto, addBulkBeneficiaryToProject, AddToProjectDto,
+  AddBenToProjectDto,
+  AddBenfGroupToProjectDto,
+  AddToProjectDto,
   CreateBeneficiaryDto,
+  CreateBeneficiaryGroupsDto,
   ListBeneficiaryDto,
-  UpdateBeneficiaryDto
+  ListBeneficiaryGroupDto,
+  ListTempBeneficiaryDto,
+  UpdateBeneficiaryDto,
+  addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
 import {
+  BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
-  BeneficiaryJobs, BQUEUE, generateRandomWallet, ProjectContants, TPIIData
+  BeneficiaryJobs,
+  ProjectContants, TPIIData,
+  generateRandomWallet
 } from '@rahataid/sdk';
-import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
+import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
+import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import { createListQuery } from './helpers';
+import { VerificationService } from './verification.service';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -31,7 +42,8 @@ export class BeneficiaryService {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
-    private eventEmitter: EventEmitter2
+    private eventEmitter: EventEmitter2,
+    private readonly verificationService: VerificationService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -85,6 +97,66 @@ export class BeneficiaryService {
     return data;
   }
 
+
+  async listBenefGroupByProject(data: any) {
+    if (data?.data.length > 0) {
+      const groupData = await this.processBenfGroups(data.data)
+      // return groupData
+      data.data = groupData;
+    }
+
+    return data;
+  }
+
+  async getOneGroupByProject(uuid: UUID) {
+    return await this.prisma.beneficiaryGroup.findUnique({
+      where: {
+        uuid: uuid
+      },
+      include: {
+        groupedBeneficiaries: {
+          where: {
+            deletedAt: null
+          },
+          include: {
+            Beneficiary: {
+              include: {
+                pii: true
+              }
+            },
+          }
+        }
+      }
+    })
+  }
+
+  async processBenfGroups(data: any) {
+    const groups = []
+    for (const d of data) {
+      const data = await this.prisma.beneficiaryGroup.findUnique({
+        where: {
+          uuid: d?.uuid
+        },
+        include: {
+          groupedBeneficiaries: {
+            where: {
+              deletedAt: null
+            },
+            include: {
+              Beneficiary: {
+                include: {
+                  pii: true
+                }
+              },
+            }
+          }
+        }
+      })
+      groups.push(data)
+    }
+    return groups
+  }
+
   async list(
     dto: ListBeneficiaryDto
   ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
@@ -134,7 +206,6 @@ export class BeneficiaryService {
   }
 
   async mergeProjectData(data: any) {
-    console.log(data)
     const mergedData = [];
     for (const d of data) {
       const projectData = await this.prisma.beneficiary.findUnique({
@@ -294,17 +365,20 @@ export class BeneficiaryService {
       delete projectPayload.referrerVendor;
     }
 
+
     // 2. Save Beneficiary to Project
     await this.saveBeneficiaryToProject({
       beneficiaryId: benef.uuid,
       projectId: projectUid,
     });
 
+
     // 3. Sync beneficiary to project
     return this.client.send(
       { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUid },
       projectPayload
     );
+
   }
 
   async saveBeneficiaryToProject(dto: AddToProjectDto) {
@@ -320,14 +394,15 @@ export class BeneficiaryService {
     const { beneficiariesData } = await this.createBulk(beneficiaries);
 
     await Promise.all(
-      beneficiariesData.map(async (ben) => {
+      beneficiariesData.map(async (ben: any) => {
         const projectPayload = {
           uuid: ben.uuid,
           walletAddress: ben.walletAddress,
           extras: ben?.extras || null,
           type: type,
           referrerBeneficiary,
-          referrerVendor
+          referrerVendor,
+          piiData: ben?.pii
         }
         benProjectData.push({
           projectId: projectUuid,
@@ -419,12 +494,20 @@ export class BeneficiaryService {
       walletAddress: beneficiaryData.walletAddress,
       extras: beneficiaryData?.extras || null,
       type: BeneficiaryConstants.Types.ENROLLED,
+      isVerfied: beneficiaryData?.isVerfied
     };
+
 
     // if project type if aa, remove type
     if (project.type.toLowerCase() === 'aa') {
       delete projectPayload.type
     }
+
+
+    // if project type is c2c, send verficition mail
+    // if (project.type.toLowerCase() === 'c2c' && !beneficiaryData.isVerfied) {
+    //   await this.verificationService.generateLink(beneficiaryId)
+    // }
 
     //2.Save beneficiary to project
 
@@ -437,25 +520,19 @@ export class BeneficiaryService {
       projectUuid: projectId,
     });
 
-    //3. Sync beneficiary to project
-    return this.client.send(
-      { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
-      projectPayload
-    );
-  }
 
-  // async createBulk(data: CreateBeneficiaryDto[]) {
-  //   if (!data.length) return;
-  //   const sanitized = data.map((d) => {
-  //     return {
-  //       ...d,
-  //       walletAddress: Buffer.from(d.walletAddress.slice(2), 'hex'),
-  //     };
-  //   });
-  //   return this.rsprisma.beneficiary.createMany({
-  //     data: sanitized,
-  //   });
-  // }
+    //3. Sync beneficiary to project
+    return lastValueFrom(
+      this.client.send(
+        { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
+        projectPayload
+      )
+    )
+    // return this.client.send(
+    //   { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
+    //   projectPayload
+    // );
+  }
 
   async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
     const findUuid = await this.prisma.beneficiary.findUnique({
@@ -544,6 +621,17 @@ export class BeneficiaryService {
       projectUuid: uuid
     });
 
+    const res = await this.prisma.groupedBeneficiaries.updateMany({
+      where: {
+        beneficiaryId: findUuid.uuid
+      },
+      data: {
+        deletedAt: new Date()
+      }
+    })
+
+    console.log(res);
+
     return rdata;
   }
 
@@ -626,11 +714,21 @@ export class BeneficiaryService {
         data: sanitizedPiiBenef,
       });
     }
+    const insertedBeneficiarieWithPii = await this.prisma.beneficiary.findMany({
+      where: {
+        uuid: {
+          in: dtos.map((dto) => dto.uuid),
+        },
+      },
+      include: {
+        pii: true,
+      },
+    });
 
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, { projectUuid });
 
     // Return some form of success indicator, as createMany does not return the records themselves
-    return { success: true, count: dtos.length, beneficiariesData: insertedBeneficiaries };
+    return { success: true, count: dtos.length, beneficiariesData: insertedBeneficiarieWithPii };
   }
 
 
@@ -708,5 +806,249 @@ export class BeneficiaryService {
         { uuid: benId, data: benData }
       );
     return benData;
+  }
+
+  async addGroup(dto: CreateBeneficiaryGroupsDto) {
+    const group = await this.prisma.beneficiaryGroup.create({
+      data: {
+        name: dto.name
+      }
+    })
+    const createPayload = dto.beneficiaries.map((d) => ({
+      beneficiaryGroupId: group.uuid,
+      beneficiaryId: d.uuid
+    }))
+
+    return await this.prisma.groupedBeneficiaries.createMany({
+      data: createPayload
+    })
+  }
+
+  async getOneGroup(uuid: string) {
+    return this.prisma.beneficiaryGroup.findUnique({
+      where: {
+        uuid: uuid
+      },
+      include: {
+        groupedBeneficiaries: {
+          where: {
+            deletedAt: null
+          },
+          include: {
+            Beneficiary: {
+              include: {
+                pii: true
+              }
+            }
+          }
+        }
+      }
+    })
+  }
+
+  async getAllGroups(dto: ListBeneficiaryGroupDto) {
+    const orderBy: Record<string, 'asc' | 'desc'> = {};
+    orderBy[dto.sort] = dto.order;
+    const projectUUID = dto.projectId;
+
+    const where = projectUUID ? {
+      deletedAt: null,
+      beneficiaryGroupProject: projectUUID === 'NOT_ASSGNED' ? {
+        none: {}
+      } : {
+        some: {
+          projectId: projectUUID
+        }
+      }
+    } : {
+      deletedAt: null
+    }
+
+    return await paginate(
+      this.prisma.beneficiaryGroup,
+      {
+        where,
+        include: {
+          _count: {
+            select: {
+              groupedBeneficiaries: {
+                where: {
+                  deletedAt: null
+                }
+              }
+            }
+          },
+          beneficiaryGroupProject: {
+            include: {
+              Project: true
+            },
+            where: {
+              deletedAt: null
+            }
+          }
+        },
+        orderBy,
+      },
+      {
+        page: dto.page,
+        perPage: dto.perPage,
+      }
+    );
+  }
+
+  async saveBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
+    return this.prisma.beneficiaryGroupProject.create({
+      data: {
+        beneficiaryGroupId: dto.beneficiaryGroupId,
+        projectId: dto.projectId
+      }
+    })
+    // return this.prisma.beneficiaryProject.create({ data: dto });
+  }
+
+  async assignBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
+    try {
+      const { beneficiaryGroupId, projectId } = dto;
+
+      // get project info
+      const project = await this.prisma.project.findUnique({
+        where: {
+          uuid: projectId
+        }
+      })
+
+      //1. Get beneficiary group data
+      const beneficiaryGroupData = await this.prisma.beneficiaryGroup.findUnique({
+        where: {
+          uuid: beneficiaryGroupId,
+        },
+        include: {
+          groupedBeneficiaries: true
+        }
+      })
+
+      const benfsInGroup = beneficiaryGroupData.groupedBeneficiaries?.map((d) => d.beneficiaryId)
+
+      // get beneficiaries from the group not assigned to selected project
+      const unassignedBenfs = await this.prisma.beneficiary.findMany({
+        where: {
+          AND: [
+            {
+              uuid: {
+                in: benfsInGroup
+              }
+            },
+            {
+              BeneficiaryProject: {
+                none: {
+                  projectId: project.uuid
+                }
+              }
+            },
+          ],
+          deletedAt: null
+        }
+      });
+
+      // bulk assign unassigned beneficiaries from group
+      if (unassignedBenfs?.length) {
+        for (const unassignedBenf of unassignedBenfs) {
+          await this.assignBeneficiaryToProject({ beneficiaryId: unassignedBenf.uuid, projectId: project.uuid })
+        }
+      }
+
+      // add as required by project specifics
+      const projectPayload = {
+        beneficiaryGroupData
+      }
+
+      //2.Save beneficiary group to project
+      await this.saveBeneficiaryGroupToProject(dto);
+
+      //3. Sync beneficiary to project
+      return this.client.send(
+        { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
+        projectPayload
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  listTempBeneficiaries(query: ListTempBeneficiaryDto) {
+    const orderBy: Record<string, 'asc' | 'desc'> = {};
+    orderBy['createdAt'] = query.order;
+    let filter = {} as any;
+    if (query.firstName) {
+      filter.firstName = { contains: query.firstName, mode: 'insensitive' };
+    }
+    if (query.groupName) filter.groupName = { equals: query.groupName, mode: 'insensitive' }
+    return paginate(
+      this.prisma.tempBeneficiary,
+      {
+        where: filter,
+        orderBy
+      },
+      {
+        page: query.page,
+        perPage: query.perPage,
+      }
+    );
+  }
+
+  listTempGroups() {
+    return this.prisma.tempBeneficiary.findMany({
+      where: {
+        groupName: {
+          not: null,
+        },
+      },
+      select: {
+        groupName: true,
+      },
+      distinct: ['groupName'],
+    });
+  }
+
+  async importBeneficiariesFromTool(data: any) {
+    const dataFromBuffer = Buffer.from(data);
+    const bufferString = dataFromBuffer.toString('utf-8');
+    const jsonData = JSON.parse(bufferString) || null;
+    if (!jsonData) return null;
+    const { groupName, targetUUID, beneficiaries } = jsonData;
+    const beneficiaryData = beneficiaries.map((d: any) => {
+      return {
+        firstName: d.firstName,
+        lastName: d.lastName,
+        targetUUID: targetUUID,
+        walletAddress: d.walletAddress,
+        govtIDNumber: d.govtIDNumber,
+        gender: d.gender,
+        bankedStatus: d.bankedStatus,
+        phoneStatus: d.phoneStatus,
+        internetStatus: d.internetStatus,
+        email: d.email || null,
+        phone: d.phone || null,
+        birthDate: d.birthDate || null,
+        location: d.location || null,
+        latitude: d.latitude || null,
+        longitude: d.longitude || null,
+        notes: d.notes || null,
+        groupName: groupName || null,
+        extras: d.extras || null,
+      }
+    })
+    return this.prisma.tempBeneficiary.createMany({
+      data: beneficiaryData,
+      skipDuplicates: true
+    })
+  }
+
+  async confirmImportedBeneficiaries(data: any) {
+    // has group
+    // does not have group
+    // has group but NOT in the groups table
+
+    return data
   }
 }

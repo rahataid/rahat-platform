@@ -100,6 +100,7 @@ export class CreateBeneficiaryDto implements Beneficiary {
     example: {
       hasCitizenship: true,
       passportNumber: '1234567',
+      email: 'test@mailinator.com'
     },
   })
   @IsOptional()

@@ -21,6 +21,13 @@ export const beneficiaryActions: ProjectActionFunc = {
   [MS_ACTIONS.BENEFICIARY.ASSGIN_TO_PROJECT]: (uuid, payload, sendCommand) => {
     return sendCommand(
       { cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT },
+      { projectId: uuid, ...payload } // WHY IS PROJECT ID PASSED HERE? THIS GOES TO BENF MS
+
+    )
+  },
+  [MS_ACTIONS.BENEFICIARY.ASSGIN_GROUP_TO_PROJECT]: (uuid, payload, sendCommand) => {
+    return sendCommand(
+      { cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT },
       { projectId: uuid, ...payload }
 
     )
@@ -70,4 +77,5 @@ export const settingActions: ProjectActionFunc = {
       { cmd: ProjectJobs.PROJECT_SETTINGS_GET, uuid },
       payload
     ),
+
 }

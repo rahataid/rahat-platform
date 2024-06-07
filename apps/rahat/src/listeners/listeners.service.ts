@@ -32,17 +32,53 @@ export class ListenersService {
     this.otp = data.otp;
     this.emailService.sendEmail(
       data.address,
-      'OTP for login',
-      'OTP for login',
-      `<h1>OTP for login</h1><p>${data.otp}</p>`
+      'Login OTP',
+      'Login OTP',
+      `
+        <div style="max-width:800px;max-height: 600px;overflow:auto;line-height:2;background: #333333;">
+          <div style="margin:50px auto;width:70%;padding:40px 40px; border: 1px solid #fff; border-radius: 12px;">
+            <div style="text-align: center;">
+              <img src='https://assets.rumsan.net/rumsan-group/rahat-logo-white.png' width="250" title="stage4all" alt="stage4all">
+            </div>
+            <div style="color:#fff; text-align: center;">
+              <h4 style="font-size:1.3em;">Your Rahat system login code</h4>
+              <h2
+                style="background: #373737;margin: 0 auto;width: 100%;padding: 0 10px;color: #fff;border-radius: 4px; letter-spacing: 10px">
+                ${data.otp}</h2>
+            </div>
+            <div style="color: #fff; text-align: left;">
+              <p>This is a one-time-code that expires in 5 minutes.</p>
+              <p style="font-size:0.9em;">Please DO NOT share your code with anyone. Rahat team will never ask for it.</p>
+            </div>
+            <hr style=" border-top: 1px solid rgb(73, 72, 72)" />
+            <div style="color:#fff!important">
+              <p>If you didn't attempt to sign up but received this email, please ignore.
+              </p>
+              <p>
+                Regards,<br />
+                Team Rahat
+              </p>
+            </div>
+          </div>
+        </div>
+      `
     );
   }
   @OnEvent(EVENTS.USER_CREATED)
   async sendUserCreatedEmail(data: any) {
     this.emailService.sendEmail(
       data.address,
-      'You has been added to rahat.',
-      `You has been successfully added to rahat. Please follow the link "${this.configService.get('FRONTEND_URL')}" to join.`
+      'Welcome to Rahat.',
+      `
+      Hi,
+      
+      We're thrilled to have you on board! You've been successfully added to Rahat dashboard.
+      
+      Click the link to access the Rahat dashboard: ${this.configService.get('FRONTEND_URL')}.
+      
+      Best regards,
+      Rahat Team  
+      `
     );
   }
 
@@ -76,9 +112,11 @@ export class ListenersService {
         type: 'WHATSAPP',
         contentSid: CONTENT_SID,
         contentVariables: {
-          name: beneficiary.piiData.name,
+          1: beneficiary.piiData.name,
         },
       };
+
+      console.log(payload)
 
       this.messageSenderService.sendWhatappMessage(payload)
     }
@@ -109,5 +147,50 @@ export class ListenersService {
 
     })
 
+  }
+
+
+  @OnEvent(ProjectEvents.UPDATE_REDEMPTION)
+  async onUpdateRedemption(data) {
+    const CONTENT_SID = this.configService.get('REDEMPTION_APPROVED_SUCESS_SID');
+    const vendors = await this.prisma.user.findMany({
+      where: {
+        uuid: {
+          in: data
+        }
+      }
+    })
+    vendors.map((vendor) => {
+      const payload = {
+        phone: vendor.phone,
+        type: 'WHATSAPP',
+        contentSid: CONTENT_SID,
+      };
+      this.messageSenderService.sendWhatappMessage(payload)
+    })
+  }
+
+  @OnEvent(ProjectEvents.REDEEM_VOUCHER)
+  async onRedeemVoucher(data) {
+    const ben = await this.prisma.beneficiary.findUnique({
+      where: {
+        uuid: data
+      }
+
+    });
+
+    const benPii = await this.prisma.beneficiaryPii.findUnique({
+      where: {
+        beneficiaryId: ben.id
+      }
+    })
+
+    const CONTENT_SID = this.configService.get('VOUCHER_REDEMPTION_SUCCESS_SID')
+    const payload = {
+      phone: benPii.phone,
+      type: 'WHATSAPP',
+      contentSid: CONTENT_SID
+    };
+    this.messageSenderService.sendWhatappMessage(payload)
   }
 }

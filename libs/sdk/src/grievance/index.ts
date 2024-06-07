@@ -1,0 +1,2 @@
+export * from './grievance.type';
+

@@ -47,9 +47,10 @@ export const MS_ACTIONS = {
     ADD_TO_PROJECT: 'beneficiary.add_to_project',
     BULK_ADD_TO_PROJECT: 'beneficiary.bulk_add_to_project',
     ASSGIN_TO_PROJECT: 'beneficiary.assign_to_project',
+    ASSGIN_GROUP_TO_PROJECT: 'beneficiary.assign_group_to_project',
     BULK_ASSIGN_TO_PROJECT: 'beneficiary.bulk_assign',
     LIST_BY_PROJECT: 'beneficiary.list_by_project',
-    GET_PROJECT_SPECIFIC: 'beneficiary.project_specific'
+    GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',
   },
   VENDOR: {
     REGISTER: 'vendor.register',
@@ -61,6 +62,7 @@ export const MS_ACTIONS = {
     REDEEM_VOUCHER: 'elProject.redeemVoucher',
     UPDATE_STATUS: 'elProject.updateStatus',
     PROCESS_OTP: 'elProject.processOtp',
+    SEND_SUCCESS_MESSAGE: 'elProject.successMessage',
     ASSIGN_DISCOUNT_VOUCHER: 'elProject.discountVoucher',
     REQUEST_REDEMPTION: 'elProject.requestRedemption',
     REQUEST_REDEMPTION_BE: 'elProject.requestRedemption_be',
@@ -74,13 +76,15 @@ export const MS_ACTIONS = {
   SETTINGS: {
     LIST: 'settings.list',
     GET: 'settings.get',
+    ADD: 'settings.add',
   },
   AAPROJECT: {
     RIVER_STATIONS: {
       GET_DHM: 'aaProject.riverStations.getDhm'
     },
     WATER_LEVELS: {
-      GET_DHM: 'aaProject.waterLevels.getDhm'
+      GET_DHM: 'aaProject.waterLevels.getDhm',
+      GET_GLOFAS: 'aaProject.waterLevels.getGlofas',
     },
     TRIGGERS: {
       DEV_ONLY: 'aaProject.triggers.devOnly',
@@ -111,8 +115,10 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.hazardTypes.getAll',
     },
     PHASES: {
+      GET_ONE: 'aaProject.phases.getOne',
       GET_ALL: 'aaProject.phases.getAll',
-      GET_STATS: 'aaProject.phases.getStats'
+      GET_STATS: 'aaProject.phases.getStats',
+      ADD_TRIGGERS: 'aaProject.phases.addTriggers',
     },
     STAKEHOLDERS: {
       GET_ALL: 'aaProject.stakeholders.getAll',
@@ -121,13 +127,36 @@ export const MS_ACTIONS = {
       UPDATE: 'aaProject.stakeholders.update',
       GET_GROUP: 'aaProject.stakeholders.getGroup',
       GET_ALL_GROUPS: 'aaProject.stakeholders.getAllGroups',
+      GET_ONE_GROUP: 'aaProject.stakeholders.getOneGroup',
       ADD_GROUP: 'aaProject.stakeholders.addGroup',
       UPDATE_GROUP: 'aaProject.stakeholders.updateGroup',
       DELETE_GROUP: 'aaProject.stakeholders.deleteGroup',
     },
+    CONTRACT: {
+      INCREASE_BUDEGET: 'aaProject.contract.increase_budget'
+    },
+    BENEFICIARY: {
+      ADD_GROUP: 'aaProject.beneficiary.addGroup',
+      GET_ALL_GROUPS: 'aaProject.beneficiary.getAllGroups',
+      ASSIGN_TOKEN_TO_GROUP: 'aaProject.beneficiary.assign_token_to_group',
+      RESERVE_TOKEN_TO_GROUP: 'aaProject.beneficiary.reserve_token_to_group',
+      GET_ALL_TOKEN_RESERVATION: 'aaProject.beneficiary.get_all_token_reservation',
+      GET_ONE_TOKEN_RESERVATION: 'aaProject.beneficiary.get_one_token_reservation',
+      GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats'
+    }
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',
     LIST_BEN_COUNT: 'c2cProject.count_ben',
-  }
+  },
+  CVAProject: {
+    UPDATE_STATUS: 'cvaProject.updateStatus',
+    REQUEST_TOKEN: 'cvaProject.requestToken',
+    REQUEST_CLAIM: 'cvaProject.requestClaim',
+    UPDATE_CLAIM: 'cvaProject.updateClaim',
+    LIST_CLAIM: 'cvaProject.listClaim',
+    GET_CLAIM: 'cvaProject.getClaim',
+    PROCESS_OTP: 'cvaProject.processOtp',
+
+  },
 };
