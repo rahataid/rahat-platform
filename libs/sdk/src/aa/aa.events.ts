@@ -64,5 +64,12 @@ export const JOBS = {
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget'
+  },
+  DAILY_MONITORING: {
+    ADD: 'aa.jobs.dailyMonitoring.add',
+    GET_ALL: 'aa.jobs.dailyMonitoring.getAll',
+    GET_ONE: 'aa.jobs.dailyMonitoring.getOne',
+    UPDATE: 'aa.jobs.dailyMonitoring.update',
+    REMOVE: 'aa.jobs.dailyMonitoring.remove',
   }
 };

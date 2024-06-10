@@ -144,6 +144,13 @@ export const MS_ACTIONS = {
       GET_ALL_TOKEN_RESERVATION: 'aaProject.beneficiary.get_all_token_reservation',
       GET_ONE_TOKEN_RESERVATION: 'aaProject.beneficiary.get_one_token_reservation',
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats'
+    },
+    DAILY_MONITORING: {
+      ADD: 'aaProject.dailyMonitoring.add',
+      GET_ALL: 'aaProject.dailyMonitoring.getAll',
+      GET_ONE: 'aaProject.dailyMonitoring.getOne',
+      UPDATE: 'aaProject.dailyMonitoring.update',
+      REMOVE: 'aaProject.dailyMonitoring.remove',
     }
   },
   C2CProject: {
