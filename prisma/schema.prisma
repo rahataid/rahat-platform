@@ -250,7 +250,7 @@ model BeneficiaryGroup {
   id   Int    @id @default(autoincrement())
   uuid String @unique @default(uuid()) @db.Uuid()
 
-  name String
+  name String @unique
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -483,3 +483,32 @@ model Grievance {
 }
 
 //  ++++++++++++++++++ END: @rahat/grievances - Grievances ++++++++++++++++++++++
+
+model TempBeneficiary {
+  id             Int            @id @default(autoincrement())
+  uuid           String         @unique @default(uuid()) @db.Uuid()
+  targetUUID     String         @db.Uuid()
+  firstName      String
+  lastName       String
+  govtIDNumber   String?
+  gender         Gender         @default(UNKNOWN)
+  birthDate      DateTime?
+  walletAddress  String
+  phone          String?
+  email          String?
+  archived       Boolean        @default(false)
+  location       String?
+  latitude       Float?
+  longitude      Float?
+  notes          String?
+  bankedStatus   BankedStatus   @default(UNKNOWN)
+  internetStatus InternetStatus @default(UNKNOWN)
+  phoneStatus    PhoneStatus    @default(UNKNOWN)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime?      @updatedAt()
+  extras         Json?          @db.JsonB()
+  deletedAt      DateTime?
+  groupName      String?
+
+  @@map("tbl_temp_beneficiaries")
+}

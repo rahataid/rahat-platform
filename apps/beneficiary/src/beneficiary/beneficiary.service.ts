@@ -9,8 +9,10 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
+  ListTempBeneficiaryDto,
   UpdateBeneficiaryDto,
   addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
@@ -972,5 +974,79 @@ export class BeneficiaryService {
     } catch (err) {
       console.log(err);
     }
+  }
+
+  listTempBeneficiaries(query: ListTempBeneficiaryDto) {
+    const orderBy: Record<string, 'asc' | 'desc'> = {};
+    orderBy['createdAt'] = query.order;
+    let filter = {} as any;
+    if (query.firstName) {
+      filter.firstName = { contains: query.firstName, mode: 'insensitive' };
+    }
+    if (query.groupName) filter.groupName = { equals: query.groupName, mode: 'insensitive' }
+    return paginate(
+      this.prisma.tempBeneficiary,
+      {
+        where: filter,
+        orderBy
+      },
+      {
+        page: query.page,
+        perPage: query.perPage,
+      }
+    );
+  }
+
+  listTempGroups() {
+    return this.prisma.tempBeneficiary.findMany({
+      where: {
+        groupName: {
+          not: null,
+        },
+      },
+      select: {
+        groupName: true,
+      },
+      distinct: ['groupName'],
+    });
+  }
+
+  async importBeneficiariesFromTool(data: any) {
+    const dataFromBuffer = Buffer.from(data);
+    const bufferString = dataFromBuffer.toString('utf-8');
+    const jsonData = JSON.parse(bufferString) || null;
+    if (!jsonData) return null;
+    const { groupName, targetUUID, beneficiaries } = jsonData;
+    const beneficiaryData = beneficiaries.map((d: any) => {
+      return {
+        firstName: d.firstName,
+        lastName: d.lastName,
+        targetUUID: targetUUID,
+        walletAddress: d.walletAddress,
+        govtIDNumber: d.govtIDNumber,
+        gender: d.gender,
+        bankedStatus: d.bankedStatus,
+        phoneStatus: d.phoneStatus,
+        internetStatus: d.internetStatus,
+        email: d.email || null,
+        phone: d.phone || null,
+        birthDate: d.birthDate || null,
+        location: d.location || null,
+        latitude: d.latitude || null,
+        longitude: d.longitude || null,
+        notes: d.notes || null,
+        groupName: groupName || null,
+        extras: d.extras || null,
+      }
+    })
+    return this.prisma.tempBeneficiary.createMany({
+      data: beneficiaryData,
+      skipDuplicates: true
+    })
+  }
+
+  async importTempBeneficiaries(dto: ImportTempBenefDto) {
+    this.beneficiaryQueue.add(BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES, dto)
+    return { message: "Beneficiaries added to the queue!" }
   }
 }

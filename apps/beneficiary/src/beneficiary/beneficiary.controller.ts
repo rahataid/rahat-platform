@@ -3,8 +3,10 @@ import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import {
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
+  ListTempBeneficiaryDto,
   UpdateBeneficiaryDto,
   addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
@@ -72,6 +74,8 @@ export class BeneficiaryController {
     return this.statsService.getAllStats();
   }
 
+
+
   @MessagePattern({ cmd: BeneficiaryJobs.PROJECT_STATS })
   async projectStats(uuid: string) {
     return this.statsService.getAllStats(uuid);
@@ -92,6 +96,8 @@ export class BeneficiaryController {
   async assignToProject(payload: any) {
     return this.service.assignBeneficiaryToProject(payload);
   }
+
+
 
   @MessagePattern({ cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT })
   async bulkAssignToProject(payload: any) {
@@ -177,5 +183,25 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP_BY_PROJECT })
   async getOneGroupByProject(uuid: UUID) {
     return this.service.getOneGroupByProject(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL })
+  async importBeneficiariesFromTool(data: any) {
+    return this.service.importBeneficiariesFromTool(data);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY })
+  async listTempBeneficiaries(query: ListTempBeneficiaryDto) {
+    return this.service.listTempBeneficiaries(query);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_TEMP_GROUPS })
+  async listTempGroups() {
+    return this.service.listTempGroups();
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES })
+  async importTempBeneficiary(data: ImportTempBenefDto) {
+    return this.service.importTempBeneficiaries(data);
   }
 }

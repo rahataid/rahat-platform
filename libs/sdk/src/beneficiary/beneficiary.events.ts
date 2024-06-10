@@ -7,6 +7,8 @@ export const EVENTS = {
 };
 
 export const JOBS = {
+  LIST_TEMP_GROUPS: 'rahat.jobs.beneficiary.list_temp_groups',
+  LIST_TEMP_BENEFICIARY: 'rahat.jobs.beneficiary.list_temp_beneficiary',
   LIST_PII: 'rahat.jobs.beneficiary.list_pii',
   CREATE: 'rahat.jobs.beneficiary.create',
   CREATE_BULK: 'rahat.jobs.beneficiary.create_bulk',
@@ -43,5 +45,7 @@ export const JOBS = {
   ADD_GROUP: 'rahat.jobs.beneficiary.add_group',
   GET_ONE_GROUP: 'rahat.jobs.beneficiary.get_one_group',
   GET_ALL_GROUPS: 'rahat.jobs.beneficiary.get_all_groups',
-  ADD_GROUP_TO_PROJECT: 'rahat.jobs.beneficiary.add_group_to_project'
+  ADD_GROUP_TO_PROJECT: 'rahat.jobs.beneficiary.add_group_to_project',
+  IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL: 'rahat.jobs.beneficiary.import_beneficiaries_from_community_tool',
+  IMPORT_TEMP_BENEFICIARIES: 'rahat.jobs.import_temp_beneficiaries'
 };

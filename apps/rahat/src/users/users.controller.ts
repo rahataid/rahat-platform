@@ -20,8 +20,12 @@ export class UsersController {
 
   @Get('')
   listVendor(@Query() dto) {
-    console.log('listing', { dto })
     return this.client.send({ cmd: VendorJobs.LIST }, dto);
+  }
+
+  @Get('/stats')
+  getVendorCount(@Query() dto) {
+    return this.client.send({ cmd: VendorJobs.GET_COUNT }, dto);
   }
 
   @ApiParam({ name: 'id', required: true })

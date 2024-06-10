@@ -19,3 +19,28 @@ export const createListQuery = (dto: any) => {
 
   return AND_CONDITIONS;
 };
+
+export const splitBeneficiaryPII = (beneficiary: any) => {
+  const { firstName, lastName, phone, email, govtIDNumber, archived, deletedAt, ...rest } = beneficiary;
+  const piiData = {
+    name: `${beneficiary.firstName} ${beneficiary.lastName}`,
+    phone: phone || '',
+    email: email || '',
+    extras: {
+      govtIDNumber: govtIDNumber || ''
+    }
+  }
+  const sanitized = sanitizeBeneficiaryPayload(rest);
+  return { piiData, nonPii: sanitized }
+}
+
+const sanitizeBeneficiaryPayload = (beneficiary: any) => {
+  if (beneficiary.id) delete beneficiary.id;
+  if (beneficiary.uuid) delete beneficiary.uuid;
+  if (beneficiary.targetUUID) delete beneficiary.targetUUID;
+  if (beneficiary.groupName) delete beneficiary.groupName;
+  if (beneficiary.createdAt) delete beneficiary.createdAt;
+  if (beneficiary.updatedAt) delete beneficiary.updatedAt;
+
+  return beneficiary;
+}

@@ -39,6 +39,9 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.WATER_LEVELS.GET_DHM]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.WATER_LEVELS.GET_DHM, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.WATER_LEVELS.GET_GLOFAS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.WATER_LEVELS.GET_GLOFAS, uuid }, payload),
   // **** river stations end ******//
 
 
@@ -97,6 +100,9 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.PHASES.ADD_TRIGGERS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PHASES.ADD_TRIGGERS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PHASES.REVERT_PHASE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PHASES.REVERT_PHASE, uuid }, payload),
   // **** phases end ******//
 
 

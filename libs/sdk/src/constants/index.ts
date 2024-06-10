@@ -62,6 +62,7 @@ export const MS_ACTIONS = {
     REDEEM_VOUCHER: 'elProject.redeemVoucher',
     UPDATE_STATUS: 'elProject.updateStatus',
     PROCESS_OTP: 'elProject.processOtp',
+    SEND_SUCCESS_MESSAGE: 'elProject.successMessage',
     ASSIGN_DISCOUNT_VOUCHER: 'elProject.discountVoucher',
     REQUEST_REDEMPTION: 'elProject.requestRedemption',
     REQUEST_REDEMPTION_BE: 'elProject.requestRedemption_be',
@@ -82,7 +83,8 @@ export const MS_ACTIONS = {
       GET_DHM: 'aaProject.riverStations.getDhm'
     },
     WATER_LEVELS: {
-      GET_DHM: 'aaProject.waterLevels.getDhm'
+      GET_DHM: 'aaProject.waterLevels.getDhm',
+      GET_GLOFAS: 'aaProject.waterLevels.getGlofas',
     },
     TRIGGERS: {
       DEV_ONLY: 'aaProject.triggers.devOnly',
@@ -117,6 +119,7 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.phases.getAll',
       GET_STATS: 'aaProject.phases.getStats',
       ADD_TRIGGERS: 'aaProject.phases.addTriggers',
+      REVERT_PHASE: 'aaProject.phases.revertPhase',
     },
     STAKEHOLDERS: {
       GET_ALL: 'aaProject.stakeholders.getAll',
