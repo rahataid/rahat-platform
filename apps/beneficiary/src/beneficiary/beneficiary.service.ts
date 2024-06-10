@@ -1039,10 +1039,44 @@ export class BeneficiaryService {
         extras: d.extras || null,
       }
     })
-    return this.prisma.tempBeneficiary.createMany({
-      data: beneficiaryData,
-      skipDuplicates: true
+    return this.prisma.$transaction(async (txn) => {
+      // 1. Upsert temp group by name
+      const group = await txn.tempGroup.upsert({
+        where: { name: groupName },
+        update: { name: groupName },
+        create: { name: groupName }
+      })
+      return this.saveTempBenefAndGroup(txn, group.uuid, beneficiaryData);
     })
+
+  }
+
+  async saveTempBenefAndGroup(txn: any, groupUID: string, beneficiaries: []) {
+    for (let b of beneficiaries) {
+      // 2. Add benef to temp table
+      const benef = await txn.tempBeneficiary.create({
+        data: b
+      });
+      // 3. Upsert temp benef group
+      await txn.tempBeneficiaryGroup.upsert({
+        where: {
+          tempBeneficiaryGroupIdentifier: {
+            tempGroupUID: groupUID,
+            tempBenefUID: benef.uuid
+          }
+        },
+        update: {
+          tempGroupUID: groupUID,
+          tempBenefUID: benef.uuid
+        },
+        create: {
+          tempGroupUID: groupUID,
+          tempBenefUID: benef.uuid
+        }
+      })
+
+    }
+    return 'Done!'
   }
 
   async importTempBeneficiaries(dto: ImportTempBenefDto) {
