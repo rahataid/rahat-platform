@@ -3,8 +3,10 @@ import { ClientProxy } from '@nestjs/microservices';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { GetVendorOtp, VendorRegisterDto, VerifyVendorOtp } from '@rahataid/extensions';
 import { BeneficiaryConstants, VendorJobs } from '@rahataid/sdk';
+import { RequestDetails } from '@rumsan/extensions/decorators';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
+
 
 @ApiTags('Vendors')
 @Controller('vendors')
@@ -35,13 +37,13 @@ export class UsersController {
   }
 
   @Post('/getOtp')
-  getOtp(@Body() dto: GetVendorOtp) {
-    return this.client.send({ cmd: VendorJobs.GET_OTP }, dto)
+  getOtp(@Body() dto: GetVendorOtp, @RequestDetails() rdetails: any) {
+    return this.client.send({ cmd: VendorJobs.GET_OTP }, { dto, rdetails })
   }
 
   @Post('/verifyOtp')
-  verifyOtp(@Body() dto: VerifyVendorOtp) {
-    return this.client.send({ cmd: VendorJobs.VERIFY_OTP }, dto)
+  verifyOtp(@Body() dto: VerifyVendorOtp, @RequestDetails() rdetails: any) {
+    return this.client.send({ cmd: VendorJobs.VERIFY_OTP }, { dto, rdetails })
   }
 
 }

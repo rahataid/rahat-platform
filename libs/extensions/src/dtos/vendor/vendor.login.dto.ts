@@ -9,7 +9,7 @@ export class GetVendorOtp {
 
     @ApiProperty({ example: 'john@mailinator.com', required: true })
     @IsString()
-    email: string
+    address: string
 
 }
 
@@ -20,7 +20,7 @@ export class VerifyVendorOtp {
 
     @ApiProperty({ example: 'john@mailinator.com', required: true })
     @IsString()
-    email: string
+    address: string
 
     @ApiProperty({ example: '' })
     @IsString()

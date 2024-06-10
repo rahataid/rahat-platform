@@ -45,11 +45,11 @@ export class VendorsController {
 
   @MessagePattern({ cmd: VendorJobs.GET_OTP })
   getOtp(data) {
-    return this.service.listRedemptionVendor(data)
+    return this.service.getOtp(data)
   }
   @MessagePattern({ cmd: VendorJobs.VERIFY_OTP })
   verifyOtp(data) {
-    return this.service.listRedemptionVendor(data)
+    return this.service.verifyOtp(data)
   }
 
 }
