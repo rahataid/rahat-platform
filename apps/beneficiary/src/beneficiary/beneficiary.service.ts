@@ -1025,7 +1025,6 @@ export class BeneficiaryService {
       return {
         firstName: d.firstName,
         lastName: d.lastName,
-        targetUUID: targetUUID,
         walletAddress: d.walletAddress,
         govtIDNumber: d.govtIDNumber,
         gender: d.gender,
@@ -1039,7 +1038,6 @@ export class BeneficiaryService {
         latitude: d.latitude || null,
         longitude: d.longitude || null,
         notes: d.notes || null,
-        groupName: groupName || null,
         extras: d.extras || null,
       }
     })

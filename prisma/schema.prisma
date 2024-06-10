@@ -488,7 +488,6 @@ model Grievance {
 model TempBeneficiary {
   id                       Int                    @id @default(autoincrement())
   uuid                     String                 @unique @default(uuid()) @db.Uuid()
-  targetUUID               String                 @db.Uuid()
   firstName                String
   lastName                 String
   govtIDNumber             String?
@@ -509,7 +508,6 @@ model TempBeneficiary {
   updatedAt                DateTime?              @updatedAt()
   extras                   Json?                  @db.JsonB()
   deletedAt                DateTime?
-  groupName                String?
   TempGroupedBeneficiaries TempBeneficiaryGroup[]
 
   @@map("tbl_temp_beneficiaries")
