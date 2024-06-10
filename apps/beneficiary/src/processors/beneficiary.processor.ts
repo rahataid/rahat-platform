@@ -7,6 +7,8 @@ import { Job } from 'bull';
 import { UUID } from 'crypto';
 import { splitBeneficiaryPII } from '../beneficiary/helpers';
 
+const BATCH_SIZE = 20;
+
 @Processor(BQUEUE.RAHAT_BENEFICIARY)
 export class BeneficiaryProcessor {
   private readonly logger = new Logger(BeneficiaryProcessor.name);
@@ -23,24 +25,31 @@ export class BeneficiaryProcessor {
   @Process(BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES)
   async importTempBeneficiary(job: Job<any>) {
     const { groupUUID } = job.data;
-    return this.prisma.$transaction(async (txn) => {
-      const tempGroup = await getTempGroup(txn, groupUUID);
-      const groups = await txn.tempBeneficiaryGroup.findMany({
-        where: {
-          tempGroupUID: groupUUID
-        },
-        include: {
-          tempBeneficiary: true
-        }
-      });
-      if (!groups.length) return;
-      const beneficiaries = groups.map((f) => f.tempBeneficiary);
-      if (!beneficiaries.length) return;
-      await importAndAddToGroup({ txn, beneficiaries, tempGroup });
-    }, {
-      maxWait: 5000,
-      timeout: 10000
-    })
+    const tempGroup = await this.prisma.tempGroup.findUnique({
+      where: { uuid: groupUUID }
+    });
+    const groups = await findTempBenefGroups(this.prisma, groupUUID);
+    if (!groups.length) return;
+    const beneficiaries = groups.map((f) => f.tempBeneficiary);
+    if (!beneficiaries.length) return;
+    // =====Txn start====
+    try {
+      for (let i = 0; i < beneficiaries.length; i += BATCH_SIZE) {
+        const batch = beneficiaries.slice(i, i + BATCH_SIZE);
+        await this.prisma.$transaction(async (txn) => {
+          await importAndAddToGroup({ txn, beneficiaries: batch, tempGroup });
+        }, {
+          maxWait: 5000,
+          timeout: 6000
+        })
+      }
+      await removeTempGroup(this.prisma, tempGroup.uuid);
+
+    } catch (err) {
+      console.log("Import Txn Err=>", err)
+    }
+    // ====Txn start end===
+
   }
 
   @Process(BeneficiaryJobs.GENERATE_LINK)
@@ -74,9 +83,8 @@ async function importAndAddToGroup({ txn, beneficiaries, tempGroup }) {
     await upsertPiiData(txn, piiDataPayload);
     await addBenefToGroup(txn, group.uuid, newBenef.uuid);
     await removeFromTempBenefGroup(txn, uuid, tempGUID);
-    await removeTempBeneficiary(txn, uuid)
+    await removeTempBeneficiary(txn, uuid);
   }
-  await removeTempGroup(txn, tempGUID);
 }
 
 async function upsertBeneficiary(txn: any, data: any) {
@@ -88,7 +96,15 @@ async function upsertBeneficiary(txn: any, data: any) {
 }
 
 async function upsertPiiData(txn: any, data: any) {
-  await txn.beneficiaryPii.upsert({
+  if (data.phone) {
+    const exist = await txn.beneficiaryPii.findUnique({
+      where: {
+        phone: data.phone
+      }
+    })
+    if (exist) return;
+  }
+  return txn.beneficiaryPii.upsert({
     where: { beneficiaryId: data.beneficiaryId },
     update: data,
     create: data
@@ -100,7 +116,7 @@ async function addBenefToGroup(txn: any, groupUID: UUID, benefUID: UUID) {
     beneficiaryGroupId: groupUID,
     beneficiaryId: benefUID
   }
-  await txn.groupedBeneficiaries.upsert({
+  return txn.groupedBeneficiaries.upsert({
     where: {
       beneficiaryGroupIdentifier: payload
     },
@@ -110,7 +126,7 @@ async function addBenefToGroup(txn: any, groupUID: UUID, benefUID: UUID) {
 };
 
 async function removeTempBeneficiary(txn: any, uuid: UUID) {
-  await txn.tempBeneficiary.delete({ where: { uuid } })
+  return txn.tempBeneficiary.delete({ where: { uuid } })
 }
 
 async function upsertGroup(txn: any, name: string) {
@@ -121,12 +137,8 @@ async function upsertGroup(txn: any, name: string) {
   })
 }
 
-async function getTempGroup(txn, uuid: UUID) {
-  return txn.tempGroup.findUnique({ where: { uuid } })
-}
-
 async function removeFromTempBenefGroup(txn: any, benefUID: UUID, groupUUID: UUID) {
-  await txn.tempBeneficiaryGroup.delete({
+  return txn.tempBeneficiaryGroup.delete({
     where: {
       tempBeneficiaryGroupIdentifier: {
         tempBenefUID: benefUID,
@@ -136,9 +148,19 @@ async function removeFromTempBenefGroup(txn: any, benefUID: UUID, groupUUID: UUI
   })
 }
 
-async function removeTempGroup(txn: any, tempGroupUID) {
-  console.log({ tempGroupUID })
-  await txn.tempGroup.delete({ where: { uuid: tempGroupUID } })
+async function removeTempGroup(prisma: any, tempGroupUID: string) {
+  return prisma.tempGroup.delete({ where: { uuid: tempGroupUID } })
+}
+
+async function findTempBenefGroups(prisma: any, groupUUID: string) {
+  return await prisma.tempBeneficiaryGroup.findMany({
+    where: {
+      tempGroupUID: groupUUID
+    },
+    include: {
+      tempBeneficiary: true
+    }
+  });
 }
 //=========== // End Import helper txns=====================
 
