@@ -12,7 +12,7 @@ import {
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
-  ListTempBeneficiaryDto,
+  ListTempGroupsDto,
   UpdateBeneficiaryDto,
   addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
@@ -976,7 +976,7 @@ export class BeneficiaryService {
     }
   }
 
-  listTempBeneficiaries(query: ListTempBeneficiaryDto) {
+  listTempBeneficiaries(query: any) {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy['createdAt'] = query.order;
     let filter = {} as any;
@@ -997,18 +997,22 @@ export class BeneficiaryService {
     );
   }
 
-  listTempGroups() {
-    return this.prisma.tempBeneficiary.findMany({
-      where: {
-        groupName: {
-          not: null,
-        },
+  listTempGroups(query: ListTempGroupsDto) {
+    const orderBy: Record<string, 'asc' | 'desc'> = {};
+    orderBy['createdAt'] = query.order;
+    let filter = {} as any;
+    if (query.name) filter.name = { contains: query.name, mode: 'insensitive' }
+    return paginate(
+      this.prisma.tempGroup,
+      {
+        where: filter,
+        orderBy
       },
-      select: {
-        groupName: true,
-      },
-      distinct: ['groupName'],
-    });
+      {
+        page: query.page,
+        perPage: query.perPage,
+      }
+    );
   }
 
   async importBeneficiariesFromTool(data: any) {
