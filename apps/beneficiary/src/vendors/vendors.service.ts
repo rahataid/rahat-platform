@@ -1,7 +1,9 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+// import * as jwt from '@nestjs/jwt';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { VendorAddToProjectDto, VendorRegisterDto } from '@rahataid/extensions';
 import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
+import { } from '@rumsan/core';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { isAddress } from 'viem';
 
@@ -11,6 +13,7 @@ const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 export class VendorsService {
   constructor(
     private readonly prisma: PrismaService,
+    // private jwt: jwt.JwtService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
 
@@ -183,4 +186,73 @@ export class VendorsService {
     return { data: combinedData, meta: data.meta }
 
   }
+
+  async getOtp(data) {
+    // if (!dto.service) {
+    //   dto.service = getServiceTypeByAddress(dto.address);
+    // }
+    // const auth = await this.prisma.auth.findUnique({
+    //   where: {
+    //     authIdentifier: {
+    //       service: dto.service as Service,
+    //       serviceId: dto.address,
+    //     },
+    //   },
+    // });
+    // if (!auth) throw new ForbiddenException('Invalid credentials!');
+    // const otp = Math.floor(100000 + Math.random() * 900000);
+    // await this.prisma.auth.update({
+    //   where: {
+    //     id: auth.id,
+    //   },
+    //   data: {
+    //     challenge: otp.toString(),
+    //   },
+    // });
+    // const user = await this.getUserById(auth.userId);
+    // const challenge = WalletUtils.createChallenge(getSecret(), {
+    //   address: dto.address,
+    //   clientId: dto.clientId,
+    //   ip: requestInfo.ip,
+    // });
+    // this.eventEmitter.emit(EVENTS.OTP_CREATED, {
+    //   ...dto,
+    //   requestInfo,
+    //   name: user?.name,
+    //   otp,
+    // });
+    // this.eventEmitter.emit(EVENTS.CHALLENGE_CREATED, {
+    //   ...dto,
+    //   challenge,
+    // });
+
+    // return challenge;
+
+  }
+
+  async verifyOtp(data) {
+    // const challengeData = WalletUtils.decryptChallenge(
+    //   getSecret(),
+    //   dto.challenge,
+    //   CONSTANTS.CLIENT_TOKEN_LIFETIME,
+    // );
+    // if (requestInfo.ip !== challengeData.ip) throw ERRORS.NO_MATCH_IP;
+
+    // const messageHash = ethers?.hashMessage(ethers?.toUtf8Bytes(dto.challenge));
+    // const walletAddress = ethers?.recoverAddress(messageHash, dto.signature);
+
+    // const auth = await this.getByServiceId(walletAddress, Service.WALLET);
+    // if (!auth) throw new ForbiddenException('Invalid credentials!');
+    // const user = await this.getUserById(auth.userId);
+    // if (!user) throw new ForbiddenException('User does not exist!');
+    // const authority = await this.getPermissionsByUserId(auth.userId);
+
+
+  }
+
+  // validateToken(token: string) {
+  //   return this.jwt.verify(token, {
+  //     secret: getSecret(),
+  //   });
+  // }
 }

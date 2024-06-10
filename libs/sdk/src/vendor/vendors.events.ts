@@ -7,4 +7,6 @@ export const JOBS = {
   GET: 'rahat.jobs.vendor.get.uuid',
   GET_REDEMPTION_VENDORS: 'rahat.jobs.vendor.redemption_vendor',
   GET_COUNT: 'rahat.jobs.vendor.count',
+  GET_OTP: 'rahat.jobs.vendor.getOtp',
+  VERIFY_OTP: 'rahat.jobs.vendor.verfiyOtp'
 };
