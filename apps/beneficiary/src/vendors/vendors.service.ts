@@ -1,8 +1,15 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+// import * as jwt from '@nestjs/jwt';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { VendorAddToProjectDto, VendorRegisterDto } from '@rahataid/extensions';
 import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
+import { CONSTANTS } from '@rumsan/sdk/constants/index';
+import { Service } from '@rumsan/sdk/enums';
+import { AuthsService } from '@rumsan/user';
+import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
+import { getSecret } from '@rumsan/user/lib/utils/config.utils';
+import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
 import { isAddress } from 'viem';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -11,6 +18,7 @@ const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 export class VendorsService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly authService: AuthsService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
 
@@ -183,4 +191,48 @@ export class VendorsService {
     return { data: combinedData, meta: data.meta }
 
   }
+
+  async getOtp(data) {
+    console.log(data)
+    return this.authService.getOtp(data.dto, data.rdetails)
+
+
+  }
+
+  async verifyOtp(data) {
+    const { dto, rdetails } = data;
+    const res = await this.authService.loginByOtp(data.dto, data.rdetails);
+    console.log(res)
+    if (res.accessToken) {
+      return this.getUserDetails(dto)
+
+    }
+
+  }
+
+  async getUserDetails(dto) {
+    const challengeData = decryptChallenge(
+      getSecret(),
+      dto.challenge,
+      CONSTANTS.CLIENT_TOKEN_LIFETIME,
+    );
+    if (!challengeData.address)
+      throw new ForbiddenException('Invalid credentials in challenge!');
+    if (!dto.service) {
+      dto.service = getServiceTypeByAddress(challengeData.address) as Service;
+    }
+    const auth = await this.authService.getByServiceId(
+      challengeData.address,
+      dto.service as Service,
+    );
+
+    const user = await this.authService.getUserById(auth.userId)
+    return user
+  }
+
+
+
+
 }
+
+

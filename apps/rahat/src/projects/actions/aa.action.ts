@@ -100,6 +100,9 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.PHASES.ADD_TRIGGERS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PHASES.ADD_TRIGGERS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PHASES.REVERT_PHASE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PHASES.REVERT_PHASE, uuid }, payload),
   // **** phases end ******//
 
 
@@ -164,4 +167,10 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.BENEFICIARY.GET_RESERVATION_STATS, uuid }, payload),
 
   // **** fund mgmt end ****//
+
+  // **** stats ****//
+  [MS_ACTIONS.AAPROJECT.STATS.GET_COMMS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STATS.GET_COMMS, uuid }, payload),
+  // **** stats end ****//
+
 };

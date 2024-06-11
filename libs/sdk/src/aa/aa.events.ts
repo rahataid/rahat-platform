@@ -39,6 +39,7 @@ export const JOBS = {
     GET_ALL: 'aa.jobs.phases.getAll',
     GET_STATS: 'aa.jobs.phases.getStats',
     ADD_TRIGGERS: 'aa.jobs.phases.addTriggers',
+    REVERT_PHASE: 'aa.jobs.phases.revertPhase'
   },
   STAKEHOLDERS: {
     GET_ALL: 'aa.jobs.stakeholders.getAll',
@@ -63,5 +64,8 @@ export const JOBS = {
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget'
+  },
+  STATS: {
+    GET_COMMS: 'aa.jobs.stats.getComms'
   }
 };

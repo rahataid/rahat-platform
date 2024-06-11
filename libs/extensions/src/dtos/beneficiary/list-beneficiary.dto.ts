@@ -79,7 +79,7 @@ export class ListProjectBeneficiaryDto {
 }
 
 
-export class ListTempBeneficiaryDto {
+export class ListTempGroupsDto {
   @ApiProperty({ example: 'desc' })
   @IsString()
   @IsOptional()
@@ -93,13 +93,8 @@ export class ListTempBeneficiaryDto {
   @IsNumber()
   perPage: number;
 
-  @ApiPropertyOptional({ example: 'John Doe' })
-  @IsString()
-  @IsOptional()
-  firstName?: string;
-
   @ApiPropertyOptional({ example: 'Demo' })
   @IsString()
   @IsOptional()
-  groupName?: string;
+  name?: string;
 }

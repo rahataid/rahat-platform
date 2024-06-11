@@ -131,6 +131,9 @@ export class ProjectService {
 
   async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy) {
 
+    console.log({ cmd, payload })
+    console.log(`first`)
+
     return client.send(cmd, payload).pipe(
       timeout(timeoutValue),
       tap((response) => {
@@ -204,6 +207,7 @@ export class ProjectService {
   }
 
   async handleProjectActions({ uuid, action, payload }) {
+    console.log({ uuid, action, payload })
     //Note: This is a temporary solution to handle metaTx actions
     const metaTxActions = {
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
@@ -212,6 +216,7 @@ export class ProjectService {
       [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
       [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () => await this.executeMetaTxRequest(payload),
     };
+
 
     const actions = {
       ...elActions,
@@ -223,6 +228,7 @@ export class ProjectService {
       ...c2cActions,
       ...cvaActions
     };
+
 
     const actionFunc = actions[action];
     if (!actionFunc) {
