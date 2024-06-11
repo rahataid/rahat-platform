@@ -17,4 +17,48 @@ export const c2cActions: ProjectActionFunc = {
       500000
     ),
 
+  [MS_ACTIONS.C2CProject.GET_ALL_DISBURSEMENT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.LIST_DISBURSEMENT, uuid },
+      payload,
+      500000
+    ),
+
+  [MS_ACTIONS.C2CProject.GET_DISBURSEMENT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.LISTONE_DISBURSEMENT, uuid },
+      payload,
+      500000
+    ),
+
+  [MS_ACTIONS.C2CProject.CREATE_DISBURSEMENT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.CREATE_DISBURSEMENT, uuid },
+      payload,
+      500000
+    ),
+
+  [MS_ACTIONS.C2CProject.UPDATE_DISBURSEMENT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.UPDATE_DISBURSEMENT, uuid },
+      payload,
+      500000
+    ),
+
+  [MS_ACTIONS.C2CProject.GET_DISBURSEMENT_TRANSACTIONS]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.GET_DISBURSEMENT_TRANSACTIONS, uuid },
+      payload,
+      500000
+    ),
+
+
+
+  [MS_ACTIONS.C2CProject.GET_DISBURESEMENT_APPROVALS]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.GET_DISBURSEMENT_APPROVALS, uuid },
+      payload,
+      500000
+    ),
+
 }

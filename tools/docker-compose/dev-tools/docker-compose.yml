@@ -48,7 +48,6 @@ services:
 
   redis-rahat:
     container_name: redis-rahat
-
     image: bitnami/redis:latest
     restart: always
     ports:
@@ -57,17 +56,3 @@ services:
       - REDIS_PASSWORD=${REDIS_PASS}
     volumes:
       - rahat_redis_data:/data
-
-  bullboard-rahat:
-    container_name: bullboard-rahat
-
-    platform: linux/amd64
-    image: deadly0/bull-board
-    restart: always
-    ports:
-      - "${BULLBOARD_PORT}:3000"
-    environment:
-      REDIS_HOST: redis-rahat
-      REDIS_PASSWORD: ${REDIS_PASS}
-    depends_on:
-      - redis-rahat
