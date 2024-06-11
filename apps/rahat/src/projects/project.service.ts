@@ -132,7 +132,7 @@ export class ProjectService {
   async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy) {
 
     console.log({ cmd, payload })
-
+    console.log(`first`)
 
     return client.send(cmd, payload).pipe(
       timeout(timeoutValue),
