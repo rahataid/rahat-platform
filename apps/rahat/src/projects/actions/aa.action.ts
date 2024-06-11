@@ -167,4 +167,10 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.BENEFICIARY.GET_RESERVATION_STATS, uuid }, payload),
 
   // **** fund mgmt end ****//
+
+  // **** stats ****//
+  [MS_ACTIONS.AAPROJECT.STATS.GET_COMMS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STATS.GET_COMMS, uuid }, payload),
+  // **** stats end ****//
+
 };
