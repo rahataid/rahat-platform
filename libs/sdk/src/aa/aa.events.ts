@@ -64,5 +64,8 @@ export const JOBS = {
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget'
+  },
+  STATS: {
+    GET_COMMS: 'aa.jobs.stats.getComms'
   }
 };
