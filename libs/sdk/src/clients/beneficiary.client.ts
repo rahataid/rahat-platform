@@ -38,7 +38,7 @@ export const getBeneficiaryClient = (
     },
 
     listTempGroups: async (data?: Pagination, config?: AxiosRequestConfig) => {
-      const response = await client.get('/beneficiaries/temp', {
+      const response = await client.get('/beneficiaries/temp-groups', {
         params: data,
         ...config,
       });
