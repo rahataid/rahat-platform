@@ -144,6 +144,9 @@ export const MS_ACTIONS = {
       GET_ALL_TOKEN_RESERVATION: 'aaProject.beneficiary.get_all_token_reservation',
       GET_ONE_TOKEN_RESERVATION: 'aaProject.beneficiary.get_one_token_reservation',
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats'
+    },
+    STATS: {
+      GET_COMMS: 'aaProject.stats.getComms'
     }
   },
   C2CProject: {
