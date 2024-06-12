@@ -11,7 +11,8 @@ export class VendorUpdateDto {
 
     @ApiProperty({ example: 'John Doe' })
     @IsString()
-    name: string;
+    @IsOptional()
+    name?: string;
 
     @ApiProperty({ example: 'john@mailinator.com', required: false })
     @IsString()
