@@ -13,50 +13,57 @@ export const c2cActions: ProjectActionFunc = {
   [MS_ACTIONS.C2CProject.LIST_BEN_COUNT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.LIST_BENEFICIARY_COUNT, uuid },
-      payload,
-      500000
+      payload
     ),
 
   [MS_ACTIONS.C2CProject.GET_ALL_DISBURSEMENT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.LIST_DISBURSEMENT, uuid },
-      payload,
-      500000
+      payload
     ),
 
   [MS_ACTIONS.C2CProject.GET_DISBURSEMENT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.LISTONE_DISBURSEMENT, uuid },
-      payload,
-      500000
+      payload
     ),
 
   [MS_ACTIONS.C2CProject.CREATE_DISBURSEMENT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.CREATE_DISBURSEMENT, uuid },
-      payload,
-      500000
+      payload
     ),
 
   [MS_ACTIONS.C2CProject.UPDATE_DISBURSEMENT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.UPDATE_DISBURSEMENT, uuid },
-      payload,
-      500000
+      payload
     ),
 
   [MS_ACTIONS.C2CProject.GET_DISBURSEMENT_TRANSACTIONS]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.GET_DISBURSEMENT_TRANSACTIONS, uuid },
       payload,
-      500000
+
     ),
-
-
 
   [MS_ACTIONS.C2CProject.GET_DISBURESEMENT_APPROVALS]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.GET_DISBURSEMENT_APPROVALS, uuid },
+      payload,
+      500000
+    ),
+
+  [MS_ACTIONS.C2CProject.CREATE_SAFE_TRANSACTION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.CREATE_SAFE_TRANSACTION, uuid },
+      payload,
+      500000
+    ),
+
+  [MS_ACTIONS.C2CProject.GET_SAFE_TRANSACTION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.GET_SAFE_TRANSACTION, uuid },
       payload,
       500000
     ),

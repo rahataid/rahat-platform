@@ -83,14 +83,6 @@ export class AppService {
     }
 
 
-    console.log('first', {
-      name,
-      value,
-      dataType,
-      requiredFields: requiredFieldsArray,
-      isReadOnly,
-      isPrivate,
-    })
     const existingSetting = await this.prisma.setting.findUnique({
       where: { name },
     });
