@@ -6,7 +6,7 @@ import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
-import { AuthsService } from '@rumsan/user';
+import { AuthsService, UsersService } from '@rumsan/user';
 import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
@@ -19,6 +19,7 @@ export class VendorsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthsService,
+    private readonly usersService: UsersService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
 
@@ -229,6 +230,16 @@ export class VendorsService {
     const user = await this.authService.getUserById(auth.userId)
     return user
   }
+
+  async updateVendor(dto) {
+    const { uuid, ...rest } = dto;
+    console.log({ uuid, ...rest })
+    const result = await this.usersService.update(uuid, rest);
+    return result;
+
+  }
+
+
 
 
 

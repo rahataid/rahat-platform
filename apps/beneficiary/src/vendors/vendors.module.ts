@@ -2,7 +2,7 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
-import { AuthsModule } from '@rumsan/user';
+import { AuthsModule, UsersModule } from '@rumsan/user';
 import { VendorsController } from './vendors.controller';
 import { VendorsService } from './vendors.service';
 
@@ -22,7 +22,8 @@ import { VendorsService } from './vendors.service';
     BullModule.registerQueue({
       name: BQUEUE.RAHAT,
     }),
-    AuthsModule
+    AuthsModule,
+    UsersModule
   ],
   controllers: [VendorsController],
   providers: [VendorsService],

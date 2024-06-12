@@ -52,4 +52,9 @@ export class VendorsController {
     return this.service.verifyOtp(data)
   }
 
+  @MessagePattern({ cmd: VendorJobs.UPDATE })
+  updateVendor(data) {
+    return this.service.updateVendor(data)
+  }
+
 }
