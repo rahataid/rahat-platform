@@ -23,7 +23,7 @@ export type BeneficiaryClient = {
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<Stats[]>>;
   listTempBeneficiary: (
-    data?: Pagination,
+    uuid: string, data?: Pagination,
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<TempBeneficiary[]>>;
   listTempGroups: (
