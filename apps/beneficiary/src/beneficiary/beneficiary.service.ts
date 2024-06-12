@@ -12,6 +12,7 @@ import {
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
+  ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
   addBulkBeneficiaryToProject
@@ -976,28 +977,176 @@ export class BeneficiaryService {
     }
   }
 
-  listTempBeneficiaries(query: any) {
-    const orderBy: Record<string, 'asc' | 'desc'> = {};
-    orderBy['createdAt'] = query.order;
-    let filter = {} as any;
-    if (query.firstName) {
-      filter.firstName = { contains: query.firstName, mode: 'insensitive' };
-    }
-    if (query.groupName) filter.groupName = { equals: query.groupName, mode: 'insensitive' }
-    return paginate(
-      this.prisma.tempBeneficiary,
-      {
-        where: filter,
-        orderBy
+  // async listTempBeneficiaries(uuid: string, query: ListTempBeneficiariesDto) {
+
+  //   const res = await this.prisma.tempGroup.findUnique({
+  //     where: {
+  //       uuid: uuid
+
+  //     },
+  //     include: {
+  //       TempGroupedBeneficiaries: {
+  //         select: {
+  //           tempBeneficiary: true
+  //         }
+  //       }
+  //     }
+
+  //   })
+  //   if (query && query.page && query.perPage) {
+
+
+  //     let filter = {} as any;
+  //     if (query.firstName) filter.firstName = { contains: query.firstName, mode: 'insensitive' }
+
+  //     const startIndex = (query.page - 1) * query.perPage;
+  //     const endIndex = query.page * query.perPage;
+  //     const paginatedBeneficiaries = res.TempGroupedBeneficiaries.slice(
+  //       startIndex,
+  //       endIndex,
+  //     )
+  //     console.log(paginatedBeneficiaries);
+  //     const total = res.TempGroupedBeneficiaries.length;
+  //     const lastPage = Math.ceil(total / query.perPage);
+
+  //     const meta = {
+  //       total,
+  //       lastPage,
+  //       currentPage: query.page,
+  //       perPage: query.perPage,
+  //     };
+
+  //     return {
+  //       ...res,
+  //       beneficiariesGroup: paginatedBeneficiaries,
+  //       meta,
+  //     };
+  //   }
+  //   return res;
+  // }
+
+
+
+
+  async listTempBeneficiaries(uuid: string, query: ListTempBeneficiariesDto) {
+    const res = await this.prisma.tempGroup.findUnique({
+      where: {
+        uuid: uuid
+
       },
-      {
-        page: query.page,
-        perPage: query.perPage,
+      include: {
+        TempGroupedBeneficiaries: {
+          select: {
+            tempBeneficiary: true
+          }
+        }
       }
-    );
+
+    })
+    if (query && query.page && query.perPage) {
+      const filteredData = res.TempGroupedBeneficiaries.filter((d) => {
+        return Object.keys(query).every(key => {
+          if (key === "firstName") {
+            return d.tempBeneficiary.firstName.toLowerCase().includes(query[key].toLowerCase());
+          }
+          return true;
+        });
+      });
+      const startIndex = (query.page - 1) * query.perPage;
+      const endIndex = query.page * query.perPage;
+      const paginatedBeneficiaries = filteredData.map(({ tempBeneficiary, ...rest }) => ({
+        ...tempBeneficiary,
+        ...rest
+      })).slice(
+        startIndex,
+        endIndex,
+      )
+      const total = filteredData.length;
+      const lastPage = Math.ceil(total / query.perPage);
+      const hasNextPage = endIndex < total;
+      const hasPreviousPage = startIndex > 0;
+      const next = hasNextPage ? query.page + 1 : null;
+      const prev = hasPreviousPage ? query.page - 1 : null;
+
+      const meta = {
+        total,
+        lastPage,
+        currentPage: query.page,
+        perPage: query.perPage,
+        prev,
+        next
+      };
+
+      return {
+
+        tempeBeneficiary: paginatedBeneficiaries,
+        meta,
+      };
+    }
+    return res;
   }
 
+
+  // async listTempBeneficiaries(uuid: string, query: ListTempBeneficiariesDto) {
+  //   const whereFilter: Prisma.TempGroupWhereInput = {
+  //     uuid,
+  //     ...(query.firstName && {
+  //       firstName: {
+  //         contains: query.firstName,
+  //         mode: 'insensitive',
+  //       },
+  //     }),
+  //   };
+
+  //   const total = await this.prisma.tempGroup.count({
+  //     where: {
+  //       ...whereFilter,
+  //       TempGroupedBeneficiaries: {
+  //         some: {
+  //           tempBeneficiary: {
+  //             firstName: {
+  //               contains: query.firstName,
+  //               mode: 'insensitive',
+  //             }
+  //           }
+  //         }
+  //       }
+  //     },
+
+
+  //   });
+
+  //   const paginatedBeneficiaries = await this.prisma.tempGroup.findMany({
+  //     where: whereFilter,
+  //     include: {
+  //       TempGroupedBeneficiaries: {
+  //         select: {
+  //           tempBeneficiary: true
+  //         }
+  //       }
+  //     },
+  //     skip: query.page && query.perPage ? (query.page - 1) * query.perPage : undefined,
+  //     take: query.page && query.perPage ? query.perPage : undefined,
+  //   });
+
+  //   const lastPage = query.page && query.perPage ? Math.ceil(total / query.perPage) : undefined;
+
+  //   const meta = {
+  //     total,
+  //     lastPage,
+  //     currentPage: query.page,
+  //     perPage: query.perPage,
+  //   };
+
+  //   return {
+  //     TempGroupedBeneficiaries: paginatedBeneficiaries,
+  //     meta,
+  //   };
+  // }
+
+
   listTempGroups(query: ListTempGroupsDto) {
+
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy['createdAt'] = query.order;
     let filter = {} as any;
