@@ -484,31 +484,58 @@ model Grievance {
 
 //  ++++++++++++++++++ END: @rahat/grievances - Grievances ++++++++++++++++++++++
 
+// ===========Temporary beneficiary storage=============
 model TempBeneficiary {
-  id             Int            @id @default(autoincrement())
-  uuid           String         @unique @default(uuid()) @db.Uuid()
-  targetUUID     String         @db.Uuid()
-  firstName      String
-  lastName       String
-  govtIDNumber   String?
-  gender         Gender         @default(UNKNOWN)
-  birthDate      DateTime?
-  walletAddress  String
-  phone          String?
-  email          String?
-  archived       Boolean        @default(false)
-  location       String?
-  latitude       Float?
-  longitude      Float?
-  notes          String?
-  bankedStatus   BankedStatus   @default(UNKNOWN)
-  internetStatus InternetStatus @default(UNKNOWN)
-  phoneStatus    PhoneStatus    @default(UNKNOWN)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime?      @updatedAt()
-  extras         Json?          @db.JsonB()
-  deletedAt      DateTime?
-  groupName      String?
+  id                       Int                    @id @default(autoincrement())
+  uuid                     String                 @unique @default(uuid()) @db.Uuid()
+  firstName                String
+  lastName                 String
+  govtIDNumber             String?
+  gender                   Gender                 @default(UNKNOWN)
+  birthDate                DateTime?
+  walletAddress            String
+  phone                    String?
+  email                    String?
+  archived                 Boolean                @default(false)
+  location                 String?
+  latitude                 Float?
+  longitude                Float?
+  notes                    String?
+  bankedStatus             BankedStatus           @default(UNKNOWN)
+  internetStatus           InternetStatus         @default(UNKNOWN)
+  phoneStatus              PhoneStatus            @default(UNKNOWN)
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime?              @updatedAt()
+  extras                   Json?                  @db.JsonB()
+  deletedAt                DateTime?
+  TempGroupedBeneficiaries TempBeneficiaryGroup[]
 
   @@map("tbl_temp_beneficiaries")
 }
+
+model TempGroup {
+  id                       Int                    @id @default(autoincrement())
+  uuid                     String                 @unique @default(uuid()) @db.Uuid()
+  name                     String                 @unique
+  createdAt                DateTime               @default(now())
+  TempGroupedBeneficiaries TempBeneficiaryGroup[]
+
+  @@map("tbl_temp_group")
+}
+
+model TempBeneficiaryGroup {
+  id   Int    @id @default(autoincrement()) @db.Integer()
+  uuid String @unique @default(uuid()) @db.Uuid()
+
+  tempGroupUID String    @db.Uuid()
+  tempGroup    TempGroup @relation(fields: [tempGroupUID], references: [uuid])
+
+  tempBenefUID    String          @db.Uuid()
+  tempBeneficiary TempBeneficiary @relation(fields: [tempBenefUID], references: [uuid])
+  createdAt       DateTime        @default(now())
+
+  @@unique([tempGroupUID, tempBenefUID], name: "tempBeneficiaryGroupIdentifier")
+  @@map("tbl_temp_beneficiary_group")
+}
+
+// ===========End Temporary benef storage=============
