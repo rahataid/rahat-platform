@@ -155,6 +155,9 @@ export const MS_ACTIONS = {
     GET_DISBURSEMENT_TRANSACTIONS: 'c2cProject.disbursement.transactions.get',
     GET_DISBURESEMENT_APPROVALS: 'c2cProject.disbursement.approvals.get',
     UPDATE_DISBURSEMENT: 'c2cProject.disbursement.update',
+    //TEMP SOLUTION
+    CREATE_SAFE_TRANSACTION: 'c2cProject.createSafeTransaction',
+    GET_SAFE_TRANSACTION: 'c2cProject.getSafeTransaction',
   },
   CVAProject: {
     UPDATE_STATUS: 'cvaProject.updateStatus',
