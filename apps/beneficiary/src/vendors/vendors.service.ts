@@ -233,16 +233,10 @@ export class VendorsService {
 
   async updateVendor(dto) {
     const { uuid, ...rest } = dto;
-    console.log({ uuid, ...rest })
     const result = await this.usersService.update(uuid, rest);
     return result;
 
   }
-
-
-
-
-
 
 }
 
