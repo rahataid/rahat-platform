@@ -6,7 +6,7 @@ import {
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
-  ListTempBeneficiaryDto,
+  ListTempGroupsDto,
   UpdateBeneficiaryDto,
   addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
@@ -191,13 +191,14 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY })
-  async listTempBeneficiaries(query: ListTempBeneficiaryDto) {
-    return this.service.listTempBeneficiaries(query);
+  async listTempBeneficiaries(data: any) {
+
+    return this.service.listTempBeneficiaries(data.uuid, data.query);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_TEMP_GROUPS })
-  async listTempGroups() {
-    return this.service.listTempGroups();
+  async listTempGroups(query: ListTempGroupsDto) {
+    return this.service.listTempGroups(query);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES })

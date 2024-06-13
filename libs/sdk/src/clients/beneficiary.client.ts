@@ -29,16 +29,17 @@ export const getBeneficiaryClient = (
       return formatResponse<Stats[]>(response);
     },
 
-    listTempBeneficiary: async (data?: Pagination, config?: AxiosRequestConfig) => {
-      const response = await client.get('/beneficiaries/temp', {
+    listTempBeneficiary: async (uuid: string, data?: Pagination, config?: AxiosRequestConfig) => {
+      const response = await client.get(`/beneficiaries/temp/${uuid}`, {
         params: data,
         ...config,
       });
       return formatResponse<TempBeneficiary[]>(response);
     },
 
-    listTempGroups: async (config?: AxiosRequestConfig) => {
+    listTempGroups: async (data?: Pagination, config?: AxiosRequestConfig) => {
       const response = await client.get('/beneficiaries/temp-groups', {
+        params: data,
         ...config,
       });
       return formatResponse<TempBeneficiary[]>(response);

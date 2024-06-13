@@ -24,7 +24,8 @@ import {
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
-  ListTempBeneficiaryDto,
+  ListTempBeneficiariesDto,
+  ListTempGroupsDto,
   UpdateBeneficiaryDto,
   ValidateWalletDto
 } from '@rahataid/extensions';
@@ -71,14 +72,16 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.LIST }, dto);
   }
 
-  @Get('temp')
-  async listTempBenef(@Query() query: ListTempBeneficiaryDto) {
-    return this.client.send({ cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY }, query);
+  @Get('temp/:uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async listTempBenef(@Param('uuid') uuid: UUID, @Query() query: ListTempBeneficiariesDto) {
+
+    return this.client.send({ cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY }, { uuid, query });
   }
 
   @Get('temp-groups')
-  async listTempGroups() {
-    return this.client.send({ cmd: BeneficiaryJobs.LIST_TEMP_GROUPS }, {});
+  async listTempGroups(@Query() query: ListTempGroupsDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.LIST_TEMP_GROUPS }, query);
   }
 
   @Get('pii')

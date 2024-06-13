@@ -144,6 +144,9 @@ export const MS_ACTIONS = {
       GET_ALL_TOKEN_RESERVATION: 'aaProject.beneficiary.get_all_token_reservation',
       GET_ONE_TOKEN_RESERVATION: 'aaProject.beneficiary.get_one_token_reservation',
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats'
+    },
+    STATS: {
+      GET_COMMS: 'aaProject.stats.getComms'
     }
   },
   C2CProject: {
@@ -155,6 +158,9 @@ export const MS_ACTIONS = {
     GET_DISBURSEMENT_TRANSACTIONS: 'c2cProject.disbursement.transactions.get',
     GET_DISBURESEMENT_APPROVALS: 'c2cProject.disbursement.approvals.get',
     UPDATE_DISBURSEMENT: 'c2cProject.disbursement.update',
+    //TEMP SOLUTION
+    CREATE_SAFE_TRANSACTION: 'c2cProject.createSafeTransaction',
+    GET_SAFE_TRANSACTION: 'c2cProject.getSafeTransaction',
   },
   CVAProject: {
     UPDATE_STATUS: 'cvaProject.updateStatus',
