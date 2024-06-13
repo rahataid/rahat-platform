@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Inject, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Param, Patch, Post, Query } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
-import { GetVendorOtp, VendorRegisterDto, VerifyVendorOtp } from '@rahataid/extensions';
+import { GetVendorOtp, VendorRegisterDto, VendorUpdateDto, VerifyVendorOtp } from '@rahataid/extensions';
 import { BeneficiaryConstants, VendorJobs } from '@rahataid/sdk';
 import { RequestDetails } from '@rumsan/extensions/decorators';
 import { UUID } from 'crypto';
@@ -44,6 +44,11 @@ export class UsersController {
   @Post('/verifyOtp')
   verifyOtp(@Body() dto: VerifyVendorOtp, @RequestDetails() rdetails: any) {
     return this.client.send({ cmd: VendorJobs.VERIFY_OTP }, { dto, rdetails })
+  }
+
+  @Patch('/update')
+  updateVendor(@Body() dto: VendorUpdateDto) {
+    return this.client.send({ cmd: VendorJobs.UPDATE }, dto)
   }
 
 }

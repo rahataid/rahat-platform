@@ -24,6 +24,7 @@ import {
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
+  ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
   ValidateWalletDto
@@ -71,9 +72,11 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.LIST }, dto);
   }
 
-  @Get('temp')
-  async listTempBenef(@Query() query: any) {
-    return this.client.send({ cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY }, query);
+  @Get('temp/:uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async listTempBenef(@Param('uuid') uuid: UUID, @Query() query: ListTempBeneficiariesDto) {
+
+    return this.client.send({ cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY }, { uuid, query });
   }
 
   @Get('temp-groups')
