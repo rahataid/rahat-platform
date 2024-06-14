@@ -147,6 +147,13 @@ export const MS_ACTIONS = {
     },
     STATS: {
       GET_COMMS: 'aaProject.stats.getComms'
+    },
+    DAILY_MONITORING: {
+      ADD: 'aaProject.dailyMonitoring.add',
+      GET_ALL: 'aaProject.dailyMonitoring.getAll',
+      GET_ONE: 'aaProject.dailyMonitoring.getOne',
+      UPDATE: 'aaProject.dailyMonitoring.update',
+      REMOVE: 'aaProject.dailyMonitoring.remove',
     }
   },
   C2CProject: {

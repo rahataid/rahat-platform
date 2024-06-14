@@ -173,4 +173,22 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.STATS.GET_COMMS, uuid }, payload),
   // **** stats end ****//
 
+  // **** daily monitoring start ****//
+  [MS_ACTIONS.AAPROJECT.DAILY_MONITORING.ADD]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.DAILY_MONITORING.ADD, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.DAILY_MONITORING.GET_ALL]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.DAILY_MONITORING.GET_ALL, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.DAILY_MONITORING.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.DAILY_MONITORING.GET_ONE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.DAILY_MONITORING.UPDATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.DAILY_MONITORING.UPDATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.DAILY_MONITORING.REMOVE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.DAILY_MONITORING.REMOVE, uuid }, payload),
+  // **** daily monitoring end ****//
+
+
 };
