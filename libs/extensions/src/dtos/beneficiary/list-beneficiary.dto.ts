@@ -98,3 +98,23 @@ export class ListTempGroupsDto {
   @IsOptional()
   name?: string;
 }
+
+export class ListTempBeneficiariesDto {
+  @ApiProperty({ example: 'desc' })
+  @IsString()
+  @IsOptional()
+  order?: 'asc' | 'desc';
+
+  @ApiProperty({ example: 1 })
+  @IsNumber()
+  page?: number;
+
+  @ApiProperty({ example: '10' })
+  @IsNumber()
+  perPage?: number;
+
+  @ApiPropertyOptional({ example: 'Demo' })
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+}
