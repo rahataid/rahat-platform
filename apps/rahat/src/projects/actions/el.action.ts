@@ -66,4 +66,5 @@ export const elActions: ProjectActionFunc = {
       { cmd: ProjectJobs.GET_ALL_STATS, uuid },
       500000
     ),
+
 };

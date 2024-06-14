@@ -12,7 +12,7 @@ import {
 import { BeneficiaryType } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
-import { tap, timeout } from 'rxjs';
+import { timeout } from 'rxjs';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { createContractSigner } from '../utils/web3';
 import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, settingActions, vendorActions } from './actions';
@@ -133,48 +133,9 @@ export class ProjectService {
 
     return client.send(cmd, payload).pipe(
       timeout(timeoutValue),
-      tap((response) => {
-        this.sendWhatsAppMsg(response, cmd, payload)
-
-        // // send whatsapp message after added referal beneficiary to project
-        // if (
-        //   response?.insertedData?.some((res) => res?.walletAddress) &&
-        //   response?.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT &&
-        //   payload?.dto?.type === BeneficiaryType.REFERRED
-        // ) {
-        //   this.eventEmitter.emit(
-        //     ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT,
-        //     payload.dto
-        //   );
-        // }
-        // //send the whatsapp message after successfully redeming voucher
-        // if (response?.data && response?.cmd === ProjectJobs.REDEEM_VOUCHER) {
-        //   this.eventEmitter.emit(
-        //     ProjectEvents.REDEEM_VOUCHER,
-        //     response.data
-        //   )
-        // }
-
-        // //send message to all admin
-        // if (
-        //   response?.id &&
-        //   cmd?.cmd === ProjectJobs.REQUEST_REDEMPTION
-        // ) {
-        //   this.eventEmitter.emit(
-        //     ProjectEvents.REQUEST_REDEMPTION
-        //   );
-        // }
-        // if (
-        //   response?.vendordata?.length > 0 &&
-        //   cmd?.cmd === ProjectJobs.UPDATE_REDEMPTION
-        // ) {
-        //   this.eventEmitter.emit(
-        //     ProjectEvents.UPDATE_REDEMPTION,
-        //     response.vendordata
-
-        //   );
-        // }
-      })
+      // tap((response) => {
+      //   this.sendWhatsAppMsg(response, cmd, payload)
+      // })
     );
   }
 
@@ -195,12 +156,15 @@ export class ProjectService {
   }
 
   async sendSucessMessage(payload) {
-    const { benId } = payload
+    const { benId, projectId, type } = payload
+    console.log(payload)
+
     this.eventEmitter.emit(
       ProjectEvents.REDEEM_VOUCHER,
       benId
     );
-    return true;
+    return this.client.send({ cmd: 'rahat.jobs.project.voucher_claim', uuid: projectId }, { type }).pipe(timeout(MS_TIMEOUT))
+
   }
 
   async handleProjectActions({ uuid, action, payload }) {
