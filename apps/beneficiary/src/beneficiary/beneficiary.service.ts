@@ -140,18 +140,15 @@ export class BeneficiaryService {
           uuid: d?.uuid
         },
         include: {
-          groupedBeneficiaries: {
-            where: {
-              deletedAt: null
-            },
-            include: {
-              Beneficiary: {
-                include: {
-                  pii: true
+          _count: {
+            select: {
+              groupedBeneficiaries: {
+                where: {
+                  deletedAt: null
                 }
-              },
+              }
             }
-          }
+          },
         }
       })
       groups.push(data)
