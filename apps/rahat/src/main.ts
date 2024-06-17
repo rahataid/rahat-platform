@@ -40,8 +40,12 @@ async function bootstrap() {
       },
     })
 
-  app.use(bodyParser.raw({ type: 'application/octet-stream' }));
+  // app.use(bodyParser.raw({ type: 'application/octet-stream' }));
+  app.use(bodyParser.raw({ type: 'application/octet-stream', limit: '50mb' }));
 
+  // increase limit of payload size
+  app.use(bodyParser.json({ limit: '500mb' }));
+  app.use(bodyParser.urlencoded({ limit: '500mb', extended: true }));
 
   //must have this if you want to implicit conversion of string to number in dto
   app.useGlobalPipes(

@@ -99,14 +99,6 @@ export class ProjectService {
         payload.dto
       );
     }
-    //send the whatsapp message after successfully redeming voucher
-    // if (response?.data && cmd?.cmd === MS_ACTIONS.ELPROJECT.PROCESS_OTP) {
-    // this.eventEmitter.emit(
-    //   ProjectEvents.REDEEM_VOUCHER,
-    //   response.data
-    // )
-    // }
-
     //send message to all admin
     if (
       response?.id &&
@@ -133,9 +125,10 @@ export class ProjectService {
 
     return client.send(cmd, payload).pipe(
       timeout(timeoutValue),
-      // tap((response) => {
-      //   this.sendWhatsAppMsg(response, cmd, payload)
-      // })
+      tap((response) => {
+        this.sendWhatsAppMsg(response, cmd, payload)
+
+      })
     );
   }
 
