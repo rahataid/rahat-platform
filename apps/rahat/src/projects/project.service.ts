@@ -155,15 +155,14 @@ export class ProjectService {
     return { txHash: res.hash, status: res.status };
   }
 
-  async sendSucessMessage(payload) {
-    const { benId, projectId, type } = payload
-    console.log(payload)
+  async sendSucessMessage(uuid, payload) {
+    const { benId } = payload
 
     this.eventEmitter.emit(
       ProjectEvents.REDEEM_VOUCHER,
       benId
     );
-    return this.client.send({ cmd: 'rahat.jobs.project.voucher_claim', uuid: projectId }, { type }).pipe(timeout(MS_TIMEOUT))
+    return this.client.send({ cmd: 'rahat.jobs.project.voucher_claim', uuid }, {}).pipe(timeout(MS_TIMEOUT))
 
   }
 
@@ -173,7 +172,7 @@ export class ProjectService {
     const metaTxActions = {
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
       [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () => await this.executeMetaTxRequest(payload),
-      [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () => await this.sendSucessMessage(payload),
+      [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () => await this.sendSucessMessage(uuid, payload),
       [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
       [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () => await this.executeMetaTxRequest(payload),
     };
