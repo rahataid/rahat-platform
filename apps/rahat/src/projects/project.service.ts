@@ -12,7 +12,7 @@ import {
 import { BeneficiaryType } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
-import { tap, timeout } from 'rxjs';
+import { timeout } from 'rxjs';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { createContractSigner } from '../utils/web3';
 import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, settingActions, vendorActions } from './actions';
@@ -123,7 +123,6 @@ export class ProjectService {
 
   async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy) {
 
-
     return client.send(cmd, payload).pipe(
       timeout(timeoutValue),
       tap((response) => {
@@ -149,13 +148,15 @@ export class ProjectService {
     return { txHash: res.hash, status: res.status };
   }
 
-  async sendSucessMessage(payload) {
+  async sendSucessMessage(uuid, payload) {
     const { benId } = payload
+
     this.eventEmitter.emit(
       ProjectEvents.REDEEM_VOUCHER,
       benId
     );
-    return true;
+    return this.client.send({ cmd: 'rahat.jobs.project.voucher_claim', uuid }, {}).pipe(timeout(MS_TIMEOUT))
+
   }
 
   async handleProjectActions({ uuid, action, payload }) {
@@ -164,7 +165,7 @@ export class ProjectService {
     const metaTxActions = {
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
       [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () => await this.executeMetaTxRequest(payload),
-      [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () => await this.sendSucessMessage(payload),
+      [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () => await this.sendSucessMessage(uuid, payload),
       [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
       [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () => await this.executeMetaTxRequest(payload),
     };
