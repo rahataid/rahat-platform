@@ -6,7 +6,7 @@ import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
-import { AuthsService } from '@rumsan/user';
+import { AuthsService, UsersService } from '@rumsan/user';
 import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
@@ -19,6 +19,7 @@ export class VendorsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthsService,
+    private readonly usersService: UsersService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
 
@@ -30,6 +31,12 @@ export class VendorsService {
     if (!role) throw new Error('Role not found');
     // Add to User table
     const { service, ...rest } = dto;
+    if (dto?.email) {
+      const userData = await this.prisma.user.findFirst({
+        where: { email: dto.email }
+      })
+      if (userData) throw new Error("Email must be unique");
+    }
     const user = await this.prisma.user.create({ data: rest });
     // Add to UserRole table
     const userRolePayload = { userId: user.id, roleId: role.id };
@@ -230,8 +237,16 @@ export class VendorsService {
     return user
   }
 
+  async updateVendor(dto) {
+    const { uuid, ...rest } = dto;
+    const userData = await this.prisma.user.findFirst({
+      where: { email: dto.email }
+    })
+    if (userData) throw new Error("Email must be unique");
+    const result = await this.usersService.update(uuid, rest);
+    return result;
 
-
+  }
 
 }
 

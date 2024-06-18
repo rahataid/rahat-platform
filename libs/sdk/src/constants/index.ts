@@ -139,6 +139,7 @@ export const MS_ACTIONS = {
     BENEFICIARY: {
       ADD_GROUP: 'aaProject.beneficiary.addGroup',
       GET_ALL_GROUPS: 'aaProject.beneficiary.getAllGroups',
+      GET_ONE_GROUP: 'aaProject.beneficiary.getOneGroup',
       ASSIGN_TOKEN_TO_GROUP: 'aaProject.beneficiary.assign_token_to_group',
       RESERVE_TOKEN_TO_GROUP: 'aaProject.beneficiary.reserve_token_to_group',
       GET_ALL_TOKEN_RESERVATION: 'aaProject.beneficiary.get_all_token_reservation',
@@ -147,6 +148,13 @@ export const MS_ACTIONS = {
     },
     STATS: {
       GET_COMMS: 'aaProject.stats.getComms'
+    },
+    DAILY_MONITORING: {
+      ADD: 'aaProject.dailyMonitoring.add',
+      GET_ALL: 'aaProject.dailyMonitoring.getAll',
+      GET_ONE: 'aaProject.dailyMonitoring.getOne',
+      UPDATE: 'aaProject.dailyMonitoring.update',
+      REMOVE: 'aaProject.dailyMonitoring.remove',
     }
   },
   C2CProject: {
@@ -158,6 +166,9 @@ export const MS_ACTIONS = {
     GET_DISBURSEMENT_TRANSACTIONS: 'c2cProject.disbursement.transactions.get',
     GET_DISBURESEMENT_APPROVALS: 'c2cProject.disbursement.approvals.get',
     UPDATE_DISBURSEMENT: 'c2cProject.disbursement.update',
+    //TEMP SOLUTION
+    CREATE_SAFE_TRANSACTION: 'c2cProject.createSafeTransaction',
+    GET_SAFE_TRANSACTION: 'c2cProject.getSafeTransaction',
   },
   CVAProject: {
     UPDATE_STATUS: 'cvaProject.updateStatus',

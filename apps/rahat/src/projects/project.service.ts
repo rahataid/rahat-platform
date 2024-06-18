@@ -99,14 +99,6 @@ export class ProjectService {
         payload.dto
       );
     }
-    //send the whatsapp message after successfully redeming voucher
-    // if (response?.data && cmd?.cmd === MS_ACTIONS.ELPROJECT.PROCESS_OTP) {
-    // this.eventEmitter.emit(
-    //   ProjectEvents.REDEEM_VOUCHER,
-    //   response.data
-    // )
-    // }
-
     //send message to all admin
     if (
       response?.id &&
@@ -131,52 +123,12 @@ export class ProjectService {
 
   async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy) {
 
-    console.log({ cmd, payload })
-    console.log(`first`)
 
     return client.send(cmd, payload).pipe(
       timeout(timeoutValue),
       tap((response) => {
         this.sendWhatsAppMsg(response, cmd, payload)
 
-        // // send whatsapp message after added referal beneficiary to project
-        // if (
-        //   response?.insertedData?.some((res) => res?.walletAddress) &&
-        //   response?.cmd === BeneficiaryJobs.BULK_REFER_TO_PROJECT &&
-        //   payload?.dto?.type === BeneficiaryType.REFERRED
-        // ) {
-        //   this.eventEmitter.emit(
-        //     ProjectEvents.BENEFICIARY_ADDED_TO_PROJECT,
-        //     payload.dto
-        //   );
-        // }
-        // //send the whatsapp message after successfully redeming voucher
-        // if (response?.data && response?.cmd === ProjectJobs.REDEEM_VOUCHER) {
-        //   this.eventEmitter.emit(
-        //     ProjectEvents.REDEEM_VOUCHER,
-        //     response.data
-        //   )
-        // }
-
-        // //send message to all admin
-        // if (
-        //   response?.id &&
-        //   cmd?.cmd === ProjectJobs.REQUEST_REDEMPTION
-        // ) {
-        //   this.eventEmitter.emit(
-        //     ProjectEvents.REQUEST_REDEMPTION
-        //   );
-        // }
-        // if (
-        //   response?.vendordata?.length > 0 &&
-        //   cmd?.cmd === ProjectJobs.UPDATE_REDEMPTION
-        // ) {
-        //   this.eventEmitter.emit(
-        //     ProjectEvents.UPDATE_REDEMPTION,
-        //     response.vendordata
-
-        //   );
-        // }
       })
     );
   }

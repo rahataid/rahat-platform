@@ -150,6 +150,9 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_ALL_GROUPS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.BENEFICIARY.GET_ALL_GROUPS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_ONE_GROUP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.BENEFICIARY.GET_ONE_GROUP, uuid }, payload),
   // **** Beneficiary Groups end **** //
 
 
@@ -172,5 +175,23 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.STATS.GET_COMMS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STATS.GET_COMMS, uuid }, payload),
   // **** stats end ****//
+
+  // **** daily monitoring start ****//
+  [MS_ACTIONS.AAPROJECT.DAILY_MONITORING.ADD]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.DAILY_MONITORING.ADD, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.DAILY_MONITORING.GET_ALL]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.DAILY_MONITORING.GET_ALL, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.DAILY_MONITORING.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.DAILY_MONITORING.GET_ONE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.DAILY_MONITORING.UPDATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.DAILY_MONITORING.UPDATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.DAILY_MONITORING.REMOVE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.DAILY_MONITORING.REMOVE, uuid }, payload),
+  // **** daily monitoring end ****//
+
 
 };
