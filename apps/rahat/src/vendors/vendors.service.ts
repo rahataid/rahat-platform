@@ -31,6 +31,12 @@ export class VendorsService {
         if (!role) throw new Error('Role not found');
         // Add to User table
         const { service, ...rest } = dto;
+        if (dto?.email) {
+            const userData = await this.prisma.user.findFirst({
+                where: { email: dto.email }
+            })
+            if (userData) throw new Error("Email must be unique");
+        }
         const user = await this.prisma.user.create({ data: rest });
         // Add to UserRole table
         const userRolePayload = { userId: user.id, roleId: role.id };
@@ -231,6 +237,12 @@ export class VendorsService {
 
     async updateVendor(dto) {
         const { uuid, ...rest } = dto;
+        if (dto?.email) {
+            const userData = await this.prisma.user.findFirst({
+                where: { email: dto.email }
+            })
+            if (userData) throw new Error("Email must be unique");
+        }
         const result = await this.usersService.update(uuid, rest);
         return result;
 
