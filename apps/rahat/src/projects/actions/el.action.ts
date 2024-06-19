@@ -2,7 +2,8 @@
 import {
   BeneficiaryJobs,
   MS_ACTIONS,
-  ProjectJobs
+  ProjectJobs,
+  VendorJobs
 } from '@rahataid/sdk';
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
 
@@ -54,7 +55,7 @@ export const elActions: ProjectActionFunc = {
 
   [MS_ACTIONS.ELPROJECT.GET_VENDOR_STATS]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.GET_VENDOR_STATS }, { projectId: uuid },
+      { cmd: VendorJobs.GET_VENDOR_STATS }, { projectId: uuid },
       500000
     ),
 };

@@ -58,7 +58,7 @@ export class VendorsController {
     return this.vendorService.updateVendor(dto)
   }
 
-  ///microser
+  ///microservice
   @MessagePattern({ cmd: VendorJobs.GET_REDEMPTION_VENDORS })
   listRedemptionVendors(data) {
     return this.vendorService.listRedemptionVendor(data)
@@ -67,6 +67,11 @@ export class VendorsController {
   @MessagePattern({ cmd: VendorJobs.ASSIGN_PROJECT })
   assignToProject(@Payload() dto: VendorAddToProjectDto) {
     return this.vendorService.assignToProject(dto)
+  }
+
+  @MessagePattern({ cmd: VendorJobs.GET_VENDOR_STATS })
+  getVendorStats(@Payload() dto) {
+    return this.vendorService.getVendorClaimStats(dto)
   }
 
 

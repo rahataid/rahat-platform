@@ -248,6 +248,21 @@ export class VendorsService {
 
     }
 
+    async getVendorClaimStats(dto) {
+        const { projectId } = dto
+        const projectVendors = await this.prisma.projectVendors.findMany({
+            where: {
+                projectId
+            },
+            select: {
+                User: true
+            }
+        });
+        return this.client.send({ cmd: VendorJobs.GET_VENDOR_STATS, uuid: projectId }, projectVendors)
+    }
+
+
+
 }
 
 
