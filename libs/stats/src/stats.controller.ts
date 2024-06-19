@@ -5,7 +5,7 @@ import { StatsService } from './stats.service';
 @ApiTags('Stats')
 @Controller('stats')
 export class StatsController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly statsService: StatsService) { }
 
   @Get()
   findAll() {
@@ -16,4 +16,5 @@ export class StatsController {
   findOne(@Param('name') name: string) {
     return this.statsService.findOne(name);
   }
+
 }
