@@ -36,8 +36,8 @@ export enum ProjectTypes {
   EL = 'EL',
   ANTICIPATORY_ACTION = 'ANTICIPATORY_ACTION',
   C2C = 'C2C',
-  PI = "PARAMETRIC INSURANCE",
-
+  PI = "PARAMETRIC_INSURANCE",
+  RP = 'RAHAT_PAYROLL'
 }
 
 export enum UploadFileType {
