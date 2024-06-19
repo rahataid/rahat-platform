@@ -38,8 +38,6 @@ export enum ProjectTypes {
   C2C = 'C2C',
   PI = "PARAMETRIC_INSURANCE",
   RP = 'RAHAT_PAYROLL'
-
-
 }
 
 export enum UploadFileType {
