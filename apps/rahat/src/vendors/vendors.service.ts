@@ -243,6 +243,18 @@ export class VendorsService {
             })
             if (userData) throw new Error("Email must be unique");
         }
+        if (dto.extras) {
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    uuid
+                }
+            })
+            const extras = dto?.extras;
+            const userExtras = Object(user?.extras)
+
+            rest.extras = { ...extras, ...userExtras }
+
+        }
         const result = await this.usersService.update(uuid, rest);
         return result;
 
