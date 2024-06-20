@@ -235,8 +235,7 @@ export class VendorsService {
         return user
     }
 
-    async updateVendor(dto) {
-        const { uuid, ...rest } = dto;
+    async updateVendor(dto, uuid) {
         if (dto?.email) {
             const userData = await this.prisma.user.findFirst({
                 where: { email: dto.email }
@@ -252,10 +251,10 @@ export class VendorsService {
             const extras = dto?.extras;
             const userExtras = Object(user?.extras)
 
-            rest.extras = { ...extras, ...userExtras }
+            dto.extras = { ...extras, ...userExtras }
 
         }
-        const result = await this.usersService.update(uuid, rest);
+        const result = await this.usersService.update(uuid, dto);
         return result;
 
     }

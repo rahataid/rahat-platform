@@ -53,9 +53,12 @@ export class VendorsController {
     return this.vendorService.verifyOtp(dto, rdetails)
   }
 
-  @Patch('/update')
-  updateVendor(@Body() dto: VendorUpdateDto) {
-    return this.vendorService.updateVendor(dto)
+  @ApiParam({ name: 'uuid', required: true })
+  @Patch('/update/:uuid')
+  updateVendor(
+    @Param('uuid') uuid: UUID,
+    @Body() dto: VendorUpdateDto) {
+    return this.vendorService.updateVendor(dto, uuid)
   }
 
   ///microservice
