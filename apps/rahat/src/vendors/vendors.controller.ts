@@ -53,12 +53,15 @@ export class VendorsController {
     return this.vendorService.verifyOtp(dto, rdetails)
   }
 
-  @Patch('/update')
-  updateVendor(@Body() dto: VendorUpdateDto) {
-    return this.vendorService.updateVendor(dto)
+  @ApiParam({ name: 'uuid', required: true })
+  @Patch('/update/:uuid')
+  updateVendor(
+    @Param('uuid') uuid: UUID,
+    @Body() dto: VendorUpdateDto) {
+    return this.vendorService.updateVendor(dto, uuid)
   }
 
-  ///microser
+  ///microservice
   @MessagePattern({ cmd: VendorJobs.GET_REDEMPTION_VENDORS })
   listRedemptionVendors(data) {
     return this.vendorService.listRedemptionVendor(data)
@@ -67,6 +70,11 @@ export class VendorsController {
   @MessagePattern({ cmd: VendorJobs.ASSIGN_PROJECT })
   assignToProject(@Payload() dto: VendorAddToProjectDto) {
     return this.vendorService.assignToProject(dto)
+  }
+
+  @MessagePattern({ cmd: VendorJobs.GET_VENDOR_STATS })
+  getVendorStats(@Payload() dto) {
+    return this.vendorService.getVendorClaimStats(dto)
   }
 
 

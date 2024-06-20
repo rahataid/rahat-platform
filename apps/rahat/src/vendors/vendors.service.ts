@@ -235,18 +235,44 @@ export class VendorsService {
         return user
     }
 
-    async updateVendor(dto) {
-        const { uuid, ...rest } = dto;
+    async updateVendor(dto, uuid) {
         if (dto?.email) {
             const userData = await this.prisma.user.findFirst({
                 where: { email: dto.email }
             })
             if (userData) throw new Error("Email must be unique");
         }
-        const result = await this.usersService.update(uuid, rest);
+        if (dto.extras) {
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    uuid
+                }
+            })
+            const extras = dto?.extras;
+            const userExtras = Object(user?.extras)
+
+            dto.extras = { ...extras, ...userExtras }
+
+        }
+        const result = await this.usersService.update(uuid, dto);
         return result;
 
     }
+
+    async getVendorClaimStats(dto) {
+        const { projectId } = dto
+        const projectVendors = await this.prisma.projectVendors.findMany({
+            where: {
+                projectId
+            },
+            select: {
+                User: true
+            }
+        });
+        return this.client.send({ cmd: VendorJobs.GET_VENDOR_STATS, uuid: projectId }, projectVendors)
+    }
+
+
 
 }
 

@@ -4,11 +4,6 @@ import { IsObject, IsOptional, IsString } from "class-validator";
 
 export class VendorUpdateDto {
 
-
-    @ApiProperty({ example: '7e272f0a-281d-474d-9a28-0658305d99f5' })
-    @IsString()
-    uuid: string;
-
     @ApiProperty({ example: 'John Doe' })
     @IsString()
     @IsOptional()
