@@ -30,6 +30,7 @@ export const JOBS = {
   COMMUNICATION: {
     ADD: 'aa.jobs.activity.communication.add',
     TRIGGER: 'aa.jobs.activity.communication.trigger',
+    COMMUNICATION_LOGS: 'aa.jobs.communication.getCommunicationLogs',
   },
   HAZARD_TYPES: {
     GET_ALL: 'aa.jobs.hazardTypes.getAll',
