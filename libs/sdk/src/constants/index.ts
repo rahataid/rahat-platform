@@ -147,7 +147,8 @@ export const MS_ACTIONS = {
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats'
     },
     STATS: {
-      GET_COMMS: 'aaProject.stats.getComms'
+      GET_COMMS: 'aaProject.stats.getComms',
+      GET_ALL: 'aaProject.stats.getAll'
     },
     DAILY_MONITORING: {
       ADD: 'aaProject.dailyMonitoring.add',
