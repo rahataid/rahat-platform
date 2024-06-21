@@ -2,20 +2,12 @@
 import {
   BeneficiaryJobs,
   MS_ACTIONS,
-  ProjectJobs
+  ProjectJobs,
+  VendorJobs
 } from '@rahataid/sdk';
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
 
 export const elActions: ProjectActionFunc = {
-  //  [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: () =>
-  // this.sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, payload),
-  // [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: () =>
-  //   this.sendCommand({ cmd: ProjectJobs.PROCESS_OTP, uuid }, payload),
-
-  // this.sendCommand(
-  //   { cmd: ProjectJobs.ASSIGN_DISCOUNT_VOUCHER, uuid },
-  //   payload
-  // ),
 
   [MS_ACTIONS.ELPROJECT.UPDATE_STATUS]: (uuid, payload, sendCommand) =>
     sendCommand(
@@ -28,12 +20,6 @@ export const elActions: ProjectActionFunc = {
       payload,
       500000
     ),
-
-  // this.sendCommand(
-  //   { cmd: ProjectJobs.REQUEST_REDEMPTION, uuid },
-  //   payload,
-  //   500000
-  // ),
 
   [MS_ACTIONS.ELPROJECT.UPDATE_REDEMPTION]: (uuid, payload, sendCommand) =>
     sendCommand(
@@ -67,4 +53,9 @@ export const elActions: ProjectActionFunc = {
       500000
     ),
 
+  [MS_ACTIONS.ELPROJECT.GET_VENDOR_STATS]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: VendorJobs.GET_VENDOR_STATS }, { projectId: uuid },
+      500000
+    ),
 };

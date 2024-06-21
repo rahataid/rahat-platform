@@ -284,7 +284,7 @@ export class BeneficiaryService {
     }
 
     // Assign beneficiary to project while creating. Useful when a beneficiary is created from inside a project
-    if (projectUUIDs.length && rdata.uuid) {
+    if (projectUUIDs?.length && rdata.uuid) {
       const assignPromises = projectUUIDs.map(projectUuid => {
         return this.assignBeneficiaryToProject({ beneficiaryId: rdata.uuid, projectId: projectUuid });
       });
