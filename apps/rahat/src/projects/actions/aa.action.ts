@@ -86,6 +86,9 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.COMMUNICATION.TRIGGER]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.COMMUNICATION.TRIGGER, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.COMMUNICATION.COMMUNICATION_LOGS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.COMMUNICATION.COMMUNICATION_LOGS, uuid }, payload),
   // **** communication end **** //
 
   // **** phases start ******//
