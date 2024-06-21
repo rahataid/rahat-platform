@@ -247,7 +247,7 @@ export class BeneficiaryService {
   }
 
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
-    const { piiData, ...data } = dto;
+    const { piiData, projectUUIDs, ...data } = dto;
     if (!data.walletAddress) {
       data.walletAddress = generateRandomWallet().address;
     }
@@ -281,6 +281,14 @@ export class BeneficiaryService {
           ...piiData,
         },
       });
+    }
+
+    // Assign beneficiary to project while creating. Useful when a beneficiary is created from inside a project
+    if (projectUUIDs?.length && rdata.uuid) {
+      const assignPromises = projectUUIDs.map(projectUuid => {
+        return this.assignBeneficiaryToProject({ beneficiaryId: rdata.uuid, projectId: projectUuid });
+      });
+      await Promise.all(assignPromises);
     }
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
       projectUuid,
@@ -487,6 +495,7 @@ export class BeneficiaryService {
     //1. Get beneficiary data
     const beneficiaryData = await this.rsprisma.beneficiary.findUnique({
       where: { uuid: beneficiaryId },
+      include: { pii: true }
     });
     const projectPayload = {
       uuid: beneficiaryData.uuid,
@@ -499,7 +508,9 @@ export class BeneficiaryService {
 
     // if project type if aa, remove type
     if (project.type.toLowerCase() === 'aa') {
-      delete projectPayload.type
+      delete projectPayload.type;
+      projectPayload['gender'] = beneficiaryData?.gender;
+      projectPayload.extras = { ...projectPayload.extras, phone: beneficiaryData?.pii?.phone }
     }
 
 

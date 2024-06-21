@@ -17,7 +17,7 @@ import { ListenersModule } from '../listeners/listeners.module';
 import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
 import { UploadModule } from '../upload/upload.module';
-import { AppUsersModule } from '../users/users.module';
+import { AppUsersModule } from '../vendors/vendors.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
