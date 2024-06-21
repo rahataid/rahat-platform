@@ -16,6 +16,7 @@ import { tap, timeout } from 'rxjs';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { createContractSigner } from '../utils/web3';
 import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, settingActions, vendorActions } from './actions';
+import { rpActions } from './actions/rp.action';
 @Injectable()
 export class ProjectService {
   constructor(
@@ -179,7 +180,8 @@ export class ProjectService {
       ...settingActions,
       ...metaTxActions,
       ...c2cActions,
-      ...cvaActions
+      ...cvaActions,
+      ...rpActions
     };
 
 

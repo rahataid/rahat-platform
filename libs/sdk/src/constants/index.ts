@@ -180,4 +180,11 @@ export const MS_ACTIONS = {
     PROCESS_OTP: 'cvaProject.processOtp',
 
   },
+  RPPROJECT: {
+    CREATE_DISBURSEMENT: 'rpProject.disbursement.create',
+    GET_ALL_DISBURSEMENT: 'rpProject.disbursements.get',
+    GET_DISBURSEMENT: 'rpProject.disbursement.getOne',
+    UPDATE_DISBURSEMENT: 'rpProject.disbursement.update',
+
+  }
 };

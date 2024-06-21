@@ -53,3 +53,10 @@ export enum ProjectStatus {
   CLOSED = 'CLOSED'
 }
 
+
+
+export enum DisbursementConditionType {
+  BALANCE_CHECK = 'BALANCE_CHECK',
+  APPROVER_SIGNATURE = 'APPROVER_SIGNATURE',
+  SCHEDULED_TIME = 'SCHEDULED_TIME',
+}
