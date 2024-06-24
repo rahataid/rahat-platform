@@ -188,6 +188,10 @@ export const MS_ACTIONS = {
     GET_ALL_DISBURSEMENT: 'rpProject.disbursements.get',
     GET_DISBURSEMENT: 'rpProject.disbursement.getOne',
     UPDATE_DISBURSEMENT: 'rpProject.disbursement.update',
+    CREATE_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.create',
+    GET_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.getOne',
+    GET_ALL_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.get',
+    UPDATE_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.update',
 
   }
 };
