@@ -14,7 +14,7 @@ async function main() {
 
   await modifyRootEnv(pvtKey[0])
 
-  /*********** cva dev settings  **************** */
+  /*********** rp dev settings  **************** */
   const rpDevSettings: Setting = {
     value: {
       privateKey: pvtKey[0],
@@ -36,7 +36,7 @@ async function main() {
     // @ts-ignore
     update: rpDevSettings
   });
-  /*********** cva dev settings end  **************** */
+  /*********** rp dev settings end  **************** */
 
 }
 
