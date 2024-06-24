@@ -22,7 +22,7 @@ async function main() {
     } as Prisma.JsonValue,
     isPrivate: true,
     isReadOnly: true,
-    name: 'CVA_DEV',
+    name: 'RP_DEV',
     requiredFields: ['privateKey', 'adminAccounts'],
     dataType: SettingDataType.OBJECT,
   }
