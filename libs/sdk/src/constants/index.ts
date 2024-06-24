@@ -192,6 +192,7 @@ export const MS_ACTIONS = {
     GET_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.getOne',
     GET_ALL_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.get',
     UPDATE_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.update',
+    CREATE_BULK_DISBURSEMENT: 'rpProject.disbursement.bulkCreate',
 
   }
 };
