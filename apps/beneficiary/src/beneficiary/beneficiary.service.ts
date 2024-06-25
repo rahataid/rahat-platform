@@ -856,6 +856,25 @@ export class BeneficiaryService {
     })
   }
 
+  async removeOneGroup(uuid: string) {
+    const benfGroup = await this.prisma.beneficiaryGroup.findUnique({
+      where: {
+        uuid,
+        deletedAt: null
+      }
+    })
+    if (!benfGroup) throw new RpcException('Beneficiary group not found or already deleted.')
+
+    return this.prisma.beneficiaryGroup.update({
+      where: {
+        uuid: uuid
+      },
+      data: {
+        deletedAt: new Date(),
+      }
+    })
+  }
+
   async getAllGroups(dto: ListBeneficiaryGroupDto) {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
