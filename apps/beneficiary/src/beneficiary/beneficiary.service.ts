@@ -895,6 +895,18 @@ export class BeneficiaryService {
             where: {
               deletedAt: null
             }
+          },
+          groupedBeneficiaries: {
+            include: {
+              Beneficiary: {
+                include: {
+                  pii: true
+                }
+              }
+            },
+            where: {
+              deletedAt: null
+            }
           }
         },
         orderBy,
