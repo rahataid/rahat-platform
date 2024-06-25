@@ -242,6 +242,14 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET_ONE_GROUP }, uuid);
   }
 
+  @Delete('groups/:uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async removeGroup(@Param('uuid') uuid: UUID) {
+    console.log("received here aksdj")
+
+    return this.client.send({ cmd: BeneficiaryJobs.REMOVE_ONE_GROUP }, uuid);
+  }
+
 
   @Post('import-tools')
   async importBeneficiariesFromTool(@Req() req: Request) {

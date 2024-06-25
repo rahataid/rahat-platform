@@ -165,6 +165,11 @@ export class BeneficiaryController {
     return this.service.getOneGroup(uuid)
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.REMOVE_ONE_GROUP })
+  removeGroup(uuid: string) {
+    return this.service.removeOneGroup(uuid)
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_GROUPS })
   getAllGroups(dto: ListBeneficiaryGroupDto) {
     return this.service.getAllGroups(dto)
