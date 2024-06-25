@@ -245,8 +245,6 @@ export class BeneficiaryController {
   @Delete('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
   async removeGroup(@Param('uuid') uuid: UUID) {
-    console.log("received here aksdj")
-
     return this.client.send({ cmd: BeneficiaryJobs.REMOVE_ONE_GROUP }, uuid);
   }
 
