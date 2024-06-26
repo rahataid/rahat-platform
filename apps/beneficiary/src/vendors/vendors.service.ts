@@ -167,6 +167,9 @@ export class VendorsService {
         Project: true,
         User: true,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
     return this.client.send({
       cmd: VendorJobs.LIST,
@@ -250,5 +253,4 @@ export class VendorsService {
   }
 
 }
-
 
