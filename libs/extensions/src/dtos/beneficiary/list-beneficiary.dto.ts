@@ -40,6 +40,15 @@ export class ListBeneficiaryDto {
   @IsString()
   @IsOptional()
   type?: string;
+
+
+  @ApiProperty({ example: '2024-06-25T18:15:00.000Z' })
+  @IsOptional()
+  startDate?: string;
+
+  @ApiProperty({ example: '2024-06-25T18:15:00.000Z' })
+  @IsOptional()
+  endDate?: string;
 }
 
 export class ListProjectBeneficiaryDto {
