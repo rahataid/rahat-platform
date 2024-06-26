@@ -167,6 +167,9 @@ export class VendorsService {
         Project: true,
         User: true,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
     return this.client.send({
       cmd: VendorJobs.LIST,
@@ -239,6 +242,7 @@ export class VendorsService {
 
   async updateVendor(dto) {
     const { uuid, ...rest } = dto;
+
     const userData = await this.prisma.user.findFirst({
       where: { email: dto.email }
     })
@@ -249,5 +253,4 @@ export class VendorsService {
   }
 
 }
-
 

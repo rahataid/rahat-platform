@@ -25,4 +25,17 @@ export const JOBS = {
   GET_VENDOR_REDEMPTION: 'rahat.jobs.project.get_redemption_vendor',
   GET_ALL_STATS: 'rahat.jobs.project.get_all_stats',
   REQUEST_CLAIM: 'rahat.jobs.project.request_claim',
+  GET_VENDOR_STATS: 'rahat.jobs.project.get_vendor_stats',
+
+  DISBURSEMENT_PLAN: {
+    CREATE_DISBURSEMENT: 'rahat.jobs.disbursement.create',
+    LIST_DISBURSEMENT: 'rahat.jobs.disbursement.list',
+    FINDONE_DISBURSEMENT: 'rahat.jobs.disbursement.listone',
+    UPDATE_DISBURSEMENT: 'rahat.jobs.disbursement.update',
+    CREATE_DISBURSEMENT_PLAN: 'rahat.jobs.disbursement_plan.create',
+    LIST_DISBURSEMENT_PLAN: 'rahat.jobs.disbursement_plan.list',
+    FINDONE_DISBURSEMENT_PLAN: 'rahat.jobs.disbursement_plan.listone',
+    UPDATE_DISBURSEMENT_PLAN: 'rahat.jobs.disbursement_plan.update',
+    BULK_CREATE_DISBURSEMENT: 'rahat.jobs.disbursement.bulk_create',
+  },
 };

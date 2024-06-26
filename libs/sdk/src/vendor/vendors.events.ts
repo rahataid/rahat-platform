@@ -9,5 +9,6 @@ export const JOBS = {
   GET_COUNT: 'rahat.jobs.vendor.count',
   GET_OTP: 'rahat.jobs.vendor.getOtp',
   VERIFY_OTP: 'rahat.jobs.vendor.verfiyOtp',
-  UPDATE: 'rahat.jobs.vendor.update'
+  UPDATE: 'rahat.jobs.vendor.update',
+  GET_VENDOR_STATS: 'rahat.jobs.get_project_vendor_stats'
 };

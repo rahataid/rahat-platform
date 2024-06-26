@@ -59,7 +59,17 @@ export class BeneficiaryService {
   async listPiiData(dto: any) {
     const repository = dto.projectId ? this.rsprisma.beneficiaryProject : this.rsprisma.beneficiaryPii;
     const include = dto.projectId ? { Beneficiary: true } : {};
-    const where = dto.projectId ? { projectId: dto.projectId } : {};
+    let where: any = dto.projectId ? { projectId: dto.projectId } : {};
+
+    const startDate = dto.startDate;
+    const endDate = dto.endDate;
+
+    if (dto.projectId) {
+      if (startDate && endDate) { where.createdAt = { gte: new Date(startDate), lte: new Date(endDate), } }
+      if (startDate && !endDate) { where.createdAt = { gte: new Date(startDate) } }
+      if (!startDate && endDate) { where.createdAt = { lte: new Date(endDate) } }
+    }
+
     //TODO: change in library to make pagination optional
     const perPage = await repository.count()
 
@@ -164,8 +174,10 @@ export class BeneficiaryService {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
     const projectUUID = dto.projectId;
+    const startDate = dto.startDate;
+    const endDate = dto.endDate;
 
-    const where = projectUUID ? {
+    let where: any = projectUUID ? {
       deletedAt: null,
       BeneficiaryProject: projectUUID === 'NOT_ASSGNED' ? {
         none: {}
@@ -173,10 +185,16 @@ export class BeneficiaryService {
         some: {
           projectId: projectUUID
         }
-      }
+      },
     } : {
       deletedAt: null
     }
+
+    if (startDate && endDate) { where.createdAt = { gte: new Date(startDate), lte: new Date(endDate), } }
+
+    if (startDate && !endDate) { where.createdAt = { gte: new Date(startDate) } }
+
+    if (!startDate && endDate) { where.createdAt = { lte: new Date(endDate) } }
 
     result = await paginate(
       this.rsprisma.beneficiary,
@@ -247,7 +265,7 @@ export class BeneficiaryService {
   }
 
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
-    const { piiData, ...data } = dto;
+    const { piiData, projectUUIDs, ...data } = dto;
     if (!data.walletAddress) {
       data.walletAddress = generateRandomWallet().address;
     }
@@ -281,6 +299,14 @@ export class BeneficiaryService {
           ...piiData,
         },
       });
+    }
+
+    // Assign beneficiary to project while creating. Useful when a beneficiary is created from inside a project
+    if (projectUUIDs?.length && rdata.uuid) {
+      const assignPromises = projectUUIDs.map(projectUuid => {
+        return this.assignBeneficiaryToProject({ beneficiaryId: rdata.uuid, projectId: projectUuid });
+      });
+      await Promise.all(assignPromises);
     }
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
       projectUuid,
@@ -487,6 +513,7 @@ export class BeneficiaryService {
     //1. Get beneficiary data
     const beneficiaryData = await this.rsprisma.beneficiary.findUnique({
       where: { uuid: beneficiaryId },
+      include: { pii: true }
     });
     const projectPayload = {
       uuid: beneficiaryData.uuid,
@@ -499,7 +526,9 @@ export class BeneficiaryService {
 
     // if project type if aa, remove type
     if (project.type.toLowerCase() === 'aa') {
-      delete projectPayload.type
+      delete projectPayload.type;
+      projectPayload['gender'] = beneficiaryData?.gender;
+      projectPayload.extras = { ...projectPayload.extras, phone: beneficiaryData?.pii?.phone }
     }
 
 
@@ -628,8 +657,6 @@ export class BeneficiaryService {
         deletedAt: new Date()
       }
     })
-
-    console.log(res);
 
     return rdata;
   }
@@ -845,6 +872,25 @@ export class BeneficiaryService {
     })
   }
 
+  async removeOneGroup(uuid: string) {
+    const benfGroup = await this.prisma.beneficiaryGroup.findUnique({
+      where: {
+        uuid,
+        deletedAt: null
+      }
+    })
+    if (!benfGroup) throw new RpcException('Beneficiary group not found or already deleted.')
+
+    return this.prisma.beneficiaryGroup.update({
+      where: {
+        uuid: uuid
+      },
+      data: {
+        deletedAt: new Date(),
+      }
+    })
+  }
+
   async getAllGroups(dto: ListBeneficiaryGroupDto) {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
@@ -880,6 +926,18 @@ export class BeneficiaryService {
           beneficiaryGroupProject: {
             include: {
               Project: true
+            },
+            where: {
+              deletedAt: null
+            }
+          },
+          groupedBeneficiaries: {
+            include: {
+              Beneficiary: {
+                include: {
+                  pii: true
+                }
+              }
             },
             where: {
               deletedAt: null
