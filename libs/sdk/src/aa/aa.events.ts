@@ -30,6 +30,7 @@ export const JOBS = {
   COMMUNICATION: {
     ADD: 'aa.jobs.activity.communication.add',
     TRIGGER: 'aa.jobs.activity.communication.trigger',
+    COMMUNICATION_LOGS: 'aa.jobs.communication.getCommunicationLogs',
   },
   HAZARD_TYPES: {
     GET_ALL: 'aa.jobs.hazardTypes.getAll',
@@ -67,7 +68,8 @@ export const JOBS = {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget'
   },
   STATS: {
-    GET_COMMS: 'aa.jobs.stats.getComms'
+    GET_COMMS: 'aa.jobs.stats.getComms',
+    GET_ALL: 'aa.jobs.stats.getAll'
   },
   DAILY_MONITORING: {
     ADD: 'aa.jobs.dailyMonitoring.add',

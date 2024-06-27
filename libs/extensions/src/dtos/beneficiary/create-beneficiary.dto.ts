@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Beneficiary, Enums, TPIIData } from '@rahataid/sdk';
 import {
+  ArrayNotEmpty,
   IsDate,
   IsEnum,
   IsNumber,
   IsOptional,
-  IsString,
+  IsString
 } from 'class-validator';
 import { UUID, randomUUID } from 'crypto';
 
@@ -151,4 +152,13 @@ export class CreateBeneficiaryDto implements Beneficiary {
   })
   @IsOptional()
   piiData?: TPIIData;
+
+  @ApiProperty({
+    example: [randomUUID().toString()],
+    description: 'Array of project UUIDs',
+  })
+  @IsOptional()
+  @ArrayNotEmpty()
+
+  projectUUIDs?: string[];
 }
