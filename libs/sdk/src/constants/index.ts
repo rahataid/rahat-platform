@@ -72,6 +72,7 @@ export const MS_ACTIONS = {
     GET_VENDOR_REFERRER: 'elProject.beneficiaryReferred',
     GET_ALL_STATS: 'elProject.getAllStats',
     LIST_BEN_VENDOR_COUNT: 'elProject.count_ben_vendor',
+    GET_VENDOR_STATS: 'elProject.getVendorStats',
   },
   SETTINGS: {
     LIST: 'settings.list',
@@ -105,6 +106,7 @@ export const MS_ACTIONS = {
     COMMUNICATION: {
       ADD: 'aaProject.activities.communication.add',
       TRIGGER: 'aaProject.activities.communication.trigger',
+      COMMUNICATION_LOGS: 'aa.jobs.communication.getCommunicationLogs',
     },
     ACTIVITY_CATEGORIES: {
       GET_ALL: 'aaProject.activityCategories.getAll',
@@ -147,7 +149,8 @@ export const MS_ACTIONS = {
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats'
     },
     STATS: {
-      GET_COMMS: 'aaProject.stats.getComms'
+      GET_COMMS: 'aaProject.stats.getComms',
+      GET_ALL: 'aaProject.stats.getAll'
     },
     DAILY_MONITORING: {
       ADD: 'aaProject.dailyMonitoring.add',
@@ -180,4 +183,16 @@ export const MS_ACTIONS = {
     PROCESS_OTP: 'cvaProject.processOtp',
 
   },
+  RPPROJECT: {
+    CREATE_DISBURSEMENT: 'rpProject.disbursement.create',
+    GET_ALL_DISBURSEMENT: 'rpProject.disbursements.get',
+    GET_DISBURSEMENT: 'rpProject.disbursement.getOne',
+    UPDATE_DISBURSEMENT: 'rpProject.disbursement.update',
+    CREATE_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.create',
+    GET_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.getOne',
+    GET_ALL_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.get',
+    UPDATE_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.update',
+    CREATE_BULK_DISBURSEMENT: 'rpProject.disbursement.bulkCreate',
+
+  }
 };

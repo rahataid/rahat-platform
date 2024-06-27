@@ -43,4 +43,27 @@ export class StatsService {
       where: { name },
     });
   }
+
+  // async getReports({
+  //   names,
+  //   group,
+  // }: {
+  //   names: string[]
+  //   group?: any;
+  // }) {
+  //   const where: Prisma.StatsWhereInput = {
+  //     name: {
+  //       in: names,
+  //     },
+  //   };
+
+  //   if (group) {
+  //     where.group = group;
+  //   }
+  //   console.log('where', where, names, group)
+  //   return this.prismaService.stats.findMany({
+  //     where
+  //   });
+
+  // }
 }
