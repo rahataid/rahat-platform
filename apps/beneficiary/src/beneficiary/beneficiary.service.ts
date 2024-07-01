@@ -15,6 +15,7 @@ import {
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
+  UpdateBeneficiaryGroupDto,
   addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
 import {
@@ -968,6 +969,35 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+  }
+
+  async updateGroup(uuid: UUID, dto: UpdateBeneficiaryGroupDto) {
+    // Find the existing group
+    const existingGroup = await this.prisma.beneficiaryGroup.findUnique({
+      where: { uuid: uuid },
+      include: { groupedBeneficiaries: true }
+    });
+
+    if (!existingGroup) throw new Error('Group not found.');
+
+    // Update the group's name if provided
+    const updatedData = await this.prisma.beneficiaryGroup.update({
+      where: { uuid: uuid },
+      data: { name: dto?.name || existingGroup?.name }
+    });
+
+    // Delete all existing grouped beneficiaries for the group
+    await this.prisma.groupedBeneficiaries.deleteMany({
+      where: { beneficiaryGroupId: updatedData.uuid }
+    });
+
+    // Create new grouped beneficiaries
+    return await this.prisma.groupedBeneficiaries.createMany({
+      data: dto.beneficiaries.map((d) => ({
+        beneficiaryGroupId: updatedData.uuid,
+        beneficiaryId: d.uuid
+      }))
+    });
   }
 
   async saveBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
