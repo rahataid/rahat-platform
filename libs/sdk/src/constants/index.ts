@@ -193,6 +193,14 @@ export const MS_ACTIONS = {
     GET_ALL_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.get',
     UPDATE_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.update',
     CREATE_BULK_DISBURSEMENT: 'rpProject.disbursement.bulkCreate',
-
+    CREATE_CAMPAIGN: 'rpProject.campaign.create',
+    CREATE_AUDIENCE: 'rpProject.campaign.create_audience',
+    GET_ALL_CAMPAIGN: 'rpProject.campaign.get',
+    GET_CAMPAIGN: 'rpProject.campaign.getOne',
+    GET_ALL_TRANSPORT: 'rpProject.campaign.get_transport',
+    GET_ALL_AUDIENCE: 'rpProject.campaign.get_audience',
+    TRIGGER_CAMPAIGN: 'rpProject.campaign.trigger',
+    GET_ALL_COMMUNICATION_LOGS: 'rpProject.campaign.communication_logs',
+    GET_ALL_COMMUNICATION_STATS: 'rpProject.campaign.communication_stats',
   }
 };
