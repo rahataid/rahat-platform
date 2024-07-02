@@ -972,6 +972,7 @@ export class BeneficiaryService {
   }
 
   async updateGroup(uuid: UUID, dto: UpdateBeneficiaryGroupDto) {
+    //Step: 1
     // Find the existing group
     const existingGroup = await this.prisma.beneficiaryGroup.findUnique({
       where: { uuid: uuid },
@@ -992,12 +993,65 @@ export class BeneficiaryService {
     });
 
     // Create new grouped beneficiaries
-    return await this.prisma.groupedBeneficiaries.createMany({
+    const updatedGroupedBeneficiaries = await this.prisma.groupedBeneficiaries.createMany({
       data: dto.beneficiaries.map((d) => ({
         beneficiaryGroupId: updatedData.uuid,
         beneficiaryId: d.uuid
       }))
     });
+
+    //Step:2
+    //Get beneficiary group data
+    const beneficiaryGroupData = await this.prisma.beneficiaryGroup.findUnique({
+      where: {
+        uuid: uuid,
+      },
+      include: {
+        groupedBeneficiaries: true
+      }
+    })
+
+    const benfsInGroup = beneficiaryGroupData.groupedBeneficiaries?.map((d) => d.beneficiaryId)
+
+    const benefGroupProjects = await this.prisma.beneficiaryGroupProject.findMany({
+      where: {
+        beneficiaryGroupId: existingGroup.uuid
+      }
+    })
+
+    if (benefGroupProjects.length > 0) {
+      for (const project of benefGroupProjects) {
+
+        // get beneficiaries from the group not assigned to project
+        const unassignedBenfs = await this.prisma.beneficiary.findMany({
+          where: {
+            AND: [
+              {
+                uuid: {
+                  in: benfsInGroup
+                }
+              },
+              {
+                BeneficiaryProject: {
+                  none: {
+                    projectId: project.projectId
+                  }
+                }
+              },
+            ],
+            deletedAt: null
+          }
+        });
+
+        // bulk assign unassigned beneficiaries from group
+        if (unassignedBenfs?.length) {
+          for (const unassignedBenf of unassignedBenfs) {
+            await this.assignBeneficiaryToProject({ beneficiaryId: unassignedBenf.uuid, projectId: project.projectId })
+          }
+        }
+      }
+      return 'Success';
+    } else return updatedGroupedBeneficiaries;
   }
 
   async saveBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
