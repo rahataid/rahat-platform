@@ -115,9 +115,6 @@ export class ListenersService {
           1: beneficiary.piiData.name,
         },
       };
-
-      console.log(payload)
-
       this.messageSenderService.sendWhatappMessage(payload)
     }
 
