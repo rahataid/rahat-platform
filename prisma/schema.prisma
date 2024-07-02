@@ -559,6 +559,11 @@ model Token {
   transactionHash String?       @unique
   type            TokenDataType @default(CREATED)
 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  createdBy Int?
+  updatedBy Int?
+
   @@map("tbl_tokens")
 }
 

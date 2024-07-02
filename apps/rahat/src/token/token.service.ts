@@ -16,7 +16,11 @@ export class TokenService {
   }
 
   findAll() {
-    return this.prisma.token.findMany({});
+    return this.prisma.token.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
   }
 
   findOne(contractAddress: string) {
