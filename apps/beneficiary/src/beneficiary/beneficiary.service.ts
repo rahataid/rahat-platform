@@ -2,7 +2,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { Beneficiary } from '@prisma/client';
+import { Beneficiary, Prisma } from '@prisma/client';
 import {
   AddBenToProjectDto,
   AddBenfGroupToProjectDto,
@@ -85,10 +85,11 @@ export class BeneficiaryService {
       }
     );
 
-    if (dto.projectId && data.data.length > 0) {
+    if (dto.projectId && data.data.length) {
       const mergedData = await this.mergeProjectPIIData(data.data);
       data.data = mergedData;
       const projectPayload = { ...data, status: dto?.type };
+      console.log(projectPayload)
       return this.client.send(
         { cmd: BeneficiaryJobs.LIST_PROJECT_PII, uuid: dto.projectId },
         projectPayload
@@ -101,11 +102,11 @@ export class BeneficiaryService {
     return data;
   }
   async listBenefByProject(data: any) {
-    if (data?.data.length > 0) {
-      const mergedProjectData = await this.mergeProjectData(data.data)
+
+    if (data?.data.length) {
+      const mergedProjectData = await this.mergeProjectData(data.data, data.payload)
       data.data = mergedProjectData;
     }
-
     return data;
   }
 
@@ -222,22 +223,39 @@ export class BeneficiaryService {
     return result;
   }
 
-  async mergeProjectData(data: any) {
-    const mergedData = [];
-    for (const d of data) {
-      const projectData = await this.prisma.beneficiary.findUnique({
-        where: { uuid: d.uuid }
-      })
-      const piiData = await this.prisma.beneficiaryPii.findUnique({
-        where: { beneficiaryId: projectData.id },
-      });
-      if (projectData) {
-        d.projectData = projectData
-        d.piiData = piiData;
-      };
-      mergedData.push(d)
+  async mergeProjectData(data: any, payload?: any) {
+
+    const where: Prisma.BeneficiaryWhereInput = {
+      uuid: {
+        in: data.map(b => b.uuid)
+      }
     }
-    return mergedData;
+    if (payload.gender) {
+      where.gender = payload.gender
+    }
+    if (payload.internetStatus) {
+      where.internetStatus = payload.internetStatus
+    }
+    if (payload.phoneStatus) {
+      where.phoneStatus = payload.phoneStatus
+    }
+    if (payload.bankedStatus) {
+      where.bankedStatus = payload.bankedStatus
+    }
+
+    const beneficiaries = await this.prisma.beneficiary.findMany({
+      where,
+      include: {
+        pii: true
+      }
+    })
+
+    // TODO: remove projectData and piiData that has been added manually, as it will affects the FE. NEEDS to be refactord in FE as well.
+    return beneficiaries.map(b => ({
+      ...b,
+      projectData: b,
+      piiData: b.pii
+    }));
   }
 
   async mergeProjectPIIData(data: any) {
@@ -699,7 +717,6 @@ export class BeneficiaryService {
         data: beneficiariesData,
       });
     } catch (e) {
-      console.log('e', e);
       throw new RpcException(
         new BadRequestException('Error in creating beneficiaries')
       );
