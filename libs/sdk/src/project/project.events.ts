@@ -38,4 +38,16 @@ export const JOBS = {
     UPDATE_DISBURSEMENT_PLAN: 'rahat.jobs.disbursement_plan.update',
     BULK_CREATE_DISBURSEMENT: 'rahat.jobs.disbursement.bulk_create',
   },
+  CAMPAIGN: {
+    CREATE_CAMPAIGN: 'rahat.jobs.campaign.create',
+    LIST_CAMPAIGN: 'rahat.jobs.campaign.list',
+    FINDONE_CAMPAIGN: 'rahat.jobs.campaign.get',
+    GET_ALL_TRANSPORT: 'rahat.jobs.campaign.get_transport',
+    GET_ALL_AUDIENCE: 'rahat.jobs.campaign.get_audience',
+    TRIGGER_CAMPAIGN: 'rahat.jobs.campaign.trigger',
+    GET_ALL_COMMUNICATION_LOGS: 'rahat.jobs.campaign.communication_logs',
+    GET_ALL_COMMUNICATION_STATS: 'rahat.jobs.campaign.communication_stats',
+    CREATE_AUDIENCE: 'rahat.jobs.campaign.create_audience',
+
+  }
 };

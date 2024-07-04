@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "tbl_tokens" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "createdBy" INTEGER,
+ADD COLUMN     "updatedAt" TIMESTAMP(3),
+ADD COLUMN     "updatedBy" INTEGER;

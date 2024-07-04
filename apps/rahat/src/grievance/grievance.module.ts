@@ -10,3 +10,4 @@ import { GrievanceService } from "./grievance.service";
   controllers: [GrievanceController]
 })
 export class GrievanceModule { }
+

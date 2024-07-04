@@ -90,6 +90,7 @@ export const users: Array<{
       id: 1,
       name: 'Rumsan Admin',
       email: 'rumsan@mailinator.com',
+      wallet: '0x75f598874DC39E364846d577CEde48d50378aC40'
     },
     {
       id: 2,

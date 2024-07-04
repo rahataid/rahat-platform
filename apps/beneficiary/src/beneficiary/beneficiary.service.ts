@@ -15,6 +15,7 @@ import {
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
+  UpdateBeneficiaryGroupDto,
   addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
 import {
@@ -59,7 +60,17 @@ export class BeneficiaryService {
   async listPiiData(dto: any) {
     const repository = dto.projectId ? this.rsprisma.beneficiaryProject : this.rsprisma.beneficiaryPii;
     const include = dto.projectId ? { Beneficiary: true } : {};
-    const where = dto.projectId ? { projectId: dto.projectId } : {};
+    let where: any = dto.projectId ? { projectId: dto.projectId } : {};
+
+    const startDate = dto.startDate;
+    const endDate = dto.endDate;
+
+    if (dto.projectId) {
+      if (startDate && endDate) { where.createdAt = { gte: new Date(startDate), lte: new Date(endDate), } }
+      if (startDate && !endDate) { where.createdAt = { gte: new Date(startDate) } }
+      if (!startDate && endDate) { where.createdAt = { lte: new Date(endDate) } }
+    }
+
     //TODO: change in library to make pagination optional
     const perPage = await repository.count()
 
@@ -75,10 +86,11 @@ export class BeneficiaryService {
       }
     );
 
-    if (dto.projectId && data.data.length > 0) {
+    if (dto.projectId && data.data.length) {
       const mergedData = await this.mergeProjectPIIData(data.data);
       data.data = mergedData;
       const projectPayload = { ...data, status: dto?.type };
+      console.log(projectPayload)
       return this.client.send(
         { cmd: BeneficiaryJobs.LIST_PROJECT_PII, uuid: dto.projectId },
         projectPayload
@@ -91,11 +103,11 @@ export class BeneficiaryService {
     return data;
   }
   async listBenefByProject(data: any) {
-    if (data?.data.length > 0) {
-      const mergedProjectData = await this.mergeProjectData(data.data)
+
+    if (data?.data.length) {
+      const mergedProjectData = await this.mergeProjectData(data.data, data.payload)
       data.data = mergedProjectData;
     }
-
     return data;
   }
 
@@ -164,8 +176,10 @@ export class BeneficiaryService {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
     const projectUUID = dto.projectId;
+    const startDate = dto.startDate;
+    const endDate = dto.endDate;
 
-    const where = projectUUID ? {
+    let where: any = projectUUID ? {
       deletedAt: null,
       BeneficiaryProject: projectUUID === 'NOT_ASSGNED' ? {
         none: {}
@@ -173,10 +187,16 @@ export class BeneficiaryService {
         some: {
           projectId: projectUUID
         }
-      }
+      },
     } : {
       deletedAt: null
     }
+
+    if (startDate && endDate) { where.createdAt = { gte: new Date(startDate), lte: new Date(endDate), } }
+
+    if (startDate && !endDate) { where.createdAt = { gte: new Date(startDate) } }
+
+    if (!startDate && endDate) { where.createdAt = { lte: new Date(endDate) } }
 
     result = await paginate(
       this.rsprisma.beneficiary,
@@ -204,22 +224,54 @@ export class BeneficiaryService {
     return result;
   }
 
-  async mergeProjectData(data: any) {
-    const mergedData = [];
-    for (const d of data) {
-      const projectData = await this.prisma.beneficiary.findUnique({
-        where: { uuid: d.uuid }
-      })
-      const piiData = await this.prisma.beneficiaryPii.findUnique({
-        where: { beneficiaryId: projectData.id },
-      });
-      if (projectData) {
-        d.projectData = projectData
-        d.piiData = piiData;
-      };
-      mergedData.push(d)
-    }
-    return mergedData;
+  async mergeProjectData(data: any, payload?: any) {
+
+    console.log(data.map(b => b.uuid))
+
+    // const where: Prisma.BeneficiaryWhereInput = {
+    //   uuid: {
+    //     in: data.map(b => b.uuid)
+    //   }
+    // }
+    // if (payload?.gender) {
+    //   where.gender = payload.gender
+    // }
+    // if (payload?.internetStatus) {
+    //   where.internetStatus = payload.internetStatus
+    // }
+    // if (payload?.phoneStatus) {
+    //   where.phoneStatus = payload.phoneStatus
+    // }
+    // if (payload?.bankedStatus) {
+    //   where.bankedStatus = payload.bankedStatus
+    // }
+
+    // const beneficiaries = await this.prisma.beneficiary.findMany({
+    //   where,
+    //   include: {
+    //     pii: true
+    //   }
+    // })
+
+    const beneficiaries = await this.prisma.beneficiary.findMany({
+      where: {
+        uuid: {
+          in: data.map(b => b.uuid)
+        }
+      },
+      include: {
+        pii: true
+      }
+    })
+
+    // const beneficiaries = []
+
+    // TODO: remove projectData and piiData that has been added manually, as it will affects the FE. NEEDS to be refactord in FE as well.
+    return beneficiaries.map(b => ({
+      ...b,
+      projectData: b,
+      piiData: b?.pii
+    }));
   }
 
   async mergeProjectPIIData(data: any) {
@@ -640,8 +692,6 @@ export class BeneficiaryService {
       }
     })
 
-    console.log(res);
-
     return rdata;
   }
 
@@ -683,7 +733,6 @@ export class BeneficiaryService {
         data: beneficiariesData,
       });
     } catch (e) {
-      console.log('e', e);
       throw new RpcException(
         new BadRequestException('Error in creating beneficiaries')
       );
@@ -935,6 +984,89 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+  }
+
+  async updateGroup(uuid: UUID, dto: UpdateBeneficiaryGroupDto) {
+    //Step: 1
+    // Find the existing group
+    const existingGroup = await this.prisma.beneficiaryGroup.findUnique({
+      where: { uuid: uuid },
+      include: { groupedBeneficiaries: true }
+    });
+
+    if (!existingGroup) throw new Error('Group not found.');
+
+    // Update the group's name if provided
+    const updatedData = await this.prisma.beneficiaryGroup.update({
+      where: { uuid: uuid },
+      data: { name: dto?.name || existingGroup?.name }
+    });
+
+    // Delete all existing grouped beneficiaries for the group
+    await this.prisma.groupedBeneficiaries.deleteMany({
+      where: { beneficiaryGroupId: updatedData.uuid }
+    });
+
+    // Create new grouped beneficiaries
+    const updatedGroupedBeneficiaries = await this.prisma.groupedBeneficiaries.createMany({
+      data: dto.beneficiaries.map((d) => ({
+        beneficiaryGroupId: updatedData.uuid,
+        beneficiaryId: d.uuid
+      }))
+    });
+
+    //Step:2
+    //Get beneficiary group data
+    const beneficiaryGroupData = await this.prisma.beneficiaryGroup.findUnique({
+      where: {
+        uuid: uuid,
+      },
+      include: {
+        groupedBeneficiaries: true
+      }
+    })
+
+    const benfsInGroup = beneficiaryGroupData.groupedBeneficiaries?.map((d) => d.beneficiaryId)
+
+    const benefGroupProjects = await this.prisma.beneficiaryGroupProject.findMany({
+      where: {
+        beneficiaryGroupId: existingGroup.uuid
+      }
+    })
+
+    if (benefGroupProjects.length > 0) {
+      for (const project of benefGroupProjects) {
+
+        // get beneficiaries from the group not assigned to project
+        const unassignedBenfs = await this.prisma.beneficiary.findMany({
+          where: {
+            AND: [
+              {
+                uuid: {
+                  in: benfsInGroup
+                }
+              },
+              {
+                BeneficiaryProject: {
+                  none: {
+                    projectId: project.projectId
+                  }
+                }
+              },
+            ],
+            deletedAt: null
+          }
+        });
+
+        // bulk assign unassigned beneficiaries from group
+        if (unassignedBenfs?.length) {
+          for (const unassignedBenf of unassignedBenfs) {
+            await this.assignBeneficiaryToProject({ beneficiaryId: unassignedBenf.uuid, projectId: project.projectId })
+          }
+        }
+      }
+      return 'Success';
+    } else return updatedGroupedBeneficiaries;
   }
 
   async saveBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
