@@ -1,0 +1,8 @@
+{
+  "base-sepolia": {
+    "Rahat Access Manager": {
+      "address": "0x91c682B0100F00Bd78e2a4738c968d074F8FFd16",
+      "startBlock": 11898557
+    }
+  }
+}
