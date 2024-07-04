@@ -90,7 +90,6 @@ export class BeneficiaryService {
       const mergedData = await this.mergeProjectPIIData(data.data);
       data.data = mergedData;
       const projectPayload = { ...data, status: dto?.type };
-      console.log(projectPayload)
       return this.client.send(
         { cmd: BeneficiaryJobs.LIST_PROJECT_PII, uuid: dto.projectId },
         projectPayload
@@ -226,7 +225,6 @@ export class BeneficiaryService {
 
   async mergeProjectData(data: any, payload?: any) {
 
-    console.log(data.map(b => b.uuid))
 
     // const where: Prisma.BeneficiaryWhereInput = {
     //   uuid: {
@@ -266,8 +264,22 @@ export class BeneficiaryService {
 
     // const beneficiaries = []
 
+    if (data) {
+      const combinedData = data.map(((dat) => {
+        const benDetails = beneficiaries.find((ben) => ben.uuid === dat.uuid);
+        const { pii, ...rest } = benDetails;
+        return {
+          piiData: pii,
+          projectData: rest,
+          ...dat
+        }
+      }))
+      return combinedData;
+    }
+
     // TODO: remove projectData and piiData that has been added manually, as it will affects the FE. NEEDS to be refactord in FE as well.
     return beneficiaries.map(b => ({
+
       ...b,
       projectData: b,
       piiData: b?.pii
