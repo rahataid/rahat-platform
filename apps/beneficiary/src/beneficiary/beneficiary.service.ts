@@ -2,7 +2,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { Beneficiary, Prisma } from '@prisma/client';
+import { Beneficiary } from '@prisma/client';
 import {
   AddBenToProjectDto,
   AddBenfGroupToProjectDto,
@@ -90,7 +90,6 @@ export class BeneficiaryService {
       const mergedData = await this.mergeProjectPIIData(data.data);
       data.data = mergedData;
       const projectPayload = { ...data, status: dto?.type };
-      console.log(projectPayload)
       return this.client.send(
         { cmd: BeneficiaryJobs.LIST_PROJECT_PII, uuid: dto.projectId },
         projectPayload
@@ -226,36 +225,64 @@ export class BeneficiaryService {
 
   async mergeProjectData(data: any, payload?: any) {
 
-    const where: Prisma.BeneficiaryWhereInput = {
-      uuid: {
-        in: data.map(b => b.uuid)
-      }
-    }
-    if (payload.gender) {
-      where.gender = payload.gender
-    }
-    if (payload.internetStatus) {
-      where.internetStatus = payload.internetStatus
-    }
-    if (payload.phoneStatus) {
-      where.phoneStatus = payload.phoneStatus
-    }
-    if (payload.bankedStatus) {
-      where.bankedStatus = payload.bankedStatus
-    }
+
+    // const where: Prisma.BeneficiaryWhereInput = {
+    //   uuid: {
+    //     in: data.map(b => b.uuid)
+    //   }
+    // }
+    // if (payload?.gender) {
+    //   where.gender = payload.gender
+    // }
+    // if (payload?.internetStatus) {
+    //   where.internetStatus = payload.internetStatus
+    // }
+    // if (payload?.phoneStatus) {
+    //   where.phoneStatus = payload.phoneStatus
+    // }
+    // if (payload?.bankedStatus) {
+    //   where.bankedStatus = payload.bankedStatus
+    // }
+
+    // const beneficiaries = await this.prisma.beneficiary.findMany({
+    //   where,
+    //   include: {
+    //     pii: true
+    //   }
+    // })
 
     const beneficiaries = await this.prisma.beneficiary.findMany({
-      where,
+      where: {
+        uuid: {
+          in: data.map(b => b.uuid)
+        }
+      },
       include: {
         pii: true
       }
     })
 
+    // const beneficiaries = []
+
+    if (data) {
+      const combinedData = data.map(((dat) => {
+        const benDetails = beneficiaries.find((ben) => ben.uuid === dat.uuid);
+        const { pii, ...rest } = benDetails;
+        return {
+          piiData: pii,
+          projectData: rest,
+          ...dat
+        }
+      }))
+      return combinedData;
+    }
+
     // TODO: remove projectData and piiData that has been added manually, as it will affects the FE. NEEDS to be refactord in FE as well.
     return beneficiaries.map(b => ({
+
       ...b,
       projectData: b,
-      piiData: b.pii
+      piiData: b?.pii
     }));
   }
 
