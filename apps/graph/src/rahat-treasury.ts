@@ -1,4 +1,3 @@
-import { DataSourceTemplate } from '@graphprotocol/graph-ts';
 import {
   AuthorityUpdated as AuthorityUpdatedEvent,
   TokenCreated as TokenCreatedEvent,
@@ -11,6 +10,7 @@ import {
   TokenMintedAndApproved,
   TokenMintedAndSent,
 } from '../generated/schema';
+import { RahatToken } from '../generated/templates';
 export function handleAuthorityUpdated(event: AuthorityUpdatedEvent): void {
   let entity = new AuthorityUpdated(
     event.transaction.hash.concatI32(event.logIndex.toI32())
@@ -35,9 +35,7 @@ export function handleTokenCreated(event: TokenCreatedEvent): void {
   entity.transactionHash = event.transaction.hash;
 
   entity.save();
-  DataSourceTemplate.create("RahatToken", [event.params.tokenAddress.toHex()])
-  // RahatToken.create(event.params.tokenAddress)
-  // fetchTokenDetail(event.params.tokenAddress);
+  RahatToken.create(event.params.tokenAddress)
 }
 
 export function handleTokenMintedAndApproved(
@@ -55,7 +53,6 @@ export function handleTokenMintedAndApproved(
   entity.transactionHash = event.transaction.hash;
 
   entity.save();
-  // fetchTokenDetail(event.params.tokenAddress);
 }
 
 export function handleTokenMintedAndSent(event: TokenMintedAndSentEvent): void {

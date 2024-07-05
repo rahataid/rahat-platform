@@ -12,6 +12,7 @@ import {
   OwnerRemoved,
   Transfer,
 } from '../generated/schema';
+import { fetchTokenDetails } from './utils';
 
 export function handleApproval(event: ApprovalEvent): void {
   let entity = new Approval(
@@ -52,7 +53,6 @@ export function handleOwnerAdded(event: OwnerAddedEvent): void {
   entity.transactionHash = event.transaction.hash;
 
   entity.save();
-  // fetchTokenDetail(event.address);
 }
 
 export function handleOwnerRemoved(event: OwnerRemovedEvent): void {
@@ -82,4 +82,6 @@ export function handleTransfer(event: TransferEvent): void {
   entity.address = event.address
 
   entity.save();
+  fetchTokenDetails(event.address)
+
 }
