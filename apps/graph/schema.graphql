@@ -193,7 +193,7 @@ type Transfer @entity(immutable: true) {
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
-  address: Bytes! #address
+  tokenAddress: Bytes! #address
 }
 
 type TokenDetail @entity(immutable: false) {

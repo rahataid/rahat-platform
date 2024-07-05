@@ -79,7 +79,7 @@ export function handleTransfer(event: TransferEvent): void {
   entity.blockNumber = event.block.number;
   entity.blockTimestamp = event.block.timestamp;
   entity.transactionHash = event.transaction.hash;
-  entity.address = event.address
+  entity.tokenAddress = event.address
 
   entity.save();
   fetchTokenDetails(event.address)
