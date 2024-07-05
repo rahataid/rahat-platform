@@ -5,12 +5,12 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: Rahat Access Manager
-    network: base-sepolia
+    name: RahatAccessManager
+    network: mainnet
     source:
-      address: "0x91c682B0100F00Bd78e2a4738c968d074F8FFd16"
-      abi: Rahat Access Manager
-      startBlock: 11898557
+      abi: RahatAccessManager
+      address: "0x97829Fe535F87246f3D8D69AEBFAA1A6ef667639"
+      startBlock: 1
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -29,14 +29,15 @@ dataSources:
         - TargetClosed
         - TargetFunctionRoleUpdated
       abis:
-        - name: Rahat Access Manager
-          file: ./abis/Rahat Access Manager.json
+        - name: RahatAccessManager
+          file: ./abis/RahatAccessManager.json
       eventHandlers:
         - event: OperationCanceled(indexed bytes32,indexed uint32)
           handler: handleOperationCanceled
         - event: OperationExecuted(indexed bytes32,indexed uint32)
           handler: handleOperationExecuted
-        - event: OperationScheduled(indexed bytes32,indexed uint32,uint48,address,address,bytes)
+        - event: OperationScheduled(indexed bytes32,indexed
+            uint32,uint48,address,address,bytes)
           handler: handleOperationScheduled
         - event: RoleAdminChanged(indexed uint64,indexed uint64)
           handler: handleRoleAdminChanged
@@ -57,3 +58,63 @@ dataSources:
         - event: TargetFunctionRoleUpdated(indexed address,bytes4,indexed uint64)
           handler: handleTargetFunctionRoleUpdated
       file: ./src/rahat-access-manager.ts
+  - kind: ethereum
+    name: RahatTreasury
+    network: mainnet
+    source:
+      abi: RahatTreasury
+      address: "0xd13e81007Fc8E52D570b365c541198FC89a666A4"
+      startBlock: 1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - AuthorityUpdated
+        - TokenCreated
+        - TokenMintedAndApproved
+        - TokenMintedAndSent
+      abis:
+        - name: RahatTreasury
+          file: ./abis/RahatTreasury.json
+      eventHandlers:
+        - event: AuthorityUpdated(address)
+          handler: handleAuthorityUpdated
+        - event: TokenCreated(indexed address)
+          handler: handleTokenCreated
+        - event: TokenMintedAndApproved(indexed address,indexed address,uint256)
+          handler: handleTokenMintedAndApproved
+        - event: TokenMintedAndSent(indexed address,indexed address,uint256)
+          handler: handleTokenMintedAndSent
+      file: ./src/rahat-treasury.ts
+templates:
+  - name: RahatToken
+    kind: ethereum
+    network: mainnet
+    source:
+      abi: RahatToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - RahatTokenAuthorityUpdated
+        - OwnerAdded
+        - OwnerRemoved
+        - Transfer
+      abis:
+        - name: RahatToken
+          file: ./abis/RahatToken.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
+        - event: AuthorityUpdated(address)
+          handler: handleAuthorityUpdated
+        - event: OwnerAdded(indexed address)
+          handler: handleOwnerAdded
+        - event: OwnerRemoved(indexed address)
+          handler: handleOwnerRemoved
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/rahat-token.ts

@@ -25,6 +25,7 @@
     "seed:chainsettings": "ts-node prisma/seed.chainsettings.ts",
     "seed:setup": "ts-node prisma/seed.settings.ts",
     "geteth": "ts-node tools/scripts/geteth.ts",
+    "graph:deploy-local": "cd ./apps/graph && graph deploy -l v0.0.1 --node http://localhost:8020/ --ipfs http://localhost:5001 --network mainnet  rahat/rp",
     "migrate:dev": "prisma migrate dev --preview-feature",
     "migrate:dev:create": "prisma migrate dev --create-only --preview-feature",
     "migrate:reset": "prisma migrate reset --preview-feature",

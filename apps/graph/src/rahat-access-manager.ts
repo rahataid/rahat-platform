@@ -11,7 +11,7 @@ import {
   TargetAdminDelayUpdated as TargetAdminDelayUpdatedEvent,
   TargetClosed as TargetClosedEvent,
   TargetFunctionRoleUpdated as TargetFunctionRoleUpdatedEvent
-} from "../generated/Rahat Access Manager/Rahat Access Manager"
+} from "../generated/RahatAccessManager/RahatAccessManager"
 import {
   OperationCanceled,
   OperationExecuted,

@@ -115,3 +115,193 @@ type TargetFunctionRoleUpdated @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
+type BeneficiaryAdded @entity(immutable: true) {
+  id: Bytes!
+  param0: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  eventType: String!
+}
+
+type BeneficiaryRemoved @entity(immutable: true) {
+  id: Bytes!
+  param0: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  eventType: String!
+}
+
+type ClaimProcessed @entity(immutable: true) {
+  id: Bytes!
+  beneficiary: Bytes! # address
+  claimer: Bytes! # address
+  token: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  eventType: String!
+}
+
+type ClaimerUpdated @entity(immutable: true) {
+  id: Bytes!
+  claimer: Bytes! # address
+  approved: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TokensAllocated @entity(immutable: true) {
+  id: Bytes!
+  token: Bytes! # address
+  beneficiary: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  eventType: String!
+}
+
+type TokensDisbursed @entity(immutable: true) {
+  id: Bytes!
+  token: Bytes! # address
+  beneficiary: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  eventType: String!
+}
+type AuthorityUpdated @entity(immutable: true) {
+  id: Bytes!
+  authority: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TokenCreated @entity(immutable: true) {
+  id: Bytes!
+  tokenAddress: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TokenMintedAndApproved @entity(immutable: true) {
+  id: Bytes!
+  tokenAddress: Bytes! # address
+  approveAddress: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TokenMintedAndSent @entity(immutable: true) {
+  id: Bytes!
+  tokenAddress: Bytes! # address
+  receiverAddress: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+type Approval @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  spender: Bytes! # address
+  value: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RahatTokenAuthorityUpdated @entity(immutable: true) {
+  id: Bytes!
+  authority: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnerAdded @entity(immutable: true) {
+  id: Bytes!
+  param0: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnerRemoved @entity(immutable: true) {
+  id: Bytes!
+  param0: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Transfer @entity(immutable: true) {
+  id: Bytes!
+  from: Bytes! # address
+  to: Bytes! # address
+  value: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  address: Bytes! #address
+}
+type ClaimCreated @entity(immutable: true) {
+  id: Bytes!
+  claimId: BigInt! # uint256
+  claimer: Bytes! # address
+  claimee: Bytes! # address
+  token: Bytes! # address
+  otpServer: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  eventType: String!
+}
+
+type RahatClaimClaimProcessed @entity(immutable: true) {
+  id: Bytes!
+  claimId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OtpAddedToClaim @entity(immutable: true) {
+  id: Bytes!
+  claimId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TokenDetail @entity(immutable: false) {
+  id: Bytes!
+  tokenAddress: Bytes! # address
+  name: String! # string
+  # decimals: BigInt! # uint8
+  # symbol: String! # string
+  # totalSupply: BigInt! # uint256
+  # treasuryBalance: BigInt! # uint256
+}
+
+type ClaimDetail @entity {
+  id: String!
+  isProcessed: Boolean
+  tokenAddress: Bytes! #address
+  vendorAddress: Bytes! #address
+  beneficiary: Bytes! #address
+  amount: BigInt!
+  blockTimestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
