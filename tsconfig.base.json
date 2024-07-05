@@ -15,11 +15,12 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@rahat/stats": ["libs/stats/src/index.ts"],
       "@rahataid/extensions": ["libs/extensions/src/index.ts"],
       "@rahataid/extensions/*": ["libs/extensions/src/*"],
       "@rahataid/sdk": ["libs/sdk/src/index.ts"],
       "@rahataid/sdk/*": ["libs/sdk/src/*"],
-      "@rahat/stats": ["libs/stats/src/index.ts"]
+      "@rahataid/subgraph": ["libs/subgraph/src/index.ts"]
     },
     "types": ["node", "tslib"]
   },
