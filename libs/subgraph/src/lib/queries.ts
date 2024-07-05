@@ -1,5 +1,5 @@
 export const TokenDetail = `query
- tokenDetails {
+ tokendetails {
     tokenCreateds(orderBy: blockTimestamp, orderDirection: desc) {
     blockNumber
     blockTimestamp

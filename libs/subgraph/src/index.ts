@@ -1,1 +1,1 @@
-export * from './lib/core-subgraph';
+export * from './lib/subgraph-query';

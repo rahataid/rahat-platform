@@ -11,18 +11,18 @@ export class GraphQuery {
 
     async getTokenDetails() {
         const { data, error } = await this.subgraphQuery.query(TokenDetail, {})
-        return { ...data.tokenDetails, error }
+        return { data, error }
     }
 
     async getTokensTransfers() {
         const { data, error } = await this.subgraphQuery.query(TokensTransfers, {});
-        return { ...data.tokensTransfers, error }
+        return { data, error }
 
     }
 
     async getTokenTransfers(tokenAddress: String) {
         const { data, error } = await this.subgraphQuery.query(TokenTransfers, { tokenAddress });
-        return { ...data.tokenTransfers, error }
+        return { data, error }
 
 
     }
