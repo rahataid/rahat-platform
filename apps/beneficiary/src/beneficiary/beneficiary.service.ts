@@ -1352,7 +1352,7 @@ export class BeneficiaryService {
     const bufferString = dataFromBuffer.toString('utf-8');
     const jsonData = JSON.parse(bufferString) || null;
     if (!jsonData) return null;
-    const { groupName, targetUUID, beneficiaries } = jsonData;
+    const { groupName, beneficiaries } = jsonData;
     const beneficiaryData = beneficiaries.map((d: any) => {
       return {
         firstName: d.firstName,
@@ -1373,6 +1373,7 @@ export class BeneficiaryService {
         extras: d.extras || null,
       }
     })
+    const tempBenefPhone = await this.listTempBenefPhone();
     return this.prisma.$transaction(async (txn) => {
       // 1. Upsert temp group by name
       const group = await txn.tempGroup.upsert({
@@ -1380,37 +1381,51 @@ export class BeneficiaryService {
         update: { name: groupName },
         create: { name: groupName }
       })
-      return this.saveTempBenefAndGroup(txn, group.uuid, beneficiaryData);
+      return this.saveTempBenefAndGroup(txn, group.uuid, beneficiaryData, tempBenefPhone);
     })
 
   }
 
-  async saveTempBenefAndGroup(txn: any, groupUID: string, beneficiaries: []) {
+  async listTempBenefPhone() {
+    return this.prisma.tempBeneficiary.findMany({
+      select: {
+        phone: true,
+        uuid: true
+      }
+    })
+  }
+
+  async saveTempBenefAndGroup(txn: any, groupUID: string, beneficiaries: any[], tempBenefPhone: any[]) {
     for (let b of beneficiaries) {
+      let createdData = null;
+      const found = tempBenefPhone.find(f => f.phone === b.phone);
       // 2. Add benef to temp table
-      const benef = await txn.tempBeneficiary.create({
-        data: b
-      });
+      if (!found)
+        createdData = await txn.tempBeneficiary.create({
+          data: b
+        });
+      let benefUID = createdData?.uuid;
+      if (found) benefUID = found.uuid;
       // 3. Upsert temp benef group
       await txn.tempBeneficiaryGroup.upsert({
         where: {
           tempBeneficiaryGroupIdentifier: {
             tempGroupUID: groupUID,
-            tempBenefUID: benef.uuid
+            tempBenefUID: benefUID
           }
         },
         update: {
           tempGroupUID: groupUID,
-          tempBenefUID: benef.uuid
+          tempBenefUID: benefUID
         },
         create: {
           tempGroupUID: groupUID,
-          tempBenefUID: benef.uuid
+          tempBenefUID: benefUID
         }
       })
 
     }
-    return 'Done!'
+    return 'Beneficiary imported to temp storage!'
   }
 
   async importTempBeneficiaries(dto: ImportTempBenefDto) {
