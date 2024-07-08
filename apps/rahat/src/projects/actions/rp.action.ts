@@ -57,7 +57,7 @@ export const rpActions: ProjectActionFunc = {
       { cmd: ProjectJobs.DISBURSEMENT_PLAN.CREATE_DISBURSEMENT, uuid },
       payload
     ),
-
+  //campaign start
   [MS_ACTIONS.RPPROJECT.CREATE_CAMPAIGN]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.CAMPAIGN.CREATE_CAMPAIGN, uuid },
@@ -79,7 +79,11 @@ export const rpActions: ProjectActionFunc = {
       { cmd: ProjectJobs.CAMPAIGN.GET_ALL_AUDIENCE, uuid },
       payload
     ),
-
+  [MS_ACTIONS.RPPROJECT.GET_ALL_TRANSPORT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.GET_ALL_TRANSPORT, uuid },
+      payload
+    ),
 
   [MS_ACTIONS.RPPROJECT.CREATE_AUDIENCE]: (uuid, payload, sendCommand) =>
     sendCommand(
@@ -101,4 +105,5 @@ export const rpActions: ProjectActionFunc = {
       { cmd: ProjectJobs.CAMPAIGN.GET_ALL_COMMUNICATION_STATS, uuid },
       payload
     ),
+  //campaign end
 }
