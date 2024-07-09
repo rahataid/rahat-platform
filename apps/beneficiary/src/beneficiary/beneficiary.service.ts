@@ -90,7 +90,6 @@ export class BeneficiaryService {
       const mergedData = await this.mergeProjectPIIData(data.data);
       data.data = mergedData;
       const projectPayload = { ...data, status: dto?.type };
-      console.log(projectPayload)
       return this.client.send(
         { cmd: BeneficiaryJobs.LIST_PROJECT_PII, uuid: dto.projectId },
         projectPayload
@@ -226,7 +225,6 @@ export class BeneficiaryService {
 
   async mergeProjectData(data: any, payload?: any) {
 
-    console.log(data.map(b => b.uuid))
 
     // const where: Prisma.BeneficiaryWhereInput = {
     //   uuid: {
@@ -266,8 +264,22 @@ export class BeneficiaryService {
 
     // const beneficiaries = []
 
+    if (data) {
+      const combinedData = data.map(((dat) => {
+        const benDetails = beneficiaries.find((ben) => ben.uuid === dat.uuid);
+        const { pii, ...rest } = benDetails;
+        return {
+          piiData: pii,
+          projectData: rest,
+          ...dat
+        }
+      }))
+      return combinedData;
+    }
+
     // TODO: remove projectData and piiData that has been added manually, as it will affects the FE. NEEDS to be refactord in FE as well.
     return beneficiaries.map(b => ({
+
       ...b,
       projectData: b,
       piiData: b?.pii
@@ -1340,7 +1352,7 @@ export class BeneficiaryService {
     const bufferString = dataFromBuffer.toString('utf-8');
     const jsonData = JSON.parse(bufferString) || null;
     if (!jsonData) return null;
-    const { groupName, targetUUID, beneficiaries } = jsonData;
+    const { groupName, beneficiaries } = jsonData;
     const beneficiaryData = beneficiaries.map((d: any) => {
       return {
         firstName: d.firstName,
@@ -1361,6 +1373,7 @@ export class BeneficiaryService {
         extras: d.extras || null,
       }
     })
+    const tempBenefPhone = await this.listTempBenefPhone();
     return this.prisma.$transaction(async (txn) => {
       // 1. Upsert temp group by name
       const group = await txn.tempGroup.upsert({
@@ -1368,37 +1381,51 @@ export class BeneficiaryService {
         update: { name: groupName },
         create: { name: groupName }
       })
-      return this.saveTempBenefAndGroup(txn, group.uuid, beneficiaryData);
+      return this.saveTempBenefAndGroup(txn, group.uuid, beneficiaryData, tempBenefPhone);
     })
 
   }
 
-  async saveTempBenefAndGroup(txn: any, groupUID: string, beneficiaries: []) {
+  async listTempBenefPhone() {
+    return this.prisma.tempBeneficiary.findMany({
+      select: {
+        phone: true,
+        uuid: true
+      }
+    })
+  }
+
+  async saveTempBenefAndGroup(txn: any, groupUID: string, beneficiaries: any[], tempBenefPhone: any[]) {
     for (let b of beneficiaries) {
+      let createdData = null;
+      const found = tempBenefPhone.find(f => f.phone === b.phone);
       // 2. Add benef to temp table
-      const benef = await txn.tempBeneficiary.create({
-        data: b
-      });
+      if (!found)
+        createdData = await txn.tempBeneficiary.create({
+          data: b
+        });
+      let benefUID = createdData?.uuid;
+      if (found) benefUID = found.uuid;
       // 3. Upsert temp benef group
       await txn.tempBeneficiaryGroup.upsert({
         where: {
           tempBeneficiaryGroupIdentifier: {
             tempGroupUID: groupUID,
-            tempBenefUID: benef.uuid
+            tempBenefUID: benefUID
           }
         },
         update: {
           tempGroupUID: groupUID,
-          tempBenefUID: benef.uuid
+          tempBenefUID: benefUID
         },
         create: {
           tempGroupUID: groupUID,
-          tempBenefUID: benef.uuid
+          tempBenefUID: benefUID
         }
       })
 
     }
-    return 'Done!'
+    return 'Beneficiary imported to temp storage!'
   }
 
   async importTempBeneficiaries(dto: ImportTempBenefDto) {

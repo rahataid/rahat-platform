@@ -249,11 +249,12 @@ export class VendorsService {
 
   async updateVendor(dto) {
     const { uuid, ...rest } = dto;
-
-    const userData = await this.prisma.user.findFirst({
-      where: { email: dto.email }
-    })
-    if (userData) throw new Error("Email must be unique");
+    if (dto?.email) {
+      const userData = await this.prisma.user.findFirst({
+        where: { email: dto.email }
+      })
+      if (userData) throw new Error("Email must be unique");
+    }
     const result = await this.usersService.update(uuid, rest);
     return result;
 
