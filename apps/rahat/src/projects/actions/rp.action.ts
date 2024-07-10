@@ -57,5 +57,10 @@ export const rpActions: ProjectActionFunc = {
       { cmd: ProjectJobs.DISBURSEMENT_PLAN.CREATE_DISBURSEMENT, uuid },
       payload
     ),
+  [MS_ACTIONS.RPPROJECT.CREATE_BULK_DISBURSEMENT]: (uuid, payload, sendCommand) =>
+      sendCommand(
+        { cmd: ProjectJobs.DISBURSEMENT_PLAN.CREATE_DISBURSEMENT, uuid },
+        payload
+      ),
 
 }

@@ -31,6 +31,7 @@ import { UUID } from 'crypto';
 import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
+import { projectStats } from '../utils/projectStatsDataSource';
 import { createListQuery } from './helpers';
 import { VerificationService } from './verification.service';
 
@@ -1305,5 +1306,9 @@ export class BeneficiaryService {
   async importTempBeneficiaries(dto: ImportTempBenefDto) {
     this.beneficiaryQueue.add(BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES, dto)
     return { message: "Beneficiaries added to the queue!" }
+  }
+
+  async projectStatsDataSource(uuid?: UUID) {
+    return projectStats(uuid);
   }
 }
