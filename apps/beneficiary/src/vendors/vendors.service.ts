@@ -1,6 +1,6 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 // import * as jwt from '@nestjs/jwt';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { ClientProxy } from '@nestjs/microservices';
 import { VendorAddToProjectDto, VendorRegisterDto } from '@rahataid/extensions';
 import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
@@ -76,26 +76,33 @@ export class VendorsService {
     };
 
     const assigned = await this.getVendorAssignedToProject(vendorId, projectId);
-    if (assigned)
-      throw new RpcException(
-        new BadRequestException('Vendor already assigned to the project!')
-      );
-    //2. Save vendor to project
-    await this.prisma.projectVendors.create({
-      data: {
-        projectId,
-        vendorId: vendorId,
-      },
-    });
 
-    //3. sync vendor to Project
-    return this.client.send(
-      {
-        cmd: VendorJobs.ADD_TO_PROJECT,
-        uuid: projectId,
-      },
-      projectPayload
-    );
+    console.log('first', {
+      assigned,
+      vendorId,
+      projectId,
+      projectPayload,
+    })
+    // if (assigned)
+    //   throw new RpcException(
+    //     new BadRequestException('Vendor already assigned to the project!')
+    //   );
+    // //2. Save vendor to project
+    // await this.prisma.projectVendors.create({
+    //   data: {
+    //     projectId,
+    //     vendorId: vendorId,
+    //   },
+    // });
+
+    // //3. sync vendor to Project
+    // return this.client.send(
+    //   {
+    //     cmd: VendorJobs.ADD_TO_PROJECT,
+    //     uuid: projectId,
+    //   },
+    //   projectPayload
+    // );
   }
 
   async getVendorAssignedToProject(vendorId: string, projectId: string) {
@@ -166,6 +173,9 @@ export class VendorsService {
       include: {
         Project: true,
         User: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
     return this.client.send({
@@ -239,16 +249,16 @@ export class VendorsService {
 
   async updateVendor(dto) {
     const { uuid, ...rest } = dto;
-
-    const userData = await this.prisma.user.findFirst({
-      where: { email: dto.email }
-    })
-    if (userData) throw new Error("Email must be unique");
+    if (dto?.email) {
+      const userData = await this.prisma.user.findFirst({
+        where: { email: dto.email }
+      })
+      if (userData) throw new Error("Email must be unique");
+    }
     const result = await this.usersService.update(uuid, rest);
     return result;
 
   }
 
 }
-
 
