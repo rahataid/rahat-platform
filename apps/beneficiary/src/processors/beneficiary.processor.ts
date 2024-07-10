@@ -32,6 +32,7 @@ export class BeneficiaryProcessor {
     if (!groups.length) return;
     const beneficiaries = groups.map((f) => f.tempBeneficiary);
     if (!beneficiaries.length) return;
+    // Validate existing benef
     // =====Txn start====
     try {
       for (let i = 0; i < beneficiaries.length; i += BATCH_SIZE) {

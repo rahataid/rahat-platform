@@ -8,6 +8,7 @@ import {
   ListBeneficiaryGroupDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
+  UpdateBeneficiaryGroupDto,
   addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
 import {
@@ -171,6 +172,12 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_GROUPS })
   getAllGroups(dto: ListBeneficiaryGroupDto) {
     return this.service.getAllGroups(dto)
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.UPDATE_GROUP })
+  updateGroup(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryGroupDto) {
+    const groupUUID = uuid ? uuid : dto?.uuid
+    return this.service.updateGroup(groupUUID, dto)
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT })
