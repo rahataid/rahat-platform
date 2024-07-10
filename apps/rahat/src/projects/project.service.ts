@@ -13,6 +13,7 @@ import { BeneficiaryType } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
+import { RequestContextService } from '../request-context/request-context.service';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { createContractSigner } from '../utils/web3';
 import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, settingActions, vendorActions } from './actions';
@@ -22,6 +23,7 @@ export class ProjectService {
   constructor(
     private prisma: PrismaService,
     private eventEmitter: EventEmitter2,
+    private requestContextService: RequestContextService,
     @Inject('RAHAT_CLIENT') private readonly client: ClientProxy
   ) { }
 
@@ -124,7 +126,9 @@ export class ProjectService {
 
   async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy) {
 
-    return client.send(cmd, payload).pipe(
+    const user = this.requestContextService.getUser()
+
+    return client.send(cmd, { ...payload, user }).pipe(
       timeout(timeoutValue),
       tap((response) => {
         this.sendWhatsAppMsg(response, cmd, payload)

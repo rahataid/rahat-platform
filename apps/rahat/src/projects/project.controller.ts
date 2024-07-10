@@ -7,10 +7,11 @@ import {
   Param,
   Patch,
   Post,
-  Query
+  Query,
+  UseGuards
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   CreateProjectDto,
   ListProjectBeneficiaryDto,
@@ -18,12 +19,15 @@ import {
   UpdateProjectDto,
   UpdateProjectStatusDto
 } from '@rahataid/extensions';
-import { BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
+import { APP, BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
+import { JwtGuard } from '@rumsan/user';
 import { UUID } from 'crypto';
 import { timeout } from 'rxjs/operators';
 import { ProjectService } from './project.service';
 
+@ApiBearerAuth(APP.JWT_BEARER)
+@UseGuards(JwtGuard)
 @Controller('projects')
 @ApiTags('Projects')
 export class ProjectController {
@@ -88,11 +92,12 @@ export class ProjectController {
       .pipe(timeout(5000));
   }
 
+  // @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
   projectActions(
     @Param('uuid') uuid: UUID,
-    @Body() data: ProjectCommunicationDto
+    @Body() data: ProjectCommunicationDto,
   ) {
     const response = this.projectService.handleProjectActions({
       uuid,

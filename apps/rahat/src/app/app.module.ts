@@ -16,6 +16,7 @@ import { GrievanceModule } from '../grievance/grievance.module';
 import { ListenersModule } from '../listeners/listeners.module';
 import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
+import { RequestContextModule } from '../request-context/request-context.module';
 import { TokenModule } from '../token/token.module';
 import { UploadModule } from '../upload/upload.module';
 import { AppUsersModule } from '../vendors/vendors.module';
@@ -47,7 +48,8 @@ import { AppService } from './app.service';
     ProcessorsModule,
     UploadModule,
     GrievanceModule,
-    TokenModule
+    TokenModule,
+    RequestContextModule
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
