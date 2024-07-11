@@ -34,7 +34,10 @@
     "prisma:studio": "npx prisma studio",
     "prisma:generate": "npx prisma generate",
     "prisma:generate:watch": "npx prisma generate --watch",
-    "generate:mnemonic": "ts-node ./tools/scripts/mn.ts"
+    "generate:mnemonic": "ts-node ./tools/scripts/mn.ts",
+    "contracts:compile": "cd ./apps/contracts && hardhat compile",
+    "contracts:coverage": "cd ./apps/contracts && hardhat coverage",
+    "contracts:test": "cd ./apps/contracts && hardhat test"
   },
   "private": true,
   "dependencies": {
@@ -118,7 +121,13 @@
     "tslib": "2.6.2",
     "typescript": "5.3.3",
     "verdaccio": "^5.29.2",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "hardhat": "^2.22.2",
+    "hardhat-gas-reporter": "^2.1.1",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@atixlabs/hardhat-time-n-mine": "^0.0.5",
+    "@openzeppelin/contracts": "^5.0.2",
+    "solidity-docgen": "0.6.0-beta.36"
   },
   "nx": {
     "includedScripts": []
