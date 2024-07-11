@@ -172,6 +172,15 @@ export const MS_ACTIONS = {
     //TEMP SOLUTION
     CREATE_SAFE_TRANSACTION: 'c2cProject.createSafeTransaction',
     GET_SAFE_TRANSACTION: 'c2cProject.getSafeTransaction',
+    CREATE_CAMPAIGN: 'c2cProject.campaign.create',
+    CREATE_AUDIENCE: 'c2cProject.campaign.create_audience',
+    GET_ALL_CAMPAIGN: 'c2cProject.campaign.get',
+    GET_CAMPAIGN: 'c2cProject.campaign.getOne',
+    GET_ALL_TRANSPORT: 'c2cProject.campaign.get_transport',
+    GET_ALL_AUDIENCE: 'c2cProject.campaign.get_audience',
+    TRIGGER_CAMPAIGN: 'c2cProject.campaign.trigger',
+    GET_ALL_COMMUNICATION_LOGS: 'c2cProject.campaign.communication_logs',
+    GET_ALL_COMMUNICATION_STATS: 'c2cProject.campaign.communication_stats',
   },
   CVAProject: {
     UPDATE_STATUS: 'cvaProject.updateStatus',
@@ -181,6 +190,15 @@ export const MS_ACTIONS = {
     LIST_CLAIM: 'cvaProject.listClaim',
     GET_CLAIM: 'cvaProject.getClaim',
     PROCESS_OTP: 'cvaProject.processOtp',
+    CREATE_CAMPAIGN: 'cvaProject.campaign.create',
+    CREATE_AUDIENCE: 'cvaProject.campaign.create_audience',
+    GET_ALL_CAMPAIGN: 'cvaProject.campaign.get',
+    GET_CAMPAIGN: 'cvaProject.campaign.getOne',
+    GET_ALL_TRANSPORT: 'cvaProject.campaign.get_transport',
+    GET_ALL_AUDIENCE: 'cvaProject.campaign.get_audience',
+    TRIGGER_CAMPAIGN: 'cvaProject.campaign.trigger',
+    GET_ALL_COMMUNICATION_LOGS: 'cvaProject.campaign.communication_logs',
+    GET_ALL_COMMUNICATION_STATS: 'cvaProject.campaign.communication_stats',
 
   },
   RPPROJECT: {
