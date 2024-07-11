@@ -20,7 +20,8 @@
       "@rahataid/extensions/*": ["libs/extensions/src/*"],
       "@rahataid/sdk": ["libs/sdk/src/index.ts"],
       "@rahataid/sdk/*": ["libs/sdk/src/*"],
-      "@rahataid/subgraph": ["libs/subgraph/src/index.ts"]
+      "@rahataid/subgraph": ["libs/subgraph/src/index.ts"],
+      "@rumsan/contracts": ["libs/contracts/src/*"]
     },
     "types": ["node", "tslib"]
   },

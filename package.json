@@ -39,7 +39,6 @@
     "prisma:generate": "npx prisma generate",
     "prisma:generate:watch": "npx prisma generate --watch",
     "generate:mnemonic": "ts-node ./tools/scripts/mn.ts",
-    "contracts:compile": "cd ./apps/contracts && hardhat compile",
     "contracts:coverage": "cd ./apps/contracts && hardhat coverage",
     "contracts:test": "cd ./apps/contracts && hardhat test"
   },
@@ -66,6 +65,7 @@
     "@rumsan/sdk": "^0.0.44",
     "@rumsan/settings": "^0.0.108",
     "@rumsan/subgraph": "link:libs\\subgraph",
+    "@rumsan/contracts":"link:libs\\contracts",
     "@rumsan/user": "^3.0.159",
     "@urql/core": "^5.0.4",
     "abitype": "^1.0.1",

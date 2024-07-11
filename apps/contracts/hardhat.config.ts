@@ -3,9 +3,14 @@ import { HardhatUserConfig, vars } from 'hardhat/config';
 import type { NetworkUserConfig } from 'hardhat/types';
 import 'solidity-docgen';
 
-const coinMarketCapApiKey: string = vars.get('COINMARKETCAP_API_KEY');
-const privateKey: string = vars.get('PRIVATE_KEY');
-const infuraApiKey: string = vars.get('INFURA_API_KEY');
+
+
+// const coinMarketCapApiKey: string = vars.get('COINMARKETCAP_API_KEY');
+// const privateKey: string = vars.get('PRIVATE_KEY');
+// const infuraApiKey: string = vars.get('INFURA_API_KEY');
+
+const privateKey: string = '0x016bb15856c19bc628d9bb0effbdb9ef069a03d1123cf24ac83e993a4ea9d855'
+const infuraApiKey: string = `43babf32ce0346fabbf1c1069418a90b`;
 
 interface DocgenConfig {
   outputDir?: string;
@@ -64,20 +69,20 @@ const config: ExtendedHardhatUserConfig = {
     },
   },
 
-  gasReporter: {
-    token: 'ETH',
-    currency: 'USD',
-    gasPriceApi:
-      'https://api.etherscan.io/api?module=proxy&action=eth_gasPrice',
-    coinmarketcap: coinMarketCapApiKey,
-    enabled:
-      vars.get('REPORT_GAS') === 'false'
-        ? false
-        : Boolean(vars.get('REPORT_GAS')),
-    showMethodSig: true,
-    outputFile: 'gas-report.txt',
-    noColors: true,
-  },
+  // gasReporter: {
+  //   token: 'ETH',
+  //   currency: 'USD',
+  //   gasPriceApi:
+  //     'https://api.etherscan.io/api?module=proxy&action=eth_gasPrice',
+  //   coinmarketcap: coinMarketCapApiKey,
+  //   enabled:
+  //     vars.get('REPORT_GAS') === 'false'
+  //       ? false
+  //       : Boolean(vars.get('REPORT_GAS')),
+  //   showMethodSig: true,
+  //   outputFile: 'gas-report.txt',
+  //   noColors: true,
+  // },
 
   docgen: {
     outputDir: './docs',
