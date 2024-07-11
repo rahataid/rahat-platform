@@ -1,0 +1,30 @@
+{
+  "name": "core-subgraph",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/subgraph/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/subgraph",
+        "main": "libs/subgraph/src/index.ts",
+        "tsConfig": "libs/subgraph/tsconfig.lib.json",
+        "assets": ["libs/subgraph/*.md"]
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs core-subgraph {args.ver} {args.tag}",
+      "dependsOn": ["build"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/subgraph/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}
