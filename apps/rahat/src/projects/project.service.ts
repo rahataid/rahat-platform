@@ -18,6 +18,7 @@ import { ERC2771FORWARDER } from '../utils/contracts';
 import { createContractSigner } from '../utils/web3';
 import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, settingActions, vendorActions } from './actions';
 import { rpActions } from './actions/rp.action';
+import { userRequiredActions } from './actions/user-required.action';
 @Injectable()
 export class ProjectService {
   constructor(
@@ -124,11 +125,14 @@ export class ProjectService {
 
   }
 
-  async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy) {
-
+  async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy, action: string) {
     const user = this.requestContextService.getUser()
+    const requiresUser = userRequiredActions.has(action)
 
-    return client.send(cmd, { ...payload, user }).pipe(
+    return client.send(cmd, {
+      ...payload,
+      ...(requiresUser && { user })
+    }).pipe(
       timeout(timeoutValue),
       tap((response) => {
         this.sendWhatsAppMsg(response, cmd, payload)
@@ -193,7 +197,7 @@ export class ProjectService {
     if (!actionFunc) {
       throw new Error('Please provide a valid action!');
     }
-    return await actionFunc(uuid, payload, (...args) => this.sendCommand(args[0], args[1], args[2], this.client));
+    return await actionFunc(uuid, payload, (...args) => this.sendCommand(args[0], args[1], args[2], this.client, action));
   }
 }
 
