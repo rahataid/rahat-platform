@@ -22,47 +22,10 @@ export class ProjectProcessor {
       this.logger.log(
         '######## SENDING PROJECT CREATION TASK TO THE WORKER ###########'
       );
-
-      const environment = this.configService.get<string>('ENVIRONMENT')
-      const formattedProjectName = job.data.name.trim().split(/\s+/).join('_');
-      const dbName = `rahat_${formattedProjectName}`;
-      const projectId = job.data.uuid;
-
-      if (environment === 'local') {
-        const projectPath = this.configService.get<string>('EL_PROJECT_DIR')
-        const localPayload = {
-          environmentVariables: {
-            environment,
-            dbName,
-            projectId,
-            projectPath
-          }
-        }
-        this.logger.log("Payload sent for local deployment.")
-        return this.client.emit({ cmd: 'project.create' }, localPayload);
-      }
-
-      const env = this.getProjectVariables();
-      env['DB_NAME'] = dbName;
-      env['DATABASE_URL'] = `postgresql://${env['DB_USERNAME']}:${env['DB_PASSWORD']}@${env['DB_HOST']}:${env['DB_PORT']}/${dbName}?schema=public`;
-      env['PROJECT_ID'] = projectId;
-
-      const dockerImage = env['DOCKER_IMAGE'];
-
-      delete env['DOCKER_IMAGE'];
-
-      const dockerConfig = {
-        projectId: projectId,
-        containerName: `${formattedProjectName}_container`,
-        serviceName: `${formattedProjectName}_service`,
-        imageName: dockerImage,
-      };
-
       const workerPayload = {
-        environmentVariables: env,
-        dockerConfig,
+        projectId: job?.data?.uuid,
+        type: job?.data?.type,
       };
-
       return this.client.emit({ cmd: 'project.create' }, workerPayload);
       // remaining setup scripts
     } catch (err) {

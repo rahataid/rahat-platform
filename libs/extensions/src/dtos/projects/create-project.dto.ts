@@ -31,7 +31,7 @@ export class CreateProjectDto {
 
   @ApiProperty({
     required: false,
-    example: 'Some extra Descriptions',
+    example: { test: 'test' },
   })
   @IsOptional()
   @IsObject()

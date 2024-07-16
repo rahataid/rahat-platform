@@ -43,6 +43,7 @@ create_rahat_volumes() {
 }
 
 start_dev_tools() {
+    docker network create rahat_platform
     declare -a composeDirs=(
         "$current_dir/tools/docker-compose/dev-tools"
         "$current_dir/tools/docker-compose/graph"
