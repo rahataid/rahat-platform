@@ -39,6 +39,9 @@ export const APP = {
 };
 
 export const MS_ACTIONS = {
+  PROJECT: {
+    SETUP: 'project.setup',
+  },
   BENEFICIARY: {
     CREATE: 'beneficiary.create',
     LIST: 'beneficiary.list',
