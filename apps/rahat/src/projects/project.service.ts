@@ -16,7 +16,7 @@ import { tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { createContractSigner } from '../utils/web3';
-import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, settingActions, vendorActions } from './actions';
+import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 @Injectable()
@@ -181,6 +181,7 @@ export class ProjectService {
 
 
     const actions = {
+      ...projectActions,
       ...elActions,
       ...aaActions,
       ...beneficiaryActions,
