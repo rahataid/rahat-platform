@@ -6,7 +6,7 @@ on:
   pull_request:
     branches:
       - 'stage-aa'
-  workflow_dispatch:
+  # workflow_dispatch:
 
 env:
   CI: false
