@@ -34,7 +34,9 @@
     "prisma:studio": "npx prisma studio",
     "prisma:generate": "npx prisma generate",
     "prisma:generate:watch": "npx prisma generate --watch",
-    "generate:mnemonic": "ts-node ./tools/scripts/mn.ts"
+    "generate:mnemonic": "ts-node ./tools/scripts/mn.ts",
+    "test:e2e": "jest --config ./apps/beneficiary-e2e/jest.config.ts",
+    "test": "jest"
   },
   "private": true,
   "dependencies": {
@@ -85,6 +87,7 @@
     "zlib": "^1.0.5"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.24.7",
     "@faker-js/faker": "^8.4.1",
     "@nestjs/schematics": "^10.1.1",
     "@nestjs/testing": "^10.3.3",
@@ -103,6 +106,7 @@
     "@swc/helpers": "~0.5.6",
     "@types/jest": "^29.5.12",
     "@types/node": "18.16.20",
+    "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "~8.48.0",
@@ -110,9 +114,11 @@
     "form-data": "^4.0.0",
     "jest": "^29.7.0",
     "jest-environment-node": "^29.7.0",
+    "nock": "^13.5.4",
     "nx": "18.0.1",
     "prettier": "^2.8.8",
     "prisma": "5.13.0",
+    "supertest": "^7.0.0",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.1",
     "tslib": "2.6.2",
