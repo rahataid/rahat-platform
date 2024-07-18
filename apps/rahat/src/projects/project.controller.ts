@@ -7,11 +7,10 @@ import {
   Param,
   Patch,
   Post,
-  Query,
-  UseGuards
+  Query
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   CreateProjectDto,
   ListProjectBeneficiaryDto,
@@ -19,15 +18,14 @@ import {
   UpdateProjectDto,
   UpdateProjectStatusDto
 } from '@rahataid/extensions';
-import { APP, BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
+import { BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
-import { JwtGuard } from '@rumsan/user';
 import { UUID } from 'crypto';
 import { timeout } from 'rxjs/operators';
 import { ProjectService } from './project.service';
 
-@ApiBearerAuth(APP.JWT_BEARER)
-@UseGuards(JwtGuard)
+// @ApiBearerAuth(APP.JWT_BEARER)
+// @UseGuards(JwtGuard)
 @Controller('projects')
 @ApiTags('Projects')
 export class ProjectController {

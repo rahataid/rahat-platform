@@ -1,0 +1,92 @@
+{
+  "arbitrum-sepolia": {
+    "RahatAccessManager": {
+      "address": "0xA89F023156Aba1A4DDC9475BBcF084AfdC6e1680",
+      "startBlock": 58839325
+    },
+    "RahatTreasury": {
+      "address": "0x32e8E3658E5807F8a0c52cdC6AD185eFA2efEa49",
+      "startBlock": 58839354
+    },
+    "RahatToken": {
+      "address": "0xF4938558c18f2D4Cc37a44A3dC99B8B28419965E",
+      "startBlock": 58839384
+    },
+    "RahatClaim": {
+      "address": "0xEd02cC217c21EDc579cDFcB27C81658AaC5d53eb",
+      "startBlock": 58839412
+    },
+    "ERC2771Forwarder": {
+      "address": "0x5F2b4e84B3Fa49825341d4990f63d6C8465eF053",
+      "startBlock": 58839441
+    },
+    "RahatPayrollProject": {
+      "address": "0x83508b87C176f3B8BD60fa7454a04178E100f8F3",
+      "startBlock": 58839468
+    },
+    "Vendor": {
+      "address": "0xf4eDA149a3CF004717D8E99738C9398C7A47c16c",
+      "startBlock": 58839496
+    }
+  },
+  "mainnet": {
+    "RahatAccessManager": {
+      "address": "0x97829Fe535F87246f3D8D69AEBFAA1A6ef667639",
+      "startBlock": 1
+    },
+    "RahatTreasury": {
+      "address": "0xd13e81007Fc8E52D570b365c541198FC89a666A4",
+      "startBlock": 1
+    },
+    "RahatToken": {
+      "address": "0xD8295B8990eeCF48feF178A89E20783452dB2Fc7",
+      "startBlock": 1
+    },
+    "RahatClaim": {
+      "address": "0x83184121a12F696fe5ed7B3f3F14188C3f86A34A",
+      "startBlock": 1
+    },
+    "ERC2771Forwarder": {
+      "address": "0x8E57DEb544a46082487117cd41795487feEE59f3",
+      "startBlock": 1
+    },
+    "RahatPayrollProject": {
+      "address": "0x4e8C53e1e9430b40A38CC9A49a9858FF61bb3B23",
+      "startBlock": 1
+    },
+    "Vendor": {
+      "address": "0x1984CbBb949651c5A2d90995D9721CfE652C5a38",
+      "startBlock": 1
+    }
+  },
+  "base-sepolia":{
+    "RahatAccessManager": {
+      "address": "0x91c682B0100F00Bd78e2a4738c968d074F8FFd16",
+      "startBlock": 11898557
+    },
+    "RahatTreasury": {
+      "address": "0x2dBd02666E1a676c0d8a93c24c8217A8D2DEF50a",
+      "startBlock": 11898557
+    },
+    "RahatToken": {
+      "address": "0x75c107744F8A50FA0E446252b4313A15c3b18799",
+      "startBlock": 11898557
+    },
+    "RahatClaim": {
+      "address": "0x8b492a739902cFEfDc0cE026bc87b63645680200",
+      "startBlock": 11898557
+    },
+    "ERC2771Forwarder": {
+      "address": "0x0410631DA23EaD32C91904e1e61a692A40945310",
+      "startBlock": 11898557
+    },
+    "RahatPayrollProject": {
+      "address": "0xA802D5b2988EF81465F157609c8BC5BEE779f623",
+      "startBlock": 11898557
+    },
+    "Vendor": {
+      "address": "0xDeD111da0A3586216a1AcDC7e95dBeA6e1414641",
+      "startBlock": 11898557
+    }
+  }
+}

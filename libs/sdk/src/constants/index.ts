@@ -39,6 +39,9 @@ export const APP = {
 };
 
 export const MS_ACTIONS = {
+  PROJECT: {
+    SETUP: 'project.setup',
+  },
   BENEFICIARY: {
     CREATE: 'beneficiary.create',
     LIST: 'beneficiary.list',
@@ -200,6 +203,7 @@ export const MS_ACTIONS = {
     GET_ALL_COMMUNICATION_LOGS: 'cvaProject.campaign.communication_logs',
     GET_ALL_COMMUNICATION_STATS: 'cvaProject.campaign.communication_stats',
 
+
   },
   RPPROJECT: {
     CREATE_DISBURSEMENT: 'rpProject.disbursement.create',
@@ -220,5 +224,9 @@ export const MS_ACTIONS = {
     TRIGGER_CAMPAIGN: 'rpProject.campaign.trigger',
     GET_ALL_COMMUNICATION_LOGS: 'rpProject.campaign.communication_logs',
     GET_ALL_COMMUNICATION_STATS: 'rpProject.campaign.communication_stats',
+    REQUEST_REDEMPTION: 'rpProject.requestRedemption',
+    UPDATE_REDEMPTION: 'rpProject.updateRedemption',
+    LIST_REDEMPTION: 'rpProject.listRedemption',
+    GET_VENDOR_REDEMPTION: 'rpProject.vendorRedemption',
   }
 };
