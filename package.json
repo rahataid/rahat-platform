@@ -65,7 +65,7 @@
     "@rumsan/sdk": "^0.0.44",
     "@rumsan/settings": "^0.0.108",
     "@rumsan/subgraph": "link:libs\\subgraph",
-    "@rumsan/contracts": "link:libs\\contracts",
+    "@rahataid/contracts": "link:libs\\contracts",
     "@rumsan/user": "^3.0.159",
     "@urql/core": "^5.0.4",
     "abitype": "^1.0.1",

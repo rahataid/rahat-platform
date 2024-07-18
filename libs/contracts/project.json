@@ -1,5 +1,5 @@
 {
-  "name": "@rumsan/contracts",
+  "name": "@rahataid/contracts",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/contracts/src",
   "projectType": "library",
@@ -9,6 +9,7 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/contracts",
+        "main":"libs/contracts/src/index.ts",
         "tsConfig": "libs/contracts/tsconfig.lib.json",
         "assets": ["libs/contracts/*.md"]
       }
