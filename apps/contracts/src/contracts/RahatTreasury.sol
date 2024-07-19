@@ -4,6 +4,8 @@ pragma solidity 0.8.20;
 import '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import '@openzeppelin/contracts/utils/introspection/ERC165.sol';
 import '@openzeppelin/contracts/access/manager/AccessManaged.sol';
+import '@openzeppelin/contracts/metatx/ERC2771Forwarder.sol';
+import '@openzeppelin/contracts/metatx/ERC2771Context.sol';
 import './RahatToken.sol';
 import '../interfaces/IRahatTreasury.sol';
 import '../interfaces/IRahatProject.sol';
@@ -12,7 +14,12 @@ import '../libraries/AbstractTokenActions.sol';
 /// @title Treasury contract to manage Rahat tokens and generate tokens
 /// @author Rumsan Associates
 /// @notice You can use this contract to manage Rahat tokens
-contract RahatTreasury is AbstractTokenActions, ERC165, AccessManaged {
+contract RahatTreasury is
+    AbstractTokenActions,
+    ERC165,
+    AccessManaged,
+    ERC2771Context
+{
     using EnumerableSet for EnumerableSet.AddressSet;
 
     event TokenCreated(address indexed tokenAddress);
@@ -27,6 +34,8 @@ contract RahatTreasury is AbstractTokenActions, ERC165, AccessManaged {
         uint256 amount
     );
 
+    address public forwarderAddress;
+
     /// @notice All the supply is allocated to this contract
     /// @dev deploys AidToken and Rahat contract by sending supply to this contract
 
@@ -34,7 +43,12 @@ contract RahatTreasury is AbstractTokenActions, ERC165, AccessManaged {
         type(IRahatTreasury).interfaceId;
     EnumerableSet.AddressSet private tokens;
 
-    constructor(address _manager) AccessManaged(_manager) {}
+    constructor(
+        address _manager,
+        address _forwarder
+    ) AccessManaged(_manager) ERC2771Context(_forwarder) {
+        forwarderAddress = _forwarder;
+    }
 
     function getTokens() public view returns (address[] memory) {
         address[] memory _tokens = new address[](tokens.length());
@@ -61,7 +75,8 @@ contract RahatTreasury is AbstractTokenActions, ERC165, AccessManaged {
             decimals,
             _initialSupply,
             _to,
-            _manager
+            _manager,
+            forwarderAddress
         );
         address _tokenAddress = address(_token);
         tokens.add(_tokenAddress);
@@ -112,6 +127,35 @@ contract RahatTreasury is AbstractTokenActions, ERC165, AccessManaged {
         return
             interfaceId == IID_RAHAT_TREASURY ||
             super.supportsInterface(interfaceId);
+    }
+
+    /// @dev overriding the method to ERC2771Context
+    function _msgSender()
+        internal
+        view
+        override(Context, ERC2771Context)
+        returns (address sender)
+    {
+        sender = ERC2771Context._msgSender();
+    }
+
+    /// @dev overriding the method to ERC2771Context
+    function _msgData()
+        internal
+        view
+        override(Context, ERC2771Context)
+        returns (bytes calldata)
+    {
+        return ERC2771Context._msgData();
+    }
+
+    function _contextSuffixLength()
+        internal
+        view
+        override(Context, ERC2771Context)
+        returns (uint256)
+    {
+        return ERC2771Context._contextSuffixLength();
     }
 
     //#endregion
