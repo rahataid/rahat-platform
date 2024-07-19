@@ -42,7 +42,7 @@ class SettingsSeed extends commonLib {
     );
     const formattedUrl = formatted
       ? formatted
-      : 'http://localhost:8000/subgraphs/name/rahat/rp';
+      : 'http://localhost:8000/subgraphs/name/rahat/core';
     await settings.create({
       name: 'Subgraph_URL',
       value: {

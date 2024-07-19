@@ -50,7 +50,7 @@ importers:
       '@prisma/client':
         specifier: 5.13.0
         version: 5.13.0(prisma@5.10.2)
-      '@rumsan/contracts':
+      '@rahataid/contracts':
         specifier: link:libs\contracts
         version: link:libs/contracts
       '@rumsan/core':
