@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: '@rumsan/contracts',
+  displayName: '@rahataid/contracts',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {
