@@ -1,13 +1,30 @@
 import '@nomicfoundation/hardhat-toolbox';
-import { HardhatUserConfig, vars } from 'hardhat/config';
+import * as dotenv from 'dotenv';
+import { HardhatUserConfig } from 'hardhat/config';
 import type { NetworkUserConfig } from 'hardhat/types';
 import 'solidity-docgen';
+dotenv.config();
 
 
+const coinMarketCapApiKey: string = process.env.COINMARKETCAP_API_KEY || '';
+const privateKey: string = process.env.PRIVATE_KEY || '';
+const infuraApiKey: string = process.env.INFURA_API_KEY || '';
 
-const coinMarketCapApiKey: string = vars.get('COINMARKETCAP_API_KEY');
-const privateKey: string = vars.get('PRIVATE_KEY');
-const infuraApiKey: string = vars.get('INFURA_API_KEY');
+// task("vars", "Set the vars")
+//   .setAction(async (taskArgs, hre) => {
+//     await hre.run("set", { privateKey: process.env.PRIVATE_KEY });
+
+
+//   })
+
+// subtask("set", 'Set the vars')
+//   .addParam("privateKey", "The private key")
+//   .setAction(async (taskArgs, hre) => {
+//     const PRIVATE_KEY = taskArgs.privateKey;
+//     console.log(vars.get('PRIVATE_KEY'));
+//   }
+//   )
+// .addParam("COINMARKETCAP_API_KEY", "The coinmarketcap api key")
 
 
 
@@ -68,25 +85,25 @@ const config: ExtendedHardhatUserConfig = {
     },
   },
 
-  gasReporter: {
-    token: 'ETH',
-    currency: 'USD',
-    gasPriceApi:
-      'https://api.etherscan.io/api?module=proxy&action=eth_gasPrice',
-    coinmarketcap: coinMarketCapApiKey,
-    enabled:
-      vars.get('REPORT_GAS') === 'false'
-        ? false
-        : Boolean(vars.get('REPORT_GAS')),
-    showMethodSig: true,
-    outputFile: 'gas-report.txt',
-    noColors: true,
-  },
+  // gasReporter: {
+  //   token: 'ETH',
+  //   currency: 'USD',
+  //   gasPriceApi:
+  //     'https://api.etherscan.io/api?module=proxy&action=eth_gasPrice',
+  //   coinmarketcap: coinMarketCapApiKey,
+  //   enabled:
 
-  docgen: {
-    outputDir: './docs',
-    pages: 'files',
-  },
+  //       ? false
+  //       : Boolean(vars.get('REPORT_GAS')),
+  //   showMethodSig: true,
+  //   outputFile: 'gas-report.txt',
+  //   noColors: true,
+  // },
+
+  // docgen: {
+  //   outputDir: './docs',
+  //   pages: 'files',
+  // },
 
   paths: {
     sources: './src',
@@ -97,17 +114,14 @@ const config: ExtendedHardhatUserConfig = {
 
   etherscan: {
     apiKey: {
-      arbitrumOne: vars.get('ARBISCAN_API_KEY', ''),
-      avalanche: vars.get('SNOWTRACE_API_KEY', ''),
-      bsc: vars.get('BSCSCAN_API_KEY', ''),
-      mainnet: vars.get('ETHERSCAN_API_KEY', ''),
-      optimisticEthereum: vars.get('OPTIMISM_API_KEY', ''),
-      polygon: vars.get('POLYGONSCAN_API_KEY', ''),
-      polygonMumbai: vars.get('POLYGONSCAN_API_KEY', ''),
-      sepolia: vars.get(
-        'SEPOLIA_API_KEY',
-        '8J72K47SVDN4R3BQ65EJRA4QJ4Z2DMUI9T'
-      ),
+      arbitrumOne: process.env.ARBITRUM_API_KEY || ' ',
+      avalanche: process.env.AVAXSCAN_API_KEY || '',
+      bsc: process.env.BSCSCAN_API_KEY || '',
+      mainnet: process.env.ETHERSCAN_API_KEY || '',
+      optimisticEthereum: process.env.OPTIMISM_API_KEY || '',
+      polygon: process.env.POLYGONSCAN_API_KEY || '',
+      polygonMumbai: process.env.MUMBAI_API_KEY || '',
+      sepolia: process.env.SEPOLIA_API_KEY || '',
     },
   },
 
@@ -140,6 +154,7 @@ const config: ExtendedHardhatUserConfig = {
     'polygon-mumbai': getChainConfig('polygon-mumbai'),
     sepolia: getChainConfig('sepolia'),
   },
+
 };
 
 export default config;

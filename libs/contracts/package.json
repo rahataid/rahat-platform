@@ -1,8 +1,10 @@
 {
-  "name": "@rumsan/contracts",
+  "name": "@rahataid/contracts",
   "version": "0.0.1",
   "dependencies": {
-    "tslib": "^2.3.0",
-    "@openzeppelin/contracts": "^5.0.2"
-  }
+    "tslib": "^2.3.0"
+  },
+  "type": "commonjs",
+  "main": "./src/index.ts",
+  "typings": "./src/index.d.ts"
 }
