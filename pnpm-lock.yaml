@@ -50,7 +50,7 @@ importers:
       '@prisma/client':
         specifier: 5.13.0
         version: 5.13.0(prisma@5.10.2)
-      '@rumsan/contracts':
+      '@rahataid/contracts':
         specifier: link:libs\contracts
         version: link:libs/contracts
       '@rumsan/core':
@@ -75,8 +75,8 @@ importers:
         specifier: link:libs\subgraph
         version: link:libs/subgraph
       '@rumsan/user':
-        specifier: ^3.0.159
-        version: 3.0.160(@nestjs/platform-express@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10))(ioredis@5.4.1)(passport@0.7.0)(prisma@5.10.2)(reflect-metadata@0.1.14)(typescript@5.3.3)
+        specifier: 3.0.159
+        version: 3.0.159(@nestjs/platform-express@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10))(ioredis@5.4.1)(passport@0.7.0)(prisma@5.10.2)(reflect-metadata@0.1.14)(typescript@5.3.3)
       '@urql/core':
         specifier: ^5.0.4
         version: 5.0.4
@@ -2072,9 +2072,6 @@ packages:
   '@rumsan/extensions@0.0.24':
     resolution: {integrity: sha512-o119d6mSayuS6+zAs8eyPH8u0YMWMgG9iLmTIzeA8j3FakFUR3hAt+iwq0so+UH4oyYX2NoXVh4HbmnCRnELeg==, tarball: https://npm.pkg.github.com/download/@rumsan/extensions/0.0.24/d1e9855048fc2a3b7b75fe6e587ffa4a7b6e57dc}
 
-  '@rumsan/extensions@0.0.25':
-    resolution: {integrity: sha512-zm6LQiNwQ2uZwgjG3BbwNKJOeJzoaoIRRTNSxWWyCsYS5WeoUhYtwfP05jbLampe5bf0QPtJ++Jlif1RDiGz4A==, tarball: https://npm.pkg.github.com/download/@rumsan/extensions/0.0.25/c5f37634be0f103f29b1cf9d52d78c48bf1bfa6a}
-
   '@rumsan/prisma@1.0.112':
     resolution: {integrity: sha512-j0POzEFg62uL0sadQI72KSaY9nD5iIX/itCTU1rZSWhCyGxRw3h2AJhAx9hPplTKsj2KpRAOqHObfiHtOvEIGw==, tarball: https://npm.pkg.github.com/download/@rumsan/prisma/1.0.112/71fbb6c324ef1c72bd9e85a8eeb483fdf787c28a}
 
@@ -2096,14 +2093,11 @@ packages:
   '@rumsan/sdk@0.0.44':
     resolution: {integrity: sha512-KJdQ6VA+qKcQhWFhvAllvbM2mbolFAeEAYGoRB5xIp6/OPtTajgtpFWekv2Ztqk+Cw8sTX1iAM1UUKroQgr2ow==, tarball: https://npm.pkg.github.com/download/@rumsan/sdk/0.0.44/3db62bce92a0c845c668a4b97203bfeaf33604e0}
 
-  '@rumsan/sdk@0.0.45':
-    resolution: {integrity: sha512-9pwvrPPAU0t+UA6rPw6ABe/jBjB+0OBHHmcQ3aMo4tmCEDgBPRnPf+Q/G+ukY7G3WxNKfqAdx/29bp30vWaZaA==, tarball: https://npm.pkg.github.com/download/@rumsan/sdk/0.0.45/a610f1d44099d69f2b58dfcc89a01a433ce15d71}
-
   '@rumsan/settings@0.0.108':
     resolution: {integrity: sha512-fph5QtpQF+x+EF/Ie8gI5572TRJQQtfjVTQQlisXJc0+6QE6IDtjR7eOn83ffCnyglWvUHTqrtwSLINRftkFiA==, tarball: https://npm.pkg.github.com/download/@rumsan/settings/0.0.108/ff6002fd14f442ab9875712765abb973cd7e90e7}
 
-  '@rumsan/user@3.0.160':
-    resolution: {integrity: sha512-0ovy7o8Rr6ugxBQHexDbO50HsJiaRD+vrncldU3gdPiHNArBO9fECwan5nBgYOkqwRruOYiXvID1VLIn3r8Wjg==, tarball: https://npm.pkg.github.com/download/@rumsan/user/3.0.160/52aba80e05c911e436e6762a7263764f4ee7e77b}
+  '@rumsan/user@3.0.159':
+    resolution: {integrity: sha512-vFzPSrWVP9aUogZYxNX1sIXBBp4nhX0BrGCpOK+BXMtD8ussAedRaUshlUBKQJ2t6tBgNKzYtqEynSB15agKVw==, tarball: https://npm.pkg.github.com/download/@rumsan/user/3.0.159/8db2c8aec5e099f7959f83b13f42a5206d3f1847}
 
   '@scure/base@1.1.7':
     resolution: {integrity: sha512-PPNYBslrLNNUQ/Yad37MHYsNQtK67EhWb6WtSvNLLPo7SdVZgkUjD6Dg+5On7zNwmskf8OX7I7Nx5oN+MIWE0g==}
@@ -11530,10 +11524,10 @@ snapshots:
     dependencies:
       tslib: 2.6.2
 
-  '@rumsan/extensions@0.0.24(@nestjs/core@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/microservices@10.3.10)(@nestjs/platform-express@10.3.10)(reflect-metadata@0.1.14)(rxjs@7.8.1))(ioredis@5.4.1)(prisma@5.10.2)(reflect-metadata@0.1.14)':
+  '@rumsan/extensions@0.0.24(@nestjs/core@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/microservices@10.3.10)(@nestjs/platform-express@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10))(reflect-metadata@0.1.14)(rxjs@7.8.1))(ioredis@5.4.1)(prisma@5.10.2)(reflect-metadata@0.1.14)':
     dependencies:
       '@nestjs/common': 10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
-      '@nestjs/microservices': 10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10)(ioredis@5.4.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
+      '@nestjs/microservices': 10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/microservices@10.3.10)(@nestjs/platform-express@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10))(reflect-metadata@0.1.14)(rxjs@7.8.1))(ioredis@5.4.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
       '@nestjs/swagger': 7.4.0(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/microservices@10.3.10)(@nestjs/platform-express@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10))(reflect-metadata@0.1.14)(rxjs@7.8.1))(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)
       '@prisma/client': 5.13.0(prisma@5.10.2)
       '@rumsan/core': 3.0.140
@@ -11561,15 +11555,15 @@ snapshots:
       - prisma
       - reflect-metadata
 
-  '@rumsan/extensions@0.0.25(@nestjs/core@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/microservices@10.3.10)(@nestjs/platform-express@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10))(reflect-metadata@0.1.14)(rxjs@7.8.1))(ioredis@5.4.1)(prisma@5.10.2)(reflect-metadata@0.1.14)':
+  '@rumsan/extensions@0.0.24(@nestjs/core@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/microservices@10.3.10)(@nestjs/platform-express@10.3.10)(reflect-metadata@0.1.14)(rxjs@7.8.1))(ioredis@5.4.1)(prisma@5.10.2)(reflect-metadata@0.1.14)':
     dependencies:
       '@nestjs/common': 10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
-      '@nestjs/microservices': 10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/microservices@10.3.10)(@nestjs/platform-express@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10))(reflect-metadata@0.1.14)(rxjs@7.8.1))(ioredis@5.4.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
+      '@nestjs/microservices': 10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10)(ioredis@5.4.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
       '@nestjs/swagger': 7.4.0(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/microservices@10.3.10)(@nestjs/platform-express@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10))(reflect-metadata@0.1.14)(rxjs@7.8.1))(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)
       '@prisma/client': 5.13.0(prisma@5.10.2)
       '@rumsan/core': 3.0.140
       '@rumsan/prisma': 1.0.130(class-transformer@0.5.1)(class-validator@0.14.1)(prisma@5.10.2)(reflect-metadata@0.1.14)(rxjs@7.8.1)
-      '@rumsan/sdk': 0.0.45
+      '@rumsan/sdk': 0.0.44
       axios: 1.7.2
       class-transformer: 0.5.1
       class-validator: 0.14.1
@@ -11674,14 +11668,6 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  '@rumsan/sdk@0.0.45':
-    dependencies:
-      axios: 1.7.2
-      http-status-codes: 2.3.0
-      tslib: 2.6.2
-    transitivePeerDependencies:
-      - debug
-
   '@rumsan/settings@0.0.108(@nestjs/core@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/microservices@10.3.10)(@nestjs/platform-express@10.3.10)(reflect-metadata@0.1.14)(rxjs@7.8.1))(prisma@5.10.2)(reflect-metadata@0.1.14)':
     dependencies:
       '@nestjs/common': 10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
@@ -11704,7 +11690,7 @@ snapshots:
       - prisma
       - reflect-metadata
 
-  '@rumsan/user@3.0.160(@nestjs/platform-express@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10))(ioredis@5.4.1)(passport@0.7.0)(prisma@5.10.2)(reflect-metadata@0.1.14)(typescript@5.3.3)':
+  '@rumsan/user@3.0.159(@nestjs/platform-express@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10))(ioredis@5.4.1)(passport@0.7.0)(prisma@5.10.2)(reflect-metadata@0.1.14)(typescript@5.3.3)':
     dependencies:
       '@casl/ability': 6.7.1
       '@nestjs/common': 10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
@@ -11717,9 +11703,9 @@ snapshots:
       '@nestjs/swagger': 7.4.0(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/microservices@10.3.10)(@nestjs/platform-express@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10))(reflect-metadata@0.1.14)(rxjs@7.8.1))(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)
       '@prisma/client': 5.13.0(prisma@5.10.2)
       '@rumsan/core': 3.0.140
-      '@rumsan/extensions': 0.0.25(@nestjs/core@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/microservices@10.3.10)(@nestjs/platform-express@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10))(reflect-metadata@0.1.14)(rxjs@7.8.1))(ioredis@5.4.1)(prisma@5.10.2)(reflect-metadata@0.1.14)
+      '@rumsan/extensions': 0.0.24(@nestjs/core@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/microservices@10.3.10)(@nestjs/platform-express@10.3.10(@nestjs/common@10.3.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.3.10))(reflect-metadata@0.1.14)(rxjs@7.8.1))(ioredis@5.4.1)(prisma@5.10.2)(reflect-metadata@0.1.14)
       '@rumsan/prisma': 1.0.130(class-transformer@0.5.1)(class-validator@0.14.1)(prisma@5.10.2)(reflect-metadata@0.1.14)(rxjs@7.8.1)
-      '@rumsan/sdk': 0.0.45
+      '@rumsan/sdk': 0.0.44
       axios: 1.7.2
       class-transformer: 0.5.1
       class-validator: 0.14.1
