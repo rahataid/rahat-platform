@@ -3,8 +3,8 @@ pragma solidity 0.8.20;
 
 //ERC20 Tokens
 import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol';
-import '@rumsan/contracts/interfaces/IRahatToken.sol';
-import '@rumsan/contracts/libraries/AbstractOwner.sol';
+import '../interfaces/IRahatToken.sol';
+import '../libraries/AbstractOwner.sol';
 import '@openzeppelin/contracts/access/manager/AccessManaged.sol';
 
 contract RahatToken is

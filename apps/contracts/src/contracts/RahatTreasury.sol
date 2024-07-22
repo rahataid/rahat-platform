@@ -5,9 +5,9 @@ import '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import '@openzeppelin/contracts/utils/introspection/ERC165.sol';
 import '@openzeppelin/contracts/access/manager/AccessManaged.sol';
 import './RahatToken.sol';
-import '@rumsan/contracts/interfaces/IRahatTreasury.sol';
-import '@rumsan/contracts/interfaces/IRahatProject.sol';
-import '@rumsan/contracts/libraries/AbstractTokenActions.sol';
+import '../interfaces/IRahatTreasury.sol';
+import '../interfaces/IRahatProject.sol';
+import '../libraries/AbstractTokenActions.sol';
 
 /// @title Treasury contract to manage Rahat tokens and generate tokens
 /// @author Rumsan Associates
