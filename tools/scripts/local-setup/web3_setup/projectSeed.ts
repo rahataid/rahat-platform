@@ -32,7 +32,7 @@ const rahatTokenDetails = {
 
 interface DeployedContract {
   address: string | Addressable;
-  blockNumber: number;
+  startBlock: number;
 }
 
 class SeedProject extends commonLib {
@@ -59,7 +59,7 @@ class SeedProject extends commonLib {
     ]);
     this.contracts['RahatAccessManager'] = {
       address: RahatAccessManager.contract.target,
-      blockNumber: RahatAccessManager.blockNumber,
+      startBlock: RahatAccessManager.blockNumber,
     };
 
     console.log(
@@ -70,12 +70,12 @@ class SeedProject extends commonLib {
     ]);
     console.log({
       ERC2771Forwarder: ERC2771Forwarder.contract.target,
-      blockNumber: ERC2771Forwarder.blockNumber,
+      startBlock: ERC2771Forwarder.blockNumber,
     });
 
     this.contracts['ERC2771Forwarder'] = {
       address: ERC2771Forwarder.contract.target,
-      blockNumber: ERC2771Forwarder.blockNumber,
+      startBlock: ERC2771Forwarder.blockNumber,
     };
 
     console.log('----------Depolying Rahat Treasury-------------------');
@@ -85,7 +85,7 @@ class SeedProject extends commonLib {
     ]);
     this.contracts['RahatTreasury'] = {
       address: RahatTreasury.contract.target,
-      blockNumber: RahatTreasury.blockNumber,
+      startBlock: RahatTreasury.blockNumber,
     };
 
 
@@ -103,7 +103,7 @@ class SeedProject extends commonLib {
     ]);
     this.contracts['RahatToken'] = {
       address: RahatToken.contract.target,
-      blockNumber: RahatToken.blockNumber,
+      startBlock: RahatToken.blockNumber,
     };
 
 
