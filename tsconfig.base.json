@@ -21,7 +21,7 @@
       "@rahataid/sdk": ["libs/sdk/src/index.ts"],
       "@rahataid/sdk/*": ["libs/sdk/src/*"],
       "@rahataid/subgraph": ["libs/subgraph/src/index.ts"],
-      "@rumsan/contracts": ["libs/contracts/src/*"]
+      "@rahataid/contracts": ["libs/contracts/src/index.ts"]
     },
     "types": ["node", "tslib"]
   },
