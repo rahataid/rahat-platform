@@ -95,6 +95,7 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
   async assignToProject(payload: any) {
+    console.log(payload, 'payload in project add');
     return this.service.assignBeneficiaryToProject(payload);
   }
 
@@ -108,6 +109,8 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
   update(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryDto) {
     const benefUUID = uuid ? uuid : dto.uuid;
+    // console.log(dto.uuid);
+    // console.log(dto);
     return this.service.update(benefUUID, dto);
   }
 
@@ -118,6 +121,7 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.REMOVE })
   async remove(payload: any) {
+    console.log(payload, 'remove payload');
     return this.service.remove(payload);
   }
 
@@ -158,6 +162,7 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.ADD_GROUP })
   addGroup(payload: CreateBeneficiaryGroupsDto) {
+    console.log(payload);
     return this.service.addGroup(payload)
   }
 
