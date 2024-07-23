@@ -3,8 +3,6 @@ export const projectStats = (uuid) => {
 
     const url = process.env.BACKEND_URL
 
-    console.log(uuid, "is the uuid")
-
     if (!uuid) {
         return {
             "dataSources": {
@@ -42,7 +40,7 @@ export const projectStats = (uuid) => {
                 [
                     {
                         "title": "Beneficiary Internet Status",
-                        "type": "pie",
+                        "type": "donut",
                         "props": {},
                         "dataSrc": "source2",
                         "dataMap": `BENEFICIARY_INTERNETSTATUS`,
@@ -87,7 +85,7 @@ export const projectStats = (uuid) => {
             [
                 {
                     "title": "Beneficiary Internet Status",
-                    "type": "pie",
+                    "type": "donut",
                     "props": {},
                     "dataSrc": "source2",
                     "dataMap": `BENEFICIARY_INTERNETSTATUS_ID_${uuid}`,

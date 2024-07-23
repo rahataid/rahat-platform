@@ -24,6 +24,8 @@ import { UUID } from 'crypto';
 import { timeout } from 'rxjs/operators';
 import { ProjectService } from './project.service';
 
+// @ApiBearerAuth(APP.JWT_BEARER)
+// @UseGuards(JwtGuard)
 @Controller('projects')
 @ApiTags('Projects')
 export class ProjectController {
@@ -88,11 +90,12 @@ export class ProjectController {
       .pipe(timeout(5000));
   }
 
+  // @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
   projectActions(
     @Param('uuid') uuid: UUID,
-    @Body() data: ProjectCommunicationDto
+    @Body() data: ProjectCommunicationDto,
   ) {
     const response = this.projectService.handleProjectActions({
       uuid,

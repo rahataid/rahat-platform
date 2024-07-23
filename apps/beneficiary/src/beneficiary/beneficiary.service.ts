@@ -32,7 +32,6 @@ import { UUID } from 'crypto';
 import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
-import { projectStats } from '../utils/projectStatsDataSource';
 import { createListQuery } from './helpers';
 import { VerificationService } from './verification.service';
 
@@ -1435,6 +1434,11 @@ export class BeneficiaryService {
   }
 
   async projectStatsDataSource(uuid?: UUID) {
-    return projectStats(uuid);
+    return this.prisma.stats.findMany(
+      {
+        where: {
+          group: `source_${uuid}`
+        }
+      })
   }
 }
