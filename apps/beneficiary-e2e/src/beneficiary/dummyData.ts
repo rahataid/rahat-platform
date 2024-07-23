@@ -1,7 +1,7 @@
 import { BankedStatus, Gender, InternetStatus, PhoneStatus } from "@prisma/client";
 
 export const createBeneficiaryDto = {
-  id: 2,
+  id: 1,
   uuid: '5c788f0e-9869-4d5d-8f52-086a18da8fdf',
   gender: 'FEMALE',
   walletAddress: '0x3a13290A8c26075F9B030C4CAF3A11ba037382b6',
@@ -66,6 +66,8 @@ export const updateBeneficiaryDto = {
 
 export const createBulkBeneficiaryDto = [
   {
+      id: 2,
+      uuid: '5c788f0e-9869-4d5d-8f52-086a18da8fdf',
       gender: "FEMALE",
       walletAddress: "0x3a6eB782B7F99bd4B317fa64652CcF9002C7B35F",
       birthDate: "1997-03-08T00:00:00.000Z",
@@ -100,6 +102,8 @@ export const createBulkBeneficiaryDto = [
       // projectUUIDs: [ "175fe40a-eee3-48f8-9eb3-bc76d5aaeb56" ]
   },
   {
+    id: 3,
+    uuid: '0xAb6323370B6dB2bAb7d2FB1454CC0334F395f1A5',
       gender: "FEMALE",
       walletAddress: "0xAb6323370B6dB2bAb7d2FB1454CC0334F395f1A5",
       birthDate: new Date(),
