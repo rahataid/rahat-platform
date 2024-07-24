@@ -2,10 +2,10 @@ name: Main AA CI/CD
 on:
   push:
     branches:
-      - 'main'
+      - 'main-aa'
   pull_request:
     branches:
-      - 'main'
+      - 'main-aa'
   workflow_dispatch:
 
 env:
