@@ -1,9 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaService } from '@rumsan/prisma';
-import * as dotenv from 'dotenv';
 import * as readline from 'readline';
 
-dotenv.config();
 
 const prisma = new PrismaService();
 const prismaClient = new PrismaClient();

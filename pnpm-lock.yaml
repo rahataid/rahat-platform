@@ -134,6 +134,9 @@ importers:
       qrcode:
         specifier: ^1.5.3
         version: 1.5.3
+      readline:
+        specifier: ^1.3.0
+        version: 1.3.0
       reflect-metadata:
         specifier: ^0.1.14
         version: 0.1.14
@@ -7125,6 +7128,9 @@ packages:
   readdirp@3.6.0:
     resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
     engines: {node: '>=8.10.0'}
+
+  readline@1.3.0:
+    resolution: {integrity: sha512-k2d6ACCkiNYz222Fs/iNze30rRJ1iIicW7JuX/7/cozvih6YCkFZH+J6mAFDVgv0dRBaAyr4jDqC95R2y4IADg==}
 
   real-require@0.1.0:
     resolution: {integrity: sha512-r/H9MzAWtrv8aSVjPCMFpDMl5q66GqtmmRkRjpHTsp4zBAa+snZyiQNlMONiUmEJcsnaw0wCauJ2GWODr/aFkg==}
@@ -17926,6 +17932,8 @@ snapshots:
   readdirp@3.6.0:
     dependencies:
       picomatch: 2.3.1
+
+  readline@1.3.0: {}
 
   real-require@0.1.0: {}
 
