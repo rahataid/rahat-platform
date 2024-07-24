@@ -106,4 +106,26 @@ export const rpActions: ProjectActionFunc = {
       payload
     ),
   //campaign end
+
+  //redemption start
+  [MS_ACTIONS.RPPROJECT.REQUEST_REDEMPTION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.REQUEST_REDEMPTION, uuid },
+      payload
+    ),
+  [MS_ACTIONS.RPPROJECT.UPDATE_REDEMPTION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.UPDATE_REDEMPTION, uuid },
+      payload
+    ),
+  [MS_ACTIONS.RPPROJECT.LIST_REDEMPTION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.LIST_REDEMPTION, uuid },
+      payload
+    ),
+  [MS_ACTIONS.RPPROJECT.GET_VENDOR_REDEMPTION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.GET_VENDOR_REDEMPTION, uuid },
+      payload
+    ),
 }

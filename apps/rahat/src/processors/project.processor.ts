@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from '@nestjs/microservices';
 import { Project } from '@prisma/client';
 import { BQUEUE, ProjectJobs } from '@rahataid/sdk';
-import { SettingsService } from '@rumsan/settings';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { Job } from 'bull';
 
 @Processor(BQUEUE.RAHAT_PROJECT)
