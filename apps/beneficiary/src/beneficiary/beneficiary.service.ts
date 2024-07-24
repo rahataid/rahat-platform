@@ -1432,4 +1432,13 @@ export class BeneficiaryService {
     this.beneficiaryQueue.add(BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES, dto)
     return { message: "Beneficiaries added to the queue!" }
   }
+
+  async projectStatsDataSource(uuid?: UUID) {
+    return this.prisma.stats.findMany(
+      {
+        where: {
+          group: `source_${uuid}`
+        }
+      })
+  }
 }

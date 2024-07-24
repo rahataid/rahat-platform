@@ -75,8 +75,6 @@ export class BeneficiaryController {
     return this.statsService.getAllStats();
   }
 
-
-
   @MessagePattern({ cmd: BeneficiaryJobs.PROJECT_STATS })
   async projectStats(uuid: string) {
     return this.statsService.getAllStats(uuid);
@@ -216,5 +214,10 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES })
   async importTempBeneficiary(data: ImportTempBenefDto) {
     return this.service.importTempBeneficiaries(data);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_STATS })
+  async getProjectStats(data: any) {
+    return this.service.projectStatsDataSource(data.uuid);
   }
 }
