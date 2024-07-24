@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService, } from '@rumsan/prisma';
-import { SettingsService } from '@rumsan/settings';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
