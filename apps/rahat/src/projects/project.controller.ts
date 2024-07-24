@@ -38,20 +38,17 @@ export class ProjectController {
   ) { }
 
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
-
   @Post()
   create(@Body() createProjectDto: CreateProjectDto) {
     return this.projectService.create(createProjectDto);
   }
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
-
   @Get()
   list() {
     return this.projectService.list();
   }
 
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
-
   @Get(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   findOne(@Param('uuid') uuid: UUID) {
@@ -59,7 +56,6 @@ export class ProjectController {
   }
 
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
-
   @ApiParam({ name: 'uuid', required: true })
   @Patch(':uuid')
   update(
@@ -69,6 +65,7 @@ export class ProjectController {
     return this.projectService.update(uuid, updateProjectDto);
   }
 
+  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
   @ApiParam({ name: 'uuid', required: true })
   @Patch(':uuid/status')
   updateStatus(
@@ -85,6 +82,7 @@ export class ProjectController {
     return this.projectService.remove(uuid);
   }
 
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: true })
   @Get(':uuid/beneficiaries')
   listBeneficiaries(@Query() dto: ListProjectBeneficiaryDto) {
@@ -116,7 +114,9 @@ export class ProjectController {
     });
     return response;
   }
+
   //list project specific stats
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: true })
   @Get(':uuid/stats')
   projectStats(@Param('uuid') uuid: UUID) {
@@ -125,7 +125,8 @@ export class ProjectController {
       .pipe(timeout(MS_TIMEOUT));
   }
 
-  //list project specific stats sources
+  ß//list project specific stats sources
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: false })
   @Get(':uuid/statsSources')
   projectStatsSources(@Param('uuid') uuid: UUID) {
