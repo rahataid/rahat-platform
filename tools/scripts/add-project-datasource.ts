@@ -15,54 +15,6 @@ const rl = readline.createInterface({
 });
 
 const projectStats = (uuid: string, url: string) => {
-  if (!uuid) {
-    return {
-      "dataSources": {
-        "source2": {
-          "type": "url",
-          "args": {
-            "url": `${url}/v1/beneficiaries/stats`
-          },
-          "data": []
-        }
-      },
-      "ui": [
-        [
-          {
-            "title": "Gender",
-            "type": "pie",
-            "props": {},
-            "dataSrc": "source2",
-            "dataMap": `BENEFICIARY_GENDER`,
-            "colSpan": 1,
-            "rowSpan": 2
-          }
-        ],
-        [
-          {
-            "title": "Beneficiary Internet Status",
-            "type": "pie",
-            "props": {},
-            "dataSrc": "source2",
-            "dataMap": `BENEFICIARY_INTERNETSTATUS`,
-            "colSpan": 1,
-            "rowSpan": 1
-          }
-        ],
-        [
-          {
-            "title": "Beneficiary Internet Status",
-            "type": "donut",
-            "props": {},
-            "dataSrc": "source2",
-            "dataMap": `BENEFICIARY_INTERNETSTATUS`,
-            "colSpan": 1,
-            "rowSpan": 1
-          }
-        ]
-      ]
-    };
-  }
   return {
     "dataSources": {
       "source2": {
@@ -70,39 +22,66 @@ const projectStats = (uuid: string, url: string) => {
         "args": {
           "url": `${url}/v1/projects/${uuid}/stats`
         },
-        "data": []
+        "data": [] // Placeholder for actual data
       }
     },
     "ui": [
       [
         {
-          "title": "Gender",
-          "type": "pie",
+          "type": "dataCard",
           "props": {},
-          "dataSrc": "source2",
-          "dataMap": `BENEFICIARY_GENDER_ID_${uuid}`,
+          "title": "Banked Beneficiaries",
           "colSpan": 1,
-          "rowSpan": 2
+          "dataMap": `BENEFICIARY_BANKEDSTATUS_ID_${uuid}.BANKED`,
+          "dataSrc": "source2",
+          "rowSpan": 1
         },
         {
-          "title": "Genders",
-          "type": "bar",
+          "type": "dataCard",
           "props": {},
-          "dataSrc": "source2",
-          "dataMap": `BENEFICIARY_GENDER_ID_${uuid}`,
+          "title": "Total Females",
           "colSpan": 1,
+          "dataMap": `BENEFICIARY_GENDER_ID_${uuid}.FEMALE`,
+          "dataSrc": "source2",
+          "rowSpan": 1
+        },
+        {
+          "type": "dataCard",
+          "props": {},
+          "title": "Unbanked Beneficiaries",
+          "colSpan": 1,
+          "dataMap": `BENEFICIARY_BANKEDSTATUS_ID_${uuid}.UNBANKED`,
+          "dataSrc": "source2",
           "rowSpan": 1
         }
       ],
       [
         {
-          "title": "Beneficiary Internet Status",
-          "type": "donut",
+          "type": "pie",
           "props": {},
-          "dataSrc": "source2",
-          "dataMap": `BENEFICIARY_INTERNETSTATUS_ID_${uuid}`,
+          "title": "Internet Status",
           "colSpan": 1,
+          "dataMap": `BENEFICIARY_INTERNETSTATUS_ID_${uuid}`,
+          "dataSrc": "source2",
           "rowSpan": 1
+        },
+        {
+          "type": "pie",
+          "props": {},
+          "title": "Gender",
+          "colSpan": 1,
+          "dataMap": `BENEFICIARY_GENDER_ID_${uuid}`,
+          "dataSrc": "source2",
+          "rowSpan": 1
+        },
+        {
+          "type": "bar",
+          "props": {},
+          "title": "Phone Status",
+          "colSpan": 1,
+          "dataMap": `BENEFICIARY_PHONESTATUS_ID_${uuid}`,
+          "dataSrc": "source2",
+          "rowSpan": 4
         }
       ]
     ]
