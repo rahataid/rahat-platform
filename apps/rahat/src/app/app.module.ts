@@ -3,8 +3,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { StatsModule } from '@rahat/stats';
+import { SettingsModule } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
-import { SettingsModule } from '@rumsan/settings';
 import {
   AuthsModule,
   RSUserModule,
@@ -42,13 +42,13 @@ import { AppService } from './app.service';
     ListenersModule,
     AppUsersModule,
     RSUserModule.forRoot([AuthsModule, UsersModule, RolesModule]),
-    SettingsModule,
     ProjectModule,
     StatsModule,
     ProcessorsModule,
     UploadModule,
     GrievanceModule,
     TokenModule,
+    SettingsModule,
     RequestContextModule
   ],
   controllers: [AppController],
