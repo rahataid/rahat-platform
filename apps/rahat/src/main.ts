@@ -17,7 +17,6 @@ import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app/app.module';
 import { loggerInstance } from './logger/winston.logger';
 
-
 // import { GlobalExceptionFilter } from './utils/exceptions/rpcException.filter';
 
 async function bootstrap() {
