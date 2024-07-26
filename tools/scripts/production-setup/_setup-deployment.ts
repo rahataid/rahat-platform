@@ -14,7 +14,7 @@ class DeploymentSetup extends commonLib {
     constructor() {
         super();
     }
-    public async setupRahatPayrollContracts() {
+    public async setupRahatContracts() {
         const deployerAccount = this.getDeployerWallet();
 
         console.log('----------Depolying Rahat Access Manager-------------------');
@@ -115,7 +115,7 @@ class DeploymentSetup extends commonLib {
 
 async function main() {
     const deploymentSetup = new DeploymentSetup();
-    await deploymentSetup.setupRahatPayrollContracts();
+    await deploymentSetup.setupRahatContracts();
     await deploymentSetup.setupBlockchainNetowrk();
 
 }
