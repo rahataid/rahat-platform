@@ -1,10 +1,10 @@
 import request from 'supertest';
-import { createBeneficiaryDto, createBeneficiaryGroupDto, createBulkBeneficiaryDto, groupUUID, listStats, projectUUID, singleGroup, tableStats, updateBeneficiaryDto } from './dummyData';
+import { beneficiaryGroup, createBeneficiaryDto, createBeneficiaryGroupDto, createBulkBeneficiaryDto, groupUUID, listStats, projectUUID, singleGroup, tableStats, updateBeneficiaryDto } from './dummyData';
 
 const baseUrl = "http://localhost:5500";
 
   describe('POST /v1/beneficiary', () => {
-    it('should create new beneficiary', async () => {
+  it('should create new beneficiary', async () => {
       const result = await request(baseUrl).post("/v1/beneficiaries").send(createBeneficiaryDto);
       expect(result.status).toBe(201);
       expect(result.body.data).toEqual(createBeneficiaryDto);
@@ -58,6 +58,7 @@ const baseUrl = "http://localhost:5500";
     it('should return detail of beneficiary using uuid', async () => {
       const result = await request(baseUrl).get(`/v1/beneficiaries/${createBeneficiaryDto.uuid}`);
       expect(result.status).toBe(200);
+      console.log(result.body);
       console.log(result.body.data, 'data');
       expect(result.body.data).toEqual(createBeneficiaryDto);
     });
@@ -81,9 +82,12 @@ const baseUrl = "http://localhost:5500";
 
   describe('POST /v1/beneficiaries/bulk', () => {
     it('should create beneficiaries in bulk', async () => {
-      const result = await request(baseUrl).post("/v1/beneficiaries/bulk").send(createBulkBeneficiaryDto);
-      expect(result.status).toBe(201);
-      expect(result.body.data).toEqual(createBulkBeneficiaryDto);
+      
+        const result = await request(baseUrl).post("/v1/beneficiaries/bulk").send(createBulkBeneficiaryDto);
+        console.log(result.body, 'result create bulk beneficiary');
+        expect(result.status).toBe(201);
+        expect(result.body.data).toEqual(createBulkBeneficiaryDto);
+      
     });
   });
 
@@ -148,4 +152,21 @@ const baseUrl = "http://localhost:5500";
       expect(result.status).toBe(200);
     });
   });
+
+  describe('DELETE /v1/beneficiaries/groups/uuid', () => {
+    it('should delete the group of beneficiaries using uuid', async () => {
+      const result = await request(baseUrl).delete(`/v1/beneficiaries/groups/${beneficiaryGroup.uuid}`);
+      expect(result.status).toBe(200);
+      expect(result).toBeDefined();
+      expect(result).toHaveBeenCalledWith(beneficiaryGroup.uuid);
+    });
+  });
+
+  // describe('POST /v1/beneficiaries/import-tools', () => {
+  //   it('should import beneficiaries from community tools', async () => {
+  //     const result = await request(baseUrl).post("/v1/beneficiaries/import-tools");
+  //   });
+  // });
+
+  
 

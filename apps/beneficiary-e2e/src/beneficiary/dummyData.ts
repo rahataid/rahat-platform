@@ -66,12 +66,10 @@ export const updateBeneficiaryDto = {
 
 export const createBulkBeneficiaryDto = [
   {
-      id: 2,
-      uuid: '5c788f0e-9869-4d5d-8f52-086a18da8fdf',
       gender: "FEMALE",
-      walletAddress: "0x3a6eB782B7F99bd4B317fa64652CcF9002C7B35F",
+      walletAddress: "0xeA85CBD038c272e3D1b9766a7bfBe66c0C8973d7",
       birthDate: "1997-03-08T00:00:00.000Z",
-      age: 20,
+      age: 30,
       location: "Jhamsikhel",
       latitude: 26.24,
       longitude: 86.24,
@@ -88,26 +86,24 @@ export const createBulkBeneficiaryDto = [
       updatedAt: "2024-07-08T07:58:30.393Z",
       deletedAt: null,
       isVerified: false,
-      BeneficiaryProject: [],
+      // BeneficiaryProject: [],
       piiData: {
         beneficiaryId: 1,
-        name: "Hari Krishna Shrestha",
-        phone: "9843848493",
+        name: "Test Krishna Shrestha",
+        phone: "9843626390",
         email: null,
         extras: {
           bank: "Laxmi Bank",
-          account: "9872200008"
+          account: "9872200002"
         }
       },
-      // projectUUIDs: [ "175fe40a-eee3-48f8-9eb3-bc76d5aaeb56" ]
+      // projectUUIDs: [ "b89775b8-7a17-42e4-b32f-98a1ea39874e" ]
   },
   {
-    id: 3,
-    uuid: '0xAb6323370B6dB2bAb7d2FB1454CC0334F395f1A5',
       gender: "FEMALE",
       walletAddress: "0xAb6323370B6dB2bAb7d2FB1454CC0334F395f1A5",
-      birthDate: new Date(),
-      age: 20,
+      birthDate: "1997-03-08T00:00:00.000Z",
+      age: 28,
       location: "Sanepa",
       latitude: 26.24,
       longitude: 86.24,
@@ -124,18 +120,18 @@ export const createBulkBeneficiaryDto = [
       updatedAt: "2024-07-08T07:58:30.393Z",
       deletedAt: null,
       isVerified: false,
-      BeneficiaryProject: [],
+      // BeneficiaryProject: [],
       piiData: {
         beneficiaryId: 1,
-        name: "Mina Shrestha",
-        phone: "9843029384",
+        name: "Hello Shrestha",
+        phone: "9843748129",
         email: null,
         extras: {
           bank: "Laxmi Bank",
-          account: "9872200004"
+          account: "9872200006"
         }
       },
-      // projectUUIDs: [ "175fe40a-eee3-48f8-9eb3-bc76d5aaeb56" ]
+      // projectUUIDs: [ "b89775b8-7a17-42e4-b32f-98a1ea39874e" ]
   }
 ];
 
@@ -301,6 +297,16 @@ export const createBeneficiaryGroupDto = {
 };
 
 export const groupUUID = "b865ff84-0e8d-43b6-97f0-b7e09b862c49";
+
+export const beneficiaryGroup = {
+    "id": 1,
+    "uuid": "69ebc15f-555c-415b-bd34-e0e82f0ff5f5",
+    "name": "e2e Test",
+    "createdAt": "2024-07-19T08:43:10.340Z",
+    "updatedAt": "2024-07-19T08:43:10.340Z",
+    "deletedAt": null,
+    "groupedBeneficiaries": []
+};
 
 export const singleGroup = 
   {
