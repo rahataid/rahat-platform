@@ -125,7 +125,23 @@ export class ProjectController {
       .pipe(timeout(MS_TIMEOUT));
   }
 
-  ß//list project specific stats sources
+  //Get datasource for entire project
+  // @Get('statsSources')
+  // statsSource() {
+  //   return this.benClient
+  //     .send({ cmd: BeneficiaryJobs.GET_ALL_STATS }, {})
+  //     .pipe(timeout(MS_TIMEOUT));
+  // }
+
+  //Get datasource for entire project
+  // @Get('statsSources')
+  // statsSource() {
+  //   return this.benClient
+  //     .send({ cmd: BeneficiaryJobs.GET_ALL_STATS }, {})
+  //     .pipe(timeout(MS_TIMEOUT));
+  // }
+
+  //list project specific stats sources
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: false })
   @Get(':uuid/statsSources')
@@ -134,4 +150,6 @@ export class ProjectController {
       .send({ cmd: BeneficiaryJobs.GET_STATS }, { uuid })
       .pipe(timeout(MS_TIMEOUT));
   }
+
+
 } 

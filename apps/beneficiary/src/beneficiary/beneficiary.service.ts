@@ -1441,4 +1441,14 @@ export class BeneficiaryService {
         }
       })
   }
+
+  async allDataSource() {
+    console.log("reached till here")
+    return this.prisma.stats.findMany(
+      {
+        where: {
+          group: `source`
+        }
+      })
+  }
 }

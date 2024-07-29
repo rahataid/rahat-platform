@@ -105,6 +105,11 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.STATS }, {});
   }
 
+  @Get('statsSource')
+  async getStatsSource() {
+    return this.client.send({ cmd: BeneficiaryJobs.GET_ALL_STATS }, {});
+  }
+
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('table-stats')
   async getTableStats() {
