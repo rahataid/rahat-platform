@@ -27,6 +27,7 @@ import {
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
+  UpdateBeneficiaryGroupDto,
   ValidateWalletDto
 } from '@rahataid/extensions';
 import {
@@ -92,6 +93,11 @@ export class BeneficiaryController {
   @Get('stats')
   async getStats() {
     return this.client.send({ cmd: BeneficiaryJobs.STATS }, {});
+  }
+
+  @Get('statsSource')
+  async getStatsSource() {
+    return this.client.send({ cmd: BeneficiaryJobs.GET_ALL_STATS }, {});
   }
 
   @Get('table-stats')
@@ -246,6 +252,12 @@ export class BeneficiaryController {
   @ApiParam({ name: 'uuid', required: true })
   async removeGroup(@Param('uuid') uuid: UUID) {
     return this.client.send({ cmd: BeneficiaryJobs.REMOVE_ONE_GROUP }, uuid);
+  }
+
+  @Patch('groups/:uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async updateGroup(@Param('uuid') uuid: UUID, @Body() dto: UpdateBeneficiaryGroupDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.UPDATE_GROUP }, { uuid, ...dto });
   }
 
 

@@ -45,6 +45,7 @@ export const JOBS = {
   ADD_GROUP: 'rahat.jobs.beneficiary.add_group',
   GET_ONE_GROUP: 'rahat.jobs.beneficiary.get_one_group',
   GET_ALL_GROUPS: 'rahat.jobs.beneficiary.get_all_groups',
+  UPDATE_GROUP: 'rahat.jobs.beneficiary.update_group',
   ADD_GROUP_TO_PROJECT: 'rahat.jobs.beneficiary.add_group_to_project',
   IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL: 'rahat.jobs.beneficiary.import_beneficiaries_from_community_tool',
   IMPORT_TEMP_BENEFICIARIES: 'rahat.jobs.import_temp_beneficiaries',
@@ -57,4 +58,6 @@ export const JOBS = {
   CREATE_SAFE_TRANSACTION: 'rahat.jobs.safe_transaction.create',
   GET_SAFE_TRANSACTION: 'rahat.jobs.safe_transaction.get',
   REMOVE_ONE_GROUP: 'rahat.jobs.beneficiary.remove_one_group',
+  GET_STATS: 'rahat.jobs.projects.get_stats',
+  GET_ALL_STATS: 'rahat.jobs.projects.get_all_stats',
 };

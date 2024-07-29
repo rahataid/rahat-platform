@@ -31,12 +31,19 @@ export class CreateProjectDto {
 
   @ApiProperty({
     required: false,
-    example: 'Some extra Descriptions',
+    example: { test: 'test' },
   })
   @IsOptional()
   @IsObject()
   extras?: object;
 
+  @ApiProperty({
+    required: false,
+    example: '0x123'
+  })
+  @IsOptional()
+  @IsString()
+  contractAddress?: string
 }
 
 export class UpdateProjectDto extends OmitType(PartialType(CreateProjectDto), [

@@ -39,6 +39,9 @@ export const APP = {
 };
 
 export const MS_ACTIONS = {
+  PROJECT: {
+    SETUP: 'project.setup',
+  },
   BENEFICIARY: {
     CREATE: 'beneficiary.create',
     LIST: 'beneficiary.list',
@@ -172,6 +175,15 @@ export const MS_ACTIONS = {
     //TEMP SOLUTION
     CREATE_SAFE_TRANSACTION: 'c2cProject.createSafeTransaction',
     GET_SAFE_TRANSACTION: 'c2cProject.getSafeTransaction',
+    CREATE_CAMPAIGN: 'c2cProject.campaign.create',
+    CREATE_AUDIENCE: 'c2cProject.campaign.create_audience',
+    GET_ALL_CAMPAIGN: 'c2cProject.campaign.get',
+    GET_CAMPAIGN: 'c2cProject.campaign.getOne',
+    GET_ALL_TRANSPORT: 'c2cProject.campaign.get_transport',
+    GET_ALL_AUDIENCE: 'c2cProject.campaign.get_audience',
+    TRIGGER_CAMPAIGN: 'c2cProject.campaign.trigger',
+    GET_ALL_COMMUNICATION_LOGS: 'c2cProject.campaign.communication_logs',
+    GET_ALL_COMMUNICATION_STATS: 'c2cProject.campaign.communication_stats',
   },
   CVAProject: {
     UPDATE_STATUS: 'cvaProject.updateStatus',
@@ -181,6 +193,16 @@ export const MS_ACTIONS = {
     LIST_CLAIM: 'cvaProject.listClaim',
     GET_CLAIM: 'cvaProject.getClaim',
     PROCESS_OTP: 'cvaProject.processOtp',
+    CREATE_CAMPAIGN: 'cvaProject.campaign.create',
+    CREATE_AUDIENCE: 'cvaProject.campaign.create_audience',
+    GET_ALL_CAMPAIGN: 'cvaProject.campaign.get',
+    GET_CAMPAIGN: 'cvaProject.campaign.getOne',
+    GET_ALL_TRANSPORT: 'cvaProject.campaign.get_transport',
+    GET_ALL_AUDIENCE: 'cvaProject.campaign.get_audience',
+    TRIGGER_CAMPAIGN: 'cvaProject.campaign.trigger',
+    GET_ALL_COMMUNICATION_LOGS: 'cvaProject.campaign.communication_logs',
+    GET_ALL_COMMUNICATION_STATS: 'cvaProject.campaign.communication_stats',
+
 
   },
   RPPROJECT: {
@@ -193,6 +215,18 @@ export const MS_ACTIONS = {
     GET_ALL_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.get',
     UPDATE_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.update',
     CREATE_BULK_DISBURSEMENT: 'rpProject.disbursement.bulkCreate',
-
+    CREATE_CAMPAIGN: 'rpProject.campaign.create',
+    CREATE_AUDIENCE: 'rpProject.campaign.create_audience',
+    GET_ALL_CAMPAIGN: 'rpProject.campaign.get',
+    GET_CAMPAIGN: 'rpProject.campaign.getOne',
+    GET_ALL_TRANSPORT: 'rpProject.campaign.get_transport',
+    GET_ALL_AUDIENCE: 'rpProject.campaign.get_audience',
+    TRIGGER_CAMPAIGN: 'rpProject.campaign.trigger',
+    GET_ALL_COMMUNICATION_LOGS: 'rpProject.campaign.communication_logs',
+    GET_ALL_COMMUNICATION_STATS: 'rpProject.campaign.communication_stats',
+    REQUEST_REDEMPTION: 'rpProject.requestRedemption',
+    UPDATE_REDEMPTION: 'rpProject.updateRedemption',
+    LIST_REDEMPTION: 'rpProject.listRedemption',
+    GET_VENDOR_REDEMPTION: 'rpProject.vendorRedemption',
   }
 };

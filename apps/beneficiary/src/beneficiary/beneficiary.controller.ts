@@ -8,6 +8,7 @@ import {
   ListBeneficiaryGroupDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
+  UpdateBeneficiaryGroupDto,
   addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
 
@@ -74,8 +75,6 @@ export class BeneficiaryController {
   async stats() {
     return this.statsService.getAllStats();
   }
-
-
 
   @MessagePattern({ cmd: BeneficiaryJobs.PROJECT_STATS })
   async projectStats(uuid: string) {
@@ -181,6 +180,12 @@ export class BeneficiaryController {
     return this.service.getAllGroups(dto)
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.UPDATE_GROUP })
+  updateGroup(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryGroupDto) {
+    const groupUUID = uuid ? uuid : dto?.uuid
+    return this.service.updateGroup(groupUUID, dto)
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT })
   async assignGroupToProject(payload: any) {
     return this.service.assignBeneficiaryGroupToProject(payload);
@@ -215,5 +220,16 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES })
   async importTempBeneficiary(data: ImportTempBenefDto) {
     return this.service.importTempBeneficiaries(data);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_STATS })
+  async getProjectStats(data: any) {
+    return this.service.projectStatsDataSource(data.uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_STATS })
+  async getAllStats() {
+    console.log("data sources here reached")
+    return this.service.allDataSource();
   }
 }

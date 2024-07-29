@@ -40,6 +40,8 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
+/apps/contracts/artifacts
+config/
 
 # System Files
 .DS_Store
@@ -53,3 +55,8 @@ combine.log
 error.log
 
 accounts.json
+
+# hardhat
+cache
+typechain-types
+
