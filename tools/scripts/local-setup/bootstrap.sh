@@ -2,7 +2,7 @@
 
 pnpm i
 
-source ./tools/scripts/utils.sh
+source ./tools/scripts/local-setup/utils.sh
 
 create_env
 
