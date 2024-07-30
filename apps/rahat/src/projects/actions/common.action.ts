@@ -79,3 +79,8 @@ export const settingActions: ProjectActionFunc = {
     ),
 
 }
+
+export const projectActions: ProjectActionFunc = {
+  [MS_ACTIONS.PROJECT.SETUP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.PROJECT_SETUP, uuid }, payload),
+};

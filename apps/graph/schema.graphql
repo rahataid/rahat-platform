@@ -1,0 +1,207 @@
+type OperationCanceled @entity(immutable: true) {
+  id: Bytes!
+  operationId: Bytes! # bytes32
+  nonce: BigInt! # uint32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OperationExecuted @entity(immutable: true) {
+  id: Bytes!
+  operationId: Bytes! # bytes32
+  nonce: BigInt! # uint32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OperationScheduled @entity(immutable: true) {
+  id: Bytes!
+  operationId: Bytes! # bytes32
+  nonce: BigInt! # uint32
+  schedule: BigInt! # uint48
+  caller: Bytes! # address
+  target: Bytes! # address
+  data: Bytes! # bytes
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleAdminChanged @entity(immutable: true) {
+  id: Bytes!
+  roleId: BigInt! # uint64
+  admin: BigInt! # uint64
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleGrantDelayChanged @entity(immutable: true) {
+  id: Bytes!
+  roleId: BigInt! # uint64
+  delay: BigInt! # uint32
+  since: BigInt! # uint48
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleGranted @entity(immutable: true) {
+  id: Bytes!
+  roleId: BigInt! # uint64
+  account: Bytes! # address
+  delay: BigInt! # uint32
+  since: BigInt! # uint48
+  newMember: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleGuardianChanged @entity(immutable: true) {
+  id: Bytes!
+  roleId: BigInt! # uint64
+  guardian: BigInt! # uint64
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleLabel @entity(immutable: true) {
+  id: Bytes!
+  roleId: BigInt! # uint64
+  label: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleRevoked @entity(immutable: true) {
+  id: Bytes!
+  roleId: BigInt! # uint64
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TargetAdminDelayUpdated @entity(immutable: true) {
+  id: Bytes!
+  target: Bytes! # address
+  delay: BigInt! # uint32
+  since: BigInt! # uint48
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TargetClosed @entity(immutable: true) {
+  id: Bytes!
+  target: Bytes! # address
+  closed: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TargetFunctionRoleUpdated @entity(immutable: true) {
+  id: Bytes!
+  target: Bytes! # address
+  selector: Bytes! # bytes4
+  roleId: BigInt! # uint64
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type AuthorityUpdated @entity(immutable: true) {
+  id: Bytes!
+  authority: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TokenCreated @entity(immutable: true) {
+  id: Bytes!
+  tokenAddress: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TokenMintedAndApproved @entity(immutable: true) {
+  id: Bytes!
+  tokenAddress: Bytes! # address
+  approveAddress: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TokenMintedAndSent @entity(immutable: true) {
+  id: Bytes!
+  tokenAddress: Bytes! # address
+  receiverAddress: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+type Approval @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  spender: Bytes! # address
+  value: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RahatTokenAuthorityUpdated @entity(immutable: true) {
+  id: Bytes!
+  authority: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnerAdded @entity(immutable: true) {
+  id: Bytes!
+  param0: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnerRemoved @entity(immutable: true) {
+  id: Bytes!
+  param0: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Transfer @entity(immutable: true) {
+  id: Bytes!
+  from: Bytes! # address
+  to: Bytes! # address
+  value: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  tokenAddress: Bytes! #address
+}
+
+type TokenDetail @entity(immutable: false) {
+  id: Bytes! #address
+  tokenAddress: Bytes! # address
+  name: String! # string
+  decimals: BigInt! # uint8
+  symbol: String! # string
+  totalSupply: BigInt! # uint256
+  # treasuryBalance: BigInt! # uint256
+}

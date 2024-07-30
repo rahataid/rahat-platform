@@ -1,7 +1,7 @@
 // email.service.ts
 
 import { Injectable } from '@nestjs/common';
-import { SettingsService } from '@rumsan/settings';
+import { SettingsService } from '@rumsan/extensions/settings';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
