@@ -19,15 +19,25 @@ import {
   UpdateProjectDto,
   UpdateProjectStatusDto
 } from '@rahataid/extensions';
+<<<<<<< HEAD
+import { APP, BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
+import { CreateSettingDto } from '@rumsan/extensions/dtos';
+import { JwtGuard } from '@rumsan/user';
+=======
 import { ACTIONS, APP, BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
 import { AbilitiesGuard, CheckAbilities, JwtGuard, SUBJECTS } from "@rumsan/user";
+>>>>>>> dev
 import { UUID } from 'crypto';
 import { timeout } from 'rxjs/operators';
 import { ProjectService } from './project.service';
 
 @ApiBearerAuth(APP.JWT_BEARER)
+<<<<<<< HEAD
+@UseGuards(JwtGuard)
+=======
 @UseGuards(JwtGuard, AbilitiesGuard)
+>>>>>>> dev
 @Controller('projects')
 @ApiTags('Projects')
 export class ProjectController {
