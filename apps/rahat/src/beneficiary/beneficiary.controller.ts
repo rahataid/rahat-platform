@@ -338,9 +338,6 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.UPDATE_GROUP }, { uuid, ...dto });
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post('import-tools')
   async importBeneficiariesFromTool(@Req() req: Request) {
     return this.client.send(
