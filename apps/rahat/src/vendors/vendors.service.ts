@@ -26,32 +26,44 @@ export class VendorsService {
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
-    const role = await this.prisma.role.findFirst({
-      where: { name: UserRoles.VENDOR },
+
+    return await this.prisma.$transaction(async (prisma) => {
+      const role = await prisma.role.findFirst({
+        where: { name: UserRoles.VENDOR },
+      });
+      if (!role) throw new Error('Role not found');
+      // Add to User table
+      const { service, ...rest } = dto;
+      if (dto?.email) {
+        const userData = await prisma.user.findFirst({
+          where: { email: dto.email }
+        })
+        if (userData) throw new Error("Email must be unique");
+      }
+      const user = await prisma.user.create({ data: rest });
+      // Add to UserRole table
+      const userRolePayload = { userId: user.id, roleId: role.id };
+      await prisma.userRole.create({ data: userRolePayload });
+      // Add to Auth table
+      await prisma.auth.create({
+        data: {
+          userId: +user.id,
+          service: dto.service as any,
+          serviceId: dto[service.toLocaleLowerCase()],
+          details: dto.extras,
+        },
+      });
+      if (dto.service === Service.WALLET) return user;
+      await prisma.auth.create({
+        data: {
+          userId: +user.id,
+          service: Service.WALLET,
+          serviceId: dto.wallet,
+          details: dto.extras
+        },
+      });
+      return user;
     });
-    if (!role) throw new Error('Role not found');
-    // Add to User table
-    const { service, ...rest } = dto;
-    if (dto?.email) {
-      const userData = await this.prisma.user.findFirst({
-        where: { email: dto.email }
-      })
-      if (userData) throw new Error("Email must be unique");
-    }
-    const user = await this.prisma.user.create({ data: rest });
-    // Add to UserRole table
-    const userRolePayload = { userId: user.id, roleId: role.id };
-    await this.prisma.userRole.create({ data: userRolePayload });
-    // Add to Auth table
-    await this.prisma.auth.create({
-      data: {
-        userId: +user.id,
-        service: dto.service as any,
-        serviceId: dto[service.toLocaleLowerCase()],
-        details: dto.extras,
-      },
-    });
-    return user;
   }
 
   async assignToProject(dto: VendorAddToProjectDto) {
