@@ -41,6 +41,7 @@ yarn-error.log
 testem.log
 /typings
 /apps/contracts/artifacts
+/tools/scripts/local-setup/web3_setup/deployments
 config/
 
 # System Files
