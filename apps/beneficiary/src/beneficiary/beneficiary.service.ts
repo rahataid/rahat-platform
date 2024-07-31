@@ -311,6 +311,7 @@ export class BeneficiaryService {
   }
 
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
+    console.log(dto, 'dto');
     const { piiData, projectUUIDs, ...data } = dto;
     if (!data.walletAddress) {
       data.walletAddress = generateRandomWallet().address;
