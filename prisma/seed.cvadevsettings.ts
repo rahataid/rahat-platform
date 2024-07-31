@@ -81,6 +81,9 @@ async function modifyRootEnv(key: string) {
             if (line.startsWith('PRIVATE_KEY')) {
                 return `PRIVATE_KEY=${key}`;
             }
+            if (line.startsWith('DEPLOYER_PRIVATE_KEY')) {
+                return `DEPLOYER_PRIVATE_KEY=${key}`;
+            }
             return line;
         });
 

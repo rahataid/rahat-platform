@@ -1,6 +1,6 @@
 import { Address, BigInt } from "@graphprotocol/graph-ts";
-import { RahatToken } from "../generated/RahatToken/RahatToken";
 import { TokenDetail } from "../generated/schema";
+import { RahatToken } from "../generated/templates/RahatToken/RahatToken";
 
 
 export function fetchTokenDetails(tokenAddress: Address): TokenDetail | null {
