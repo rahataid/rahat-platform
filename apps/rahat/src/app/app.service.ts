@@ -29,6 +29,7 @@ export class AppService {
   constructor(
     private readonly prisma: PrismaService
   ) { }
+
   async createRahatAppSettings(
     createSettingDto: CreateSettingDto,
   ) {
@@ -102,5 +103,13 @@ export class AppService {
     });
 
     return newSetting;
+  }
+
+  async getCommunicationSettings() {
+    return this.prisma.setting.findMany({
+      where: {
+        name: "COMMUNICATION"
+      }
+    })
   }
 }
