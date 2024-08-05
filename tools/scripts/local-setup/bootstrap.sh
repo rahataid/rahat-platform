@@ -15,3 +15,6 @@ start_dev_tools
 get_ganache_accounts
 
 migrate_seed
+
+contract_setup
+graph_setup

@@ -3,6 +3,7 @@
 .env
 .env.*
 !.env.example
+!.env.setup.example
 play
 .npmrc
 
@@ -41,6 +42,7 @@ yarn-error.log
 testem.log
 /typings
 /apps/contracts/artifacts
+/tools/scripts/local-setup/web3_setup/deployments
 config/
 
 # System Files

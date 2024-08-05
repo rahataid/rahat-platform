@@ -84,6 +84,17 @@ rm_modules() {
     rm -rf dist node_modules tmp
 }
 
+contract_setup(){
+    pnpm seed:contracts
+    pnpm seed:network $current_dir
+}
+
+graph_setup() {
+    pnpm graph:create-local
+    graph_url=$(pnpm graph:deploy-local | grep -o 'http://[^ ]*' | tail -1)
+    export graph_url
+}
+
 reset() {
     stop_dev_tools
     remove_rahat_volumes

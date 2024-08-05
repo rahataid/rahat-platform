@@ -180,6 +180,9 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.STATS.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STATS.GET_ALL, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STATS.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STATS.GET_ONE, uuid }, payload),
   // **** stats end ****//
 
   // **** daily monitoring start ****//

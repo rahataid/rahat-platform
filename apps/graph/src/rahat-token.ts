@@ -1,17 +1,17 @@
 import {
-  Approval as ApprovalEvent,
-  AuthorityUpdated as AuthorityUpdatedEvent,
-  OwnerAdded as OwnerAddedEvent,
-  OwnerRemoved as OwnerRemovedEvent,
-  Transfer as TransferEvent,
-} from '../generated/RahatToken/RahatToken';
-import {
   Approval,
   AuthorityUpdated,
   OwnerAdded,
   OwnerRemoved,
   Transfer,
 } from '../generated/schema';
+import {
+  Approval as ApprovalEvent,
+  AuthorityUpdated as AuthorityUpdatedEvent,
+  OwnerAdded as OwnerAddedEvent,
+  OwnerRemoved as OwnerRemovedEvent,
+  Transfer as TransferEvent,
+} from '../generated/templates/RahatToken/RahatToken';
 import { fetchTokenDetails } from './utils';
 
 export function handleApproval(event: ApprovalEvent): void {
