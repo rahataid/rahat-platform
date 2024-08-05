@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { TokenDataType } from "@prisma/client";
 import { IsInt, IsOptional, IsString } from "class-validator";
 
 export class CreateTokenDto {
@@ -60,5 +61,13 @@ export class CreateTokenDto {
         example: '0x9c6d83987ff6dfd81b4e428b4f4c468d2769b451ca2d4c31b99bb338e8cbeec9',
     })
     @IsString()
+    @IsOptional()
     transactionHash?: string;
+
+    @ApiProperty({
+        required: false,
+        example: 'CREATED',
+    })
+    @IsString()
+    type?: TokenDataType;
 }
