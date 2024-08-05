@@ -69,7 +69,8 @@ export const JOBS = {
   },
   STATS: {
     GET_COMMS: 'aa.jobs.stats.getComms',
-    GET_ALL: 'aa.jobs.stats.getAll'
+    GET_ALL: 'aa.jobs.stats.getAll',
+    GET_ONE: 'aa.jobs.stats.getOne',
   },
   DAILY_MONITORING: {
     ADD: 'aa.jobs.dailyMonitoring.add',
