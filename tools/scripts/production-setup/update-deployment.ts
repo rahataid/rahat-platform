@@ -63,7 +63,7 @@ class DeploymentUpdater {
     return contractDetails;
   }
 
-  public async addAppSettings() {
+  public async addBlockchainSettings() {
     console.log("Adding Blockchain settings")
 
     await settings.create({
@@ -148,7 +148,7 @@ async function main() {
   const deploymentUpdater = new DeploymentUpdater();
 
   await deploymentUpdater.addContractSettings();
-  await deploymentUpdater.addAppSettings();
+  await deploymentUpdater.addBlockchainSettings();
   await deploymentUpdater.addGraphSettings();
   // await deploymentUpdater.addTreasurySettings();
 

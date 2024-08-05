@@ -34,9 +34,10 @@ export class commonLib {
         const contract = await factory.deploy(...args);
         const address = await contract.getAddress();
         await contract.waitForDeployment();
+        const txBlock = await contract.deploymentTransaction()?.getBlock();
         this.sleep(2000);
         return {
-            blockNumber: contract.deploymentTransaction()?.blockNumber ?? 1,
+            blockNumber: txBlock?.number,
             contract: new ethers.Contract(address, abi, this.provider),
         };
     }
