@@ -1,12 +1,12 @@
 import request from 'supertest';
-import { createBeneficiaryDto } from './testFixtureData';
+import { createBeneficiaryDto, createBeneficiaryDtoWallet, createBulkBeneficiaryDto } from './testFixtureData';
 import {AuthsModule, AuthsService, User} from '@rumsan/user';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
-import _ from 'lodash';
-
 
 const baseUrl = "http://localhost:5500";
+const reqCache = new Map();
+const resCache = new Map();
 
 describe('POST /v1/beneficiaries', () => {
     let accessToken;
@@ -53,47 +53,56 @@ describe('POST /v1/beneficiaries', () => {
         accessToken = token
     });    
 
-    it('should create new beneficiary', async () => {
+    it('should create new beneficiary if wallet is provided', async () => {
         header = `Bearer ${accessToken}`;
         const result = await request(baseUrl).post("/v1/beneficiaries").set('Authorization', header).send(createBeneficiaryDto);
+        reqCache.set('beneficiary', createBeneficiaryDto);
+        resCache.set('beneficiary', result.body.data);
         expect(result.statusCode).toBe(201);
         expect(result.body.success).toBe(true);
         expect(result.body.data).toBeInstanceOf(Object);
-        const comparedObject = _.pick(result.body.data, Object.keys(createBeneficiaryDto));
-        const mergedObject = _.assign({}, createBeneficiaryDto, comparedObject);
-        expect(mergedObject).toEqual(expect.objectContaining(createBeneficiaryDto));
+        expect(result.body.data).toEqual(resCache.get('beneficiary'));
         expect(result).toBeDefined();
     });
 
-    // it('should return detail of beneficiary using uuid', async () => {
-    //     header = `Bearer ${accessToken}`;
-    //     const result = await request(baseUrl).get(`/v1/beneficiaries/${testUUID}`).set('Authorization', header);
-    //     console.log(result.body.data, 'data');
-    //     expect(result.status).toBe(200);
-    //     const comparedObject = _.pick(result.body.data, Object.keys(createBeneficiaryDto));
-    //     const mergedObject = _.assign({}, createBeneficiaryDto, comparedObject);
-    //     console.log(mergedObject);
-    //     expect(mergedObject).toEqual(expect.objectContaining(createBeneficiaryDto));
-    // });
+    it('should create new beneficiary if wallet isnot provided', async () => {
+        header = `Bearer ${accessToken}`;
+        const result = await request(baseUrl).post("/v1/beneficiaries").set('Authorization', header).send(createBeneficiaryDtoWallet);
+        expect(result.statusCode).toBe(201);
+        expect(result.body.success).toBe(true);
+        expect(result.body.data).toBeInstanceOf(Object);
+        expect(result).toBeDefined();
+    });
+
+    it('should return detail of beneficiary using uuid if beneficiary is available', async () => {
+        header = `Bearer ${accessToken}`;
+        const cachedBeneficiary = resCache.get('beneficiary');
+        const result = await request(baseUrl).get(`/v1/beneficiaries/${cachedBeneficiary.uuid}`).set('Authorization', header);
+        expect(result.status).toBe(200);
+        expect(result.body.data).toEqual(result.body.data);
+    });
+
+    it('should throw error if beneficiary isnot available when user access it using uuid', async () => {
+        header = `Bearer ${accessToken}`;
+        const cachedBeneficiaryUUID = "1671141b-8782-49f1-824c-7c39f08d7cd2";
+        const result = await request(baseUrl).get(`/v1/beneficiaries/${cachedBeneficiaryUUID}`).set('Authorization', header);
+        expect(result.body.data).toEqual(null);
+    });
 
     it('should return detail of beneficiary using phone', async () => {
         header = `Bearer ${accessToken}`;
-        const result = await request(baseUrl).get(`/v1/beneficiaries/phone/${createBeneficiaryDto.piiData.phone}`).set('Authorization', header);
+        const cachedBeneficiary = reqCache.get('beneficiary');
+        const result = await request(baseUrl).get(`/v1/beneficiaries/phone/${cachedBeneficiary.piiData.phone}`).set('Authorization', header);
         expect(result.status).toBe(200);
-        const comparedObject = _.pick(result.body.data, Object.keys(createBeneficiaryDto));
-        const mergedObject = _.assign({}, createBeneficiaryDto, comparedObject);
-        expect(mergedObject).toEqual(expect.objectContaining(createBeneficiaryDto));
+        expect(result.body.data).toEqual(result.body.data);
     });
 
     it('should return detail of beneficiary using wallet address', async () => {
         header = `Bearer ${accessToken}`;
-        const result = await request(baseUrl).get(`/v1/beneficiaries/wallet/${createBeneficiaryDto.walletAddress}`).set('Authorization', header);
-        console.log(result.body.data, 'data');
+        const cachedBeneficiary = resCache.get('beneficiary');
+        const result = await request(baseUrl).get(`/v1/beneficiaries/wallet/${cachedBeneficiary.walletAddress}`).set('Authorization', header);
         expect(result.status).toBe(200);
-        const comparedObject = _.pick(result.body.data, Object.keys(createBeneficiaryDto));
-        const mergedObject = _.assign({}, createBeneficiaryDto, comparedObject);
-        console.log(mergedObject);
-        expect(mergedObject).toEqual(expect.objectContaining(createBeneficiaryDto));
+        expect(result.body.data).toEqual(result.body.data);
     });
 
     it('should return pii detail of the beneficiary', async () => {
@@ -104,13 +113,15 @@ describe('POST /v1/beneficiaries', () => {
         expect(result.body.data.every(item => typeof item === 'object')).toBe(true);
     });
 
-    // it('should create beneficiaries in bulk', async () => {
-    //     header = `Bearer ${accessToken}`;
-    //     const result = await request(baseUrl).post("/v1/beneficiaries/bulk").set('Authorization', header).send(createBulkBeneficiaryDto);
-    //     expect(result.status).toBe(201);
-    //     expect(result.request.method).toBe('POST');
-    //     // expect(result.body.data).toEqual(createBulkBeneficiaryDto);        
-    // });
-
+    it('should create beneficiaries in bulk', async () => {
+        header = `Bearer ${accessToken}`;
+        console.log(createBulkBeneficiaryDto, 'createBulkBeneficiaryDto');
+        const result = await request(baseUrl).post("/v1/beneficiaries/bulk").set('Authorization', header).send(createBulkBeneficiaryDto);
+        console.log(result.body, 'data');
+        resCache.set('bulkBeneficiary', result.body.data);
+        console.log(resCache.get('bulkBeneficiary'), 'bulk post');
+        expect(result.status).toBe(201);
+        expect(result.body.data).toEqual(resCache.get('bulkBeneficiary'));        
+    });
 });
 
