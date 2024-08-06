@@ -13,7 +13,7 @@ import {
   Req,
   UploadedFile,
   UseGuards,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -29,7 +29,7 @@ import {
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto,
-  ValidateWalletDto
+  ValidateWalletDto,
 } from '@rahataid/extensions';
 import {
   APP,
@@ -37,9 +37,15 @@ import {
   BQUEUE,
   Enums,
   MS_TIMEOUT,
-  TFile
+  TFile,
 } from '@rahataid/sdk';
-import { AbilitiesGuard, ACTIONS, CheckAbilities, JwtGuard, SUBJECTS } from '@rumsan/user';
+import {
+  AbilitiesGuard,
+  ACTIONS,
+  CheckAbilities,
+  JwtGuard,
+  SUBJECTS,
+} from '@rumsan/user';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, throwError, timeout } from 'rxjs';
@@ -65,12 +71,11 @@ function getDateInfo(dateString) {
 
 @Controller('beneficiaries')
 @ApiTags('Beneficiaries')
-
 export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue
-  ) { }
+  ) {}
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -85,9 +90,14 @@ export class BeneficiaryController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('temp/:uuid')
   @ApiParam({ name: 'uuid', required: true })
-  async listTempBenef(@Param('uuid') uuid: UUID, @Query() query: ListTempBeneficiariesDto) {
-
-    return this.client.send({ cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY }, { uuid, query });
+  async listTempBenef(
+    @Param('uuid') uuid: UUID,
+    @Query() query: ListTempBeneficiariesDto
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY },
+      { uuid, query }
+    );
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -106,16 +116,16 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.LIST_PII }, dto);
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('stats')
   async getStats() {
     return this.client.send({ cmd: BeneficiaryJobs.STATS }, {});
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
   @Get('statsSource')
   async getStatsSource() {
     return this.client.send({ cmd: BeneficiaryJobs.GET_ALL_STATS }, {});
@@ -291,7 +301,6 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
   }
 
-
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
@@ -299,7 +308,6 @@ export class BeneficiaryController {
   async createGroup(@Body() dto: CreateBeneficiaryGroupsDto) {
     return this.client.send({ cmd: BeneficiaryJobs.ADD_GROUP }, dto);
   }
-
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -309,7 +317,6 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET_ALL_GROUPS }, dto);
   }
 
-
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
@@ -318,7 +325,6 @@ export class BeneficiaryController {
   async getOneGroup(@Param('uuid') uuid: UUID) {
     return this.client.send({ cmd: BeneficiaryJobs.GET_ONE_GROUP }, uuid);
   }
-
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -334,8 +340,14 @@ export class BeneficiaryController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Patch('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
-  async updateGroup(@Param('uuid') uuid: UUID, @Body() dto: UpdateBeneficiaryGroupDto) {
-    return this.client.send({ cmd: BeneficiaryJobs.UPDATE_GROUP }, { uuid, ...dto });
+  async updateGroup(
+    @Param('uuid') uuid: UUID,
+    @Body() dto: UpdateBeneficiaryGroupDto
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.UPDATE_GROUP },
+      { uuid, ...dto }
+    );
   }
 
   @Post('import-tools')
@@ -353,6 +365,9 @@ export class BeneficiaryController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post('import-temp')
   async importTempBeneficiaries(@Body() dto: ImportTempBenefDto) {
-    return this.client.send({ cmd: BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES }, dto);
+    return this.client.send(
+      { cmd: BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES },
+      dto
+    );
   }
 }
