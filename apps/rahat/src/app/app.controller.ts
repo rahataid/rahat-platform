@@ -31,7 +31,6 @@ export class AppController {
   @Get('auth-apps/:uuid')
   @ApiParam({ name: 'uuid', type: 'string' })
   async getAuthApp(@Param('uuid') uuid: UUID) {
-    console.log("UID", uuid)
     return this.appService.getAuthApp(uuid);
   }
 

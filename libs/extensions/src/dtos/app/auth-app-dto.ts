@@ -15,7 +15,7 @@ export class CreateAuthAppDto {
     @IsOptional()
     description?: string;
 
-    @ApiProperty({ example: 'e4eaaaf2-d142-11e1-b3e4-080027620cdd ' })
+    @ApiProperty({ example: 'e4eaaaf2-d142-11e1-b3e4-080027620cdd' })
     @IsString()
     @IsOptional()
     createdBy?: string;
@@ -34,6 +34,16 @@ export class ListAuthAppsDto {
     @ApiProperty({ example: '10' })
     @IsNumber()
     perPage: number;
+
+    @ApiPropertyOptional({ example: "1" })
+    @IsString()
+    @IsOptional()
+    sort: string;
+
+    @ApiPropertyOptional({ example: "desc" })
+    @IsString()
+    @IsOptional()
+    order: 'asc' | 'desc';
 }
 
 export class UpdateAuthAppDto extends PartialType(CreateAuthAppDto) { }
