@@ -183,37 +183,41 @@ export const reqBeneficiary = {
 export const locationDto = faker.location.city();
 
 export const sampleUpdate =  {
-    id: 246,
-    uuid: '3d9009ca-e8a5-424a-bdbd-06cb6dd502a2',
-    gender: 'MALE',
-    walletAddress: '0xa6171076A94E6d0D892D96415f42f928C332fB7c',
-    birthDate: '1979-12-09T12:37:15.440Z',
-    age: 26,
-    location: 'Gilroy',
-    latitude: 62.82,
-    longitude: 105.749,
-    extras: {
-      email: 'Nathanael.Krajcik95@hotmail.com',
-      hasCitizenship: true,
-      passportNumber: 5332758484226031
+    "id": 15,
+    "uuid": "70b890d1-5c17-4dbe-98bc-d2710c86cc3a",
+    "gender": "MALE",
+    "walletAddress": "0x425034454DADE83aE694A7839623788949bB95Dd",
+    "birthDate": "1971-11-14T00:30:20.805Z",
+    "age": 26,
+    "location": "Romaguerashire",
+    "latitude": 25.871,
+    "longitude": -158.5314,
+    "extras": {
+      "email": "Michel.Jones@gmail.com",
+      "hasCitizenship": true,
+      "passportNumber": 8276474146587435
     },
-    notes: '1593499179585326',
-    bankedStatus: 'BANKED',
-    internetStatus: 'UNKNOWN',
-    phoneStatus: 'FEATURE_PHONE',
-    createdAt: '2024-08-06T11:10:05.901Z',
-    updatedAt: '2024-08-06T11:10:05.901Z',
-    deletedAt: null,
-    isVerified: false,
-    BeneficiaryProject: [],
-    piiData: {
-        beneficiaryId: 246,
-        name: 'Allan Jenkins III',
-        phone: '(589) 417-6930 x97261',
-        email: null,
-        extras: { bank: 'c', account: '69245417' }
+    "notes": "8763039922809315",
+    "bankedStatus": "UNBANKED",
+    "internetStatus": "HOME_INTERNET",
+    "phoneStatus": "UNKNOWN",
+    "createdAt": "2024-07-31T09:40:16.038Z",
+    "updatedAt": "2024-07-31T09:40:16.038Z",
+    "deletedAt": null,
+    "isVerified": false,
+    "BeneficiaryProject": [],
+    "piiData": {
+      "beneficiaryId": 15,
+      "name": "Geneva Rice",
+      "phone": "(363) 477-0356 x8173",
+      "email": null,
+      "extras": {
+        "bank": "O",
+        "account": "86480074"
+      }
     }
-}
+};
 
 export const verifiedUUID = "5c788f0e-9869-4d5d-8f52-086a18da8fdf";
+export const deleteUUID = "bc229aa9-90a5-4a4f-b77a-1b25fee3fe6c";
 

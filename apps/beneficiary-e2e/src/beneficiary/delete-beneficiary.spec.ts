@@ -1,12 +1,12 @@
 import request from 'supertest';
-import { invalidUUID, locationDto, sampleUpdate, verifiedUUID } from './testFixtureData';
+import { deleteUUID, invalidUUID } from './testFixtureData';
 import { AuthsModule, AuthsService, User } from '@rumsan/user';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 
 const baseUrl = "http://localhost:5500";
 
-describe('PATCH /v1/beneficiaries', () => {
+describe('DELETE /v1/beneficiaries', () => {
     let accessToken;
     let authService: AuthsService;
     let header;
@@ -51,38 +51,22 @@ describe('PATCH /v1/beneficiaries', () => {
         accessToken = token
     });    
 
-    it('should update the beneficiaries details', async () => {
+    it('should delete the beneficiaries details', async () => {
         header = `Bearer ${accessToken}`;
-        const result = await request(baseUrl).patch(`/v1/beneficiaries/${sampleUpdate.uuid}`).set('Authorization', header).send({location: locationDto});
-        console.log(result.body);
+        const result = await request(baseUrl).delete(`/v1/beneficiaries/${deleteUUID}`).set('Authorization', header);
         expect(result.status).toBe(200);
-        expect(result.body.data.location).toEqual(locationDto);
+        expect(result.body.success).toBe(true);
         expect(result.body.data).toEqual(result.body.data);
         expect(result.body.data).toHaveProperty('uuid');
         expect(result).toBeDefined();
     });
 
-    it('should throw error message if uuid is invalid', async () => {
+    it('should return error message if uuid is invalid', async () => {
         header = `Bearer ${accessToken}`;
-        const result = await request(baseUrl).patch(`/v1/beneficiaries/${invalidUUID}`).set('Authorization', header).send({location: locationDto});
-        expect(result.statusCode).toBe(400);
-        expect(result.body.message).toEqual("Data not Found");
-        expect(result).toBeDefined();
-    });
-
-    it('should update the deletedAt field of beneficiary', async () => {
-        header = `Bearer ${accessToken}`;
-        const result = await request(baseUrl).patch(`/v1/beneficiaries/remove/${verifiedUUID}`).set('Authorization', header);
-        expect(result.status).toBe(200);
-        expect(result.body.success).toBe(true); 
-        expect(result.body.data).toHaveProperty('uuid');       
-    });
-
-    it('should throw error message is uuid is invalid', async () => {
-        header = `Bearer ${accessToken}`;
-        const result = await request(baseUrl).patch(`/v1/beneficiaries/remove/${invalidUUID}`).set('Authorization', header);
+        const result = await request(baseUrl).delete(`/v1/beneficiaries/${invalidUUID}`).set('Authorization', header);
         expect(result.body.statusCode).toBe(400);
-        expect(result.body.message).toEqual('Data not Found');     
+        expect(result.body.message).toEqual('Data not Found');
+        expect(result.body.success).toBe(false);
     });
 });
 
