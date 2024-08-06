@@ -1,12 +1,12 @@
 import request from 'supertest';
 import { createBeneficiaryDto, createBeneficiaryDtoWallet, createBulkBeneficiaryDto, invalidPhone, invalidUUID, invalidWallet } from './testFixtureData';
-import {AuthsModule, AuthsService, User} from '@rumsan/user';
+import { AuthsModule, AuthsService, User } from '@rumsan/user';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 
 const baseUrl = "http://localhost:5500";
+const resCache = new Map();
 export const reqCache = new Map();
-export const resCache = new Map();
 
 describe('POST /v1/beneficiaries', () => {
     let accessToken;
