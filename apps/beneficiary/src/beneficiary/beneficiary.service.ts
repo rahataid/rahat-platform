@@ -709,7 +709,6 @@ export class BeneficiaryService {
   }
 
   async createBulk(dtos: CreateBeneficiaryDto[], projectUuid?: string) {
-    console.log(dtos, 'dtos in service');
     const hasPhone = dtos.every((dto) => dto.piiData.phone);
     if (!hasPhone) throw new RpcException('Phone number is required');
 
