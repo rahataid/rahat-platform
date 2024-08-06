@@ -32,6 +32,7 @@ export const SUBJECTS = {
   BENEFICIARY: 'beneficiary',
   PROJECT: 'project',
   VENDOR: 'vendor',
+  PUBLIC: 'puclic'
 };
 
 export const APP = {

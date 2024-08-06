@@ -204,6 +204,21 @@ enum TokenDataType {
 }
 
 // ++++++++++++++++++ END: @rumsan/settings +++++++++++++++++++++++++++
+
+model AuthApp {
+  id          Int @id @default(autoincrement())
+  uuid        String @unique @default(uuid())
+  name        String
+  description String?
+  publicKey   String @unique
+
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
+  @@map("tbl_auth_apps")
+}
+
 // ++++++++++++++++++ START: @rahat/beneficiaries +++++++++++++++++++++++++++
 
 model Beneficiary {
