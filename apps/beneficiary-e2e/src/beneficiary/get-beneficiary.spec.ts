@@ -2,7 +2,7 @@
 // import {AuthsModule, AuthsService, User} from '@rumsan/user';
 // import { EventEmitterModule } from '@nestjs/event-emitter';
 // import { Test, TestingModule } from '@nestjs/testing';
-// import { createBeneficiaryDto, extraDto } from './testFixtureData';
+// import { createBeneficiaryDto } from './testFixtureData';
 
 // const baseUrl = "http://localhost:5500";
 
@@ -57,7 +57,6 @@
 //         console.log(result.body);
 //         expect(result.status).toBe(200);
 //         expect(result.body.data.uuid).toBe(extraDto.uuid);
-//         // expect(result.req.headers.Authorization).toBe(header);
 //     });
 
 //     it('should return detail of beneficiary using phone', async () => {

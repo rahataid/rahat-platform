@@ -2,18 +2,20 @@ import { faker } from '@faker-js/faker';
 import { Gender } from '@rumsan/sdk/enums';
 import { BankedStatus, InternetStatus, PhoneStatus } from '@prisma/client';
 import { ethers } from 'ethers';
+import { randomUUID } from 'crypto';
 
 const wallet = ethers.Wallet.createRandom();
 const wallet2 = ethers.Wallet.createRandom();
 const wallet3 = ethers.Wallet.createRandom();
+export const invalidWallet = ethers.Wallet.createRandom();
+export const invalidPhone = faker.phone.number();
+export const invalidUUID = randomUUID();
 
 const getRandomEnumValue = (enumObj) => {
     const enumValues = Object.values(enumObj);
     const randomIndex = Math.floor(Math.random() * enumValues.length);
     return enumValues[randomIndex];
 };
-
-export const benefData = [];
 
 export const createBeneficiaryDto = {
     walletAddress: wallet.address,
@@ -71,7 +73,6 @@ export const createBeneficiaryDtoWallet = {
         }
     },   
 };
-
 
 export const createBulkBeneficiaryDto = [
     {

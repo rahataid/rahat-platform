@@ -1,12 +1,12 @@
 import request from 'supertest';
-import { createBeneficiaryDto, createBeneficiaryDtoWallet, createBulkBeneficiaryDto } from './testFixtureData';
+import { createBeneficiaryDto, createBeneficiaryDtoWallet, createBulkBeneficiaryDto, invalidPhone, invalidUUID, invalidWallet } from './testFixtureData';
 import {AuthsModule, AuthsService, User} from '@rumsan/user';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 
 const baseUrl = "http://localhost:5500";
-const reqCache = new Map();
-const resCache = new Map();
+export const reqCache = new Map();
+export const resCache = new Map();
 
 describe('POST /v1/beneficiaries', () => {
     let accessToken;
@@ -82,19 +82,26 @@ describe('POST /v1/beneficiaries', () => {
         expect(result.body.data).toEqual(result.body.data);
     });
 
-    it('should throw error if beneficiary isnot available when user access it using uuid', async () => {
+    it('should return null if uuid is invalid', async () => {
         header = `Bearer ${accessToken}`;
-        const cachedBeneficiaryUUID = "1671141b-8782-49f1-824c-7c39f08d7cd2";
-        const result = await request(baseUrl).get(`/v1/beneficiaries/${cachedBeneficiaryUUID}`).set('Authorization', header);
+        const result = await request(baseUrl).get(`/v1/beneficiaries/${invalidUUID}`).set('Authorization', header);
+        expect(result.status).toBe(200);
         expect(result.body.data).toEqual(null);
     });
 
-    it('should return detail of beneficiary using phone', async () => {
+    it('should return detail of beneficiary using phone number', async () => {
         header = `Bearer ${accessToken}`;
         const cachedBeneficiary = reqCache.get('beneficiary');
         const result = await request(baseUrl).get(`/v1/beneficiaries/phone/${cachedBeneficiary.piiData.phone}`).set('Authorization', header);
         expect(result.status).toBe(200);
         expect(result.body.data).toEqual(result.body.data);
+    });
+
+    it('should return null if phone number is invalid', async () => {
+        header = `Bearer ${accessToken}`;
+        const result = await request(baseUrl).get(`/v1/beneficiaries/phone/${invalidPhone}`).set('Authorization', header);
+        expect(result.status).toBe(200);
+        expect(result.body.data).toEqual(null);
     });
 
     it('should return detail of beneficiary using wallet address', async () => {
@@ -103,6 +110,13 @@ describe('POST /v1/beneficiaries', () => {
         const result = await request(baseUrl).get(`/v1/beneficiaries/wallet/${cachedBeneficiary.walletAddress}`).set('Authorization', header);
         expect(result.status).toBe(200);
         expect(result.body.data).toEqual(result.body.data);
+    });
+
+    it('should return null if wallet address is invalid', async () => {
+        header = `Bearer ${accessToken}`;
+        const result = await request(baseUrl).get(`/v1/beneficiaries/wallet/${invalidWallet.address}`).set('Authorization', header);
+        expect(result.status).toBe(200);
+        expect(result.body.data).toEqual(null);
     });
 
     it('should return pii detail of the beneficiary', async () => {
@@ -115,11 +129,8 @@ describe('POST /v1/beneficiaries', () => {
 
     it('should create beneficiaries in bulk', async () => {
         header = `Bearer ${accessToken}`;
-        console.log(createBulkBeneficiaryDto, 'createBulkBeneficiaryDto');
         const result = await request(baseUrl).post("/v1/beneficiaries/bulk").set('Authorization', header).send(createBulkBeneficiaryDto);
-        console.log(result.body, 'data');
         resCache.set('bulkBeneficiary', result.body.data);
-        console.log(resCache.get('bulkBeneficiary'), 'bulk post');
         expect(result.status).toBe(201);
         expect(result.body.data).toEqual(resCache.get('bulkBeneficiary'));        
     });
