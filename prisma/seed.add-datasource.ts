@@ -81,17 +81,6 @@ const projectStats = (url: string) => {
           rowSpan: 4,
         },
       ],
-      [
-        {
-          type: 'map',
-          props: {},
-          title: 'Beneficiaries GPS Location',
-          colSpan: 3,
-          dataMap: `BENEFICIARY_MAP_STATS`,
-          dataSrc: 'source2',
-          rowSpan: 1,
-        },
-      ],
     ],
   };
 };
