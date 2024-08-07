@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
 import { ACTIONS, APP, SUBJECTS } from '@rahataid/sdk';
@@ -39,7 +39,14 @@ export class AppController {
   @Put('auth-apps/:uuid')
   @ApiParam({ name: 'uuid', type: 'string' })
   async updateAuthApp(@Param('uuid') uuid: UUID, @Body() dto: UpdateAuthAppDto) {
-    console.log("UID", uuid)
     return this.appService.updateAuthApp(uuid, dto);
+  }
+
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
+  @Delete('auth-apps/:uuid')
+  @ApiParam({ name: 'uuid', type: 'string' })
+  async softDeleteAuthApp(@Param('uuid') uuid: UUID) {
+    return this.appService.softDeleteAuthApp(uuid);
   }
 }

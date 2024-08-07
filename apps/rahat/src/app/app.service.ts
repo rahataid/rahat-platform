@@ -83,6 +83,15 @@ export class AppService {
     })
   }
 
+  async softDeleteAuthApp(uuid: UUID) {
+    return this.prisma.authApp.update({
+      where: { uuid },
+      data: {
+        deletedAt: new Date()
+      }
+    })
+  }
+
   // =====End of Auth app services==========
 
   async createRahatAppSettings(

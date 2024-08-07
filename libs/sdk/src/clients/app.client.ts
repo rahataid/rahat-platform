@@ -28,6 +28,10 @@ export const getAppClient = (client: AxiosInstance): AppClient => {
         getAuthApp: async (uuid: UUID, config?: AxiosRequestConfig) => {
             const response = await client.get(`/app/auth-apps/${uuid}`, config);
             return formatResponse<TAuthApp>(response)
+        },
+        softDeleteAuthApp: async (uuid: UUID, config?: AxiosRequestConfig) => {
+            const response = await client.delete(`/app/auth-apps/${uuid}`, config);
+            return formatResponse<TAuthApp>(response)
         }
     };
 };

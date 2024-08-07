@@ -19,4 +19,6 @@ export type AppClient = {
     ) => Promise<FormattedResponse<TAuthApp[]>>;
     getAuthApp: (uuid: UUID, config?: AxiosRequestConfig
     ) => Promise<FormattedResponse<TAuthApp>>
+    softDeleteAuthApp: (uuid: UUID, config?: AxiosRequestConfig
+    ) => Promise<FormattedResponse<TAuthApp>>
 };
