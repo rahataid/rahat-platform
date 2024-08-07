@@ -183,6 +183,8 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE_GROUP })
   updateGroup(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryGroupDto) {
     const groupUUID = uuid ? uuid : dto?.uuid
+    console.log(groupUUID, 'groupUUID');
+    console.log(dto, 'dto');
     return this.service.updateGroup(groupUUID, dto)
   }
 

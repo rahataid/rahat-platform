@@ -1,12 +1,12 @@
 // import request from 'supertest';
-// import { deleteUUID, invalidUUID } from './testFixtureData';
 // import { AuthsModule, AuthsService, User } from '@rumsan/user';
 // import { EventEmitterModule } from '@nestjs/event-emitter';
 // import { Test, TestingModule } from '@nestjs/testing';
+// import { groupBeneficiaryDto, invalidUUID, verifiedBeneficiaryGroupUUID } from '../beneficiary/testFixtureData';
 
 // const baseUrl = "http://localhost:5500";
 
-// describe('DELETE /v1/beneficiaries', () => {
+// describe('UPDATE /v1/beneficiaries/groups', () => {
 //     let accessToken;
 //     let authService: AuthsService;
 //     let header;
@@ -51,22 +51,10 @@
 //         accessToken = token
 //     });    
 
-//     it('should delete the beneficiaries details', async () => {
-//         header = `Bearer ${accessToken}`;
-//         const result = await request(baseUrl).delete(`/v1/beneficiaries/${deleteUUID}`).set('Authorization', header);
-//         expect(result.status).toBe(200);
-//         expect(result.body.success).toBe(true);
-//         expect(result.body.data).toEqual(result.body.data);
-//         expect(result.body.data).toHaveProperty('uuid');
-//         expect(result).toBeDefined();
-//     });
-
-//     it('should return error message if uuid is invalid', async () => {
-//         header = `Bearer ${accessToken}`;
-//         const result = await request(baseUrl).delete(`/v1/beneficiaries/${invalidUUID}`).set('Authorization', header);
-//         expect(result.body.statusCode).toBe(400);
-//         expect(result.body.message).toEqual('Data not Found');
-//         expect(result.body.success).toBe(false);
+//     it('should update the beneficiary group using uuid', async () => {
+//         const header = `Bearer ${accessToken}`;
+//         const result = await request(baseUrl).patch(`/v1/beneficiaries/groups/${uuid}`).set('Authorization', header);
+//         console.log(result.body, 'result in patch group beneficiary');
 //     });
 // });
 

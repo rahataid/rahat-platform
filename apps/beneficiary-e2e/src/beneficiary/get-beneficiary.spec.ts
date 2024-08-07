@@ -49,7 +49,7 @@ describe('GET /v1/beneficiaries', () => {
         };
         const { accessToken: token } = await authService.signToken(mockUser, mockAuthority);
         accessToken = token
-    });    
+    });   
     
     it('should return detail of beneficiary using uuid', async () => {
         header = `Bearer ${accessToken}`;

@@ -1,12 +1,13 @@
 // import request from 'supertest';
-// import { deleteUUID, invalidUUID } from './testFixtureData';
 // import { AuthsModule, AuthsService, User } from '@rumsan/user';
 // import { EventEmitterModule } from '@nestjs/event-emitter';
 // import { Test, TestingModule } from '@nestjs/testing';
+// import { createProjectDto, resProject } from './testFixtureProjectData';
 
+// const projectResCache = new Map();
 // const baseUrl = "http://localhost:5500";
 
-// describe('DELETE /v1/beneficiaries', () => {
+// describe('POST /v1/projects', () => {
 //     let accessToken;
 //     let authService: AuthsService;
 //     let header;
@@ -51,22 +52,22 @@
 //         accessToken = token
 //     });    
 
-//     it('should delete the beneficiaries details', async () => {
+//     it('should create project details', async () => {
 //         header = `Bearer ${accessToken}`;
-//         const result = await request(baseUrl).delete(`/v1/beneficiaries/${deleteUUID}`).set('Authorization', header);
-//         expect(result.status).toBe(200);
+//         const result = await request(baseUrl).post('/v1/projects').set('Authorization', header).send(createProjectDto);
+//         projectResCache.set('project', result.body.data);
+//         expect(result.status).toBe(201);
 //         expect(result.body.success).toBe(true);
 //         expect(result.body.data).toEqual(result.body.data);
-//         expect(result.body.data).toHaveProperty('uuid');
-//         expect(result).toBeDefined();
 //     });
 
-//     it('should return error message if uuid is invalid', async () => {
+//     it('should return the project details using uuid', async () => {
 //         header = `Bearer ${accessToken}`;
-//         const result = await request(baseUrl).delete(`/v1/beneficiaries/${invalidUUID}`).set('Authorization', header);
-//         expect(result.body.statusCode).toBe(400);
-//         expect(result.body.message).toEqual('Data not Found');
-//         expect(result.body.success).toBe(false);
+//         const result = await request(baseUrl).get(`/v1/projects/${resProject.uuid}`).set('Authorization', header);
+//         console.log(result.body, 'get project');
+//         expect(result.status).toBe(200);
+//         expect(result.body.data).toEqual(resProject);
+//         expect(result).toBeDefined();
 //     });
 // });
 

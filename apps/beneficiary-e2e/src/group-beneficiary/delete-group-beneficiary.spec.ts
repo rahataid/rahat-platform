@@ -1,12 +1,13 @@
 // import request from 'supertest';
-// import { deleteUUID, invalidUUID } from './testFixtureData';
 // import { AuthsModule, AuthsService, User } from '@rumsan/user';
 // import { EventEmitterModule } from '@nestjs/event-emitter';
 // import { Test, TestingModule } from '@nestjs/testing';
+// import { invalidUUID } from '../beneficiary/testFixtureData';
+// import { groupUUIDDelete } from './testFixtureGroupData';
 
 // const baseUrl = "http://localhost:5500";
 
-// describe('DELETE /v1/beneficiaries', () => {
+// describe('DELETE /v1/beneficiaries/groups', () => {
 //     let accessToken;
 //     let authService: AuthsService;
 //     let header;
@@ -51,22 +52,21 @@
 //         accessToken = token
 //     });    
 
-//     it('should delete the beneficiaries details', async () => {
-//         header = `Bearer ${accessToken}`;
-//         const result = await request(baseUrl).delete(`/v1/beneficiaries/${deleteUUID}`).set('Authorization', header);
-//         expect(result.status).toBe(200);
-//         expect(result.body.success).toBe(true);
-//         expect(result.body.data).toEqual(result.body.data);
-//         expect(result.body.data).toHaveProperty('uuid');
-//         expect(result).toBeDefined();
-//     });
+//     // it('should delete the beneficiary group using uuid', async () => {
+//     //     header = `Bearer ${accessToken}`;
+//     //     const result = await request(baseUrl).delete(`/v1/beneficiaries/groups/${groupUUIDDelete}`).set('Authorization', header);
+//     //     console.log(result.body, 'get invalid uuid');
+//     //     expect(result.status).toBe(200);
+//     //     expect(result.body.success).toBe(true);
+//     //     expect(result.body.data).toEqual(result.body.data);
+//     // });
 
-//     it('should return error message if uuid is invalid', async () => {
+//     it('should return null if uuid is invalid', async () => {
 //         header = `Bearer ${accessToken}`;
-//         const result = await request(baseUrl).delete(`/v1/beneficiaries/${invalidUUID}`).set('Authorization', header);
+//         const result = await request(baseUrl).delete(`/v1/beneficiaries/groups/${invalidUUID}`).set('Authorization', header);
+//         console.log(result.body, 'get invalid uuid');
 //         expect(result.body.statusCode).toBe(400);
-//         expect(result.body.message).toEqual('Data not Found');
-//         expect(result.body.success).toBe(false);
+//         expect(result.body.message).toEqual('Beneficiary group not found or already deleted.');
 //     });
 // });
 
