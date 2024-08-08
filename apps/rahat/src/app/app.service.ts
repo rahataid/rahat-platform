@@ -72,7 +72,7 @@ export class AppService {
 
   async getByPublicKey(publicKey: string) {
     return this.prisma.authApp.findUnique({
-      where: { publicKey }
+      where: { publicKey, deletedAt: null }
     })
   }
 

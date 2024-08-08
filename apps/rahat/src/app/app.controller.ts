@@ -49,4 +49,10 @@ export class AppController {
   async softDeleteAuthApp(@Param('uuid') uuid: UUID) {
     return this.appService.softDeleteAuthApp(uuid);
   }
+
+  @Get('auth-apps/:publicKey/identity')
+  @ApiParam({ name: 'publicKey', type: 'string' })
+  async getByPublicKey(@Param('publicKey') publicKey: string) {
+    return this.appService.getByPublicKey(publicKey);
+  }
 }
