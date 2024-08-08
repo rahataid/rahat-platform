@@ -1,4 +1,6 @@
 import { faker } from "@faker-js/faker";
+const fields = ['id', 'uuid', 'name', 'createdAt', 'updatedAt', 'deletedAt'];
+const fields2 = ['asc', 'dsc']
 
 export const createProjectDto = {
     name: faker.word.sample(),
@@ -22,4 +24,12 @@ export const resProject = {
     createdAt: '2024-08-07T11:25:05.950Z',
     updatedAt: '2024-08-07T11:25:05.950Z',
     deletedAt: null
+};
+
+export const queryParams = {
+    sort: fields[Math.floor(Math.random() * fields.length)],
+    orderBy: fields2[Math.floor(Math.random() * fields2.length)],
+    page: faker.number.int({min: 1, max: 4}),
+    perPage: 10,
+    projectId: resProject.uuid,
 };

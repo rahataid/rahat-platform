@@ -59,8 +59,6 @@ describe('POST /v1/beneficiaries/groups', () => {
         const result = await request(baseUrl).post('/v1/beneficiaries/groups').set('Authorization', header).send(groupBeneficiaryDto);
         reqGroupCache.set('group', groupBeneficiaryDto);
         resGroupCache.set('resGroup', result.body.data);
-        console.log(reqGroupCache, 'reqGroupCache');
-        console.log(resGroupCache, 'resGroupCache');
         expect(result.status).toBe(201);
         expect(result.body.success).toBe(true);
         expect(result.body.data).toEqual(result.body.data);

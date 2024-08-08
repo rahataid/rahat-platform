@@ -50,16 +50,16 @@
 //         };
 //         const { accessToken: token } = await authService.signToken(mockUser, mockAuthority);
 //         accessToken = token
-//     });    
+//     }); 
 
-//     // it('should delete the beneficiary group using uuid', async () => {
-//     //     header = `Bearer ${accessToken}`;
-//     //     const result = await request(baseUrl).delete(`/v1/beneficiaries/groups/${groupUUIDDelete}`).set('Authorization', header);
-//     //     console.log(result.body, 'get invalid uuid');
-//     //     expect(result.status).toBe(200);
-//     //     expect(result.body.success).toBe(true);
-//     //     expect(result.body.data).toEqual(result.body.data);
-//     // });
+//     it('should delete the beneficiary group using uuid', async () => {
+//         header = `Bearer ${accessToken}`;
+//         const result = await request(baseUrl).delete(`/v1/beneficiaries/groups/${groupUUIDDelete}`).set('Authorization', header);
+//         console.log(result.body, 'get valid uuid');
+//         expect(result.status).toBe(200);
+//         expect(result.body.success).toBe(true);
+//         expect(result.body.data).toEqual(result.body.data);
+//     });
 
 //     it('should return null if uuid is invalid', async () => {
 //         header = `Bearer ${accessToken}`;

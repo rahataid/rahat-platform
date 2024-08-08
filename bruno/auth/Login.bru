@@ -1,0 +1,24 @@
+meta {
+  name: Login
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "challenge": "{{auth-challenge}}",
+    "otp": "438881",
+    "service": "EMAIL"
+  }
+}
+
+tests {
+  var resBody = res.getBody().data;
+  bru.setVar("access-token",resBody.accessToken)
+}

@@ -1,0 +1,15 @@
+meta {
+  name: create
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/beneficiaries
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access-token}}
+}

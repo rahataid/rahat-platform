@@ -205,6 +205,7 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL })
   async importBeneficiariesFromTool(data: any) {
+    console.log(data, 'data in import tool');
     return this.service.importBeneficiariesFromTool(data);
   }
 
