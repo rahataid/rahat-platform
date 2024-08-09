@@ -77,11 +77,10 @@ export class AppService {
     if (!row) return null;
     // Generate and update nonce message
     const nonceMessage = new Date().getTime().toString();
-    await this.prisma.authApp.update({
+    return this.prisma.authApp.update({
       where: { address },
       data: { nonceMessage }
     });
-    return row;
   }
 
   async updateAuthApp(uuid: UUID, dto: UpdateAuthAppDto) {

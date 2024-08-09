@@ -43,6 +43,7 @@ import { AbilitiesGuard, ACTIONS, CheckAbilities, JwtGuard, SUBJECTS } from '@ru
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, throwError, timeout } from 'rxjs';
+import { CheckHeaders, ExternalAppGuard } from '../decorators';
 import { DocParser } from './parser';
 
 function getDateInfo(dateString) {
@@ -339,6 +340,8 @@ export class BeneficiaryController {
   }
 
   @Post('import-tools')
+  @UseGuards(ExternalAppGuard)
+  @CheckHeaders('Signature')
   async importBeneficiariesFromTool(@Req() req: Request) {
     return this.client.send(
       {
