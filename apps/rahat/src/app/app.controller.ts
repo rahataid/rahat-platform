@@ -50,9 +50,9 @@ export class AppController {
     return this.appService.softDeleteAuthApp(uuid);
   }
 
-  @Get('auth-apps/:publicKey/identity')
-  @ApiParam({ name: 'publicKey', type: 'string' })
-  async getByPublicKey(@Param('publicKey') publicKey: string) {
-    return this.appService.getByPublicKey(publicKey);
+  @Get('auth-apps/:address/identity')
+  @ApiParam({ name: 'address', type: 'string' })
+  async getByAddress(@Param('address') address: string) {
+    return this.appService.getByAddress(address);
   }
 }

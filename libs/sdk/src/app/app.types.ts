@@ -4,7 +4,8 @@ export type TAuthApp = {
     uuid?: UUID;
     name?: string;
     description?: string;
-    publicKey?: string;
+    nonceMessage?: string;
+    address?: string;
     createdBy?: string;
     createdAt?: Date;
     updatedAt?: Date;

@@ -6,14 +6,19 @@ export class CreateAuthAppDto {
     @IsString()
     name: string;
 
-    @ApiProperty({ example: 'abc' })
+    @ApiProperty({ example: '0x0afe4eaaaf2080027620cdd' })
     @IsString()
-    publicKey: string;
+    address: string;
 
     @ApiProperty({ example: 'This is app desc' })
     @IsString()
     @IsOptional()
     description?: string;
+
+    @ApiProperty({ example: 'HelloWorld' })
+    @IsString()
+    @IsOptional()
+    nonceMessage?: string;
 
     @ApiProperty({ example: 'e4eaaaf2-d142-11e1-b3e4-080027620cdd' })
     @IsString()
