@@ -57,6 +57,6 @@ import { AppService } from './app.service';
   providers: [AppService, PrismaService, {
     provide: APP_GUARD,
     useClass: ExternalAppGuard,
-  },],
+  }],
 })
 export class AppModule { }

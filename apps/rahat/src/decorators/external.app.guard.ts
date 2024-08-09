@@ -17,7 +17,6 @@ export class ExternalAppGuard implements CanActivate {
         const headersToCheck = this.reflector.get<string[]>(CHECK_HEADERS_KEY, context.getHandler());
 
         if (!headersToCheck) return true;
-
         const request = context.switchToHttp().getRequest();
 
         for (const header of headersToCheck) {
