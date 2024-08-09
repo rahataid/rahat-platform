@@ -71,9 +71,17 @@ export class AppService {
   }
 
   async getByAddress(address: string) {
-    return this.prisma.authApp.findUnique({
+    const row = await this.prisma.authApp.findUnique({
       where: { address, deletedAt: null }
-    })
+    });
+    if (!row) return null;
+    // Generate and update nonce message
+    const nonceMessage = new Date().getTime().toString();
+    await this.prisma.authApp.update({
+      where: { address },
+      data: { nonceMessage }
+    });
+    return row;
   }
 
   async updateAuthApp(uuid: UUID, dto: UpdateAuthAppDto) {
