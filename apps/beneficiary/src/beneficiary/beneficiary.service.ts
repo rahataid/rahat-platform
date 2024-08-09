@@ -616,7 +616,15 @@ export class BeneficiaryService {
     });
 
     if (!findUuid) throw new Error('Data not Found');
-    const { piiData, ...rest } = dto;
+    const { piiData, id, ...rest } = dto;
+
+    const benWithSameNumber = await this.rsprisma.beneficiaryPii.findFirst({
+      where: {
+        phone: piiData.phone,
+        beneficiaryId: { not: id }
+      },
+    });
+    if (benWithSameNumber) throw new RpcException('Phone number should be unique');
 
     const rdata = await this.prisma.beneficiary.update({
       where: {
