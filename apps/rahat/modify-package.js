@@ -22,6 +22,8 @@ try {
     prisma: '^5.1.0',
     'ts-node': '^10.9.1',
     '@prisma/client': '^5.1.0',
+    dotenv: '16.4.5',
+    readline: '1.3.0',
   };
 
   packageData.prisma = {

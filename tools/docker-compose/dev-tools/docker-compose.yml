@@ -20,6 +20,8 @@ services:
       - rahat_pg_data:/var/lib/postgresql/data
     ports:
       - "${PG_PORT}:5432"
+    networks:
+      - rahat_platform
 
   pgadmin-rahat:
     image: dpage/pgadmin4:latest
@@ -34,6 +36,8 @@ services:
       - "${PGADMIN_PORT}:80"
     depends_on:
       - postgres-rahat
+    networks:
+      - rahat_platform
 
   ganache-rahat:
     image: trufflesuite/ganache
@@ -45,6 +49,8 @@ services:
       - "${GANACHE_PORT}:8545"
     volumes:
       - rahat_ganache_data:/db
+    networks:
+      - rahat_platform
 
   redis-rahat:
     container_name: redis-rahat
@@ -56,3 +62,12 @@ services:
       - REDIS_PASSWORD=${REDIS_PASS}
     volumes:
       - rahat_redis_data:/data
+    networks:
+      - rahat_platform
+      - rahat_projects
+
+networks:
+  rahat_platform:
+    external: true
+  rahat_projects:
+    external: true

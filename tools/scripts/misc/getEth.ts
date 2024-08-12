@@ -58,7 +58,7 @@ const rl = readline.createInterface({
 
 rl.question('Please enter the address to transfer test ether: ', async (userAddress) => {
     await sendToken(userAddress as `0x${string}`);
-    console.log(`Successfully sent ${ethAmount} ETH to`, userAddress);
+    console.log(`Successfully sent ${ethAmount} ETH to:`, userAddress);
     rl.close();
 });
 

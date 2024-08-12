@@ -2,7 +2,7 @@
 
 pnpm i
 
-source ./tools/scripts/utils.sh
+source ./tools/scripts/local-setup/utils.sh
 
 create_env
 
@@ -15,3 +15,6 @@ start_dev_tools
 get_ganache_accounts
 
 migrate_seed
+
+contract_setup
+graph_setup

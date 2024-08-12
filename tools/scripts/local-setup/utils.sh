@@ -43,6 +43,8 @@ create_rahat_volumes() {
 }
 
 start_dev_tools() {
+    docker network create rahat_platform
+    docker network create rahat_projects
     declare -a composeDirs=(
         "$current_dir/tools/docker-compose/dev-tools"
         "$current_dir/tools/docker-compose/graph"
@@ -80,6 +82,17 @@ remove_rahat_volumes() {
 
 rm_modules() {
     rm -rf dist node_modules tmp
+}
+
+contract_setup(){
+    pnpm seed:contracts
+    pnpm seed:network $current_dir
+}
+
+graph_setup() {
+    pnpm graph:create-local
+    graph_url=$(pnpm graph:deploy-local | grep -o 'http://[^ ]*' | tail -1)
+    export graph_url
 }
 
 reset() {

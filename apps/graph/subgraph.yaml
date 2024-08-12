@@ -1,0 +1,120 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: RahatAccessManager
+    network: mainnet
+    source:
+      abi: RahatAccessManager
+      address: "0xa13eFB17bD975F64e6b8458329E4cD1c9e442E3c"
+      startBlock: 1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - OperationCanceled
+        - OperationExecuted
+        - OperationScheduled
+        - RoleAdminChanged
+        - RoleGrantDelayChanged
+        - RoleGranted
+        - RoleGuardianChanged
+        - RoleLabel
+        - RoleRevoked
+        - TargetAdminDelayUpdated
+        - TargetClosed
+        - TargetFunctionRoleUpdated
+      abis:
+        - name: RahatAccessManager
+          file: ./abis/RahatAccessManager.json
+      eventHandlers:
+        - event: OperationCanceled(indexed bytes32,indexed uint32)
+          handler: handleOperationCanceled
+        - event: OperationExecuted(indexed bytes32,indexed uint32)
+          handler: handleOperationExecuted
+        - event: OperationScheduled(indexed bytes32,indexed
+            uint32,uint48,address,address,bytes)
+          handler: handleOperationScheduled
+        - event: RoleAdminChanged(indexed uint64,indexed uint64)
+          handler: handleRoleAdminChanged
+        - event: RoleGrantDelayChanged(indexed uint64,uint32,uint48)
+          handler: handleRoleGrantDelayChanged
+        - event: RoleGranted(indexed uint64,indexed address,uint32,uint48,bool)
+          handler: handleRoleGranted
+        - event: RoleGuardianChanged(indexed uint64,indexed uint64)
+          handler: handleRoleGuardianChanged
+        - event: RoleLabel(indexed uint64,string)
+          handler: handleRoleLabel
+        - event: RoleRevoked(indexed uint64,indexed address)
+          handler: handleRoleRevoked
+        - event: TargetAdminDelayUpdated(indexed address,uint32,uint48)
+          handler: handleTargetAdminDelayUpdated
+        - event: TargetClosed(indexed address,bool)
+          handler: handleTargetClosed
+        - event: TargetFunctionRoleUpdated(indexed address,bytes4,indexed uint64)
+          handler: handleTargetFunctionRoleUpdated
+      file: ./src/rahat-access-manager.ts
+  - kind: ethereum
+    name: RahatTreasury
+    network: mainnet
+    source:
+      abi: RahatTreasury
+      address: "0x614cf4c251d28C064dFBDe4f97140cE5Ba717Fe1"
+      startBlock: 1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - AuthorityUpdated
+        - TokenCreated
+        - TokenMintedAndApproved
+        - TokenMintedAndSent
+      abis:
+        - name: RahatTreasury
+          file: ./abis/RahatTreasury.json
+      eventHandlers:
+        - event: AuthorityUpdated(address)
+          handler: handleAuthorityUpdated
+        - event: TokenCreated(indexed address)
+          handler: handleTokenCreated
+        - event: TokenMintedAndApproved(indexed address,indexed address,uint256)
+          handler: handleTokenMintedAndApproved
+        - event: TokenMintedAndSent(indexed address,indexed address,uint256)
+          handler: handleTokenMintedAndSent
+      file: ./src/rahat-treasury.ts
+templates:
+  - name: RahatToken
+    kind: ethereum
+    network: mainnet
+    source:
+      abi: RahatToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - RahatTokenAuthorityUpdated
+        - OwnerAdded
+        - OwnerRemoved
+        - Transfer
+      abis:
+        - name: RahatToken
+          file: ./abis/RahatToken.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
+        - event: AuthorityUpdated(address)
+          handler: handleAuthorityUpdated
+        - event: OwnerAdded(indexed address)
+          handler: handleOwnerAdded
+        - event: OwnerRemoved(indexed address)
+          handler: handleOwnerRemoved
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/rahat-token.ts

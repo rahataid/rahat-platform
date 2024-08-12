@@ -3,6 +3,7 @@
 .env
 .env.*
 !.env.example
+!.env.setup.example
 play
 .npmrc
 
@@ -40,6 +41,9 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
+/apps/contracts/artifacts
+/tools/scripts/local-setup/web3_setup/deployments
+config/
 
 # System Files
 .DS_Store
@@ -53,3 +57,8 @@ combine.log
 error.log
 
 accounts.json
+
+# hardhat
+cache
+typechain-types
+
