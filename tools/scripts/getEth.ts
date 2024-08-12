@@ -4,7 +4,7 @@ import { createWalletClient, defineChain, http, parseEther } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 
 
-const gnacheAccounts = `${__dirname}/../../accounts.json`;
+const gnacheAccounts = `${__dirname}/../../../accounts.json`;
 const ethAmount = parseEther('1');
 
 const localChain = {
