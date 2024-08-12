@@ -514,7 +514,7 @@ model TempBeneficiary {
   govtIDNumber             String?
   gender                   Gender                 @default(UNKNOWN)
   birthDate                DateTime?
-  walletAddress            String
+  walletAddress            String                
   phone                    String?
   email                    String?
   archived                 Boolean                @default(false)
