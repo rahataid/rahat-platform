@@ -1,0 +1,39 @@
+meta {
+  name: get-beneficiary-uuid
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{url}}/beneficiaries/{{uuid}}
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access-token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data: isJson object
+}
+
+tests {
+  var resBody = res.getBody().data;
+  bru.setVar("benef-uuid", resBody.uuid);
+  bru.setVar("wallet-address", resBody.walletAddress);
+  bru.setVar("phone", resBody.piiData.phone);
+  
+  test('should return detail of beneficiary using uuid', async () => {
+    const resData = res.getBody();
+    expect(res.body.data.uuid).to.equal(resData.data.uuid);
+    expect(res.body.data).to.equal(resData.data);
+    expect(res.body.data).to.have.property('uuid');
+  });
+  
+  
+  
+  
+}

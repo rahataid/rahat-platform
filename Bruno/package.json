@@ -1,0 +1,9 @@
+{
+    "name": "rahat-core",
+    "version": "1.0.0",
+    "dependencies": {
+        "@faker-js/faker": "^8.4.1",
+        "ethers": "6.11.1",
+        "tslib": "2.6.2"
+    }
+}

@@ -1,0 +1,34 @@
+meta {
+  name: get-beneficiary-phone
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{url}}/beneficiaries/phone/{{phone}}
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access-token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.data: isJson
+  res.body.success: eq true
+}
+
+tests {
+  test('should return detail of beneficiary using phone number', async () => {
+    const result = res.getBody();
+    expect(res.body.data).to.equal(result.data);
+    expect(res.body.data.piiData.phone).to.equal(result.data.piiData.phone); 
+    expect(res.body.data.piiData).to.have.property('phone');
+  });
+  
+  
+  
+  
+}

@@ -1,0 +1,62 @@
+meta {
+  name: create-group-beneficiary
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/beneficiaries/groups
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access-token}}
+}
+
+body:json {
+  {
+    "name": "bruno-test",
+    "beneficiaries": [
+      {
+        "uuid": "{{benef-uuid}}"
+      },
+      {
+        "uuid": "{{benef-uuids}}"
+      }
+    ]
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.success: eq true
+}
+
+script:pre-request {
+  req.setBody({
+    name: "bruno-test",
+    beneficiaries: [
+      {
+        uuid: "{{benef-uuid}}"
+      },
+      {
+        uuid: "{{benef-uuids}}"
+      }
+    ]
+  })
+}
+
+tests {
+  var groupRes = res.getBody().data;
+  bru.setVar("benef-group", groupRes);
+  
+  test('should add the beneficiaries in a group', async () => {
+    const result = res.getBody();
+    expect(res.getStatus()).to.equal(201);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.equal(result.data);
+  });
+  
+  
+}

@@ -1,0 +1,43 @@
+meta {
+  name: get-accessToken
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "challenge": "{{auth-challenge}}",
+    "otp": "587435",
+    "service": "EMAIL"
+  }
+}
+
+script:pre-request {
+  req.setBody({
+    challenge: "{{auth-challenge}}",
+    otp: "587435" ,
+    service: "EMAIL"
+  })
+  
+}
+
+tests {
+  var resBody = res.getBody().data;
+  bru.setVar("access-token",resBody.accessToken);
+  
+  test("should be able to login", function() {
+    const data = res.getBody();
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body.data).to.equal(res.body.data);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.have.property("accessToken");
+  });
+  
+  
+}

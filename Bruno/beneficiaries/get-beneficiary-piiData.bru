@@ -1,0 +1,32 @@
+meta {
+  name: get-beneficiary-piiData
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{url}}/beneficiaries/pii
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access-token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data: isArray
+}
+
+tests {
+  test('should return pii detail of the beneficiaries', async () => {
+    const result = res.getBody();
+    expect(Array.isArray(result.data)).to.equal(true);
+    expect(result.data.every(item => typeof item === 'object')).to.equal(true);
+  });
+  
+  
+  
+}

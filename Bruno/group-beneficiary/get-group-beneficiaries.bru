@@ -1,0 +1,39 @@
+meta {
+  name: get-group-beneficiaries
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{url}}/beneficiaries/groups/{{group-details.uuid}}
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access-token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+}
+
+tests {
+  var groupDetails = res.getBody().data;
+  bru.setVar("group-details", groupDetails);
+  bru.setVar("group-uuid", groupDetails.uuid);
+  
+  test('should return group detail using uuid', async () => {
+    const result = res.getBody();
+    expect(res.body.data).to.equal(result.data);
+    expect(res.body.data).to.have.property('id');
+    expect(res.body.data).to.have.property('uuid');
+    expect(res.body.data).to.have.property('name');
+    expect(res.body.data).to.have.property('createdAt');
+    expect(res.body.data).to.have.property('updatedAt');
+    expect(res.body.data).to.have.property('deletedAt');
+    expect(res.body.data).to.have.property('groupedBeneficiaries');
+  });
+  
+}

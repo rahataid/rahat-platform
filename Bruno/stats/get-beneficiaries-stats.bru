@@ -1,0 +1,28 @@
+meta {
+  name: get-beneficiaries-stats
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/beneficiaries/stats
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access-token}}
+}
+
+tests {
+  test('should return the beneficiaries stats details', async () => {
+    const result = res.getBody();
+    expect(res.getStatus()).to.equal(200);
+    expect(result.success).to.equal(true);
+    expect(res.body.data).to.equal(result.data);
+    expect(Array.isArray(result.data)).to.equal(true);
+    expect(result.data.every(item => typeof item === 'object')).to.equal(true);
+  });
+  
+  
+}
