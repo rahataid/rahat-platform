@@ -6,7 +6,7 @@ dotenv.config({ path: `${__dirname}/.env.setup` });
 const modifyNetworksFile = async (
     networkName: string = 'mainnet',
 ) => {
-    const graphNetworksPath = `${__dirname}/../../apps/graph/networks.json`;
+    const graphNetworksPath = `${__dirname}/../../../apps/graph/networks.json`;
     const deploymentFilePath = `${__dirname}/deployments/contracts.json`;
     try {
         const contractData = await fs.readFile(deploymentFilePath, 'utf8');
