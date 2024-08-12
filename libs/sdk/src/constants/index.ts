@@ -229,5 +229,8 @@ export const MS_ACTIONS = {
     UPDATE_REDEMPTION: 'rpProject.updateRedemption',
     LIST_REDEMPTION: 'rpProject.listRedemption',
     GET_VENDOR_REDEMPTION: 'rpProject.vendorRedemption',
+    GENERATE_OTP_HASH: 'rpProject.generateOtpHash',
+    GET_OFFLINE_BENEFICIARIES: "rpProject.getOfflineBeneficiaries",
+    SYNC_OFFLINE_BENEFICIARIES: "rpProject.syncOfflineBeneficiaries"
   }
 };

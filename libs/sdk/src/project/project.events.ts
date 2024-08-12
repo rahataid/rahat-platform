@@ -28,6 +28,7 @@ export const JOBS = {
   REQUEST_CLAIM: 'rahat.jobs.project.request_claim',
   GET_VENDOR_STATS: 'rahat.jobs.project.get_vendor_stats',
 
+
   DISBURSEMENT_PLAN: {
     CREATE_DISBURSEMENT: 'rahat.jobs.disbursement.create',
     LIST_DISBURSEMENT: 'rahat.jobs.disbursement.list',
@@ -49,6 +50,9 @@ export const JOBS = {
     GET_ALL_COMMUNICATION_LOGS: 'rahat.jobs.campaign.communication_logs',
     GET_ALL_COMMUNICATION_STATS: 'rahat.jobs.campaign.communication_stats',
     CREATE_AUDIENCE: 'rahat.jobs.campaign.create_audience',
-
+  },
+  OFFLINE_BENEFICIARIES: {
+    SYNC_BENEFICIARIES: "rahat.jobs.sync_beneficiaries",
+    GET_SYNCED_BENEFICIARIES: "rahat.jobs.get_synced_beneficiaries"
   }
 };
