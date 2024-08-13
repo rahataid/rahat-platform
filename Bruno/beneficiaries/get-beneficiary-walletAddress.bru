@@ -17,13 +17,12 @@ headers {
 assert {
   res.status: eq 200
   res.body.success: eq true
-  res.body.data: isJson 
+  res.body.data: isJson
 }
 
 tests {
   test('should return detail of beneficiary using wallet address', async () => {
     const result = res.getBody();
-    expect(res.getStatus()).to.equal(200);
     expect(res.body.data).to.equal(result.data);
     expect(res.body.data.walletAddress).to.equal(result.data.walletAddress); 
     expect(res.body.data).to.have.property('walletAddress');

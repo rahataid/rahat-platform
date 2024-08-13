@@ -10,21 +10,12 @@ post {
   auth: none
 }
 
-body:json {
-  {
-    "challenge": "{{auth-challenge}}",
-    "otp": "587435",
-    "service": "EMAIL"
-  }
-}
-
 script:pre-request {
   req.setBody({
     challenge: "{{auth-challenge}}",
-    otp: "587435" ,
+    otp: "{{otp}}",
     service: "EMAIL"
   })
-  
 }
 
 tests {
@@ -38,6 +29,4 @@ tests {
     expect(res.body.success).to.equal(true);
     expect(res.body.data).to.have.property("accessToken");
   });
-  
-  
 }

@@ -10,12 +10,9 @@ post {
   auth: none
 }
 
-body:json {
-  {
-    "address": "{{user-email}}",
-    "service": "EMAIL",
-    "clientId": "{{client-id}}"
-  }
+assert {
+  res.status: eq 200
+  res.body.success: eq true
 }
 
 script:pre-request {
@@ -24,12 +21,11 @@ script:pre-request {
     service: "EMAIL",
     clientId: "{{client-id}}"
   })
-  
 }
 
 tests {
   var resBody = res.getBody().data;
-  bru.setVar("auth-challenge", resBody.challenge);
+  bru.setEnvVar("auth-challenge", resBody.challenge);
   
   test("should be able to provide otp token", function() {
     const data = res.getBody();
@@ -38,6 +34,4 @@ tests {
     expect(res.body.success).to.equal(true);
     expect(res.body.data).to.have.property("challenge");
   });
-  
-  
 }

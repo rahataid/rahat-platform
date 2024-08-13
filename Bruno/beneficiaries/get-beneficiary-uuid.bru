@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{url}}/beneficiaries/{{uuid}}
+  url: {{url}}/beneficiaries/{{benef-uuid}}
   body: none
   auth: none
 }
@@ -22,8 +22,6 @@ assert {
 
 tests {
   var resBody = res.getBody().data;
-  bru.setVar("benef-uuid", resBody.uuid);
-  bru.setVar("wallet-address", resBody.walletAddress);
   bru.setVar("phone", resBody.piiData.phone);
   
   test('should return detail of beneficiary using uuid', async () => {

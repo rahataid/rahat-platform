@@ -14,28 +14,18 @@ headers {
   Authorization: Bearer {{access-token}}
 }
 
-body:json {
-  {
-    "name": "bruno-test",
-    "beneficiaries": [
-      {
-        "uuid": "{{benef-uuid}}"
-      },
-      {
-        "uuid": "{{benef-uuids}}"
-      }
-    ]
-  }
-}
-
 assert {
   res.status: eq 201
   res.body.success: eq true
 }
 
 script:pre-request {
+  const {faker} = require("@faker-js/faker");
+  
+  const name = faker.name.fullName();
+  
   req.setBody({
-    name: "bruno-test",
+    name,
     beneficiaries: [
       {
         uuid: "{{benef-uuid}}"
