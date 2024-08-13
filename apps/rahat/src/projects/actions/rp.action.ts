@@ -138,5 +138,34 @@ export const rpActions: ProjectActionFunc = {
       5000
     ),
 
+  [MS_ACTIONS.RPPROJECT.GET_OFFLINE_VENDORS]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      {
+        cmd: ProjectJobs.OFFLINE_BENEFICIARIES.GET_OFFLINE_VENDORS,
+        uuid,
+      },
+      payload,
+      5000
+    ),
+  [MS_ACTIONS.RPPROJECT.GET_OFFLINE_SINGLE_VENDOR]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      {
+        cmd: ProjectJobs.OFFLINE_BENEFICIARIES.GET_OFFLINE_SINGLE_VENDOR,
+        uuid,
+      },
+      payload,
+      5000
+    ),
+
+  [MS_ACTIONS.RPPROJECT.SAVE_SYNCED_BENEFICIARIES_TO_VENDOR]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      {
+        cmd: ProjectJobs.OFFLINE_BENEFICIARIES.SAVE_SYNCED_BENEFICIARIES_TO_VENDOR,
+        uuid,
+      },
+      payload,
+      5000
+    ),
+
 
 };

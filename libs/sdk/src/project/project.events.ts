@@ -53,6 +53,10 @@ export const JOBS = {
   },
   OFFLINE_BENEFICIARIES: {
     SYNC_BENEFICIARIES: "rahat.jobs.sync_beneficiaries",
-    GET_SYNCED_BENEFICIARIES: "rahat.jobs.get_synced_beneficiaries"
+    GET_SYNCED_BENEFICIARIES: "rahat.jobs.get_synced_beneficiaries",
+    GET_OFFLINE_VENDORS: "rahat.jobs.get_offline_vendors",
+    GET_OFFLINE_SINGLE_VENDOR: "rahat.jobs.get_offline_single_vendor",
+    SAVE_SYNCED_BENEFICIARIES_TO_VENDOR: "rahat.jobs.save_synced_beneficiaries_to_vendor",
+
   }
 };
