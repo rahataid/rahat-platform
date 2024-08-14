@@ -1,0 +1,44 @@
+meta {
+  name: get-challenge
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/auth/challenge
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 201
+  res.success: eq true
+}
+
+tests {
+  const { privateKeyToAccount } = require('viem/accounts');
+  
+  async function signMessages() {
+    const account = privateKeyToAccount("{{privateKey}}")
+    console.log(account, 'account');
+    const signature = await account.signMessage({
+      message: 'Sample message',
+    })
+    bru.setVar('signature', signature);
+    console.log(bru.getVar('signature'), 'signature');
+  }
+  
+  signMessages();
+  
+  var resChall = res.getBody().data;
+  console.log(resChall, 'resChall');
+  bru.setVar('challenge',resChall.challenge);
+  console.log(bru.getVar('challenge'), 'challenge');
+  
+  test('should return challenge', async () => {
+    const result = res.getBody();
+    console.log(result);
+    expect(res.body.data).to.equal(result.data);
+    expect(result.data).to.have.property('challenge');
+  });
+}

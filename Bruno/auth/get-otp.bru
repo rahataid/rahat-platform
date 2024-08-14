@@ -24,11 +24,14 @@ script:pre-request {
 }
 
 tests {
+  const sessionVars = require('./session-vars');
   var resBody = res.getBody().data;
   bru.setEnvVar("auth-challenge", resBody.challenge);
+  sessionVars.test = resBody.challenge;
   
   test("should be able to provide otp token", function() {
     const data = res.getBody();
+    console.log(sessionVars.test, 'hello')
     expect(res.getStatus()).to.equal(200);
     expect(res.body.data).to.equal(res.body.data);
     expect(res.body.success).to.equal(true);
