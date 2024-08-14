@@ -5,9 +5,10 @@
         "@faker-js/faker": "^8.4.1",
         "@noble/hashes": "^1.4.0",
         "@scure/bip32": "^1.4.0",
-        "crypto": "^1.0.1",
         "ethers": "6.11.1",
+        "text-encoding": "^0.7.0",
         "tslib": "2.6.2",
+        "util": "^0.12.5",
         "viem": "^2.19.4"
     }
 }

@@ -5,5 +5,20 @@
   "ignore": [
     "node_modules",
     ".git"
-  ]
+  ],
+  "scripts": {
+    "moduleWhitelist": [
+      "crypto",
+      "@noble/curves/secp256k1",
+      "@noble/curves/abstract/modular",
+      "@scure/base",
+      "util"
+    ],
+    "filesystemAccess": {
+      "allow": true
+    },
+    "polyfills": [
+      "text-encoding"
+    ]
+  }
 }
