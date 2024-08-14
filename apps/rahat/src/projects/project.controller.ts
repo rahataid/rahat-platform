@@ -116,8 +116,8 @@ export class ProjectController {
   }
 
   //list project specific stats
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
-  @ApiParam({ name: 'uuid', required: true })
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @ApiParam({ name: 'uuid', required: true })
   @Get(':uuid/stats')
   projectStats(@Param('uuid') uuid: UUID) {
     return this.benClient
@@ -152,4 +152,4 @@ export class ProjectController {
   }
 
 
-} 
+}
