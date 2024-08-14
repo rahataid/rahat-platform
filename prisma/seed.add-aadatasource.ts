@@ -144,7 +144,7 @@ const projectStats = (url: string) => {
             dataMap: ``,
             dataSrc: 'source2',
             rowSpan: 1,
-            icon: 'MessageSquare'
+            icon: 'MessageSquare',
           },
           {
             type: 'dataCard',
@@ -171,8 +171,7 @@ const projectStats = (url: string) => {
             rowSpan: 1,
           },
         ],
-      }
-
+      },
     ],
   };
 };

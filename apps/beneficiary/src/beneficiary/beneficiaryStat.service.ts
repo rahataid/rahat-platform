@@ -8,7 +8,7 @@ export class BeneficiaryStatService {
   constructor(
     protected prisma: PrismaService,
     private readonly statsService: StatsService
-  ) { }
+  ) {}
 
   async getTableStats() {
     return await this.prisma.stats.findMany({});
