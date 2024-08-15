@@ -1,7 +1,7 @@
 meta {
   name: get-challenge
   type: http
-  seq: 3
+  seq: 1
 }
 
 post {
@@ -20,23 +20,18 @@ tests {
   console.log(resChall, 'resChall');
   bru.setVar('challenge',resChall.challenge);
   console.log(bru.getVar('challenge'), 'challenge');
-
-  const { privateKeyToAccount } = require('viem/accounts');
-  const { TextEncoder } = require('text-encoding');
-
+  
+  const {ethers} = require('ethers');
+  
   async function signMessage(message) {
-    const account = privateKeyToAccount("{{privateKey}}")
-    console.log(account, 'account');
-    const encoder = new TextEncoder();
-    const uint8Array = encoder.encode(message);
-    const signature = await account.signMessage({
-      message,
-    })
+    const wallet = new ethers.Wallet(bru.getEnvVar('private-key'));
+    const signature = await wallet.signMessage(message);
+    console.log(signature, 'signature');
     bru.setVar('signature', signature);
     console.log(bru.getVar('signature'), 'signature');
   }
-
-  signMessages('Sample message');
+  
+  await signMessage(bru.getVar('challenge'));
   
   test('should return challenge', async () => {
     const result = res.getBody();

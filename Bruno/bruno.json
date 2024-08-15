@@ -9,10 +9,11 @@
   "scripts": {
     "moduleWhitelist": [
       "crypto",
-      "@noble/curves/secp256k1",
-      "@noble/curves/abstract/modular",
-      "@scure/base",
-      "util"
+      "util",
+      "events",
+      "net",
+      "tls",
+      "buffer"
     ],
     "filesystemAccess": {
       "allow": true
