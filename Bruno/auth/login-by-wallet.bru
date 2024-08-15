@@ -1,0 +1,25 @@
+meta {
+  name: login-by-wallet
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/auth/wallet
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "challenge":"{{challenge}}",
+    "signature":"{{signature}}"
+  }
+}
+
+tests {
+  const response = res.getBody().data;
+  console.log(response.accessToken, 'accessToken');
+  bru.setEnvVar('access-token', response.accessToken);
+  
+}
