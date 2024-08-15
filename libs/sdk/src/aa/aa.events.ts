@@ -1,6 +1,6 @@
 export const JOBS = {
   RIVER_STATIONS: {
-    GET_DHM: 'aa.jobs.riverStations.getDhm'
+    GET_DHM: 'aa.jobs.riverStations.getDhm',
   },
   WATER_LEVELS: {
     GET_DHM: 'aa.jobs.waterLevels.getDhm',
@@ -17,6 +17,7 @@ export const JOBS = {
   ACTIVITIES: {
     GET_ONE: 'aa.jobs.activities.getOne',
     GET_ALL: 'aa.jobs.activities.getAll',
+    GET_HAVING_COMMS: 'aa.jobs.activities.getHavingComms',
     ADD: 'aa.jobs.activities.add',
     REMOVE: 'aa.jobs.activities.remove',
     UPDATE: 'aa.jobs.activities.update',
@@ -25,7 +26,7 @@ export const JOBS = {
   ACTIVITY_CATEGORIES: {
     GET_ALL: 'aa.jobs.activityCategories.getAll',
     ADD: 'aa.jobs.activityCategories.add',
-    REMOVE: 'aa.jobs.activityCategories.remove'
+    REMOVE: 'aa.jobs.activityCategories.remove',
   },
   COMMUNICATION: {
     ADD: 'aa.jobs.activity.communication.add',
@@ -40,7 +41,7 @@ export const JOBS = {
     GET_ALL: 'aa.jobs.phases.getAll',
     GET_STATS: 'aa.jobs.phases.getStats',
     ADD_TRIGGERS: 'aa.jobs.phases.addTriggers',
-    REVERT_PHASE: 'aa.jobs.phases.revertPhase'
+    REVERT_PHASE: 'aa.jobs.phases.revertPhase',
   },
   STAKEHOLDERS: {
     GET_ALL: 'aa.jobs.stakeholders.getAll',
@@ -52,7 +53,7 @@ export const JOBS = {
     GET_ONE_GROUP: 'aa.jobs.stakeholders.getOneGroup',
     ADD_GROUP: 'aa.jobs.stakeholders.addGroup',
     UPDATE_GROUP: 'aa.jobs.stakeholders.updateGroup',
-    DELETE_GROUP: 'aa.jobs.stakeholders.deleteGroup'
+    DELETE_GROUP: 'aa.jobs.stakeholders.deleteGroup',
   },
   BENEFICIARY: {
     ADD_GROUP: 'aa.jobs.beneficiary.addGroup',
@@ -62,14 +63,14 @@ export const JOBS = {
     GET_ONE_GROUP: 'aa.jobs.beneficiary.getOneGroup',
     GET_ALL_TOKEN_RESERVATION: 'aa.jobs.beneficiary.getAllTokenReservation',
     GET_ONE_TOKEN_RESERVATION: 'aa.jobs.beneficiary.getOneTokenReservation',
-    GET_RESERVATION_STATS: 'aa.jobs.beneficiary.getReservationStats'
+    GET_RESERVATION_STATS: 'aa.jobs.beneficiary.getReservationStats',
   },
   CONTRACT: {
-    INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget'
+    INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget',
   },
   STATS: {
     GET_COMMS: 'aa.jobs.stats.getComms',
-    GET_ALL: 'aa.jobs.stats.getAll'
+    GET_ALL: 'aa.jobs.stats.getAll',
   },
   DAILY_MONITORING: {
     ADD: 'aa.jobs.dailyMonitoring.add',
@@ -77,5 +78,5 @@ export const JOBS = {
     GET_ONE: 'aa.jobs.dailyMonitoring.getOne',
     UPDATE: 'aa.jobs.dailyMonitoring.update',
     REMOVE: 'aa.jobs.dailyMonitoring.remove',
-  }
+  },
 };
