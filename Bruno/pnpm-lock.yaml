@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@adraffy/ens-normalize':
+        specifier: ^1.10.1
+        version: 1.10.1
       '@faker-js/faker':
         specifier: ^8.4.1
         version: 8.4.1
@@ -32,6 +35,9 @@ importers:
       viem:
         specifier: ^2.19.4
         version: 2.19.4
+      ws:
+        specifier: ^8.18.0
+        version: 8.18.0
 
 packages:
 
@@ -203,6 +209,18 @@ packages:
 
   ws@8.17.1:
     resolution: {integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
+  ws@8.18.0:
+    resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -411,5 +429,7 @@ snapshots:
       has-tostringtag: 1.0.2
 
   ws@8.17.1: {}
+
+  ws@8.18.0: {}
 
   ws@8.5.0: {}

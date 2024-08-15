@@ -9,16 +9,19 @@
   "scripts": {
     "moduleWhitelist": [
       "crypto",
+      "events",
+      "net",
+      "tls",
+      "buffer",
+      "aes-js",
       "@noble/curves/secp256k1",
       "@noble/curves/abstract/modular",
       "@scure/base",
-      "util"
+      "util",
+      "@noble/curves/secp256k1"
     ],
     "filesystemAccess": {
       "allow": true
-    },
-    "polyfills": [
-      "text-encoding"
-    ]
+    }
   }
 }

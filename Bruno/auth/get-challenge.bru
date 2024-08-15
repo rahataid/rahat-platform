@@ -12,35 +12,46 @@ post {
 
 assert {
   res.status: eq 201
-  res.success: eq true
+  res.body.success: eq true
 }
 
 tests {
   var resChall = res.getBody().data;
-  console.log(resChall, 'resChall');
+  // console.log(resChall, 'resChall');
   bru.setVar('challenge',resChall.challenge);
-  console.log(bru.getVar('challenge'), 'challenge');
+  // console.log(bru.getVar('challenge'), 'challenge');
 
-  const { privateKeyToAccount } = require('viem/accounts');
-  const { TextEncoder } = require('text-encoding');
-
+  const { ethers } = require('ethers');
+  
+  // const { privateKeyToAccount } = require('viem/accounts');
+  
+  // async function signMessage(message) {
+  //   const account = privateKeyToAccount("0x4c5Eab717721F61587d92Ed3904C70428854B32f")
+  //   console.log(account, 'account');
+  //   const uint8Array = Buffer.from(message, 'utf8');
+  //   const signature = await account.signMessage({
+  //     message: uint8Array,
+  //   })
+  //   bru.setVar('signature', signature);
+  //   console.log(bru.getVar('signature'), 'signature');
+  // }
+  
   async function signMessage(message) {
-    const account = privateKeyToAccount("{{privateKey}}")
-    console.log(account, 'account');
-    const encoder = new TextEncoder();
-    const uint8Array = encoder.encode(message);
-    const signature = await account.signMessage({
-      message,
-    })
+    console.log(message, 'message');
+    // const privateKey = "0x{{private-key}}"
+    // console.log("{{private-key}}", 'private key');
+    const wallet = new ethers.Wallet("0x66586f143cca77fe4fcb59bb90f9625ea5081d65ca09d3aef2ce7eb77fbdb27c");
+    console.log(wallet, 'wallet');
+    const signature = await wallet.signMessage(message);
     bru.setVar('signature', signature);
     console.log(bru.getVar('signature'), 'signature');
   }
-
-  signMessages('Sample message');
+  
+  signMessage('Sample message');
+  
   
   test('should return challenge', async () => {
     const result = res.getBody();
-    console.log(result);
     expect(res.body.data).to.equal(result.data);
     expect(result.data).to.have.property('challenge');
   });
