@@ -13,12 +13,7 @@
       "net",
       "tls",
       "buffer",
-      "aes-js",
-      "@noble/curves/secp256k1",
-      "@noble/curves/abstract/modular",
-      "@scure/base",
-      "util",
-      "@noble/curves/secp256k1"
+      "util"
     ],
     "filesystemAccess": {
       "allow": true
