@@ -32,6 +32,7 @@ export class BeneficiaryProcessor {
     if (!groups.length) return;
     const beneficiaries = groups.map((f) => f.tempBeneficiary);
     if (!beneficiaries.length) return;
+    console.log("Total Benef=>", beneficiaries.length)
     // Validate existing benef
     // =====Txn start====
     try {
@@ -41,7 +42,7 @@ export class BeneficiaryProcessor {
           await importAndAddToGroup({ txn, beneficiaries: batch, tempGroup });
         }, {
           maxWait: 5000,
-          timeout: 6000
+          timeout: 25000
         })
       }
       await removeTempGroup(this.prisma, tempGroup.uuid);
@@ -76,6 +77,7 @@ export class BeneficiaryProcessor {
 async function importAndAddToGroup({ txn, beneficiaries, tempGroup }) {
   const { name, uuid: tempGUID } = tempGroup;
   const group = await upsertGroup(txn, name);
+  console.log("Group upsert!")
   for (let benef of beneficiaries) {
     const { uuid, ...rest } = benef;
     const { piiData, nonPii } = splitBeneficiaryPII(rest);
@@ -83,8 +85,8 @@ async function importAndAddToGroup({ txn, beneficiaries, tempGroup }) {
     const piiDataPayload = { ...piiData, beneficiaryId: newBenef.id };
     await upsertPiiData(txn, piiDataPayload);
     await addBenefToGroup(txn, group.uuid, newBenef.uuid);
-    await removeFromTempBenefGroup(txn, uuid, tempGUID);
-    await removeTempBeneficiary(txn, uuid);
+    const removed = await removeFromTempBenefGroup(txn, uuid, tempGUID);
+    await removeTempBeneficiary(txn, removed.tempBenefUID);
   }
 }
 
@@ -127,6 +129,8 @@ async function addBenefToGroup(txn: any, groupUID: UUID, benefUID: UUID) {
 };
 
 async function removeTempBeneficiary(txn: any, uuid: UUID) {
+  const rows = await txn.tempBeneficiaryGroup.findMany({ where: { tempBenefUID: uuid } });
+  if (rows.length) return;
   return txn.tempBeneficiary.delete({ where: { uuid } })
 }
 
