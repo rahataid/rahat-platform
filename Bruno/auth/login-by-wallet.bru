@@ -17,9 +17,27 @@ body:json {
   }
 }
 
-tests {
-  const response = res.getBody().data;
-  console.log(response.accessToken, 'accessToken');
-  bru.setEnvVar('access-token', response.accessToken);
+script:pre-request {
+  const {ethers} = require('ethers');
   
+  async function signMessage(message) {
+    const wallet = new ethers.Wallet(bru.getEnvVar('private-key'));
+    const signature = await wallet.signMessage(message);
+    bru.setVar('signature', signature);
+  }
+  
+  await signMessage(bru.getVar('challenge'));
+}
+
+script:post-response {
+  const responseData = res.getBody().data;
+  bru.setVar("access-token", responseData.accessToken);
+
+}
+
+tests {
+  test('should return challenge', async () => {
+    const resposeData = res.getBody().data
+    expect(resposeData).to.have.property('accessToken');
+  });
 }

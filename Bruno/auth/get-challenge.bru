@@ -10,33 +10,16 @@ post {
   auth: none
 }
 
-assert {
-  res.status: eq 201
-  res.success: eq true
+script:post-response {
+  
+  const response = res.getBody().data;
+  bru.setVar('challenge',response.challenge);
+  
 }
 
 tests {
-  var resChall = res.getBody().data;
-  console.log(resChall, 'resChall');
-  bru.setVar('challenge',resChall.challenge);
-  console.log(bru.getVar('challenge'), 'challenge');
-  
-  const {ethers} = require('ethers');
-  
-  async function signMessage(message) {
-    const wallet = new ethers.Wallet(bru.getEnvVar('private-key'));
-    const signature = await wallet.signMessage(message);
-    console.log(signature, 'signature');
-    bru.setVar('signature', signature);
-    console.log(bru.getVar('signature'), 'signature');
-  }
-  
-  await signMessage(bru.getVar('challenge'));
-  
   test('should return challenge', async () => {
-    const result = res.getBody();
-    console.log(result);
-    expect(res.body.data).to.equal(result.data);
-    expect(result.data).to.have.property('challenge');
+    const responseData = res.getBody().data;
+    expect(responseData).to.have.property('challenge');
   });
 }

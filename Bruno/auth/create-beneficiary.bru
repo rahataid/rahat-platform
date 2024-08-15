@@ -1,17 +1,13 @@
 meta {
   name: create-beneficiary
   type: http
-  seq: 1
+  seq: 3
 }
 
 post {
   url: {{url}}/beneficiaries
   body: json
   auth: none
-}
-
-headers {
-  Authorization: Bearer {{access-token}}
 }
 
 assert {
@@ -22,9 +18,9 @@ assert {
 
 script:pre-request {
   const { faker } = require("@faker-js/faker");
-  const access_token = bru.getEnvVar("access_token");
+  const access_token = bru.getVar("access-token");
   console.log({access_token})
-  req.setHeader("Authorization",`Bearer ${bru.getEnvVar("access_token")}`);
+  req.setHeader("Authorization",`Bearer ${access_token}`);
   
   const gender = "FEMALE";
   const birthDate = faker.date.birthdate().toISOString();
