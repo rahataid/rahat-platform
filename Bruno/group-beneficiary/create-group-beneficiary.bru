@@ -10,10 +10,6 @@ post {
   auth: none
 }
 
-headers {
-  Authorization: Bearer {{access-token}}
-}
-
 assert {
   res.status: eq 201
   res.body.success: eq true

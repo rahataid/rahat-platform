@@ -1,0 +1,43 @@
+meta {
+  name: patch-beneficiary-uuid
+  type: http
+  seq: 8
+}
+
+patch {
+  url: {{url}}/beneficiaries/{{uuid}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data: isJson
+  res.body.data: isDefined 
+}
+
+script:pre-request {
+  const { access_token } = require('./temp/auth-data.json');
+  const { beneficiaryData } = require('./temp/beneficiary-data.json');
+  const { faker } = require("@faker-js/faker");
+  
+  const url = bru.getEnvVar('url');
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+  req.setUrl(`${url}/beneficiaries/${beneficiaryData.uuid}`);
+  
+  const location = faker.location.city();
+  
+  req.setBody({
+    location
+  });
+}
+
+tests {
+  test('should patch the beneficiary', async () => {
+    const result = res.getBody().data;
+    expect(res.body.data.location).to.equal(req.body.location);
+    expect(res.body.data).to.equal(result);
+    expect(res.body.data).to.have.property('uuid');
+  });
+}

@@ -10,10 +10,15 @@ post {
   auth: none
 }
 
+assert {
+  res.status: eq 201
+  res.body.success: eq true
+  res.body.data: isJson 
+}
+
 script:post-response {
-  
   const response = res.getBody().data;
-  bru.setVar('challenge',response.challenge);
+  bru.setVar('challenge', response.challenge);
 }
 
 tests {

@@ -5,13 +5,9 @@ meta {
 }
 
 get {
-  url: {{url}}/beneficiaries/{{benef-uuid}}
+  url: {{url}}/beneficiaries/{{beneficiaryData.uuid}}
   body: none
   auth: none
-}
-
-headers {
-  Authorization: Bearer {{access-token}}
 }
 
 assert {
@@ -20,18 +16,25 @@ assert {
   res.body.data: isJson object
 }
 
-tests {
-  var resBody = res.getBody().data;
-  bru.setVar("phone", resBody.piiData.phone);
+script:pre-request {
+  const { access_token } = require('./temp/auth-data.json');
+  const { beneficiaryData } = require('./temp/beneficiary-data.json');
+  req.setHeader("Authorization", `Bearer ${access_token}`);
   
+  const url = bru.getEnvVar('url');
+  req.setUrl(`${url}/beneficiaries/${beneficiaryData.uuid}`);
+}
+
+script:post-response {
+  var resData = res.getBody().data;
+  bru.setVar('benef-phone', resData.piiData.phone);
+}
+
+tests {
   test('should return detail of beneficiary using uuid', async () => {
     const resData = res.getBody();
     expect(res.body.data.uuid).to.equal(resData.data.uuid);
     expect(res.body.data).to.equal(resData.data);
     expect(res.body.data).to.have.property('uuid');
   });
-  
-  
-  
-  
 }

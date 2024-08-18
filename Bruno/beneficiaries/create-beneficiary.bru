@@ -10,10 +10,6 @@ post {
   auth: none
 }
 
-headers {
-  Authorization: Bearer {{access-token}}
-}
-
 assert {
   res.status: eq 201
   res.body.success: eq true
@@ -22,9 +18,8 @@ assert {
 
 script:pre-request {
   const { faker } = require("@faker-js/faker");
-  const access_token = bru.getEnvVar("access_token");
-  console.log({access_token})
-  req.setHeader("Authorization",`Bearer ${bru.getEnvVar("access_token")}`);
+  const { access_token } = require('./temp/auth-data.json');
+  req.setHeader("Authorization",`Bearer ${access_token}`);
   
   const gender = "FEMALE";
   const birthDate = faker.date.birthdate().toISOString();
@@ -64,15 +59,12 @@ script:pre-request {
     phoneStatus,
     piiData
   })
-  
 }
 
+
 tests {
-  var resp = res.getBody().data;  
   test('should create new beneficiary if wallet isnot provided', async () => {
     const data = res.getBody();
-    console.log(data);
-    expect(res.getStatus()).to.equal(201);
     expect(res.body.success).to.equal(true);
     expect(res.body.data).to.equal(data.data);
   });

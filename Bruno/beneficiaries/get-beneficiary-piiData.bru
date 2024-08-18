@@ -10,14 +10,15 @@ get {
   auth: none
 }
 
-headers {
-  Authorization: Bearer {{access-token}}
-}
-
 assert {
   res.status: eq 200
   res.body.success: eq true
   res.body.data: isArray
+}
+
+script:pre-request {
+  const { access_token } = require('./temp/auth-data.json');
+  req.setHeader("Authorization", `Bearer ${access_token}`);
 }
 
 tests {
@@ -26,7 +27,4 @@ tests {
     expect(Array.isArray(result.data)).to.equal(true);
     expect(result.data.every(item => typeof item === 'object')).to.equal(true);
   });
-  
-  
-  
 }

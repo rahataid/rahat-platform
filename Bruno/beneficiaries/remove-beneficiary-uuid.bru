@@ -1,0 +1,36 @@
+meta {
+  name: remove-beneficiary-uuid
+  type: http
+  seq: 9
+}
+
+patch {
+  url: {{url}}/beneficiaries/remove/{{uuid}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data: isJson
+  res.body.data: isDefined 
+}
+
+script:pre-request {
+  const { access_token } = require('./temp/auth-data.json');
+  const { beneficiaryData } = require('./temp/beneficiary-data.json');
+  const { faker } = require("@faker-js/faker");
+  
+  const url = bru.getEnvVar('url');
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+  req.setUrl(`${url}/beneficiaries/remove/${beneficiaryData.uuid}`);
+}
+
+tests {
+  test('should patch the beneficiary', async () => {
+    const result = res.getBody().data;
+    expect(res.body.data).to.equal(result);
+    expect(res.body.data).to.have.property('uuid');
+  });
+}

@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{url}}/beneficiaries/phone/{{phone}}
+  url: {{url}}/beneficiaries/phone/{{benef-phone}}
   body: none
   auth: none
 }
@@ -20,6 +20,14 @@ assert {
   res.body.success: eq true
 }
 
+script:pre-request {
+  const { access_token } = require('./temp/auth-data.json');
+  const url = bru.getEnvVar('url');
+  const phone = bru.getVar('benef-phone');
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+  req.setUrl(`${url}/beneficiaries/phone/${phone}`);
+}
+
 tests {
   test('should return detail of beneficiary using phone number', async () => {
     const result = res.getBody();
@@ -27,8 +35,4 @@ tests {
     expect(res.body.data.piiData.phone).to.equal(result.data.piiData.phone); 
     expect(res.body.data.piiData).to.have.property('phone');
   });
-  
-  
-  
-  
 }
