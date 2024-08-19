@@ -28,7 +28,7 @@ function createFile (data, fileName) {
       }
       fs.writeFileSync(filePath, JSON.stringify(existingData));
     }
-    else 
+    else if(fileName === 'beneficiary-data.json')
     {
       const existingData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       if(existingData.beneficiaryData)
@@ -41,6 +41,20 @@ function createFile (data, fileName) {
       }
       fs.writeFileSync(filePath, JSON.stringify(existingData));
     }
+    else
+      {
+        console.log(data, 'data in file');
+        const existingData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        if(existingData.groupData)
+        {
+          existingData.groupData = data.groupData;
+        }
+        else 
+        {
+          existingData.groupData = data;
+        }
+        fs.writeFileSync(filePath, JSON.stringify(existingData));
+      }
   }
 }
 

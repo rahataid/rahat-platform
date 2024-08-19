@@ -1,0 +1,45 @@
+meta {
+  name: create-project
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/projects
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  const { faker } = require("@faker-js/faker");
+  const { access_token } = require('./temp/auth-data.json');
+  req.setHeader("Authorization",`Bearer ${access_token}`);
+  
+  const name = faker.word.sample();
+  const description = faker.lorem.paragraph();
+  const type = "el";
+  const extras = {
+    test : faker.word.sample(),
+  };
+  const contractAddress = faker.string.hexadecimal();
+  console.log(name, description, type, extras, contractAddress);
+  
+  req.setBody({
+    name,
+    description,
+    type,
+    extras,
+    contractAddress
+  })
+
+  console.log(req.body, 'body');
+}
+
+tests {
+  test('should create new project', async () => {
+    const data = res.getBody();
+    console.log(data, 'data');
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.equal(data.data);
+  });
+}
