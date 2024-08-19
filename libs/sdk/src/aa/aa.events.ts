@@ -22,16 +22,15 @@ export const JOBS = {
     REMOVE: 'aa.jobs.activities.remove',
     UPDATE: 'aa.jobs.activities.update',
     UPDATE_STATUS: 'aa.jobs.activities.updateStatus',
+    COMMUNICATION: {
+      TRIGGER: 'aa.jobs.activity.communication.trigger',
+      SESSION_LOGS: 'aa.jobs.activities.communication.sessionLogs',
+    }
   },
   ACTIVITY_CATEGORIES: {
     GET_ALL: 'aa.jobs.activityCategories.getAll',
     ADD: 'aa.jobs.activityCategories.add',
     REMOVE: 'aa.jobs.activityCategories.remove',
-  },
-  COMMUNICATION: {
-    ADD: 'aa.jobs.activity.communication.add',
-    TRIGGER: 'aa.jobs.activity.communication.trigger',
-    COMMUNICATION_LOGS: 'aa.jobs.communication.getCommunicationLogs',
   },
   HAZARD_TYPES: {
     GET_ALL: 'aa.jobs.hazardTypes.getAll',

@@ -106,11 +106,10 @@ export const MS_ACTIONS = {
       REMOVE: 'aaProject.activities.remove',
       UPDATE: 'aaProject.activities.update',
       UPDATE_STATUS: 'aaProject.activities.updateStatus',
-    },
-    COMMUNICATION: {
-      ADD: 'aaProject.activities.communication.add',
-      TRIGGER: 'aaProject.activities.communication.trigger',
-      COMMUNICATION_LOGS: 'aa.jobs.communication.getCommunicationLogs',
+      COMMUNICATION: {
+        TRIGGER: 'aaProject.activities.communication.trigger',
+        SESSION_LOGS: 'aa.activities.communication.sessionLogs',
+      }
     },
     ACTIVITY_CATEGORIES: {
       GET_ALL: 'aaProject.activityCategories.getAll',
@@ -155,7 +154,6 @@ export const MS_ACTIONS = {
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats',
     },
     STATS: {
-      GET_COMMS: 'aaProject.stats.getComms',
       GET_ALL: 'aaProject.stats.getAll',
     },
     DAILY_MONITORING: {
