@@ -1,20 +1,24 @@
 meta {
-  name: get-group-beneficiaries
+  name: get-beneficiary
   type: http
-  seq: 2
+  seq: 4
 }
 
 get {
-  url: {{url}}/beneficiaries/groups/all?sort=createdAt&order=desc&page=1&perPage=10
+  url: {{url}}/beneficiaries?sort=createdAt&order=asc&page=1&perPage=10&gender=FEMALE&type=REFERRED&startDate=2024-08-05T11:50:52.013Z&endDate=2024-08-20T11:50:52.013Z
   body: none
   auth: none
 }
 
 params:query {
   sort: createdAt
-  order: desc
+  order: asc
   page: 1
   perPage: 10
+  gender: FEMALE
+  type: REFERRED
+  startDate: 2024-08-05T11:50:52.013Z
+  endDate: 2024-08-20T11:50:52.013Z
 }
 
 assert {
@@ -24,20 +28,12 @@ assert {
 }
 
 script:pre-request {
-  const { access_token } = require("./temp/auth-data.json");
+  const { access_token } = require('./temp/auth-data.json');
   req.setHeader("Authorization", `Bearer ${access_token}`);
 }
 
-script:post-response {
-  const createFile = require('./createFile');
-
-  const resData = res.getBody().data[0];
-  const data = { "groupData": resData };
-  createFile(data, 'group-data.json');
-}
-
 tests {
-  test('should return list of groups', async () => {
+  test('should return lists of beneficiaries', async () => {
     const result = res.getBody().data;
     expect(res.body.data).to.equal(result);
     expect(result.every(item => typeof item === 'object')).to.equal(true);

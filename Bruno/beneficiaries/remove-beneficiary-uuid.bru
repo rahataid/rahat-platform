@@ -1,7 +1,7 @@
 meta {
   name: remove-beneficiary-uuid
   type: http
-  seq: 9
+  seq: 10
 }
 
 patch {
@@ -27,8 +27,15 @@ script:pre-request {
   req.setUrl(`${url}/beneficiaries/remove/${beneficiaryData.uuid}`);
 }
 
+script:post-response {
+  const createFile = require('./createFile');
+  const removedData = res.getBody().data;
+  const data = { "beneficiaryData": removedData };
+  createFile(data, 'beneficiary-data.json');
+}
+
 tests {
-  test('should patch the beneficiary', async () => {
+  test('should remove the beneficiary', async () => {
     const result = res.getBody().data;
     expect(res.body.data).to.equal(result);
     expect(res.body.data).to.have.property('uuid');

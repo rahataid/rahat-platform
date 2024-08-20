@@ -22,7 +22,6 @@ script:pre-request {
     test : faker.word.sample(),
   };
   const contractAddress = faker.string.hexadecimal();
-  console.log(name, description, type, extras, contractAddress);
   
   req.setBody({
     name,
@@ -31,14 +30,19 @@ script:pre-request {
     extras,
     contractAddress
   })
+}
 
-  console.log(req.body, 'body');
+script:post-response {
+  const createFile = require('./createFile');
+  
+  var resp = res.getBody().data;
+  const data = {"projectData": resp}
+  createFile(data, 'project-data.json');
 }
 
 tests {
   test('should create new project', async () => {
     const data = res.getBody();
-    console.log(data, 'data');
     expect(res.body.success).to.equal(true);
     expect(res.body.data).to.equal(data.data);
   });

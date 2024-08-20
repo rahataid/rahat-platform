@@ -1,7 +1,7 @@
 meta {
   name: create-bulk-beneficiaries
   type: http
-  seq: 7
+  seq: 3
 }
 
 post {
@@ -63,6 +63,14 @@ script:pre-request {
       piiData
     }
   ])
+}
+
+script:post-response {
+  const createFile = require('./createFile');
+  const resData = res.getBody().data;
+
+  const data = { "benefUUIDs": [resData.beneficiariesData[0].uuid] }
+  createFile(data, 'beneficiary-data.json');
 }
 
 tests {

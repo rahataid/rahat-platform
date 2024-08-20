@@ -30,31 +30,60 @@ function createFile (data, fileName) {
     }
     else if(fileName === 'beneficiary-data.json')
     {
-      const existingData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      if(existingData.beneficiaryData)
+      let existingData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      if(data.beneficiaryData)
       {
-        existingData.beneficiaryData = data.beneficiaryData;
+        if(existingData.beneficiaryData)
+        {
+          existingData.beneficiaryData = data.beneficiaryData;
+        }
+        else 
+        {
+          existingData = data;
+        }
       }
       else 
       {
-        existingData.beneficiaryData = data;
+        if (data.benefUUIDs && data.benefUUIDs.length > 0) 
+        {
+          if (existingData.benefUUIDs) 
+          {
+            existingData.benefUUIDs = [...existingData.benefUUIDs, ...data.benefUUIDs];
+          }
+          else 
+          {
+            existingData.benefUUIDs = data.benefUUIDs;
+          }
+        }
+      }
+      fs.writeFileSync(filePath, JSON.stringify(existingData));
+    }
+    else if(fileName === 'group-data.json')
+    {
+      let existingData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      if(existingData.groupData)
+      {
+        existingData.groupData = data.groupData;
+      }
+      else 
+      {
+        existingData = data;
       }
       fs.writeFileSync(filePath, JSON.stringify(existingData));
     }
     else
+    {
+      let existingData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      if(existingData.projectData)
       {
-        console.log(data, 'data in file');
-        const existingData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        if(existingData.groupData)
-        {
-          existingData.groupData = data.groupData;
-        }
-        else 
-        {
-          existingData.groupData = data;
-        }
-        fs.writeFileSync(filePath, JSON.stringify(existingData));
+        existingData.projectData = data.projectData;
       }
+      else 
+      {
+        existingData = data;
+      }
+      fs.writeFileSync(filePath, JSON.stringify(existingData));
+    }
   }
 }
 

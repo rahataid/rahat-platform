@@ -17,33 +17,23 @@ assert {
 
 script:pre-request {
   const { faker } = require("@faker-js/faker");
-  const { beneficiaryData } = require('./temp/beneficiary-data.json');
+  const { benefUUIDs } = require('./temp/beneficiary-data.json');
   const { access_token } = require("./temp/auth-data.json");
+
   req.setHeader("Authorization", `Bearer ${access_token}`);
-  
+
   const name = faker.person.fullName();
   req.setBody({
     name,
     beneficiaries: [
       {
-        uuid: "093d7f58-3b05-4587-ad9e-ea6f460dc8da"
+        uuid: benefUUIDs[0]
       },
       {
-        uuid: "bfbbb9ff-edf2-4c5a-860d-bdf89a2a216c"
+        uuid: benefUUIDs[1]
       }
     ]
   })
-}
-
-script:post-response {
-  const createFile = require('./createFile');
-  
-  var resData = res.getBody();
-  bru.setVar("groupDto", resData.data);
-
-  const group = bru.getVar("groupDto");
-  const data = {"groupData": group};
-  createFile(data, 'group-data.json');
 }
 
 tests {

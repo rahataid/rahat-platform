@@ -1,7 +1,7 @@
 meta {
   name: delete-group-beneficiaries
   type: http
-  seq: 3
+  seq: 4
 }
 
 delete {
@@ -13,7 +13,7 @@ delete {
 assert {
   res.status: eq 200
   res.body.success: eq true
-  res.body.data: isJson 
+  res.body.data: isJson
 }
 
 script:pre-request {
@@ -23,6 +23,13 @@ script:pre-request {
   
   const url = bru.getEnvVar('url');
   req.setUrl(`${url}/beneficiaries/groups/${groupData.uuid}`);
+}
+
+script:post-response {
+  const createFile = require('./createFile');
+  const deletedData = res.getBody().data;
+  const data = { "groupData": deletedData };
+  createFile(data, 'group-data.json');
 }
 
 tests {

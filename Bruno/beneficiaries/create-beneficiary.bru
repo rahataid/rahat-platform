@@ -1,7 +1,7 @@
 meta {
   name: create-beneficiary
   type: http
-  seq: 1
+  seq: 2
 }
 
 post {
@@ -61,6 +61,13 @@ script:pre-request {
   })
 }
 
+script:post-response {
+  const createFile = require('./createFile');
+  const resData = res.getBody().data;
+
+  const data = { "benefUUIDs": [resData.uuid] }
+  createFile(data, 'beneficiary-data.json');
+}
 
 tests {
   test('should create new beneficiary if wallet isnot provided', async () => {

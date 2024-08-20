@@ -1,11 +1,11 @@
 meta {
-  name: patch-beneficiary-uuid
+  name: patch-project
   type: http
-  seq: 9
+  seq: 4
 }
 
 patch {
-  url: {{url}}/beneficiaries/{{uuid}}
+  url: {{url}}/projects/{{uuid}}
   body: none
   auth: none
 }
@@ -19,30 +19,34 @@ assert {
 
 script:pre-request {
   const { access_token } = require('./temp/auth-data.json');
-  const { beneficiaryData } = require('./temp/beneficiary-data.json');
+  const { projectData } = require('./temp/project-data.json');
   const { faker } = require("@faker-js/faker");
   const url = bru.getEnvVar('url');
   req.setHeader("Authorization", `Bearer ${access_token}`);
-  req.setUrl(`${url}/beneficiaries/${beneficiaryData.uuid}`);
+  req.setUrl(`${url}/projects/${projectData.uuid}`);
   
-  const location = faker.location.city();
+  const name = faker.word.sample(); 
+  const description = faker.lorem.paragraph(); 
   
   req.setBody({
-    location
+    name,
+    description
   });
 }
 
 script:post-response {
   const createFile = require('./createFile');
-  const updatedData = res.getBody().data;
-  const data = { "beneficiaryData": updatedData };
-  createFile(data, 'beneficiary-data.json');
+  
+  const resData = res.getBody().data;
+  const data = {"projectData": resData};
+  createFile(data, 'project-data.json');
 }
 
 tests {
-  test('should patch the beneficiary details', async () => {
+  test('should patch the project details', async () => {
     const result = res.getBody().data;
-    expect(res.body.data.location).to.equal(req.body.location);
+    expect(res.body.data.name).to.equal(req.body.name);
+    expect(res.body.data.description).to.equal(req.body.description);
     expect(res.body.data).to.equal(result);
     expect(res.body.data).to.have.property('uuid');
   });
