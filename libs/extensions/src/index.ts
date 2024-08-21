@@ -1,3 +1,4 @@
+export * from './dtos/app';
 export * from './dtos/beneficiary';
 export * from './dtos/grievance';
 export * from './dtos/projects';
