@@ -46,6 +46,7 @@
     "generate:mnemonic": "ts-node ./tools/scripts/mn.ts",
     "test:e2e": "jest --config ./apps/beneficiary-e2e/jest.config.ts",
     "test": "jest",
+    "test:coverage": "jest --config ./apps/beneficiary-e2e/jest.config.ts --coverage",
     "contracts:coverage": "cd ./apps/contracts && hardhat coverage",
     "contracts:test": "cd ./apps/contracts && hardhat test"
   },

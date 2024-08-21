@@ -1,12 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BeneficiaryService } from './beneficiary.service';
+import { BeneficiaryService } from './beneficiary.module';
 import { PrismaService } from '@rumsan/prisma';
-import { PaginatorTypes, paginator } from '@rumsan/prisma';
 
-const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
-jest.mock('paginate');
-
-describe('BeneficiaryService', () => {
+describe('findOne', () => {
   let service: BeneficiaryService;
   let prismaService: PrismaService;
 
@@ -17,9 +13,12 @@ describe('BeneficiaryService', () => {
         {
           provide: PrismaService,
           useValue: {
-            beneficiaryProject: {
-              create: jest.fn()
+            beneficiary: {
+              findUnique: jest.fn()
             },
+            beneficiaryPii: {
+              findUnique: jest.fn()
+            }
           }
         }
       ],
@@ -33,49 +32,29 @@ describe('BeneficiaryService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('addToProject', () => {
-    it('should add beneficiary to the project', () => {
-      const dto = {
-        id: 1,
-        uuid: '1',
-        projectId: '1',
-        beneficiaryId: '1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: new Date(),
-      };
+  it('display beneficiary detail', async () => {
+    const uuid = '7ce001c8-2336-4a6e-8f57-7e952dafb9bc';
+    const mockBeneficiary = {id: 1, uuid, BeneficiaryProject: []};
+    const mockPiiData = {beneficiaryId: 1, phone: '9898'};
 
-      const createdBeneficiaryProject = {
-        id: 1,
-        ...dto
-      };
+    (prismaService.beneficiary.findUnique as jest.Mock).mockResolvedValue(mockBeneficiary);
+    (prismaService.beneficiaryPii.findUnique as jest.Mock).mockResolvedValue(mockPiiData);
+    
+    const result = await service.findOne(uuid);
 
-      jest.spyOn(prismaService.beneficiaryProject, 'create').mockResolvedValue(createdBeneficiaryProject);
-      const result = service.addToProject(dto);
-      expect(result).toEqual(createdBeneficiaryProject);
-      expect(prismaService.beneficiaryProject.create).toHaveBeenCalledWith({
-        data: dto,
-      });
-    })
-  });
-
-  // describe('listPiiDate', () => {
-  //   it('should return list of Pii data with project id', async () => {
-  //     // const dto = {
-  //     //   projectId: 1,
-  //     // };
-  //     const repository = service.rsprisma.beneficiaryProject
-  //     repository.count.mockResolvedValue(2);
-  //     paginate.mockResolvedValue(data);
-  //   });
-  // });
-  
-  describe('listBenefByProject', () => {
-    it('should return list of beneficiaries with project id', async () => {
-      const data = [{projectId: 1, beneficiaryId: 1}]
-      const result = await service.mergeProjectData(data);
-      
-      expect(result).toBeDefined();
+    expect(prismaService.beneficiary.findUnique).toHaveBeenCalledWith({
+      where: {uuid},
+      include: {
+        BeneficiaryProject: {
+          include: {
+            Project: true
+          }
+        }
+      }
     });
+    expect(prismaService.beneficiaryPii.findUnique).toHaveBeenCalledWith({
+      where: {beneficiaryId: mockBeneficiary.id}
+    });
+    expect(result).toEqual({...mockBeneficiary, piiData: mockPiiData});
   });
 });
