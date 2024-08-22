@@ -219,6 +219,7 @@ export const MS_ACTIONS = {
     CREATE_BULK_DISBURSEMENT: 'rpProject.disbursement.bulkCreate',
     CREATE_CAMPAIGN: 'rpProject.campaign.create',
     CREATE_AUDIENCE: 'rpProject.campaign.create_audience',
+    CREATE_BULK_AUDIENCE: 'rpProject.campaign.create_bulk_audience',
     GET_ALL_CAMPAIGN: 'rpProject.campaign.get',
     GET_CAMPAIGN: 'rpProject.campaign.getOne',
     GET_ALL_TRANSPORT: 'rpProject.campaign.get_transport',

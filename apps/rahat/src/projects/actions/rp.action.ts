@@ -86,8 +86,13 @@ export const rpActions: ProjectActionFunc = {
 
   [MS_ACTIONS.RPPROJECT.CREATE_AUDIENCE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.CAMPAIGN.CREATE_AUDIENCE, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.CREATE_BULK_AUDIENCE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.CAMPAIGN.CREATE_BULK_AUDIENCE, uuid }, payload),
+
   [MS_ACTIONS.RPPROJECT.TRIGGER_CAMPAIGN]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.CAMPAIGN.TRIGGER_CAMPAIGN, uuid }, payload),
+
   [MS_ACTIONS.RPPROJECT.GET_ALL_COMMUNICATION_LOGS]: (
     uuid,
     payload,
