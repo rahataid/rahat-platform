@@ -56,6 +56,7 @@ describe('CRUD /v1/grievances', () => {
     });
 
     it('should create new grievance', async () => {
+        console.log(header, 'header');
         const response = await request(baseUrl).post('/grievances').set('Authorization', header).send(grievanceData);
         resCache.set('grievance', response.body.data);
         expect(response.statusCode).toBe(201);
