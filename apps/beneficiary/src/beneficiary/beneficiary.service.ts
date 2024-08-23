@@ -218,7 +218,7 @@ export class BeneficiaryService {
 
     console.time("check")
 
-    let resultData = result.data
+    const resultData = result.data
 
     if (resultData.length > 0) {
       const benfPiiData = await this.prisma.beneficiaryPii.findMany({
@@ -228,12 +228,21 @@ export class BeneficiaryService {
           }
         }
       })
-      for (let d of resultData) {
-        const piiData = benfPiiData.find((data) => data.beneficiaryId === d.id)
-        resultData.piiData = piiData
+      const piiDataMap = new Map();
+      for (const piiData of benfPiiData) {
+        piiDataMap.set(piiData.beneficiaryId, piiData);
       }
+
+      const mergedData = resultData.map((d) => {
+        const piiData = piiDataMap.get(d.id);
+        if (piiData) {
+          d.piiData = piiData;
+        }
+        return d;
+      });
+      result.data = mergedData;
     }
-    result.data = resultData
+
 
     console.timeEnd("check")
 
