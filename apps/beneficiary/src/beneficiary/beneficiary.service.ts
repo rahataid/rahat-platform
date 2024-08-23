@@ -216,6 +216,8 @@ export class BeneficiaryService {
       }
     );
 
+    console.time("check")
+
     let resultData = result.data
 
     if (resultData.length > 0) {
