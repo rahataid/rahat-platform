@@ -216,11 +216,26 @@ export class BeneficiaryService {
       }
     );
 
-    if (result.data.length > 0) {
-      const mergedData = await this.mergePIIData(result.data);
-      result.data = mergedData;
+    let resultData = result.data
+
+    if (resultData.length > 0) {
+      const benfPiiData = await this.prisma.beneficiaryPii.findMany({
+        where: {
+          beneficiaryId: {
+            in: resultData?.map((d) => d.id)
+          }
+        }
+      })
+      for (let d of resultData) {
+        const piiData = benfPiiData.find((data) => data.beneficiaryId === d.id)
+        resultData.piiData = piiData
+      }
     }
-    return result;
+    result.data = resultData
+
+    console.timeEnd("check")
+
+    return result
   }
 
   async mergeProjectData(data: any, payload?: any) {
