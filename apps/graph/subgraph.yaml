@@ -10,7 +10,7 @@ dataSources:
     source:
       abi: RahatAccessManager
       address: "0xfE9E28530FC8FA89F2126dcf914c826834C82FBe"
-      startBlock: 23
+      startBlock: 14
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -64,7 +64,7 @@ dataSources:
     source:
       abi: RahatTreasury
       address: "0x7805E7D0939e14BBab4A5210b7cC182c22ED20A9"
-      startBlock: 27
+      startBlock: 18
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
