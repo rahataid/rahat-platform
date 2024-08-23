@@ -206,17 +206,18 @@ enum TokenDataType {
 // ++++++++++++++++++ END: @rumsan/settings +++++++++++++++++++++++++++
 
 model AuthApp {
-  id           Int @id @default(autoincrement())
-  uuid         String @unique @default(uuid())
-  address      String @unique
+  id           Int     @id @default(autoincrement())
+  uuid         String  @unique @default(uuid())
+  address      String  @unique
   name         String
   description  String?
   nonceMessage String?
 
   createdBy String?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
   deletedAt DateTime?
+
   @@map("tbl_auth_apps")
 }
 
@@ -246,6 +247,7 @@ model Beneficiary {
   BeneficiaryProject   BeneficiaryProject[]
   groupedBeneficiaries GroupedBeneficiaries[]
 
+  @@index([deletedAt])
   @@map("tbl_beneficiaries")
 }
 
@@ -264,6 +266,9 @@ model GroupedBeneficiaries {
   deletedAt DateTime?
 
   @@unique([beneficiaryGroupId, beneficiaryId], name: "beneficiaryGroupIdentifier")
+  @@index([beneficiaryGroupId])
+  @@index([beneficiaryId])
+  @@index([deletedAt])
   @@map("tbl_grouped_beneficiaries")
 }
 
@@ -280,6 +285,7 @@ model BeneficiaryGroup {
   groupedBeneficiaries    GroupedBeneficiaries[]
   beneficiaryGroupProject BeneficiaryGroupProject[]
 
+  @@index([deletedAt])
   @@map("tbl_beneficiaries_group")
 }
 
@@ -298,6 +304,9 @@ model BeneficiaryGroupProject {
   deletedAt DateTime?
 
   @@unique([projectId, beneficiaryGroupId], name: "beneficiaryGroupProjectIdentifier")
+  @@index([projectId])
+  @@index([beneficiaryGroupId])
+  @@index([deletedAt])
   @@map("tbl_beneficiaries_gorup_projects")
 }
 
@@ -316,6 +325,9 @@ model BeneficiaryProject {
   deletedAt DateTime?
 
   @@unique([projectId, beneficiaryId], name: "beneficiaryProjectIdentifier")
+  @@index([projectId])
+  @@index([beneficiaryId])
+  @@index([deletedAt])
   @@map("tbl_beneficiaries_projects")
 }
 
@@ -514,7 +526,7 @@ model TempBeneficiary {
   govtIDNumber             String?
   gender                   Gender                 @default(UNKNOWN)
   birthDate                DateTime?
-  walletAddress            String                
+  walletAddress            String
   phone                    String?
   email                    String?
   archived                 Boolean                @default(false)
