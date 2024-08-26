@@ -128,9 +128,10 @@ export class VendorsService {
             projectId,
             vendorId,
             extras: {
-              projectVendorIdentifier: projectResponse.id,
+              projectVendorIdentifier: projectResponse.id
             }
-          });
+          }
+        });
         console.log('Vendor successfully assigned to the project:', createRes);
       },
       onError: (error) => {
