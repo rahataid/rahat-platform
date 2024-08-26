@@ -46,7 +46,8 @@
     "generate:mnemonic": "ts-node ./tools/scripts/misc/mn.ts",
     "contracts:coverage": "cd ./apps/contracts && hardhat coverage",
     "contracts:test": "cd ./apps/contracts && hardhat test",
-    "test:e2e": "jest --config ./apps/rahat-e2e/jest.config.ts"
+    "test:coverage": "jest --config ./apps/rahat-e2e/jest.config.ts --coverage",
+    "test": "jest"
   },
   "private": true,
   "dependencies": {

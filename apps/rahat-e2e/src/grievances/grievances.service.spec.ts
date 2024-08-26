@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GrievanceService } from '../../../../../rahat/src/grievance/grievance.service';
-import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
-import { GrievanceStatus } from '@prisma/client';
-import { createGrievanceDTO, deletedGrievance, expectedGrievance, grievanceQuery, grievancesList, updatedGrievance, userId } from './testFixtureData';
+import { GrievanceService } from '../../../rahat/src/grievance/grievance.service';
+import { PrismaService } from "@rumsan/prisma";
+import { createGrievanceDTO, deletedGrievance, expectedGrievance, grievancesList, updatedGrievance, userId } from './testFixtureData2';
 import { ChangeGrievanceStatusDTO } from '@rahataid/extensions';
+import { GrievanceStatus } from '@rahataid/sdk';
 
 describe('GrievanceService', () => {
   let service: GrievanceService;

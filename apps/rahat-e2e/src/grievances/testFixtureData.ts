@@ -1,8 +1,9 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 import { faker } from '@faker-js/faker';
-import { GrievanceType, GrievanceStatus } from '@rahataid/sdk';
+// import { GrievanceType, GrievanceStatus } from ;
 import { randomUUID } from 'crypto';
+import { GrievanceStatus, GrievanceType } from '@prisma/client';
 
 export const grievanceData = {
     projectId: process.env.PROJECT_ID,
