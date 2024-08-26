@@ -10,6 +10,11 @@ post {
   auth: none
 }
 
+assert {
+  res.status: eq 201
+  res.body.success: eq true
+}
+
 script:pre-request {
   const { faker } = require("@faker-js/faker");
   const { access_token } = require('./temp/auth-data.json');
