@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GrievanceService } from '../../../rahat/src/grievance/grievance.service';
+import { GrievanceService } from './grievance.service';
 import { PrismaService } from "@rumsan/prisma";
 import { createGrievanceDTO, deletedGrievance, expectedGrievance, grievancesList, updatedGrievance, userId } from './testFixtureData2';
 import { ChangeGrievanceStatusDTO } from '@rahataid/extensions';

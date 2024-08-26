@@ -7,5 +7,5 @@
     "types": ["jest", "node"],
     "esModuleInterop": true
   },
-  "include": ["jest.config.ts", "src/**/*.ts"]
+  "include": ["jest.config.ts", "src/**/*.ts", "../rahat/src/grievance/testFixtureData2.ts", "../rahat/src/grievance/grievances.service.spec.ts", "../rahat/src/vendors/vendors-controllers.spec.ts", "../rahat/src/vendors/vendors.services.spec.ts"]
 }

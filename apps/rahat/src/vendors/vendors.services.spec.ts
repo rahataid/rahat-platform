@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from "@rumsan/prisma";
-import {VendorsService} from "../../../rahat/src/vendors/vendors.service";
+import {VendorsService} from "./vendors.service";
 
 
 describe('VendorsService', () => {
   let service: VendorsService;
-  let prisma: PrismaService;
+//   let prisma: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,7 +26,7 @@ describe('VendorsService', () => {
     }).compile();
 
     service = module.get<VendorsService>(VendorsService);
-    prisma = module.get<PrismaService>(PrismaService);
+    // prisma = module.get<PrismaService>(PrismaService);
   });
 
     it('should return the count of vendors', async () => {
