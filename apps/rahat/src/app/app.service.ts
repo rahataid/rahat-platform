@@ -175,4 +175,12 @@ export class AppService {
 
     return newSetting;
   }
+
+  async getCommunicationSettings() {
+    return this.prisma.setting.findMany({
+      where: {
+        name: "COMMUNICATION"
+      }
+    })
+  }
 }
