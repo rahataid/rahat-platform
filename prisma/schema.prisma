@@ -417,6 +417,7 @@ model ProjectVendors {
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
   deletedAt DateTime?
+  extras    Json?     @db.JsonB()
 
   @@unique([projectId, vendorId], name: "projectVendorIdentifier")
   @@map("tbl_projects_vendors")
