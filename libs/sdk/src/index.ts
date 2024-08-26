@@ -1,4 +1,5 @@
 export * from './aa';
+export * from './app';
 export * from './beneficiary';
 export * from './constants';
 export * as Enums from './enums';
