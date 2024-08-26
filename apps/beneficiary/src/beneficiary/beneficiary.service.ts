@@ -1397,15 +1397,10 @@ export class BeneficiaryService {
 
   async saveTempBenefAndGroup(txn: any, groupUID: string, beneficiaries: any[], tempBenefPhone: any[]) {
     for (let b of beneficiaries) {
-      let createdData = null;
-      const found = tempBenefPhone.find(f => f.phone === b.phone);
-      // 2. Add benef to temp table
-      if (!found)
-        createdData = await txn.tempBeneficiary.create({
-          data: b
-        });
-      let benefUID = createdData?.uuid;
-      if (found) benefUID = found.uuid;
+      const row = await txn.tempBeneficiary.create({
+        data: b
+      });
+      const benefUID = row.uuid;
       // 3. Upsert temp benef group
       await txn.tempBeneficiaryGroup.upsert({
         where: {
