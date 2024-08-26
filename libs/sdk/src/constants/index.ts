@@ -219,6 +219,7 @@ export const MS_ACTIONS = {
     CREATE_BULK_DISBURSEMENT: 'rpProject.disbursement.bulkCreate',
     CREATE_CAMPAIGN: 'rpProject.campaign.create',
     CREATE_AUDIENCE: 'rpProject.campaign.create_audience',
+    CREATE_BULK_AUDIENCE: 'rpProject.campaign.create_bulk_audience',
     GET_ALL_CAMPAIGN: 'rpProject.campaign.get',
     GET_CAMPAIGN: 'rpProject.campaign.getOne',
     GET_ALL_TRANSPORT: 'rpProject.campaign.get_transport',
@@ -230,5 +231,11 @@ export const MS_ACTIONS = {
     UPDATE_REDEMPTION: 'rpProject.updateRedemption',
     LIST_REDEMPTION: 'rpProject.listRedemption',
     GET_VENDOR_REDEMPTION: 'rpProject.vendorRedemption',
+    GENERATE_OTP_HASH: 'rpProject.generateOtpHash',
+    GET_OFFLINE_BENEFICIARIES: "rpProject.getOfflineBeneficiaries",
+    SYNC_OFFLINE_BENEFICIARIES: "rpProject.syncOfflineBeneficiaries",
+    GET_OFFLINE_VENDORS: "rpProject.getOfflineVendors",
+    GET_OFFLINE_SINGLE_VENDOR: "rpProject.getOfflineSingleVendor",
+    SAVE_SYNCED_BENEFICIARIES_TO_VENDOR: "rpProject.saveSyncedBeneficiariesToVendor",
   }
 };
