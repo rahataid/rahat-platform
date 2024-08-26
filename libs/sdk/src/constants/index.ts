@@ -85,7 +85,7 @@ export const MS_ACTIONS = {
   },
   AAPROJECT: {
     RIVER_STATIONS: {
-      GET_DHM: 'aaProject.riverStations.getDhm'
+      GET_DHM: 'aaProject.riverStations.getDhm',
     },
     WATER_LEVELS: {
       GET_DHM: 'aaProject.waterLevels.getDhm',
@@ -102,20 +102,20 @@ export const MS_ACTIONS = {
     ACTIVITIES: {
       GET_ONE: 'aaProject.activities.getOne',
       GET_ALL: 'aaProject.activities.getAll',
+      GET_HAVING_COMMS: 'aaProject.activities.getHavingComms',
       ADD: 'aaProject.activities.add',
       REMOVE: 'aaProject.activities.remove',
       UPDATE: 'aaProject.activities.update',
       UPDATE_STATUS: 'aaProject.activities.updateStatus',
-    },
-    COMMUNICATION: {
-      ADD: 'aaProject.activities.communication.add',
-      TRIGGER: 'aaProject.activities.communication.trigger',
-      COMMUNICATION_LOGS: 'aa.jobs.communication.getCommunicationLogs',
+      COMMUNICATION: {
+        TRIGGER: 'aaProject.activities.communication.trigger',
+        SESSION_LOGS: 'aa.activities.communication.sessionLogs',
+      }
     },
     ACTIVITY_CATEGORIES: {
       GET_ALL: 'aaProject.activityCategories.getAll',
       ADD: 'aaProject.activityCategories.add',
-      REMOVE: 'aaProject.activityCategories.remove'
+      REMOVE: 'aaProject.activityCategories.remove',
     },
     HAZARD_TYPES: {
       GET_ALL: 'aaProject.hazardTypes.getAll',
@@ -140,7 +140,7 @@ export const MS_ACTIONS = {
       DELETE_GROUP: 'aaProject.stakeholders.deleteGroup',
     },
     CONTRACT: {
-      INCREASE_BUDEGET: 'aaProject.contract.increase_budget'
+      INCREASE_BUDEGET: 'aaProject.contract.increase_budget',
     },
     BENEFICIARY: {
       ADD_GROUP: 'aaProject.beneficiary.addGroup',
@@ -148,12 +148,13 @@ export const MS_ACTIONS = {
       GET_ONE_GROUP: 'aaProject.beneficiary.getOneGroup',
       ASSIGN_TOKEN_TO_GROUP: 'aaProject.beneficiary.assign_token_to_group',
       RESERVE_TOKEN_TO_GROUP: 'aaProject.beneficiary.reserve_token_to_group',
-      GET_ALL_TOKEN_RESERVATION: 'aaProject.beneficiary.get_all_token_reservation',
-      GET_ONE_TOKEN_RESERVATION: 'aaProject.beneficiary.get_one_token_reservation',
-      GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats'
+      GET_ALL_TOKEN_RESERVATION:
+        'aaProject.beneficiary.get_all_token_reservation',
+      GET_ONE_TOKEN_RESERVATION:
+        'aaProject.beneficiary.get_one_token_reservation',
+      GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats',
     },
     STATS: {
-      GET_COMMS: 'aaProject.stats.getComms',
       GET_ALL: 'aaProject.stats.getAll',
       GET_ONE: 'aaProject.stats.getOne',
     },
@@ -163,7 +164,7 @@ export const MS_ACTIONS = {
       GET_ONE: 'aaProject.dailyMonitoring.getOne',
       UPDATE: 'aaProject.dailyMonitoring.update',
       REMOVE: 'aaProject.dailyMonitoring.remove',
-    }
+    },
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',
@@ -204,8 +205,6 @@ export const MS_ACTIONS = {
     TRIGGER_CAMPAIGN: 'cvaProject.campaign.trigger',
     GET_ALL_COMMUNICATION_LOGS: 'cvaProject.campaign.communication_logs',
     GET_ALL_COMMUNICATION_STATS: 'cvaProject.campaign.communication_stats',
-
-
   },
   RPPROJECT: {
     CREATE_DISBURSEMENT: 'rpProject.disbursement.create',
