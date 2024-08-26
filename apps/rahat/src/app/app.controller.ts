@@ -1,9 +1,11 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
 import { ACTIONS, APP, SUBJECTS } from '@rahataid/sdk';
 import { AbilitiesGuard, CheckAbilities, JwtGuard } from '@rumsan/user';
 import { UUID } from 'crypto';
+import { AppJobs } from './app.jobs';
 import { AppService } from './app.service';
 
 @Controller('app')
@@ -11,6 +13,11 @@ import { AppService } from './app.service';
 @ApiBearerAuth(APP.JWT_BEARER)
 export class AppController {
   constructor(private readonly appService: AppService) { }
+
+  @MessagePattern({ cmd: AppJobs.COMMUNICATION.GET_SETTINGS })
+  getSettings() {
+    return this.appService.getCommunicationSettings()
+  }
 
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
