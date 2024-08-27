@@ -1,0 +1,53 @@
+meta {
+  name: patch-project
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{url}}/projects/{{uuid}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data: isJson
+  res.body.data: isDefined
+}
+
+script:pre-request {
+  const { access_token } = require('./temp/auth-data.json');
+  const { projectData } = require('./temp/project-data.json');
+  const { faker } = require("@faker-js/faker");
+  const url = bru.getEnvVar('url');
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+  req.setUrl(`${url}/projects/${projectData.uuid}`);
+  
+  const name = faker.word.sample(); 
+  const description = faker.lorem.paragraph(); 
+  
+  req.setBody({
+    name,
+    description
+  });
+}
+
+script:post-response {
+  const createFile = require('./createFile');
+  
+  const resData = res.getBody().data;
+  const data = {"projectData": resData};
+  createFile(data, 'project-data.json');
+}
+
+tests {
+  test('should patch the project details', async () => {
+    const result = res.getBody().data;
+    expect(res.body.data.name).to.equal(req.body.name);
+    expect(res.body.data.description).to.equal(req.body.description);
+    expect(res.body.data).to.equal(result);
+    expect(res.body.data).to.have.property('uuid');
+  });
+}
