@@ -27,8 +27,6 @@ const serviceAccountAuth = new JWT({
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
-console.log(google_cred.client_email)
-
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const getGoogleSheetsData = async (
@@ -42,7 +40,6 @@ const getGoogleSheetsData = async (
     return rows;
 };
 
-
 const addUser = async (config: ApiAuth, user: User): Promise<void> => {
     const response = await axios.post(config.url, user, {
         headers: {
@@ -55,7 +52,7 @@ const addUser = async (config: ApiAuth, user: User): Promise<void> => {
 // //Rahat Demo Training
 const sheetId = '1uVvlb-VQ8DKrSirWwgEr6akE9p5SnC8ZR7_KDFnwEew';
 const sheetName = 'dev_users';
-const accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcklkIjoyLCJ1dWlkIjoiYzcwZWFlNzQtMTgxYy00YTQ4LTk3MWEtZDJlYWMyNTkzYzVjIiwibmFtZSI6Ik1zIE1hbmFnZXIiLCJlbWFpbCI6bnVsbCwicGhvbmUiOm51bGwsIndhbGxldCI6IjB4QUM2YkZhZjEwZTg5MjAyYzI5M2RENzk1ZUNlMTgwQkJmMTQzMGQ3QiIsInJvbGVzIjpbIk1hbmFnZXIiXSwicGVybWlzc2lvbnMiOlt7ImFjdGlvbiI6Im1hbmFnZSIsInN1YmplY3QiOiJ1c2VyIiwiaW52ZXJ0ZWQiOmZhbHNlLCJjb25kaXRpb25zIjpudWxsfV0sImlhdCI6MTcyNDgyODg0MywiZXhwIjoxNzI0OTE1MjQzfQ.VAchv_irsh-5zPONvPJ8lXvzdmNg0ahsWbOQLqgI9eY'
+const accessToken = ''
 const baseUrl = 'http://localhost:5500';
 const userAddUrl = `${baseUrl}/v1/users`;
 
@@ -64,6 +61,7 @@ const userAddUrl = `${baseUrl}/v1/users`;
         url: userAddUrl,
         accessToken
     }
+    console.log("Fetching data from Google Sheets");
     const users = await getGoogleSheetsData(sheetId, sheetName);
     for (const u of users) {
         const newUser: User = {
@@ -80,6 +78,7 @@ const userAddUrl = `${baseUrl}/v1/users`;
         u.set('isAdded', 'TRUE');
         u.save();
         sleep(1000);
+        console.log(`Completed`);
     }
 
 })();
