@@ -44,6 +44,10 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.SESSION_LOGS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.ACTIVITIES.COMMUNICATION.SESSION_LOGS, uuid }, payload),
 
+
+  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.RETRY_FAILED]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.ACTIVITIES.COMMUNICATION.RETRY_FAILED, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.TRIGGER]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.ACTIVITIES.COMMUNICATION.TRIGGER, uuid }, payload),
 

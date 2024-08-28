@@ -110,6 +110,7 @@ export const MS_ACTIONS = {
       COMMUNICATION: {
         TRIGGER: 'aaProject.activities.communication.trigger',
         SESSION_LOGS: 'aa.activities.communication.sessionLogs',
+        RETRY_FAILED: 'aa.activities.communication.retryFailed'
       }
     },
     ACTIVITY_CATEGORIES: {

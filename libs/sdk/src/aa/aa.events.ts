@@ -25,6 +25,7 @@ export const JOBS = {
     COMMUNICATION: {
       TRIGGER: 'aa.jobs.activity.communication.trigger',
       SESSION_LOGS: 'aa.jobs.activities.communication.sessionLogs',
+      RETRY_FAILED: 'aa.jobs.activities.communication.retryFailed',
     }
   },
   ACTIVITY_CATEGORIES: {
