@@ -45,10 +45,15 @@
     "prisma:generate:watch": "npx prisma generate --watch",
     "generate:mnemonic": "ts-node ./tools/scripts/misc/mn.ts",
     "contracts:coverage": "cd ./apps/contracts && hardhat coverage",
-    "contracts:test": "cd ./apps/contracts && hardhat test"
+    "contracts:test": "cd ./apps/contracts && hardhat test",
+    "test:e2e": "jest --config ./apps/beneficiary-e2e/jest.config.ts",
+    "test": "jest",
+    "bruno:test": "cd bruno && bru run --env local",
+    "bruno:coverage": "cd bruno && bru run --env local --output results.json"
   },
   "private": true,
   "dependencies": {
+    "@graphprotocol/graph-ts": "0.32.0",
     "@nestjs-modules/mailer": "1.11.2",
     "@nestjs/bull": "10.1.0",
     "@nestjs/common": "10.3.3",
@@ -73,7 +78,6 @@
     "@rumsan/settings": "^0.0.108",
     "@rumsan/subgraph": "link:libs\\subgraph",
     "@rumsan/user": "3.0.159",
-    "@graphprotocol/graph-ts": "0.32.0",
     "@urql/core": "^5.0.4",
     "abitype": "^1.0.1",
     "axios": "^1.6.7",
@@ -140,6 +144,7 @@
     "prettier": "^2.8.8",
     "prisma": "5.13.0",
     "solidity-docgen": "0.6.0-beta.36",
+    "supertest": "^7.0.0",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.1",
     "tslib": "2.6.2",

@@ -1,0 +1,29 @@
+meta {
+  name: get-challenge
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/auth/challenge
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 201
+  res.body.success: eq true
+  res.body.data: isJson 
+}
+
+script:post-response {
+  const response = res.getBody().data;
+  bru.setVar('challenge', response.challenge);
+}
+
+tests {
+  test('should return challenge', async () => {
+    const responseData = res.getBody().data;
+    expect(responseData).to.have.property('challenge');
+  });
+}

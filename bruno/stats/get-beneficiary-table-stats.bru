@@ -1,0 +1,30 @@
+meta {
+  name: get-beneficiary-table-stats
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{url}}/beneficiaries/table-stats
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+}
+
+script:pre-request {
+  const { access_token } = require("./temp/auth-data.json");
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+}
+
+tests {
+  test('should return the beneficiaries table stats', async () => {
+    const result = res.getBody();
+    expect(res.body.data).to.equal(result.data);
+    expect(Array.isArray(result.data)).to.equal(true);
+    expect(result.data.every(item => typeof item === 'object')).to.equal(true);
+  }); 
+}

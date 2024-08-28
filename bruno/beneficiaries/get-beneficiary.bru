@@ -1,0 +1,41 @@
+meta {
+  name: get-beneficiary
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{url}}/beneficiaries?sort=createdAt&order=asc&page=1&perPage=10&gender=FEMALE&type=REFERRED&startDate=2024-08-05T11:50:52.013Z&endDate=2024-08-20T11:50:52.013Z
+  body: none
+  auth: none
+}
+
+params:query {
+  sort: createdAt
+  order: asc
+  page: 1
+  perPage: 10
+  gender: FEMALE
+  type: REFERRED
+  startDate: 2024-08-05T11:50:52.013Z
+  endDate: 2024-08-20T11:50:52.013Z
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data: isArray
+}
+
+script:pre-request {
+  const { access_token } = require('./temp/auth-data.json');
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+}
+
+tests {
+  test('should return lists of beneficiaries', async () => {
+    const result = res.getBody().data;
+    expect(res.body.data).to.equal(result);
+    expect(result.every(item => typeof item === 'object')).to.equal(true);
+  });
+}
