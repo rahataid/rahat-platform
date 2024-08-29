@@ -1,0 +1,78 @@
+meta {
+  name: create-beneficiary
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/beneficiaries
+  body: json
+  auth: none
+}
+
+assert {
+  res.status: eq 201
+  res.body.success: eq true
+  res.body.data: isJson
+}
+
+script:pre-request {
+  const { faker } = require("@faker-js/faker");
+  const { access_token } = require('./temp/auth-data.json');
+  req.setHeader("Authorization",`Bearer ${access_token}`);
+  
+  const gender = "FEMALE";
+  const birthDate = faker.date.birthdate().toISOString();
+  const age = 26;
+  const location = faker.location.city();
+  const latitude = faker.location.latitude();
+  const longitude = faker.location.longitude();
+  const extras = {
+    email : faker.internet.email(),
+    hasCitizenship : faker.datatype.boolean(),
+    passportNumber : faker.number.int({ min:10000 })
+  };
+  const notes = faker.number.int({ min : 1000000 }).toString();
+  const bankedStatus = "BANKED";
+  const internetStatus = "NO_INTERNET";
+  const phoneStatus = "FEATURE_PHONE";
+  const piiData = {
+    name : faker.person.fullName(),
+    phone : faker.phone.number(),
+    extras: {
+      bank: faker.string.alpha(),
+      account: faker.finance.accountNumber()
+    }
+  };
+  
+  req.setBody({
+    gender,
+    birthDate,
+    age,
+    location,
+    latitude,
+    longitude,
+    extras,
+    notes,
+    bankedStatus,
+    internetStatus,
+    phoneStatus,
+    piiData
+  })
+}
+
+script:post-response {
+  const createFile = require('./createFile');
+  const resData = res.getBody().data;
+
+  const data = { "benefUUIDs": [resData.uuid] }
+  createFile(data, 'beneficiary-data.json');
+}
+
+tests {
+  test('should create new beneficiary if wallet isnot provided', async () => {
+    const data = res.getBody();
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.equal(data.data);
+  });
+}

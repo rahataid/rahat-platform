@@ -1,0 +1,41 @@
+meta {
+  name: delete-beneficiary-uuid
+  type: http
+  seq: 11
+}
+
+delete {
+  url: {{utl}}/beneficiaries/{{uuid}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+}
+
+script:pre-request {
+  const { access_token } = require('./temp/auth-data.json');
+  const { beneficiaryData } = require('./temp/beneficiary-data.json');
+  const { faker } = require("@faker-js/faker");
+  
+  const url = bru.getEnvVar('url');
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+  req.setUrl(`${url}/beneficiaries/${beneficiaryData.uuid}`);
+}
+
+script:post-response {
+  const createFile = require('./createFile');
+  const deletedData = res.getBody().data;
+  const data = { "beneficiaryData": deletedData };
+  createFile(data, 'beneficiary-data.json');
+}
+
+tests {
+  test('should delete the beneficiary using uuid', async () => {
+    const result = res.getBody().data;
+    expect(res.body.data).to.equal(result);
+    expect(res.body.data).to.have.property('uuid');
+  });
+}

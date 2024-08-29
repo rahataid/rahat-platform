@@ -3,6 +3,7 @@ import { Enums, TPIIData } from '@rahataid/sdk';
 import {
   IsDate,
   IsEnum,
+  IsInt,
   IsNumber,
   IsOptional,
   IsString,
@@ -12,6 +13,14 @@ import {
 import { UUID } from 'crypto';
 
 export class UpdateBeneficiaryDto {
+  @ApiProperty({
+    example: '1',
+    description: 'beneficiaryId',
+  })
+  @IsInt()
+  @IsOptional()
+  id?: number;
+
   @ApiProperty({
     example: '0-0-0-0-0',
     description: 'Beneficiary ID',

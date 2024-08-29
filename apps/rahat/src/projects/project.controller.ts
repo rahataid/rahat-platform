@@ -26,8 +26,7 @@ import { UUID } from 'crypto';
 import { timeout } from 'rxjs/operators';
 import { ProjectService } from './project.service';
 
-@ApiBearerAuth(APP.JWT_BEARER)
-@UseGuards(JwtGuard, AbilitiesGuard)
+
 @Controller('projects')
 @ApiTags('Projects')
 export class ProjectController {
@@ -37,17 +36,24 @@ export class ProjectController {
     @Inject('BEN_CLIENT') private readonly benClient: ClientProxy
   ) { }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
   @Post()
   create(@Body() createProjectDto: CreateProjectDto) {
     return this.projectService.create(createProjectDto);
   }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
   @Get()
   list() {
     return this.projectService.list();
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
   @Get(':uuid')
   @ApiParam({ name: 'uuid', required: true })
@@ -55,6 +61,8 @@ export class ProjectController {
     return this.projectService.findOne(uuid);
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
   @ApiParam({ name: 'uuid', required: true })
   @Patch(':uuid')
@@ -65,6 +73,8 @@ export class ProjectController {
     return this.projectService.update(uuid, updateProjectDto);
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
   @ApiParam({ name: 'uuid', required: true })
   @Patch(':uuid/status')
@@ -75,13 +85,16 @@ export class ProjectController {
     return this.projectService.updateStatus(uuid, data);
   }
 
-
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
   @Delete(':uuid')
   remove(@Param('uuid') uuid: UUID) {
     return this.projectService.remove(uuid);
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: true })
   @Get(':uuid/beneficiaries')
@@ -92,6 +105,8 @@ export class ProjectController {
   }
 
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/settings')
@@ -101,6 +116,8 @@ export class ProjectController {
       .pipe(timeout(5000));
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
@@ -116,8 +133,8 @@ export class ProjectController {
   }
 
   //list project specific stats
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
-  @ApiParam({ name: 'uuid', required: true })
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @ApiParam({ name: 'uuid', required: true })
   @Get(':uuid/stats')
   projectStats(@Param('uuid') uuid: UUID) {
     return this.benClient
@@ -142,6 +159,8 @@ export class ProjectController {
   // }
 
   //list project specific stats sources
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: false })
   @Get(':uuid/statsSources')
@@ -152,4 +171,4 @@ export class ProjectController {
   }
 
 
-} 
+}
