@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { paginator, PrismaService } from "@rumsan/prisma";
+import { PrismaService } from "@rumsan/prisma";
 import { VendorsService } from "./vendors.service";
 import { UserRoles } from '@rahataid/sdk';
 import { AuthsService, UsersService } from '@rumsan/user';
