@@ -33,11 +33,14 @@ export class BeneficiaryProcessor {
     const beneficiaries = groups.map((f) => f.tempBeneficiary);
     if (!beneficiaries.length) return;
     console.log("Total Benef=>", beneficiaries.length)
-    // Validate existing benef
+    // Filter beneficiaries not in PII table
+    const sanitizedBenef = await excludeDuplicatePhone(beneficiaries);
+    console.log("Sanitized Benef=>", sanitizedBenef.length)
+
     // =====Txn start====
     try {
-      for (let i = 0; i < beneficiaries.length; i += BATCH_SIZE) {
-        const batch = beneficiaries.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < sanitizedBenef.length; i += BATCH_SIZE) {
+        const batch = sanitizedBenef.slice(i, i + BATCH_SIZE);
         await this.prisma.$transaction(async (txn) => {
           await importAndAddToGroup({ txn, beneficiaries: batch, tempGroup });
         }, {
@@ -73,6 +76,18 @@ export class BeneficiaryProcessor {
   }
 }
 
+async function excludeDuplicatePhone(beneficiaries: any[]) {
+  let result = [];
+  if (!beneficiaries.length) return result;
+  for (let b of beneficiaries) {
+    const exist = await this.prisma.beneficiaryPii.findUnique({
+      where: { phone: b.phone }
+    });
+    if (!exist) result.push(b);
+  }
+  return result;
+}
+
 //===========Import helper txns=====================
 async function importAndAddToGroup({ txn, beneficiaries, tempGroup }) {
   const { name, uuid: tempGUID } = tempGroup;
@@ -99,16 +114,8 @@ async function upsertBeneficiary(txn: any, data: any) {
 }
 
 async function upsertPiiData(txn: any, data: any) {
-  if (data.phone) {
-    const exist = await txn.beneficiaryPii.findUnique({
-      where: {
-        phone: data.phone
-      }
-    })
-    if (exist) return;
-  }
   return txn.beneficiaryPii.upsert({
-    where: { beneficiaryId: data.beneficiaryId },
+    where: { phone: data.phone },
     update: data,
     create: data
   });
