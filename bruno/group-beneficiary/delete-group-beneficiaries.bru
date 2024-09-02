@@ -1,0 +1,41 @@
+meta {
+  name: delete-group-beneficiaries
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{url}}/beneficiaries/groups/uuid
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data: isJson
+}
+
+script:pre-request {
+  const { groupData } = require('./temp/group-data.json');
+  const { access_token } = require("./temp/auth-data.json");
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+  
+  const url = bru.getEnvVar('url');
+  req.setUrl(`${url}/beneficiaries/groups/${groupData.uuid}`);
+}
+
+script:post-response {
+  const createFile = require('./createFile');
+  const deletedData = res.getBody().data;
+  const data = { "groupData": deletedData };
+  createFile(data, 'group-data.json');
+}
+
+tests {
+  test('should delete the beneficiaries group', async () => {
+    const result = res.getBody().data;
+    expect(res.body.data).to.equal(result);
+    expect(res.body.data).to.have.property('uuid');
+  });
+}

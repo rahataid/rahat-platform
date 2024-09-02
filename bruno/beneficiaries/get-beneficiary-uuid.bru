@@ -1,0 +1,40 @@
+meta {
+  name: get-beneficiary-uuid
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{url}}/beneficiaries/{{beneficiaryData.uuid}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data: isJson object
+}
+
+script:pre-request {
+  const { access_token } = require('./temp/auth-data.json');
+  const { beneficiaryData } = require('./temp/beneficiary-data.json');
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+  
+  const url = bru.getEnvVar('url');
+  req.setUrl(`${url}/beneficiaries/${beneficiaryData.uuid}`);
+}
+
+script:post-response {
+  var resData = res.getBody().data;
+  bru.setVar('benef-phone', resData.piiData.phone);
+}
+
+tests {
+  test('should return detail of beneficiary using uuid', async () => {
+    const resData = res.getBody();
+    expect(res.body.data.uuid).to.equal(resData.data.uuid);
+    expect(res.body.data).to.equal(resData.data);
+    expect(res.body.data).to.have.property('uuid');
+  });
+}

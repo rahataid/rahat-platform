@@ -1,0 +1,51 @@
+meta {
+  name: login-by-wallet
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/auth/wallet
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "challenge":"{{challenge}}",
+    "signature":"{{signature}}"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.success: eq true
+}
+
+script:pre-request {
+  const { ethers } = require('ethers');
+  
+  async function signMessage(message) {
+    const wallet = new ethers.Wallet(bru.getEnvVar('private_key'));
+    const signature = await wallet.signMessage(message);
+    bru.setVar('signature', signature);
+  }
+  await signMessage(bru.getVar('challenge'));
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("access_token", responseData.data?.accessToken);
+  const token = bru.getVar("access_token");
+
+  const createFile = require('./createFile');
+  const data = {"access_token": token};
+  createFile(data, 'auth-data.json');
+}
+
+tests {
+  test('should return accessToken', async () => {
+    const responseData = res.getBody().data;
+    expect(responseData).to.have.property('accessToken');
+  });
+}

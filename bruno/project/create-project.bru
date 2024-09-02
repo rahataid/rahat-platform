@@ -1,0 +1,54 @@
+meta {
+  name: create-project
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/projects
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 201
+  res.body.success: eq true
+}
+
+script:pre-request {
+  const { faker } = require("@faker-js/faker");
+  const { access_token } = require('./temp/auth-data.json');
+  req.setHeader("Authorization",`Bearer ${access_token}`);
+  
+  const name = faker.word.sample();
+  const description = faker.lorem.paragraph();
+  const type = "el";
+  const extras = {
+    test : faker.word.sample(),
+  };
+  const contractAddress = faker.string.hexadecimal();
+  
+  req.setBody({
+    name,
+    description,
+    type,
+    extras,
+    contractAddress
+  })
+}
+
+script:post-response {
+  const createFile = require('./createFile');
+  
+  var resp = res.getBody().data;
+  const data = {"projectData": resp}
+  createFile(data, 'project-data.json');
+}
+
+tests {
+  test('should create new project', async () => {
+    const data = res.getBody();
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.equal(data.data);
+  });
+}
