@@ -1,6 +1,7 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Process, Processor } from '@nestjs/bull';
 import { BadRequestException, Logger } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
 import { BQUEUE, BeneficiaryJobs } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { Job } from 'bull';
@@ -31,16 +32,14 @@ export class BeneficiaryProcessor {
     const groups = await findTempBenefGroups(this.prisma, groupUUID);
     if (!groups.length) return;
     const beneficiaries = groups.map((f) => f.tempBeneficiary);
+    console.log("Total Benef=>", beneficiaries.length);
     if (!beneficiaries.length) return;
-    console.log("Total Benef=>", beneficiaries.length)
     // Filter beneficiaries not in PII table
-    const sanitizedBenef = await excludeDuplicatePhone(beneficiaries);
-    console.log("Sanitized Benef=>", sanitizedBenef.length)
-
+    // const duplicatePhoneExcluded = await excludeDuplicatePhone(this.prisma, beneficiaries);
     // =====Txn start====
     try {
-      for (let i = 0; i < sanitizedBenef.length; i += BATCH_SIZE) {
-        const batch = sanitizedBenef.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < beneficiaries.length; i += BATCH_SIZE) {
+        const batch = beneficiaries.slice(i, i + BATCH_SIZE);
         await this.prisma.$transaction(async (txn) => {
           await importAndAddToGroup({ txn, beneficiaries: batch, tempGroup });
         }, {
@@ -76,12 +75,34 @@ export class BeneficiaryProcessor {
   }
 }
 
-async function excludeDuplicatePhone(beneficiaries: any[]) {
+async function excludeDuplicatePhone(prisma: PrismaClient, beneficiaries: any[]) {
   let result = [];
   if (!beneficiaries.length) return result;
   for (let b of beneficiaries) {
-    const exist = await this.prisma.beneficiaryPii.findUnique({
+    const exist = await prisma.beneficiaryPii.findUnique({
       where: { phone: b.phone }
+    });
+    if (!exist) result.push(b);
+  }
+  return result;
+}
+
+function checkDuplicateWalletInPayload(data: any[]) {
+  const walletSet = new Set();
+
+  for (const d of data) {
+    if (walletSet.has(d.walletAddress)) return true;
+    walletSet.add(d.walletAddress);
+  }
+  return false;
+}
+
+async function excludeDuplicateWallet(prisma: PrismaClient, beneficiaries: any[]) {
+  let result = [];
+  if (!beneficiaries.length) return result;
+  for (let b of beneficiaries) {
+    const exist = await prisma.beneficiary.findUnique({
+      where: { walletAddress: b.walletAddress }
     });
     if (!exist) result.push(b);
   }
@@ -97,6 +118,7 @@ async function importAndAddToGroup({ txn, beneficiaries, tempGroup }) {
     const { uuid, ...rest } = benef;
     const { piiData, nonPii } = splitBeneficiaryPII(rest);
     const newBenef = await upsertBeneficiary(txn, nonPii);
+    console.log("NEW=>", newBenef.id);
     const piiDataPayload = { ...piiData, beneficiaryId: newBenef.id };
     await upsertPiiData(txn, piiDataPayload);
     await addBenefToGroup(txn, group.uuid, newBenef.uuid);
