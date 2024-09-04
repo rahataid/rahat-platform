@@ -14,6 +14,8 @@ import { BeneficiaryController } from './beneficiary.controller';
           host: process.env.REDIS_HOST,
           port: +process.env.REDIS_PORT,
           password: process.env.REDIS_PASSWORD,
+          retryAttempts: 10,
+          retryDelay: 2000,
         },
       },
     ]),
@@ -24,4 +26,4 @@ import { BeneficiaryController } from './beneficiary.controller';
   controllers: [BeneficiaryController],
   providers: [],
 })
-export class BeneficiaryModule {}
+export class BeneficiaryModule { }
