@@ -216,11 +216,38 @@ export class BeneficiaryService {
       }
     );
 
-    if (result.data.length > 0) {
-      const mergedData = await this.mergePIIData(result.data);
+    console.time("check")
+
+    const resultData = result.data
+
+    if (resultData.length > 0) {
+      const benfPiiData = await this.prisma.beneficiaryPii.findMany({
+        where: {
+          beneficiaryId: {
+            in: resultData?.map((d) => d.id)
+          }
+        }
+      })
+      const piiDataMap = new Map();
+      for (const piiData of benfPiiData) {
+        piiDataMap.set(piiData.beneficiaryId, piiData);
+      }
+
+      const mergedData = resultData.map((d) => {
+        const piiData = piiDataMap.get(d.id);
+        if (piiData) {
+          d.piiData = piiData;
+        }
+        return d;
+      });
       result.data = mergedData;
     }
-    return result;
+
+
+    console.timeEnd("check")
+    console.log(new Date())
+
+    return result
   }
 
   async mergeProjectData(data: any, payload?: any) {
@@ -970,40 +997,61 @@ export class BeneficiaryService {
       deletedAt: null
     }
 
-    return await paginate(
+    console.time("group")
+
+    const data = await paginate(
       this.prisma.beneficiaryGroup,
       {
         where,
-        include: {
+        select: {
+          id: true,
+          uuid: true,
+          name: true,
+          createdAt: true,
+          updatedAt: true,
           _count: {
             select: {
               groupedBeneficiaries: {
                 where: {
-                  deletedAt: null
-                }
-              }
-            }
+                  deletedAt: null,
+                },
+              },
+            },
           },
           beneficiaryGroupProject: {
-            include: {
-              Project: true
+            select: {
+              Project: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+              deletedAt: true,
             },
             where: {
-              deletedAt: null
-            }
+              deletedAt: null,
+            },
           },
           groupedBeneficiaries: {
-            include: {
+            select: {
               Beneficiary: {
-                include: {
-                  pii: true
-                }
-              }
+                select: {
+                  id: true,
+                  uuid: true,
+                  pii: {
+                    select: {
+                      name: true,
+                      phone: true,
+                    },
+                  },
+                },
+              },
+              deletedAt: true,
             },
             where: {
-              deletedAt: null
-            }
-          }
+              deletedAt: null,
+            },
+          },
         },
         orderBy,
       },
@@ -1012,6 +1060,10 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+
+    console.timeEnd("group")
+    console.log(new Date())
+    return data
   }
 
   async updateGroup(uuid: UUID, dto: UpdateBeneficiaryGroupDto) {
