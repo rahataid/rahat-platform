@@ -2,7 +2,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { Beneficiary } from '@prisma/client';
+import { Beneficiary, Prisma } from '@prisma/client';
 import {
   AddBenToProjectDto,
   AddBenfGroupToProjectDto,
@@ -251,12 +251,20 @@ export class BeneficiaryService {
     //   }
     // })
 
+    const where: Prisma.BeneficiaryWhereInput = {
+    }
+    if (data.map(b => b.walletAddress)) {
+      where.walletAddress = {
+        in: data.map(b => b.walletAddress)
+      }
+    }
+    else {
+      where.uuid = {
+        in: data.map(b => b.uuid)
+      }
+    }
     const beneficiaries = await this.prisma.beneficiary.findMany({
-      where: {
-        uuid: {
-          in: data.map(b => b.uuid)
-        }
-      },
+      where,
       include: {
         pii: true
       }
@@ -266,7 +274,7 @@ export class BeneficiaryService {
 
     if (data) {
       const combinedData = data.map(((dat) => {
-        const benDetails = beneficiaries.find((ben) => ben.uuid === dat.uuid);
+        const benDetails = beneficiaries.find((ben) => ben.walletAddress === dat.walletAddress);
         const { pii, ...rest } = benDetails;
         return {
           piiData: pii,
