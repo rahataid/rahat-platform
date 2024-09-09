@@ -1,11 +1,9 @@
 import { PrismaClient } from '@prisma/client';
-import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService, } from '@rumsan/prisma';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
 const prisma = new PrismaService();
-const settings = new SettingsService(prisma);
 const prismaClient = new PrismaClient()
 
 const data =
