@@ -4,8 +4,8 @@ import * as readline from 'readline';
 
 const prisma = new PrismaService();
 const prismaClient = new PrismaClient({
-  datasourceUrl: 'postgresql://postgres:Il1ibC2ltqwobb99Zlo0aWc5rK@147.182.205.3:7520/core?schema=public'
-});
+  datasourceUrl: 'postgresql://${username}:${password}@${address}:%{port}/{db_name}?schema=public'
+});;
 // Setup readline interface
 const rl = readline.createInterface({
   input: process.stdin,
