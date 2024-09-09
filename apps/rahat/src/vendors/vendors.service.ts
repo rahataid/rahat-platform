@@ -35,12 +35,22 @@ export class VendorsService {
       if (!role) throw new Error('Role not found');
       // Add to User table
       const { service, ...rest } = dto;
-      if (dto?.email) {
+      if (dto?.email || dto?.phone) {
         const userData = await prisma.user.findFirst({
-          where: { email: dto.email }
-        })
-        if (userData) throw new Error("Email must be unique");
+          where: {
+            OR: [
+              { email: dto.email },
+              { phone: dto.phone }
+            ]
+          }
+        });
+
+        if (userData) {
+          if (userData?.email === dto.email) throw new Error("Email must be unique");
+          if (userData?.phone === dto.phone) throw new Error("Phone Number must be unique");
+        }
       }
+
       const user = await prisma.user.create({ data: rest });
       // Add to UserRole table
       const userRolePayload = { userId: user.id, roleId: role.id };
@@ -68,7 +78,6 @@ export class VendorsService {
   }
 
   async assignToProject(dto: VendorAddToProjectDto) {
-    console.log('hERE 1');
     const { vendorId, projectId } = dto;
     const vendorUser = await this.prisma.user.findUnique({
       where: { uuid: vendorId },
@@ -90,10 +99,6 @@ export class VendorsService {
       walletAddress: vendorUser.wallet,
     };
 
-    console.log('hERE 2');
-
-
-
     const assigned = await this.getVendorAssignedToProject(vendorId, projectId)
 
 
@@ -108,8 +113,6 @@ export class VendorsService {
     //     vendorId: vendorId,
     //   },
     // });
-
-    console.log('hERE 3');
 
     const response = await handleMicroserviceCall({
       client: this.client.send(
@@ -220,7 +223,6 @@ export class VendorsService {
         createdAt: 'desc',
       },
     });
-    console.log('vendData', venData)
     return this.client.send({
       cmd: VendorJobs.LIST,
       uuid: projectId
