@@ -10,8 +10,8 @@ const prismaClient = new PrismaClient()
 
 const data =
 {
-  URL: "",
-  APP_ID: ""
+  URL: "https://connect.rumsan.net/api/v1",
+  APP_ID: "cm0uy35h2035e10ax58lf5mvj"
 }
 
 
@@ -22,7 +22,7 @@ const main = async () => {
       value: data as object,
       isPrivate: false,
       isReadOnly: false,
-      name: 'COMMUNICATIONS',
+      name: 'COMMUNICATION',
       dataType: 'OBJECT',
 
       requiredFields: ["URL", "APP_ID"],
