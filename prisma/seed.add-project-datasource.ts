@@ -24,64 +24,70 @@ const projectStats = (uuid: string, url: string) => {
       }
     },
     "ui": [
-      [
-        {
-          "type": "dataCard",
-          "props": {},
-          "title": "Banked Beneficiaries",
-          "colSpan": 1,
-          "dataMap": `BENEFICIARY_BANKEDSTATUS_ID_${uuid}.BANKED`,
-          "dataSrc": "source2",
-          "rowSpan": 1
-        },
-        {
-          "type": "dataCard",
-          "props": {},
-          "title": "Total Females",
-          "colSpan": 1,
-          "dataMap": `BENEFICIARY_GENDER_ID_${uuid}.FEMALE`,
-          "dataSrc": "source2",
-          "rowSpan": 1
-        },
-        {
-          "type": "dataCard",
-          "props": {},
-          "title": "Unbanked Beneficiaries",
-          "colSpan": 1,
-          "dataMap": `BENEFICIARY_BANKEDSTATUS_ID_${uuid}.UNBANKED`,
-          "dataSrc": "source2",
-          "rowSpan": 1
-        }
-      ],
-      [
-        {
-          "type": "pie",
-          "props": {},
-          "title": "Internet Status",
-          "colSpan": 1,
-          "dataMap": `BENEFICIARY_INTERNETSTATUS_ID_${uuid}`,
-          "dataSrc": "source2",
-          "rowSpan": 1
-        },
-        {
-          "type": "pie",
-          "props": {},
-          "title": "Gender",
-          "colSpan": 1,
-          "dataMap": `BENEFICIARY_GENDER_ID_${uuid}`,
-          "dataSrc": "source2",
-          "rowSpan": 1
-        },
-        {
-          "type": "bar",
-          "props": {},
-          "title": "Phone Status",
-          "colSpan": 1,
-          "dataMap": `BENEFICIARY_PHONESTATUS_ID_${uuid}`,
-          "dataSrc": "source2",
-          "rowSpan": 4
-        }
-      ]
+      {
+        title: '',
+        fields: [
+          {
+            "type": "dataCard",
+            "props": {},
+            "title": "Banked Beneficiaries",
+            "colSpan": 1,
+            "dataMap": `BENEFICIARY_BANKEDSTATUS_ID_${uuid}.BANKED`,
+            "dataSrc": "source2",
+            "rowSpan": 1
+          },
+          {
+            "type": "dataCard",
+            "props": {},
+            "title": "Total Females",
+            "colSpan": 1,
+            "dataMap": `BENEFICIARY_GENDER_ID_${uuid}.FEMALE`,
+            "dataSrc": "source2",
+            "rowSpan": 1
+          },
+          {
+            "type": "dataCard",
+            "props": {},
+            "title": "Unbanked Beneficiaries",
+            "colSpan": 1,
+            "dataMap": `BENEFICIARY_BANKEDSTATUS_ID_${uuid}.UNBANKED`,
+            "dataSrc": "source2",
+            "rowSpan": 1
+          }
+        ]
+      },
+      {
+        title: '',
+        fields: [
+          {
+            "type": "pie",
+            "props": {},
+            "title": "Internet Status",
+            "colSpan": 1,
+            "dataMap": `BENEFICIARY_INTERNETSTATUS_ID_${uuid}`,
+            "dataSrc": "source2",
+            "rowSpan": 1
+          },
+          {
+            "type": "pie",
+            "props": {},
+            "title": "Gender",
+            "colSpan": 1,
+            "dataMap": `BENEFICIARY_GENDER_ID_${uuid}`,
+            "dataSrc": "source2",
+            "rowSpan": 1
+          },
+          {
+            "type": "bar",
+            "props": {},
+            "title": "Phone Status",
+            "colSpan": 1,
+            "dataMap": `BENEFICIARY_PHONESTATUS_ID_${uuid}`,
+            "dataSrc": "source2",
+            "rowSpan": 4
+          }
+        ]
+      }
     ]
   };
 };
