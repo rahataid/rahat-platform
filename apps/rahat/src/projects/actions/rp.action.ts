@@ -183,6 +183,9 @@ export const rpActions: ProjectActionFunc = {
 
   [MS_ACTIONS.RPPROJECT.GET_ONE_GROUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.BENEFICIARY.GET_ONE_GROUP, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.UPDATE_OFFLINE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.OFFLINE_BENEFICIARIES.UPDATE_OFFLINE_BENEFICIARY, uuid }, payload),
   // **** Beneficiary Groups end **** //
 
 };
