@@ -179,6 +179,7 @@ export const MS_ACTIONS = {
     //TEMP SOLUTION
     CREATE_SAFE_TRANSACTION: 'c2cProject.createSafeTransaction',
     GET_SAFE_TRANSACTION: 'c2cProject.getSafeTransaction',
+    GET_SAFE_PENDING: 'c2cProject.getSafePending',
     CREATE_CAMPAIGN: 'c2cProject.campaign.create',
     CREATE_AUDIENCE: 'c2cProject.campaign.create_audience',
     GET_ALL_CAMPAIGN: 'c2cProject.campaign.get',

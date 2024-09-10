@@ -58,6 +58,7 @@ export const JOBS = {
   GET_DISBURSEMENT_APPROVALS: 'rahat.jobs.disbursement.approvals.get',
   CREATE_SAFE_TRANSACTION: 'rahat.jobs.safe_transaction.create',
   GET_SAFE_TRANSACTION: 'rahat.jobs.safe_transaction.get',
+  GET_SAFE_PENDING: 'rahat.jobs.safe_transaction.get_pending',
   REMOVE_ONE_GROUP: 'rahat.jobs.beneficiary.remove_one_group',
   GET_STATS: 'rahat.jobs.projects.get_stats',
   GET_ALL_STATS: 'rahat.jobs.projects.get_all_stats',
