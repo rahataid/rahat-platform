@@ -20,20 +20,20 @@ script:pre-request {
   const { access_token } = require('./temp/auth-data.json');
   req.setHeader("Authorization",`Bearer ${access_token}`);
   
-  const name = faker.word.sample();
-  const description = faker.lorem.paragraph();
-  const type = "el";
-  const extras = {
+  const fName = faker.word.sample();
+  const fDescription = faker.lorem.paragraph();
+  const fType = "el";
+  const fExtras = {
     test : faker.word.sample(),
   };
-  const contractAddress = faker.string.hexadecimal();
+  const fContractAddress = faker.string.hexadecimal();
   
   req.setBody({
-    name,
-    description,
-    type,
-    extras,
-    contractAddress
+    name: fName,
+    description: fDescription,
+    type: fType,
+    extras: fExtras,
+    contractAddress: fContractAddress
   })
 }
 
@@ -41,6 +41,7 @@ script:post-response {
   const createFile = require('./createFile');
   
   var resp = res.getBody().data;
+  console.log(resp, 'resp');
   const data = {"projectData": resp}
   createFile(data, 'project-data.json');
 }
