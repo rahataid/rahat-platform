@@ -106,9 +106,14 @@ export class BeneficiaryService {
 
     if (data?.data.length) {
       const mergedProjectData = await this.mergeProjectData(data.data, data.payload)
-      data.data = mergedProjectData;
+      if (data?.extras) {
+        data.data = { data: mergedProjectData, extras: data?.extras }
+      }
+      else {
+        data.data = mergedProjectData
+      }
+      return data;
     }
-    return data;
   }
 
 
@@ -252,8 +257,6 @@ export class BeneficiaryService {
   }
 
   async mergeProjectData(data: any, payload?: any) {
-
-
     // const where: Prisma.BeneficiaryWhereInput = {
     //   uuid: {
     //     in: data.map(b => b.uuid)
