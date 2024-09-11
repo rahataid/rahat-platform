@@ -462,5 +462,27 @@ describe('BeneficiaryClient', () => {
     });
   });
 
-  
+  describe('importTempBeneficiaries', () => {
+    it('should import beneficiaries from temp', async () => {
+      const mockRequest = {
+        groupUUID: randomUUID()
+      };
+      const mockResponse = {
+        success: true,
+        data: {
+          message: "Beneficiaries added to the queue!"
+        }
+      };
+      mockAxiosInstance.post.mockResolvedValue(mockResponse);
+      const result = await client.importTempBeneficiaries(mockRequest);
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/beneficiaries/import-temp', mockRequest, undefined);
+      expect(result.httpReponse).toEqual(mockResponse);
+    });
+  });
+
+  describe('generateVerificationLink', () => {
+    it('should generate verification link', async () => {
+      
+    });
+  });
 });
