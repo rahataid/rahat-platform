@@ -171,6 +171,18 @@ export const rpActions: ProjectActionFunc = {
       payload,
       5000
     ),
+  [MS_ACTIONS.RPPROJECT.GET_BENEFICIARIES_DISBURSEMENTS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.GET_BENEFICIARIES_DISBURSEMENTS, uuid }, payload),
 
+  // **** Beneficiary Groups **** //
+  [MS_ACTIONS.RPPROJECT.ADD_GROUP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.ADD_GROUP, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.GET_ALL_GROUPS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.GET_ALL_GROUPS, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.GET_ONE_GROUP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.GET_ONE_GROUP, uuid }, payload),
+  // **** Beneficiary Groups end **** //
 
 };

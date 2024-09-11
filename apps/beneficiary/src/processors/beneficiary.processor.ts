@@ -6,6 +6,7 @@ import { PrismaService } from '@rumsan/prisma';
 import { Job } from 'bull';
 import { UUID } from 'crypto';
 import { splitBeneficiaryPII } from '../beneficiary/helpers';
+import { findTempBenefGroups, validateDupicatePhone, validateDupicateWallet } from './processor.utils';
 
 const BATCH_SIZE = 20;
 
@@ -24,19 +25,25 @@ export class BeneficiaryProcessor {
 
   @Process(BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES)
   async importTempBeneficiary(job: Job<any>) {
-    const { groupUUID } = job.data;
-    const tempGroup = await this.prisma.tempGroup.findUnique({
-      where: { uuid: groupUUID }
-    });
-    const groups = await findTempBenefGroups(this.prisma, groupUUID);
-    if (!groups.length) return;
-    const beneficiaries = groups.map((f) => f.tempBeneficiary);
-    if (!beneficiaries.length) return;
-    console.log("Total Benef=>", beneficiaries.length)
-    // Validate existing benef
-    // =====Txn start====
     try {
+      const { groupUUID } = job.data;
+      const tempGroup = await this.prisma.tempGroup.findUnique({
+        where: { uuid: groupUUID }
+      });
+      const groups = await findTempBenefGroups(this.prisma, groupUUID);
+      if (!groups.length) return;
+      const beneficiaries = groups.map((f) => f.tempBeneficiary);
+      if (!beneficiaries.length) return;
+
+      // Validate duplicate phones and wallets
+      const dupliPhones = await validateDupicatePhone(this.prisma, beneficiaries);
+      if (dupliPhones.length) throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
+      const dupliWallets = await validateDupicateWallet(this.prisma, beneficiaries);
+      if (dupliWallets.length) throw new Error(`Duplicate walletAddress found: ${dupliWallets.toString()}`);
+
+      // =====Txn start====
       for (let i = 0; i < beneficiaries.length; i += BATCH_SIZE) {
+        console.log("Batch=>", i);
         const batch = beneficiaries.slice(i, i + BATCH_SIZE);
         await this.prisma.$transaction(async (txn) => {
           await importAndAddToGroup({ txn, beneficiaries: batch, tempGroup });
@@ -45,13 +52,13 @@ export class BeneficiaryProcessor {
           timeout: 25000
         })
       }
+      // ====Txn start end===
       await removeTempGroup(this.prisma, tempGroup.uuid);
 
     } catch (err) {
-      console.log("Import Txn Err=>", err)
+      console.log("Import Error=>", err.message);
+      throw err;
     }
-    // ====Txn start end===
-
   }
 
   @Process(BeneficiaryJobs.GENERATE_LINK)
@@ -77,7 +84,6 @@ export class BeneficiaryProcessor {
 async function importAndAddToGroup({ txn, beneficiaries, tempGroup }) {
   const { name, uuid: tempGUID } = tempGroup;
   const group = await upsertGroup(txn, name);
-  console.log("Group upsert!")
   for (let benef of beneficiaries) {
     const { uuid, ...rest } = benef;
     const { piiData, nonPii } = splitBeneficiaryPII(rest);
@@ -99,16 +105,8 @@ async function upsertBeneficiary(txn: any, data: any) {
 }
 
 async function upsertPiiData(txn: any, data: any) {
-  if (data.phone) {
-    const exist = await txn.beneficiaryPii.findUnique({
-      where: {
-        phone: data.phone
-      }
-    })
-    if (exist) return;
-  }
   return txn.beneficiaryPii.upsert({
-    where: { beneficiaryId: data.beneficiaryId },
+    where: { phone: data.phone },
     update: data,
     create: data
   });
@@ -157,16 +155,6 @@ async function removeTempGroup(prisma: any, tempGroupUID: string) {
   return prisma.tempGroup.delete({ where: { uuid: tempGroupUID } })
 }
 
-async function findTempBenefGroups(prisma: any, groupUUID: string) {
-  return await prisma.tempBeneficiaryGroup.findMany({
-    where: {
-      tempGroupUID: groupUUID
-    },
-    include: {
-      tempBeneficiary: true
-    }
-  });
-}
 //=========== // End Import helper txns=====================
 
 

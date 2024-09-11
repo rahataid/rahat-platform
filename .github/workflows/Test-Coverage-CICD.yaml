@@ -1,0 +1,47 @@
+name: Test Coverage CI/CD
+on:
+  push:
+    branches:
+      - 'benef-test'
+  pull_request:
+    branches:
+      - 'benef-test'
+  workflow_dispatch:
+
+env:
+  CI: false
+  env_npmrc: ${{ secrets.ENV_NPMRC }}
+
+jobs:
+  deploy:
+    name: build && push image to Docker hub
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, 'action') || contains(github.event.pull_request.title, 'action') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: import env file
+        run: |
+          touch ./.npmrc && echo "$env_npmrc" >> ./.npmrc
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20.10.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: install dependencies and Bootstrap apps
+        run: |
+          npm install -g pnpm@8.14.1
+          pnpm install
+          pnpm bootstrap
+          pnpm rahat&
+          pnpm beneficiary&
+          sleep 5
+
+      - name: Run Test Coverage
+        run: pnpm test:coverage
+
+
