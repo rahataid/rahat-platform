@@ -461,4 +461,6 @@ describe('BeneficiaryClient', () => {
       expect(result.httpReponse).toEqual(mockResponse);
     });
   });
+
+  
 });
