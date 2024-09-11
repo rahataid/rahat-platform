@@ -1,7 +1,7 @@
 /* eslint-disable */
 export default {
   displayName: 'beneficiary-e2e',
-  preset: '../../jest.preset.js',
+  preset: 'ts-jest',
   globalSetup: '<rootDir>/src/support/global-setup.ts',
   globalTeardown: '<rootDir>/src/support/global-teardown.ts',
   setupFiles: ['<rootDir>/src/support/test-setup.ts'],
