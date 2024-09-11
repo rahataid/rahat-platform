@@ -16,6 +16,8 @@ async function bootstrap() {
         host: configService.get('REDIS_HOST'),
         port: configService.get('REDIS_PORT'),
         password: configService.get('REDIS_PASSWORD'),
+        retryAttempts: 20,
+        retryDelay: 3000,
       },
     }
   );

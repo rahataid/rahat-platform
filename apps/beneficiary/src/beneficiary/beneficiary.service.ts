@@ -32,6 +32,7 @@ import { UUID } from 'crypto';
 import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
+import { findTempBenefGroups, validateDupicatePhone, validateDupicateWallet } from '../processors/processor.utils';
 import { createListQuery } from './helpers';
 import { VerificationService } from './verification.service';
 
@@ -216,11 +217,38 @@ export class BeneficiaryService {
       }
     );
 
-    if (result.data.length > 0) {
-      const mergedData = await this.mergePIIData(result.data);
+    console.time("check")
+
+    const resultData = result.data
+
+    if (resultData.length > 0) {
+      const benfPiiData = await this.prisma.beneficiaryPii.findMany({
+        where: {
+          beneficiaryId: {
+            in: resultData?.map((d) => d.id)
+          }
+        }
+      })
+      const piiDataMap = new Map();
+      for (const piiData of benfPiiData) {
+        piiDataMap.set(piiData.beneficiaryId, piiData);
+      }
+
+      const mergedData = resultData.map((d) => {
+        const piiData = piiDataMap.get(d.id);
+        if (piiData) {
+          d.piiData = piiData;
+        }
+        return d;
+      });
       result.data = mergedData;
     }
-    return result;
+
+
+    console.timeEnd("check")
+    console.log(new Date())
+
+    return result
   }
 
   async mergeProjectData(data: any, payload?: any) {
@@ -253,8 +281,8 @@ export class BeneficiaryService {
 
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
-        uuid: {
-          in: data.map(b => b.uuid)
+        walletAddress: {
+          in: data.map(b => b.walletAddress)
         }
       },
       include: {
@@ -266,7 +294,7 @@ export class BeneficiaryService {
 
     if (data) {
       const combinedData = data.map(((dat) => {
-        const benDetails = beneficiaries.find((ben) => ben.uuid === dat.uuid);
+        const benDetails = beneficiaries.find((ben) => ben.walletAddress === dat.walletAddress);
         const { pii, ...rest } = benDetails;
         return {
           piiData: pii,
@@ -962,40 +990,61 @@ export class BeneficiaryService {
       deletedAt: null
     }
 
-    return await paginate(
+    console.time("group")
+
+    const data = await paginate(
       this.prisma.beneficiaryGroup,
       {
         where,
-        include: {
+        select: {
+          id: true,
+          uuid: true,
+          name: true,
+          createdAt: true,
+          updatedAt: true,
           _count: {
             select: {
               groupedBeneficiaries: {
                 where: {
-                  deletedAt: null
-                }
-              }
-            }
+                  deletedAt: null,
+                },
+              },
+            },
           },
           beneficiaryGroupProject: {
-            include: {
-              Project: true
+            select: {
+              Project: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+              deletedAt: true,
             },
             where: {
-              deletedAt: null
-            }
+              deletedAt: null,
+            },
           },
           groupedBeneficiaries: {
-            include: {
+            select: {
               Beneficiary: {
-                include: {
-                  pii: true
-                }
-              }
+                select: {
+                  id: true,
+                  uuid: true,
+                  pii: {
+                    select: {
+                      name: true,
+                      phone: true,
+                    },
+                  },
+                },
+              },
+              deletedAt: true,
             },
             where: {
-              deletedAt: null
-            }
-          }
+              deletedAt: null,
+            },
+          },
         },
         orderBy,
       },
@@ -1004,6 +1053,10 @@ export class BeneficiaryService {
         perPage: dto.perPage,
       }
     );
+
+    console.timeEnd("group")
+    console.log(new Date())
+    return data
   }
 
   async updateGroup(uuid: UUID, dto: UpdateBeneficiaryGroupDto) {
@@ -1432,8 +1485,18 @@ export class BeneficiaryService {
   }
 
   async importTempBeneficiaries(dto: ImportTempBenefDto) {
+    const groups = await findTempBenefGroups(this.prisma, dto.groupUUID);
+    if (!groups.length) throw new Error("No groups found!")
+    const beneficiaries = groups.map((f) => f.tempBeneficiary);
+    if (!beneficiaries.length) throw new Error('No benficiaries found!');
+
+    const dupliPhones = await validateDupicatePhone(this.prisma, beneficiaries);
+    if (dupliPhones.length) throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
+    const dupliWallets = await validateDupicateWallet(this.prisma, beneficiaries);
+    if (dupliWallets.length) throw new Error(`Duplicate walletAddress found: ${dupliWallets.toString()}`);
+
     this.beneficiaryQueue.add(BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES, dto)
-    return { message: "Beneficiaries added to the queue!" }
+    return { message: "Beneficiaries added to the import queue!" }
   }
 
   async projectStatsDataSource(uuid?: UUID) {

@@ -179,6 +179,7 @@ export const MS_ACTIONS = {
     //TEMP SOLUTION
     CREATE_SAFE_TRANSACTION: 'c2cProject.createSafeTransaction',
     GET_SAFE_TRANSACTION: 'c2cProject.getSafeTransaction',
+    GET_SAFE_PENDING: 'c2cProject.getSafePending',
     CREATE_CAMPAIGN: 'c2cProject.campaign.create',
     CREATE_AUDIENCE: 'c2cProject.campaign.create_audience',
     GET_ALL_CAMPAIGN: 'c2cProject.campaign.get',
@@ -237,5 +238,10 @@ export const MS_ACTIONS = {
     GET_OFFLINE_VENDORS: "rpProject.getOfflineVendors",
     GET_OFFLINE_SINGLE_VENDOR: "rpProject.getOfflineSingleVendor",
     SAVE_SYNCED_BENEFICIARIES_TO_VENDOR: "rpProject.saveSyncedBeneficiariesToVendor",
+    ADD_GROUP: 'rpProject.beneficiary.addGroup',
+    GET_ALL_GROUPS: 'rpProject.beneficiary.getAllGroups',
+    GET_ONE_GROUP: 'rpProject.beneficiary.getOneGroup',
+    GET_BENEFICIARIES_DISBURSEMENTS: 'rpProject.beneficiaries.getDisbursements',
+    UPDATE_OFFLINE: 'rpProject.offlineBeneficiaries.update',
   }
 };

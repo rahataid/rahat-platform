@@ -58,6 +58,15 @@ export const JOBS = {
     GET_OFFLINE_VENDORS: "rahat.jobs.get_offline_vendors",
     GET_OFFLINE_SINGLE_VENDOR: "rahat.jobs.get_offline_single_vendor",
     SAVE_SYNCED_BENEFICIARIES_TO_VENDOR: "rahat.jobs.save_synced_beneficiaries_to_vendor",
+    UPDATE_OFFLINE_BENEFICIARY: 'rahat.jobs.beneficiary.update_offline',
 
-  }
+  },
+  BENEFICIARY: {
+    ADD_GROUP: 'rahat.jobs.beneficiary.addGroup',
+    GET_ALL_GROUPS: 'rahat.jobs.beneficiary.getAllGroups',
+    GET_ONE_GROUP: 'rahat.jobs.beneficiary.getOneGroup',
+    GET_BENEFICIARIES_DISBURSEMENTS: 'rahat.jobs.beneficiaries.getDisbursements',
+
+  },
+
 };
