@@ -8,21 +8,24 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards
+  UploadedFile,
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   CreateProjectDto,
   ListProjectBeneficiaryDto,
-  ProjectCommunicationDto,
   UpdateProjectDto,
   UpdateProjectStatusDto
 } from '@rahataid/extensions';
-import { ACTIONS, APP, BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
+import { ACTIONS, APP, BeneficiaryJobs, MS_TIMEOUT, ProjectJobs, TFile } from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
 import { AbilitiesGuard, CheckAbilities, JwtGuard, SUBJECTS } from "@rumsan/user";
 import { UUID } from 'crypto';
+import { memoryStorage } from 'multer';
 import { timeout } from 'rxjs/operators';
 import { ProjectService } from './project.service';
 
@@ -121,13 +124,20 @@ export class ProjectController {
   @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
+  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
   projectActions(
     @Param('uuid') uuid: UUID,
-    @Body() data: ProjectCommunicationDto,
+    @Body() data: any,
+    @UploadedFile() file?: TFile
   ) {
+
+    const fileData = file
+      ? { action: data.action, payload: { ...data, file: { ...file, buffer: file.buffer.toString('base64') } } }
+      : data;
+
     const response = this.projectService.handleProjectActions({
       uuid,
-      ...data,
+      ...fileData,
     });
     return response;
   }
@@ -169,6 +179,7 @@ export class ProjectController {
       .send({ cmd: BeneficiaryJobs.GET_STATS }, { uuid })
       .pipe(timeout(MS_TIMEOUT));
   }
+
 
 
 }

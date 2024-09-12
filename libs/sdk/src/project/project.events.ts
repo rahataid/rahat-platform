@@ -58,7 +58,6 @@ export const JOBS = {
     GET_OFFLINE_VENDORS: "rahat.jobs.get_offline_vendors",
     GET_OFFLINE_SINGLE_VENDOR: "rahat.jobs.get_offline_single_vendor",
     SAVE_SYNCED_BENEFICIARIES_TO_VENDOR: "rahat.jobs.save_synced_beneficiaries_to_vendor",
-    UPDATE_OFFLINE_BENEFICIARY: 'rahat.jobs.beneficiary.update_offline',
 
   },
   BENEFICIARY: {
@@ -68,5 +67,10 @@ export const JOBS = {
     GET_BENEFICIARIES_DISBURSEMENTS: 'rahat.jobs.beneficiaries.getDisbursements',
 
   },
+  STELLAR: {
+    CREATE_DISBURSEMENT: 'rahat.jobs.stellar.createDisbursement',
+    SEND_OTP: 'rahat.jobs.stellar.sendOTP',
+    VERIFY_OTP: 'rahat.jobs.stellar.verifyOTP'
+  }
 
 };

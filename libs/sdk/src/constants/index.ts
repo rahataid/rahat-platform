@@ -243,5 +243,10 @@ export const MS_ACTIONS = {
     GET_ONE_GROUP: 'rpProject.beneficiary.getOneGroup',
     GET_BENEFICIARIES_DISBURSEMENTS: 'rpProject.beneficiaries.getDisbursements',
     UPDATE_OFFLINE: 'rpProject.offlineBeneficiaries.update',
+  },
+  STELLAR_PROJECT: {
+    CREATE_DISBURSEMENT: 'rpProject.stellar.createDisbursement',
+    SEND_OTP: 'rpProject.stellar.sendOTP',
+    VERIFY_OTP: 'rpProject.stellar.verifyOTP'
   }
 };

@@ -18,6 +18,7 @@ import { ERC2771FORWARDER } from '../utils/contracts';
 import { createContractSigner } from '../utils/web3';
 import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
 import { rpActions } from './actions/rp.action';
+import { stellarActions } from './actions/stellar.action';
 import { userRequiredActions } from './actions/user-required.action';
 @Injectable()
 export class ProjectService {
@@ -190,7 +191,8 @@ export class ProjectService {
       ...metaTxActions,
       ...c2cActions,
       ...cvaActions,
-      ...rpActions
+      ...rpActions,
+      ...stellarActions
     };
 
 
@@ -200,5 +202,6 @@ export class ProjectService {
     }
     return await actionFunc(uuid, payload, (...args) => this.sendCommand(args[0], args[1], args[2], this.client, action));
   }
+
 }
 
