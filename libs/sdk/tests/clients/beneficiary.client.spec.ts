@@ -1,5 +1,5 @@
-import { getBeneficiaryClient } from './beneficiary.client';
-import { Beneficiary } from '../beneficiary';
+import { getBeneficiaryClient } from '../../src/clients/beneficiary.client';
+import { Beneficiary } from '../../src/beneficiary';
 import axios from 'axios';
 import { Pagination } from '@rumsan/sdk/types';
 import { randomUUID } from 'crypto';
@@ -477,12 +477,6 @@ describe('BeneficiaryClient', () => {
       const result = await client.importTempBeneficiaries(mockRequest);
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/beneficiaries/import-temp', mockRequest, undefined);
       expect(result.httpReponse).toEqual(mockResponse);
-    });
-  });
-
-  describe('generateVerificationLink', () => {
-    it('should generate verification link', async () => {
-      
     });
   });
 });

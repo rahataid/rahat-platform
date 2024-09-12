@@ -10,5 +10,5 @@
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
     "src/**/*.d.ts"
-  ]
+, "tests/clients/app.client.spec.ts", "tests/clients/beneficiary.client.spec.ts"  ]
 }
