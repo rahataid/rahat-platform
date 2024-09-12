@@ -49,6 +49,7 @@ export class ProjectController {
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
   @Get()
   list() {
+  
     return this.projectService.list();
   }
 
@@ -58,6 +59,7 @@ export class ProjectController {
   @Get(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   findOne(@Param('uuid') uuid: UUID) {
+ 
     return this.projectService.findOne(uuid);
   }
 
@@ -125,6 +127,7 @@ export class ProjectController {
     @Param('uuid') uuid: UUID,
     @Body() data: ProjectCommunicationDto,
   ) {
+   
     const response = this.projectService.handleProjectActions({
       uuid,
       ...data,

@@ -123,6 +123,7 @@ export class BeneficiaryService {
       // return groupData
       data.data = groupData;
     }
+ // console.log(data,'data')
 
     return data;
   }

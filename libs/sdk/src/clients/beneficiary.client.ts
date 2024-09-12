@@ -46,6 +46,7 @@ export const getBeneficiaryClient = (
     },
 
     list: async (data?: Pagination, config?: AxiosRequestConfig) => {
+    
       const response = await client.get('/beneficiaries', {
         params: data,
         ...config,

@@ -37,6 +37,7 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET })
   async getBeneficiary(uuid: UUID) {
+  
     return this.service.findOne(uuid);
   }
 
@@ -57,6 +58,7 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST })
   async list(dto: ListBeneficiaryDto) {
+   
     return this.service.list(dto);
   }
 
