@@ -111,6 +111,15 @@ export const rpActions: ProjectActionFunc = {
       { cmd: ProjectJobs.CAMPAIGN.GET_ALL_COMMUNICATION_STATS, uuid },
       payload
     ),
+  [MS_ACTIONS.RPPROJECT.GET_CAMPAIGN_LOG]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.GET_CAMPAIGN_LOG, uuid },
+      payload
+    ),
   //campaign end
 
   //redemption start

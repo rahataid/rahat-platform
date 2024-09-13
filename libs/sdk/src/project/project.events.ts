@@ -51,6 +51,7 @@ export const JOBS = {
     GET_ALL_COMMUNICATION_STATS: 'rahat.jobs.campaign.communication_stats',
     CREATE_AUDIENCE: 'rahat.jobs.campaign.create_audience',
     CREATE_BULK_AUDIENCE: 'rahat.jobs.campaign.create_bulk_audience',
+    GET_CAMPAIGN_LOG: 'rahat.jobs.campaign.log',
   },
   OFFLINE_BENEFICIARIES: {
     SYNC_BENEFICIARIES: "rahat.jobs.sync_beneficiaries",
