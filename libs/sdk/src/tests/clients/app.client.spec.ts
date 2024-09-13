@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { TAuthApp } from '../../src/app';
-import { AppClient } from '../../src/types/app.types';
-import { getAppClient } from '../../src/clients/app.client';
+import { TAuthApp } from '../../app';
+import { AppClient } from '../../types/app.types';
+import { getAppClient } from '../../clients/app.client';
 import { Pagination } from '@rumsan/sdk/types';
 
 jest.mock('axios');

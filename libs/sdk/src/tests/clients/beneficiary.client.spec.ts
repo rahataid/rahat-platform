@@ -1,5 +1,5 @@
-import { getBeneficiaryClient } from '../../src/clients/beneficiary.client';
-import { Beneficiary } from '../../src/beneficiary';
+import { getBeneficiaryClient } from '../../clients/beneficiary.client';
+import { Beneficiary } from '../../beneficiary';
 import axios from 'axios';
 import { Pagination } from '@rumsan/sdk/types';
 import { randomUUID } from 'crypto';
