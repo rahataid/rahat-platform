@@ -1,11 +1,10 @@
-import axios from 'axios';
 import { Pagination } from '@rumsan/sdk/types';
 import { getProjectClient } from '../../clients/project.client';
 import { ProjectClient } from '../../types';
+import { mockAxiosInstance } from './app.client.spec';
 
-jest.mock('axios');
 
-const mockAxiosInstance = axios as jest.Mocked<typeof axios>;
+// const mockAxiosInstance = axios as jest.Mocked<typeof axios>;
 
 describe('ProjectClient', () => {
     const client:ProjectClient = getProjectClient(mockAxiosInstance);

@@ -1,12 +1,10 @@
 import { getBeneficiaryClient } from '../../clients/beneficiary.client';
 import { Beneficiary } from '../../beneficiary';
-import axios from 'axios';
 import { Pagination } from '@rumsan/sdk/types';
 import { randomUUID } from 'crypto';
+import { mockAxiosInstance } from './app.client.spec';
 
-jest.mock('axios');
-
-const mockAxiosInstance = axios as jest.Mocked<typeof axios>;
+// const mockAxiosInstance = axios as jest.Mocked<typeof axios>;
 
 describe('BeneficiaryClient', () => {
   const client = getBeneficiaryClient(mockAxiosInstance);

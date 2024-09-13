@@ -1,12 +1,19 @@
-import axios from 'axios';
 import { Pagination, Setting } from '@rumsan/sdk/types';
 import { SettingClient } from '../../types/settings.clients.types';
-import { SettingList } from '../../settings/settings.types';
+import { SettingList, SettingResponse } from '../../settings/settings.types';
 import { getSettingsClient } from '../../clients/settings.client';
+import { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { formatResponse } from '@rumsan/sdk/utils';
 
-jest.mock('axios');
-
-const mockAxiosInstance = axios as jest.Mocked<typeof axios>;
+const mockAxios: jest.Mocked<AxiosInstance> = {
+    post: jest.fn(),
+    get: jest.fn(),
+    patch: jest.fn()
+} as any;
+  
+jest.mock('@rumsan/sdk/utils', () => ({
+    formatResponse: jest.fn(),
+}));
 
 const settingsUrl = {
     create: '/settings',
@@ -15,10 +22,8 @@ const settingsUrl = {
     getByName: (settingName: string) => `/settings/${settingName}`
 };
 
-settingsUrl.update("lishu")
-
 describe('SettingsClient', () => {
-    const client:SettingClient = getSettingsClient(mockAxiosInstance);
+    const client:SettingClient = getSettingsClient(mockAxios);
 
     describe('create', () => {
         it('should create settings with necessary details', async () => {
@@ -41,15 +46,17 @@ describe('SettingsClient', () => {
                 isReadOnly: false,
                 isPrivate: true
             };
-
             const mockResponse: SettingList = {
                 sucess: true,
                 data: mockRequest
             };
-            mockAxiosInstance.post.mockResolvedValue(mockResponse);
-            const result = await client.create(mockRequest);
-            expect(mockAxiosInstance.post).toHaveBeenCalledWith(settingsUrl.create, mockRequest, undefined);
-            expect(result.httpReponse).toEqual(mockResponse);
+            const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+            mockAxios.post.mockResolvedValue(mockResponse);
+            (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+            const result = await client.create(mockRequest, mockConfig);
+            expect(mockAxios.post).toHaveBeenCalledWith(settingsUrl.create, mockRequest, mockConfig);
+            expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+            expect(result).toEqual(mockResponse);
         });
     });
 
@@ -61,9 +68,8 @@ describe('SettingsClient', () => {
                 page: 1,
                 perPage: 10
             };
-
-            const mockResponse = {
-                success: true,
+            const mockResponse:SettingList = {
+                sucess: true,
                 data: [
                     {
                         name: "TEST_ABC",
@@ -105,27 +111,21 @@ describe('SettingsClient', () => {
                             password: "test"
                         }
                     }
-                ],
-                meta: {
-                    total: 1,
-                    lastPage: 1,
-                    currentPage: 1,
-                    perPage: 10,
-                    prev: null,
-                    next: null
-                }
+                ]
             };
-            mockAxiosInstance.get.mockResolvedValue(mockResponse);
-            const result = await client.listSettings(queryParams);
-            console.log(result, 'result');
-            expect(mockAxiosInstance.get).toHaveBeenCalledWith(settingsUrl.get, { params: queryParams, undefined });
-            expect(result.httpReponse).toEqual(mockResponse);
+            const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }, params: queryParams};
+            mockAxios.get.mockResolvedValue(mockResponse);
+            (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+            const result = await client.listSettings(queryParams, mockConfig);
+            expect(mockAxios.get).toHaveBeenCalledWith(settingsUrl.get, mockConfig);
+            expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+            expect(result).toEqual(mockResponse);
         });
     });
 
     describe('update', () => {
         it('should update the settings detail as per uuid', async () => {
-            const mockRequest = {
+            const mockRequest:Setting = {
                 name: "SMTPS",
                 value: {
                     username: "xyz",
@@ -139,9 +139,7 @@ describe('SettingsClient', () => {
                 isReadOnly: true
             };
 
-            const mockResponse = {
-                sucess: true,
-                data: {
+            const mockResponse:SettingResponse = {
                     name: "SMTPS",
                     value: {
                         password: "12345",
@@ -154,12 +152,15 @@ describe('SettingsClient', () => {
                     ],
                     isReadOnly: true,
                     isPrivate: false
-                }
             };
-            mockAxiosInstance.patch.mockResolvedValue(mockResponse);
-            const result = await client.update(mockRequest);
-            expect(mockAxiosInstance.patch).toHaveBeenCalledWith(settingsUrl.update(mockRequest.name), mockRequest, undefined);
-            expect(result.httpReponse).toEqual(mockResponse);
+            const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+            mockAxios.patch.mockResolvedValue(mockResponse);
+            (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+            const result = await client.update(mockRequest, mockConfig);
+            console.log(result, 'result');
+            expect(mockAxios.patch).toHaveBeenCalledWith(settingsUrl.update(mockRequest.name), mockRequest, mockConfig);
+            expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+            expect(result).toEqual(mockResponse);
         });
     });
 
@@ -182,10 +183,13 @@ describe('SettingsClient', () => {
                     }
                 }
             };
-            mockAxiosInstance.get.mockResolvedValue(mockResponse);
-            const result = await client.getByName(mockResponse.data.name);
-            expect(mockAxiosInstance.get).toHaveBeenCalledWith(settingsUrl.getByName(mockResponse.data.name), undefined);
-            expect(result.httpReponse).toEqual(mockResponse);
+            const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+            mockAxios.get.mockResolvedValue(mockResponse);
+            (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+            const result = await client.getByName(mockResponse.data.name, mockConfig);
+            expect(mockAxios.get).toHaveBeenCalledWith(settingsUrl.getByName(mockResponse.data.name), mockConfig);
+            expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+            expect(result).toEqual(mockResponse);
         });
     });
 });

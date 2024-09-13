@@ -6,7 +6,7 @@ import { Pagination } from '@rumsan/sdk/types';
 
 jest.mock('axios');
 
-const mockAxiosInstance = axios as jest.Mocked<typeof axios>;
+export const mockAxiosInstance = axios as jest.Mocked<typeof axios>;
 
 describe('AppClient', () => {
     const client: AppClient = getAppClient(mockAxiosInstance);
