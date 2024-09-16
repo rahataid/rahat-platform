@@ -7,11 +7,14 @@ export const stellarActions: ProjectActionFunc = {
             { cmd: ProjectJobs.STELLAR.CREATE_DISBURSEMENT, uuid },
             payload
         ),
-    [MS_ACTIONS.STELLAR_PROJECT.SEND_OTP]: (uuid, payload, sendCommand) =>
-        sendCommand(
+    [MS_ACTIONS.STELLAR_PROJECT.SEND_OTP]: (uuid, payload, sendCommand) => {
+        console.log('Reached', uuid, ProjectJobs.STELLAR.SEND_OTP)
+        return sendCommand(
             { cmd: ProjectJobs.STELLAR.SEND_OTP, uuid },
             payload
-        ),
+        )
+    }
+    ,
     [MS_ACTIONS.STELLAR_PROJECT.VERIFY_OTP]: (uuid, payload, sendCommand) =>
         sendCommand(
             { cmd: ProjectJobs.STELLAR.VERIFY_OTP, uuid },
