@@ -243,5 +243,6 @@ export const MS_ACTIONS = {
     GET_ONE_GROUP: 'rpProject.beneficiary.getOneGroup',
     GET_BENEFICIARIES_DISBURSEMENTS: 'rpProject.beneficiaries.getDisbursements',
     UPDATE_OFFLINE: 'rpProject.offlineBeneficiaries.update',
+    GET_UNSYNCED_BENEFICIARIES: 'rpProject.beneficiaries.getUnsynced',
   }
 };
