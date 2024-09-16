@@ -17,4 +17,19 @@ export const stellarActions: ProjectActionFunc = {
             { cmd: ProjectJobs.STELLAR.VERIFY_OTP, uuid },
             payload
         ),
+    [MS_ACTIONS.STELLAR_PROJECT.GET_BALANCE]: (uuid, payload, sendCommand) =>
+        sendCommand(
+            { cmd: ProjectJobs.STELLAR.GET_BALANCE, uuid },
+            payload
+        ),
+    [MS_ACTIONS.STELLAR_PROJECT.ADD_TRUSTLINE]: (uuid, payload, sendCommand) =>
+        sendCommand(
+            { cmd: ProjectJobs.STELLAR.GET_BALANCE, uuid },
+            payload
+        ),
+    [MS_ACTIONS.STELLAR_PROJECT.FAUCET]: (uuid, payload, sendCommand) =>
+        sendCommand(
+            { cmd: ProjectJobs.STELLAR.FAUCET, uuid },
+            payload
+        ),
 }

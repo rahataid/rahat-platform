@@ -247,6 +247,9 @@ export const MS_ACTIONS = {
   STELLAR_PROJECT: {
     CREATE_DISBURSEMENT: 'rpProject.stellar.createDisbursement',
     SEND_OTP: 'rpProject.stellar.sendOTP',
-    VERIFY_OTP: 'rpProject.stellar.verifyOTP'
+    VERIFY_OTP: 'rpProject.stellar.verifyOTP',
+    GET_BALANCE: 'rpProject.stellar.getBalance',
+    ADD_TRUSTLINE: 'rpProject.stellar.addTrustline',
+    FAUCET: 'rpProject.stellar.faucet'
   }
 };

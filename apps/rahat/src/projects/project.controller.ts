@@ -119,9 +119,9 @@ export class ProjectController {
       .pipe(timeout(5000));
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
   @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
