@@ -228,6 +228,7 @@ export const MS_ACTIONS = {
     TRIGGER_CAMPAIGN: 'rpProject.campaign.trigger',
     GET_ALL_COMMUNICATION_LOGS: 'rpProject.campaign.communication_logs',
     GET_ALL_COMMUNICATION_STATS: 'rpProject.campaign.communication_stats',
+    GET_CAMPAIGN_LOG: 'rpProject.campaign.log',
     REQUEST_REDEMPTION: 'rpProject.requestRedemption',
     UPDATE_REDEMPTION: 'rpProject.updateRedemption',
     LIST_REDEMPTION: 'rpProject.listRedemption',
