@@ -1,5 +1,4 @@
 import { PrismaService } from '@rumsan/prisma';
-import { SettingsService } from '@rumsan/settings';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
 import { existsSync, readFileSync } from 'fs';
@@ -30,7 +29,6 @@ const contractNames = [
 ];
 
 const prisma = new PrismaService();
-const settings = new SettingsService(prisma);
 
 class DeploymentUpdater {
   deploymentSettings: any;
