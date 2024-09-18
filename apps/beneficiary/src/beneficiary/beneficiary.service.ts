@@ -32,6 +32,7 @@ import { UUID } from 'crypto';
 import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
+import { findTempBenefGroups, validateDupicatePhone, validateDupicateWallet } from '../processors/processor.utils';
 import { createListQuery } from './helpers';
 import { VerificationService } from './verification.service';
 
@@ -105,9 +106,14 @@ export class BeneficiaryService {
 
     if (data?.data.length) {
       const mergedProjectData = await this.mergeProjectData(data.data, data.payload)
-      data.data = mergedProjectData;
+      if (data?.extras) {
+        data.data = { data: mergedProjectData, extras: data?.extras }
+      }
+      else {
+        data.data = mergedProjectData
+      }
+      return data;
     }
-    return data;
   }
 
 
@@ -251,8 +257,6 @@ export class BeneficiaryService {
   }
 
   async mergeProjectData(data: any, payload?: any) {
-
-
     // const where: Prisma.BeneficiaryWhereInput = {
     //   uuid: {
     //     in: data.map(b => b.uuid)
@@ -280,8 +284,8 @@ export class BeneficiaryService {
 
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
-        uuid: {
-          in: data.map(b => b.uuid)
+        walletAddress: {
+          in: data.map(b => b.walletAddress)
         }
       },
       include: {
@@ -293,7 +297,7 @@ export class BeneficiaryService {
 
     if (data) {
       const combinedData = data.map(((dat) => {
-        const benDetails = beneficiaries.find((ben) => ben.uuid === dat.uuid);
+        const benDetails = beneficiaries.find((ben) => ben.walletAddress === dat.walletAddress);
         const { pii, ...rest } = benDetails;
         return {
           piiData: pii,
@@ -1484,8 +1488,18 @@ export class BeneficiaryService {
   }
 
   async importTempBeneficiaries(dto: ImportTempBenefDto) {
+    const groups = await findTempBenefGroups(this.prisma, dto.groupUUID);
+    if (!groups.length) throw new Error("No groups found!")
+    const beneficiaries = groups.map((f) => f.tempBeneficiary);
+    if (!beneficiaries.length) throw new Error('No benficiaries found!');
+
+    const dupliPhones = await validateDupicatePhone(this.prisma, beneficiaries);
+    if (dupliPhones.length) throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
+    const dupliWallets = await validateDupicateWallet(this.prisma, beneficiaries);
+    if (dupliWallets.length) throw new Error(`Duplicate walletAddress found: ${dupliWallets.toString()}`);
+
     this.beneficiaryQueue.add(BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES, dto)
-    return { message: "Beneficiaries added to the queue!" }
+    return { message: "Beneficiaries added to the import queue!" }
   }
 
   async projectStatsDataSource(uuid?: UUID) {
