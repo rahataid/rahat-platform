@@ -3,8 +3,9 @@ import { PrismaService } from '@rumsan/prisma';
 import * as readline from 'readline';
 
 const prisma = new PrismaService();
-const prismaClient = new PrismaClient();
-
+const prismaClient = new PrismaClient({
+  datasourceUrl: 'postgresql://${username}:${password}@${address}:%{port}/{db_name}?schema=public'
+});;
 // Setup readline interface
 const rl = readline.createInterface({
   input: process.stdin,
@@ -23,64 +24,70 @@ const projectStats = (url: string) => {
       },
     },
     ui: [
-      [
-        {
-          type: 'dataCard',
-          props: {},
-          title: 'Banked Beneficiaries',
-          colSpan: 1,
-          dataMap: `BENEFICIARY_BANKEDSTATUS.BANKED`,
-          dataSrc: 'source2',
-          rowSpan: 1,
-        },
-        {
-          type: 'dataCard',
-          props: {},
-          title: 'Total Females',
-          colSpan: 1,
-          dataMap: `BENEFICIARY_GENDER.FEMALE`,
-          dataSrc: 'source2',
-          rowSpan: 1,
-        },
-        {
-          type: 'dataCard',
-          props: {},
-          title: 'Unbanked Beneficiaries',
-          colSpan: 1,
-          dataMap: `BENEFICIARY_BANKEDSTATUS.BANKED`,
-          dataSrc: 'source2',
-          rowSpan: 1,
-        },
-      ],
-      [
-        {
-          type: 'pie',
-          props: {},
-          title: 'Internet Status',
-          colSpan: 1,
-          dataMap: `BENEFICIARY_INTERNETSTATUS`,
-          dataSrc: 'source2',
-          rowSpan: 1,
-        },
-        {
-          type: 'pie',
-          props: {},
-          title: 'Gender',
-          colSpan: 1,
-          dataMap: `BENEFICIARY_GENDER`,
-          dataSrc: 'source2',
-          rowSpan: 1,
-        },
-        {
-          type: 'bar',
-          props: {},
-          title: 'Phone Status',
-          colSpan: 1,
-          dataMap: `BENEFICIARY_PHONESTATUS`,
-          dataSrc: 'source2',
-          rowSpan: 4,
-        },
-      ],
+      {
+        title: '',
+        fields: [
+          {
+            type: 'dataCard',
+            props: {},
+            title: 'Banked Beneficiaries',
+            colSpan: 1,
+            dataMap: `BENEFICIARY_BANKEDSTATUS.BANKED`,
+            dataSrc: 'source2',
+            rowSpan: 1,
+          },
+          {
+            type: 'dataCard',
+            props: {},
+            title: 'Total Females',
+            colSpan: 1,
+            dataMap: `BENEFICIARY_GENDER.FEMALE`,
+            dataSrc: 'source2',
+            rowSpan: 1,
+          },
+          {
+            type: 'dataCard',
+            props: {},
+            title: 'Unbanked Beneficiaries',
+            colSpan: 1,
+            dataMap: `BENEFICIARY_BANKEDSTATUS.BANKED`,
+            dataSrc: 'source2',
+            rowSpan: 1,
+          },
+        ]
+      },
+      {
+        title: '',
+        fields: [
+          {
+            type: 'pie',
+            props: {},
+            title: 'Internet Status',
+            colSpan: 1,
+            dataMap: `BENEFICIARY_INTERNETSTATUS`,
+            dataSrc: 'source2',
+            rowSpan: 1,
+          },
+          {
+            type: 'pie',
+            props: {},
+            title: 'Gender',
+            colSpan: 1,
+            dataMap: `BENEFICIARY_GENDER`,
+            dataSrc: 'source2',
+            rowSpan: 1,
+          },
+          {
+            type: 'bar',
+            props: {},
+            title: 'Phone Status',
+            colSpan: 1,
+            dataMap: `BENEFICIARY_PHONESTATUS`,
+            dataSrc: 'source2',
+            rowSpan: 4,
+          },
+        ],
+      }
     ],
   };
 };

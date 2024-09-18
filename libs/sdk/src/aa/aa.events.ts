@@ -26,6 +26,7 @@ export const JOBS = {
       TRIGGER: 'aa.jobs.activity.communication.trigger',
       SESSION_LOGS: 'aa.jobs.activities.communication.sessionLogs',
       RETRY_FAILED: 'aa.jobs.activities.communication.retryFailed',
+      GET_STATS: 'aa.jobs.activities.communication.getStats',
     }
   },
   ACTIVITY_CATEGORIES: {

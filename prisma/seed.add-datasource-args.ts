@@ -3,7 +3,7 @@ import { PrismaService } from '@rumsan/prisma';
 
 const prisma = new PrismaService();
 const prismaClient = new PrismaClient({
-  datasourceUrl: 'postgresql://postgres:6cmL6UhwRL@206.189.141.44:7500/core?schema=public'
+  datasourceUrl: 'postgresql://${username}:${password}@${address}:%{port}/{db_name}?schema=public'
 });
 
 const projectStats = (url: string) => {
