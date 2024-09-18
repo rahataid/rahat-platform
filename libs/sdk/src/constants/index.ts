@@ -244,5 +244,9 @@ export const MS_ACTIONS = {
     GET_ONE_GROUP: 'rpProject.beneficiary.getOneGroup',
     GET_BENEFICIARIES_DISBURSEMENTS: 'rpProject.beneficiaries.getDisbursements',
     UPDATE_OFFLINE: 'rpProject.offlineBeneficiaries.update',
+    CREATE_WALKIN: 'rpProject.walkin.create',
+    GET_WALKIN: 'rpProject.walkin.get',
+    GET_ALL_WALKIN: 'rpProject.walkin.getAll',
+
   }
 };
