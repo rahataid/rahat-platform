@@ -157,10 +157,6 @@ export class ProjectController {
   //Get datasource for entire project
   // @Get('statsSources')
   // statsSource() {
-  @Post() //   return this.benClient
-  //     .send({ cmd: BeneficiaryJobs.GET_ALL_STATS }, {})
-  //     .pipe(timeout(MS_TIMEOUT));
-  // }
 
   //list project specific stats sources
   @ApiBearerAuth(APP.JWT_BEARER)
