@@ -15,8 +15,9 @@ import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
 import { ERC2771FORWARDER } from '../utils/contracts';
+import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import { createContractSigner } from '../utils/web3';
-import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
+import { aaActions, beneficiaryActions, c2cActions, combodiaActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 @Injectable()
@@ -127,6 +128,7 @@ export class ProjectService {
 
   async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy, action: string) {
     const user = this.requestContextService.getUser()
+    console.log({ user })
     const requiresUser = userRequiredActions.has(action)
 
     return client.send(cmd, {
@@ -169,7 +171,6 @@ export class ProjectService {
   }
 
   async handleProjectActions({ uuid, action, payload }) {
-    console.log({ uuid, action, payload })
     //Note: This is a temporary solution to handle metaTx actions
     const metaTxActions = {
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
@@ -181,6 +182,7 @@ export class ProjectService {
 
 
     const actions = {
+      ...combodiaActions,
       ...projectActions,
       ...elActions,
       ...aaActions,
@@ -200,5 +202,34 @@ export class ProjectService {
     }
     return await actionFunc(uuid, payload, (...args) => this.sendCommand(args[0], args[1], args[2], this.client, action));
   }
+
+  async importKoboBeneficiary(uuid: UUID, data: any) {
+    const mappedData = this.mapKoboFields(data);
+    console.log('KoboData=>', mappedData);
+    // Save to temp table
+    // Send to projectMS
+    // Update temp table
+    await this.sendTestMsg(uuid);
+    return mappedData;
+  }
+
+  mapKoboFields(payload: any) {
+    const mappedPayload = {};
+    const meta = {};
+
+    for (const key in payload) {
+      if (KOBO_FIELD_MAPPINGS[key]) {
+        mappedPayload[KOBO_FIELD_MAPPINGS[key]] = payload[key];
+      } else {
+        meta[key] = payload[key];
+      }
+    }
+    return { ...mappedPayload, meta };
+  }
+
+  async sendTestMsg(uuid: UUID) {
+    return this.client.send({ cmd: 'rahat.jobs.test', uuid }, { msg: 'This is test msg!' }).pipe(timeout(MS_TIMEOUT))
+  }
+
 }
 
