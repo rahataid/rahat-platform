@@ -1,39 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GrievanceService } from './grievance.service';
-import { PrismaService } from "@rumsan/prisma";
+import { PrismaService, paginator } from "@rumsan/prisma";
 import { createGrievanceDTO, deletedGrievance, expectedGrievance, grievanceQuery, grievancesList, updatedGrievance, userId } from './testFixtureData2';
-import { ChangeGrievanceStatusDTO } from '@rahataid/extensions';
+import { ChangeGrievanceStatusDTO, ListGrievanceDTO } from '@rahataid/extensions';
 import { GrievanceStatus } from '@rahataid/sdk';
+
+// const mockPaginator = jest.fn();
+// jest.mock('@rumsan/prisma', () => ({
+//   paginator: jest.fn(() => mockPaginator)
+// }));
 
 describe('GrievanceService', () => {
   let service: GrievanceService;
   let prisma: PrismaService;
-  // let paginate: jest.Mock;
 
   beforeEach(async () => {
-    // paginate = jest.fn().mockImplementation(async (model, params, options) => {
-    //   const { page = 1, perPage = 20 } = options;
-    //   const data = grievancesList.slice((page - 1) * perPage, page * perPage);
-    //   const totalCount = grievancesList.length; 
-    //   const result: {
-    //     data: any[];
-    //     page: number;
-    //     perPage: number;
-    //     total: number;
-    //     count: jest.Mock;
-    //   } = {
-    //     data,
-    //     page,
-    //     perPage,
-    //     total: totalCount,
-    //     count: undefined
-    //   };
-    //   result.count = jest.fn().mockResolvedValue(totalCount);
-    //   return result;
-    // });
-  
-    // ...
-  
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GrievanceService,
@@ -44,14 +25,11 @@ describe('GrievanceService', () => {
               create: jest.fn(),
               update: jest.fn(),
               findUnique: jest.fn(),
-              delete: jest.fn()
+              delete: jest.fn(),
+              findMany: jest.fn()
             },
           },
         },
-        // {
-        //   provide: 'paginate',
-        //   useValue: paginate
-        // },
       ],
     }).compile();
 
@@ -60,32 +38,43 @@ describe('GrievanceService', () => {
   });
 
   // it('should return list of paginated grievances as per query', async () => {
-  //   const result = await service.findAll(grievanceQuery);
-  //   console.log(result, 'result');
-  //   expect(paginate).toHaveBeenCalledWith(
-  //     prisma.grievance,
-  //     {
-  //       include: {
-  //         project: { select: { name: true, uuid: true } },
-  //         reporterUser: { select: { name: true, uuid: true, id: true } },
-  //       },
-  //       where: {
-  //         deletedAt: null,
-  //         projectId: {
-  //           equals: grievanceQuery.projectId,
-  //         },
-  //       },
-  //     },
-  //     {
-  //       page: grievanceQuery.page,
-  //       perPage: grievanceQuery.perPage,
-  //     },
-  //   );
-  //   expect(result).toEqual({
-  //     data: grievancesList.slice(0, 20),
+  //   const grievanceQuery: ListGrievanceDTO = {
+  //     sort: 'createAt',
+  //     order: 'asc',
   //     page: 1,
   //     perPage: 20,
-  //     total: grievancesList.length,
+  //     projectId: process.env.PROJECT_ID
+  //   };
+  //   mockPaginator.mockResolvedValueOnce({
+  //     data: [
+  //       {
+  //         id: 1,
+  //         title: "title",
+  //         description: "description",
+  //         status: GrievanceStatus.NEW,
+  //         projectId: 1,
+  //         reporterUserId: 1
+  //       }
+  //     ],
+  //     page: 1,
+  //     perPage: 20,
+  //     total: 1
+  //   });
+  //   const result = await service.findAll(grievanceQuery);
+  //   expect(result).toEqual({
+  //     data: [
+  //       {
+  //         id: 1,
+  //         title: "title",
+  //         description: "description",
+  //         status: GrievanceStatus.NEW,
+  //         projectId: 1,
+  //         reporterUserId: 1
+  //       }
+  //     ],
+  //     page: 1,
+  //     perPage: 20,
+  //     total: 1
   //   });
   // });
 

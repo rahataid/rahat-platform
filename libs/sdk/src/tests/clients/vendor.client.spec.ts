@@ -42,23 +42,21 @@ describe('VendorClient', () => {
                 updatedAt: new Date ("2024-09-13T07:17:19.294Z"),
                 deletedAt: null,
             };
-            const mockResponse = {
-                success: true,
-                data: {
-                    id: 1,
-                    uuid: 'uuid',
-                    name: 'John Doe',
-                    gender: 'UNKNOWN',
-                    email: 'john@mailinator.com',
-                    phone: '9898',
-                    wallet: '0x00',
-                    extras: { isVendor: true },
-                    createdAt: '2024-09-13T07:17:19.294Z',
-                    updatedAt: '2024-09-13T07:17:19.294Z',
-                    deletedAt: null,
-                    createdBy: null,
-                    updatedBy: null
-                }
+            const mockResponse: Vendor = {
+                id: 1,
+                uuid: "uuid",
+                name: "John Doe",
+                email: "john@mailinator.com",
+                phone: "9843847838",
+                location: 'ktm',
+                wallet: "0x00",
+                extras: {
+                    isVendor: true
+                },
+                service: Service.EMAIL,
+                createdAt: new Date ("2024-09-13T07:17:19.294Z"),
+                updatedAt: new Date ("2024-09-13T07:17:19.294Z"),
+                deletedAt: null,
             };
             const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
             mockAxios.post.mockResolvedValue(mockResponse);
@@ -78,32 +76,40 @@ describe('VendorClient', () => {
                 sort: 'createdAt',
                 order: 'asc'
             };
-            const mockResponse = [{
-                id: 6,
-                userId: 6,
-                roleId: 4,
-                expiry: null,
-                createdAt: "2024-09-13T07:17:19.294Z",
-                createdBy: null,
-                User: {
-                    id: 6,
+            const mockResponse: Vendor[] = [
+                {
+                    id: 1,
                     uuid: "uuid",
                     name: "John Doe",
-                    gender: "UNKNOWN",
                     email: "john@mailinator.com",
-                    phone: "9898",
+                    phone: "9843847838",
+                    location: 'ktm',
                     wallet: "0x00",
                     extras: {
                         isVendor: true
                     },
-                    createdAt: "2024-09-13T07:17:19.294Z",
-                    updatedAt: "2024-09-13T07:17:19.294Z",
+                    service: Service.EMAIL,
+                    createdAt: new Date ("2024-09-13T07:17:19.294Z"),
+                    updatedAt: new Date ("2024-09-13T07:17:19.294Z"),
                     deletedAt: null,
-                    createdBy: null,
-                    updatedBy: null,
-                    VendorProject: []
+                },
+                {
+                    id: 2,
+                    uuid: "uuid",
+                    name: "John Karki",
+                    email: "john@mailinator.com",
+                    phone: "9843748732",
+                    location: 'jhamsikhel',
+                    wallet: "0x0000",
+                    extras: {
+                        isVendor: true
+                    },
+                    service: Service.EMAIL,
+                    createdAt: new Date ("2024-09-13T07:17:19.294Z"),
+                    updatedAt: new Date ("2024-09-13T07:17:19.294Z"),
+                    deletedAt: null,
                 }
-            }];  
+            ];  
             const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }, params: queryParams };
             mockAxios.get.mockResolvedValue( { data: mockResponse });
             (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
@@ -117,30 +123,26 @@ describe('VendorClient', () => {
     describe('get', () => {
         it('should return vendor details as per uuid', async () => {
             const mockResponse = {
-                data: {
-                    id: 6,
-                    uuid: "uuid" as `${string}-${string}-${string}-${string}-${string}`,
-                    name: "John Doe",
-                    gender: "UNKNOWN",
-                    email: "john@mailinator.com",
-                    phone: "9898",
-                    wallet: "0x00",
-                    extras: {
-                        isVendor: true
-                    },
-                    createdAt: "2024-09-13T07:17:19.294Z",
-                    updatedAt: "2024-09-13T07:17:19.294Z",
-                    deletedAt: null,
-                    createdBy: null,
-                    updatedBy: null,
-                    projects: []
-                }
+                id: 2,
+                uuid: "uuid" as `${string}-${string}-${string}-${string}-${string}`,
+                name: "John Karki",
+                email: "john@mailinator.com",
+                phone: "9843748732",
+                location: 'jhamsikhel',
+                wallet: "0x0000",
+                extras: {
+                    isVendor: true
+                },
+                service: Service.EMAIL,
+                createdAt: new Date ("2024-09-13T07:17:19.294Z"),
+                updatedAt: new Date ("2024-09-13T07:17:19.294Z"),
+                deletedAt: null,
             };
             const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' } };
             mockAxios.get.mockResolvedValue(mockResponse);
             (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
-            const result = await client.get(mockResponse.data.uuid, mockConfig);
-            expect(mockAxios.get).toHaveBeenCalledWith(vendorUrl.get(mockResponse.data.uuid), mockConfig);
+            const result = await client.get(mockResponse.uuid, mockConfig);
+            expect(mockAxios.get).toHaveBeenCalledWith(vendorUrl.get(mockResponse.uuid), mockConfig);
             expect(formatResponse).toHaveBeenCalledWith(mockResponse);
             expect(result).toEqual(mockResponse);
         });

@@ -1,20 +1,44 @@
 import { getBeneficiaryClient } from '../../clients/beneficiary.client';
-import { Beneficiary } from '../../beneficiary';
+import { Beneficiary, TPIIData } from '../../beneficiary';
 import { Pagination } from '@rumsan/sdk/types';
 import { randomUUID } from 'crypto';
-import { mockAxiosInstance } from './app.client.spec';
+import { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { formatResponse } from '@rumsan/sdk/utils';
+import { Stats } from '../../types';
+import { BankedStatus, Gender, InternetStatus, PhoneStatus } from '@rahataid/sdk/enums';
 
-// const mockAxiosInstance = axios as jest.Mocked<typeof axios>;
+const mockAxios: jest.Mocked<AxiosInstance> = {
+  post: jest.fn(),
+  get: jest.fn(),
+  patch: jest.fn(),
+  put: jest.fn()
+} as any;
+
+jest.mock('@rumsan/sdk/utils', () => ({
+  formatResponse: jest.fn(),
+}));
+
+const beneficiaryUrl = {
+  create: '/beneficiaries',
+  createBulk: '/beneficiaries/bulk',
+  getStats: '/beneficiaries/stats',
+  list: '/beneficiaries',
+  listPiiData: '/beneficiaries/pii',
+  get: (uuid: string) => `/beneficiaries/${uuid}`,
+  update: (uuid: string) => `/beneficiaries/${uuid}`,
+  getByPhone: (phone: string) => `/beneficiaries/phone/${phone}`,
+  importTempBeneficiaries: '/beneficiaries/import-temp'
+};
 
 describe('BeneficiaryClient', () => {
-  const client = getBeneficiaryClient(mockAxiosInstance);
+  const client = getBeneficiaryClient(mockAxios);
 
   describe('create', () => {
     it('should create a new beneficiary', async () => {
-      const mockRequest = {
+      const mockRequest: Beneficiary = {
         birthDate: new Date('2024-09-05T06:27:57.136Z'),
         age: 20,
-        gender: 'FEMALE',
+        gender: Gender.FEMALE,
         location: 'abc',
         latitude: 26.24,
         longitude: 86.24,
@@ -25,9 +49,9 @@ describe('BeneficiaryClient', () => {
           passportNumber: '1234567',
           email: 'test@mailinator.com',
         },
-        bankedStatus: 'BANKED',
-        internetStatus: 'HOME_INTERNET',
-        phoneStatus: 'FEATURE_PHONE',
+        bankedStatus: BankedStatus.BANKED,
+        internetStatus: InternetStatus.HOME_INTERNET,
+        phoneStatus: PhoneStatus.NO_PHONE,
         piiData: {
           name: 'Test Test',
           phone: '9800000',
@@ -36,27 +60,47 @@ describe('BeneficiaryClient', () => {
             account: 'account',
           },
         },
-        projectUUIDs: [randomUUID()],
-        id: 'mock-beneficiary-id',
       };
-      const mockResponse = {
-        success: true,
-        data: mockRequest,
+      const mockResponse: Beneficiary = {
+        uuid: "uuid" as `${string}-${string}-${string}-${string}-${string}`,
+        gender: Gender.FEMALE,
+        walletAddress: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+        birthDate: new Date('2024-09-05T06:27:57.136Z'),
+        age: 20,
+        location: "lalitpur",
+        latitude: 26.24,
+        longitude: 86.24,
+        extras: {
+          email: "test@mailinator.com",
+          hasCitizenship: true,
+          passportNumber: "1234567"
+        },
+        notes: "9785623749",
+        bankedStatus: BankedStatus.BANKED,
+        internetStatus: InternetStatus.HOME_INTERNET,
+        phoneStatus: PhoneStatus.NO_PHONE,
+        createdAt: new Date("2024-09-18T10:11:32.878Z"),
+        updatedAt: new Date("2024-09-18T10:11:32.878Z"),
+        deletedAt: null
       };
-      mockAxiosInstance.post.mockResolvedValue(mockResponse);
-      const result = await client.create(mockRequest as Beneficiary);
-      expect(mockAxiosInstance.post).toHaveBeenCalledTimes(1);
-      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/beneficiaries', mockRequest, undefined);
-      expect(result.httpReponse).toEqual(mockResponse);
+      const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+      mockAxios.post.mockResolvedValue(mockResponse);
+      (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+      const result = await client.create(mockRequest as Beneficiary, mockConfig);
+      expect(mockAxios.post).toHaveBeenCalledTimes(1);
+      expect(mockAxios.post).toHaveBeenCalledWith(beneficiaryUrl.create, mockRequest, mockConfig);
+      expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+      expect(result).toEqual(mockResponse);
     });
   });
 
   describe('createBulk', () => {
     it('should create beneficiaries in bulk', async () => {
-        const mockRequest = [{
+        const mockRequest: Beneficiary[] = [
+          {
             birthDate: new Date('2024-09-05T06:27:57.136Z'),
             age: 20,
-            gender: 'FEMALE',
+            gender: Gender.FEMALE,
             location: 'abc',
             latitude: 26.24,
             longitude: 86.24,
@@ -67,9 +111,9 @@ describe('BeneficiaryClient', () => {
               passportNumber: '1234567',
               email: 'test@mailinator.com',
             },
-            bankedStatus: 'BANKED',
-            internetStatus: 'HOME_INTERNET',
-            phoneStatus: 'FEATURE_PHONE',
+            bankedStatus: BankedStatus.BANKED,
+            internetStatus: InternetStatus.HOME_INTERNET,
+            phoneStatus: PhoneStatus.NO_PHONE,
             piiData: {
               name: 'Test Test',
               phone: '9800000',
@@ -78,26 +122,24 @@ describe('BeneficiaryClient', () => {
                 account: 'account',
               },
             },
-            projectUUIDs: [randomUUID()],
-            id: 'mock-beneficiary-id',
           },
           {
             birthDate: new Date('2024-09-05T06:27:57.136Z'),
             age: 20,
-            gender: 'FEMALE',
+            gender: Gender.FEMALE,
             location: 'xyz',
             latitude: 26.24,
             longitude: 86.24,
             notes: 'notes',
-            walletAddress: '0x00',
+            walletAddress: '0x0000',
             extras: {
               hasCitizenship: true,
               passportNumber: '1234567',
               email: 'test@mailinator.com',
             },
-            bankedStatus: 'BANKED',
-            internetStatus: 'HOME_INTERNET',
-            phoneStatus: 'FEATURE_PHONE',
+            bankedStatus: BankedStatus.BANKED,
+            internetStatus: InternetStatus.HOME_INTERNET,
+            phoneStatus: PhoneStatus.NO_PHONE,
             piiData: {
               name: 'Test Test',
               phone: '9800000',
@@ -106,81 +148,113 @@ describe('BeneficiaryClient', () => {
                 account: 'account',
               },
             },
-            projectUUIDs: [randomUUID()],
-            id: 'mock-beneficiary-id',
           }];
-          const mockResponse = {
-            success: true,
-            data: mockRequest,
-          };
-          mockAxiosInstance.post.mockResolvedValue(mockResponse);
-          const result = await client.createBulk(mockRequest as Beneficiary[]);
-          expect(mockAxiosInstance.post).toHaveBeenCalledWith('/beneficiaries/bulk', mockRequest, undefined);
-          expect(result.httpReponse).toEqual(mockResponse);
+        const mockResponse: Beneficiary[] = [
+          {
+            uuid: "uuid" as `${string}-${string}-${string}-${string}-${string}`,
+            gender: Gender.FEMALE,
+            walletAddress: "0x00",
+            birthDate: new Date('2024-09-05T06:27:57.136Z'),
+            age: 20,
+            location: "abc",
+            latitude: 26.24,
+            longitude: 86.24,
+            extras: {
+              email: "test@mailinator.com",
+              hasCitizenship: true,
+              passportNumber: "1234567"
+            },
+            notes: "notes",
+            bankedStatus: BankedStatus.BANKED,
+            internetStatus: InternetStatus.HOME_INTERNET,
+            phoneStatus: PhoneStatus.NO_PHONE,
+            createdAt: new Date("2024-09-18T10:11:32.878Z"),
+            updatedAt: new Date("2024-09-18T10:11:32.878Z"),
+            deletedAt: null
+          },
+          {
+            uuid: "uuid" as `${string}-${string}-${string}-${string}-${string}`,
+            gender: Gender.FEMALE,
+            walletAddress: "0x0000",
+            birthDate: new Date('2024-09-05T06:27:57.136Z'),
+            age: 20,
+            location: "xyz",
+            latitude: 26.24,
+            longitude: 86.24,
+            extras: {
+              email: "test@mailinator.com",
+              hasCitizenship: true,
+              passportNumber: "1234567"
+            },
+            notes: "notes",
+            bankedStatus: BankedStatus.BANKED,
+            internetStatus: InternetStatus.HOME_INTERNET,
+            phoneStatus: PhoneStatus.NO_PHONE,
+            createdAt: new Date("2024-09-18T10:11:32.878Z"),
+            updatedAt: new Date("2024-09-18T10:11:32.878Z"),
+            deletedAt: null
+          }
+        ];
+        const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+        mockAxios.post.mockResolvedValue(mockResponse);
+        (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+        const result = await client.createBulk(mockRequest as Beneficiary[], mockConfig);
+        expect(mockAxios.post).toHaveBeenCalledWith(beneficiaryUrl.createBulk, mockRequest, mockConfig);
+        expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+        expect(result).toEqual(mockResponse);
     });
   });
 
   describe('getStats', () => {
     it('should return list of stats', async () => {
-      const mockResponse = {
-          success: true,
+      const mockResponse: Stats[] = [
+        {
+          name: "BENEFICIARY_BANKEDSTATUS",
           data: [
             {
-              name: "BENEFICIARY_BANKEDSTATUS",
-              data: [
-                {
-                  id: "BANKED",
-                  count: 2
-                }
-              ]
+              id: "BANKED",
+              count: 2
+              }
+            ]
+        },
+        {
+          name: "BENEFICIARY_AGE_RANGE",
+          data: [
+            {
+              id: "0-20",
+              count: 2
             },
             {
-              name: "BENEFICIARY_AGE_RANGE",
-              data: [
-                {
-                  id: "0-20",
-                  count: 2
-                },
-                {
-                  id: "20-40",
-                  count: 0
-                },
-                {
-                  id: "40-60",
-                  count: 0
-                },
-                {
-                  id: "60+",
-                  count: 0
-                }
-              ]
-            }
+              id: "20-40",
+              count: 0
+            },
           ]
-        };
-        mockAxiosInstance.get.mockResolvedValue(mockResponse);
-        const result = await client.getStats();
-        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/beneficiaries/stats', undefined);
-        expect(result.response).toEqual(mockResponse.data);
+        }
+      ];
+      const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+      mockAxios.get.mockResolvedValue(mockResponse);
+      (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+      const result = await client.getStats(mockConfig);
+      expect(mockAxios.get).toHaveBeenCalledWith(beneficiaryUrl.getStats, mockConfig);
+      expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+      expect(result).toEqual(mockResponse);
     });
   });
 
   describe('list', () => {
     it('should return list of beneficiaries', async () => {
-      const data: Pagination = {
-        sort: 'gender',
-        order: 'asc',
+      const paramData:Pagination = {
+        order: "asc",
         page: 1,
-        perPage: 10
+        perPage: 10,
+        sort: "gender"
       };
-      const mockResponse = {
-        success: 'true',
-        data: [
+      const mockResponse: Beneficiary[] = [
           {
-            id: 1,
             uuid: randomUUID(),
-            gender: "FEMALE",
+            gender: Gender.FEMALE,
             walletAddress: "0x00",
-            birthDate: "1997-03-08T00:00:00.000Z",
+            birthDate: new Date("1997-03-08T00:00:00.000Z"),
             age: 20,
             location: "xyz",
             latitude: 26.24,
@@ -191,14 +265,12 @@ describe('BeneficiaryClient', () => {
               passportNumber: "1234567"
             },
             notes: "9785623749",
-            bankedStatus: "BANKED",
-            internetStatus: "HOME_INTERNET",
-            phoneStatus: "FEATURE_PHONE",
-            createdAt: "2024-09-03T16:15:32.098Z",
-            updatedAt: "2024-09-03T16:15:32.098Z",
+            bankedStatus: BankedStatus.BANKED,
+            internetStatus: InternetStatus.NO_INTERNET,
+            phoneStatus: PhoneStatus.SMART_PHONE,
+            createdAt: new Date("2024-09-03T16:15:32.098Z"),
+            updatedAt: new Date("2024-09-03T16:15:32.098Z"),
             deletedAt: null,
-            isVerified: false,
-            BeneficiaryProject: [],
             piiData: {
               beneficiaryId: 1,
               name: "ABC",
@@ -211,11 +283,10 @@ describe('BeneficiaryClient', () => {
             }
           },
           {
-            id: 2,
             uuid: randomUUID(),
-            gender: "FEMALE",
+            gender: Gender.MALE,
             walletAddress: "0x00",
-            birthDate: "1997-03-08T00:00:00.000Z",
+            birthDate: new Date("1997-03-08T00:00:00.000Z"),
             age: 20,
             location: "abc",
             latitude: 26.24,
@@ -226,14 +297,12 @@ describe('BeneficiaryClient', () => {
               passportNumber: "1234567"
             },
             notes: "9785623749",
-            bankedStatus: "BANKED",
-            internetStatus: "HOME_INTERNET",
-            phoneStatus: "FEATURE_PHONE",
-            createdAt: "2024-09-03T16:15:32.098Z",
-            updatedAt: "2024-09-03T16:15:32.098Z",
+            bankedStatus: BankedStatus.BANKED,
+            internetStatus: InternetStatus.NO_INTERNET,
+            phoneStatus: PhoneStatus.FEATURE_PHONE,
+            createdAt: new Date("2024-09-03T16:15:32.098Z"),
+            updatedAt: new Date("2024-09-03T16:15:32.098Z"),
             deletedAt: null,
-            isVerified: false,
-            BeneficiaryProject: [],
             piiData: {
               beneficiaryId: 1,
               name: "XYZ",
@@ -245,120 +314,98 @@ describe('BeneficiaryClient', () => {
               }
             }
           }
-        ],
-        meta: {
-          total: 2,
-          lastPage: 1,
-          currentPage: 1,
-          perPage: 10,
-          prev: null,
-          next: null
-        }
-      };
-      mockAxiosInstance.get.mockResolvedValue(mockResponse);
-      const result = await client.list(data); 
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/beneficiaries', {params: data});
-      expect(result.httpReponse).toEqual(mockResponse);
+      ];
+      const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' } };
+      mockAxios.get.mockResolvedValue(mockResponse);
+      (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+      const result = await client.list(paramData, mockConfig); 
+      expect(mockAxios.get).toHaveBeenCalledWith(beneficiaryUrl.list, { params: paramData, ...mockConfig } );
+      expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+      expect(result).toEqual(mockResponse);
     });
   });
 
   describe('listPiiData', () => {
     it('should return list of beneficiary piiData', async () => {
-      const mockResponse = {
-        success: true,
-        data: [
-          {
-            piiData: {
-              beneficiaryId: 1,
-              name: "ABC",
-              phone: "9898",
-              email: null,
-              extras: {
-                bank: "Bank",
-                account: "9872200001"
-              }
-            }
-          },
-          {
-            piiData: {
-              beneficiaryId: 2,
-              name: "XYZ",
-              phone: "989898",
-              email: null,
-              extras: {
-                bank: "Bank",
-                account: "9872200001"
-              }
-            }
-          }
-        ],
-        meta: {
-          total: 2,
-          lastPage: 1,
-          currentPage: 1,
-          perPage: 2,
-          prev: null,
-          next: null
-        }
-      };
-      
-      const paramData: Pagination = {
-        order: "asc",
-        page: 1,
-        perPage: 10,
-        sort: "gender"
-      };
-      mockAxiosInstance.get.mockResolvedValue(mockResponse);
-      const result = await client.listPiiData(paramData);
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/beneficiaries/pii', { params: paramData });
-      expect(result.httpReponse).toEqual(mockResponse);
-    });
-  });
-
-  describe('get', () => {
-    it('should return specific beneficiary as per UUID', async () => {
-      const mockResponse = {
-        success: true,
-        data: {
-          id: 2,
-          uuid: randomUUID(),
-          gender: "FEMALE",
-          walletAddress: "0x00",
-          birthDate: "1997-03-08T00:00:00.000Z",
-          age: 20,
-          location: "lalitpur",
-          latitude: 26.24,
-          longitude: 86.24,
+      const mockResponse:TPIIData[] = [
+        {
+          beneficiaryId: 1,
+          name: "ABC",
+          phone: "9898",
+          email: null,
           extras: {
-            email: "test@mailinator.com",
-            hasCitizenship: true,
-            passportNumber: "1234567"
+            bank: "Bank",
+            account: "9872200001"
+          }
           },
-          notes: "9785623749",
-          bankedStatus: "BANKED",
-          internetStatus: "HOME_INTERNET",
-          phoneStatus: "FEATURE_PHONE",
-          createdAt: "2024-09-09T10:38:19.380Z",
-          updatedAt: "2024-09-09T10:38:19.380Z",
-          deletedAt: null,
-          isVerified: false,
-          BeneficiaryProject: [],
-          piiData: {
+          {
             beneficiaryId: 2,
-            name: "ABC",
-            phone: "9898",
+            name: "XYZ",
+            phone: "989898",
             email: null,
             extras: {
               bank: "Bank",
               account: "9872200001"
             }
           }
+        ];
+      const paramData: Pagination = {
+        order: "asc",
+        page: 1,
+        perPage: 10,
+        sort: "gender"
+      };
+      const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }, params: paramData};
+      mockAxios.get.mockResolvedValue(mockResponse);
+      (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+      const result = await client.listPiiData(paramData, mockConfig);
+      expect(mockAxios.get).toHaveBeenCalledWith(beneficiaryUrl.listPiiData, { params: paramData, ...mockConfig });
+      expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+      expect(result).toEqual(mockResponse);
+    });
+  });
+
+  describe('get', () => {
+    it('should return specific beneficiary as per UUID', async () => {
+      const mockResponse:Beneficiary = {
+        uuid: randomUUID(),
+        gender: Gender.FEMALE,
+        walletAddress: "0x00",
+        birthDate: new Date("1997-03-08T00:00:00.000Z"),
+        age: 20,
+        location: "xyz",
+        latitude: 26.24,
+        longitude: 86.24,
+        extras: {
+          email: "test@mailinator.com",
+          hasCitizenship: true,
+          passportNumber: "1234567"
+        },
+        notes: "9785623749",
+        bankedStatus: BankedStatus.BANKED,
+        internetStatus: InternetStatus.NO_INTERNET,
+        phoneStatus: PhoneStatus.SMART_PHONE,
+        createdAt: new Date("2024-09-03T16:15:32.098Z"),
+        updatedAt: new Date("2024-09-03T16:15:32.098Z"),
+        deletedAt: null,
+        piiData: {
+          beneficiaryId: 1,
+          name: "ABC",
+          phone: "9898",
+          email: null,
+          extras: {
+            bank: "Bank",
+            account: "9872200001"
+          }
         }
       };
-      mockAxiosInstance.get.mockResolvedValueOnce(mockResponse);
-      const result = await client.get(mockResponse.data.uuid);
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith(`/beneficiaries/${mockResponse.data.uuid}`, undefined );
-      expect(result.httpReponse).toEqual(mockResponse);
+      const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+      mockAxios.get.mockResolvedValueOnce(mockResponse);
+      (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+      const result = await client.get(mockResponse.uuid, mockConfig);
+      expect(mockAxios.get).toHaveBeenCalledWith(beneficiaryUrl.get(mockResponse.uuid), mockConfig );
+      expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+      expect(result).toEqual(mockResponse);
     });
   });
 
@@ -373,90 +420,93 @@ describe('BeneficiaryClient', () => {
           phone: '9898848498'
         }
       };
-      const mockResponse = {
-        success: true,
-        data: {
-          id: 2,
-          uuid: randomUUID(),
-          gender: "FEMALE",
-          walletAddress: "0x00",
-          birthDate: "1997-03-08T00:00:00.000Z",
-          age: 28,
-          location: "lalitpur",
-          latitude: 26.24,
-          longitude: 86.24,
+      const mockResponse:Beneficiary = {
+        uuid: randomUUID(),
+        gender: Gender.FEMALE,
+        walletAddress: "0x00",
+        birthDate: new Date("1997-03-08T00:00:00.000Z"),
+        age: 28,
+        location: "xyz",
+        latitude: 26.24,
+        longitude: 86.24,
+        extras: {
+          email: "test@mailinator.com",
+          hasCitizenship: false,
+          passportNumber: "1234567"
+        },
+        notes: "9785623749",
+        bankedStatus: BankedStatus.BANKED,
+        internetStatus: InternetStatus.NO_INTERNET,
+        phoneStatus: PhoneStatus.SMART_PHONE,
+        createdAt: new Date("2024-09-03T16:15:32.098Z"),
+        updatedAt: new Date("2024-09-03T16:15:32.098Z"),
+        deletedAt: null,
+        piiData: {
+          beneficiaryId: 1,
+          name: "ABC",
+          phone: "9898848498",
+          email: null,
           extras: {
-            email: "test@mailinator.com",
-            hasCitizenship: false,
-            passportNumber: "1234567"
-          },
-          notes: "9785623749",
-          bankedStatus: "BANKED",
-          internetStatus: "HOME_INTERNET",
-          phoneStatus: "FEATURE_PHONE",
-          createdAt: "2024-09-09T10:38:19.380Z",
-          updatedAt: "2024-09-10T11:52:23.576Z",
-          deletedAt: null,
-          isVerified: false
+            bank: "Bank",
+            account: "9872200001"
+          }
         }
       };
-      
       const updateDto = {
-        uuid: mockResponse.data.uuid,
+        uuid: mockResponse.uuid,
         data: dto
       };
-
-      mockAxiosInstance.put.mockResolvedValue(mockResponse);
-      const result = await client.update(updateDto);
-      expect(mockAxiosInstance.put).toHaveBeenCalledWith(`/beneficiaries/${updateDto.uuid}`, updateDto.data, undefined);
-      expect(result.httpReponse).toEqual(mockResponse);
+      const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+      mockAxios.put.mockResolvedValue(mockResponse);
+      (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+      const result = await client.update(updateDto, mockConfig);
+      expect(mockAxios.put).toHaveBeenCalledWith(beneficiaryUrl.update(mockResponse.uuid), updateDto.data, mockConfig);
+      expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+      expect(result).toEqual(mockResponse);
     });
   });
 
   describe('getByPhone', () => {
     it('should return details of specific beneficiary as per phone number', async () => {
-      const mockResponse = {
-        success: true,
-        data: {
-          id: 2,
-          uuid: randomUUID(),
-          gender: "FEMALE",
-          walletAddress: "0x00",
-          birthDate: "1997-03-08T00:00:00.000Z",
-          age: 20,
-          location: "xyz",
-          latitude: 26.24,
-          longitude: 86.24,
+      const mockResponse:Beneficiary = {
+        uuid: randomUUID(),
+        gender: Gender.FEMALE,
+        walletAddress: "0x00",
+        birthDate: new Date("1997-03-08T00:00:00.000Z"),
+        age: 20,
+        location: "xyz",
+        latitude: 26.24,
+        longitude: 86.24,
+        extras: {
+          email: "test@mailinator.com",
+          hasCitizenship: true,
+          passportNumber: "1234567"
+        },
+        notes: "9785623749",
+        bankedStatus: BankedStatus.BANKED,
+        internetStatus: InternetStatus.NO_INTERNET,
+        phoneStatus: PhoneStatus.SMART_PHONE,
+        createdAt: new Date("2024-09-03T16:15:32.098Z"),
+        updatedAt: new Date("2024-09-03T16:15:32.098Z"),
+        deletedAt: null,
+        piiData: {
+          beneficiaryId: 1,
+          name: "ABC",
+          phone: "9898",
+          email: null,
           extras: {
-            email: "test@mailinator.com",
-            hasCitizenship: true,
-            passportNumber: "1234567"
-          },
-          notes: "9785623749",
-          bankedStatus: "BANKED",
-          internetStatus: "HOME_INTERNET",
-          phoneStatus: "FEATURE_PHONE",
-          createdAt: "2024-09-09T10:38:19.380Z",
-          updatedAt: "2024-09-09T10:38:19.380Z",
-          deletedAt: null,
-          isVerified: false,
-          BeneficiaryProject: [],
-          piiData: {
-            beneficiaryId: 2,
-            name: "ABC",
-            phone: "9898",
-            email: null,
-            extras: {
-              bank: "Bank",
-              account: "9872200001"
-            }
+            bank: "Bank",
+            account: "9872200001"
           }
         }
       };
-      mockAxiosInstance.get.mockResolvedValueOnce(mockResponse);
-      const result = await client.getByPhone(mockResponse.data.piiData.phone);
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith(`/beneficiaries/phone/${mockResponse.data.piiData.phone}`, undefined );
-      expect(result.httpReponse).toEqual(mockResponse);
+      const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+      mockAxios.get.mockResolvedValueOnce(mockResponse);
+      (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+      const result = await client.getByPhone(mockResponse.piiData.phone, mockConfig);
+      expect(mockAxios.get).toHaveBeenCalledWith(beneficiaryUrl.getByPhone(mockResponse.piiData.phone), mockConfig );
+      expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+      expect(result).toEqual(mockResponse);
     });
   });
 
@@ -471,10 +521,13 @@ describe('BeneficiaryClient', () => {
           message: "Beneficiaries added to the queue!"
         }
       };
-      mockAxiosInstance.post.mockResolvedValue(mockResponse);
-      const result = await client.importTempBeneficiaries(mockRequest);
-      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/beneficiaries/import-temp', mockRequest, undefined);
-      expect(result.httpReponse).toEqual(mockResponse);
+      const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+      mockAxios.post.mockResolvedValue(mockResponse);
+      (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+      const result = await client.importTempBeneficiaries(mockRequest, mockConfig);
+      expect(mockAxios.post).toHaveBeenCalledWith(beneficiaryUrl.importTempBeneficiaries, mockRequest, mockConfig);
+      expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+      expect(result).toEqual(mockResponse);
     });
   });
 });

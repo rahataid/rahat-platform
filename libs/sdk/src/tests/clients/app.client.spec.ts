@@ -1,15 +1,32 @@
-import axios from 'axios';
+import { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { formatResponse } from '@rumsan/sdk/utils';
 import { TAuthApp } from '../../app';
 import { AppClient } from '../../types/app.types';
 import { getAppClient } from '../../clients/app.client';
 import { Pagination } from '@rumsan/sdk/types';
 
-jest.mock('axios');
+const mockAxios: jest.Mocked<AxiosInstance> = {
+    post: jest.fn(),
+    get: jest.fn(),
+    patch: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn()
+} as any;
+  
+jest.mock('@rumsan/sdk/utils', () => ({
+    formatResponse: jest.fn(),
+}));
 
-export const mockAxiosInstance = axios as jest.Mocked<typeof axios>;
+const appUrl = {
+    createAuthApp: '/app/auth-apps',
+    updateAuthApp: (uuid: string) => `/app/auth-apps/${uuid}`,
+    listAuthApps: '/app/auth-apps',
+    getAuthApp: (uuid: string) => `/app/auth-apps/${uuid}`,
+    softDeleteAuthApp: (uuid: string) => `/app/auth-apps/${uuid}`,
+}
 
 describe('AppClient', () => {
-    const client: AppClient = getAppClient(mockAxiosInstance);
+    const client: AppClient = getAppClient(mockAxios);
 
     describe('createAuthApp', () => {
         it('should create new auth app', async () => {
@@ -20,26 +37,24 @@ describe('AppClient', () => {
                 nonceMessage: "HelloWorld",
                 createdBy: "0x00"
             };
-
-            const mockResponse = {
-                success: true,
-                data: {
-                    id: 1,
-                    uuid: 'uuid',
-                    address: "0x00",
-                    name: "Community Tool",
-                    description: "This is app desc",
-                    nonceMessage: "HelloWorld",
-                    createdBy: "abc",
-                    createdAt: "2024-09-12T04:57:05.255Z",
-                    updatedAt: "2024-09-12T04:57:05.255Z",
-                    deletedAt: null
-                }
+            const mockResponse: TAuthApp = {
+                uuid: 'uuid' as `${string}-${string}-${string}-${string}-${string}`,
+                name: "Community Tool",
+                description: "This is app desc",
+                nonceMessage: "HelloWorld",
+                address: "0x00",
+                createdBy: "abc",
+                createdAt: new Date("2024-09-12T04:57:05.255Z"),
+                updatedAt: new Date("2024-09-12T04:57:05.255Z"),
+                deletedAt: null
             };
-            mockAxiosInstance.post.mockResolvedValue(mockResponse);
-            const result = await client.createAuthApp(mockRequest);
-            expect(mockAxiosInstance.post).toHaveBeenCalledWith(`/app/auth-apps`, mockRequest, undefined);
-            expect(result.httpReponse).toEqual(mockResponse);
+            const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+            mockAxios.post.mockResolvedValue(mockResponse);
+            (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+            const result = await client.createAuthApp(mockRequest, mockConfig);
+            expect(mockAxios.post).toHaveBeenCalledWith(appUrl.createAuthApp, mockRequest, mockConfig);
+            expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+            expect(result).toEqual(mockResponse);
         });
     });
 
@@ -50,30 +65,28 @@ describe('AppClient', () => {
                 description: "Updated Description",
                 nonceMessage: "Ipdated NonceMessage"
             };
-
-            const mockResponse = {
-                success: true,
-                data: {
-                    id: 1,
-                    uuid: '88846157-77b2-4cd9-9d72-08359526a46f',
-                    address: "0x00",
-                    name: "Updated Name",
-                    description: "Updated Description",
-                    nonceMessage: "Updated NonceMessage",
-                    createdBy: "abc",
-                    createdAt: "2024-09-12T04:57:05.255Z",
-                    updatedAt: "2024-09-12T05:17:10.302Z",
-                    deletedAt: null
-                }
+            const mockResponse: TAuthApp= {
+                uuid: 'uuid' as `${string}-${string}-${string}-${string}-${string}`,
+                name: "Updated Name",
+                description: "Updated Description",
+                nonceMessage: "Updated NonceMessage",
+                address: "0x00",
+                createdBy: "abc",
+                createdAt: new Date("2024-09-12T04:57:05.255Z"),
+                updatedAt: new Date("2024-09-12T04:57:05.255Z"),
+                deletedAt: null
             };
             const mockDto = {
                 uuid: 'uuid' as`${string}-${string}-${string}-${string}-${string}`,
                 data: mockRequest
-            }
-            mockAxiosInstance.put.mockResolvedValue(mockResponse);
-            const result = await client.updateAuthApp(mockDto);
-            expect(mockAxiosInstance.put).toHaveBeenCalledWith(`/app/auth-apps/${mockDto.uuid}`, mockRequest, undefined);
-            expect(result.httpReponse).toEqual(mockResponse);
+            };
+            const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+            mockAxios.put.mockResolvedValue(mockResponse);
+            (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+            const result = await client.updateAuthApp(mockDto, mockConfig);
+            expect(mockAxios.put).toHaveBeenCalledWith(appUrl.updateAuthApp(mockResponse.uuid), mockDto.data, mockConfig);
+            expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+            expect(result).toEqual(mockResponse);
         });
     });
 
@@ -85,85 +98,85 @@ describe('AppClient', () => {
                 sort: 'createdAt',
                 order: 'asc'
             };
-            const mockResponse = {
-                success: true,
-                data: [
-                    {
-                        id: 1,
-                        uuid: 'uuid' as `${string}-${string}-${string}-${string}-${string}`,
-                        address: "0x00",
-                        name: "Updated Name",
-                        description: "Updated Description",
-                        nonceMessage: "Updated NonceMessage",
-                        createdBy: "abc",
-                        createdAt: "2024-09-12T04:57:05.255Z",
-                        updatedAt: "2024-09-12T05:17:10.302Z",
-                        deletedAt: null
-                    }
-                ],
-                meta: {
-                    total: 1,
-                    lastPage: 1,
-                    currentPage: 1,
-                    perPage: 10,
-                    prev: null,
-                    next: null
+            const mockResponse: TAuthApp[] = [
+                {
+                    uuid: 'uuid' as `${string}-${string}-${string}-${string}-${string}`,
+                    address: "0x00",
+                    name: "Updated Name",
+                    description: "Updated Description",
+                    nonceMessage: "Updated NonceMessage",
+                    createdBy: "abc",
+                    createdAt: new Date("2024-09-12T04:57:05.255Z"),
+                    updatedAt: new Date("2024-09-12T04:57:05.255Z"),
+                    deletedAt: null
+                },
+                {
+                    uuid: 'uuid' as `${string}-${string}-${string}-${string}-${string}`,
+                    address: "0x0000",
+                    name: "Updated Name Two",
+                    description: "Updated Description Two",
+                    nonceMessage: "Updated NonceMessage Two",
+                    createdBy: "xyz",
+                    createdAt: new Date("2024-09-12T04:57:05.255Z"),
+                    updatedAt: new Date("2024-09-12T04:57:05.255Z"),
+                    deletedAt: null
                 }
-            };
-            mockAxiosInstance.get.mockResolvedValue(mockResponse);
-            const result = await client.listAuthApps(queryParams);
-            expect(mockAxiosInstance.get).toHaveBeenCalledWith(`/app/auth-apps`, {
-                params: queryParams, undefined
+            ];
+            const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' } };
+            mockAxios.get.mockResolvedValue(mockResponse);
+            (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+            const result = await client.listAuthApps(queryParams, mockConfig);
+            expect(mockAxios.get).toHaveBeenCalledWith(appUrl.listAuthApps, {
+                params: queryParams, ...mockConfig
             });
-            expect(result.httpReponse).toEqual(mockResponse);
+            expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+            expect(result).toEqual(mockResponse);
         });
     });
 
     describe('getAuthApp', () => {
         it('should return the details of auth app as per uuid', async () => {
             const mockResponse = {
-                success: true,
-                data: {
-                    id: 1,
-                    uuid: 'uuid' as `${string}-${string}-${string}-${string}-${string}`,
-                    address: "0x00",
-                    name: "Updated Name",
-                    description: "Updated Description",
-                    nonceMessage: "Updated NonceMessage",
-                    createdBy: "abc",
-                    createdAt: "2024-09-12T04:57:05.255Z",
-                    updatedAt: "2024-09-12T05:17:10.302Z",
-                    deletedAt: null
-                }
+                uuid: 'uuid' as `${string}-${string}-${string}-${string}-${string}`,
+                address: "0x00",
+                name: "Updated Name",
+                description: "Updated Description",
+                nonceMessage: "Updated NonceMessage",
+                createdBy: "abc",
+                createdAt: new Date("2024-09-12T04:57:05.255Z"),
+                updatedAt: new Date("2024-09-12T04:57:05.255Z"),
+                deletedAt: null
             };
-            mockAxiosInstance.get.mockResolvedValue(mockResponse);
-            const result = await client.getAuthApp(mockResponse.data.uuid);
-            expect(mockAxiosInstance.get).toHaveBeenCalledWith(`/app/auth-apps/${mockResponse.data.uuid}`, undefined);
-            expect(result.httpReponse).toEqual(mockResponse);
+            const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+            mockAxios.get.mockResolvedValue(mockResponse);
+            (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+            const result = await client.getAuthApp(mockResponse.uuid, mockConfig);
+            expect(mockAxios.get).toHaveBeenCalledWith(appUrl.getAuthApp(mockResponse.uuid), mockConfig);
+            expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+            expect(result).toEqual(mockResponse);
         });
     });
 
     describe('softDeleteAuthApp', () => {
         it('should soft delete an auth app as per uuid', async () => {
-            const mockResponse = {
-                success: true,
-                data: {
-                    id: 1,
-                    uuid: 'uuid' as `${string}-${string}-${string}-${string}-${string}`,
-                    address: "0x00",
-                    name: "Updated Name",
-                    description: "Updated Description",
-                    nonceMessage: "Updated NonceMessage",
-                    createdBy: "abc",
-                    createdAt: "2024-09-12T04:57:05.255Z",
-                    updatedAt: "2024-09-12T05:17:10.302Z",
-                    deletedAt: "2024-09-12T06:11:33.812Z"
-                }
+            const mockResponse: TAuthApp = {
+                uuid: 'uuid' as `${string}-${string}-${string}-${string}-${string}`,
+                address: "0x00",
+                name: "Updated Name",
+                description: "Updated Description",
+                nonceMessage: "Updated NonceMessage",
+                createdBy: "abc",
+                createdAt: new Date("2024-09-12T04:57:05.255Z"),
+                updatedAt: new Date("2024-09-12T04:57:05.255Z"),
+                deletedAt: new Date("2024-09-12T06:11:33.812Z")
             };
-            mockAxiosInstance.delete.mockResolvedValue(mockResponse);
-            const result = await client.softDeleteAuthApp(mockResponse.data.uuid);
-            expect(mockAxiosInstance.delete).toHaveBeenCalledWith(`/app/auth-apps/${mockResponse.data.uuid}`, undefined);
-            expect(result.httpReponse).toEqual(mockResponse);
+            const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
+            mockAxios.delete.mockResolvedValue(mockResponse);
+            (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
+            const result = await client.softDeleteAuthApp(mockResponse.uuid, mockConfig);
+            expect(mockAxios.delete).toHaveBeenCalledWith(appUrl.softDeleteAuthApp(mockResponse.uuid), mockConfig);
+            expect(formatResponse).toHaveBeenCalledWith(mockResponse);
+            expect(result).toEqual(mockResponse);
         });
     });
 });

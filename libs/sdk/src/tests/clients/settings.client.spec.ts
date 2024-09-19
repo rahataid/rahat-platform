@@ -157,7 +157,6 @@ describe('SettingsClient', () => {
             mockAxios.patch.mockResolvedValue(mockResponse);
             (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
             const result = await client.update(mockRequest, mockConfig);
-            console.log(result, 'result');
             expect(mockAxios.patch).toHaveBeenCalledWith(settingsUrl.update(mockRequest.name), mockRequest, mockConfig);
             expect(formatResponse).toHaveBeenCalledWith(mockResponse);
             expect(result).toEqual(mockResponse);
@@ -166,28 +165,25 @@ describe('SettingsClient', () => {
 
     describe('getByName', () => {
         it('should return seting as per name', async () => {
-            const mockResponse = {
-                success: true,
-                data: {
-                    name: "SMTPS",
-                    dataType: "OBJECT",
-                    isPrivate: false,
-                    isReadOnly: true,
-                    requiredFields: [
-                        "username",
-                        "password"
-                    ],
-                    value: {
-                        password: "12345",
-                        username: "xyz"
-                    }
+            const mockResponse: SettingResponse = {
+                name: "SMTPS",
+                dataType: "OBJECT",
+                isPrivate: false,
+                isReadOnly: true,
+                requiredFields: [
+                    "username",
+                    "password"
+                ],
+                value: {
+                    password: "12345",
+                    username: "xyz"
                 }
             };
             const mockConfig:AxiosRequestConfig = { headers: { 'Content-Type': 'application/json' }};
             mockAxios.get.mockResolvedValue(mockResponse);
             (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
-            const result = await client.getByName(mockResponse.data.name, mockConfig);
-            expect(mockAxios.get).toHaveBeenCalledWith(settingsUrl.getByName(mockResponse.data.name), mockConfig);
+            const result = await client.getByName(mockResponse.name, mockConfig);
+            expect(mockAxios.get).toHaveBeenCalledWith(settingsUrl.getByName(mockResponse.name), mockConfig);
             expect(formatResponse).toHaveBeenCalledWith(mockResponse);
             expect(result).toEqual(mockResponse);
         });

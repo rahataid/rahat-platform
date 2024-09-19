@@ -156,7 +156,6 @@ describe('BeneficiaryService', () => {
           projectUUIDs: undefined,
         },
       });
-      console.log('Calls to beneficiaryPii.create:', (rsprisma.beneficiaryPii.create as jest.Mock).mock.calls);
       (rsprisma.beneficiaryPii.create as jest.Mock).mockResolvedValue({
         beneficiaryId: 'mock-beneficiary-id',
         phone: mockRequest.piiData.phone,
@@ -241,121 +240,6 @@ describe('BeneficiaryService', () => {
       };
     });
   });
-
-  // describe('findOne', () => {
-  //   it('should return a beneficiary with piiData if found using uuid', async () => {
-  //     const mockResponse = {
-  //       id: 1,
-  //       uuid: "uuid" as `${string}-${string}-${string}-${string}-${string}`,
-  //       birthDate: new Date(),
-  //       age: 20,
-  //       gender: 'FEMALE',
-  //       location: 'lalitpur',
-  //       latitude: 26.24,
-  //       longitude: 86.24,
-  //       notes: 'notes',
-  //       walletAddress: '0x00' as `${string}-${string}-${string}-${string}-${string}`,
-  //       extras: {
-  //         hasCitizenship: true,
-  //         passportNumber: '1234567',
-  //         email: 'test@mailinator.com',
-  //       },
-  //       bankedStatus: 'BANKED',
-  //       internetStatus: 'HOME_INTERNET',
-  //       phoneStatus: 'FEATURE_PHONE',
-  //       piiData: {
-  //         beneficiaryId: 1,
-  //         name: "Ram Shrestha",
-  //         phone: "9898989898",
-  //         email: null,
-  //         extras: {
-  //           bank: "Bank",
-  //           account: "account"
-  //         }
-  //       }
-  //     };
-  //     (rsprisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(mockResponse);
-  //     (rsprisma.beneficiaryPii.findUnique as jest.Mock).mockResolvedValue(mockResponse.piiData);
-  //     const result = await service.findOne(mockResponse.uuid);
-  //     expect(result).toEqual(mockResponse);
-  //     expect(rsprisma.beneficiary.findUnique).toHaveBeenCalledWith({
-  //       where: { 
-  //         uuid: mockResponse.uuid
-  //       },
-  //       include: {
-  //         BeneficiaryProject: {
-  //           include: {
-  //             Project: true,
-  //           }
-  //         }
-  //       }
-  //     });
-  //     expect(rsprisma.beneficiaryPii.findUnique).toHaveBeenCalledWith({
-  //       where: { beneficiaryId: mockResponse.id },
-  //     });
-  //   });
-
-  //   it('should return a beneficiary if piiData isnot found using uuid', async () => {
-  //     const mockResponse = {
-  //       id: 1,
-  //       uuid: "uuid" as `${string}-${string}-${string}-${string}-${string}`,
-  //       birthDate: new Date(),
-  //       age: 20,
-  //       gender: 'FEMALE',
-  //       location: 'lalitpur',
-  //       latitude: 26.24,
-  //       longitude: 86.24,
-  //       notes: 'notes',
-  //       walletAddress: '0x00' as `${string}-${string}-${string}-${string}-${string}`,
-  //       extras: {
-  //         hasCitizenship: true,
-  //         passportNumber: '1234567',
-  //         email: 'test@mailinator.com',
-  //       },
-  //       bankedStatus: 'BANKED',
-  //       internetStatus: 'HOME_INTERNET',
-  //       phoneStatus: 'FEATURE_PHONE',
-  //     };
-  //     (rsprisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(mockResponse);
-  //     (rsprisma.beneficiaryPii.findUnique as jest.Mock).mockResolvedValue(null);
-  //     const result = await service.findOne(mockResponse.uuid);
-  //     expect(result).toEqual(mockResponse);
-  //     expect(rsprisma.beneficiary.findUnique).toHaveBeenCalledWith({
-  //       where: { 
-  //         uuid: mockResponse.uuid
-  //       },
-  //       include: {
-  //         BeneficiaryProject: {
-  //           include: {
-  //             Project: true,
-  //           }
-  //         }
-  //       }
-  //     });
-  //     expect(rsprisma.beneficiaryPii.findUnique).toHaveBeenCalledWith({
-  //       where: { beneficiaryId: mockResponse.id },
-  //     });
-  //   });
-
-  //   it('should return null if uuid is invalid', async () => {
-  //     const invalidUUID = randomUUID();
-  //     (rsprisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(null);
-  //     const result = await service.findOne(invalidUUID);
-  //     expect(rsprisma.beneficiary.findUnique).toHaveBeenCalledWith({
-  //       where: {
-  //         uuid: invalidUUID
-  //       },
-  //       include: {
-  //         BeneficiaryProject: {
-  //           include: {
-  //             Project: true,
-  //           }
-  //         }
-  //       }
-  //     });
-  //     expect(result).toBeNull();
-  //   });
-  // });
 
   describe('findOneByWallet', () => {
     it('should return a beneficiary if piiData found using walletAddress', async () => {

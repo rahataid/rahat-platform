@@ -4,6 +4,8 @@ import { ProjectClient } from '../../types';
 import { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { formatResponse } from '@rumsan/sdk/utils';
 import { ProjectStatus } from '@rahataid/sdk/enums';
+import { Project } from '@rahataid/sdk/project/project.types';
+import { GrievanceStatus } from '@rahataid/sdk/grievance';
 
 const mockAxios: jest.Mocked<AxiosInstance> = {
     post: jest.fn(),
@@ -25,50 +27,29 @@ const projectUrl = {
 describe('ProjectClient', () => {
     const client:ProjectClient = getProjectClient(mockAxios);
 
-    // describe('projectActions', () => {
-    //     it('should create project actions', async () => {
-    //         const mockUUID = 'uuid';
-    //         const mockRequest ={
-    //             action: "beneficiary.create",
-    //             payload: {
-    //                 name: "John Doe"
-    //             }
-    //         };
-    //         mockAxios.post.mockResolvedValue(mockResponse);
-    //     });
-    // });
-
     describe('list', () => {
         it('should list all the projects with formatted response', async () => {
-            const mockResponse = [
+            const mockResponse: Project[]= [
                 {
-                    id: 1,
-                    uuid: "uuid",
+                    uuid: "uuid" as `${string}-${string}-${string}-${string}-${string}`,
                     name: "Test One",
                     description: "Description about test one",
-                    status: "NOT_READY",
+                    status: ProjectStatus.ACTIVE,
                     type: "el",
                     contractAddress: "0x123",
-                    extras: {
-                        test: "test"
-                    },
-                    createdAt: "2024-09-02T11:59:25.229Z",
-                    updatedAt: "2024-09-02T11:59:25.229Z",
+                    createdAt: new Date("2024-09-02T11:59:25.229Z"),
+                    updatedAt: new Date("2024-09-02T11:59:25.229Z"),
                     deletedAt: null
                 },
                 {
-                    id: 2,
-                    uuid: "uuid",
+                    uuid: "uuid" as `${string}-${string}-${string}-${string}-${string}`,
                     name: "Test Two",
                     description: "Description about test two",
-                    status: "NOT_READY",
+                    status: ProjectStatus.NOT_READY,
                     type: "el",
                     contractAddress: "0x123",
-                    extras: {
-                        test: "test"
-                    },
-                    createdAt: "2024-09-02T11:59:25.229Z",
-                    updatedAt: "2024-09-02T11:59:25.229Z",
+                    createdAt: new Date("2024-09-02T11:59:25.229Z"),
+                    updatedAt: new Date("2024-09-02T11:59:25.229Z"),
                     deletedAt: null
                 }
             ];
@@ -76,7 +57,6 @@ describe('ProjectClient', () => {
             mockAxios.get.mockResolvedValue(mockResponse);
             (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
             const result = await client.list(mockConfig);
-            console.log(result, 'result');
             expect(mockAxios.get).toHaveBeenCalledWith(projectUrl.list, mockConfig);
             expect(formatResponse).toHaveBeenCalledWith(mockResponse);
             expect(result).toEqual(mockResponse);
@@ -85,16 +65,13 @@ describe('ProjectClient', () => {
 
     describe('get', () => {
         it('should return project details as per uuid with formatted response', async () => {
-            const mockResponse = {
+            const mockResponse: Project = {
                 uuid: "uuid" as `${string}-${string}-${string}-${string}-${string}`,
                 name: "abc",
                 description: "Aestas textus praesentium aegrotatio. Defetiscor atque creptio antepono spectaculum cumque carus subiungo umbra. Conculco eligendi audentia aeger statua curatio.",
                 status: ProjectStatus.NOT_READY,
                 type: "el",
                 contractAddress: "0xd",
-                extras: {
-                    test: "into"
-                },
                 createdAt: new Date("2024-09-11T05:50:54.486Z"),
                 updatedAt: new Date("2024-09-11T05:51:00.147Z"),
                 deletedAt: null
@@ -103,7 +80,6 @@ describe('ProjectClient', () => {
             mockAxios.get.mockResolvedValue(mockResponse);
             (formatResponse as jest.Mock).mockReturnValueOnce(mockResponse);
             const result = await client.get(mockResponse.uuid, mockConfig);
-            console.log(result, 'result');
             expect(mockAxios.get).toHaveBeenCalledWith(projectUrl.get(mockResponse.uuid), mockConfig);
             expect(formatResponse).toHaveBeenCalledWith(mockResponse);
             expect(result).toEqual(mockResponse);
