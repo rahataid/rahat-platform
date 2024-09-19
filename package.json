@@ -76,7 +76,7 @@
     "@rumsan/extensions": "0.0.31",
     "@rumsan/prisma": "1.0.131",
     "@rumsan/sdk": "0.0.45",
-    "@rumsan/user": "3.0.161",
+    "@rumsan/user": "3.0.159",
     "@urql/core": "^5.0.4",
     "abitype": "^1.0.1",
     "axios": "^1.6.7",

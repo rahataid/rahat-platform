@@ -21,9 +21,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: import env file
-        run: |
-          touch ./.npmrc && echo "$env_npmrc" >> ./.npmrc
+      # - name: import env file
+      #   run: |
+      #     touch ./.npmrc && echo "$env_npmrc" >> ./.npmrc
 
       - uses: actions/setup-node@v3
         with:

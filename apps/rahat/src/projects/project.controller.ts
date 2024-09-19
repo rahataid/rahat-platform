@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -23,6 +24,7 @@ import { ACTIONS, APP, BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahatai
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
 import { AbilitiesGuard, CheckAbilities, JwtGuard, SUBJECTS } from "@rumsan/user";
 import { UUID } from 'crypto';
+import { Request } from "express";
 import { timeout } from 'rxjs/operators';
 import { ProjectService } from './project.service';
 
@@ -124,10 +126,12 @@ export class ProjectController {
   projectActions(
     @Param('uuid') uuid: UUID,
     @Body() data: ProjectCommunicationDto,
+    @Req() request: Request
   ) {
     const response = this.projectService.handleProjectActions({
       uuid,
       ...data,
+      user: request.user
     });
     return response;
   }

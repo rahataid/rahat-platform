@@ -126,21 +126,28 @@ export class ProjectService {
 
   }
 
-  async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy, action: string) {
-    const user = this.requestContextService.getUser()
-    console.log({ user })
-    const requiresUser = userRequiredActions.has(action)
+  async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy, action: string, user: any) {
+    try {
 
-    return client.send(cmd, {
-      ...payload,
-      ...(requiresUser && { user })
-    }).pipe(
-      timeout(timeoutValue),
-      tap((response) => {
-        this.sendWhatsAppMsg(response, cmd, payload)
+      // console.log("here")
+      // const user = this.requestContextService.getUser()
+      // console.log("user", user)
 
-      })
-    );
+      const requiresUser = userRequiredActions.has(action)
+
+      return client.send(cmd, {
+        ...payload,
+        ...(requiresUser && { user })
+      }).pipe(
+        timeout(timeoutValue),
+        tap((response) => {
+          this.sendWhatsAppMsg(response, cmd, payload)
+
+        })
+      );
+    } catch (err) {
+      console.log("Err", err)
+    }
   }
 
   async executeMetaTxRequest(params: any) {
@@ -170,7 +177,8 @@ export class ProjectService {
 
   }
 
-  async handleProjectActions({ uuid, action, payload }) {
+  async handleProjectActions({ uuid, action, payload, user }) {
+    console.log({ uuid, action, payload })
     //Note: This is a temporary solution to handle metaTx actions
     const metaTxActions = {
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
@@ -200,7 +208,7 @@ export class ProjectService {
     if (!actionFunc) {
       throw new Error('Please provide a valid action!');
     }
-    return await actionFunc(uuid, payload, (...args) => this.sendCommand(args[0], args[1], args[2], this.client, action));
+    return await actionFunc(uuid, payload, (...args) => this.sendCommand(args[0], args[1], args[2], this.client, action, user));
   }
 
   async importKoboBeneficiary(uuid: UUID, data: any) {
