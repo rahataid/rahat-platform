@@ -224,7 +224,6 @@ export class BeneficiaryService {
       }
     );
 
-    console.time("check")
 
     const resultData = result.data
 
@@ -252,8 +251,6 @@ export class BeneficiaryService {
     }
 
 
-    console.timeEnd("check")
-    console.log(new Date())
 
     return result
   }
@@ -303,7 +300,8 @@ export class BeneficiaryService {
       console.log('data', data)
       const combinedData = data.map(((dat) => {
         const benDetails = beneficiaries.find((ben) => ben.walletAddress === dat.walletAddress);
-        const { pii, ...rest } = benDetails;
+        console.log('benDetails', benDetails)
+        const { pii, ...rest } = benDetails || {};
         return {
           piiData: pii,
           projectData: rest,
