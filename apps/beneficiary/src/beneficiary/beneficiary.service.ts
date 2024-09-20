@@ -29,10 +29,10 @@ import {
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import { findTempBenefGroups, validateDupicatePhone, validateDupicateWallet } from '../processors/processor.utils';
+import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { createListQuery } from './helpers';
 import { VerificationService } from './verification.service';
 
@@ -370,10 +370,12 @@ export class BeneficiaryService {
       },
     });
     if (benData) throw new RpcException('Phone number should be unique');
+    console
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const rdata = await this.rsprisma.beneficiary.create({
       data,
     });
+    console.log('rdata', rdata)
     if (piiData) {
       await this.prisma.beneficiaryPii.create({
         data: {
@@ -385,9 +387,10 @@ export class BeneficiaryService {
     }
 
     // Assign beneficiary to project while creating. Useful when a beneficiary is created from inside a project
-    if (projectUUIDs?.length && rdata.uuid) {
+    if (projectUUIDs?.length && rdata?.uuid) {
+      console.log('projectUUIDs', projectUUIDs)
       const assignPromises = projectUUIDs.map(projectUuid => {
-        return this.assignBeneficiaryToProject({ beneficiaryId: rdata.uuid, projectId: projectUuid });
+        return this.assignBeneficiaryToProject({ beneficiaryId: rdata?.uuid, projectId: projectUuid });
       });
       await Promise.all(assignPromises);
     }
@@ -490,6 +493,7 @@ export class BeneficiaryService {
   }
 
   async saveBeneficiaryToProject(dto: AddToProjectDto) {
+    console.log(dto)
     return this.prisma.beneficiaryProject.create({ data: dto });
   }
 
@@ -598,6 +602,7 @@ export class BeneficiaryService {
       where: { uuid: beneficiaryId },
       include: { pii: true }
     });
+    console.log('beneficiaryData', beneficiaryData)
     const projectPayload = {
       uuid: beneficiaryData.uuid,
       walletAddress: beneficiaryData.walletAddress,
@@ -614,6 +619,11 @@ export class BeneficiaryService {
       projectPayload.extras = { ...projectPayload.extras, phone: beneficiaryData?.pii?.phone }
     }
 
+    if (project.type.toLowerCase() === 'rp') {
+      delete projectPayload.type;
+    }
+
+    console.log('projectPayload', projectPayload)
 
     // if project type is c2c, send verficition mail
     // if (project.type.toLowerCase() === 'c2c' && !beneficiaryData.isVerfied) {
@@ -633,11 +643,20 @@ export class BeneficiaryService {
 
 
     //3. Sync beneficiary to project
-    return lastValueFrom(
-      this.client.send(
+    return handleMicroserviceCall({
+      client: this.client.send(
         { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
         projectPayload
-      )
+      ),
+      onSuccess(response) {
+        console.log('response', response)
+      },
+      onError(error) {
+        console.log('error', error)
+        throw new RpcException(error.message)
+      },
+    }
+
     )
     // return this.client.send(
     //   { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
@@ -1139,6 +1158,7 @@ export class BeneficiaryService {
             deletedAt: null
           }
         });
+        console.log('unassignedBenfs', unassignedBenfs)
 
         // bulk assign unassigned beneficiaries from group
         if (unassignedBenfs?.length) {
