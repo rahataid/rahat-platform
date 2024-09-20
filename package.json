@@ -108,6 +108,7 @@
   "devDependencies": {
     "@atixlabs/hardhat-time-n-mine": "^0.0.5",
     "@faker-js/faker": "^8.4.1",
+    "@graphprotocol/graph-cli": "^0.82.0",
     "@nestjs/schematics": "^10.1.1",
     "@nestjs/testing": "^10.3.3",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
