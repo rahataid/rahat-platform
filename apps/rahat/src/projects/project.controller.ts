@@ -157,10 +157,6 @@ export class ProjectController {
   //Get datasource for entire project
   // @Get('statsSources')
   // statsSource() {
-  //   return this.benClient
-  //     .send({ cmd: BeneficiaryJobs.GET_ALL_STATS }, {})
-  //     .pipe(timeout(MS_TIMEOUT));
-  // }
 
   //list project specific stats sources
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -174,5 +170,15 @@ export class ProjectController {
       .pipe(timeout(MS_TIMEOUT));
   }
 
+  @Post('/:uuid/kobo-import')
+  @ApiParam({ name: 'uuid', required: true })
+  importFromKobo(@Param('uuid') uuid: UUID, @Body() data: any) {
+    return this.projectService.importKoboBeneficiary(uuid, data);
+  }
 
+  @Post('/:uuid/test')
+  @ApiParam({ name: 'uuid', required: true })
+  testMsg(@Param('uuid') uuid: UUID) {
+    return this.projectService.sendTestMsg(uuid);
+  }
 }

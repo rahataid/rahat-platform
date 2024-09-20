@@ -1,14 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { StatsService } from '@rahat/stats';
 import { PrismaService } from '@rumsan/prisma';
+import { hasKey } from '../utils/objectUtil';
 import { mapVulnerabilityStatusCount } from '../utils/vulnerabilityCountHelpers';
+
+const REPORTING_FIELD = {
+  FAMILY_MEMBER_BANK_ACCOUNT: "is_there_any_family_member_who_has_an_active_bank_account",
+  TYPE_OF_PHONE_SET: "type_of_phone_set"
+}
 
 @Injectable()
 export class BeneficiaryStatService {
   constructor(
     protected prisma: PrismaService,
     private readonly statsService: StatsService
-  ) {}
+  ) { }
 
   async getTableStats() {
     return await this.prisma.stats.findMany({});
@@ -129,6 +135,54 @@ export class BeneficiaryStatService {
       count: stat._count.bankedStatus,
     }));
   }
+
+  async calculateBankedStatusStatsNew() {
+    const data = await this.prisma.beneficiary.findMany({
+      where: { deletedAt: null },
+      select: {
+        extras: true
+      }
+    });
+
+    let myData = {};
+
+
+    for (let d of data) {
+      const extras = d?.extras ?? null;
+      if (
+        extras &&
+        hasKey(extras, REPORTING_FIELD.FAMILY_MEMBER_BANK_ACCOUNT) &&
+        typeof extras[REPORTING_FIELD.FAMILY_MEMBER_BANK_ACCOUNT] === 'string' &&
+        extras[REPORTING_FIELD.FAMILY_MEMBER_BANK_ACCOUNT]
+          .toUpperCase()
+          .trim() === 'YES'
+      ) {
+        if (myData['Banked']) {
+          myData['Banked'] += 1;
+        } else myData['Banked'] = 1;
+      }
+      if (
+        extras &&
+        extras &&
+        hasKey(extras, REPORTING_FIELD.FAMILY_MEMBER_BANK_ACCOUNT) &&
+        typeof extras[REPORTING_FIELD.FAMILY_MEMBER_BANK_ACCOUNT] === 'string' &&
+        extras[REPORTING_FIELD.FAMILY_MEMBER_BANK_ACCOUNT]
+          .toUpperCase()
+          .trim() === 'NO'
+      ) {
+        if (myData['UnBanked']) {
+          myData['UnBanked'] += 1;
+        } else myData['UnBanked'] = 1;
+      }
+    }
+
+    const result = Object.keys(myData).map((d) => ({
+      id: d,
+      count: myData[d],
+    }));
+
+    return result;
+  };
 
   async calculateInternetStatusStats(projectUuid?: string) {
     let filter = {};
@@ -271,6 +325,35 @@ export class BeneficiaryStatService {
     ];
   }
 
+  async calculatePhoneTypeStats() {
+    return await this.calculateExtrasStats(REPORTING_FIELD.TYPE_OF_PHONE_SET)
+  }
+
+  async calculateExtrasStats(fieldName: string) {
+    const data = await this.prisma.beneficiary.findMany({
+      where: {
+        extras: { path: [fieldName], not: null },
+      },
+      select: { extras: true },
+    });
+    if (!data) return [];
+    const myData = {};
+    // Calculate count for each value
+    data.forEach((item: any) => {
+      const value = item.extras[fieldName];
+      if (myData[value]) {
+        myData[value] += 1;
+      } else {
+        myData[value] = 1;
+      }
+    });
+    const result = Object.keys(myData).map((d) => ({
+      id: d,
+      count: myData[d],
+    }));
+    return result.filter((f) => f.id.toLocaleUpperCase() !== 'NO');
+  }
+
   async calculatePhoneAvailabilityStats() {
     const results = await this.prisma.beneficiaryPii.findMany({});
     const finalResult = this.filterAndCountPhoneStatus(results);
@@ -329,6 +412,7 @@ export class BeneficiaryStatService {
     const [
       gender,
       bankedStatus,
+      bankedStatusNew,
       internetStatus,
       phoneStatus,
       total,
@@ -337,9 +421,11 @@ export class BeneficiaryStatService {
       phoneAvailabilityStats,
       vulnerabilityCountStats,
       casteCountStats,
+      phoneTypeStats
     ] = await Promise.all([
       this.calculateGenderStats(),
       this.calculateBankedStatusStats(),
+      this.calculateBankedStatusStatsNew(),
       this.calculateInternetStatusStats(),
       this.calculatePhoneStatusStats(),
       this.totalBeneficiaries(),
@@ -348,11 +434,13 @@ export class BeneficiaryStatService {
       this.calculatePhoneAvailabilityStats(),
       this.calculateVulnerabilityCountStats(),
       this.calculateCountByCasteStats(),
+      this.calculatePhoneTypeStats()
     ]);
 
     return {
       gender,
       bankedStatus,
+      bankedStatusNew,
       internetStatus,
       phoneStatus,
       total,
@@ -361,6 +449,7 @@ export class BeneficiaryStatService {
       phoneAvailabilityStats,
       vulnerabilityCountStats,
       casteCountStats,
+      phoneTypeStats
     };
   }
   async calculateProjectStats(projectUuid: string) {
@@ -420,6 +509,7 @@ export class BeneficiaryStatService {
     const {
       gender,
       bankedStatus,
+      bankedStatusNew,
       internetStatus,
       phoneStatus,
       total,
@@ -428,6 +518,7 @@ export class BeneficiaryStatService {
       phoneAvailabilityStats,
       vulnerabilityCountStats,
       casteCountStats,
+      phoneTypeStats
     } = await this.calculateAllStats();
 
     const rangedAge = await this.calculateRangedAge(age);
@@ -446,6 +537,11 @@ export class BeneficiaryStatService {
       this.statsService.save({
         name: 'beneficiary_bankedStatus',
         data: bankedStatus,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'beneficiary_bankedStatus_new',
+        data: bankedStatusNew,
         group: 'beneficiary',
       }),
       this.statsService.save({
@@ -481,6 +577,11 @@ export class BeneficiaryStatService {
       this.statsService.save({
         name: 'beneficiary_caste_count_stats',
         data: casteCountStats,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'beneficiary_phone_type_stats',
+        data: phoneTypeStats,
         group: 'beneficiary',
       }),
     ]);
