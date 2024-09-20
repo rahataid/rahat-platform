@@ -9,7 +9,7 @@ import {
   ProjectEvents,
   ProjectJobs
 } from '@rahataid/sdk';
-import { BeneficiaryType } from '@rahataid/sdk/enums';
+import { BeneficiaryType, KoboBeneficiaryStatus } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
@@ -19,6 +19,7 @@ import { ERC2771FORWARDER } from '../utils/contracts';
 import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import { createContractSigner } from '../utils/web3';
 import { aaActions, beneficiaryActions, c2cActions, cambodiaActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
+import { CAMBODIA_JOBS } from './actions/cambodia.action';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 @Injectable()
@@ -214,6 +215,7 @@ export class ProjectService {
 
   async importKoboBeneficiary(uuid: UUID, data: any) {
     const benef: any = this.mapKoboFields(data);
+    if (!benef.phone) throw new Error("Phone number is required!");
     if (benef.gender) benef.gender = benef.gender.toUpperCase();
     if (benef.type) benef.type = benef.type.toUpperCase();
     if (benef.age) benef.age = parseInt(benef.age);
@@ -228,13 +230,18 @@ export class ProjectService {
       data: beneficiary
     })
     // 2. Send to project MS
-    // 3. Update status
+    return this.client.send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, beneficiary).pipe(timeout(MS_TIMEOUT), tap((response) => {
+      return this.updateImportStatus(row.uuid, KoboBeneficiaryStatus.SUCCESS)
+    }));
+  }
+
+  async updateImportStatus(uuid: string, status: KoboBeneficiaryStatus) {
     return this.prisma.koboBeneficiary.update({
       where: {
-        id: row.id
+        uuid: uuid
       },
       data: {
-        status: 'SUCCESS'
+        status
       }
     })
   }
