@@ -223,7 +223,6 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_STATS })
   async getAllStats() {
-    console.log("data sources here reached")
     return this.service.allDataSource();
   }
 }
