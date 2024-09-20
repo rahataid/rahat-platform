@@ -41,10 +41,10 @@ export const APP = {
 
 export const MS_ACTIONS = {
   CHW: {
-    CREATE: 'combodia.chw.create',
-    LIST: 'combodia.chw.list',
-    GET: 'combodia.chw.get',
-    UPDATE: 'combodia.chw.update',
+    CREATE: 'cambodia.chw.create',
+    LIST: 'cambodia.chw.list',
+    GET: 'cambodia.chw.get',
+    UPDATE: 'cambodia.chw.update',
   },
   PROJECT: {
     SETUP: 'project.setup',

@@ -18,7 +18,7 @@ import { splitCoordinates } from '../utils';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import { createContractSigner } from '../utils/web3';
-import { aaActions, beneficiaryActions, c2cActions, combodiaActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
+import { aaActions, beneficiaryActions, c2cActions, cambodiaActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 @Injectable()
@@ -191,7 +191,7 @@ export class ProjectService {
 
 
     const actions = {
-      ...combodiaActions,
+      ...cambodiaActions,
       ...projectActions,
       ...elActions,
       ...aaActions,
