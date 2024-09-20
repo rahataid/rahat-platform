@@ -14,9 +14,11 @@ import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
+import { splitCoordinates } from '../utils';
 import { ERC2771FORWARDER } from '../utils/contracts';
+import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import { createContractSigner } from '../utils/web3';
-import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
+import { aaActions, beneficiaryActions, c2cActions, cambodiaActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 @Injectable()
@@ -189,6 +191,7 @@ export class ProjectService {
 
 
     const actions = {
+      ...cambodiaActions,
       ...projectActions,
       ...elActions,
       ...aaActions,
@@ -208,5 +211,51 @@ export class ProjectService {
     }
     return await actionFunc(uuid, payload, (...args) => this.sendCommand(args[0], args[1], args[2], this.client, action, user));
   }
+
+  async importKoboBeneficiary(uuid: UUID, data: any) {
+    const benef: any = this.mapKoboFields(data);
+    if (benef.gender) benef.gender = benef.gender.toUpperCase();
+    if (benef.type) benef.type = benef.type.toUpperCase();
+    if (benef.age) benef.age = parseInt(benef.age);
+    if (benef.leadInterests) {
+      benef.leadInterests = benef.leadInterests.split(' ').map((item: string) => item.trim().toUpperCase());
+    }
+    const coords = splitCoordinates(benef.coordinates);
+    const beneficiary = { ...benef, ...coords };
+    if (beneficiary.coordinates) delete beneficiary.coordinates;
+    // 1. Save to TEMP_DB
+    const row = await this.prisma.koboBeneficiary.create({
+      data: beneficiary
+    })
+    // 2. Send to project MS
+    // 3. Update status
+    return this.prisma.koboBeneficiary.update({
+      where: {
+        id: row.id
+      },
+      data: {
+        status: 'SUCCESS'
+      }
+    })
+  }
+
+  mapKoboFields(payload: any) {
+    const mappedPayload = {};
+    const meta = {};
+
+    for (const key in payload) {
+      if (KOBO_FIELD_MAPPINGS[key]) {
+        mappedPayload[KOBO_FIELD_MAPPINGS[key]] = payload[key];
+      } else {
+        meta[key] = payload[key];
+      }
+    }
+    return { ...mappedPayload, meta };
+  }
+
+  async sendTestMsg(uuid: UUID) {
+    return this.client.send({ cmd: 'rahat.jobs.test', uuid }, { msg: 'This is test msg!' }).pipe(timeout(MS_TIMEOUT))
+  }
+
 }
 
