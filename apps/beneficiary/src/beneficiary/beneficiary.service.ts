@@ -106,12 +106,14 @@ export class BeneficiaryService {
 
     if (data?.data.length) {
       const mergedProjectData = await this.mergeProjectData(data.data, data.payload)
+      console.log({ mergedProjectData })
       if (data?.extras) {
-        data.data = { data: mergedProjectData, extras: data?.extras }
+        data.data = { data: mergedProjectData || [], extras: data?.extras }
       }
       else {
-        data.data = mergedProjectData
+        data.data = mergedProjectData || []
       }
+      console.log({ data })
       return data;
     }
   }
@@ -293,9 +295,12 @@ export class BeneficiaryService {
       }
     })
 
+    console.log({ beneficiaries })
+
     // const beneficiaries = []
 
-    if (data) {
+    if (data && beneficiaries.length > 0) {
+      console.log('data', data)
       const combinedData = data.map(((dat) => {
         const benDetails = beneficiaries.find((ben) => ben.walletAddress === dat.walletAddress);
         const { pii, ...rest } = benDetails;
@@ -305,7 +310,8 @@ export class BeneficiaryService {
           ...dat
         }
       }))
-      return combinedData;
+      console.log({ combinedData })
+      return combinedData || [];
     }
 
     // TODO: remove projectData and piiData that has been added manually, as it will affects the FE. NEEDS to be refactord in FE as well.
