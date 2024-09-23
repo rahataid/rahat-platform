@@ -14,12 +14,11 @@ import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
-import { splitCoordinates } from '../utils';
+import { createExtrasAndPIIData, splitCoordinates } from '../utils';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import { createContractSigner } from '../utils/web3';
 import { aaActions, beneficiaryActions, c2cActions, cambodiaActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
-import { CAMBODIA_JOBS } from './actions/cambodia.action';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 @Injectable()
@@ -224,15 +223,19 @@ export class ProjectService {
     }
     const coords = splitCoordinates(benef.coordinates);
     const beneficiary = { ...benef, ...coords };
-    if (beneficiary.coordinates) delete beneficiary.coordinates;
+    const payload = createExtrasAndPIIData(beneficiary);
     // 1. Save to TEMP_DB
     const row = await this.prisma.koboBeneficiary.create({
       data: beneficiary
     })
-    // 2. Send to project MS
-    return this.client.send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, beneficiary).pipe(timeout(MS_TIMEOUT), tap((response) => {
+    // 2. Save to Benef and PII
+    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, payload).pipe(timeout(MS_TIMEOUT), tap((response) => {
       return this.updateImportStatus(row.uuid, KoboBeneficiaryStatus.SUCCESS)
     }));
+    // 4. Send to project MS?
+    // return this.client.send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, beneficiary).pipe(timeout(MS_TIMEOUT), tap((response) => {
+    //   return this.updateImportStatus(row.uuid, KoboBeneficiaryStatus.SUCCESS)
+    // }));
   }
 
   async updateImportStatus(uuid: string, status: KoboBeneficiaryStatus) {
