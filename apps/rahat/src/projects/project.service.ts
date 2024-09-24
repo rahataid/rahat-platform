@@ -12,13 +12,14 @@ import {
 import { BeneficiaryType, KoboBeneficiaryStatus } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
-import { tap, timeout } from 'rxjs';
+import { switchMap, tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
 import { createExtrasAndPIIData, splitCoordinates } from '../utils';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import { createContractSigner } from '../utils/web3';
 import { aaActions, beneficiaryActions, c2cActions, cambodiaActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
+import { CAMBODIA_JOBS } from './actions/cambodia.action';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 @Injectable()
@@ -224,19 +225,39 @@ export class ProjectService {
     const coords = splitCoordinates(benef.coordinates);
     const beneficiary = { ...benef, ...coords };
     const payload = createExtrasAndPIIData(beneficiary);
-    // 1. Save to TEMP_DB
+    // 1. Save to Kobo Import Logs
     const row = await this.prisma.koboBeneficiary.create({
       data: beneficiary
     })
-    // 2. Save to Benef and PII
-    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, payload).pipe(timeout(MS_TIMEOUT), tap((response) => {
-      return this.updateImportStatus(row.uuid, KoboBeneficiaryStatus.SUCCESS)
+    // Check phone in PII if exists?
+    // 2. Save to Beneficiary and PII
+    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, payload).pipe(timeout(MS_TIMEOUT), switchMap((response) => {
+      const payload = {
+        uuid: response.uuid,
+        walletAddress: response.walletAddress,
+        type: response.extras?.type || 'UNKNOWN',
+        extras: response.extras,
+      }
+      // 3. Send to project MS
+      return this.client.send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, payload).pipe(timeout(MS_TIMEOUT), tap((response) => {
+        // 4. Update status and addToProject
+        return this.addToProjectAndUpdate({ projectId: uuid, beneficiaryId: payload.uuid, importId: row.uuid })
+      }));
+
     }));
-    // 4. Send to project MS?
-    // return this.client.send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, beneficiary).pipe(timeout(MS_TIMEOUT), tap((response) => {
-    //   return this.updateImportStatus(row.uuid, KoboBeneficiaryStatus.SUCCESS)
-    // }));
   }
+
+
+  async addToProjectAndUpdate({ projectId, beneficiaryId, importId }) {
+    await this.updateImportStatus(importId, KoboBeneficiaryStatus.SUCCESS);
+    return this.prisma.beneficiaryProject.create({
+      data: {
+        beneficiaryId: beneficiaryId,
+        projectId: projectId
+      }
+    })
+  }
+
 
   async updateImportStatus(uuid: string, status: KoboBeneficiaryStatus) {
     return this.prisma.koboBeneficiary.update({
@@ -264,6 +285,7 @@ export class ProjectService {
   }
 
   async sendTestMsg(uuid: UUID) {
+    console.log({ uuid })
     return this.client.send({ cmd: 'rahat.jobs.test', uuid }, { msg: 'This is test msg!' }).pipe(timeout(MS_TIMEOUT))
   }
 
