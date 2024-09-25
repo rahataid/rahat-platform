@@ -9,14 +9,17 @@ import {
   ProjectEvents,
   ProjectJobs
 } from '@rahataid/sdk';
-import { BeneficiaryType } from '@rahataid/sdk/enums';
+import { BeneficiaryType, KoboBeneficiaryStatus } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
-import { tap, timeout } from 'rxjs';
+import { switchMap, tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
+import { createExtrasAndPIIData, splitCoordinates } from '../utils';
 import { ERC2771FORWARDER } from '../utils/contracts';
+import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import { createContractSigner } from '../utils/web3';
-import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
+import { aaActions, beneficiaryActions, c2cActions, cambodiaActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
+import { CAMBODIA_JOBS } from './actions/cambodia.action';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 @Injectable()
@@ -125,20 +128,28 @@ export class ProjectService {
 
   }
 
-  async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy, action: string) {
-    const user = this.requestContextService.getUser()
-    const requiresUser = userRequiredActions.has(action)
+  async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy, action: string, user: any) {
+    try {
 
-    return client.send(cmd, {
-      ...payload,
-      ...(requiresUser && { user })
-    }).pipe(
-      timeout(timeoutValue),
-      tap((response) => {
-        this.sendWhatsAppMsg(response, cmd, payload)
+      // console.log("here")
+      // const user = this.requestContextService.getUser()
+      // console.log("user", user)
 
-      })
-    );
+      const requiresUser = userRequiredActions.has(action)
+
+      return client.send(cmd, {
+        ...payload,
+        ...(requiresUser && { user })
+      }).pipe(
+        timeout(timeoutValue),
+        tap((response) => {
+          this.sendWhatsAppMsg(response, cmd, payload)
+
+        })
+      );
+    } catch (err) {
+      console.log("Err", err)
+    }
   }
 
   async executeMetaTxRequest(params: any) {
@@ -168,7 +179,7 @@ export class ProjectService {
 
   }
 
-  async handleProjectActions({ uuid, action, payload }) {
+  async handleProjectActions({ uuid, action, payload, user }) {
     console.log({ uuid, action, payload })
     //Note: This is a temporary solution to handle metaTx actions
     const metaTxActions = {
@@ -181,6 +192,7 @@ export class ProjectService {
 
 
     const actions = {
+      ...cambodiaActions,
       ...projectActions,
       ...elActions,
       ...aaActions,
@@ -198,7 +210,84 @@ export class ProjectService {
     if (!actionFunc) {
       throw new Error('Please provide a valid action!');
     }
-    return await actionFunc(uuid, payload, (...args) => this.sendCommand(args[0], args[1], args[2], this.client, action));
+    return await actionFunc(uuid, payload, (...args) => this.sendCommand(args[0], args[1], args[2], this.client, action, user));
   }
+
+  async importKoboBeneficiary(uuid: UUID, data: any) {
+    const benef: any = this.mapKoboFields(data);
+    if (!benef.phone) throw new Error("Phone number is required!");
+    if (benef.gender) benef.gender = benef.gender.toUpperCase();
+    if (benef.type) benef.type = benef.type.toUpperCase();
+    if (benef.age) benef.age = parseInt(benef.age);
+    if (benef.leadInterests) {
+      benef.leadInterests = benef.leadInterests.split(' ').map((item: string) => item.trim().toUpperCase());
+    }
+    const coords = splitCoordinates(benef.coordinates);
+    const beneficiary = { ...benef, ...coords };
+    const payload = createExtrasAndPIIData(beneficiary);
+    // 1. Save to Kobo Import Logs
+    const row = await this.prisma.koboBeneficiary.create({
+      data: beneficiary
+    })
+    // Check phone in PII if exists?
+    // 2. Save to Beneficiary and PII
+    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, payload).pipe(timeout(MS_TIMEOUT), switchMap((response) => {
+      const payload = {
+        uuid: response.uuid,
+        walletAddress: response.walletAddress,
+        type: response.extras?.type || 'UNKNOWN',
+        extras: response.extras,
+      }
+      // 3. Send to project MS
+      return this.client.send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, payload).pipe(timeout(MS_TIMEOUT), tap((response) => {
+        // 4. Update status and addToProject
+        return this.addToProjectAndUpdate({ projectId: uuid, beneficiaryId: payload.uuid, importId: row.uuid })
+      }));
+
+    }));
+  }
+
+
+  async addToProjectAndUpdate({ projectId, beneficiaryId, importId }) {
+    await this.updateImportStatus(importId, KoboBeneficiaryStatus.SUCCESS);
+    return this.prisma.beneficiaryProject.create({
+      data: {
+        beneficiaryId: beneficiaryId,
+        projectId: projectId
+      }
+    })
+  }
+
+
+  async updateImportStatus(uuid: string, status: KoboBeneficiaryStatus) {
+    return this.prisma.koboBeneficiary.update({
+      where: {
+        uuid: uuid
+      },
+      data: {
+        status
+      }
+    })
+  }
+
+  mapKoboFields(payload: any) {
+    const mappedPayload = {};
+    const meta = {};
+
+    for (const key in payload) {
+      if (KOBO_FIELD_MAPPINGS[key]) {
+        mappedPayload[KOBO_FIELD_MAPPINGS[key]] = payload[key];
+      } else {
+        meta[key] = payload[key];
+      }
+    }
+    return { ...mappedPayload, meta };
+  }
+
+  async sendTestMsg(uuid: UUID) {
+    console.log({ uuid })
+    return this.client.send({ cmd: 'rahat.jobs.test', uuid }, { msg: 'This is test msg!' }).pipe(timeout(MS_TIMEOUT))
+  }
+
 }
 
