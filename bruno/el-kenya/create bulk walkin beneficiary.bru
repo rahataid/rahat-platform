@@ -1,0 +1,28 @@
+meta {
+  name: create bulk walkin beneficiary
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+}
+
+body:json {
+  {
+    "action": "rpProject.walkin.createBulk",
+    "payload": {
+      "data": [
+        {
+          "name": "JHON"
+        }
+      ]
+    }
+  }
+}
