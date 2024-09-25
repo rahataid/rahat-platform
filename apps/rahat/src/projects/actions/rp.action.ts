@@ -197,6 +197,8 @@ export const rpActions: ProjectActionFunc = {
     sendCommand({ cmd: ProjectJobs.OFFLINE_BENEFICIARIES.UPDATE_OFFLINE_BENEFICIARY, uuid }, payload),
   // **** Beneficiary Groups end **** //
 
+  // TODO Move to kenya specific actions
+
   // Walkin Beneficiary
   [MS_ACTIONS.RPPROJECT.CREATE_WALKIN]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.BENEFICIARY.CREATE_WALKIN_BENEFICIARY, uuid }, payload),
@@ -206,6 +208,9 @@ export const rpActions: ProjectActionFunc = {
 
   [MS_ACTIONS.RPPROJECT.GET_ALL_WALKIN]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.BENEFICIARY.GET_ALL_WALKIN_BENEFICIARY, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.CREATE_BULK_WALKIN_BENEFICIARIES]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.CREATE_BULK_WALKIN_BENEFICIARY, uuid }, payload),
 
 
 };

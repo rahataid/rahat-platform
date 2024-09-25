@@ -70,6 +70,7 @@ export const JOBS = {
     CREATE_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin',
     GET_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_walkin',
     GET_ALL_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_all_walkin',
+    CREATE_BULK_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin_bulk'
 
   },
 
