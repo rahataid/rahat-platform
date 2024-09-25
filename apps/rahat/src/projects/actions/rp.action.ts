@@ -199,10 +199,10 @@ export const rpActions: ProjectActionFunc = {
 
   // Walkin Beneficiary
   [MS_ACTIONS.RPPROJECT.CREATE_WALKIN]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: ProjectJobs.BENEFICIARY, uuid }, payload),
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.CREATE_WALKIN_BENEFICIARY, uuid }, payload),
 
   [MS_ACTIONS.RPPROJECT.GET_WALKIN]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: ProjectJobs.BENEFICIARY, uuid }, payload),
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.GET_WALKIN_BENEFICIARY, uuid }, payload),
 
   [MS_ACTIONS.RPPROJECT.GET_ALL_WALKIN]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.BENEFICIARY.GET_ALL_WALKIN_BENEFICIARY, uuid }, payload),
