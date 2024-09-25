@@ -250,6 +250,7 @@ export const MS_ACTIONS = {
     VERIFY_OTP: 'rpProject.stellar.verifyOTP',
     GET_BALANCE: 'rpProject.stellar.getBalance',
     ADD_TRUSTLINE: 'rpProject.stellar.addTrustline',
-    FAUCET: 'rpProject.stellar.faucet'
+    FAUCET: 'rpProject.stellar.faucet',
+    TRANSACTION: 'rpProject.stellar.transactions'
   }
 };

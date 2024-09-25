@@ -72,7 +72,8 @@ export const JOBS = {
     VERIFY_OTP: 'rahat.jobs.stellar.verifyOTP',
     CREATE_DISBURSEMENT: 'rahat.jobs.stellar.createDisbursement',
     GET_BALANCE: 'rahat.jobs.stellar.getBalance',
-    FAUCET: 'rahat.jobs.stellar.faucet'
+    FAUCET: 'rahat.jobs.stellar.faucet',
+    TRANSACTIONS: 'rahat.jobs.stellar.transactions'
   }
 
 };
