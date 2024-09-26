@@ -52,7 +52,9 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
   createBulk(@Payload() data) {
-    return this.service.createBulk(data);
+    console.log('payload sent data', JSON.stringify(data, null, 2))
+    const payloadData = data.length || data?.payload
+    return this.service.createBulk(payloadData);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST })
