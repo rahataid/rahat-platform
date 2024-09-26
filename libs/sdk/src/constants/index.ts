@@ -41,18 +41,29 @@ export const APP = {
 
 export const MS_ACTIONS = {
   CAMBODIA: {
+    BENEFICIARY: {
+      CREATE: 'cambodia.beneficiary.create',
+      LIST: 'cambodia.beneficiary.list',
+      GET: 'cambodia.beneficiary.get',
+      DELETE: 'cambodia.beneficiary.delete',
+      ADD_TO_PROJECT: 'cambodia.beneficiary.add_to_project',
+    },
+    CHW: {
+      CREATE: 'cambodia.chw.create',
+      LIST: 'cambodia.chw.list',
+      GET: 'cambodia.chw.get',
+      UPDATE: 'cambodia.chw.update',
+      DELETE: 'cambodia.chw.delete',
+    },
     VENDOR: {
       LIST: 'cambodia.vendor.list',
       GET: 'cambodia.vendor.get',
-    }
+      UPDATE_IS_VERIFIED: 'cambodia.vendor.update_is_verified',
+      ASSIGN_TO_PROJECT: 'cambodia.vendor.assign_to_project',
+    },
+
   },
-  CHW: {
-    CREATE: 'cambodia.chw.create',
-    LIST: 'cambodia.chw.list',
-    GET: 'cambodia.chw.get',
-    UPDATE: 'cambodia.chw.update',
-    DELETE: 'cambodia.chw.delete',
-  },
+
   PROJECT: {
     SETUP: 'project.setup',
   },
