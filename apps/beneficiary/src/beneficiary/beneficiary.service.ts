@@ -105,6 +105,7 @@ export class BeneficiaryService {
   async listBenefByProject(data: any) {
 
     if (data?.data.length) {
+      console.log('sent data==', data)
       const mergedProjectData = await this.mergeProjectData(data.data, data.payload)
       console.log({ mergedProjectData })
       if (data?.extras) {
@@ -280,6 +281,7 @@ export class BeneficiaryService {
     //     pii: true
     //   }
     // })
+    console.log('data', data)
 
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
