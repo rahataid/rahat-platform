@@ -103,18 +103,17 @@ export class BeneficiaryService {
     return data;
   }
   async listBenefByProject(data: any) {
-
-    if (data?.data.length) {
-      const mergedProjectData = await this.mergeProjectData(data.data, data.payload)
-      if (data?.extras) {
-        data.data = { data: mergedProjectData, extras: data?.extras }
-      }
-      else {
-        data.data = mergedProjectData
-      }
-      return data;
+    if (!data?.data.length) return data;
+    const mergedProjectData = await this.mergeProjectData(data.data, data.payload)
+    if (data?.extras) {
+      data.data = { data: mergedProjectData, extras: data?.extras }
     }
+    else {
+      data.data = mergedProjectData
+    }
+    return data;
   }
+
 
 
   async listBenefGroupByProject(data: any) {

@@ -40,6 +40,12 @@ export const APP = {
 };
 
 export const MS_ACTIONS = {
+  CAMBODIA: {
+    VENDOR: {
+      LIST: 'cambodia.vendor.list',
+      GET: 'cambodia.vendor.get',
+    }
+  },
   CHW: {
     CREATE: 'cambodia.chw.create',
     LIST: 'cambodia.chw.list',
@@ -68,6 +74,7 @@ export const MS_ACTIONS = {
     ASSIGN_TO_PROJECT: 'vendor.assign_to_project',
     LIST_BY_PROJECT: 'vendor.list_by_project',
     UPDATE_IS_VERIFIED: 'vendor.update_is_verified',
+    LIST: 'vendor.list',
   },
   USER: {},
   ELPROJECT: {

@@ -14,8 +14,9 @@ export const CAMBODIA_JOBS = {
   },
   BENEFICIARY: {
     CREATE: 'rahat.jobs.beneficiary.create',
-    LIST: 'rahat.jobs.beneficiary.list',
+    LIST_BY_PROJECT: 'rahat.jobs.beneficiary.list_by_project',
     GET: 'rahat.jobs.beneficiary.get',
+    LIST: 'rahat.jobs.beneficiary.list',
   },
   VENDOR: {
     CREATE: 'rahat.jobs.vendor.create',
@@ -24,6 +25,7 @@ export const CAMBODIA_JOBS = {
     UPDATE: 'rahat.jobs.vendor.update',
     ADD_TO_PROJECT: 'rahat.jobs.vendor.add_to_project',
     UPDATE_IS_VERIFIED: 'rahat.jobs.vendor.update_is_verified',
+    LIST_BY_PROJECT: 'rahat.jobs.vendor.list_by_project',
   }
 }
 
@@ -37,6 +39,16 @@ export const cambodiaActions: ProjectActionFunc = {
   [MS_ACTIONS.VENDOR.ASSIGN_TO_PROJECT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: CAMBODIA_JOBS.VENDOR.ADD_TO_PROJECT, uuid },
+      payload),
+
+  [MS_ACTIONS.CAMBODIA.VENDOR.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.VENDOR.LIST, uuid },
+      payload),
+
+  [MS_ACTIONS.CAMBODIA.VENDOR.GET]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.VENDOR.GET, uuid },
       payload),
 
 
