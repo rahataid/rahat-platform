@@ -16,10 +16,29 @@ export const CAMBODIA_JOBS = {
     CREATE: 'rahat.jobs.beneficiary.create',
     LIST: 'rahat.jobs.beneficiary.list',
     GET: 'rahat.jobs.beneficiary.get',
+  },
+  VENDOR: {
+    CREATE: 'rahat.jobs.vendor.create',
+    LIST: 'rahat.jobs.vendor.list',
+    GET: 'rahat.jobs.vendor.get',
+    UPDATE: 'rahat.jobs.vendor.update',
+    ADD_TO_PROJECT: 'rahat.jobs.vendor.add_to_project',
+    UPDATE_IS_VERIFIED: 'rahat.jobs.vendor.update_is_verified',
   }
 }
 
 export const cambodiaActions: ProjectActionFunc = {
+
+  [MS_ACTIONS.VENDOR.UPDATE_IS_VERIFIED]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.VENDOR.UPDATE_IS_VERIFIED, uuid },
+      payload),
+
+  [MS_ACTIONS.VENDOR.ASSIGN_TO_PROJECT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.VENDOR.ADD_TO_PROJECT, uuid },
+      payload),
+
 
   [MS_ACTIONS.BENEFICIARY.CREATE]: (uuid, payload, sendCommand) =>
     sendCommand(
