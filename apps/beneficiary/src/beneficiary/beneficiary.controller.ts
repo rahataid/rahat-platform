@@ -53,8 +53,8 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
   createBulk(@Payload() data) {
     console.log('payload sent data', JSON.stringify(data, null, 2))
-    const payloadData = data.length || data?.payload
-    return this.service.createBulk(payloadData);
+    const payloadData = Array.isArray(data) ? data : data?.payload
+    return this.service.createBulk(payloadData, data?.data?.projectUUID, data?.data?.walkinBulk);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST })
