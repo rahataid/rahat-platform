@@ -51,7 +51,7 @@ async function splitAndCombineDuplicateBenef(rows: any[]) {
 }
 
 async function addBeneficiaryAndPii(beneficiary: any) {
-    const { name, phone, email, ...rest } = beneficiary;
+    const { name, phone, email, createdAt, updatedAt, deletedAt, ...rest } = beneficiary;
     const b = await prisma.beneficiary.create({
         data: { ...rest }
     });
