@@ -103,31 +103,21 @@ export class BeneficiaryService {
     return data;
   }
   async listBenefByProject(data: any) {
-    if (!data?.data.length) return data;
-    const mergedProjectData = await this.mergeProjectData(data.data, data.payload)
+    console.log('data', data);
+
+    if (!data?.data?.length) return data;
+
+    const mergedProjectData = await this.mergeProjectData(data.data, data.payload);
+
     if (data?.extras) {
-      data.data = { data: mergedProjectData, extras: data?.extras }
-
-      if (data?.data.length) {
-        console.log('sent data==', data)
-        const mergedProjectData = await this.mergeProjectData(data.data, data.payload)
-        console.log({ mergedProjectData })
-        if (data?.extras) {
-          data.data = { data: mergedProjectData || [], extras: data?.extras }
-        }
-        else {
-          data.data = mergedProjectData || []
-        }
-        console.log({ data })
-        return data;
-      }
-      else {
-        data.data = mergedProjectData
-      }
-      return data;
+      data.data = { data: mergedProjectData, extras: data.extras };
+    } else {
+      data.data = mergedProjectData || [];
     }
-  }
 
+    console.log('final data', data);
+    return data;
+  }
 
 
   async listBenefGroupByProject(data: any) {
@@ -312,7 +302,6 @@ export class BeneficiaryService {
       console.log('data', data)
       const combinedData = data.map(((dat) => {
         const benDetails = beneficiaries.find((ben) => ben.walletAddress === dat.walletAddress);
-        console.log('benDetails', benDetails)
         const { pii, ...rest } = benDetails || {};
         return {
           piiData: pii,
@@ -323,6 +312,7 @@ export class BeneficiaryService {
       console.log({ combinedData })
       return combinedData || [];
     }
+    console.log('beneficiaries', beneficiaries)
 
     // TODO: remove projectData and piiData that has been added manually, as it will affects the FE. NEEDS to be refactord in FE as well.
     return beneficiaries.map(b => ({
