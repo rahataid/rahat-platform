@@ -31,6 +31,7 @@ migrate_seed() {
     pnpm seed:cvadevsettings $current_dir
     pnpm seed:rpdevsettings $current_dir
     pnpm seed:kenyadevsettings $current_dir
+    pnpm seed:cambodiadevsettings $current_dir
     pnpm seed:chainsettings
 }
 
