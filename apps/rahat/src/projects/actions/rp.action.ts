@@ -68,7 +68,7 @@ export const rpActions: ProjectActionFunc = {
     sendCommand
   ) =>
     sendCommand(
-      { cmd: ProjectJobs.DISBURSEMENT_PLAN.CREATE_DISBURSEMENT, uuid },
+      { cmd: ProjectJobs.DISBURSEMENT_PLAN.BULK_CREATE_DISBURSEMENT, uuid },
       payload
     ),
   //campaign start
