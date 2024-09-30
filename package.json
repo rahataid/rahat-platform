@@ -23,6 +23,7 @@
     "seed:cvadevsettings": "ts-node prisma/seed.cvadevsettings.ts",
     "seed:rpdevsettings": "ts-node prisma/seed.rpdevsettings.ts",
     "seed:kenyadevsettings": "ts-node prisma/seed.kenyadevsettings.ts",
+    "seed:cambodiadevsettings": "ts-node prisma/seed.cambodiadevsettings.ts",
     "seed:chainsettings": "ts-node prisma/seed.chainsettings.ts",
     "seed:setup": "ts-node prisma/seed.settings.ts",
     "seed:contracts": "ts-node ./tools/scripts/local-setup/web3_setup/projectSeed.ts",
