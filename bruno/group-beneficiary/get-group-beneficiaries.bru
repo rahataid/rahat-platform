@@ -30,7 +30,7 @@ script:pre-request {
 
 script:post-response {
   const createFile = require('./createFile');
-
+  
   const resData = res.getBody().data[0];
   const data = { "groupData": resData };
   createFile(data, 'group-data.json');

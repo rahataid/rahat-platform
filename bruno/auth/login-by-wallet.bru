@@ -30,6 +30,7 @@ script:pre-request {
     const signature = await wallet.signMessage(message);
     bru.setVar('signature', signature);
   }
+  console.log({signature})
   await signMessage(bru.getVar('challenge'));
 }
 
@@ -37,7 +38,7 @@ script:post-response {
   const responseData = res.getBody();
   bru.setVar("access_token", responseData.data?.accessToken);
   const token = bru.getVar("access_token");
-
+  
   const createFile = require('./createFile');
   const data = {"access_token": token};
   createFile(data, 'auth-data.json');

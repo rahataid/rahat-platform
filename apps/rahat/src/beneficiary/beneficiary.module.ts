@@ -7,6 +7,9 @@ import { BeneficiaryController } from './beneficiary.controller';
 @Module({
   imports: [
     ClientsModule.register([
+
+      //Beneficiary Redis microservice
+
       {
         name: BeneficiaryConstants.Client,
         transport: Transport.REDIS,
@@ -18,6 +21,15 @@ import { BeneficiaryController } from './beneficiary.controller';
           retryDelay: 2000,
         },
       },
+
+      //Beneficiary TCP microservice
+      // {
+      //   name: BeneficiaryConstants.Client,
+      //   transport: Transport.TCP,
+      //   options: {
+      //     port: Number(process.env.PORT_BEN),
+      //   },
+      // },
     ]),
     BullModule.registerQueue({
       name: BQUEUE.RAHAT,

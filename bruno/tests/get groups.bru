@@ -1,0 +1,22 @@
+meta {
+  name: get groups
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/beneficiaries/groups/all?sort=createdAt&order=desc&page=1&perPage=10
+  body: none
+  auth: none
+}
+
+params:query {
+  sort: createdAt
+  order: desc
+  page: 1
+  perPage: 10
+}
+
+headers {
+  authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcklkIjozLCJ1dWlkIjoiMWI2OTlmYjUtNGM2Ny00YmJjLTliZjItYjc1MzExNzhmNDRjIiwibmFtZSI6IlNhcm9qIEZSQyIsImVtYWlsIjoic2Fyb2oudGhha3VyQGZpbnJjLmZpIiwicGhvbmUiOiIrOTc3OTg1ODQyMzc5NyIsIndhbGxldCI6IjB4NjU1RDM2MTY5MDcyRjE5MDE2ZjBiNkREZTFlQWI3ZTg1Qzk3MmU5QyIsInJvbGVzIjpbIkFkbWluIl0sInBlcm1pc3Npb25zIjpbeyJhY3Rpb24iOiJtYW5hZ2UiLCJzdWJqZWN0IjoiYWxsIiwiaW52ZXJ0ZWQiOmZhbHNlLCJjb25kaXRpb25zIjpudWxsfV0sImlhdCI6MTcyNzQyNDI1MCwiZXhwIjoxNzI3NTEwNjUwfQ.l4ABOZcA-7BxAJvDRkD3olc58MkhsFS07baK5K559ng
+}

@@ -20,6 +20,12 @@ async function bootstrap() {
         retryDelay: 3000,
       },
     }
+    // {
+    //   transport: Transport.TCP,
+    //   options: {
+    //     port: PORT,
+    //   },
+    // }
   );
   app.useGlobalFilters(new RpcExceptionFilter());
   await app.listen();

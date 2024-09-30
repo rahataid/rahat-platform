@@ -28,8 +28,9 @@ async function bootstrap() {
   });
   const globalPrefix = 'v1';
   app.enableCors();
+  const port = Number(process.env.PORT) || 3333;
 
-  const microservice = app.connectMicroservice<MicroserviceOptions>(
+  const microserviceRedis = app.connectMicroservice<MicroserviceOptions>(
     {
       transport: Transport.REDIS,
       options: {
@@ -38,6 +39,10 @@ async function bootstrap() {
         password: configService.get('REDIS_PASSWORD'),
       },
     })
+
+  // const microserviceTcp = app.connectMicroservice<MicroserviceOptions>({
+  //   transport: Transport.TCP,
+  // });
 
   // app.use(bodyParser.raw({ type: 'application/octet-stream' }));
   app.use(bodyParser.raw({ type: 'application/octet-stream', limit: '50mb' }));
@@ -58,7 +63,6 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
 
-  const port = process.env.PORT || 3333;
 
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
