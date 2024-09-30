@@ -18,6 +18,7 @@ import {
 } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
+import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
 import { VerificationService } from './verification.service';
 
@@ -26,6 +27,7 @@ export class BeneficiaryController {
   constructor(
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly service: BeneficiaryService,
+    private readonly utilService: BeneficiaryUtilsService,
     private readonly statsService: BeneficiaryStatService,
     private readonly verificationService: VerificationService
   ) { }
@@ -93,10 +95,8 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
   async assignToProject(payload: any) {
-    return this.service.assignBeneficiaryToProject(payload);
+    return this.utilService.assignBeneficiaryToProject(payload);
   }
-
-
 
   @MessagePattern({ cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT })
   async bulkAssignToProject(payload: any) {
@@ -202,7 +202,6 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY })
   async listTempBeneficiaries(data: any) {
-
     return this.service.listTempBeneficiaries(data.uuid, data.query);
   }
 

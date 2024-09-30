@@ -1,3 +1,4 @@
+export * from './addToProject.types';
 export * from './client.types';
 export * from './exceptionResponse.types';
 export * from './file.types';

@@ -29,11 +29,9 @@ import {
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { isAddress } from 'viem';
 import { findTempBenefGroups, validateDupicatePhone, validateDupicateWallet } from '../processors/processor.utils';
-import { createListQuery } from './helpers';
+import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -47,7 +45,8 @@ export class BeneficiaryService {
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
     private eventEmitter: EventEmitter2,
-    private readonly verificationService: VerificationService
+    private readonly verificationService: VerificationService,
+    private readonly beneficiaryUtilsService: BeneficiaryUtilsService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -177,31 +176,10 @@ export class BeneficiaryService {
     dto: ListBeneficiaryDto
   ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
     let result = null as any;
-    const AND_QUERY = createListQuery(dto);
-    const orderBy: Record<string, 'asc' | 'desc'> = {};
-    orderBy[dto.sort] = dto.order;
-    const projectUUID = dto.projectId;
-    const startDate = dto.startDate;
-    const endDate = dto.endDate;
+    const { page, perPage, sort, order } = dto;
+    const orderBy: Record<string, 'asc' | 'desc'> = { [sort]: order };
+    const where = this.beneficiaryUtilsService.buildWhereClause(dto);
 
-    let where: any = projectUUID ? {
-      deletedAt: null,
-      BeneficiaryProject: projectUUID === 'NOT_ASSGNED' ? {
-        none: {}
-      } : {
-        some: {
-          projectId: projectUUID
-        }
-      },
-    } : {
-      deletedAt: null
-    }
-
-    if (startDate && endDate) { where.createdAt = { gte: new Date(startDate), lte: new Date(endDate), } }
-
-    if (startDate && !endDate) { where.createdAt = { gte: new Date(startDate) } }
-
-    if (!startDate && endDate) { where.createdAt = { lte: new Date(endDate) } }
 
     result = await paginate(
       this.rsprisma.beneficiary,
@@ -214,41 +192,14 @@ export class BeneficiaryService {
             },
           },
         },
-        orderBy,
+        orderBy
       },
       {
-        page: dto.page,
-        perPage: dto.perPage,
+        page, perPage
       }
     );
-
-    console.time("check")
-
-    const resultData = result.data
-
-    if (resultData.length > 0) {
-      const benfPiiData = await this.prisma.beneficiaryPii.findMany({
-        where: {
-          beneficiaryId: {
-            in: resultData?.map((d) => d.id)
-          }
-        }
-      })
-      const piiDataMap = new Map();
-      for (const piiData of benfPiiData) {
-        piiDataMap.set(piiData.beneficiaryId, piiData);
-      }
-
-      const mergedData = resultData.map((d) => {
-        const piiData = piiDataMap.get(d.id);
-        if (piiData) {
-          d.piiData = piiData;
-        }
-        return d;
-      });
-      result.data = mergedData;
-    }
-
+    result = await this.beneficiaryUtilsService.attachPiiData(result);
+    console.log({ result })
 
     console.timeEnd("check")
     console.log(new Date())
@@ -343,52 +294,29 @@ export class BeneficiaryService {
 
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
     const { piiData, projectUUIDs, ...data } = dto;
-    if (!data.walletAddress) {
-      data.walletAddress = generateRandomWallet().address;
-    }
-    if (data.walletAddress) {
-      const ben = await this.prisma.beneficiary.findUnique({
-        where: {
-          walletAddress: data.walletAddress,
-        },
-      });
-      if (ben) throw new RpcException('Wallet should be unique');
-      const isWallet = isAddress(data.walletAddress);
-      if (!isWallet)
-        throw new RpcException('Wallet should be valid Ethereum address');
-    }
+    let { walletAddress } = data;
+    walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(walletAddress);
+
     if (!piiData.phone) throw new RpcException('Phone number is required');
-    const benData = await this.rsprisma.beneficiaryPii.findUnique({
-      where: {
-        phone: piiData.phone,
-      },
-    });
-    if (benData) throw new RpcException('Phone number should be unique');
+    await this.beneficiaryUtilsService.ensureUniquePhone(piiData.phone);
+
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
-    const rdata = await this.rsprisma.beneficiary.create({
-      data,
+    const createdBeneficiary = await this.rsprisma.beneficiary.create({
+      data: { ...data, walletAddress },
     });
-    if (piiData) {
-      await this.prisma.beneficiaryPii.create({
-        data: {
-          beneficiaryId: rdata.id,
-          phone: piiData.phone ? piiData.phone.toString() : null,
-          ...piiData,
-        },
-      });
-    }
+
+    await this.beneficiaryUtilsService.addPIIData(createdBeneficiary.id, piiData)
+
 
     // Assign beneficiary to project while creating. Useful when a beneficiary is created from inside a project
-    if (projectUUIDs?.length && rdata.uuid) {
-      const assignPromises = projectUUIDs.map(projectUuid => {
-        return this.assignBeneficiaryToProject({ beneficiaryId: rdata.uuid, projectId: projectUuid });
-      });
-      await Promise.all(assignPromises);
+    if (projectUUIDs.length) {
+      await this.beneficiaryUtilsService.assignToProjects(createdBeneficiary.uuid, projectUUIDs)
     }
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
       projectUuid,
     });
-    return rdata;
+
+    return createdBeneficiary;
   }
 
   async findOne(uuid: UUID) {
@@ -469,7 +397,7 @@ export class BeneficiaryService {
 
 
     // 2. Save Beneficiary to Project
-    await this.saveBeneficiaryToProject({
+    await this.beneficiaryUtilsService.saveBeneficiaryToProject({
       beneficiaryId: benef.uuid,
       projectId: projectUid,
     });
@@ -483,9 +411,7 @@ export class BeneficiaryService {
 
   }
 
-  async saveBeneficiaryToProject(dto: AddToProjectDto) {
-    return this.prisma.beneficiaryProject.create({ data: dto });
-  }
+
 
   async addBulkBeneficiaryToProject(dto: addBulkBeneficiaryToProject) {
     const { dto: { beneficiaries, referrerBeneficiary, referrerVendor, type, projectUuid }
@@ -575,68 +501,6 @@ export class BeneficiaryService {
       },
       projectPayloads
     );
-  }
-
-  async assignBeneficiaryToProject(dto: AddToProjectDto) {
-    const { beneficiaryId, projectId } = dto;
-
-    // get project info
-    const project = await this.prisma.project.findUnique({
-      where: {
-        uuid: projectId
-      }
-    })
-
-    //1. Get beneficiary data
-    const beneficiaryData = await this.rsprisma.beneficiary.findUnique({
-      where: { uuid: beneficiaryId },
-      include: { pii: true }
-    });
-    const projectPayload = {
-      uuid: beneficiaryData.uuid,
-      walletAddress: beneficiaryData.walletAddress,
-      extras: beneficiaryData?.extras || null,
-      type: BeneficiaryConstants.Types.ENROLLED,
-      isVerfied: beneficiaryData?.isVerfied
-    };
-
-
-    // if project type if aa, remove type
-    if (project.type.toLowerCase() === 'aa') {
-      delete projectPayload.type;
-      projectPayload['gender'] = beneficiaryData?.gender;
-      projectPayload.extras = { ...projectPayload.extras, phone: beneficiaryData?.pii?.phone }
-    }
-
-
-    // if project type is c2c, send verficition mail
-    // if (project.type.toLowerCase() === 'c2c' && !beneficiaryData.isVerfied) {
-    //   await this.verificationService.generateLink(beneficiaryId)
-    // }
-
-    //2.Save beneficiary to project
-
-    await this.saveBeneficiaryToProject({
-      beneficiaryId: beneficiaryId,
-      projectId: projectId,
-    });
-
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
-      projectUuid: projectId,
-    });
-
-
-    //3. Sync beneficiary to project
-    return lastValueFrom(
-      this.client.send(
-        { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
-        projectPayload
-      )
-    )
-    // return this.client.send(
-    //   { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
-    //   projectPayload
-    // );
   }
 
   async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
@@ -1137,7 +1001,7 @@ export class BeneficiaryService {
         // bulk assign unassigned beneficiaries from group
         if (unassignedBenfs?.length) {
           for (const unassignedBenf of unassignedBenfs) {
-            await this.assignBeneficiaryToProject({ beneficiaryId: unassignedBenf.uuid, projectId: project.projectId })
+            await this.beneficiaryUtilsService.assignBeneficiaryToProject({ beneficiaryId: unassignedBenf.uuid, projectId: project.projectId })
           }
         }
       }
@@ -1202,7 +1066,7 @@ export class BeneficiaryService {
       // bulk assign unassigned beneficiaries from group
       if (unassignedBenfs?.length) {
         for (const unassignedBenf of unassignedBenfs) {
-          await this.assignBeneficiaryToProject({ beneficiaryId: unassignedBenf.uuid, projectId: project.uuid })
+          await this.beneficiaryUtilsService.assignBeneficiaryToProject({ beneficiaryId: unassignedBenf.uuid, projectId: project.uuid })
         }
       }
 
@@ -1276,10 +1140,9 @@ export class BeneficiaryService {
 
 
   async listTempBeneficiaries(uuid: string, query: ListTempBeneficiariesDto) {
-    const res = await this.prisma.tempGroup.findUnique({
+    const tempGroupWithBeneficiaries = await this.prisma.tempGroup.findUnique({
       where: {
         uuid: uuid
-
       },
       include: {
         TempGroupedBeneficiaries: {
@@ -1288,49 +1151,43 @@ export class BeneficiaryService {
           }
         }
       }
-
     })
-    if (query && query.page && query.perPage) {
-      const filteredData = res.TempGroupedBeneficiaries.filter((d) => {
-        return Object.keys(query).every(key => {
-          if (key === "firstName") {
-            return d.tempBeneficiary.firstName.toLowerCase().includes(query[key].toLowerCase());
-          }
-          return true;
-        });
-      });
-      const startIndex = (query.page - 1) * query.perPage;
-      const endIndex = query.page * query.perPage;
-      const paginatedBeneficiaries = filteredData.map(({ tempBeneficiary, ...rest }) => ({
-        ...tempBeneficiary,
-        ...rest
-      })).slice(
-        startIndex,
-        endIndex,
-      )
-      const total = filteredData.length;
-      const lastPage = Math.ceil(total / query.perPage);
-      const hasNextPage = endIndex < total;
-      const hasPreviousPage = startIndex > 0;
-      const next = hasNextPage ? query.page + 1 : null;
-      const prev = hasPreviousPage ? query.page - 1 : null;
 
-      const meta = {
-        total,
-        lastPage,
-        currentPage: query.page,
-        perPage: query.perPage,
-        prev,
-        next
-      };
+    if (!tempGroupWithBeneficiaries) throw new Error('Temp Group not Found.')
 
-      return {
+    const { page = 1, perPage = 10, firstName } = query
 
-        tempeBeneficiary: paginatedBeneficiaries,
-        meta,
-      };
+    let filteredData = tempGroupWithBeneficiaries.TempGroupedBeneficiaries;
+    if (firstName) {
+      const lowerFirstName = firstName.toLowerCase()
+      filteredData = filteredData.filter(({ tempBeneficiary }) => tempBeneficiary.firstName.toLowerCase().includes(lowerFirstName))
     }
-    return res;
+
+
+    //Pagination Logic
+    const total = filteredData.length
+    const lastPage = Math.ceil(total / perPage)
+    const startIndex = (page - 1) * perPage
+    const endIndex = Math.min(startIndex + perPage, total)
+
+    const paginatedBeneficiaries = filteredData.slice(startIndex, endIndex).map(({ tempBeneficiary }) => tempBeneficiary)
+
+    const hasNextPage = page < lastPage;
+    const hasPreviousPage = page > 1
+
+    const meta = {
+      total,
+      lastPage,
+      currentPage: page,
+      perPage,
+      prev: hasNextPage ? page - 1 : null,
+      next: hasPreviousPage ? page + 1 : null
+    }
+
+
+    return {
+      tempBeneficiaries: paginatedBeneficiaries, meta
+    }
   }
 
 
