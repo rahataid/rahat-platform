@@ -234,6 +234,7 @@ export class ProjectService {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, payload).pipe(timeout(MS_TIMEOUT), switchMap((response) => {
       const payload = {
         uuid: response.uuid,
+        phone: benef.phone,
         walletAddress: response.walletAddress,
         type: response.extras?.type || 'UNKNOWN',
         extras: response.extras,
