@@ -36,17 +36,6 @@ export const cambodiaActions: ProjectActionFunc = {
       payload),
 
 
-  [MS_ACTIONS.CAMBODIA.VENDOR.LIST]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.VENDOR.LIST, uuid },
-      payload),
-
-  [MS_ACTIONS.CAMBODIA.VENDOR.GET]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.VENDOR.GET, uuid },
-      payload),
-
-
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.CREATE]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid },
