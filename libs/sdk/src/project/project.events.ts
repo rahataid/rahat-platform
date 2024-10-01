@@ -69,5 +69,8 @@ export const JOBS = {
     GET_BENEFICIARIES_DISBURSEMENTS: 'rahat.jobs.beneficiaries.getDisbursements',
 
   },
+  META_TRANSACTION: {
+    ADD_QUEUE: 'rahat.jobs.metatxn.add'
+  }
 
 };

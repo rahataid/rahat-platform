@@ -1,16 +1,20 @@
+import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
 import { CreateProjectDto, UpdateProjectDto, UpdateProjectStatusDto } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
+  BQUEUE,
   MS_ACTIONS,
   MS_TIMEOUT,
   ProjectEvents,
   ProjectJobs
 } from '@rahataid/sdk';
 import { BeneficiaryType } from '@rahataid/sdk/enums';
+import { JOBS } from '@rahataid/sdk/project/project.events';
 import { PrismaService } from '@rumsan/prisma';
+import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
@@ -27,7 +31,8 @@ export class ProjectService {
     private prisma: PrismaService,
     private eventEmitter: EventEmitter2,
     private requestContextService: RequestContextService,
-    @Inject('RAHAT_CLIENT') private readonly client: ClientProxy
+    @Inject('RAHAT_CLIENT') private readonly client: ClientProxy,
+    @InjectQueue(BQUEUE.META_TXN) private readonly metaTransactionQueue: Queue
   ) { }
 
   async create(data: CreateProjectDto) {
@@ -152,7 +157,7 @@ export class ProjectService {
   }
 
   async executeMetaTxRequest(params: any) {
-    const { metaTxRequest } = params;
+    const { metaTxRequest, event } = params;
     const forwarderContract = await createContractSigner(
       ERC2771FORWARDER,
       process.env.ERC2771_FORWARDER_ADDRESS
@@ -162,9 +167,12 @@ export class ProjectService {
     metaTxRequest.nonce = BigInt(metaTxRequest.nonce);
     metaTxRequest.value = BigInt(metaTxRequest.value);
     const tx = await forwarderContract.execute(metaTxRequest);
-    const res = await tx.wait();
 
-    return { txHash: res.hash, status: res.status };
+    const res = await this.metaTransactionQueue.add(JOBS.META_TRANSACTION.ADD_QUEUE, { tx, event })
+
+    // const res = await tx.wait();
+
+    return { txHash: res.data.hash, status: res.data.status };
   }
 
   async sendSucessMessage(uuid, payload) {

@@ -1,13 +1,11 @@
 import { Module } from "@nestjs/common";
 import { ClientsModule, Transport } from "@nestjs/microservices";
-import { ProjectProcessor } from "./project.processor";
-import { RahatProcessor } from "./rahat.processor";
 
 @Module({
     imports: [
         ClientsModule.register([
             {
-                name: 'DEPLOYMENT_CLIENT',
+                name: 'META_TRANSACTION_CLIENT',
                 transport: Transport.REDIS,
                 options: {
                     host: process.env.REDIS_HOST,
@@ -17,6 +15,6 @@ import { RahatProcessor } from "./rahat.processor";
             },
         ])
     ],
-    providers: [RahatProcessor, ProjectProcessor]
+    providers: []
 })
 export class ProcessorsModule { }
