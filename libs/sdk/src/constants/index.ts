@@ -86,6 +86,7 @@ export const MS_ACTIONS = {
     LIST_BY_PROJECT: 'vendor.list_by_project',
     UPDATE_IS_VERIFIED: 'vendor.update_is_verified',
     LIST: 'vendor.list',
+    GET_BY_UUID: 'vendor.get_by_uuid',
   },
   USER: {},
   ELPROJECT: {

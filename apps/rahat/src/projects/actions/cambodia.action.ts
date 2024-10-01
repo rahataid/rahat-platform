@@ -23,7 +23,6 @@ export const CAMBODIA_JOBS = {
     LIST: 'rahat.jobs.vendor.list',
     GET: 'rahat.jobs.vendor.get',
     UPDATE: 'rahat.jobs.vendor.update',
-    ADD_TO_PROJECT: 'rahat.jobs.vendor.add_to_project',
     UPDATE_IS_VERIFIED: 'rahat.jobs.vendor.update_is_verified',
     LIST_BY_PROJECT: 'rahat.jobs.vendor.list_by_project',
   }
@@ -36,10 +35,6 @@ export const cambodiaActions: ProjectActionFunc = {
       { cmd: CAMBODIA_JOBS.VENDOR.UPDATE_IS_VERIFIED, uuid },
       payload),
 
-  [MS_ACTIONS.CAMBODIA.VENDOR.ASSIGN_TO_PROJECT]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.VENDOR.ADD_TO_PROJECT, uuid },
-      payload),
 
   [MS_ACTIONS.CAMBODIA.VENDOR.LIST]: (uuid, payload, sendCommand) =>
     sendCommand(

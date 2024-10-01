@@ -328,6 +328,16 @@ export class VendorsService {
   }
 
 
+  async getVendorByUuid(dto: { projectId: string, vendorId: string }) {
+    return this.prisma.projectVendors.findUnique({
+      where: {
+        projectVendorIdentifier: dto
+      },
+      include: {
+        User: true
+      }
+    })
+  }
 
 }
 
