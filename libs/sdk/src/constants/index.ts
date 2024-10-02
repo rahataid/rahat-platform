@@ -55,6 +55,11 @@ export const MS_ACTIONS = {
       UPDATE: 'cambodia.chw.update',
       DELETE: 'cambodia.chw.delete',
     },
+    COMMISISION_SCHEME: {
+      CREATE: 'cambodia.commission_scheme.create',
+      LIST: 'cambodia.commission_scheme.list',
+      GET_CURRENT: 'cambodia.commission_scheme.get_current',
+    },
     VENDOR: {
       LIST: 'cambodia.vendor.list',
       GET: 'cambodia.vendor.get',

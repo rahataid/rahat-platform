@@ -18,6 +18,11 @@ export const CAMBODIA_JOBS = {
     GET: 'rahat.jobs.beneficiary.get',
     LIST: 'rahat.jobs.beneficiary.list',
   },
+  COMMISSION_SCHEME: {
+    CREATE: 'rahat.jobs.commission_scheme.create',
+    LIST: 'rahat.jobs.commission_scheme.list',
+    GET_CURRENT: 'rahat.jobs.commission_scheme.get_current',
+  },
   VENDOR: {
     CREATE: 'rahat.jobs.vendor.create',
     LIST: 'rahat.jobs.vendor.list',
@@ -30,11 +35,25 @@ export const CAMBODIA_JOBS = {
 
 export const cambodiaActions: ProjectActionFunc = {
 
+  [MS_ACTIONS.CAMBODIA.COMMISISION_SCHEME.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.COMMISSION_SCHEME.CREATE, uuid },
+      payload),
+
+  [MS_ACTIONS.CAMBODIA.COMMISISION_SCHEME.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.COMMISSION_SCHEME.LIST, uuid },
+      payload),
+
+  [MS_ACTIONS.CAMBODIA.COMMISISION_SCHEME.GET_CURRENT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.COMMISSION_SCHEME.GET_CURRENT, uuid },
+      payload),
+
   [MS_ACTIONS.CAMBODIA.VENDOR.UPDATE_IS_VERIFIED]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: CAMBODIA_JOBS.VENDOR.UPDATE_IS_VERIFIED, uuid },
       payload),
-
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.CREATE]: (uuid, payload, sendCommand) =>
     sendCommand(
