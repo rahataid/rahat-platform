@@ -41,12 +41,30 @@ export const APP = {
 };
 
 export const MS_ACTIONS = {
-  CHW: {
-    CREATE: 'cambodia.chw.create',
-    LIST: 'cambodia.chw.list',
-    GET: 'cambodia.chw.get',
-    UPDATE: 'cambodia.chw.update',
+  CAMBODIA: {
+    BENEFICIARY: {
+      CREATE: 'cambodia.beneficiary.create',
+      LIST: 'cambodia.beneficiary.list',
+      GET: 'cambodia.beneficiary.get',
+      DELETE: 'cambodia.beneficiary.delete',
+      ADD_TO_PROJECT: 'cambodia.beneficiary.add_to_project',
+    },
+    CHW: {
+      CREATE: 'cambodia.chw.create',
+      LIST: 'cambodia.chw.list',
+      GET: 'cambodia.chw.get',
+      UPDATE: 'cambodia.chw.update',
+      DELETE: 'cambodia.chw.delete',
+    },
+    VENDOR: {
+      LIST: 'cambodia.vendor.list',
+      GET: 'cambodia.vendor.get',
+      UPDATE_IS_VERIFIED: 'cambodia.vendor.update_is_verified',
+      ASSIGN_TO_PROJECT: 'cambodia.vendor.assign_to_project',
+    },
+
   },
+
   PROJECT: {
     SETUP: 'project.setup',
   },
@@ -67,6 +85,9 @@ export const MS_ACTIONS = {
     REGISTER: 'vendor.register',
     ASSIGN_TO_PROJECT: 'vendor.assign_to_project',
     LIST_BY_PROJECT: 'vendor.list_by_project',
+    UPDATE_IS_VERIFIED: 'vendor.update_is_verified',
+    LIST: 'vendor.list',
+    GET_BY_UUID: 'vendor.get_by_uuid',
   },
   USER: {},
   ELPROJECT: {
@@ -252,5 +273,12 @@ export const MS_ACTIONS = {
     GET_ONE_GROUP: 'rpProject.beneficiary.getOneGroup',
     GET_BENEFICIARIES_DISBURSEMENTS: 'rpProject.beneficiaries.getDisbursements',
     UPDATE_OFFLINE: 'rpProject.offlineBeneficiaries.update',
+    GET_UNSYNCED_BENEFICIARIES: 'rpProject.beneficiaries.getUnsynced',
+    // TODO: move to kenya specific actions
+    CREATE_WALKIN: 'rpProject.walkin.create',
+    GET_WALKIN: 'rpProject.walkin.get',
+    GET_ALL_WALKIN: 'rpProject.walkin.getAll',
+    CREATE_BULK_WALKIN_BENEFICIARIES: "rpProject.walkin.createBulk"
+
   }
 };

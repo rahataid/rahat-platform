@@ -1,0 +1,43 @@
+meta {
+  name: create bulk walkin beneficiary
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+}
+
+body:json {
+  {
+    "action": "rpProject.walkin.createBulk",
+    "payload": {
+      "data": [
+        {
+          "extras": {
+            "name": "Bhakta Ram",
+            "phone": "+9776289822839",
+            "age": "22",
+            "location": "Ktm",
+            "gender": "MALE"
+          },
+          "eyeCheckupStatus": "NOT_CHECKED",
+          "glassStatus": "REQUIRED",
+          "voucherType": "SINGLE_VISION",
+          "voucherStatus": "REDEEMED",
+          "walletAddress": "0x8ye1E1d30cA2D2244B9CF3CBaCdA7C70936b14r",
+          "vendorWalletAddress": "0xdcdFfcB7c57B971Daaa9D29158Dad0783E191cr",
+          "onboardedAt": "2024-09-25T12:20:13.058Z",
+          "type": "WALK_IN",
+          "isSynced": false
+        }
+      ]
+    }
+  }
+}

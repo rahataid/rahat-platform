@@ -67,10 +67,16 @@ export const JOBS = {
     GET_ALL_GROUPS: 'rahat.jobs.beneficiary.getAllGroups',
     GET_ONE_GROUP: 'rahat.jobs.beneficiary.getOneGroup',
     GET_BENEFICIARIES_DISBURSEMENTS: 'rahat.jobs.beneficiaries.getDisbursements',
+    GET_UNSYNCED_BENEFICIARIES: 'rahat.jobs.beneficiary.get_unsynced',
+    CREATE_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin',
+    GET_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_walkin',
+    GET_ALL_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_all_walkin',
+    CREATE_BULK_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin_bulk',
 
   },
   META_TRANSACTION: {
-    ADD_QUEUE: 'rahat.jobs.metatxn.add'
+    ADD_QUEUE: 'rahat.jobs.metatxn.add',
+    PROJECT_CALL: 'rahat.jobs.metatxn.call.project'
   }
 
 };

@@ -11,18 +11,17 @@ import {
   ProjectEvents,
   ProjectJobs
 } from '@rahataid/sdk';
-import { BeneficiaryType } from '@rahataid/sdk/enums';
+import { BeneficiaryType, KoboBeneficiaryStatus } from '@rahataid/sdk/enums';
 import { JOBS } from '@rahataid/sdk/project/project.events';
 import { PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { tap, timeout } from 'rxjs';
+import { switchMap, tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
-import { splitCoordinates } from '../utils';
-import { ERC2771FORWARDER } from '../utils/contracts';
+import { createExtrasAndPIIData, splitCoordinates } from '../utils';
 import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
-import { createContractSigner } from '../utils/web3';
 import { aaActions, beneficiaryActions, c2cActions, cambodiaActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
+import { CAMBODIA_JOBS } from './actions/cambodia.action';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 @Injectable()
@@ -135,10 +134,6 @@ export class ProjectService {
   async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy, action: string, user: any) {
     try {
 
-      // console.log("here")
-      // const user = this.requestContextService.getUser()
-      // console.log("user", user)
-
       const requiresUser = userRequiredActions.has(action)
 
       return client.send(cmd, {
@@ -157,20 +152,8 @@ export class ProjectService {
   }
 
   async executeMetaTxRequest(params: any) {
-    const { metaTxRequest, event } = params;
-    const forwarderContract = await createContractSigner(
-      ERC2771FORWARDER,
-      process.env.ERC2771_FORWARDER_ADDRESS
-    );
 
-    metaTxRequest.gas = BigInt(metaTxRequest.gas);
-    metaTxRequest.nonce = BigInt(metaTxRequest.nonce);
-    metaTxRequest.value = BigInt(metaTxRequest.value);
-    const tx = await forwarderContract.execute(metaTxRequest);
-
-    const res = await this.metaTransactionQueue.add(JOBS.META_TRANSACTION.ADD_QUEUE, { tx, event })
-
-    // const res = await tx.wait();
+    const res = await this.metaTransactionQueue.add(JOBS.META_TRANSACTION.ADD_QUEUE, { params })
 
     return { txHash: res.data.hash, status: res.data.status };
   }
@@ -182,6 +165,7 @@ export class ProjectService {
       ProjectEvents.REDEEM_VOUCHER,
       benId
     );
+
     return this.client.send({ cmd: 'rahat.jobs.project.voucher_claim', uuid }, {}).pipe(timeout(MS_TIMEOUT))
 
   }
@@ -222,6 +206,7 @@ export class ProjectService {
 
   async importKoboBeneficiary(uuid: UUID, data: any) {
     const benef: any = this.mapKoboFields(data);
+    if (!benef.phone) throw new Error("Phone number is required!");
     if (benef.gender) benef.gender = benef.gender.toUpperCase();
     if (benef.type) benef.type = benef.type.toUpperCase();
     if (benef.age) benef.age = parseInt(benef.age);
@@ -230,19 +215,48 @@ export class ProjectService {
     }
     const coords = splitCoordinates(benef.coordinates);
     const beneficiary = { ...benef, ...coords };
-    if (beneficiary.coordinates) delete beneficiary.coordinates;
-    // 1. Save to TEMP_DB
+    const payload = createExtrasAndPIIData(beneficiary);
+    // 1. Save to Kobo Import Logs
     const row = await this.prisma.koboBeneficiary.create({
       data: beneficiary
     })
-    // 2. Send to project MS
-    // 3. Update status
+    // Check phone in PII if exists?
+    // 2. Save to Beneficiary and PII
+    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, payload).pipe(timeout(MS_TIMEOUT), switchMap((response) => {
+      const payload = {
+        uuid: response.uuid,
+        walletAddress: response.walletAddress,
+        type: response.extras?.type || 'UNKNOWN',
+        extras: response.extras,
+      }
+      // 3. Send to project MS
+      return this.client.send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, payload).pipe(timeout(MS_TIMEOUT), tap((response) => {
+        // 4. Update status and addToProject
+        return this.addToProjectAndUpdate({ projectId: uuid, beneficiaryId: payload.uuid, importId: row.uuid })
+      }));
+
+    }));
+  }
+
+
+  async addToProjectAndUpdate({ projectId, beneficiaryId, importId }) {
+    await this.updateImportStatus(importId, KoboBeneficiaryStatus.SUCCESS);
+    return this.prisma.beneficiaryProject.create({
+      data: {
+        beneficiaryId: beneficiaryId,
+        projectId: projectId
+      }
+    })
+  }
+
+
+  async updateImportStatus(uuid: string, status: KoboBeneficiaryStatus) {
     return this.prisma.koboBeneficiary.update({
       where: {
-        id: row.id
+        uuid: uuid
       },
       data: {
-        status: 'SUCCESS'
+        status
       }
     })
   }
@@ -262,6 +276,7 @@ export class ProjectService {
   }
 
   async sendTestMsg(uuid: UUID) {
+    console.log({ uuid })
     return this.client.send({ cmd: 'rahat.jobs.test', uuid }, { msg: 'This is test msg!' }).pipe(timeout(MS_TIMEOUT))
   }
 

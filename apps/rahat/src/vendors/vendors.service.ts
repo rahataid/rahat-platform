@@ -101,7 +101,6 @@ export class VendorsService {
 
     const assigned = await this.getVendorAssignedToProject(vendorId, projectId)
 
-
     if (assigned)
       throw new RpcException(
         new BadRequestException('Vendor already assigned to the project!')
@@ -113,6 +112,7 @@ export class VendorsService {
     //     vendorId: vendorId,
     //   },
     // });
+
 
     const response = await handleMicroserviceCall({
       client: this.client.send(
@@ -328,6 +328,16 @@ export class VendorsService {
   }
 
 
+  async getVendorByUuid(dto: { projectId: string, vendorId: string }) {
+    return this.prisma.projectVendors.findUnique({
+      where: {
+        projectVendorIdentifier: dto
+      },
+      include: {
+        User: true
+      }
+    })
+  }
 
 }
 

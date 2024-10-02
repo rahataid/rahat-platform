@@ -68,7 +68,7 @@ export const rpActions: ProjectActionFunc = {
     sendCommand
   ) =>
     sendCommand(
-      { cmd: ProjectJobs.DISBURSEMENT_PLAN.CREATE_DISBURSEMENT, uuid },
+      { cmd: ProjectJobs.DISBURSEMENT_PLAN.BULK_CREATE_DISBURSEMENT, uuid },
       payload
     ),
   //campaign start
@@ -183,6 +183,16 @@ export const rpActions: ProjectActionFunc = {
   [MS_ACTIONS.RPPROJECT.GET_BENEFICIARIES_DISBURSEMENTS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.BENEFICIARY.GET_BENEFICIARIES_DISBURSEMENTS, uuid }, payload),
 
+  [MS_ACTIONS.RPPROJECT.GET_UNSYNCED_BENEFICIARIES]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      {
+        cmd: ProjectJobs.BENEFICIARY.GET_UNSYNCED_BENEFICIARIES,
+        uuid,
+      },
+      payload,
+      5000
+    ),
+
   // **** Beneficiary Groups **** //
   [MS_ACTIONS.RPPROJECT.ADD_GROUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.BENEFICIARY.ADD_GROUP, uuid }, payload),
@@ -196,5 +206,21 @@ export const rpActions: ProjectActionFunc = {
   [MS_ACTIONS.RPPROJECT.UPDATE_OFFLINE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.OFFLINE_BENEFICIARIES.UPDATE_OFFLINE_BENEFICIARY, uuid }, payload),
   // **** Beneficiary Groups end **** //
+
+  // TODO Move to kenya specific actions
+
+  // Walkin Beneficiary
+  [MS_ACTIONS.RPPROJECT.CREATE_WALKIN]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.CREATE_WALKIN_BENEFICIARY, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.GET_WALKIN]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.GET_WALKIN_BENEFICIARY, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.GET_ALL_WALKIN]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.GET_ALL_WALKIN_BENEFICIARY, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.CREATE_BULK_WALKIN_BENEFICIARIES]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.CREATE_BULK_WALKIN_BENEFICIARY, uuid }, payload)
+
 
 };

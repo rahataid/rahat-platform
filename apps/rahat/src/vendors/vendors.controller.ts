@@ -77,5 +77,11 @@ export class VendorsController {
     return this.vendorService.getVendorClaimStats(dto)
   }
 
+  @MessagePattern({ cmd: VendorJobs.GET_BY_UUID })
+  getVenderByUuid(@Payload() dto) {
+    return this.vendorService.getVendorByUuid(dto)
+  }
+
+
 
 }
