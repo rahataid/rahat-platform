@@ -11,6 +11,7 @@ export const CAMBODIA_JOBS = {
     GET: 'rahat.jobs.chw.get',
     UPDATE: 'rahat.jobs.chw.update',
     DELETE: 'rahat.jobs.chw.delete',
+    LIST_BY_VENDOR: 'rahat.jobs.chw.list_by_vendor',
   },
   BENEFICIARY: {
     CREATE: 'rahat.jobs.beneficiary.create',
@@ -78,6 +79,11 @@ export const cambodiaActions: ProjectActionFunc = {
   [MS_ACTIONS.CAMBODIA.CHW.LIST]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: CAMBODIA_JOBS.CHW.LIST, uuid },
+      payload),
+
+  [MS_ACTIONS.CAMBODIA.CHW.LIST_BY_VENDOR]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.CHW.LIST_BY_VENDOR, uuid },
       payload),
 
   [MS_ACTIONS.CAMBODIA.CHW.GET]: (uuid, payload, sendCommand) =>

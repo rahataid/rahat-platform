@@ -135,7 +135,7 @@ export class ProjectService {
       // const user = this.requestContextService.getUser()
       // console.log("user", user)
 
-      const requiresUser = userRequiredActions.has(action)
+      const requiresUser = userRequiredActions.has(action);
 
       return client.send(cmd, {
         ...payload,
