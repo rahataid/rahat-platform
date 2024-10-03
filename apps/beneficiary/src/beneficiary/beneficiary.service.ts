@@ -774,8 +774,6 @@ export class BeneficiaryService {
 
   async createBulk(dtos: CreateBeneficiaryDto[], projectUuid?: string, conditional?: boolean) {
     return this.prisma.$transaction(async (prm) => {
-      console.log('dtos', dtos, projectUuid);
-
       // Validate phone numbers are present and unique
       if (!dtos.every((dto) => dto.piiData.phone)) {
         throw new RpcException('Phone number is required');
@@ -787,7 +785,8 @@ export class BeneficiaryService {
       }
 
       // Validate wallet addresses are unique if provided
-      if (dtos.every((dto) => dto.walletAddress)) {
+      const walletAddresses = dtos.map((dto) => dto.walletAddress).filter(Boolean);
+      if (walletAddresses.length > 0) {
         const duplicateWallets = await this.checkWalletAddress(dtos);
         if (duplicateWallets.length > 0) {
           throw new RpcException('Wallet addresses must be unique');
@@ -797,7 +796,7 @@ export class BeneficiaryService {
       // Pre-generate UUIDs and wallet addresses if necessary
       dtos.forEach((dto) => {
         dto.uuid = dto.uuid || uuidv4();
-        dto.walletAddress = dto.walletAddress || (dto.walletAddress ? dto.walletAddress : generateRandomWallet().address);
+        dto.walletAddress = dto.walletAddress || generateRandomWallet().address;
       });
 
       // Separate PII data and beneficiary data for insertion
@@ -838,20 +837,16 @@ export class BeneficiaryService {
         where: { uuid: { in: dtos.map((dto) => dto.uuid) } },
         include: { pii: true },
       });
+      console.log('first', projectUuid)
 
       // Assign beneficiaries to the project if a projectUuid is provided
       if (projectUuid && conditional) {
         await prm.beneficiaryProject.createMany({
-          data: insertedBeneficiariesWithPii.map(({ uuid, }) => ({
+          data: insertedBeneficiariesWithPii.map(({ uuid }) => ({
             beneficiaryId: uuid,
-            projectId: projectUuid
-          }))
-        })
-        // const assignPromises = insertedBeneficiariesWithPii.map((b) =>
-        //   this.assignBeneficiaryToProject({ beneficiaryId: b.uuid, projectId: projectUuid })
-        // );
-        // console.log('assignPromises', assignPromises)
-        // await Promise.all(assignPromises);
+            projectId: projectUuid,
+          })),
+        });
       }
 
       // Emit an event after beneficiaries are created
