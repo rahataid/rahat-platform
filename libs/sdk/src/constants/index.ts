@@ -44,6 +44,7 @@ export const MS_ACTIONS = {
     BENEFICIARY: {
       CREATE: 'cambodia.beneficiary.create',
       LIST: 'cambodia.beneficiary.list',
+      LIST_DISCARDED: 'cambodia.beneficiary.list_discarded',
       GET: 'cambodia.beneficiary.get',
       DELETE: 'cambodia.beneficiary.delete',
       ADD_TO_PROJECT: 'cambodia.beneficiary.add_to_project',
