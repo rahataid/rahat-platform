@@ -135,7 +135,7 @@ export class ProjectService {
       // const user = this.requestContextService.getUser()
       // console.log("user", user)
 
-      const requiresUser = userRequiredActions.has(action)
+      const requiresUser = userRequiredActions.has(action);
 
       return client.send(cmd, {
         ...payload,
@@ -229,11 +229,16 @@ export class ProjectService {
     const row = await this.prisma.koboBeneficiary.create({
       data: beneficiary
     })
-    // Check phone in PII if exists?
+    const piiExist = await this.checkPiiPhone(benef.phone);
+    if (piiExist) {
+      const { piiData, ...rest } = payload;
+      return this.client.send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE_DISCARDED, uuid }, { ...piiData, ...rest }).pipe(timeout(MS_TIMEOUT))
+    }
     // 2. Save to Beneficiary and PII
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, payload).pipe(timeout(MS_TIMEOUT), switchMap((response) => {
       const payload = {
         uuid: response.uuid,
+        phone: benef.phone,
         walletAddress: response.walletAddress,
         type: response.extras?.type || 'UNKNOWN',
         extras: response.extras,
@@ -246,6 +251,8 @@ export class ProjectService {
 
     }));
   }
+
+
 
 
   async addToProjectAndUpdate({ projectId, beneficiaryId, importId }) {
@@ -266,6 +273,14 @@ export class ProjectService {
       },
       data: {
         status
+      }
+    })
+  }
+
+  async checkPiiPhone(phone: string) {
+    return this.prisma.beneficiaryPii.findUnique({
+      where: {
+        phone
       }
     })
   }
