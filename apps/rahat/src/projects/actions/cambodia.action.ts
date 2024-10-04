@@ -14,6 +14,7 @@ export const CAMBODIA_JOBS = {
     LIST_BY_VENDOR: 'rahat.jobs.chw.list_by_vendor',
   },
   BENEFICIARY: {
+    CREATE_DISCARDED: 'rahat.jobs.beneficiary.create_discarded',
     CREATE: 'rahat.jobs.beneficiary.create',
     LIST_BY_PROJECT: 'rahat.jobs.beneficiary.list_by_project',
     GET: 'rahat.jobs.beneficiary.get',
