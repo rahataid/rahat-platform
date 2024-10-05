@@ -13,7 +13,7 @@ import {
   Req,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -29,7 +29,7 @@ import {
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto,
-  ValidateWalletDto,
+  ValidateWalletDto
 } from '@rahataid/extensions';
 import {
   APP,
@@ -37,14 +37,14 @@ import {
   BQUEUE,
   Enums,
   MS_TIMEOUT,
-  TFile,
+  TFile
 } from '@rahataid/sdk';
 import {
   AbilitiesGuard,
   ACTIONS,
   CheckAbilities,
   JwtGuard,
-  SUBJECTS,
+  SUBJECTS
 } from '@rumsan/user';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -190,6 +190,7 @@ export class BeneficiaryController {
   async upload(@UploadedFile() file: TFile, @Req() req: Request) {
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
+    const projectId = req.body['projectId']
     const beneficiaries = await DocParser(docType, file.buffer);
 
     const beneficiariesMapped = beneficiaries.map((b) => ({
@@ -216,7 +217,7 @@ export class BeneficiaryController {
     }));
 
     return this.client
-      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, beneficiariesMapped)
+      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, { data: beneficiariesMapped, projectUUID: projectId })
       .pipe(
         catchError((error) => {
           console.log('error', error);
