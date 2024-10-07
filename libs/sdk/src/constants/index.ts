@@ -64,6 +64,7 @@ export const MS_ACTIONS = {
       GET_CURRENT: 'cambodia.commission_scheme.get_current',
     },
     VENDOR: {
+      LEAD_CONVERSIONS: 'cambodia.vendor.lead_conversions',
       LIST: 'cambodia.vendor.list',
       GET: 'cambodia.vendor.get',
       UPDATE_IS_VERIFIED: 'cambodia.vendor.update_is_verified',

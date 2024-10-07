@@ -30,6 +30,7 @@ export const CAMBODIA_JOBS = {
   VENDOR: {
     CREATE: 'rahat.jobs.vendor.create',
     LIST: 'rahat.jobs.vendor.list',
+    LEAD_CONVERSIONS: 'rahat.jobs.vendor.lead_conversions',
     GET: 'rahat.jobs.vendor.get',
     UPDATE: 'rahat.jobs.vendor.update',
     UPDATE_IS_VERIFIED: 'rahat.jobs.vendor.update_is_verified',
@@ -38,6 +39,11 @@ export const CAMBODIA_JOBS = {
 }
 
 export const cambodiaActions: ProjectActionFunc = {
+
+  [MS_ACTIONS.CAMBODIA.VENDOR.LEAD_CONVERSIONS]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.VENDOR.LEAD_CONVERSIONS, uuid },
+      payload),
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.LEAD_CONVERSION]: (uuid, payload, sendCommand) =>
     sendCommand(
