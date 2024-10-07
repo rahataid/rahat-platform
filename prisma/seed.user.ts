@@ -108,6 +108,12 @@ export const users: Array<{
       name: 'Mr User',
       email: 'user@mailinator.com',
     },
+    {
+      id: 5,
+      name: 'Raghav',
+      email: 'raghav.kattel@rumsan.net',
+      wallet: '0xAC6bFaf10e89202c293dD795eCe180BBf1430d7B'
+    },
   ];
 
 export const userRoles: Array<{
@@ -130,6 +136,16 @@ export const userRoles: Array<{
       userId: 3,
       roleId: 3,
     },
+    {
+      id: 4,
+      userId: 4,
+      roleId: 3,
+    },
+    {
+      id: 5,
+      userId: 5,
+      roleId: 1,
+    }
   ];
 
 export const auths: Array<{
@@ -168,6 +184,12 @@ export const auths: Array<{
       service: Service.EMAIL,
       serviceId: 'user@mailinator.com',
     },
+    {
+      id: 6,
+      userId: 5,
+      service: Service.EMAIL,
+      serviceId: 'raghav.kattel@rumsan.net'
+    }
   ];
 
 const projectTypes: Array<{
@@ -202,69 +224,73 @@ async function main() {
   // 	prisma.role.deleteMany(),
   // ]);
   // ===========Create Roles=============
-  for await (const role of roles) {
-    const roleAttrs = cloneDeep(role);
-    delete roleAttrs.id;
-    await prisma.role.upsert({
-      where: {
-        id: role.id,
-      },
-      create: roleAttrs,
-      update: roleAttrs,
-    });
-  }
 
-  // ===========Create Permissions==========
-  for await (const permission of permissions) {
-    const permissionAttrs = cloneDeep(permission);
-    delete permissionAttrs.id;
-    await prisma.permission.upsert({
-      where: {
-        id: permission.id,
-      },
-      create: permissionAttrs,
-      update: permissionAttrs,
-    });
-  }
+  prisma.$transaction(async prm => {
+    for await (const role of roles) {
+      const roleAttrs = cloneDeep(role);
+      delete roleAttrs.id;
+      await prm.role.upsert({
+        where: {
+          id: role.id,
+        },
+        create: roleAttrs,
+        update: roleAttrs,
+      });
+    }
 
-  // ==============Create Users===============
-  for await (const user of users) {
-    const userAttrs = cloneDeep(user);
-    delete userAttrs.id;
-    await prisma.user.upsert({
-      where: {
-        id: user.id,
-      },
-      create: userAttrs,
-      update: userAttrs,
-    });
-  }
+    // ===========Create Permissions==========
+    for await (const permission of permissions) {
+      const permissionAttrs = cloneDeep(permission);
+      delete permissionAttrs.id;
+      await prm.permission.upsert({
+        where: {
+          id: permission.id,
+        },
+        create: permissionAttrs,
+        update: permissionAttrs,
+      });
+    }
 
-  // ==============Create Auths===============
-  for await (const auth of auths) {
-    const authAttrs = cloneDeep(auth);
-    delete authAttrs.id;
-    await prisma.auth.upsert({
-      where: {
-        id: auth.id,
-      },
-      create: authAttrs,
-      update: authAttrs,
-    });
-  }
+    // ==============Create Users===============
+    for await (const user of users) {
+      const userAttrs = cloneDeep(user);
+      delete userAttrs.id;
+      await prm.user.upsert({
+        where: {
+          id: user.id,
+        },
+        create: userAttrs,
+        update: userAttrs,
+      });
+    }
 
-  // ==============Create User Roles===============
-  for await (const userRole of userRoles) {
-    const userRoleAttrs = cloneDeep(userRole);
-    delete userRoleAttrs.id;
-    await prisma.userRole.upsert({
-      where: {
-        id: userRole.id,
-      },
-      create: userRoleAttrs,
-      update: userRoleAttrs,
-    });
-  }
+    // ==============Create Auths===============
+    for await (const auth of auths) {
+      const authAttrs = cloneDeep(auth);
+      delete authAttrs.id;
+      await prm.auth.upsert({
+        where: {
+          id: auth.id,
+        },
+        create: authAttrs,
+        update: authAttrs,
+      });
+    }
+
+    // ==============Create User Roles===============
+    for await (const userRole of userRoles) {
+      const userRoleAttrs = cloneDeep(userRole);
+      delete userRoleAttrs.id;
+      await prm.userRole.upsert({
+        where: {
+          id: userRole.id,
+        },
+        create: userRoleAttrs,
+        update: userRoleAttrs,
+      });
+    }
+  });
+
 }
 
 main()

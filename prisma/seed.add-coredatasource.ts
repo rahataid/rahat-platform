@@ -35,26 +35,7 @@ const projectStats = (url: string) => {
             rowSpan: 1,
             icon: 'UsersRound',
           },
-          {
-            type: 'dataCard',
-            props: {},
-            title: 'Household by Caste',
-            colSpan: 1,
-            dataMap: `BENEFICIARY_CASTE_COUNT_STATS`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-            icon: 'Home',
-          },
-          {
-            type: 'dataCard',
-            props: {},
-            title: 'Vulnerability Status',
-            colSpan: 1,
-            dataMap: `BENEFICIARY_VULNERABILITY_COUNT_STATS`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-            icon: 'Home',
-          },
+
         ],
       },
       {
@@ -68,29 +49,6 @@ const projectStats = (url: string) => {
             dataSrc: 'source2',
             rowSpan: 1,
           },
-          {
-            type: 'donut',
-            props: {},
-            title: 'Household by Caste',
-            colSpan: 1,
-            dataMap: `BENEFICIARY_CASTE_COUNT_STATS`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            type: 'donut',
-            props: {},
-            title: 'Vulnerability Status',
-            colSpan: 1,
-            dataMap: `BENEFICIARY_VULNERABILITY_COUNT_STATS`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-        ],
-      },
-      {
-        title: '',
-        fields: [
           {
             type: 'donut',
             props: {},
@@ -109,6 +67,13 @@ const projectStats = (url: string) => {
             dataSrc: 'source2',
             rowSpan: 1,
           },
+
+        ],
+      },
+      {
+        title: '',
+        fields: [
+
           {
             type: 'donut',
             props: {},
