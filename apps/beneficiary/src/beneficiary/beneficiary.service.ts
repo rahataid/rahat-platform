@@ -4,9 +4,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
-  AddBenToProjectDto,
-  AddBenfGroupToProjectDto,
-  AddToProjectDto,
+  AddBenfGroupToProjectDto, AddBenToProjectDto, addBulkBeneficiaryToProject, AddToProjectDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ImportTempBenefDto,
@@ -15,18 +13,14 @@ import {
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto,
-  addBulkBeneficiaryToProject
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
-  BQUEUE,
   BeneficiaryConstants,
   BeneficiaryEvents,
-  BeneficiaryJobs,
-  ProjectContants, TPIIData,
-  generateRandomWallet
+  BeneficiaryJobs, BQUEUE, generateRandomWallet, ProjectContants, TPIIData
 } from '@rahataid/sdk';
-import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
+import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -873,13 +867,48 @@ export class BeneficiaryService {
       console.log('first', projectUuid)
 
       // Assign beneficiaries to the project if a projectUuid is provided
-      if (projectUuid && conditional) {
+      // && conditional
+      if (projectUuid) {
         await prm.beneficiaryProject.createMany({
           data: insertedBeneficiariesWithPii.map(({ uuid }) => ({
             beneficiaryId: uuid,
-            projectId: projectUuid,
-          })),
+            projectId: projectUuid
+          }))
+        })
+
+        this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
+          projectUuid: projectUuid,
         });
+        const assignPromises = insertedBeneficiariesWithPii.map((b) => {
+          const projectPayload = {
+            uuid: b.uuid,
+            walletAddress: b.walletAddress,
+            extras: b?.extras || null,
+            type: BeneficiaryConstants.Types.ENROLLED,
+            isVerified: b?.isVerified
+          };
+          return handleMicroserviceCall({
+            client: this.client.send(
+              { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUuid },
+              projectPayload
+            ),
+            onSuccess(response) {
+              console.log('response', response)
+            },
+            onError(error) {
+              console.log('error', error)
+              throw new RpcException(error.message)
+            },
+          }
+
+          )
+
+        }
+          //   this.assignBeneficiaryToProject({ beneficiaryId: b.uuid, projectId: projectUuid })
+
+        );
+        console.log('assignPromises', assignPromises)
+        await Promise.all(assignPromises);
       }
 
       // Emit an event after beneficiaries are created

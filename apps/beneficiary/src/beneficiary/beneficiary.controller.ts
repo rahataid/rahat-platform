@@ -1,20 +1,19 @@
 import { Controller, Inject, Param } from '@nestjs/common';
 import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import {
-  CreateBeneficiaryDto,
+  addBulkBeneficiaryToProject, CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto,
-  addBulkBeneficiaryToProject
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
   ProjectContants,
-  ValidateWallet,
+  ValidateWallet
 } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
@@ -53,8 +52,8 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
   createBulk(@Payload() data) {
     console.log('payload sent data', JSON.stringify(data, null, 2))
-    const payloadData = Array.isArray(data) ? data : data?.payload
-    return this.service.createBulk(payloadData, data?.data?.projectUUID, data?.data?.walkinBulk);
+    const payloadData = Array.isArray(data?.data) ? data?.data : data?.payload
+    return this.service.createBulk(payloadData, data?.projectUUID, data?.data?.walkinBulk);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST })
