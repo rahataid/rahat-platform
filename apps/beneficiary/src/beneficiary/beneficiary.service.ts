@@ -119,6 +119,37 @@ export class BeneficiaryService {
     return data;
   }
 
+  async listLeadsConversions(data: any) {
+    if (!data?.data?.length) return data;
+
+    const beneficiaries = await this.listBeneficiaryPiiByWalletAddress(data.data);
+    const final = data.data.map((d: any) => {
+      const ben = beneficiaries.find((b) => b.walletAddress === d.beneficiary.walletAddress);
+      return {
+        ...d,
+        pii: ben?.pii || {},
+      };
+    })
+
+    return {
+      meta: data.meta,
+      data: final
+    }
+  }
+
+  async listBeneficiaryPiiByWalletAddress(data: any) {
+    return this.prisma.beneficiary.findMany({
+      where: {
+        walletAddress: {
+          in: data.map((b: any) => b.beneficiary.walletAddress)
+        }
+      },
+      include: {
+        pii: true
+      }
+    })
+  }
+
 
   async listBenefGroupByProject(data: any) {
     if (data?.data.length > 0) {
@@ -255,6 +286,8 @@ export class BeneficiaryService {
 
     return result
   }
+
+
 
   async mergeProjectData(data: any, payload?: any) {
     // const where: Prisma.BeneficiaryWhereInput = {
