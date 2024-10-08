@@ -1,20 +1,26 @@
+import { BullModule } from "@nestjs/bull";
 import { Module } from "@nestjs/common";
 import { ClientsModule, Transport } from "@nestjs/microservices";
+import { BQUEUE } from "@rahataid/sdk";
+import { MetaTransationProcessor } from "./metaTransaction.processor";
 
 @Module({
     imports: [
         ClientsModule.register([
             {
-                name: 'META_TRANSACTION_CLIENT',
+                name: 'RAHAT_CLIENT',
                 transport: Transport.REDIS,
                 options: {
                     host: process.env.REDIS_HOST,
                     port: +process.env.REDIS_PORT,
-                    password: process.env.REDIS_PASSWORD,
-                },
-            },
-        ])
+                    password: process.env.REDIS_PASSWORD
+                }
+            }
+        ]),
+        BullModule.registerQueue({
+            name: BQUEUE.META_TXN
+        }),
     ],
-    providers: []
+    providers: [MetaTransationProcessor]
 })
-export class ProcessorsModule { }
+export class MetaTxnProcessorsModule { }
