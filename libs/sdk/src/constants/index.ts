@@ -65,6 +65,7 @@ export const MS_ACTIONS = {
     },
     VENDOR: {
       STATS: 'cambodia.vendor.stats',
+      HEALTH_WORKERS: 'cambodia.vendor.health_workers',
       LEAD_CONVERSIONS: 'cambodia.vendor.lead_conversions',
       LIST: 'cambodia.vendor.list',
       GET: 'cambodia.vendor.get',
