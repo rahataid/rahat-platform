@@ -229,7 +229,11 @@ export class ProjectService {
     const row = await this.prisma.koboBeneficiary.create({
       data: beneficiary
     })
-    // Check phone in PII if exists?
+    const piiExist = await this.checkPiiPhone(benef.phone);
+    if (piiExist) {
+      const { piiData, ...rest } = payload;
+      return this.client.send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE_DISCARDED, uuid }, { ...piiData, ...rest }).pipe(timeout(MS_TIMEOUT))
+    }
     // 2. Save to Beneficiary and PII
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, payload).pipe(timeout(MS_TIMEOUT), switchMap((response) => {
       const payload = {
@@ -247,6 +251,8 @@ export class ProjectService {
 
     }));
   }
+
+
 
 
   async addToProjectAndUpdate({ projectId, beneficiaryId, importId }) {
@@ -267,6 +273,14 @@ export class ProjectService {
       },
       data: {
         status
+      }
+    })
+  }
+
+  async checkPiiPhone(phone: string) {
+    return this.prisma.beneficiaryPii.findUnique({
+      where: {
+        phone
       }
     })
   }

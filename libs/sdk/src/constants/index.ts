@@ -42,8 +42,10 @@ export const APP = {
 export const MS_ACTIONS = {
   CAMBODIA: {
     BENEFICIARY: {
+      LEAD_CONVERSION: 'cambodia.beneficiary.lead_conversion',
       CREATE: 'cambodia.beneficiary.create',
       LIST: 'cambodia.beneficiary.list',
+      LIST_DISCARDED: 'cambodia.beneficiary.list_discarded',
       GET: 'cambodia.beneficiary.get',
       DELETE: 'cambodia.beneficiary.delete',
       ADD_TO_PROJECT: 'cambodia.beneficiary.add_to_project',
@@ -62,6 +64,7 @@ export const MS_ACTIONS = {
       GET_CURRENT: 'cambodia.commission_scheme.get_current',
     },
     VENDOR: {
+      LEAD_CONVERSIONS: 'cambodia.vendor.lead_conversions',
       LIST: 'cambodia.vendor.list',
       GET: 'cambodia.vendor.get',
       UPDATE_IS_VERIFIED: 'cambodia.vendor.update_is_verified',

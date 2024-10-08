@@ -14,10 +14,13 @@ export const CAMBODIA_JOBS = {
     LIST_BY_VENDOR: 'rahat.jobs.chw.list_by_vendor',
   },
   BENEFICIARY: {
+    CREATE_DISCARDED: 'rahat.jobs.beneficiary.create_discarded',
     CREATE: 'rahat.jobs.beneficiary.create',
     LIST_BY_PROJECT: 'rahat.jobs.beneficiary.list_by_project',
     GET: 'rahat.jobs.beneficiary.get',
     LIST: 'rahat.jobs.beneficiary.list',
+    LIST_DISCARDED: 'rahat.jobs.beneficiary.list_discarded',
+    LEAD_CONVERSION: 'rahat.jobs.beneficiary.lead_conversion',
   },
   COMMISSION_SCHEME: {
     CREATE: 'rahat.jobs.commission_scheme.create',
@@ -27,6 +30,7 @@ export const CAMBODIA_JOBS = {
   VENDOR: {
     CREATE: 'rahat.jobs.vendor.create',
     LIST: 'rahat.jobs.vendor.list',
+    LEAD_CONVERSIONS: 'rahat.jobs.vendor.lead_conversions',
     GET: 'rahat.jobs.vendor.get',
     UPDATE: 'rahat.jobs.vendor.update',
     UPDATE_IS_VERIFIED: 'rahat.jobs.vendor.update_is_verified',
@@ -35,6 +39,16 @@ export const CAMBODIA_JOBS = {
 }
 
 export const cambodiaActions: ProjectActionFunc = {
+
+  [MS_ACTIONS.CAMBODIA.VENDOR.LEAD_CONVERSIONS]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.VENDOR.LEAD_CONVERSIONS, uuid },
+      payload),
+
+  [MS_ACTIONS.CAMBODIA.BENEFICIARY.LEAD_CONVERSION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.BENEFICIARY.LEAD_CONVERSION, uuid },
+      payload),
 
   [MS_ACTIONS.CAMBODIA.COMMISISION_SCHEME.CREATE]: (uuid, payload, sendCommand) =>
     sendCommand(
@@ -64,6 +78,11 @@ export const cambodiaActions: ProjectActionFunc = {
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.LIST]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: CAMBODIA_JOBS.BENEFICIARY.LIST, uuid },
+      payload),
+
+  [MS_ACTIONS.CAMBODIA.BENEFICIARY.LIST_DISCARDED]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.BENEFICIARY.LIST_DISCARDED, uuid },
       payload),
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.GET]: (uuid, payload, sendCommand) =>
