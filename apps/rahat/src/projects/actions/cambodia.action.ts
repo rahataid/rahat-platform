@@ -28,6 +28,7 @@ export const CAMBODIA_JOBS = {
     GET_CURRENT: 'rahat.jobs.commission_scheme.get_current',
   },
   VENDOR: {
+    STATS: 'rahat.jobs.vendor.stats',
     CREATE: 'rahat.jobs.vendor.create',
     LIST: 'rahat.jobs.vendor.list',
     LEAD_CONVERSIONS: 'rahat.jobs.vendor.lead_conversions',
@@ -39,6 +40,15 @@ export const CAMBODIA_JOBS = {
 }
 
 export const cambodiaActions: ProjectActionFunc = {
+  [MS_ACTIONS.CAMBODIA.VENDOR.STATS]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.VENDOR.STATS, uuid },
+      payload),
+
+  [MS_ACTIONS.CAMBODIA.VENDOR.GET]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.VENDOR.GET, uuid },
+      payload),
 
   [MS_ACTIONS.CAMBODIA.VENDOR.LEAD_CONVERSIONS]: (uuid, payload, sendCommand) =>
     sendCommand(
