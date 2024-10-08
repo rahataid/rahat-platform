@@ -131,6 +131,19 @@ const projectStats = (uuid: string, url: string) => {
                     },
                 ],
             },
+            {
+                fields: [
+                    {
+                        type: 'line',
+                        props: {},
+                        title: 'No. of Redemptions/per week',
+                        colSpan: 1,
+                        dataMap: ``,
+                        dataSrc: 'source2',
+                        rowSpan: 1,
+                    }
+                ]
+            }
         ],
     };
 };
