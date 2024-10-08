@@ -42,6 +42,7 @@ export const APP = {
 export const MS_ACTIONS = {
   CAMBODIA: {
     BENEFICIARY: {
+      STATS: 'cambodia.beneficiary.stats',
       LEAD_CONVERSION: 'cambodia.beneficiary.lead_conversion',
       CREATE: 'cambodia.beneficiary.create',
       LIST: 'cambodia.beneficiary.list',
@@ -64,6 +65,8 @@ export const MS_ACTIONS = {
       GET_CURRENT: 'cambodia.commission_scheme.get_current',
     },
     VENDOR: {
+      STATS: 'cambodia.vendor.stats',
+      HEALTH_WORKERS: 'cambodia.vendor.health_workers',
       LEAD_CONVERSIONS: 'cambodia.vendor.lead_conversions',
       LIST: 'cambodia.vendor.list',
       GET: 'cambodia.vendor.get',
