@@ -1,15 +1,17 @@
 import { Process, Processor } from "@nestjs/bull";
 import { Inject } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
-import { BQUEUE } from "@rahataid/sdk";
+import { BQUEUE, ProjectContants } from "@rahataid/sdk";
 import { JOBS } from "@rahataid/sdk/project/project.events";
+import { lastValueFrom } from "rxjs";
 import { ERC2771FORWARDER } from "../../utils/contracts";
 import { createContractSigner } from "../../utils/web3";
 
 @Processor(BQUEUE.META_TXN)
 export class MetaTransationProcessor {
 
-    constructor(@Inject('RAHAT_CLIENT') private readonly client: ClientProxy) { }
+    constructor(
+        @Inject(ProjectContants.ELClient) private readonly client: ClientProxy) { }
 
     @Process(JOBS.META_TRANSACTION.ADD_QUEUE)
     async processMetaTxn(job: any) {
@@ -18,9 +20,7 @@ export class MetaTransationProcessor {
         const { metaTxRequest, txnUuid } = params;
 
         // Store txn details in project
-
-        // This is not redirecting
-        // return this.client.send({ cmd: 'rahat.jobs.metatxn.call.project', uuid: '56a4fba3-5408-448e-89ac-377d4df7b4ec', payload: {} }, { msg: 'This is test msgss!' }).pipe(timeout(MS_TIMEOUT))
+        return lastValueFrom(this.client.send({ cmd: 'rahat.jobs.metatxn.call.project', uuid }, {}));
 
         const forwarderContract = await createContractSigner(
             ERC2771FORWARDER,
