@@ -54,7 +54,7 @@ const projectStats = (uuid: string, url: string) => {
             dataSrc: 'source2',
             rowSpan: 1,
             icon: 'UsersRound',
-          }
+          },
         ],
       },
       {
@@ -88,7 +88,7 @@ const projectStats = (uuid: string, url: string) => {
             dataSrc: 'source2',
             rowSpan: 1,
             icon: 'Ticket',
-          }
+          },
         ],
       },
       {
@@ -131,6 +131,19 @@ const projectStats = (uuid: string, url: string) => {
           },
         ],
       },
+      {
+        fields: [
+          {
+            type: 'line',
+            props: {},
+            title: 'No. of Redemptions/per week',
+            colSpan: 1,
+            dataMap: ``,
+            dataSrc: 'source2',
+            rowSpan: 1,
+          },
+        ],
+      },
     ],
   };
 };
@@ -143,8 +156,8 @@ const main = async () => {
           data: {
             name: `DASHBOARD_SOURCE_${projectUUID}`,
             data: projectStats(projectUUID, url),
-            group: `source_${projectUUID}`
-          }
+            group: `source_${projectUUID}`,
+          },
         });
         console.log('Stats created successfully');
       } catch (error) {
@@ -157,8 +170,7 @@ const main = async () => {
   });
 };
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
