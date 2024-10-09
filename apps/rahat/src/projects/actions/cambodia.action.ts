@@ -6,6 +6,7 @@ import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
 
 export const CAMBODIA_JOBS = {
   CHW: {
+    STATS: 'rahat.jobs.chw.stats',
     CREATE: 'rahat.jobs.chw.create',
     LIST: 'rahat.jobs.chw.list',
     GET: 'rahat.jobs.chw.get',
@@ -115,6 +116,11 @@ export const cambodiaActions: ProjectActionFunc = {
   [MS_ACTIONS.CAMBODIA.CHW.CREATE]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: CAMBODIA_JOBS.CHW.CREATE, uuid },
+      payload),
+
+  [MS_ACTIONS.CAMBODIA.CHW.STATS]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.CHW.STATS, uuid },
       payload),
 
   [MS_ACTIONS.CAMBODIA.CHW.LIST]: (uuid, payload, sendCommand) =>

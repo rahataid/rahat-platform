@@ -52,6 +52,7 @@ export const MS_ACTIONS = {
       ADD_TO_PROJECT: 'cambodia.beneficiary.add_to_project',
     },
     CHW: {
+      STATS: 'cambodia.chw.stats',
       CREATE: 'cambodia.chw.create',
       LIST: 'cambodia.chw.list',
       GET: 'cambodia.chw.get',
