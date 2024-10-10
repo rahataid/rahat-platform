@@ -1,15 +1,13 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
-  Patch,
   Post,
-  Query,
+  Query
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateOfframpProviderDto, ListOfframpProviderDto } from '@rahataid/extensions';
+import { CreateOfframpProviderDto, ListOfframpProviderDto, ProviderActionDto } from '@rahataid/extensions';
 import { OfframpService } from './offramp.service';
 
 @Controller('offramps')
@@ -37,6 +35,11 @@ export class OfframpController {
     return this.offrampService.getProviderById(uuid);
   }
 
+  @Post('/providers/actions')
+  providerActions(@Body() data: ProviderActionDto) {
+    return this.offrampService.providerActions(data);
+  }
+
 
   @Get()
   findAll() {
@@ -48,13 +51,13 @@ export class OfframpController {
     return this.offrampService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOfframpDto: any) {
-    return this.offrampService.update(+id, updateOfframpDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateOfframpDto: any) {
+  //   return this.offrampService.update(+id, updateOfframpDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.offrampService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.offrampService.remove(+id);
+  // }
 }
