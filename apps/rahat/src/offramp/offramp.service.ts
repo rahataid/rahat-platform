@@ -1,13 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateOfframpProviderDto, ListOfframpProviderDto, ProviderActionDto } from '@rahataid/extensions';
 import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
+import { KotaniPayService } from './offrampProviders/kotaniPay.service';
 
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
 @Injectable()
 export class OfframpService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private kotaniPayService: KotaniPayService
+  ) { }
 
   registerProvider(createOfframpDto: CreateOfframpProviderDto) {
     console.log({ createOfframpDto });
@@ -21,7 +25,17 @@ export class OfframpService {
       deletedAt: null
     }
     return paginate(this.prisma.offrampProvider, {
-      where
+      where,
+      select: {
+        id: true,
+        uuid: true,
+        name: true,
+        description: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+        extras: true
+      }
     }, {
       page: query.page || 1,
       perPage: query.perPage || 10,
@@ -35,37 +49,29 @@ export class OfframpService {
     });
   }
 
-  providerActions(data: ProviderActionDto) {
+  async providerActions(data: ProviderActionDto) {
     console.log({ data });
-    if (data.action === 'create-customer-mobile-wallet') {
-      return {
-        "success": true,
-        "message": "Customer has been successfully created.",
-        "data": {
-          "phone_number": "+254722154745 ",
-          "country_code": "KE",
-          "customer_key": "QozR5knCfvkdAezXT7rx",
-          "integrator": "66d93d7524321e43c9245c9a",
-          "account_name": "rumsan-tester",
-          "network": "AIRTEL"
-        }
-      }
-    }
-    if (data.action === 'create-fiat-wallet') {
-      console.log({ data });
-      return {
-        "success": false,
-        "message": "WALLET_ALREADY_EXIST",
-        "error_code": 409
-      }
-    }
-    return {
-      "success": false,
-      "message": "Action not found",
-      "error_code": 404
-    }
-  }
 
+    const offrampProvider = await this.getProviderById(data.uuid);
+    if (!offrampProvider) {
+      throw new BadRequestException('Offramp provider not found');
+    }
+
+    if (offrampProvider.name === 'Kotani Pay') {
+      const action = this.kotaniPayService.kotaniPayActions[data.action];
+      if (action) {
+        return action(data);
+      }
+    }
+
+    // Handle other providers here
+
+    return {
+      success: false,
+      message: "Action not found",
+      error_code: 404
+    };
+  }
 
   create(createOfframpDto: CreateOfframpProviderDto) {
     console.log({ createOfframpDto });

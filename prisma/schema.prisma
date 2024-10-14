@@ -686,7 +686,7 @@ model OfframpTransaction {
   id             Int            @id @default(autoincrement())
   uuid           String         @unique @default(uuid())
   requestId      String         @unique
-  txHash         String?
+  txHash         String
   walletId       String?
   customerKey    String?
   chain          String?

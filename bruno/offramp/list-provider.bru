@@ -1,0 +1,29 @@
+meta {
+  name: list-provider
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{url}}/offramps/providers
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Kotani Pay",
+    "config": {
+      "baseUrl": "https://sandbox-api.kotanipay.io/api/v3",
+      "apiKey": "kee"
+    },
+    "description": "Kotani Pay is a payment gateway",
+    "extras": {
+      "fee": 0.1,
+      "supportedCurrency": [
+        "KES",
+        "USD"
+      ]
+    }
+  }
+}

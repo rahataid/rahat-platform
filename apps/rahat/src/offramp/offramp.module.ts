@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from '@rumsan/prisma';
 import { OfframpController } from './offramp.controller';
 import { OfframpService } from './offramp.service';
+import { KotaniPayService } from './offrampProviders/kotaniPay.service';
 
 @Module({
-  imports: [PrismaModule],
   controllers: [OfframpController],
-  providers: [OfframpService],
+  providers: [OfframpService, KotaniPayService]
 })
 export class OfframpModule { }
