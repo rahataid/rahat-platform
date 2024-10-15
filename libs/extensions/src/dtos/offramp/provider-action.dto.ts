@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsObject, IsString } from "class-validator";
+import { IsObject, IsOptional, IsString } from "class-validator";
 
 
 export class ProviderActionDto {
@@ -27,6 +27,7 @@ export class ProviderActionDto {
         description: 'Payload to be sent to the offramp provider'
     })
     @IsObject()
+    @IsOptional()
     payload: any;
 
 }

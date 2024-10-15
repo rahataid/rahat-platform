@@ -6,3 +6,13 @@ export type OfframpProvider<T> = {
     extras?: any;
 
 }
+
+export type OfframpRequest = {
+    providerUuid: string;
+    chain: string;
+    token: string;
+    amount: number;
+    senderAddress: string;
+
+
+}

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateOfframpProviderDto, ListOfframpProviderDto, ProviderActionDto } from '@rahataid/extensions';
+import { CreateOfframpProviderDto, CreateOfframpRequestDto, ListOfframpProviderDto, ListOfframpRequestDto, ProviderActionDto } from '@rahataid/extensions';
 import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
 import { KotaniPayService } from './offrampProviders/kotaniPay.service';
 
@@ -73,15 +73,27 @@ export class OfframpService {
     };
   }
 
-  create(createOfframpDto: CreateOfframpProviderDto) {
-    console.log({ createOfframpDto });
-    return this.prisma.offrampProvider.create({
-      data: createOfframpDto
+  async create(createOfframpData: CreateOfframpRequestDto) {
+    console.log({ createOfframpData });
+    const { providerUuid, ...offrampRequestData } = createOfframpData;
+    const { data: kotaniPayResponse } = await this.kotaniPayService.createMobileMoneyOfframpRequest(providerUuid, offrampRequestData);
+    console.log({ kotaniPayResponse });
+    return this.prisma.offrampRequest.create({
+      data: { ...offrampRequestData, requestId: kotaniPayResponse?.data.request_id, escrowAddress: kotaniPayResponse?.data.escrow_address }
     })
   }
 
-  findAll() {
-    return `This action returns all offramp`;
+  findAllOfframpRequests(query?: ListOfframpRequestDto) {
+    const where = {
+      deletedAt: null
+    };
+
+    return paginate(this.prisma.offrampRequest, {
+      where
+    }, {
+      page: query?.page || 1,
+      perPage: query?.perPage || 10,
+    });
   }
 
   findOne(id: number) {

@@ -60,9 +60,11 @@ export class ExceptionHandler {
     exception: Error,
     responseData: ExceptionResponse
   ): ExceptionResponse {
+    console.log({ stack: exception?.stack })
     responseData.name = exception?.name;
     responseData.message = exception?.message;
     responseData.group = 'General Error';
+    responseData.meta = exception?.stack;
 
     this.logger.error(responseData?.message);
 
