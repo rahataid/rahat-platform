@@ -13,6 +13,19 @@ export type OfframpRequest = {
     token: string;
     amount: number;
     senderAddress: string;
+}
 
+export type KotaniPayExecutionData = {
+    chain: string;
+    token: string;
+    transaction_hash: string;
+    wallet_id: string;
+    request_id: string;
+    customer_key: string;
+};
 
+export type ExecuteOfframpRequest = {
+    providerUuid: string;
+    requestUuid: string;
+    data: KotaniPayExecutionData;
 }

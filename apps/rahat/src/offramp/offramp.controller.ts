@@ -7,7 +7,7 @@ import {
   Query
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateOfframpProviderDto, CreateOfframpRequestDto, ListOfframpProviderDto, ProviderActionDto } from '@rahataid/extensions';
+import { CreateOfframpProviderDto, CreateOfframpRequestDto, ExecuteOfframpRequestDto, ListOfframpProviderDto, ProviderActionDto } from '@rahataid/extensions';
 import { OfframpService } from './offramp.service';
 
 @Controller('offramps')
@@ -16,8 +16,13 @@ export class OfframpController {
   constructor(private readonly offrampService: OfframpService) { }
 
   @Post('')
-  create(@Body() data: CreateOfframpRequestDto) {
-    return this.offrampService.create(data);
+  createOfframpRequest(@Body() data: CreateOfframpRequestDto) {
+    return this.offrampService.createOfframpRequest(data);
+  }
+
+  @Post('/execute')
+  executeOfframpRequest(@Body() data: ExecuteOfframpRequestDto) {
+    return this.offrampService.executeOfframpRequest(data);
   }
 
   @Post('/providers')

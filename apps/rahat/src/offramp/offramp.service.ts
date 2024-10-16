@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateOfframpProviderDto, CreateOfframpRequestDto, ListOfframpProviderDto, ListOfframpRequestDto, ProviderActionDto } from '@rahataid/extensions';
+import { CreateOfframpProviderDto, CreateOfframpRequestDto, ExecuteOfframpRequestDto, ListOfframpProviderDto, ListOfframpRequestDto, ProviderActionDto } from '@rahataid/extensions';
 import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
 import { KotaniPayService } from './offrampProviders/kotaniPay.service';
 
@@ -73,14 +73,63 @@ export class OfframpService {
     };
   }
 
-  async create(createOfframpData: CreateOfframpRequestDto) {
+  async createOfframpRequest(createOfframpData: CreateOfframpRequestDto) {
     console.log({ createOfframpData });
     const { providerUuid, ...offrampRequestData } = createOfframpData;
-    const { data: kotaniPayResponse } = await this.kotaniPayService.createMobileMoneyOfframpRequest(providerUuid, offrampRequestData);
-    console.log({ kotaniPayResponse });
+    const { data: kotaniPayResponse } = await this.kotaniPayService.createOfframpRequest(providerUuid, offrampRequestData);
     return this.prisma.offrampRequest.create({
       data: { ...offrampRequestData, requestId: kotaniPayResponse?.data.request_id, escrowAddress: kotaniPayResponse?.data.escrow_address }
     })
+  }
+
+  //TODO: Geenralize the offramp request execution
+  async executeOfframpRequest(executeOfframpData: ExecuteOfframpRequestDto) {
+    console.log({ executeOfframpData });
+    const { providerUuid, requestUuid, ...data } = executeOfframpData;
+    const request = await this.prisma.offrampRequest.findUnique({
+      where: {
+        uuid: requestUuid
+      }
+    });
+    console.log({ request });
+    if (!request) {
+      throw new BadRequestException('Offramp request not found');
+    }
+    const executionData = {
+      chain: data.data.chain,
+      token: data.data.token,
+      transaction_hash: data.data.transaction_hash,
+      wallet_id: data.data.wallet_id,
+      request_id: data.data.request_id,
+      customer_key: data.data.customer_key
+    }
+    console.log({ executionData });
+    const { data: kotaniPayResponse } = await this.kotaniPayService.executeOfframpRequest(providerUuid, executionData).catch((error) => {
+      console.log({ error });
+      throw new BadRequestException(error.message);
+    });
+    console.log({ kotaniPayResponse });
+
+    const transaction = await this.prisma.offrampTransaction.create({
+      data: {
+        txHash: data.data.transaction_hash,
+        chain: data.data.chain,
+        token: data.data.token,
+        walletId: data.data.wallet_id,
+        customerKey: data.data.customer_key,
+        referenceId: kotaniPayResponse.data.reference_id,
+        offrampRequest: {
+          connect: { id: request.id }
+        }
+      }
+    });
+
+    return { transaction, kotaniPayResponse };
+    // const { data: kotaniPayResponse } = await this.kotaniPayService.executeOfframpRequest(providerUuid, offrampRequestData);
+    // return this.prisma.offrampRequest.update({
+    //   where: { id: offrampRequestData.id },
+    //   data: { ...offrampRequestData, transactionHash: kotaniPayResponse?.data.transaction_hash }
+    // })
   }
 
   findAllOfframpRequests(query?: ListOfframpRequestDto) {
