@@ -32,13 +32,14 @@ import { AppService } from './app.service';
     BullModule.registerQueue({
       name: BQUEUE.RAHAT_BENEFICIARY,
     }),
+
     BeneficiaryModule,
     VendorsModule,
     ListenersModule,
     SettingsModule,
-    ProcessorsModule
+    ProcessorsModule,
   ],
   controllers: [AppController],
-  providers: [AppService,],
+  providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
