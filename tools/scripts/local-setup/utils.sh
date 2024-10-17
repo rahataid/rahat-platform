@@ -33,6 +33,7 @@ migrate_seed() {
     pnpm seed:kenyadevsettings $current_dir
     pnpm seed:cambodiadevsettings $current_dir
     pnpm seed:chainsettings
+    npx ts-node prisma/seed.communication-settings.ts
 }
 
 create_rahat_volumes() {

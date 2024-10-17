@@ -68,7 +68,6 @@ export class BeneficiaryController {
     const payloadData = Array.isArray(queueData?.data)
       ? queueData?.data
       : queueData?.payload;
-    console.log('queueData', queueData);
     return this.service.createBulkWithQueue(payloadData, queueData);
   }
 

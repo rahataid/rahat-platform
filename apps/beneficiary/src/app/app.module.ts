@@ -15,7 +15,7 @@ import { AppService } from './app.service';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot({
-      maxListeners: 10,
+      maxListeners: 20,
       ignoreErrors: false,
     }),
     BullModule.forRootAsync({

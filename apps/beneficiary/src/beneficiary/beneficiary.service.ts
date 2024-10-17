@@ -29,7 +29,7 @@ import {
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
-import { UUID } from 'crypto';
+import { randomUUID, UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import {
@@ -40,9 +40,10 @@ import {
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { createListQuery } from './helpers';
 import { VerificationService } from './verification.service';
+import { createBatches } from '../utils/array';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
-const BATCH_SIZE = 20;
+const BATCH_SIZE = 100;
 
 @Injectable()
 export class BeneficiaryService {
@@ -1006,14 +1007,15 @@ export class BeneficiaryService {
       console.log('uniqueGroupKeys', uniqueGroupKeys);
     }
     // Break beneficiaries into batches
-    const batches = [];
-    for (let i = 0; i < beneficiaries.length; i += BATCH_SIZE) {
-      const batch = beneficiaries.slice(i, i + BATCH_SIZE);
-      batches.push(batch);
-    }
+    const batches = createBatches(beneficiaries, BATCH_SIZE);
+    console.log('batches', batches);
+    // for (let i = 0; i < beneficiaries.length; i += BATCH_SIZE) {
+    //   const batch = beneficiaries.slice(i, i + BATCH_SIZE);
+    //   batches.push(batch);
+    // }
 
-    batches.map((batch, index) => {
-      this.beneficiaryQueue.add(
+    batches.map(async (batch, index) => {
+      const job = await this.beneficiaryQueue.add(
         BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE,
         {
           data: batch,
@@ -1022,8 +1024,22 @@ export class BeneficiaryService {
           totalBatches: batches.length,
           batchNumber: index,
           automatedGroupOption: allData?.automatedGroupOption,
+        },
+        {
+          jobId: randomUUID(),
+          attempts: 3,
+          removeOnComplete: true,
+          removeOnFail: true,
         }
       );
+      const result = await job.finished();
+
+      // Check if the result is successful
+      if (!result.success) {
+        throw new Error(`Batch ${index} failed`);
+      }
+
+      return { success: true, job };
     });
     console.log('Total Batches to be created:', batches.length);
     return {
