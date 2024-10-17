@@ -15,7 +15,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
@@ -172,13 +172,9 @@ export class BeneficiaryController {
       ...b,
       birthDate: b.birthDate ? new Date(b.birthDate).toISOString() : null,
     }));
+
     return this.client
       .send({ cmd: BeneficiaryJobs.CREATE_BULK }, data)
-      .pipe(
-        catchError((error) =>
-          throwError(() => new RpcException(error.response))
-        )
-      )
       .pipe(timeout(MS_TIMEOUT));
   }
 

@@ -1,5 +1,5 @@
-import { Controller, Inject, Param } from '@nestjs/common';
-import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
+import { Controller, Param } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
@@ -13,8 +13,7 @@ import {
 } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
-  ProjectContants,
-  ValidateWallet,
+  ValidateWallet
 } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
@@ -25,7 +24,6 @@ import { VerificationService } from './verification.service';
 @Controller()
 export class BeneficiaryController {
   constructor(
-    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly service: BeneficiaryService,
     private readonly utilService: BeneficiaryUtilsService,
     private readonly statsService: BeneficiaryStatService,

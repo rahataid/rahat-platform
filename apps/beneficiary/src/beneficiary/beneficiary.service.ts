@@ -1,5 +1,5 @@
 import { InjectQueue } from '@nestjs/bull';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
@@ -23,8 +23,7 @@ import {
   BeneficiaryConstants,
   BeneficiaryEvents,
   BeneficiaryJobs,
-  ProjectContants, TPIIData,
-  generateRandomWallet
+  ProjectContants, TPIIData
 } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { Queue } from 'bull';
@@ -180,7 +179,6 @@ export class BeneficiaryService {
     const orderBy: Record<string, 'asc' | 'desc'> = { [sort]: order };
     const where = this.beneficiaryUtilsService.buildWhereClause(dto);
 
-
     result = await paginate(
       this.rsprisma.beneficiary,
       {
@@ -199,7 +197,6 @@ export class BeneficiaryService {
       }
     );
     result = await this.beneficiaryUtilsService.attachPiiData(result);
-    console.log({ result })
 
     console.timeEnd("check")
     console.log(new Date())
@@ -298,7 +295,7 @@ export class BeneficiaryService {
     walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(walletAddress);
 
     if (!piiData.phone) throw new RpcException('Phone number is required');
-    await this.beneficiaryUtilsService.ensureUniquePhone(piiData.phone);
+    await this.beneficiaryUtilsService.ensureUniquePhone(piiData.phone.toString());
 
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const createdBeneficiary = await this.rsprisma.beneficiary.create({
@@ -320,41 +317,59 @@ export class BeneficiaryService {
   }
 
   async findOne(uuid: UUID) {
-    const row = await this.rsprisma.beneficiary.findUnique({
-      where: { uuid },
-      include: {
-        BeneficiaryProject: {
-          include: {
-            Project: true,
+    const [data, piiData] = await Promise.all([
+      this.rsprisma.beneficiary.findUnique({
+        where: { uuid },
+        include: {
+          BeneficiaryProject: {
+            include: {
+              Project: true
+            },
           },
         },
-      },
-    });
-    if (!row) return null;
-    const piiData = await this.rsprisma.beneficiaryPii.findUnique({
-      where: { beneficiaryId: row.id },
-    });
-    if (piiData) row.piiData = piiData;
-    return row;
+      }),
+
+      this.prisma.beneficiaryPii.findUnique({
+        where: {
+          beneficiaryId: (await this.rsprisma.beneficiary.findUnique({ where: { uuid }, select: { id: true } }))?.id || '',
+        },
+      }),
+    ])
+
+    if (!data) return null;
+    if (piiData) data.piiData = piiData;
+    return data;
   }
 
   async findOneByWallet(walletAddress: string) {
-    const row = await this.rsprisma.beneficiary.findFirst({
-      where: { walletAddress },
-      include: {
-        BeneficiaryProject: {
-          include: {
-            Project: true,
+    const [data, piiData] = await Promise.all([
+      this.rsprisma.beneficiary.findUnique({
+        where: { walletAddress },
+        include: {
+          BeneficiaryProject: {
+            include: {
+              Project: true,
+            },
           },
         },
-      },
-    });
-    if (!row) return null;
-    const piiData = await this.rsprisma.beneficiaryPii.findUnique({
-      where: { beneficiaryId: row.id },
-    });
-    if (piiData) row.piiData = piiData;
-    return row;
+      }),
+      this.rsprisma.beneficiary.findUnique({
+        where: { walletAddress },
+        select: { id: true },
+      }).then(beneficiary =>
+        beneficiary
+          ? this.rsprisma.beneficiaryPii.findUnique({
+            where: { beneficiaryId: beneficiary.id },
+          })
+          : null
+      ),
+    ]);
+
+    if (!data) return null;
+
+    data.piiData = piiData || null;
+
+    return data;
   }
 
   async findOneByPhone(phone: string) {
@@ -362,6 +377,7 @@ export class BeneficiaryService {
       where: { phone },
     });
     if (!piiData) return null;
+
     const beneficiary = await this.rsprisma.beneficiary.findUnique({
       where: { id: piiData.beneficiaryId },
       include: {
@@ -372,7 +388,9 @@ export class BeneficiaryService {
         },
       },
     });
+
     if (!beneficiary) return null;
+
     beneficiary.piiData = piiData;
     return beneficiary;
   }
@@ -611,98 +629,23 @@ export class BeneficiaryService {
   }
 
   async createBulk(dtos: CreateBeneficiaryDto[], projectUuid?: string) {
-    const hasPhone = dtos.every((dto) => dto.piiData.phone);
-    if (!hasPhone) throw new RpcException('Phone number is required');
 
-    //check if phone number is unique or not
-    const benPhone = await this.checkPhoneNumber(dtos);
-    if (benPhone.length > 0) throw new RpcException(`${benPhone} Phone number should be unique`);
-
-    const hasWallet = dtos.every((dto) => dto.walletAddress);
-    if (hasWallet) {
-      //check uniquness of wallet address
-      const ben = await this.checkWalletAddress(dtos);
-      if (ben.length > 0) throw new RpcException('Wallet should be unique');
-
-      // Pre-generate UUIDs for each beneficiary to use as a linking key
-      dtos.forEach((dto) => {
-        dto.uuid = dto.uuid || uuidv4(); // Assuming generateUuid() is a method that generates unique UUIDs
-      });
+    this.beneficiaryUtilsService.ensurePhoneNumbers(dtos);
+    for (const dto of dtos) {
+      await this.beneficiaryUtilsService.ensureUniquePhone(dto.piiData.phone.toString())
+      dto.walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(dto.walletAddress);
+      dto.uuid = dto.uuid || uuidv4();
     }
-    if (!hasWallet)
-      // Pre-generate UUIDs for each beneficiary to use as a linking key
-      dtos.forEach((dto) => {
-        dto.uuid = dto.uuid || uuidv4(); // Assuming generateUuid() is a method that generates unique UUIDs
-        dto.walletAddress = dto.walletAddress || generateRandomWallet().address;
-      });
 
-    // Separate PII data and prepare beneficiary data for bulk insertion
-    const beneficiariesData = dtos.map(({ piiData, ...data }) => data);
-    const piiDataList = dtos.map(({ uuid, piiData }) => ({
-      ...piiData,
-      uuid, // Temporarily store the uuid with PII data for linking
-    }));
+    const { beneficiariesData, piiDataList } = this.beneficiaryUtilsService.prepareBulkInsertData(dtos)
 
-    try {
-      await this.prisma.beneficiary.createMany({
-        data: beneficiariesData,
-      });
-    } catch (e) {
-      throw new RpcException(
-        new BadRequestException('Error in creating beneficiaries')
-      );
-    }
     // Insert beneficiaries in bulk
-
-    // Assuming PII data includes a uuid field for linking purposes
-    // Retrieve all just inserted beneficiaries by their uuids to link them with their PII data
-    const insertedBeneficiaries = await this.prisma.beneficiary.findMany({
-      where: {
-        uuid: {
-          in: dtos.map((dto) => dto.uuid),
-        },
-      },
-    });
-
-    // Prepare PII data for bulk insertion with correct beneficiaryId
-    const piiBulkInsertData = piiDataList.map((piiData) => {
-      const beneficiary = insertedBeneficiaries.find(
-        (b) => b.uuid === piiData.uuid
-      );
-      return {
-        beneficiaryId: beneficiary.id,
-        ...piiData,
-        uuid: undefined, // Remove the temporary uuid field
-      };
-    });
-
-    // Insert PII data in bulk
-    if (piiBulkInsertData.length > 0) {
-      const sanitizedPiiBenef = piiBulkInsertData.map((b) => {
-        return {
-          ...b,
-          phone: b.phone ? b.phone.toString() : null,
-        };
-      });
-      await this.prisma.beneficiaryPii.createMany({
-        data: sanitizedPiiBenef,
-      });
-    }
-    const insertedBeneficiarieWithPii = await this.prisma.beneficiary.findMany({
-      where: {
-        uuid: {
-          in: dtos.map((dto) => dto.uuid),
-        },
-      },
-      include: {
-        pii: true,
-      },
-    });
+    const insertedBeneficiariesWithPii = await this.beneficiaryUtilsService.insertBeneficiariesAndPIIData(beneficiariesData, piiDataList, dtos);
 
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, { projectUuid });
 
     // Return some form of success indicator, as createMany does not return the records themselves
-    return { success: true, count: dtos.length, beneficiariesData: insertedBeneficiarieWithPii };
+    return { success: true, count: dtos.length, beneficiariesData: insertedBeneficiariesWithPii };
   }
 
 

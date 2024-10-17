@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
-import { AddToProjectDto, ListBeneficiaryDto } from '@rahataid/extensions';
+import { AddToProjectDto, CreateBeneficiaryDto, ListBeneficiaryDto } from '@rahataid/extensions';
 import { AAPayload, BeneficiaryConstants, BeneficiaryEvents, BeneficiaryJobs, BeneficiaryPayload, generateRandomWallet, ProjectContants } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { lastValueFrom } from 'rxjs';
@@ -75,6 +75,11 @@ export class BeneficiaryUtilsService {
             throw new RpcException('Wallet should be valid Ethereum Address');
         }
         return walletAddress;
+    }
+
+    async ensurePhoneNumbers(dtos: CreateBeneficiaryDto[]) {
+        const hasPhone = dtos.every((dto) => dto.piiData.phone)
+        if (!hasPhone) throw new RpcException('Phone number is required');
     }
 
     async ensureUniquePhone(phone: string): Promise<void> {
@@ -165,6 +170,56 @@ export class BeneficiaryUtilsService {
 
     async saveBeneficiaryToProject(dto: AddToProjectDto) {
         return this.prismaService.beneficiaryProject.create({ data: dto })
+    }
+
+
+    prepareBulkInsertData(dtos: CreateBeneficiaryDto[]) {
+        const beneficiariesData = dtos.map(({ piiData, ...data }) => data)
+        const piiDataList = dtos.map(({ uuid, piiData }) => ({ ...piiData, uuid }))
+        return { beneficiariesData, piiDataList }
+    }
+
+    async insertBeneficiariesAndPIIData(beneficiariesData: any[], piiDataList: any[], dtos: CreateBeneficiaryDto[]) {
+        const insertedBeneficiaries = await this.prismaService.$transaction(async (prisma) => {
+            await prisma.beneficiary.createMany(
+                { data: beneficiariesData }
+            )
+            const insertedBeneficiaries = await prisma.beneficiary.findMany({
+                where: {
+                    uuid: {
+                        in: dtos.map(dto => dto.uuid)
+                    }
+                }
+            })
+
+            const piiBulkInsertData = piiDataList.map((piiData) => {
+                const beneficiary = insertedBeneficiaries.find((b) => b.uuid === piiData.uuid)
+                return {
+                    beneficiaryId: beneficiary.id,
+                    ...piiData,
+                    uuid: undefined
+                }
+            })
+
+            if (piiBulkInsertData.length > 0) {
+                const sanitizedPiiBenef = piiBulkInsertData.map((bulkData) => ({ ...bulkData, phone: bulkData.phone ? bulkData.phone.toString() : null }))
+                await prisma.beneficiaryPii.createMany({
+                    data: sanitizedPiiBenef
+                })
+            }
+
+            return prisma.beneficiary.findMany({
+                where: {
+                    uuid: {
+                        in: dtos.map((dto) => dto.uuid),
+                    },
+                },
+                include: {
+                    pii: true, // Include the related PII data
+                },
+            });
+        });
+        return insertedBeneficiaries
     }
 
 
