@@ -118,8 +118,6 @@ export class BeneficiaryService {
     return data;
   }
   async listBenefByProject(data: any) {
-    console.log('data', data);
-
     if (!data?.data?.length) return data;
 
     const mergedProjectData = await this.mergeProjectData(
@@ -133,7 +131,6 @@ export class BeneficiaryService {
       data.data = mergedProjectData || [];
     }
 
-    console.log('final data', data);
     return data;
   }
 
@@ -320,7 +317,6 @@ export class BeneficiaryService {
     //     pii: true
     //   }
     // })
-    console.log('data', data);
 
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
@@ -333,12 +329,9 @@ export class BeneficiaryService {
       },
     });
 
-    console.log({ beneficiaries });
-
     // const beneficiaries = []
 
     if (data && beneficiaries.length > 0) {
-      console.log('data', data);
       const combinedData = data.map((dat) => {
         const benDetails = beneficiaries.find(
           (ben) => ben.walletAddress === dat.walletAddress
@@ -350,10 +343,8 @@ export class BeneficiaryService {
           ...dat,
         };
       });
-      console.log({ combinedData });
       return combinedData || [];
     }
-    console.log('beneficiaries', beneficiaries);
 
     // TODO: remove projectData and piiData that has been added manually, as it will affects the FE. NEEDS to be refactord in FE as well.
     return beneficiaries.map((b) => ({
@@ -410,12 +401,10 @@ export class BeneficiaryService {
       },
     });
     if (benData) throw new RpcException('Phone number should be unique');
-    console;
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const rdata = await this.rsprisma.beneficiary.create({
       data,
     });
-    console.log('rdata', rdata);
     if (piiData) {
       await this.prisma.beneficiaryPii.create({
         data: {
@@ -428,7 +417,6 @@ export class BeneficiaryService {
 
     // Assign beneficiary to project while creating. Useful when a beneficiary is created from inside a project
     if (projectUUIDs?.length && rdata?.uuid) {
-      console.log('projectUUIDs', projectUUIDs);
       const assignPromises = projectUUIDs.map((projectUuid) => {
         return this.assignBeneficiaryToProject({
           beneficiaryId: rdata?.uuid,
@@ -533,7 +521,6 @@ export class BeneficiaryService {
   }
 
   async saveBeneficiaryToProject(dto: AddToProjectDto) {
-    console.log(dto);
     return this.prisma.beneficiaryProject.create({ data: dto });
   }
 
@@ -642,14 +629,12 @@ export class BeneficiaryService {
         uuid: projectId,
       },
     });
-    console.log('project', project);
 
     //1. Get beneficiary data
     const beneficiaryData = await this.rsprisma.beneficiary.findUnique({
       where: { uuid: beneficiaryId },
       include: { pii: true },
     });
-    console.log('beneficiaryData', beneficiaryData);
     const projectPayload = {
       uuid: beneficiaryData.uuid,
       walletAddress: beneficiaryData.walletAddress,
@@ -671,8 +656,6 @@ export class BeneficiaryService {
     if (project.type.toLowerCase() === 'rp') {
       delete projectPayload.type;
     }
-
-    console.log('projectPayload', projectPayload);
 
     // if project type is c2c, send verficition mail
     // if (project.type.toLowerCase() === 'c2c' && !beneficiaryData.isVerfied) {
@@ -897,7 +880,6 @@ export class BeneficiaryService {
         where: { uuid: { in: dtos.map((dto) => dto.uuid) } },
         include: { pii: true },
       });
-      console.log('first', projectUuid);
 
       // Assign beneficiaries to the project if a projectUuid is provided
       // && conditional
@@ -940,7 +922,6 @@ export class BeneficiaryService {
           }
           //   this.assignBeneficiaryToProject({ beneficiaryId: b.uuid, projectId: projectUuid })
         );
-        console.log('assignPromises', assignPromises);
         await Promise.all(assignPromises);
       }
 
@@ -1170,8 +1151,6 @@ export class BeneficiaryService {
           deletedAt: null,
         };
 
-    console.time('group');
-
     const data = await paginate(
       this.prisma.beneficiaryGroup,
       {
@@ -1234,8 +1213,6 @@ export class BeneficiaryService {
       }
     );
 
-    console.timeEnd('group');
-    console.log(new Date());
     return data;
   }
 
@@ -1313,7 +1290,6 @@ export class BeneficiaryService {
             deletedAt: null,
           },
         });
-        console.log('unassignedBenfs', unassignedBenfs);
 
         // bulk assign unassigned beneficiaries from group
         if (unassignedBenfs?.length) {
@@ -1360,8 +1336,6 @@ export class BeneficiaryService {
             groupedBeneficiaries: true,
           },
         });
-
-      console.log('ben', beneficiaryGroupData);
 
       const benfsInGroup = beneficiaryGroupData.groupedBeneficiaries?.map(
         (d) => d.beneficiaryId
