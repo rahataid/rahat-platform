@@ -63,4 +63,5 @@ export const JOBS = {
   REMOVE_ONE_GROUP: 'rahat.jobs.beneficiary.remove_one_group',
   GET_STATS: 'rahat.jobs.projects.get_stats',
   GET_ALL_STATS: 'rahat.jobs.projects.get_all_stats',
+  IMPORT_BENEFICIARY_LARGE_QUEUE: 'rahat.jobs.beneficiary.import_beneficiary_large_queue',
 };

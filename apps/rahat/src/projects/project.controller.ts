@@ -9,7 +9,7 @@ import {
   Post,
   Query,
   Req,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
@@ -18,16 +18,26 @@ import {
   ListProjectBeneficiaryDto,
   ProjectCommunicationDto,
   UpdateProjectDto,
-  UpdateProjectStatusDto
+  UpdateProjectStatusDto,
 } from '@rahataid/extensions';
-import { ACTIONS, APP, BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
+import {
+  ACTIONS,
+  APP,
+  BeneficiaryJobs,
+  MS_TIMEOUT,
+  ProjectJobs,
+} from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
-import { AbilitiesGuard, CheckAbilities, JwtGuard, SUBJECTS } from "@rumsan/user";
+import {
+  AbilitiesGuard,
+  CheckAbilities,
+  JwtGuard,
+  SUBJECTS,
+} from '@rumsan/user';
 import { UUID } from 'crypto';
-import { Request } from "express";
+import { Request } from 'express';
 import { timeout } from 'rxjs/operators';
 import { ProjectService } from './project.service';
-
 
 @Controller('projects')
 @ApiTags('Projects')
@@ -36,7 +46,7 @@ export class ProjectController {
     private readonly projectService: ProjectService,
     @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy,
     @Inject('BEN_CLIENT') private readonly benClient: ClientProxy
-  ) { }
+  ) {}
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -106,7 +116,6 @@ export class ProjectController {
       .pipe(timeout(5000));
   }
 
-
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
@@ -118,9 +127,9 @@ export class ProjectController {
       .pipe(timeout(5000));
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
   projectActions(
@@ -131,7 +140,7 @@ export class ProjectController {
     const response = this.projectService.handleProjectActions({
       uuid,
       ...data,
-      user: request.user
+      user: request.user,
     });
     return response;
   }

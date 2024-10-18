@@ -6,7 +6,7 @@ import { BQUEUE } from '@rahataid/sdk';
 import { SettingsModule } from '@rumsan/extensions/settings';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ListenersModule } from '../listeners/listener.module';
-import { BeneficiaryProcessor } from '../processors/beneficiary.processor';
+import { ProcessorsModule } from '../processors/processor.module';
 import { VendorsModule } from '../vendors/vendors.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -15,7 +15,7 @@ import { AppService } from './app.service';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot({
-      maxListeners: 10,
+      maxListeners: 50,
       ignoreErrors: false,
     }),
     BullModule.forRootAsync({
@@ -32,12 +32,14 @@ import { AppService } from './app.service';
     BullModule.registerQueue({
       name: BQUEUE.RAHAT_BENEFICIARY,
     }),
+
     BeneficiaryModule,
     VendorsModule,
     ListenersModule,
-    SettingsModule
+    SettingsModule,
+    ProcessorsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, BeneficiaryProcessor],
+  providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

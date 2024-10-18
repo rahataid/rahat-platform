@@ -13,7 +13,7 @@ import {
   Req,
   UploadedFile,
   UseGuards,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -29,7 +29,7 @@ import {
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto,
-  ValidateWalletDto
+  ValidateWalletDto,
 } from '@rahataid/extensions';
 import {
   APP,
@@ -37,19 +37,20 @@ import {
   BQUEUE,
   Enums,
   MS_TIMEOUT,
-  TFile
+  TFile,
 } from '@rahataid/sdk';
 import {
   AbilitiesGuard,
   ACTIONS,
   CheckAbilities,
   JwtGuard,
-  SUBJECTS
+  SUBJECTS,
 } from '@rumsan/user';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, throwError, timeout } from 'rxjs';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
+import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { DocParser } from './parser';
 
 function getDateInfo(dateString) {
@@ -76,7 +77,7 @@ export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue
-  ) { }
+  ) {}
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -190,11 +191,14 @@ export class BeneficiaryController {
   async upload(@UploadedFile() file: TFile, @Req() req: Request) {
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
-    const projectId = req.body['projectId']
+    const projectId = req.body['projectId'];
     const beneficiaries = await DocParser(docType, file.buffer);
-
+    console.log('projectId', projectId);
+    console.log('beneficiaries', beneficiaries);
     const beneficiariesMapped = beneficiaries.map((b) => ({
-      birthDate: new Date(b['Birth Date']).toISOString() || null,
+      birthDate: b['Birth Date']
+        ? new Date(b['Birth Date']).toISOString()
+        : null,
       internetStatus: b['Internet Status*'],
       bankedStatus: b['Bank Status*'],
       location: b['Location'],
@@ -206,8 +210,8 @@ export class BeneficiaryController {
       age: b['Age'] || null,
       walletAddress: b['Wallet Address'],
       piiData: {
-        name: b['Name*'],
-        phone: b['Whatsapp Number*'],
+        name: b['Name*'] || 'Unknown',
+        phone: b['Whatsapp Number*'] || b['Phone Number*'],
         extras: {
           isAdult:
             getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age*']) > 18,
@@ -215,9 +219,13 @@ export class BeneficiaryController {
         },
       },
     }));
+    console.log('beneficiariesMapped', beneficiariesMapped);
 
     return this.client
-      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, { data: beneficiariesMapped, projectUUID: projectId })
+      .send(
+        { cmd: BeneficiaryJobs.CREATE_BULK },
+        { data: beneficiariesMapped, projectUUID: projectId }
+      )
       .pipe(
         catchError((error) => {
           console.log('error', error);
@@ -225,6 +233,78 @@ export class BeneficiaryController {
         })
       )
       .pipe(timeout(MS_TIMEOUT));
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Post('upload-queue')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadWithQueue(@UploadedFile() file: TFile, @Req() req: Request) {
+    const docType: Enums.UploadFileType =
+      req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
+    const projectId = req.body['projectId'];
+    const automatedGroupOption = req.body['automatedGroupOption'];
+    console.log('queueData', automatedGroupOption);
+    const beneficiaries = await DocParser(docType, file.buffer);
+    const beneficiariesMapped = beneficiaries.map((b) => ({
+      birthDate: b['Birth Date']
+        ? new Date(b['Birth Date']).toISOString()
+        : null,
+      internetStatus: b['Internet Status*'],
+      bankedStatus: b['Bank Status*'],
+      location: b['Location'],
+      phoneStatus: b['Phone Status*'],
+      notes: b['Notes'],
+      gender: b['Gender*'],
+      latitude: b['Latitude'],
+      longitude: b['Longitude'],
+      age: b['Age'] || null,
+      walletAddress: b['Wallet Address'],
+      piiData: {
+        name: b['Name*'] || 'Unknown',
+        phone: b['Whatsapp Number*'] || b['Phone Number*'],
+        extras: {},
+      },
+    }));
+
+    return handleMicroserviceCall({
+      client: this.client.send(
+        { cmd: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE },
+        {
+          data: beneficiariesMapped,
+          projectUUID: projectId,
+          ignoreExisting: true,
+          automatedGroupOption,
+        }
+      ),
+      onError(error) {
+        console.log('error', error);
+        return throwError(() => new BadRequestException(error.message));
+      },
+      onSuccess(response) {
+        // console.log('response', response)
+        return response;
+      },
+    });
+
+    // return this.client
+    //   .send({ cmd: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE }, {
+    //     data: beneficiariesMapped, projectUUID: projectId,
+
+    //   })
+    //   .pipe(
+    //     catchError((error) => {
+    //       console.log('error', error);
+    //       return throwError(() => new BadRequestException(error.message));
+    //     })
+    //   )
+    //   .pipe(timeout(MS_TIMEOUT)).toPromise()
+
+    // return {
+    //   success: true,
+    //   message: 'Upload in progress. Will start appearing once completed.'
+    // }
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
