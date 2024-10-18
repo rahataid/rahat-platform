@@ -63,7 +63,7 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.LEAD_CONVERSION_BENEFICIARY })
   async leadConversions(dto: ListBeneficiaryDto) {
-    return this.service.listLeadsConversions(dto);
+    return this.service.listBeneficiaryPiiByWalletAddress(dto);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_BY_PROJECT })
