@@ -5,7 +5,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { CreateBeneficiaryDto } from '@rahataid/extensions';
 import {
-  BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
   generateRandomWallet,
@@ -21,9 +20,8 @@ import {
   validateDupicatePhone,
   validateDupicateWallet,
 } from './processor.utils';
-import { canProcessJob } from '../utils/queueUtil';
 
-const BATCH_SIZE = 20;
+const BATCH_SIZE = 500;
 
 @Processor(BQUEUE.RAHAT_BENEFICIARY)
 export class BeneficiaryProcessor {
@@ -33,7 +31,7 @@ export class BeneficiaryProcessor {
     private readonly prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private eventEmitter: EventEmitter2
-  ) { }
+  ) {}
 
   @Process(BeneficiaryJobs.UPDATE_STATS)
   async sample(job: Job<any>) {
@@ -108,18 +106,22 @@ export class BeneficiaryProcessor {
     throw new BadRequestException();
   }
 
-  @Process({ name: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE, concurrency: 1 })
-  async importBeneficiaryLargeQueue(job: Job<{
-    data: CreateBeneficiaryDto[];
-    projectUUID: UUID;
-    batchNumber: number;
-    ignoreExisting: boolean;
-    totalBatches: number;
-    automatedGroupOption: {
-      groupKey: string;
-    };
-  }>) {
-
+  @Process({
+    name: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE,
+    concurrency: 1,
+  })
+  async importBeneficiaryLargeQueue(
+    job: Job<{
+      data: CreateBeneficiaryDto[];
+      projectUUID: UUID;
+      batchNumber: number;
+      ignoreExisting: boolean;
+      totalBatches: number;
+      automatedGroupOption: {
+        groupKey: string;
+      };
+    }>
+  ) {
     const {
       data: beneficiaries,
       projectUUID,
@@ -128,12 +130,11 @@ export class BeneficiaryProcessor {
       totalBatches,
       automatedGroupOption,
     } = job.data;
-
-    const canProceed = await canProcessJob(job, this.logger);
-    if (!canProceed) {
-      return; // Stop processing if the queue is busy
-    }
-    console.log(`Processing batch ${batchNumber} of ${totalBatches}`);
+    // const canProceed = await canProcessJob(job, this.logger);
+    // if (!canProceed) {
+    //   return; // Stop processing if the queue is busy
+    // }
+    // console.log(`Processing batch ${batchNumber} of ${totalBatches}`);
 
     // Helper function to validate phone numbers and wallet addresses
     const validateBeneficiaries = async (
@@ -185,180 +186,189 @@ export class BeneficiaryProcessor {
     );
 
     await this.prisma
-      .$transaction(async (txn) => {
-        // Validate and possibly filter out duplicates
-        const filteredBatch = await validateBeneficiaries(
-          beneficiaries,
-          this.prisma
-        );
-        if (filteredBatch.length === 0) {
-          console.log(
-            `Batch ${batchNumber} skipped, no new beneficiaries after filtering.`
+      .$transaction(
+        async (txn) => {
+          // Validate and possibly filter out duplicates
+          const filteredBatch = await validateBeneficiaries(
+            beneficiaries,
+            this.prisma
           );
-          return; // Skip the batch if there are no valid beneficiaries to process
-        }
-
-        // Pre-generate UUIDs and wallet addresses if necessary
-        filteredBatch.forEach((beneficiary) => {
-          beneficiary.uuid = beneficiary.uuid || randomUUID();
-          beneficiary.walletAddress =
-            beneficiary.walletAddress || generateRandomWallet().address;
-        });
-
-        // Separate PII data and beneficiary data
-        const beneficiariesData = filteredBatch.map(
-          ({ piiData, ...data }) => data
-        );
-        const piiDataList = filteredBatch.map(({ uuid, piiData }) => ({
-          ...piiData,
-          uuid,
-        }));
-
-        // Insert beneficiaries in bulk
-        const insertedBeneficiaries = await txn.beneficiary.createManyAndReturn(
-          {
-            data: beneficiariesData,
+          if (filteredBatch.length === 0) {
+            console.log(
+              `Batch ${batchNumber} skipped, no new beneficiaries after filtering.`
+            );
+            return; // Skip the batch if there are no valid beneficiaries to process
           }
-        );
 
-        // // Retrieve inserted beneficiaries for linking PII data
-        // const insertedBeneficiaries = await txn.beneficiary.findMany({
-        //   where: {
-        //     uuid: { in: filteredBatch.map((beneficiary) => beneficiary.uuid) },
-        //   },
-        // });
-
-        // Map PII data with correct beneficiary IDs
-        const piiBulkInsertData = piiDataList.map((piiData) => {
-          const beneficiary = insertedBeneficiaries.find(
-            (b) => b.uuid === piiData.uuid
-          );
-          return { beneficiaryId: beneficiary.id, ...piiData, uuid: undefined }; // Remove temporary UUID
-        });
-
-        // Insert PII data in bulk
-        if (piiBulkInsertData.length > 0) {
-          await txn.beneficiaryPii.createMany({ data: piiBulkInsertData });
-        }
-
-        // for automated grouping
-        let createdBenGroups;
-        if (automatedGroupOption.groupKey) {
-          const uniqueGroup = [
-            ...new Set(
-              beneficiaries.map(
-                (b) => b[automatedGroupOption?.groupKey.toLowerCase()]
-              )
-            ),
-          ];
-
-          const groups = await txn.beneficiaryGroup.findMany({
-            where: {
-              name: {
-                in: uniqueGroup,
-              },
-            },
+          // Pre-generate UUIDs and wallet addresses if necessary
+          filteredBatch.forEach((beneficiary) => {
+            beneficiary.uuid = beneficiary.uuid || randomUUID();
+            beneficiary.walletAddress =
+              beneficiary.walletAddress || generateRandomWallet().address;
           });
 
-          const beneficiaryGroupData = insertedBeneficiaries.map((b) => {
-            const beneficiaryId = b.uuid;
-            const beneficiaryGroupId = groups.find(
-              (g) => g.name === b[automatedGroupOption?.groupKey.toLowerCase()]
-            ).uuid;
+          // Separate PII data and beneficiary data
+          const beneficiariesData = filteredBatch.map(
+            ({ piiData, ...data }) => data
+          );
+          const piiDataList = filteredBatch.map(({ uuid, piiData }) => ({
+            ...piiData,
+            uuid,
+          }));
+
+          // Insert beneficiaries in bulk
+          const insertedBeneficiaries =
+            await txn.beneficiary.createManyAndReturn({
+              data: beneficiariesData,
+            });
+
+          // // Retrieve inserted beneficiaries for linking PII data
+          // const insertedBeneficiaries = await txn.beneficiary.findMany({
+          //   where: {
+          //     uuid: { in: filteredBatch.map((beneficiary) => beneficiary.uuid) },
+          //   },
+          // });
+
+          // Map PII data with correct beneficiary IDs
+          const piiBulkInsertData = piiDataList.map((piiData) => {
+            const beneficiary = insertedBeneficiaries.find(
+              (b) => b.uuid === piiData.uuid
+            );
             return {
-              beneficiaryId,
-              beneficiaryGroupId,
-            };
+              beneficiaryId: beneficiary.id,
+              ...piiData,
+              uuid: undefined,
+            }; // Remove temporary UUID
           });
 
-          createdBenGroups = await txn.groupedBeneficiaries.createManyAndReturn(
-            {
-              data: beneficiaryGroupData,
-              skipDuplicates: true,
-              select: {
-                Beneficiary: true,
-                beneficiaryGroup: true,
-                uuid: true,
-              },
-            }
-          );
-        }
+          // Insert PII data in bulk
+          if (piiBulkInsertData.length > 0) {
+            await txn.beneficiaryPii.createMany({ data: piiBulkInsertData });
+          }
 
-        // Assign beneficiaries to the project if projectUUID is provided
-        if (projectUUID) {
-          // if (projectUUID && !automatedGroupOption.groupKey) {
-          await txn.beneficiaryProject.createMany({
-            data: insertedBeneficiaries.map(({ uuid }) => ({
-              beneficiaryId: uuid,
-              projectId: projectUUID,
-            })),
-          });
-
-          // this.eventEmitter.emit(
-          //   BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-          //   {
-          //     projectUuid: projectUUID,
-          //   }
-          // );
-
-          const assignPromises = insertedBeneficiaries.map((b) => {
-            const projectPayload = {
-              uuid: b.uuid,
-              walletAddress: b.walletAddress,
-              extras: b?.extras || null,
-              isVerified: b?.isVerified,
-            };
-            return handleMicroserviceCall({
-              client: this.client.send(
-                { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUUID },
-                projectPayload
+          // for automated grouping
+          let createdBenGroups;
+          if (automatedGroupOption.groupKey) {
+            const uniqueGroup = [
+              ...new Set(
+                beneficiaries.map(
+                  (b) => b[automatedGroupOption?.groupKey.toLowerCase()]
+                )
               ),
-              onSuccess(response) {
-                console.log('response', response);
-                return response;
-              },
-              onError(error) {
-                console.log('Error assiging Beneficiaries to project.', error);
-                throw new RpcException(error.message);
+            ];
+
+            const groups = await txn.beneficiaryGroup.findMany({
+              where: {
+                name: {
+                  in: uniqueGroup,
+                },
               },
             });
-          });
 
-          await Promise.all(assignPromises);
+            const beneficiaryGroupData = insertedBeneficiaries.map((b) => {
+              const beneficiaryId = b.uuid;
+              const beneficiaryGroupId = groups.find(
+                (g) =>
+                  g.name === b[automatedGroupOption?.groupKey.toLowerCase()]
+              ).uuid;
+              return {
+                beneficiaryId,
+                beneficiaryGroupId,
+              };
+            });
+
+            createdBenGroups =
+              await txn.groupedBeneficiaries.createManyAndReturn({
+                data: beneficiaryGroupData,
+                skipDuplicates: true,
+                select: {
+                  Beneficiary: true,
+                  beneficiaryGroup: true,
+                  uuid: true,
+                },
+              });
+          }
+
+          // Assign beneficiaries to the project if projectUUID is provided
+          if (projectUUID) {
+            // if (projectUUID && !automatedGroupOption.groupKey) {
+            await txn.beneficiaryProject.createMany({
+              data: insertedBeneficiaries.map(({ uuid }) => ({
+                beneficiaryId: uuid,
+                projectId: projectUUID,
+              })),
+            });
+
+            // this.eventEmitter.emit(
+            //   BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
+            //   {
+            //     projectUuid: projectUUID,
+            //   }
+            // );
+
+            const assignPromises = insertedBeneficiaries.map((b) => {
+              const projectPayload = {
+                uuid: b.uuid,
+                walletAddress: b.walletAddress,
+                extras: b?.extras || null,
+                isVerified: b?.isVerified,
+              };
+              return handleMicroserviceCall({
+                client: this.client.send(
+                  { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUUID },
+                  projectPayload
+                ),
+                onSuccess(response) {
+                  console.log('response', response);
+                  return response;
+                },
+                onError(error) {
+                  console.log(
+                    'Error assiging Beneficiaries to project.',
+                    error
+                  );
+                  throw new RpcException(error.message);
+                },
+              });
+            });
+
+            await Promise.all(assignPromises);
+          }
+
+          // if (automatedGroupOption.groupKey && projectUUID) {
+          //   // console.log('createdGroups', createdBenGroups);
+          //   const assignedGroupsToProject = createdBenGroups.map((bg) => {
+          //     const payload = {
+          //       beneficiaryGroupId: bg.beneficiaryGroup.uuid,
+          //       projectId: projectUUID,
+          //     };
+          //     console.log('payload', payload);
+          //     return handleMicroserviceCall({
+          //       client: this.client.send(
+          //         {
+          //           cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT,
+          //           uuid: projectUUID,
+          //         },
+          //         payload
+          //       ),
+          //       onSuccess(response) {
+          //         console.log('response', response);
+          //         return response;
+          //       },
+          //       onError(error) {
+          //         console.log('Error assiging Groups to project.', error);
+          //         throw new RpcException(error.message);
+          //       },
+          //     });
+          //   });
+          //   await Promise.all(assignedGroupsToProject);
+          // }
+          console.log(`Successfully processed batch ${batchNumber}`);
+        },
+        {
+          timeout: 25000,
         }
-
-        // if (automatedGroupOption.groupKey && projectUUID) {
-        //   // console.log('createdGroups', createdBenGroups);
-        //   const assignedGroupsToProject = createdBenGroups.map((bg) => {
-        //     const payload = {
-        //       beneficiaryGroupId: bg.beneficiaryGroup.uuid,
-        //       projectId: projectUUID,
-        //     };
-        //     console.log('payload', payload);
-        //     return handleMicroserviceCall({
-        //       client: this.client.send(
-        //         {
-        //           cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT,
-        //           uuid: projectUUID,
-        //         },
-        //         payload
-        //       ),
-        //       onSuccess(response) {
-        //         console.log('response', response);
-        //         return response;
-        //       },
-        //       onError(error) {
-        //         console.log('Error assiging Groups to project.', error);
-        //         throw new RpcException(error.message);
-        //       },
-        //     });
-        //   });
-        //   await Promise.all(assignedGroupsToProject);
-        // }
-        console.log(`Successfully processed batch ${batchNumber}`);
-      }, {
-        timeout: 25000
-      })
+      )
       .catch((error) => {
         console.error(
           `Failed to process batch ${batchNumber}: ${error.message}`

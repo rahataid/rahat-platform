@@ -28,7 +28,7 @@ import {
   TPIIData,
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
-import { Queue } from 'bull';
+import { JobOptions, Queue } from 'bull';
 import { randomUUID, UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
@@ -43,7 +43,7 @@ import { VerificationService } from './verification.service';
 import { createBatches } from '../utils/array';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
-const BATCH_SIZE = 100;
+const BATCH_SIZE = 20;
 
 @Injectable()
 export class BeneficiaryService {
@@ -241,21 +241,21 @@ export class BeneficiaryService {
 
     let where: any = projectUUID
       ? {
-        deletedAt: null,
-        BeneficiaryProject:
-          projectUUID === 'NOT_ASSGNED'
-            ? {
-              none: {},
-            }
-            : {
-              some: {
-                projectId: projectUUID,
-              },
-            },
-      }
+          deletedAt: null,
+          BeneficiaryProject:
+            projectUUID === 'NOT_ASSGNED'
+              ? {
+                  none: {},
+                }
+              : {
+                  some: {
+                    projectId: projectUUID,
+                  },
+                },
+        }
       : {
-        deletedAt: null,
-      };
+          deletedAt: null,
+        };
 
     if (startDate && endDate) {
       where.createdAt = { gte: new Date(startDate), lte: new Date(endDate) };
@@ -1003,44 +1003,31 @@ export class BeneficiaryService {
         data: groupData,
         skipDuplicates: true,
       });
-
-      console.log('uniqueGroupKeys', uniqueGroupKeys);
     }
     // Break beneficiaries into batches
     const batches = createBatches(beneficiaries, BATCH_SIZE);
-    console.log('batches', batches);
-    // for (let i = 0; i < beneficiaries.length; i += BATCH_SIZE) {
-    //   const batch = beneficiaries.slice(i, i + BATCH_SIZE);
-    //   batches.push(batch);
-    // }
 
-    batches.map(async (batch, index) => {
-      const job = await this.beneficiaryQueue.add(
-        BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE,
-        {
-          data: batch,
-          projectUUID: allData?.projectUUID,
-          ignoreExisting: allData?.ignoreExisting,
-          totalBatches: batches.length,
-          batchNumber: index,
-          automatedGroupOption: allData?.automatedGroupOption,
-        },
-        {
-          jobId: randomUUID(),
-          attempts: 3,
-          removeOnComplete: true,
-          removeOnFail: true,
-        }
-      );
-      const result = await job.finished();
+    const bulkQueueData = batches.map((batch, index) => ({
+      name: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE,
+      data: {
+        data: batch,
+        projectUUID: allData?.projectUUID,
+        ignoreExisting: allData?.ignoreExisting,
+        totalBatches: batches.length,
+        batchNumber: index,
+        automatedGroupOption: allData?.automatedGroupOption,
+      },
+      opts: {
+        jobId: randomUUID(),
+        attempts: 3,
+        removeOnComplete: true,
+        removeOnFail: true,
+      },
+    }));
 
-      // Check if the result is successful
-      if (!result.success) {
-        throw new Error(`Batch ${index} failed`);
-      }
+    // Using addBulk to add multiple jobs to the queue
+    await this.beneficiaryQueue.addBulk(bulkQueueData);
 
-      return { success: true, job };
-    });
     console.log('Total Batches to be created:', batches.length);
     return {
       success: true,
@@ -1188,21 +1175,21 @@ export class BeneficiaryService {
 
     const where = projectUUID
       ? {
-        deletedAt: null,
-        beneficiaryGroupProject:
-          projectUUID === 'NOT_ASSGNED'
-            ? {
-              none: {},
-            }
-            : {
-              some: {
-                projectId: projectUUID,
-              },
-            },
-      }
+          deletedAt: null,
+          beneficiaryGroupProject:
+            projectUUID === 'NOT_ASSGNED'
+              ? {
+                  none: {},
+                }
+              : {
+                  some: {
+                    projectId: projectUUID,
+                  },
+                },
+        }
       : {
-        deletedAt: null,
-      };
+          deletedAt: null,
+        };
 
     console.time('group');
 
