@@ -21,8 +21,7 @@ import {
   validateDupicatePhone,
   validateDupicateWallet,
 } from './processor.utils';
-import { Prisma } from '@prisma/client';
-import { DefaultArgs } from '@prisma/client/runtime/library';
+import { canProcessJob } from '../utils/queueUtil';
 
 const BATCH_SIZE = 20;
 
@@ -34,7 +33,7 @@ export class BeneficiaryProcessor {
     private readonly prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private eventEmitter: EventEmitter2
-  ) {}
+  ) { }
 
   @Process(BeneficiaryJobs.UPDATE_STATS)
   async sample(job: Job<any>) {
@@ -109,17 +108,8 @@ export class BeneficiaryProcessor {
     throw new BadRequestException();
   }
 
-  @Process(BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE)
-  async importBeneficiaryLargeQueue({
-    data: {
-      data: beneficiaries,
-      projectUUID,
-      ignoreExisting,
-      batchNumber,
-      totalBatches,
-      automatedGroupOption,
-    },
-  }: Job<{
+  @Process({ name: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE, concurrency: 1 })
+  async importBeneficiaryLargeQueue(job: Job<{
     data: CreateBeneficiaryDto[];
     projectUUID: UUID;
     batchNumber: number;
@@ -129,6 +119,20 @@ export class BeneficiaryProcessor {
       groupKey: string;
     };
   }>) {
+
+    const {
+      data: beneficiaries,
+      projectUUID,
+      ignoreExisting,
+      batchNumber,
+      totalBatches,
+      automatedGroupOption,
+    } = job.data;
+
+    const canProceed = await canProcessJob(job, this.logger);
+    if (!canProceed) {
+      return; // Stop processing if the queue is busy
+    }
     console.log(`Processing batch ${batchNumber} of ${totalBatches}`);
 
     // Helper function to validate phone numbers and wallet addresses
@@ -352,6 +356,8 @@ export class BeneficiaryProcessor {
         //   await Promise.all(assignedGroupsToProject);
         // }
         console.log(`Successfully processed batch ${batchNumber}`);
+      }, {
+        timeout: 25000
       })
       .catch((error) => {
         console.error(

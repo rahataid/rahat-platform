@@ -241,21 +241,21 @@ export class BeneficiaryService {
 
     let where: any = projectUUID
       ? {
-          deletedAt: null,
-          BeneficiaryProject:
-            projectUUID === 'NOT_ASSGNED'
-              ? {
-                  none: {},
-                }
-              : {
-                  some: {
-                    projectId: projectUUID,
-                  },
-                },
-        }
+        deletedAt: null,
+        BeneficiaryProject:
+          projectUUID === 'NOT_ASSGNED'
+            ? {
+              none: {},
+            }
+            : {
+              some: {
+                projectId: projectUUID,
+              },
+            },
+      }
       : {
-          deletedAt: null,
-        };
+        deletedAt: null,
+      };
 
     if (startDate && endDate) {
       where.createdAt = { gte: new Date(startDate), lte: new Date(endDate) };
@@ -1188,21 +1188,21 @@ export class BeneficiaryService {
 
     const where = projectUUID
       ? {
-          deletedAt: null,
-          beneficiaryGroupProject:
-            projectUUID === 'NOT_ASSGNED'
-              ? {
-                  none: {},
-                }
-              : {
-                  some: {
-                    projectId: projectUUID,
-                  },
-                },
-        }
+        deletedAt: null,
+        beneficiaryGroupProject:
+          projectUUID === 'NOT_ASSGNED'
+            ? {
+              none: {},
+            }
+            : {
+              some: {
+                projectId: projectUUID,
+              },
+            },
+      }
       : {
-          deletedAt: null,
-        };
+        deletedAt: null,
+      };
 
     console.time('group');
 
