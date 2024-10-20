@@ -310,16 +310,23 @@ export class BeneficiaryProcessor {
               const projectPayload = {
                 uuid: b.uuid,
                 walletAddress: b.walletAddress,
-                extras: b?.extras || null,
+                extras: {
+                  location: b?.location,
+                  ...(typeof b.extras === 'object' ? b.extras : {}),
+                },
+
                 isVerified: b?.isVerified,
               };
+              console.log('projectPayload', projectPayload);
               return handleMicroserviceCall({
                 client: this.client.send(
                   { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUUID },
                   projectPayload
                 ),
-                onSuccess(response) {
-                  console.log('response', response);
+                onSuccess: (response) => {
+                  this.logger.log(
+                    `Successfully assigned beneficiary ${b.uuid} to project ${projectUUID}`
+                  );
                   return response;
                 },
                 onError(error) {
