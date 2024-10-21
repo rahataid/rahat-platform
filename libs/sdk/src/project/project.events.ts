@@ -74,5 +74,9 @@ export const JOBS = {
     CREATE_BULK_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin_bulk'
 
   },
+  REPORTING: {
+    LIST: 'rahat.jobs.reporting.list',
+    GET: 'rahat.jobs.reporting.get',
+  },
 
 };

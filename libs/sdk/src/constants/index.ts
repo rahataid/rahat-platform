@@ -290,7 +290,8 @@ export const MS_ACTIONS = {
     CREATE_WALKIN: 'rpProject.walkin.create',
     GET_WALKIN: 'rpProject.walkin.get',
     GET_ALL_WALKIN: 'rpProject.walkin.getAll',
-    CREATE_BULK_WALKIN_BENEFICIARIES: "rpProject.walkin.createBulk"
+    CREATE_BULK_WALKIN_BENEFICIARIES: "rpProject.walkin.createBulk",
+    LIST_REPORTING: 'rpProject.reporting.list',
 
   }
 };
