@@ -153,10 +153,7 @@ export class ProjectService {
 
   async executeMetaTxRequest(params: any, uuid: string) {
 
-    // To test in project side
-    // return this.client.send({ cmd: 'rahat.jobs.metatxn.call.project', uuid}, { walletAddress: '0xE21cC3e069C36Ebe495F06F083De1309cA36f015' }).pipe(timeout(MS_TIMEOUT))
-
-    const res = await this.metaTransactionQueue.add(JOBS.META_TRANSACTION.ADD_QUEUE, { params, uuid, client: this.client })
+    const res = await this.metaTransactionQueue.add(JOBS.META_TRANSACTION.ADD_QUEUE, { params, uuid })
 
     return { txHash: res.data.hash, status: res.data.status }
   }
