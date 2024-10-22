@@ -19,6 +19,7 @@ payload:{
 metatx:
 }
 trigger:{
+projectUuid: "",
 event_name:””,
 payload:””
 }

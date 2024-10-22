@@ -181,7 +181,6 @@ export class ProjectService {
       [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () => await this.executeMetaTxRequest(payload, uuid),
     };
 
-
     const actions = {
       ...cambodiaActions,
       ...projectActions,
@@ -195,7 +194,6 @@ export class ProjectService {
       ...cvaActions,
       ...rpActions
     };
-
 
     const actionFunc = actions[action];
     if (!actionFunc) {

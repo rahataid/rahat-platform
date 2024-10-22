@@ -56,14 +56,18 @@ metaTxnFlow().catch((e) => {
 
 // Utility functions
 async function getSettings() {
-    // Issue: Need to fix seed script (forwarder and token address is incorrect)
     const contract = await prismaClient.setting.findUnique({
         where: {
             name: 'CONTRACTS'
         }
     })
+    const rahatTokenAddress = "0xFFC9B300d18B4Be060e4c8A908593024Cd11b0B3";
+    const erc721ForwarderAddress = "0x4565Df874684d086fe279797BAA672DE51e54CF5";
+
+    // Issue: Need to fix seed script (forwarder and token address is incorrect)
+    // const erc721ForwarderAddress =  contract?.value?.ERC2771FORWARDER.ADDRESS
     //@ts-ignore
-    return { rahatTokenAddress: contract?.value?.RAHATTOKEN.ADDRESS, erc721ForwarderAddress: contract?.value?.ERC2771FORWARDER.ADDRESS };
+    return { rahatTokenAddress, erc721ForwarderAddress: erc721ForwarderAddress };
 }
 
 async function requestClaims(walletAddresses: string[], vendorMnemonics: string) {
@@ -101,10 +105,12 @@ async function requestClaims(walletAddresses: string[], vendorMnemonics: string)
             },
         }, {
             headers: {
-                Authorization
+                Authorization: `Bearer ${Authorization}`
             }
         })
     })
+
+    console.log(`Requested claim for: ${walletAddresses}`)
 }
 
 async function processTokenClaim(walletAddresses: string[], vendorMnemonics: string) {
@@ -140,11 +146,11 @@ async function processTokenClaim(walletAddresses: string[], vendorMnemonics: str
             },
         }, {
             headers: {
-                Authorization
+                Authorization: `Bearer ${Authorization}`
             }
         })
     })
-
+    console.log(`Processed claim for: ${walletAddresses}`)
 }
 
 async function getMetaTxRequest(
@@ -257,12 +263,9 @@ const types = mapValues(
 );
 
 export async function createContractSigner(abi: any, address: string) {
-
-    //  Create wallet from private key
     const provider = new JsonRpcProvider(rpcUrl);
     const privateKey = signerPrivateKey;
     const wallet = new ethers.Wallet(privateKey, provider);
-    //  Create an instance of the contract
     const contracts = new Contract(address, abi, wallet);
     return contracts
 }
@@ -308,5 +311,3 @@ async function signMessage({ wallet, message }: any) {
 };
 
 
-// const rahatTokenAddress = "0xFFC9B300d18B4Be060e4c8A908593024Cd11b0B3";
-// const erc721ForwarderAddress = "0x4565Df874684d086fe279797BAA672DE51e54CF5";
