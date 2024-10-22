@@ -74,6 +74,7 @@ export const JOBS = {
     GET_ALL_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_all_walkin',
     CREATE_BULK_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin_bulk',
     UPDATE_BENEFICIARY_REDEMPTION: 'rahat.jobs.beneficiary.update_redemption',
+    LIST_BENEFICIARY_REIMBURSEMENTS:'rahat.jobs.beneficiary.list_reimbursements',
 
   },
   REPORTING: {

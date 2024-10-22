@@ -230,7 +230,8 @@ export const rpActions: ProjectActionFunc = {
 
   [MS_ACTIONS.RPPROJECT.UPDATE_BENEFICIARY]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.BENEFICIARY.UPDATE_BENEFICIARY_REDEMPTION, uuid }, payload),
-  
-  
+
+  [MS_ACTIONS.RPPROJECT.LIST_BENEFICIARY_REIMBURSEMENTS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.LIST_BENEFICIARY_REIMBURSEMENTS, uuid }, payload),
 
 };

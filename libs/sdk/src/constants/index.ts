@@ -293,7 +293,8 @@ export const MS_ACTIONS = {
     GET_ALL_WALKIN: 'rpProject.walkin.getAll',
     CREATE_BULK_WALKIN_BENEFICIARIES: "rpProject.walkin.createBulk",
     LIST_REPORTING: 'rpProject.reporting.list',
-    UPDATE_BENEFICIARY:'rpProject.beneficiary.update'
+    UPDATE_BENEFICIARY:'rpProject.beneficiary.update',
+    LIST_BENEFICIARY_REIMBURSEMENTS: 'rpProject.beneficiary.listReimbursements',
 
 
   }
