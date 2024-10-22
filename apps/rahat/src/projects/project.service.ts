@@ -170,173 +170,175 @@ export class ProjectService {
                 this.sendWhatsAppMsg(response, cmd, payload);
               })
             );
-        } catch (err) {
-          console.log('Err', err);
-        }
+        })
+      )
+    } catch (err) {
+      console.log('Err', err);
     }
+  }
 
   async executeMetaTxRequest(params: any, uuid: string) {
 
-      const res = await this.metaTransactionQueue.add(JOBS.META_TRANSACTION.ADD_QUEUE, { params, uuid })
+    const res = await this.metaTransactionQueue.add(JOBS.META_TRANSACTION.ADD_QUEUE, { params, uuid })
 
-      return { txHash: res.data.hash, status: res.data.status }
-    }
+    return { txHash: res.data.hash, status: res.data.status }
+  }
 
   async sendSucessMessage(uuid, payload) {
-      const { benId } = payload
+    const { benId } = payload
 
-      this.eventEmitter.emit(
-        ProjectEvents.REDEEM_VOUCHER,
-        benId
-      );
+    this.eventEmitter.emit(
+      ProjectEvents.REDEEM_VOUCHER,
+      benId
+    );
 
-      return this.client.send({ cmd: 'rahat.jobs.project.voucher_claim', uuid }, {}).pipe(timeout(MS_TIMEOUT))
+    return this.client.send({ cmd: 'rahat.jobs.project.voucher_claim', uuid }, {}).pipe(timeout(MS_TIMEOUT))
 
-      this.eventEmitter.emit(ProjectEvents.REDEEM_VOUCHER, benId);
-      return this.client
-        .send({ cmd: 'rahat.jobs.project.voucher_claim', uuid }, {})
-        .pipe(timeout(MS_TIMEOUT));
-    }
+    this.eventEmitter.emit(ProjectEvents.REDEEM_VOUCHER, benId);
+    return this.client
+      .send({ cmd: 'rahat.jobs.project.voucher_claim', uuid }, {})
+      .pipe(timeout(MS_TIMEOUT));
+  }
 
   async handleProjectActions({ uuid, action, payload, user }) {
-      console.log({ uuid, action, payload });
-      //Note: This is a temporary solution to handle metaTx actions
-      const metaTxActions = {
-        [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload, uuid),
-        [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () => await this.executeMetaTxRequest(payload, uuid),
-        [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () => await this.sendSucessMessage(uuid, payload),
-        [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () => await this.executeMetaTxRequest(payload, uuid),
-        [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () => await this.executeMetaTxRequest(payload, uuid),
-      };
+    console.log({ uuid, action, payload });
+    //Note: This is a temporary solution to handle metaTx actions
+    const metaTxActions = {
+      [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload, uuid),
+      [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () => await this.executeMetaTxRequest(payload, uuid),
+      [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () => await this.sendSucessMessage(uuid, payload),
+      [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () => await this.executeMetaTxRequest(payload, uuid),
+      [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () => await this.executeMetaTxRequest(payload, uuid),
+    };
 
-      const actions = {
-        ...cambodiaActions,
-        ...projectActions,
-        ...elActions,
-        ...aaActions,
-        ...beneficiaryActions,
-        ...vendorActions,
-        ...settingActions,
-        ...metaTxActions,
-        ...c2cActions,
-        ...cvaActions,
-        ...rpActions,
-      };
+    const actions = {
+      ...cambodiaActions,
+      ...projectActions,
+      ...elActions,
+      ...aaActions,
+      ...beneficiaryActions,
+      ...vendorActions,
+      ...settingActions,
+      ...metaTxActions,
+      ...c2cActions,
+      ...cvaActions,
+      ...rpActions,
+    };
 
-      const actionFunc = actions[action];
-      if (!actionFunc) {
-        throw new Error('Please provide a valid action!');
-      }
-      return await actionFunc(uuid, payload, (...args) =>
-        this.sendCommand(args[0], args[1], args[2], this.client, action, user)
-      );
+    const actionFunc = actions[action];
+    if (!actionFunc) {
+      throw new Error('Please provide a valid action!');
     }
+    return await actionFunc(uuid, payload, (...args) =>
+      this.sendCommand(args[0], args[1], args[2], this.client, action, user)
+    );
+  }
 
   async importKoboBeneficiary(uuid: UUID, data: any) {
-      const benef: any = this.mapKoboFields(data);
-      if (!benef.phone) throw new Error('Phone number is required!');
-      if (benef.gender) benef.gender = benef.gender.toUpperCase();
-      if (benef.type) benef.type = benef.type.toUpperCase();
-      if (benef.age) benef.age = parseInt(benef.age);
-      if (benef.leadInterests) {
-        benef.leadInterests = benef.leadInterests
-          .split(' ')
-          .map((item: string) => item.trim().toUpperCase());
-      }
-      benef.phone = `+${benef.phone}`;
-      const coords = splitCoordinates(benef.coordinates);
-      const beneficiary = { ...benef, ...coords };
-      const payload = createExtrasAndPIIData(beneficiary);
-      // 1. Save to Kobo Import Logs
-      const row = await this.prisma.koboBeneficiary.create({
-        data: beneficiary,
-      });
-      const piiExist = await this.checkPiiPhone(benef.phone);
-      if (piiExist) {
-        const { piiData, ...rest } = payload;
-        return this.client
-          .send(
-            { cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE_DISCARDED, uuid },
-            { ...piiData, ...rest }
-          )
-          .pipe(timeout(MS_TIMEOUT));
-      }
-      // 2. Save to Beneficiary and PII
-      return this.client.send({ cmd: BeneficiaryJobs.CREATE }, payload).pipe(
-        timeout(MS_TIMEOUT),
-        switchMap((response) => {
-          const payload = {
-            uuid: response.uuid,
-            phone: benef.phone,
-            walletAddress: response.walletAddress,
-            type: response.extras?.type || 'UNKNOWN',
-            extras: response.extras,
-          };
-          // 3. Send to project MS
-          return this.client
-            .send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, payload)
-            .pipe(
-              timeout(MS_TIMEOUT),
-              tap((response) => {
-                // 4. Update status and addToProject
-                return this.addToProjectAndUpdate({
-                  projectId: uuid,
-                  beneficiaryId: payload.uuid,
-                  importId: row.uuid,
-                });
-              })
-            );
-        })
-      );
+    const benef: any = this.mapKoboFields(data);
+    if (!benef.phone) throw new Error('Phone number is required!');
+    if (benef.gender) benef.gender = benef.gender.toUpperCase();
+    if (benef.type) benef.type = benef.type.toUpperCase();
+    if (benef.age) benef.age = parseInt(benef.age);
+    if (benef.leadInterests) {
+      benef.leadInterests = benef.leadInterests
+        .split(' ')
+        .map((item: string) => item.trim().toUpperCase());
     }
-
-  async addToProjectAndUpdate({ projectId, beneficiaryId, importId }) {
-      await this.updateImportStatus(importId, KoboBeneficiaryStatus.SUCCESS);
-      return this.prisma.beneficiaryProject.create({
-        data: {
-          beneficiaryId: beneficiaryId,
-          projectId: projectId,
-        },
-      });
-    }
-
-  async updateImportStatus(uuid: string, status: KoboBeneficiaryStatus) {
-      return this.prisma.koboBeneficiary.update({
-        where: {
-          uuid: uuid,
-        },
-        data: {
-          status,
-        },
-      });
-    }
-
-  async checkPiiPhone(phone: string) {
-      return this.prisma.beneficiaryPii.findUnique({
-        where: {
-          phone,
-        },
-      });
-    }
-
-    mapKoboFields(payload: any) {
-      const mappedPayload = {};
-      const meta = {};
-
-      for (const key in payload) {
-        if (KOBO_FIELD_MAPPINGS[key]) {
-          mappedPayload[KOBO_FIELD_MAPPINGS[key]] = payload[key];
-        } else {
-          meta[key] = payload[key];
-        }
-      }
-      return { ...mappedPayload, meta };
-    }
-
-  async sendTestMsg(uuid: UUID) {
-      console.log({ uuid });
+    benef.phone = `+${benef.phone}`;
+    const coords = splitCoordinates(benef.coordinates);
+    const beneficiary = { ...benef, ...coords };
+    const payload = createExtrasAndPIIData(beneficiary);
+    // 1. Save to Kobo Import Logs
+    const row = await this.prisma.koboBeneficiary.create({
+      data: beneficiary,
+    });
+    const piiExist = await this.checkPiiPhone(benef.phone);
+    if (piiExist) {
+      const { piiData, ...rest } = payload;
       return this.client
-        .send({ cmd: 'rahat.jobs.test', uuid }, { msg: 'This is test msg!' })
+        .send(
+          { cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE_DISCARDED, uuid },
+          { ...piiData, ...rest }
+        )
         .pipe(timeout(MS_TIMEOUT));
     }
+    // 2. Save to Beneficiary and PII
+    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, payload).pipe(
+      timeout(MS_TIMEOUT),
+      switchMap((response) => {
+        const payload = {
+          uuid: response.uuid,
+          phone: benef.phone,
+          walletAddress: response.walletAddress,
+          type: response.extras?.type || 'UNKNOWN',
+          extras: response.extras,
+        };
+        // 3. Send to project MS
+        return this.client
+          .send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, payload)
+          .pipe(
+            timeout(MS_TIMEOUT),
+            tap((response) => {
+              // 4. Update status and addToProject
+              return this.addToProjectAndUpdate({
+                projectId: uuid,
+                beneficiaryId: payload.uuid,
+                importId: row.uuid,
+              });
+            })
+          );
+      })
+    );
   }
+
+  async addToProjectAndUpdate({ projectId, beneficiaryId, importId }) {
+    await this.updateImportStatus(importId, KoboBeneficiaryStatus.SUCCESS);
+    return this.prisma.beneficiaryProject.create({
+      data: {
+        beneficiaryId: beneficiaryId,
+        projectId: projectId,
+      },
+    });
+  }
+
+  async updateImportStatus(uuid: string, status: KoboBeneficiaryStatus) {
+    return this.prisma.koboBeneficiary.update({
+      where: {
+        uuid: uuid,
+      },
+      data: {
+        status,
+      },
+    });
+  }
+
+  async checkPiiPhone(phone: string) {
+    return this.prisma.beneficiaryPii.findUnique({
+      where: {
+        phone,
+      },
+    });
+  }
+
+  mapKoboFields(payload: any) {
+    const mappedPayload = {};
+    const meta = {};
+
+    for (const key in payload) {
+      if (KOBO_FIELD_MAPPINGS[key]) {
+        mappedPayload[KOBO_FIELD_MAPPINGS[key]] = payload[key];
+      } else {
+        meta[key] = payload[key];
+      }
+    }
+    return { ...mappedPayload, meta };
+  }
+
+  async sendTestMsg(uuid: UUID) {
+    console.log({ uuid });
+    return this.client
+      .send({ cmd: 'rahat.jobs.test', uuid }, { msg: 'This is test msg!' })
+      .pipe(timeout(MS_TIMEOUT));
+  }
+}
