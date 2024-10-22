@@ -1,7 +1,7 @@
 import { Process, Processor } from "@nestjs/bull";
 import { Inject, Logger } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
-import { BQUEUE, MS_TIMEOUT } from "@rahataid/sdk";
+import { BQUEUE, MS_TIMEOUT, ProjectContants } from "@rahataid/sdk";
 import { JOBS } from "@rahataid/sdk/project/project.events";
 import { timeout } from "rxjs";
 import { ERC2771FORWARDER } from "../../utils/contracts";
@@ -9,10 +9,9 @@ import { createContractSigner, getBlocktimeStamp } from "../../utils/web3";
 
 @Processor(BQUEUE.META_TXN)
 export class MetaTransationProcessor {
-
     private readonly logger = new Logger(MetaTransationProcessor.name);
-
-    constructor(@Inject('RAHAT_CLIENT') private readonly client: ClientProxy) { }
+    constructor(
+        @Inject(ProjectContants.ELClient) private readonly client: ClientProxy) { }
 
     @Process(JOBS.META_TRANSACTION.ADD_QUEUE)
     async processMetaTxn(job: any) {
