@@ -274,6 +274,7 @@ export const MS_ACTIONS = {
     UPDATE_REDEMPTION: 'rpProject.updateRedemption',
     LIST_REDEMPTION: 'rpProject.listRedemption',
     GET_VENDOR_REDEMPTION: 'rpProject.vendorRedemption',
+    GET_REDEMPTION:'rpProject.getRedemption',
     GENERATE_OTP_HASH: 'rpProject.generateOtpHash',
     GET_OFFLINE_BENEFICIARIES: "rpProject.getOfflineBeneficiaries",
     SYNC_OFFLINE_BENEFICIARIES: "rpProject.syncOfflineBeneficiaries",
@@ -292,6 +293,8 @@ export const MS_ACTIONS = {
     GET_ALL_WALKIN: 'rpProject.walkin.getAll',
     CREATE_BULK_WALKIN_BENEFICIARIES: "rpProject.walkin.createBulk",
     LIST_REPORTING: 'rpProject.reporting.list',
+    UPDATE_BENEFICIARY:'rpProject.beneficiary.update'
+
 
   }
 };
