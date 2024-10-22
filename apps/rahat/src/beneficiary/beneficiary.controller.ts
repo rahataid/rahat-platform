@@ -52,6 +52,7 @@ import { catchError, throwError, timeout } from 'rxjs';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { DocParser } from './parser';
+import { removeSpaces } from '../utils';
 
 function getDateInfo(dateString) {
   try {
@@ -263,7 +264,7 @@ export class BeneficiaryController {
       walletAddress: b['Wallet Address'],
       piiData: {
         name: b['Name*'] || 'Unknown',
-        phone: b['Whatsapp Number*'] || b['Phone Number*'],
+        phone: removeSpaces(b['Whatsapp Number*'] || b['Phone Number*']),
         extras: {},
       },
     }));

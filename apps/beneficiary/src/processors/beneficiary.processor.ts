@@ -248,7 +248,7 @@ export class BeneficiaryProcessor {
 
           // for automated grouping
           let createdBenGroups;
-          if (automatedGroupOption.groupKey) {
+          if (automatedGroupOption?.groupKey) {
             const uniqueGroup = [
               ...new Set(
                 beneficiaries.map(
