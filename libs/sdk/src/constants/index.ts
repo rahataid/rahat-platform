@@ -33,7 +33,7 @@ export const SUBJECTS = {
   BENEFICIARY: 'beneficiary',
   PROJECT: 'project',
   VENDOR: 'vendor',
-  PUBLIC: 'public'
+  PUBLIC: 'public',
 };
 
 export const APP = {
@@ -42,27 +42,40 @@ export const APP = {
 
 export const MS_ACTIONS = {
   CAMBODIA: {
+    APP: { STATS: 'cambodia.app.stats' },
     BENEFICIARY: {
+      STATS: 'cambodia.beneficiary.stats',
+      LEAD_CONVERSION: 'cambodia.beneficiary.lead_conversion',
       CREATE: 'cambodia.beneficiary.create',
       LIST: 'cambodia.beneficiary.list',
+      LIST_DISCARDED: 'cambodia.beneficiary.list_discarded',
       GET: 'cambodia.beneficiary.get',
       DELETE: 'cambodia.beneficiary.delete',
       ADD_TO_PROJECT: 'cambodia.beneficiary.add_to_project',
     },
     CHW: {
+      STATS: 'cambodia.chw.stats',
       CREATE: 'cambodia.chw.create',
       LIST: 'cambodia.chw.list',
       GET: 'cambodia.chw.get',
       UPDATE: 'cambodia.chw.update',
       DELETE: 'cambodia.chw.delete',
+      LIST_BY_VENDOR: 'cambodia.chw.list_by_vendor',
+    },
+    COMMISISION_SCHEME: {
+      CREATE: 'cambodia.commission_scheme.create',
+      LIST: 'cambodia.commission_scheme.list',
+      GET_CURRENT: 'cambodia.commission_scheme.get_current',
     },
     VENDOR: {
+      STATS: 'cambodia.vendor.stats',
+      HEALTH_WORKERS: 'cambodia.vendor.health_workers',
+      LEAD_CONVERSIONS: 'cambodia.vendor.lead_conversions',
       LIST: 'cambodia.vendor.list',
       GET: 'cambodia.vendor.get',
       UPDATE_IS_VERIFIED: 'cambodia.vendor.update_is_verified',
       ASSIGN_TO_PROJECT: 'cambodia.vendor.assign_to_project',
     },
-
   },
 
   PROJECT: {
@@ -139,8 +152,8 @@ export const MS_ACTIONS = {
         TRIGGER: 'aaProject.activities.communication.trigger',
         SESSION_LOGS: 'aa.activities.communication.sessionLogs',
         RETRY_FAILED: 'aa.activities.communication.retryFailed',
-        GET_STATS: 'aa.activities.communication.getStats'
-      }
+        GET_STATS: 'aa.activities.communication.getStats',
+      },
     },
     ACTIVITY_CATEGORIES: {
       GET_ALL: 'aaProject.activityCategories.getAll',
@@ -262,12 +275,14 @@ export const MS_ACTIONS = {
     UPDATE_REDEMPTION: 'rpProject.updateRedemption',
     LIST_REDEMPTION: 'rpProject.listRedemption',
     GET_VENDOR_REDEMPTION: 'rpProject.vendorRedemption',
+    GET_REDEMPTION:'rpProject.getRedemption',
     GENERATE_OTP_HASH: 'rpProject.generateOtpHash',
-    GET_OFFLINE_BENEFICIARIES: "rpProject.getOfflineBeneficiaries",
-    SYNC_OFFLINE_BENEFICIARIES: "rpProject.syncOfflineBeneficiaries",
-    GET_OFFLINE_VENDORS: "rpProject.getOfflineVendors",
-    GET_OFFLINE_SINGLE_VENDOR: "rpProject.getOfflineSingleVendor",
-    SAVE_SYNCED_BENEFICIARIES_TO_VENDOR: "rpProject.saveSyncedBeneficiariesToVendor",
+    GET_OFFLINE_BENEFICIARIES: 'rpProject.getOfflineBeneficiaries',
+    SYNC_OFFLINE_BENEFICIARIES: 'rpProject.syncOfflineBeneficiaries',
+    GET_OFFLINE_VENDORS: 'rpProject.getOfflineVendors',
+    GET_OFFLINE_SINGLE_VENDOR: 'rpProject.getOfflineSingleVendor',
+    SAVE_SYNCED_BENEFICIARIES_TO_VENDOR:
+      'rpProject.saveSyncedBeneficiariesToVendor',
     ADD_GROUP: 'rpProject.beneficiary.addGroup',
     GET_ALL_GROUPS: 'rpProject.beneficiary.getAllGroups',
     GET_ONE_GROUP: 'rpProject.beneficiary.getOneGroup',
@@ -278,7 +293,9 @@ export const MS_ACTIONS = {
     CREATE_WALKIN: 'rpProject.walkin.create',
     GET_WALKIN: 'rpProject.walkin.get',
     GET_ALL_WALKIN: 'rpProject.walkin.getAll',
-    CREATE_BULK_WALKIN_BENEFICIARIES: "rpProject.walkin.createBulk"
-
+    CREATE_BULK_WALKIN_BENEFICIARIES: "rpProject.walkin.createBulk",
+    LIST_REPORTING: 'rpProject.reporting.list',
+    UPDATE_BENEFICIARY:'rpProject.beneficiary.update',
+    LIST_BENEFICIARY_REIMBURSEMENTS: 'rpProject.beneficiary.listReimbursements',
   }
 };
