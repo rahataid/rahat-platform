@@ -220,7 +220,10 @@ export const rpActions: ProjectActionFunc = {
     sendCommand({ cmd: ProjectJobs.BENEFICIARY.GET_ALL_WALKIN_BENEFICIARY, uuid }, payload),
 
   [MS_ACTIONS.RPPROJECT.CREATE_BULK_WALKIN_BENEFICIARIES]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: ProjectJobs.BENEFICIARY.CREATE_BULK_WALKIN_BENEFICIARY, uuid }, payload)
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.CREATE_BULK_WALKIN_BENEFICIARY, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.SYNC_OFFLINE_TRANSACTIONS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.SYNC_OFFLINE_TRANSACTIONS, uuid }, payload)
 
 
 };

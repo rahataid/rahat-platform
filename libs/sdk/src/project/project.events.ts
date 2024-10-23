@@ -72,6 +72,8 @@ export const JOBS = {
     GET_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_walkin',
     GET_ALL_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_all_walkin',
     CREATE_BULK_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin_bulk',
+    SYNC_OFFLINE_TRANSACTIONS: 'rahat.jobs.beneficiary.sync_offline_transactions',
+
 
   },
   META_TRANSACTION: {
