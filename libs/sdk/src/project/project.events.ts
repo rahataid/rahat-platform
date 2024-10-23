@@ -24,6 +24,7 @@ export const JOBS = {
   UPDATE_REDEMPTION: 'rahat.jobs.project.update_redemption',
   LIST_REDEMPTION: 'rahat.jobs.project.list_redemption',
   GET_VENDOR_REDEMPTION: 'rahat.jobs.project.get_redemption_vendor',
+  GET_REDEMPTION: 'rahat.jobs.project.get_redemption',
   GET_ALL_STATS: 'rahat.jobs.project.get_all_stats',
   REQUEST_CLAIM: 'rahat.jobs.project.request_claim',
   GET_VENDOR_STATS: 'rahat.jobs.project.get_vendor_stats',
@@ -71,8 +72,14 @@ export const JOBS = {
     CREATE_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin',
     GET_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_walkin',
     GET_ALL_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_all_walkin',
-    CREATE_BULK_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin_bulk'
+    CREATE_BULK_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin_bulk',
+    UPDATE_BENEFICIARY_REDEMPTION: 'rahat.jobs.beneficiary.update_redemption',
+    LIST_BENEFICIARY_REIMBURSEMENTS:'rahat.jobs.beneficiary.list_reimbursements',
 
+  },
+  REPORTING: {
+    LIST: 'rahat.jobs.reporting.list',
+    GET: 'rahat.jobs.reporting.get',
   },
 
 };
