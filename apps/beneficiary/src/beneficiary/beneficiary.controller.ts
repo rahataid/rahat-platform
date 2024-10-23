@@ -61,15 +61,15 @@ export class BeneficiaryController {
     );
   }
 
-  @MessagePattern({
-    cmd: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE,
-  })
-  createBulkWithQueue(@Payload() queueData) {
-    const payloadData = Array.isArray(queueData?.data)
-      ? queueData?.data
-      : queueData?.payload;
-    return this.service.createBulkWithQueue(payloadData, queueData);
-  }
+  // @MessagePattern({
+  //   cmd: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE,
+  // })
+  // createBulkWithQueue(@Payload() queueData) {
+  //   const payloadData = Array.isArray(queueData?.data)
+  //     ? queueData?.data
+  //     : queueData?.payload;
+  //   return this.service.createBulkWithQueue(payloadData, queueData);
+  // }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST })
   async list(dto: ListBeneficiaryDto) {
