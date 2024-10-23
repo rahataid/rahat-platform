@@ -471,7 +471,11 @@ export class BeneficiaryService {
 
   async findOneByPhone(phone: string) {
     const piiData = await this.rsprisma.beneficiaryPii.findFirst({
-      where: { phone },
+      where: {
+        phone: {
+          contains: phone,
+        },
+      },
     });
     if (!piiData) return null;
     const beneficiary = await this.rsprisma.beneficiary.findUnique({
@@ -1081,9 +1085,21 @@ export class BeneficiaryService {
       beneficiaryId: d.uuid,
     }));
 
-    return await this.prisma.groupedBeneficiaries.createMany({
-      data: createPayload,
-    });
+    const groupedBeneficiaries =
+      await this.prisma.groupedBeneficiaries.createMany({
+        data: createPayload,
+      });
+
+    //assign to project
+    if (dto?.projectId) {
+      const payload = {
+        beneficiaryGroupId: group.uuid,
+        projectId: dto.projectId,
+      };
+      await (await this.assignBeneficiaryGroupToProject(payload)).toPromise();
+    }
+
+    return groupedBeneficiaries;
   }
 
   async getOneGroup(uuid: string) {
@@ -1379,7 +1395,6 @@ export class BeneficiaryService {
 
       //2.Save beneficiary group to project
       await this.saveBeneficiaryGroupToProject(dto);
-
       //3. Sync beneficiary to project
       return this.client.send(
         { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
