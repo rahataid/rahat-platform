@@ -76,6 +76,9 @@ export const JOBS = {
     UPDATE_BENEFICIARY_REDEMPTION: 'rahat.jobs.beneficiary.update_redemption',
     LIST_BENEFICIARY_REIMBURSEMENTS:
       'rahat.jobs.beneficiary.list_reimbursements',
+    SYNC_OFFLINE_TRANSACTIONS: 'rahat.jobs.beneficiary.sync_offline_transactions',
+
+
   },
   META_TRANSACTION: {
     ADD_QUEUE: 'rahat.jobs.metatxn.add',

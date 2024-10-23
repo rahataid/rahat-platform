@@ -24,7 +24,6 @@ import { switchMap, tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
 import { createExtrasAndPIIData, splitCoordinates } from '../utils';
 import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
-import { createContractSigner } from '../utils/web3';
 import {
   aaActions,
   beneficiaryActions,
@@ -47,7 +46,7 @@ export class ProjectService {
     private requestContextService: RequestContextService,
     @Inject('RAHAT_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.META_TXN) private readonly metaTransactionQueue: Queue
-  ) {}
+  ) { }
 
   async create(data: CreateProjectDto) {
     // TODO: refactor to proper validator
@@ -148,9 +147,6 @@ export class ProjectService {
     user: any
   ) {
     try {
-      // console.log("here")
-      // const user = this.requestContextService.getUser()
-      // console.log("user", user)
 
       const requiresUser = userRequiredActions.has(action);
 
@@ -165,6 +161,7 @@ export class ProjectService {
             this.sendWhatsAppMsg(response, cmd, payload);
           })
         );
+
     } catch (err) {
       console.log('Err', err);
     }
