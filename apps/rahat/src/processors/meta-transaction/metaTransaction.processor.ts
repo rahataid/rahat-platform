@@ -1,26 +1,25 @@
 import { Process, Processor } from "@nestjs/bull";
-import { Inject } from "@nestjs/common";
+import { Inject, Logger } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
-import { BQUEUE, ProjectContants } from "@rahataid/sdk";
+import { BQUEUE, MS_TIMEOUT, ProjectContants } from "@rahataid/sdk";
 import { JOBS } from "@rahataid/sdk/project/project.events";
-import { lastValueFrom } from "rxjs";
+import { timeout } from "rxjs";
 import { ERC2771FORWARDER } from "../../utils/contracts";
-import { createContractSigner } from "../../utils/web3";
+import { createContractSigner, getBlocktimeStamp } from "../../utils/web3";
 
 @Processor(BQUEUE.META_TXN)
 export class MetaTransationProcessor {
-
+    private readonly logger = new Logger(MetaTransationProcessor.name);
     constructor(
         @Inject(ProjectContants.ELClient) private readonly client: ClientProxy) { }
 
     @Process(JOBS.META_TRANSACTION.ADD_QUEUE)
     async processMetaTxn(job: any) {
+        this.logger.log(`Added job ${job.id} to queue`)
+        await sleep(3000);
         const { params, uuid } = job.data;
 
-        const { metaTxRequest, txnUuid } = params;
-
-        // Store txn details in project
-        return lastValueFrom(this.client.send({ cmd: 'rahat.jobs.metatxn.call.project', uuid }, {}));
+        const { metaTxRequest, txnUuid, txnDetails } = params;
 
         const forwarderContract = await createContractSigner(
             ERC2771FORWARDER,
@@ -30,15 +29,30 @@ export class MetaTransationProcessor {
         metaTxRequest.gas = BigInt(metaTxRequest.gas);
         metaTxRequest.nonce = BigInt(metaTxRequest.nonce);
         metaTxRequest.value = BigInt(metaTxRequest.value);
+        try {
+            const tx = await forwarderContract.execute(metaTxRequest);
 
-        const tx = await forwarderContract.execute(metaTxRequest);
-        const res = await tx.wait();
+            const res = await tx.wait()
+            const blockTimestamp = await getBlocktimeStamp(res.hash)
+            const payload: any = { res, vendorAddress: metaTxRequest.from }
 
-        // Send success txn to project
+            if (txnUuid) {
+                payload.txnUuid = txnUuid;
+                payload.txnDetails = txnDetails;
+                payload.blockTimestamp = blockTimestamp;
+            }
 
-        return res;
+            // Todo: Remove .toPromise()
+            await this.client.send({ cmd: JOBS.META_TRANSACTION.PROJECT_CALL, uuid }, payload)
+                .pipe(timeout(MS_TIMEOUT)).toPromise();
+            console.log(res)
+            this.logger.warn(`Processed job ${job.id}`)
+            return res;
+        } catch (error) {
+            console.log(error)
+        }
+
     }
-
-
-
 }
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

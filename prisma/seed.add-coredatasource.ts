@@ -4,6 +4,7 @@ import * as readline from 'readline';
 
 const prisma = new PrismaService();
 const prismaClient = new PrismaClient();
+
 // Setup readline interface
 const rl = readline.createInterface({
   input: process.stdin,
@@ -23,69 +24,81 @@ const projectStats = (url: string) => {
     },
     ui: [
       {
-        title: '',
         fields: [
           {
             type: 'dataCard',
             props: {},
-            title: 'Banked Beneficiaries',
+            title: 'Total Beneficiaries',
             colSpan: 1,
-            dataMap: `BENEFICIARY_BANKEDSTATUS.BANKED`,
+            dataMap: `BENEFICIARY_TOTAL`,
             dataSrc: 'source2',
             rowSpan: 1,
+            icon: 'UsersRound',
           },
-          {
-            type: 'dataCard',
-            props: {},
-            title: 'Total Females',
-            colSpan: 1,
-            dataMap: `BENEFICIARY_GENDER.FEMALE`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            type: 'dataCard',
-            props: {},
-            title: 'Unbanked Beneficiaries',
-            colSpan: 1,
-            dataMap: `BENEFICIARY_BANKEDSTATUS.BANKED`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-        ]
+
+        ],
       },
       {
-        title: '',
         fields: [
           {
-            type: 'pie',
+            type: 'donut',
             props: {},
-            title: 'Internet Status',
-            colSpan: 1,
-            dataMap: `BENEFICIARY_INTERNETSTATUS`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            type: 'pie',
-            props: {},
-            title: 'Gender',
+            title: 'Total Beneficiaries',
             colSpan: 1,
             dataMap: `BENEFICIARY_GENDER`,
             dataSrc: 'source2',
             rowSpan: 1,
           },
           {
-            type: 'bar',
+            type: 'donut',
             props: {},
-            title: 'Phone Status',
+            title: 'Household Phone Availability',
+            colSpan: 1,
+            dataMap: `BENEFICIARY_PHONE_AVAILABILITY_STATS`,
+            dataSrc: 'source2',
+            rowSpan: 1,
+          },
+          {
+            type: 'donut',
+            props: {},
+            title: 'Household Bank Status',
+            colSpan: 1,
+            dataMap: `BENEFICIARY_BANKEDSTATUS`,
+            dataSrc: 'source2',
+            rowSpan: 1,
+          },
+
+        ],
+      },
+      {
+        title: '',
+        fields: [
+
+          {
+            type: 'donut',
+            props: {},
+            title: 'Type of Phone',
             colSpan: 1,
             dataMap: `BENEFICIARY_PHONESTATUS`,
             dataSrc: 'source2',
-            rowSpan: 4,
+            rowSpan: 1,
           },
         ],
-      }
+      },
+      {
+        title: 'Beneficiaries GPS Location',
+        fields: [
+          {
+            type: 'map',
+            props: {},
+            title: '',
+            colSpan: 3,
+            dataMap: `BENEFICIARY_MAP_STATS`,
+            dataSrc: 'source2',
+            rowSpan: 1,
+          },
+        ],
+      },
     ],
   };
 };

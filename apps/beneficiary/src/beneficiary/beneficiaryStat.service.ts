@@ -623,6 +623,6 @@ export class BeneficiaryStatService {
       ]);
     }
 
-    return { gender, bankedStatus, internetStatus, phoneStatus };
+    return { gender, bankedStatus, internetStatus, phoneStatus, total };
   }
 }
