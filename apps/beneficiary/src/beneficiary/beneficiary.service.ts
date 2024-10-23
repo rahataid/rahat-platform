@@ -471,7 +471,11 @@ export class BeneficiaryService {
 
   async findOneByPhone(phone: string) {
     const piiData = await this.rsprisma.beneficiaryPii.findFirst({
-      where: { phone },
+      where: {
+        phone: {
+          contains: phone,
+        },
+      },
     });
     if (!piiData) return null;
     const beneficiary = await this.rsprisma.beneficiary.findUnique({
