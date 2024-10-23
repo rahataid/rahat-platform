@@ -1081,9 +1081,21 @@ export class BeneficiaryService {
       beneficiaryId: d.uuid,
     }));
 
-    return await this.prisma.groupedBeneficiaries.createMany({
-      data: createPayload,
-    });
+    const groupedBeneficiaries =
+      await this.prisma.groupedBeneficiaries.createMany({
+        data: createPayload,
+      });
+
+    //assign to project
+    if (dto?.projectId) {
+      const payload = {
+        beneficiaryGroupId: group.uuid,
+        projectId: dto.projectId,
+      };
+      await (await this.assignBeneficiaryGroupToProject(payload)).toPromise();
+    }
+
+    return groupedBeneficiaries;
   }
 
   async getOneGroup(uuid: string) {
@@ -1379,7 +1391,6 @@ export class BeneficiaryService {
 
       //2.Save beneficiary group to project
       await this.saveBeneficiaryGroupToProject(dto);
-
       //3. Sync beneficiary to project
       return this.client.send(
         { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
