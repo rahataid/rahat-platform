@@ -223,7 +223,18 @@ export const rpActions: ProjectActionFunc = {
     sendCommand({ cmd: ProjectJobs.BENEFICIARY.CREATE_BULK_WALKIN_BENEFICIARY, uuid }, payload),
 
   [MS_ACTIONS.RPPROJECT.SYNC_OFFLINE_TRANSACTIONS]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: ProjectJobs.BENEFICIARY.SYNC_OFFLINE_TRANSACTIONS, uuid }, payload)
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.SYNC_OFFLINE_TRANSACTIONS, uuid }, payload),
 
+  [MS_ACTIONS.RPPROJECT.LIST_REPORTING]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.REPORTING.LIST, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.GET_REDEMPTION]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.GET_REDEMPTION, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.UPDATE_BENEFICIARY]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.UPDATE_BENEFICIARY_REDEMPTION, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.LIST_BENEFICIARY_REIMBURSEMENTS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.LIST_BENEFICIARY_REIMBURSEMENTS, uuid }, payload),
 
 };

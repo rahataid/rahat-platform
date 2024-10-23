@@ -24,7 +24,6 @@ import { switchMap, tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
 import { createExtrasAndPIIData, splitCoordinates } from '../utils';
 import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
-import { createContractSigner } from '../utils/web3';
 import {
   aaActions,
   beneficiaryActions,
@@ -149,50 +148,40 @@ export class ProjectService {
   ) {
     try {
 
-      const requiresUser = userRequiredActions.has(action)
+      const requiresUser = userRequiredActions.has(action);
 
-      return client.send(cmd, {
-        ...payload,
-        ...(requiresUser && { user })
-      }).pipe(
-        timeout(timeoutValue),
-        tap((response) => {
-          this.sendWhatsAppMsg(response, cmd, payload)
-
-          return client
-            .send(cmd, {
-              ...payload,
-              ...(requiresUser && { user }),
-            })
-            .pipe(
-              timeout(timeoutValue),
-              tap((response) => {
-                this.sendWhatsAppMsg(response, cmd, payload);
-              })
-            );
+      return client
+        .send(cmd, {
+          ...payload,
+          ...(requiresUser && { user }),
         })
-      )
+        .pipe(
+          timeout(timeoutValue),
+          tap((response) => {
+            this.sendWhatsAppMsg(response, cmd, payload);
+          })
+        );
+
     } catch (err) {
       console.log('Err', err);
     }
   }
 
-  async executeMetaTxRequest(params: any, uuid: string) {
+  async executeMetaTxRequest(params: any, uuid: string, trigger?: any) {
+    const payload: any = { params, uuid };
 
-    const res = await this.metaTransactionQueue.add(JOBS.META_TRANSACTION.ADD_QUEUE, { params, uuid })
+    payload.trigger = trigger ?? payload.trigger;
 
-    return { txHash: res.data.hash, status: res.data.status }
+    const res = await this.metaTransactionQueue.add(
+      JOBS.META_TRANSACTION.ADD_QUEUE,
+      payload
+    );
+
+    return { txHash: res.data.hash, status: res.data.status };
   }
 
   async sendSucessMessage(uuid, payload) {
-    const { benId } = payload
-
-    this.eventEmitter.emit(
-      ProjectEvents.REDEEM_VOUCHER,
-      benId
-    );
-
-    return this.client.send({ cmd: 'rahat.jobs.project.voucher_claim', uuid }, {}).pipe(timeout(MS_TIMEOUT))
+    const { benId } = payload;
 
     this.eventEmitter.emit(ProjectEvents.REDEEM_VOUCHER, benId);
     return this.client
@@ -200,15 +189,20 @@ export class ProjectService {
       .pipe(timeout(MS_TIMEOUT));
   }
 
-  async handleProjectActions({ uuid, action, payload, user }) {
-    console.log({ uuid, action, payload });
+  async handleProjectActions({ uuid, action, payload, trigger, user }: any) {
     //Note: This is a temporary solution to handle metaTx actions
+
     const metaTxActions = {
-      [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload, uuid),
-      [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () => await this.executeMetaTxRequest(payload, uuid),
-      [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () => await this.sendSucessMessage(uuid, payload),
-      [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () => await this.executeMetaTxRequest(payload, uuid),
-      [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () => await this.executeMetaTxRequest(payload, uuid),
+      [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () =>
+        await this.executeMetaTxRequest(payload, uuid, trigger),
+      [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () =>
+        await this.executeMetaTxRequest(payload, uuid, trigger),
+      [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () =>
+        await this.sendSucessMessage(uuid, payload),
+      [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () =>
+        await this.executeMetaTxRequest(payload, uuid, trigger),
+      [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () =>
+        await this.executeMetaTxRequest(payload, uuid, trigger),
     };
 
     const actions = {
