@@ -151,9 +151,13 @@ export class ProjectService {
     }
   }
 
-  async executeMetaTxRequest(params: any, uuid: string) {
+  async executeMetaTxRequest(params: any, uuid: string, trigger?: any) {
 
-    const res = await this.metaTransactionQueue.add(JOBS.META_TRANSACTION.ADD_QUEUE, { params, uuid })
+    const payload: any = { params, uuid }
+
+    payload.trigger = trigger ?? payload.trigger;
+
+    const res = await this.metaTransactionQueue.add(JOBS.META_TRANSACTION.ADD_QUEUE, payload)
 
     return { txHash: res.data.hash, status: res.data.status }
   }
@@ -170,15 +174,15 @@ export class ProjectService {
 
   }
 
-  async handleProjectActions({ uuid, action, payload, user }) {
-    console.log({ uuid, action, payload })
+  async handleProjectActions({ uuid, action, payload, trigger, user }: any) {
     //Note: This is a temporary solution to handle metaTx actions
+
     const metaTxActions = {
-      [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload, uuid),
-      [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () => await this.executeMetaTxRequest(payload, uuid),
+      [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload, uuid, trigger),
+      [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () => await this.executeMetaTxRequest(payload, uuid, trigger),
       [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () => await this.sendSucessMessage(uuid, payload),
-      [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () => await this.executeMetaTxRequest(payload, uuid),
-      [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () => await this.executeMetaTxRequest(payload, uuid),
+      [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () => await this.executeMetaTxRequest(payload, uuid, trigger),
+      [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () => await this.executeMetaTxRequest(payload, uuid, trigger),
     };
 
     const actions = {
