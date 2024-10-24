@@ -192,7 +192,6 @@ export class ProjectService {
   }
 
   async handleProjectActions({ uuid, action, payload, user }) {
-    console.log({ uuid, action, payload });
     //Note: This is a temporary solution to handle metaTx actions
     const metaTxActions = {
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () =>

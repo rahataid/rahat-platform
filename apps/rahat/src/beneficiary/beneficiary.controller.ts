@@ -15,7 +15,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
@@ -142,9 +142,9 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET_TABLE_STATS }, {});
   }
 
-  // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
-  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post()
   async create(@Body() dto: CreateBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
@@ -174,13 +174,9 @@ export class BeneficiaryController {
       ...b,
       birthDate: b.birthDate ? new Date(b.birthDate).toISOString() : null,
     }));
+
     return this.client
       .send({ cmd: BeneficiaryJobs.CREATE_BULK }, data)
-      .pipe(
-        catchError((error) =>
-          throwError(() => new RpcException(error.response))
-        )
-      )
       .pipe(timeout(MS_TIMEOUT));
   }
 
