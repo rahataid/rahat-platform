@@ -10,5 +10,6 @@ export const JOBS = {
   GET_OTP: 'rahat.jobs.vendor.getOtp',
   VERIFY_OTP: 'rahat.jobs.vendor.verfiyOtp',
   UPDATE: 'rahat.jobs.vendor.update',
-  GET_VENDOR_STATS: 'rahat.jobs.get_project_vendor_stats'
+  GET_VENDOR_STATS: 'rahat.jobs.get_project_vendor_stats',
+  GET_BY_UUID: 'rahat.jobs.vendor.get.uuid',
 };
