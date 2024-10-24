@@ -496,9 +496,7 @@ export class BeneficiaryService {
     const projectPayloads = [];
     const benProjectData = [];
 
-    const { beneficiaries: beneficiariesData } = await this.createBulk(
-      beneficiaries
-    );
+    const { beneficiariesData } = await this.createBulk(beneficiaries);
 
     await Promise.all(
       beneficiariesData.map(async (ben: any) => {
@@ -686,7 +684,11 @@ export class BeneficiaryService {
     return rdata;
   }
 
-  async createBulk(dtos: CreateBeneficiaryDto[], projectUuid?: string) {
+  async createBulk(
+    dtos: CreateBeneficiaryDto[],
+    projectUuid?: string,
+    conditional?: boolean
+  ) {
     this.beneficiaryUtilsService.ensurePhoneNumbers(dtos);
     for (const dto of dtos) {
       await this.beneficiaryUtilsService.ensureUniquePhone(
@@ -713,7 +715,7 @@ export class BeneficiaryService {
     // Assign beneficiaries to the project if a projectUuid is provided
     // && conditional
     if (projectUuid) {
-      await prm.beneficiaryProject.createMany({
+      await this.prisma.beneficiaryProject.createMany({
         data: insertedBeneficiariesWithPii.map(({ uuid }) => ({
           beneficiaryId: uuid,
           projectId: projectUuid,
