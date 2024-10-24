@@ -17,9 +17,9 @@ export class MetaTransationProcessor {
     async processMetaTxn(job: any) {
         this.logger.log(`Added job ${job.id} to queue`)
         await sleep(3000);
-        const { params, uuid, trigger } = job.data;
+        const { params, trigger } = job.data;
 
-        const { metaTxRequest, txnUuid, txnDetails } = params;
+        const { metaTxRequest } = params;
 
         const forwarderContract = await createContractSigner(
             ERC2771FORWARDER,
@@ -33,26 +33,12 @@ export class MetaTransationProcessor {
         const tx = await forwarderContract.execute(metaTxRequest);
 
         const res = await tx.wait();
-        // const blockTimestamp = await getBlocktimeStamp(res.hash)
-        // const payload: any = { res, vendorAddress: metaTxRequest.from }
 
-        // if (txnUuid) {
-        //     payload.txnUuid = txnUuid;
-        //     payload.txnDetails = txnDetails;
-        //     payload.blockTimestamp = blockTimestamp;
-        // }
-
-        // await this.client.send({ cmd: JOBS.META_TRANSACTION.PROJECT_CALL, uuid }, payload)
-        //     .pipe(timeout(MS_TIMEOUT)).toPromise();
-
-        if (trigger) {
-            lastValueFrom(this.client.send({ cmd: trigger.event_name, uuid: trigger.projectUuid }, { payload: trigger.payload })
-                .pipe(timeout(MS_TIMEOUT)));
-        }
+        trigger && lastValueFrom(this.client.send({ cmd: trigger.event_name, uuid: trigger.projectUuid }, { payload: trigger.payload })
+            .pipe(timeout(MS_TIMEOUT)));
 
         this.logger.warn(`Processed job ${job.id}`)
         return res;
-
     }
 }
 

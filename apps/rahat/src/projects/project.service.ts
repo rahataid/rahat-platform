@@ -189,7 +189,7 @@ export class ProjectService {
       .pipe(timeout(MS_TIMEOUT));
   }
 
-  async handleProjectActions({ uuid, action, payload, trigger, user }: any) {
+  async handleProjectActions({ uuid, action, payload, trigger, user }) {
     //Note: This is a temporary solution to handle metaTx actions
 
     const metaTxActions = {
