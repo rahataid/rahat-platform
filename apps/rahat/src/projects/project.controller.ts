@@ -46,7 +46,7 @@ export class ProjectController {
     private readonly projectService: ProjectService,
     @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy,
     @Inject('BEN_CLIENT') private readonly benClient: ClientProxy
-  ) {}
+  ) { }
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -137,7 +137,6 @@ export class ProjectController {
     @Body() data: ProjectCommunicationDto,
     @Req() request: Request
   ) {
-    console.log('CONTROLLER')
     const response = this.projectService.handleProjectActions({
       uuid,
       ...data,

@@ -54,31 +54,31 @@ export const permissions: Array<{
   action: string;
   subject: string;
 }> = [
-  {
-    id: 1,
-    roleId: 1,
-    action: 'manage',
-    subject: 'all',
-  },
-  {
-    id: 2,
-    roleId: 2,
-    action: 'manage',
-    subject: 'user',
-  },
-  {
-    id: 3,
-    roleId: 4,
-    action: 'manage',
-    subject: 'user',
-  },
-  {
-    id: 4,
-    roleId: 3,
-    action: 'read',
-    subject: 'user',
-  },
-];
+    {
+      id: 1,
+      roleId: 1,
+      action: 'manage',
+      subject: 'all',
+    },
+    {
+      id: 2,
+      roleId: 2,
+      action: 'manage',
+      subject: 'user',
+    },
+    {
+      id: 3,
+      roleId: 4,
+      action: 'manage',
+      subject: 'user',
+    },
+    {
+      id: 4,
+      roleId: 3,
+      action: 'read',
+      subject: 'user',
+    },
+  ];
 
 export const users: Array<{
   id?: number;
@@ -86,45 +86,45 @@ export const users: Array<{
   email?: string;
   wallet?: string;
 }> = [
-  {
-    id: 1,
-    name: 'Rumsan Admin',
-    email: 'rumsan@mailinator.com',
-    wallet: '0x75f598874DC39E364846d577CEde48d50378aC40',
-  },
-  {
-    id: 2,
-    name: 'Ms Manager',
-    wallet: '0xAC6bFaf10e89202c293dD795eCe180BBf1430d7B',
-  },
-  {
-    id: 3,
-    name: 'Mr User',
-    email: 'user@mailinator.com',
-  },
-];
+    {
+      id: 1,
+      name: 'Rumsan Admin',
+      email: 'rumsan@mailinator.com',
+      wallet: '0x75f598874DC39E364846d577CEde48d50378aC40'
+    },
+    {
+      id: 2,
+      name: 'Ms Manager',
+      wallet: '0xAC6bFaf10e89202c293dD795eCe180BBf1430d7B',
+    },
+    {
+      id: 3,
+      name: 'Mr User',
+      email: 'user@mailinator.com',
+    },
+  ];
 
 export const userRoles: Array<{
   id?: number;
   userId: number;
   roleId: number;
 }> = [
-  {
-    id: 1,
-    userId: 1,
-    roleId: 1,
-  },
-  {
-    id: 2,
-    userId: 2,
-    roleId: 2,
-  },
-  {
-    id: 3,
-    userId: 3,
-    roleId: 3,
-  },
-];
+    {
+      id: 1,
+      userId: 1,
+      roleId: 1,
+    },
+    {
+      id: 2,
+      userId: 2,
+      roleId: 2,
+    },
+    {
+      id: 3,
+      userId: 3,
+      roleId: 3,
+    },
+  ];
 
 export const auths: Array<{
   id?: number;
@@ -132,48 +132,48 @@ export const auths: Array<{
   service: Service;
   serviceId: string;
 }> = [
-  {
-    id: 1,
-    userId: 1,
-    service: Service.EMAIL,
-    serviceId: 'rumsan@mailinator.com',
-  },
-  {
-    id: 2,
-    userId: 2,
-    service: Service.WALLET,
-    serviceId: '0xAC6bFaf10e89202c293dD795eCe180BBf1430d7B',
-  },
-  {
-    id: 3,
-    userId: 3,
-    service: Service.EMAIL,
-    serviceId: 'user@mailinator.com',
-  },
-];
+    {
+      id: 1,
+      userId: 1,
+      service: Service.EMAIL,
+      serviceId: 'rumsan@mailinator.com',
+    },
+    {
+      id: 2,
+      userId: 2,
+      service: Service.WALLET,
+      serviceId: '0xAC6bFaf10e89202c293dD795eCe180BBf1430d7B',
+    },
+    {
+      id: 3,
+      userId: 3,
+      service: Service.EMAIL,
+      serviceId: 'user@mailinator.com',
+    },
+  ];
 
 const projectTypes: Array<{
   id?: number;
   name: string;
   description?: string;
 }> = [
-  {
-    id: 1,
-    name: 'aa',
-  },
-  {
-    id: 2,
-    name: 'cva',
-  },
-  {
-    id: 3,
-    name: 'el',
-  },
-  {
-    id: 3,
-    name: 'c2c',
-  },
-];
+    {
+      id: 1,
+      name: 'aa',
+    },
+    {
+      id: 2,
+      name: 'cva',
+    },
+    {
+      id: 3,
+      name: 'el',
+    },
+    {
+      id: 3,
+      name: 'c2c',
+    },
+  ];
 
 const prisma = new PrismaClient();
 
