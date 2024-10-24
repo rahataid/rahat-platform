@@ -137,6 +137,7 @@ export class ProjectController {
     @Body() data: ProjectCommunicationDto,
     @Req() request: Request
   ) {
+    console.log('CONTROLLER')
     const response = this.projectService.handleProjectActions({
       uuid,
       ...data,
