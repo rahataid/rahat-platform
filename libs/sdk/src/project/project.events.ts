@@ -73,13 +73,13 @@ export const JOBS = {
     GET_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_walkin',
     GET_ALL_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_all_walkin',
     CREATE_BULK_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin_bulk',
+    GET_UNSYNCED_BENEFICIARY_GROUP: 'rahat.jobs.beneficiary.group.get_unsynced',
     UPDATE_BENEFICIARY_REDEMPTION: 'rahat.jobs.beneficiary.update_redemption',
     LIST_BENEFICIARY_REIMBURSEMENTS:
       'rahat.jobs.beneficiary.list_reimbursements',
     SYNC_OFFLINE_TRANSACTIONS: 'rahat.jobs.beneficiary.sync_offline_transactions',
-
-
   },
+
   META_TRANSACTION: {
     ADD_QUEUE: 'rahat.jobs.metatxn.add',
     PROJECT_CALL: 'rahat.jobs.metatxn.call.project',

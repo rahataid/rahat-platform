@@ -289,15 +289,18 @@ export const MS_ACTIONS = {
     GET_BENEFICIARIES_DISBURSEMENTS: 'rpProject.beneficiaries.getDisbursements',
     UPDATE_OFFLINE: 'rpProject.offlineBeneficiaries.update',
     GET_UNSYNCED_BENEFICIARIES: 'rpProject.beneficiaries.getUnsynced',
+    GET_UNSYNCED_BENEFICIARY_GROUP: 'rpProject.beneficiary.group.get_unsynced',
     // TODO: move to kenya specific actions
     CREATE_WALKIN: 'rpProject.walkin.create',
     GET_WALKIN: 'rpProject.walkin.get',
     GET_ALL_WALKIN: 'rpProject.walkin.getAll',
-    CREATE_BULK_WALKIN_BENEFICIARIES: "rpProject.walkin.createBulk",
+    CREATE_BULK_WALKIN_BENEFICIARIES: 'rpProject.walkin.createBulk',
     LIST_REPORTING: 'rpProject.reporting.list',
     UPDATE_BENEFICIARY: 'rpProject.beneficiary.update',
     LIST_BENEFICIARY_REIMBURSEMENTS: 'rpProject.beneficiary.listReimbursements',
     SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions'
 
-  }
-};
+  },
+
+
+}

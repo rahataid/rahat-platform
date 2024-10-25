@@ -16,7 +16,7 @@ import {
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto,
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
   BeneficiaryConstants,
@@ -25,7 +25,7 @@ import {
   BQUEUE,
   generateRandomWallet,
   ProjectContants,
-  TPIIData,
+  TPIIData
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
@@ -35,7 +35,7 @@ import { isAddress } from 'viem';
 import {
   findTempBenefGroups,
   validateDupicatePhone,
-  validateDupicateWallet,
+  validateDupicateWallet
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
@@ -1075,6 +1075,18 @@ export class BeneficiaryService {
   }
 
   async addGroup(dto: CreateBeneficiaryGroupsDto) {
+
+    const benGroup = await this.prisma.beneficiaryGroup.findFirst({
+      where: {
+        name: dto.name,
+      },
+    });
+
+    if (benGroup) {
+      throw new RpcException('Beneficiary group already exist.');
+
+    }
+
     const group = await this.prisma.beneficiaryGroup.create({
       data: {
         name: dto.name,
