@@ -3,7 +3,7 @@ import { Inject, Logger } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { BQUEUE, MS_TIMEOUT, ProjectContants } from "@rahataid/sdk";
 import { JOBS } from "@rahataid/sdk/project/project.events";
-import { lastValueFrom, timeout } from "rxjs";
+import { timeout } from "rxjs";
 import { ERC2771FORWARDER } from "../../utils/contracts";
 import { createContractSigner } from "../../utils/web3";
 
@@ -31,14 +31,21 @@ export class MetaTransationProcessor {
         metaTxRequest.value = BigInt(metaTxRequest.value);
 
         const tx = await forwarderContract.execute(metaTxRequest);
-
         const res = await tx.wait();
 
-        trigger && lastValueFrom(this.client.send({ cmd: trigger.event_name, uuid: trigger.projectUuid }, { payload: trigger.payload })
-            .pipe(timeout(MS_TIMEOUT)));
+        try {
+            if (trigger) {
+                await this.client.send({ cmd: trigger.event_name, uuid: trigger.projectUuid }, { payload: trigger.payload })
+                    .pipe(timeout(MS_TIMEOUT)).toPromise();
+            }
+        } catch (error) {
+            console.log(error)
+        }
+
 
         this.logger.warn(`Processed job ${job.id}`)
         return res;
+
     }
 }
 

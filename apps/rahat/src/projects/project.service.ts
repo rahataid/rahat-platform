@@ -170,7 +170,7 @@ export class ProjectService {
   async executeMetaTxRequest(params: any, uuid: string, trigger?: any) {
     const payload: any = { params, uuid };
 
-    payload.trigger = trigger ?? payload.trigger;
+    if (trigger) payload.trigger = trigger;
 
     const res = await this.metaTransactionQueue.add(
       JOBS.META_TRANSACTION.ADD_QUEUE,
@@ -191,7 +191,6 @@ export class ProjectService {
 
   async handleProjectActions({ uuid, action, payload, trigger, user }) {
     //Note: This is a temporary solution to handle metaTx actions
-
     const metaTxActions = {
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () =>
         await this.executeMetaTxRequest(payload, uuid, trigger),
