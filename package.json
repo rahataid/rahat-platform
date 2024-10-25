@@ -73,7 +73,6 @@
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@openzeppelin/contracts": "^5.0.2",
     "@prisma/client": "5.15.1",
-    "@rahataid/contracts": "link:libs\\contracts",
     "@rumsan/core": "3.0.134",
     "@rumsan/extensions": "0.0.30",
     "@rumsan/prisma": "1.0.130",

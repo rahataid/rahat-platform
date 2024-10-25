@@ -988,7 +988,6 @@ export class BeneficiaryService {
         removeOnFail: true,
       },
     }));
-    console.log('first', bulkQueueData)
 
     // Using addBulk to add multiple jobs to the queue
     await this.beneficiaryQueue.addBulk(bulkQueueData);
