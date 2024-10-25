@@ -50,6 +50,7 @@ import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, throwError, timeout } from 'rxjs';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
+import { removeSpaces } from '../utils';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { DocParser } from './parser';
 
@@ -77,7 +78,7 @@ export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue
-  ) {}
+  ) { }
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -263,7 +264,7 @@ export class BeneficiaryController {
       walletAddress: b['Wallet Address'],
       piiData: {
         name: b['Name*'] || 'Unknown',
-        phone: b['Whatsapp Number*'] || b['Phone Number*'],
+        phone: removeSpaces(b['Whatsapp Number*'] || b['Phone Number*']),
         extras: {},
       },
     }));

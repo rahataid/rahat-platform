@@ -1,5 +1,33 @@
 import { PrismaClient, Service } from '@prisma/client';
 
+function cloneDeep<T>(obj: T): T {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (obj instanceof Date) {
+    return new Date(obj.getTime()) as T;
+  }
+
+  if (Array.isArray(obj)) {
+    const arrCopy: any[] = [];
+    obj.forEach((val, i) => {
+      arrCopy[i] = cloneDeep(val);
+    });
+    return arrCopy as T;
+  }
+
+  if (obj instanceof Object) {
+    const objCopy: { [key: string]: any } = {};
+    Object.keys(obj).forEach((key) => {
+      objCopy[key] = cloneDeep((obj as { [key: string]: any })[key]);
+    });
+    return objCopy as T;
+  }
+
+  throw new Error("Unable to copy obj! Its type isn't supported.");
+}
+
 export const roles: Array<{ id?: number; name: string; isSystem?: boolean }> = [
   {
     id: 1,
@@ -60,32 +88,12 @@ export const users: Array<{
 }> = [
     {
       id: 1,
-      name: 'Rumsan Admin',
-      email: 'rumsan@mailinator.com',
-      wallet: '0x75f598874DC39E364846d577CEde48d50378aC40',
-    },
-    {
-      id: 2,
-      name: 'Manjik Admin',
-      email: 'manjik@mailinator.com',
-      wallet: '0xcDEe632FB1Ba1B3156b36cc0bDabBfd821305e06',
-    },
-    {
-      id: 3,
-      name: 'Ms Manager',
-      wallet: '0xNC6bFaf10e89202c293dD795eCe180BBf1430d7B',
-    },
-    {
-      id: 4,
-      name: 'Mr User',
-      email: 'user@mailinator.com',
-    },
-    {
-      id: 5,
-      name: 'Raghav',
+      name: 'Raghav Kattel',
       email: 'raghav.kattel@rumsan.net',
       wallet: '0xAC6bFaf10e89202c293dD795eCe180BBf1430d7B',
     },
+
+
   ];
 
 export const userRoles: Array<{
@@ -96,26 +104,6 @@ export const userRoles: Array<{
     {
       id: 1,
       userId: 1,
-      roleId: 1,
-    },
-    {
-      id: 2,
-      userId: 2,
-      roleId: 2,
-    },
-    {
-      id: 3,
-      userId: 3,
-      roleId: 3,
-    },
-    {
-      id: 4,
-      userId: 4,
-      roleId: 3,
-    },
-    {
-      id: 5,
-      userId: 5,
       roleId: 1,
     },
   ];
@@ -130,37 +118,31 @@ export const auths: Array<{
       id: 1,
       userId: 1,
       service: Service.EMAIL,
-      serviceId: 'rumsan@mailinator.com',
+      serviceId: 'raghav.kattel@rumsan.net',
+    },
+
+  ];
+
+const projectTypes: Array<{
+  id?: number;
+  name: string;
+  description?: string;
+}> = [
+    {
+      id: 1,
+      name: 'aa',
     },
     {
       id: 2,
-      userId: 2,
-      service: Service.EMAIL,
-      serviceId: 'manjik@mailinator.com',
+      name: 'cva',
     },
     {
       id: 3,
-      userId: 2,
-      service: Service.WALLET,
-      serviceId: '0xcDEe632FB1Ba1B3156b36cc0bDabBfd821305e06',
+      name: 'el',
     },
     {
-      id: 4,
-      userId: 3,
-      service: Service.WALLET,
-      serviceId: '0xNC6bFaf10e89202c293dD795eCe180BBf1430d7B',
-    },
-    {
-      id: 5,
-      userId: 4,
-      service: Service.EMAIL,
-      serviceId: 'user@mailinator.com',
-    },
-    {
-      id: 6,
-      userId: 5,
-      service: Service.EMAIL,
-      serviceId: 'raghav.kattel@rumsan.net',
+      id: 3,
+      name: 'c2c',
     },
   ];
 
@@ -172,50 +154,70 @@ async function main() {
   // 	prisma.user.deleteMany(),
   // 	prisma.role.deleteMany(),
   // ]);
-
-  await prisma.$transaction(async (prm) => {
-    // ===========Create Roles=============
-    const rolesCreated = await prm.role.createManyAndReturn({
-      data: roles,
+  // ===========Create Roles=============
+  for await (const role of roles) {
+    const roleAttrs = cloneDeep(role);
+    delete roleAttrs.id;
+    await prisma.role.upsert({
+      where: {
+        id: role.id,
+      },
+      create: roleAttrs,
+      update: roleAttrs,
     });
+  }
 
-    console.log('Created Roles:', rolesCreated)
-    console.log('Roles Created.');
-
-    const permissionsCreated = await prm.permission.createManyAndReturn({
-      data: permissions,
+  // ===========Create Permissions==========
+  for await (const permission of permissions) {
+    const permissionAttrs = cloneDeep(permission);
+    delete permissionAttrs.id;
+    await prisma.permission.upsert({
+      where: {
+        id: permission.id,
+      },
+      create: permissionAttrs,
+      update: permissionAttrs,
     });
-    console.log('Created Permissions:', permissionsCreated)
+  }
 
-
-
-    console.log('Permissions Created.');
-
-
-    // ==============Create Users===============
-    const usersCreated = await prm.user.createManyAndReturn({
-      data: users,
+  // ==============Create Users===============
+  for await (const user of users) {
+    const userAttrs = cloneDeep(user);
+    delete userAttrs.id;
+    await prisma.user.upsert({
+      where: {
+        id: user.id,
+      },
+      create: userAttrs,
+      update: userAttrs,
     });
+  }
 
-    console.log('Created Users:', usersCreated)
-
-
-    console.log('Users Created.');
-
-    // ==============Create Auths===============
-    const authsCreated = await prm.auth.createManyAndReturn({
-      data: auths,
+  // ==============Create Auths===============
+  for await (const auth of auths) {
+    const authAttrs = cloneDeep(auth);
+    delete authAttrs.id;
+    await prisma.auth.upsert({
+      where: {
+        id: auth.id,
+      },
+      create: authAttrs,
+      update: authAttrs,
     });
-    console.log('Auths Created.');
-    console.log('Created Auths:', authsCreated)
+  }
 
-    // ==============Create User Roles===============
-    const userRolesCreated = await prm.userRole.createManyAndReturn({
-      data: userRoles,
+  // ==============Create User Roles===============
+  for await (const userRole of userRoles) {
+    const userRoleAttrs = cloneDeep(userRole);
+    delete userRoleAttrs.id;
+    await prisma.userRole.upsert({
+      where: {
+        id: userRole.id,
+      },
+      create: userRoleAttrs,
+      update: userRoleAttrs,
     });
-    console.log('User Roles Created.');
-    console.log('Created User Roles:', userRolesCreated)
-  });
+  }
 }
 
 main()

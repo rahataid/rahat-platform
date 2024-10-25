@@ -46,7 +46,7 @@ export class ProjectController {
     private readonly projectService: ProjectService,
     @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy,
     @Inject('BEN_CLIENT') private readonly benClient: ClientProxy
-  ) {}
+  ) { }
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -127,9 +127,9 @@ export class ProjectController {
       .pipe(timeout(5000));
   }
 
-  // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
-  // @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
   projectActions(

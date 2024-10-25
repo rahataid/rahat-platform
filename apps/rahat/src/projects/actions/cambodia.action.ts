@@ -1,10 +1,10 @@
-
-import {
-  MS_ACTIONS
-} from '@rahataid/sdk';
+import { MS_ACTIONS } from '@rahataid/sdk';
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
 
 export const CAMBODIA_JOBS = {
+  APP: {
+    STATS: 'rahat.jobs.app.stats',
+  },
   CHW: {
     STATS: 'rahat.jobs.chw.stats',
     CREATE: 'rahat.jobs.chw.create',
@@ -39,110 +39,103 @@ export const CAMBODIA_JOBS = {
     UPDATE: 'rahat.jobs.vendor.update',
     UPDATE_IS_VERIFIED: 'rahat.jobs.vendor.update_is_verified',
     LIST_BY_PROJECT: 'rahat.jobs.vendor.list_by_project',
-  }
-}
+  },
+};
 
 export const cambodiaActions: ProjectActionFunc = {
+  [MS_ACTIONS.CAMBODIA.APP.STATS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: CAMBODIA_JOBS.APP.STATS, uuid }, payload),
+
   [MS_ACTIONS.CAMBODIA.VENDOR.HEALTH_WORKERS]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.VENDOR.HEALTH_WORKERS, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.VENDOR.HEALTH_WORKERS, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.VENDOR.STATS]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.VENDOR.STATS, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.VENDOR.STATS, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.VENDOR.GET]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.VENDOR.GET, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.VENDOR.GET, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.VENDOR.LEAD_CONVERSIONS]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.VENDOR.LEAD_CONVERSIONS, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.VENDOR.LEAD_CONVERSIONS, uuid }, payload),
 
-  [MS_ACTIONS.CAMBODIA.BENEFICIARY.LEAD_CONVERSION]: (uuid, payload, sendCommand) =>
+  [MS_ACTIONS.CAMBODIA.BENEFICIARY.LEAD_CONVERSION]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
     sendCommand(
       { cmd: CAMBODIA_JOBS.BENEFICIARY.LEAD_CONVERSION, uuid },
-      payload),
+      payload
+    ),
 
-  [MS_ACTIONS.CAMBODIA.COMMISISION_SCHEME.CREATE]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.COMMISSION_SCHEME.CREATE, uuid },
-      payload),
+  [MS_ACTIONS.CAMBODIA.COMMISISION_SCHEME.CREATE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: CAMBODIA_JOBS.COMMISSION_SCHEME.CREATE, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.COMMISISION_SCHEME.LIST]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.COMMISSION_SCHEME.LIST, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.COMMISSION_SCHEME.LIST, uuid }, payload),
 
-  [MS_ACTIONS.CAMBODIA.COMMISISION_SCHEME.GET_CURRENT]: (uuid, payload, sendCommand) =>
+  [MS_ACTIONS.CAMBODIA.COMMISISION_SCHEME.GET_CURRENT]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
     sendCommand(
       { cmd: CAMBODIA_JOBS.COMMISSION_SCHEME.GET_CURRENT, uuid },
-      payload),
+      payload
+    ),
 
-  [MS_ACTIONS.CAMBODIA.VENDOR.UPDATE_IS_VERIFIED]: (uuid, payload, sendCommand) =>
+  [MS_ACTIONS.CAMBODIA.VENDOR.UPDATE_IS_VERIFIED]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
     sendCommand(
       { cmd: CAMBODIA_JOBS.VENDOR.UPDATE_IS_VERIFIED, uuid },
-      payload),
+      payload
+    ),
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.CREATE]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.STATS]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.BENEFICIARY.STATS, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.STATS, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.LIST]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.BENEFICIARY.LIST, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.LIST, uuid }, payload),
 
-  [MS_ACTIONS.CAMBODIA.BENEFICIARY.LIST_DISCARDED]: (uuid, payload, sendCommand) =>
+  [MS_ACTIONS.CAMBODIA.BENEFICIARY.LIST_DISCARDED]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
     sendCommand(
       { cmd: CAMBODIA_JOBS.BENEFICIARY.LIST_DISCARDED, uuid },
-      payload),
+      payload
+    ),
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.GET]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.BENEFICIARY.GET, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.GET, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.CHW.CREATE]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.CHW.CREATE, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.CHW.CREATE, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.CHW.STATS]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.CHW.STATS, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.CHW.STATS, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.CHW.LIST]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.CHW.LIST, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.CHW.LIST, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.CHW.LIST_BY_VENDOR]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.CHW.LIST_BY_VENDOR, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.CHW.LIST_BY_VENDOR, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.CHW.GET]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.CHW.GET, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.CHW.GET, uuid }, payload),
   [MS_ACTIONS.CAMBODIA.CHW.UPDATE]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.CHW.UPDATE, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.CHW.UPDATE, uuid }, payload),
   [MS_ACTIONS.CAMBODIA.CHW.DELETE]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.CHW.DELETE, uuid },
-      payload),
+    sendCommand({ cmd: CAMBODIA_JOBS.CHW.DELETE, uuid }, payload),
 };

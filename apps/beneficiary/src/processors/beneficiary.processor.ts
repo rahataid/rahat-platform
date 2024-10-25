@@ -5,10 +5,11 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { CreateBeneficiaryDto } from '@rahataid/extensions';
 import {
+  BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
   generateRandomWallet,
-  ProjectContants,
+  ProjectContants
 } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { Job } from 'bull';
@@ -31,7 +32,7 @@ export class BeneficiaryProcessor {
     private readonly prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private eventEmitter: EventEmitter2
-  ) {}
+  ) { }
 
   @Process(BeneficiaryJobs.UPDATE_STATS)
   async sample(job: Job<any>) {
@@ -299,12 +300,12 @@ export class BeneficiaryProcessor {
               })),
             });
 
-            // this.eventEmitter.emit(
-            //   BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-            //   {
-            //     projectUuid: projectUUID,
-            //   }
-            // );
+            this.eventEmitter.emit(
+              BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
+              {
+                projectUuid: projectUUID,
+              }
+            );
 
             const assignPromises = insertedBeneficiaries.map((b) => {
               const projectPayload = {

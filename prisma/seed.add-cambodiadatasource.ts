@@ -14,13 +14,7 @@ const rl = readline.createInterface({
 const projectStats = (uuid: string, url: string) => {
   return {
     dataSources: {
-      source2: {
-        type: 'url',
-        args: {
-          url: `${url}/v1/projects/${uuid}/stats`,
-        },
-        data: [], // Placeholder for actual data
-      },
+
       source3: {
         type: 'url',
         args: {
@@ -31,7 +25,7 @@ const projectStats = (uuid: string, url: string) => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              action: 'rpProject.reporting.list',
+              action: 'cambodia.app.stats',
               payload: {},
             }),
           },
@@ -43,68 +37,69 @@ const projectStats = (uuid: string, url: string) => {
       {
         fields: [
           {
+            icon: 'UsersRound',
             type: 'dataCard',
             props: {},
-            title: 'Total Beneficiaries',
+            title: 'Total Consumers',
             colSpan: 1,
-            dataMap: `BENEFICIARY_TOTAL_ID_${uuid}`,
+            dataMap: 'TOTAL_CONSUMERS',
             dataSrc: 'source3',
             rowSpan: 1,
-            icon: 'UsersRound',
           },
           {
+            icon: 'HousePlus',
             type: 'dataCard',
             props: {},
-            title: 'Total Vision Centers/Hospitals',
+            title: 'Total Lead Received',
             colSpan: 1,
-            dataMap: ``,
-            dataSrc: 'source2',
+            dataMap: 'TOTAL_LEADS',
+            dataSrc: 'source3',
             rowSpan: 1,
-            icon: 'HousePlus',
           },
           {
+            icon: 'HousePlus',
+            type: 'dataCard',
+            props: {},
+            title: 'Total Lead Converted',
+            colSpan: 1,
+            dataMap: 'TOTAL_LEAD_CONVERTED',
+            dataSrc: 'source3',
+            rowSpan: 1,
+          },
+        ],
+      },
+
+      {
+        fields: [
+          {
+            icon: 'UsersRound',
             type: 'dataCard',
             props: {},
             title: 'Total Health Workers',
             colSpan: 1,
-            dataMap: ``,
+            dataMap: 'TOTAL_HEALTH_WORKERS',
             dataSrc: 'source3',
             rowSpan: 1,
-            icon: 'UsersRound',
-          },
-        ],
-      },
-      {
-        fields: [
-          {
-            type: 'dataCard',
-            props: {},
-            title: 'Total Vouchers',
-            colSpan: 1,
-            dataMap: ``,
-            dataSrc: 'source2',
-            rowSpan: 1,
-            icon: 'Ticket',
           },
           {
+            icon: 'Ticket',
             type: 'dataCard',
             props: {},
-            title: 'Total Redeemed Vouchers',
+            title: 'Total Vendors',
             colSpan: 1,
-            dataMap: ``,
-            dataSrc: 'source2',
+            dataMap: 'TOTAL_VENDORS',
+            dataSrc: 'source3',
             rowSpan: 1,
-            icon: 'Ticket',
           },
           {
+            icon: 'Ticket',
             type: 'dataCard',
             props: {},
-            title: 'Total Reimbursed Vouchers',
+            title: 'Total Footfalls',
             colSpan: 1,
-            dataMap: ``,
-            dataSrc: 'source2',
+            dataMap: 'TOTAL_FOOTFALLS',
+            dataSrc: 'source3',
             rowSpan: 1,
-            icon: 'Ticket',
           },
         ],
       },
@@ -113,54 +108,36 @@ const projectStats = (uuid: string, url: string) => {
           {
             type: 'donut',
             props: {},
-            title: 'Total Beneficiaries',
+            title: 'Consumer Type',
             colSpan: 1,
-            dataMap: `BENEFICIARY_GENDER_ID_${uuid}`,
-            dataSrc: 'source2',
+            dataMap: `CONSUMER_TYPE`,
+            dataSrc: 'source3',
             rowSpan: 1,
           },
           {
             type: 'donut',
             props: {},
-            title: 'Total Vouchers',
+            title: 'Conversion Type',
             colSpan: 1,
-            dataMap: ``,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            type: 'donut',
-            props: { horizontal: true, xaxisLabels: false },
-            title: 'Total Redeemed Vouchers',
-            colSpan: 1,
-            dataMap: ``,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            type: 'donut',
-            props: { horizontal: true, xaxisLabels: false },
-            title: 'Total Reimbursment',
-            colSpan: 1,
-            dataMap: ``,
-            dataSrc: 'source2',
+            dataMap: `CONVERSION_TYPE`,
+            dataSrc: 'source3',
             rowSpan: 1,
           },
         ],
       },
-      {
-        fields: [
-          {
-            type: 'line',
-            props: {},
-            title: 'No. of Redemptions/per week',
-            colSpan: 1,
-            dataMap: ``,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-        ],
-      },
+      // {
+      //   fields: [
+      //     {
+      //       type: 'line',
+      //       props: {},
+      //       title: 'No. of Redemptions/per week',
+      //       colSpan: 1,
+      //       dataMap: ``,
+      //       dataSrc: 'source2',
+      //       rowSpan: 1,
+      //     },
+      //   ],
+      // },
     ],
   };
 };
