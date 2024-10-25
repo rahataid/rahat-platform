@@ -32,7 +32,7 @@ export const SUBJECTS = {
   BENEFICIARY: 'beneficiary',
   PROJECT: 'project',
   VENDOR: 'vendor',
-  PUBLIC: 'public'
+  PUBLIC: 'public',
 };
 
 export const APP = {
@@ -74,7 +74,6 @@ export const MS_ACTIONS = {
       UPDATE_IS_VERIFIED: 'cambodia.vendor.update_is_verified',
       ASSIGN_TO_PROJECT: 'cambodia.vendor.assign_to_project',
     },
-
   },
 
   PROJECT: {
@@ -151,8 +150,8 @@ export const MS_ACTIONS = {
         TRIGGER: 'aaProject.activities.communication.trigger',
         SESSION_LOGS: 'aa.activities.communication.sessionLogs',
         RETRY_FAILED: 'aa.activities.communication.retryFailed',
-        GET_STATS: 'aa.activities.communication.getStats'
-      }
+        GET_STATS: 'aa.activities.communication.getStats',
+      },
     },
     ACTIVITY_CATEGORIES: {
       GET_ALL: 'aaProject.activityCategories.getAll',
@@ -275,22 +274,23 @@ export const MS_ACTIONS = {
     LIST_REDEMPTION: 'rpProject.listRedemption',
     GET_VENDOR_REDEMPTION: 'rpProject.vendorRedemption',
     GENERATE_OTP_HASH: 'rpProject.generateOtpHash',
-    GET_OFFLINE_BENEFICIARIES: "rpProject.getOfflineBeneficiaries",
-    SYNC_OFFLINE_BENEFICIARIES: "rpProject.syncOfflineBeneficiaries",
-    GET_OFFLINE_VENDORS: "rpProject.getOfflineVendors",
-    GET_OFFLINE_SINGLE_VENDOR: "rpProject.getOfflineSingleVendor",
-    SAVE_SYNCED_BENEFICIARIES_TO_VENDOR: "rpProject.saveSyncedBeneficiariesToVendor",
+    GET_OFFLINE_BENEFICIARIES: 'rpProject.getOfflineBeneficiaries',
+    SYNC_OFFLINE_BENEFICIARIES: 'rpProject.syncOfflineBeneficiaries',
+    GET_OFFLINE_VENDORS: 'rpProject.getOfflineVendors',
+    GET_OFFLINE_SINGLE_VENDOR: 'rpProject.getOfflineSingleVendor',
+    SAVE_SYNCED_BENEFICIARIES_TO_VENDOR:
+      'rpProject.saveSyncedBeneficiariesToVendor',
     ADD_GROUP: 'rpProject.beneficiary.addGroup',
     GET_ALL_GROUPS: 'rpProject.beneficiary.getAllGroups',
     GET_ONE_GROUP: 'rpProject.beneficiary.getOneGroup',
     GET_BENEFICIARIES_DISBURSEMENTS: 'rpProject.beneficiaries.getDisbursements',
     UPDATE_OFFLINE: 'rpProject.offlineBeneficiaries.update',
     GET_UNSYNCED_BENEFICIARIES: 'rpProject.beneficiaries.getUnsynced',
+    GET_UNSYNCED_BENEFICIARY_GROUP: 'rpProject.beneficiary.group.get_unsynced',
     // TODO: move to kenya specific actions
     CREATE_WALKIN: 'rpProject.walkin.create',
     GET_WALKIN: 'rpProject.walkin.get',
     GET_ALL_WALKIN: 'rpProject.walkin.getAll',
-    CREATE_BULK_WALKIN_BENEFICIARIES: "rpProject.walkin.createBulk"
-
-  }
+    CREATE_BULK_WALKIN_BENEFICIARIES: 'rpProject.walkin.createBulk',
+  },
 };
