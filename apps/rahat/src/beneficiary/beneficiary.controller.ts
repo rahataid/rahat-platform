@@ -50,9 +50,9 @@ import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, throwError, timeout } from 'rxjs';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
+import { removeSpaces } from '../utils';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { DocParser } from './parser';
-import { removeSpaces } from '../utils';
 
 function getDateInfo(dateString) {
   try {
@@ -78,7 +78,7 @@ export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue
-  ) {}
+  ) { }
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)

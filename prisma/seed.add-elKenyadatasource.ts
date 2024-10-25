@@ -21,6 +21,23 @@ const projectStats = (uuid: string, url: string) => {
         },
         data: [], // Placeholder for actual data
       },
+      source3: {
+        type: 'url',
+        args: {
+          url: `${url}/v1/projects/${uuid}/actions`,
+          apiCallData: {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'rpProject.reporting.list',
+              payload: {},
+            }),
+          },
+        },
+        data: [], // Placeholder for actual data
+      },
     },
     ui: [
       {
@@ -31,7 +48,7 @@ const projectStats = (uuid: string, url: string) => {
             title: 'Total Beneficiaries',
             colSpan: 1,
             dataMap: `BENEFICIARY_TOTAL_ID_${uuid}`,
-            dataSrc: 'source2',
+            dataSrc: 'source3',
             rowSpan: 1,
             icon: 'UsersRound',
           },
@@ -51,7 +68,7 @@ const projectStats = (uuid: string, url: string) => {
             title: 'Total Health Workers',
             colSpan: 1,
             dataMap: ``,
-            dataSrc: 'source2',
+            dataSrc: 'source3',
             rowSpan: 1,
             icon: 'UsersRound',
           },
