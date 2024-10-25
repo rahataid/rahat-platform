@@ -28,7 +28,7 @@ import {
   TPIIData,
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
-import { JobOptions, Queue } from 'bull';
+import { Queue } from 'bull';
 import { randomUUID, UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
@@ -37,10 +37,10 @@ import {
   validateDupicatePhone,
   validateDupicateWallet,
 } from '../processors/processor.utils';
+import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { createListQuery } from './helpers';
 import { VerificationService } from './verification.service';
-import { createBatches } from '../utils/array';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 const BATCH_SIZE = 20;
@@ -217,21 +217,21 @@ export class BeneficiaryService {
 
     let where: any = projectUUID
       ? {
-          deletedAt: null,
-          BeneficiaryProject:
-            projectUUID === 'NOT_ASSGNED'
-              ? {
-                  none: {},
-                }
-              : {
-                  some: {
-                    projectId: projectUUID,
-                  },
-                },
-        }
+        deletedAt: null,
+        BeneficiaryProject:
+          projectUUID === 'NOT_ASSGNED'
+            ? {
+              none: {},
+            }
+            : {
+              some: {
+                projectId: projectUUID,
+              },
+            },
+      }
       : {
-          deletedAt: null,
-        };
+        deletedAt: null,
+      };
 
     if (startDate && endDate) {
       where.createdAt = { gte: new Date(startDate), lte: new Date(endDate) };
@@ -988,6 +988,7 @@ export class BeneficiaryService {
         removeOnFail: true,
       },
     }));
+    console.log('first', bulkQueueData)
 
     // Using addBulk to add multiple jobs to the queue
     await this.beneficiaryQueue.addBulk(bulkQueueData);
@@ -1151,21 +1152,21 @@ export class BeneficiaryService {
 
     const where = projectUUID
       ? {
-          deletedAt: null,
-          beneficiaryGroupProject:
-            projectUUID === 'NOT_ASSGNED'
-              ? {
-                  none: {},
-                }
-              : {
-                  some: {
-                    projectId: projectUUID,
-                  },
-                },
-        }
+        deletedAt: null,
+        beneficiaryGroupProject:
+          projectUUID === 'NOT_ASSGNED'
+            ? {
+              none: {},
+            }
+            : {
+              some: {
+                projectId: projectUUID,
+              },
+            },
+      }
       : {
-          deletedAt: null,
-        };
+        deletedAt: null,
+      };
 
     const data = await paginate(
       this.prisma.beneficiaryGroup,
