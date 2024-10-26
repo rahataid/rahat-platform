@@ -1,3 +1,5 @@
+import { FastifyAdapter } from '@bull-board/fastify';
+import { BullBoardModule } from "@bull-board/nestjs";
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -41,6 +43,11 @@ import { AppService } from './app.service';
       }),
       inject: [ConfigService],
     }),
+    BullBoardModule.forRoot({
+      route: '/queues',
+      adapter: FastifyAdapter // Or FastifyAdapter from `@bull-board/fastify`
+    }),
+
     EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false }),
     ListenersModule,
     AppUsersModule,

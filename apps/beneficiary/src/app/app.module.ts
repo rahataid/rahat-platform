@@ -1,3 +1,6 @@
+import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
+import { FastifyAdapter } from "@bull-board/fastify";
+import { BullBoardModule } from "@bull-board/nestjs";
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -10,6 +13,7 @@ import { ProcessorsModule } from '../processors/processor.module';
 import { VendorsModule } from '../vendors/vendors.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+
 
 @Module({
   imports: [
@@ -32,6 +36,14 @@ import { AppService } from './app.service';
     BullModule.registerQueue({
       name: BQUEUE.RAHAT_BENEFICIARY,
     }),
+    BullBoardModule.forRoot({
+      route: '/queues',
+      adapter: FastifyAdapter, // Use FastifyAdapter for routing
+    }),
+    BullBoardModule.forFeature({
+      name: BQUEUE.RAHAT_BENEFICIARY,
+      adapter: BullMQAdapter, // Use FastifyAdapter for the queue
+    }),
 
     BeneficiaryModule,
     VendorsModule,
@@ -42,4 +54,4 @@ import { AppService } from './app.service';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

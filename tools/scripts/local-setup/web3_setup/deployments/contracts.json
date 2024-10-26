@@ -1,18 +1,18 @@
 {
   "RahatAccessManager": {
-    "address": "0x538bc5eE2edC30b992fa5A27c7a3b93068d9cd4b",
-    "startBlock": 19
+    "address": "0x39B028cf092DB441b3FA596DE3148434BFeb74C7",
+    "startBlock": 11
   },
   "ERC2771Forwarder": {
-    "address": "0x5a158c74BCaee8f8992F24E77Df8aab364a2abe8",
-    "startBlock": 22
+    "address": "0x994cF243FA6E2CF55CB4569bBfbd46BebcC96baF",
+    "startBlock": 13
   },
   "RahatTreasury": {
-    "address": "0x6C8eAFd3fE6a94864D2BdF15CFd86E74f197905C",
-    "startBlock": 24
+    "address": "0x8F7CCA8C319ea62Ae56E912a2835Fb92772A9722",
+    "startBlock": 15
   },
   "RahatToken": {
-    "address": "0xE3dAFDABf635c5613c844B45A99ED23474d8Ff19",
-    "startBlock": 26
+    "address": "0x66A6588be17A682508f31c4D4feb9668bD8A24bc",
+    "startBlock": 17
   }
 }
