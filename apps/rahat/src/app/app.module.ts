@@ -19,6 +19,7 @@ import { ListenersModule } from '../listeners/listeners.module';
 import { MetaTxnProcessorsModule } from '../processors/meta-transaction/metaTransaction.module';
 import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
+import { QueueModule } from '../queue/queue.module';
 import { RequestContextModule } from '../request-context/request-context.module';
 import { TokenModule } from '../token/token.module';
 import { UploadModule } from '../upload/upload.module';
@@ -53,7 +54,8 @@ import { AppService } from './app.service';
     GrievanceModule,
     TokenModule,
     SettingsModule,
-    RequestContextModule
+    RequestContextModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, {
