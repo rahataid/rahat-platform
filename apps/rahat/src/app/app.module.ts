@@ -1,5 +1,3 @@
-import { FastifyAdapter } from '@bull-board/fastify';
-import { BullBoardModule } from "@bull-board/nestjs";
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -15,6 +13,7 @@ import {
   UsersModule,
 } from '@rumsan/user';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
+import { BullBoardModule } from '../bull-board/bullboard.module';
 import { ExternalAppGuard } from '../decorators';
 import { GrievanceModule } from '../grievance/grievance.module';
 import { ListenersModule } from '../listeners/listeners.module';
@@ -43,10 +42,11 @@ import { AppService } from './app.service';
       }),
       inject: [ConfigService],
     }),
-    BullBoardModule.forRoot({
-      route: '/queues',
-      adapter: FastifyAdapter // Or FastifyAdapter from `@bull-board/fastify`
-    }),
+    // BullBoardModule.forRoot({
+    //   route: '/queues',
+    //   adapter: FastifyAdapter // Or FastifyAdapter from `@bull-board/fastify`
+    // }),
+    BullBoardModule,
 
     EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false }),
     ListenersModule,

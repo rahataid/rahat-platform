@@ -15,6 +15,7 @@ import { APP } from '@rahataid/sdk';
 import { ResponseTransformInterceptor } from '@rumsan/extensions/interceptors';
 import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app/app.module';
+import { BullBoardService } from './bull-board/bullboard.service';
 import { loggerInstance } from './logger/winston.logger';
 
 // import { GlobalExceptionFilter } from './utils/exceptions/rpcException.filter';
@@ -55,6 +56,9 @@ async function bootstrap() {
     })
   );
   app.useGlobalFilters(new GlobalCustomExceptionFilter());
+
+  const bullBoardService = app.get(BullBoardService);
+  app.use('/admin/queues', bullBoardService.onModuleInit());
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
 
