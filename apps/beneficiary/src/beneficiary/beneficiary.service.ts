@@ -45,6 +45,10 @@ import { VerificationService } from './verification.service';
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 const BATCH_SIZE = 20;
 
+function sanitizeInput(input: string): string {
+  return input.replace(/[^\w\s]/gi, ''); // Remove all non-alphanumeric characters except whitespace
+}
+
 @Injectable()
 export class BeneficiaryService {
   private rsprisma;
@@ -958,13 +962,17 @@ export class BeneficiaryService {
           )
         ),
       ];
+      // Utility function to sanitize input by removing special characters
 
-      console.log('uniqueGroupKeys', { uniqueGroupKeys })
-      // group creation based on dynamic data
+
+      console.log('uniqueGroupKeys', { uniqueGroupKeys });
+
+      // Sanitize and map uniqueGroupKeys to groupData
       const groupData = uniqueGroupKeys.map((g) => ({
-        name: String(g),
+        name: sanitizeInput(String(g)),
       }));
-      console.log('groupData', { groupData, })
+
+      console.log('groupData', { groupData });
 
       await this.prisma.beneficiaryGroup.createManyAndReturn({
         data: groupData,
