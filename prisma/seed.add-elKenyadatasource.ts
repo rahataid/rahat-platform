@@ -48,7 +48,7 @@ const projectStats = (uuid: string, url: string) => {
             title: 'Total Beneficiaries',
             colSpan: 1,
             dataMap: `BENEFICIARY_TOTAL_ID_${uuid}`,
-            dataSrc: 'source3',
+            dataSrc: 'source2',
             rowSpan: 1,
             icon: 'UsersRound',
           },
