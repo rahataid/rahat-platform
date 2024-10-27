@@ -317,6 +317,7 @@ export class BeneficiaryService {
     //     pii: true
     //   }
     // })
+    console.log('data', data)
 
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
@@ -960,7 +961,7 @@ export class BeneficiaryService {
 
       // group creation based on dynamic data
       const groupData = uniqueGroupKeys.map((g) => ({
-        name: g,
+        name: g.toString(),
       }));
 
       await this.prisma.beneficiaryGroup.createManyAndReturn({
