@@ -265,7 +265,7 @@ export class BeneficiaryProcessor {
                 )
               ),
             ];
-            console.log('beneficiaries', beneficiaries)
+
 
             const groups = await txn.beneficiaryGroup.findMany({
               where: {
@@ -342,7 +342,6 @@ export class BeneficiaryProcessor {
 
                 isVerified: b?.isVerified,
               };
-              console.log('projectPayload', projectPayload);
               return handleMicroserviceCall({
                 client: this.client.send(
                   { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUUID },
