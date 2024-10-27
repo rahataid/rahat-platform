@@ -52,6 +52,7 @@ import { catchError, throwError, timeout } from 'rxjs';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
 import { removeSpaces } from '../utils';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
+import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
 import { DocParser } from './parser';
 
 function getDateInfo(dateString) {
@@ -194,8 +195,6 @@ export class BeneficiaryController {
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const projectId = req.body['projectId'];
     const beneficiaries = await DocParser(docType, file.buffer);
-    console.log('projectId', projectId);
-    console.log('beneficiaries', beneficiaries);
     const beneficiariesMapped = beneficiaries.map((b) => ({
       birthDate: b['Birth Date']
         ? new Date(b['Birth Date']).toISOString()
@@ -220,7 +219,6 @@ export class BeneficiaryController {
         },
       },
     }));
-    console.log('beneficiariesMapped', beneficiariesMapped);
 
     return this.client
       .send(
@@ -247,7 +245,6 @@ export class BeneficiaryController {
     const projectId = req.body['projectId'];
     const automatedGroupOption = req.body['automatedGroupOption'];
     const beneficiaries = await DocParser(docType, file.buffer);
-    console.log('beneficiaries', beneficiaries)
     // Utility function to sanitize input keys by trimming whitespace
     function sanitizeKey(key: string): string {
       return key.trim();
@@ -262,7 +259,6 @@ export class BeneficiaryController {
     }
     );
 
-    console.log('beneficiariesWithSanitizedKeys', beneficiariesWithSanitizedKeys)
 
     // Map the beneficiaries to the format expected by the microservice
 
@@ -273,7 +269,7 @@ export class BeneficiaryController {
         : null,
       internetStatus: b[sanitizeKey('Internet Status*')],
       bankedStatus: b[sanitizeKey('Bank Status*')],
-      location: b[sanitizeKey('Location')],
+      location: trimNonAlphaNumericValue(b[sanitizeKey('Location')]),
       phoneStatus: b[sanitizeKey('Phone Status*')],
       notes: b[sanitizeKey('Notes')],
       gender: b[sanitizeKey('Gender*')],
@@ -293,14 +289,25 @@ export class BeneficiaryController {
       },
     }));
 
-    console.log(`Trying to upload ${beneficiariesMapped.length} beneficiaries through queue`);
-    console.log('first', beneficiariesMapped)
+
+
+
+    const uniquePhoneNumberedBeneficiaries = beneficiariesMapped.filter(
+      (b, index, self) =>
+        index ===
+        self.findIndex(
+          (t) => t.piiData.phone === b.piiData.phone
+        )
+    );
+
+
+    console.log(`Trying to upload ${beneficiariesMapped.length} beneficiaries through queue. Unique phone numbers: ${uniquePhoneNumberedBeneficiaries.length}, Duplicate phone numbers: ${beneficiariesMapped.length - uniquePhoneNumberedBeneficiaries.length}`);
 
     return handleMicroserviceCall({
       client: this.client.send(
         { cmd: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE },
         {
-          data: beneficiariesMapped,
+          data: uniquePhoneNumberedBeneficiaries,
           projectUUID: projectId,
           ignoreExisting: true,
           automatedGroupOption,
