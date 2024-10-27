@@ -29,7 +29,7 @@ import {
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
-import { randomUUID, UUID } from 'crypto';
+import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import {
@@ -1050,7 +1050,7 @@ export class BeneficiaryService {
         automatedGroupOption: allData?.automatedGroupOption,
       },
       opts: {
-        jobId: randomUUID(),
+        // jobId: randomUUID(),
         attempts: 3,
         removeOnComplete: true,
         removeOnFail: true,
