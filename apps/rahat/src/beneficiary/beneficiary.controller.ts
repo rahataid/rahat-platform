@@ -246,28 +246,55 @@ export class BeneficiaryController {
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const projectId = req.body['projectId'];
     const automatedGroupOption = req.body['automatedGroupOption'];
-    console.log('queueData', automatedGroupOption);
     const beneficiaries = await DocParser(docType, file.buffer);
-    const beneficiariesMapped = beneficiaries.map((b) => ({
-      birthDate: b['Birth Date']
-        ? new Date(b['Birth Date']).toISOString()
+    console.log('beneficiaries', beneficiaries)
+    // Utility function to sanitize input keys by trimming whitespace
+    function sanitizeKey(key: string): string {
+      return key.trim();
+    }
+
+    const beneficiariesWithSanitizedKeys = beneficiaries.map((b) => {
+      const sanitizedBeneficiary = {};
+      for (const key in b) {
+        sanitizedBeneficiary[sanitizeKey(key)] = b[key];
+      }
+      return sanitizedBeneficiary;
+    }
+    );
+
+    console.log('beneficiariesWithSanitizedKeys', beneficiariesWithSanitizedKeys)
+
+    // Map the beneficiaries to the format expected by the microservice
+
+
+    const beneficiariesMapped = beneficiariesWithSanitizedKeys.map((b) => ({
+      birthDate: b[sanitizeKey('Birth Date')]
+        ? new Date(b[sanitizeKey('Birth Date')]).toISOString()
         : null,
-      internetStatus: b['Internet Status*'],
-      bankedStatus: b['Bank Status*'],
-      location: b['Location'],
-      phoneStatus: b['Phone Status*'],
-      notes: b['Notes'],
-      gender: b['Gender*'],
-      latitude: b['Latitude'],
-      longitude: b['Longitude'],
-      age: b['Age'] || null,
-      walletAddress: b['Wallet Address'],
+      internetStatus: b[sanitizeKey('Internet Status*')],
+      bankedStatus: b[sanitizeKey('Bank Status*')],
+      location: b[sanitizeKey('Location')],
+      phoneStatus: b[sanitizeKey('Phone Status*')],
+      notes: b[sanitizeKey('Notes')],
+      gender: b[sanitizeKey('Gender*')],
+      latitude: b[sanitizeKey('Latitude')],
+      longitude: b[sanitizeKey('Longitude')],
+      age: b[sanitizeKey('Age')] || null,
+      walletAddress: b[sanitizeKey('Wallet Address')],
       piiData: {
-        name: b['Name*'] || 'Unknown',
-        phone: removeSpaces(b['Whatsapp Number*'] || b['Phone Number*']),
+        name: b[sanitizeKey('Name*')] || 'Unknown',
+        phone: removeSpaces(
+          b[sanitizeKey('Whatsapp Number*')] ||
+          b[sanitizeKey('Phone Number*')] ||
+          b[sanitizeKey('Phone Number')] ||
+          b[sanitizeKey('Phone number')]
+        ),
         extras: {},
       },
     }));
+
+    console.log(`Trying to upload ${beneficiariesMapped.length} beneficiaries through queue`);
+    console.log('first', beneficiariesMapped)
 
     return handleMicroserviceCall({
       client: this.client.send(
