@@ -959,11 +959,12 @@ export class BeneficiaryService {
         ),
       ];
 
+      console.log('uniqueGroupKeys', { uniqueGroupKeys })
       // group creation based on dynamic data
       const groupData = uniqueGroupKeys.map((g) => ({
-        name: g.toString(),
+        name: String(g),
       }));
-      console.log('groupData', { groupData, uniqueGroupKeys })
+      console.log('groupData', { groupData, })
 
       await this.prisma.beneficiaryGroup.createManyAndReturn({
         data: groupData,
