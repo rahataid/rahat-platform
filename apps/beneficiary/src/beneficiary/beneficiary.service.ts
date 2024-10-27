@@ -963,6 +963,7 @@ export class BeneficiaryService {
       const groupData = uniqueGroupKeys.map((g) => ({
         name: g.toString(),
       }));
+      console.log('groupData', { groupData, uniqueGroupKeys })
 
       await this.prisma.beneficiaryGroup.createManyAndReturn({
         data: groupData,
