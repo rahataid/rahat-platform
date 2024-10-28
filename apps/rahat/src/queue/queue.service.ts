@@ -32,29 +32,26 @@ export class QueueService {
     const jobs = await queue.getJobs([status || 'failed', 'waiting', 'active', 'completed', 'delayed']);
 
     // Apply additional filters on the jobs
-    return jobs
+    const filteredJobs = jobs
       .filter(job =>
         (!name || job.name === name) &&
         (!startDate || job.timestamp >= startDate.getTime()) &&
         (!endDate || job.timestamp <= endDate.getTime())
-      )
-      .map(job => ({
-        // ...job,
+      );
 
-        id: job.id,
-        name: job.name,
-        // status:await job.st(),
-        data: job.data,
-        attemptsMade: job.attemptsMade,
-        failedReason: job.failedReason,
-        timestamp: job.timestamp,
-        processedOn: job.processedOn,
-        finishedOn: job.finishedOn,
-        progress: job.progress,
-        returnvalue: job.returnvalue,
-        status: job.getState()
-
-      }));
+    return Promise.all(filteredJobs.map(async job => ({
+      id: job.id,
+      name: job.name,
+      data: job.data,
+      attemptsMade: job.attemptsMade,
+      failedReason: job.failedReason,
+      timestamp: job.timestamp,
+      processedOn: job.processedOn,
+      finishedOn: job.finishedOn,
+      progress: job.progress,
+      returnvalue: job.returnvalue,
+      status: await job.getState()
+    })));
   }
 
   async retryJob(queue: Queue, jobId: string | number | UUID) {
