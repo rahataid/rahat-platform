@@ -38,6 +38,11 @@ import { AppService } from './app.service';
           host: configService.get('REDIS_HOST'),
           port: configService.get('REDIS_PORT'),
           password: configService.get('REDIS_PASSWORD'),
+
+        },
+        settings: {
+          stalledInterval: 30000, // Time (ms) to check for stalled jobs, default is 30 seconds.
+          lockDuration: 60000, // Time (ms) for a job to finish before considering it stalled, default is 30 seconds.
         },
       }),
       inject: [ConfigService],

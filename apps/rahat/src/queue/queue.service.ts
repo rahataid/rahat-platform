@@ -48,11 +48,17 @@ export class QueueService {
         attemptsMade: job.attemptsMade,
         failedReason: job.failedReason,
         timestamp: job.timestamp,
+        processedOn: job.processedOn,
+        finishedOn: job.finishedOn,
+        progress: job.progress,
+        returnvalue: job.returnvalue,
+
       }));
   }
 
   async retryJob(queue: Queue, jobId: string | number | UUID) {
     const job = await queue.getJob(jobId);
+    console.log('job', job)
     if (job && job.failedReason) {
       await job.retry();
       return { message: `Job ${jobId} retried successfully.` };
