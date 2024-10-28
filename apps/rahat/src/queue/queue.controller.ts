@@ -20,13 +20,13 @@ export class QueueController {
   @ApiQuery({ name: 'startDate', required: false, description: 'Filter by job creation start date (YYYY-MM-DD)' })
   @ApiQuery({ name: 'endDate', required: false, description: 'Filter by job creation end date (YYYY-MM-DD)' })
   async getPendingContractJobs(
-    @Query('status') status?: string,
+    @Query('status') status?: string[],
     @Query('name') name?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string
   ) {
     const filters = {
-      status: status as JobStatus,
+      status: status as JobStatus[],
       name,
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
@@ -50,13 +50,13 @@ export class QueueController {
   @ApiQuery({ name: 'startDate', required: false, description: 'Filter by job creation start date (YYYY-MM-DD)' })
   @ApiQuery({ name: 'endDate', required: false, description: 'Filter by job creation end date (YYYY-MM-DD)' })
   async getPendingRahatJobs(
-    @Query('status') status?: string,
+    @Query('status') status?: string[],
     @Query('name') name?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string
   ) {
     const filters = {
-      status: status as JobStatus,
+      status: status as JobStatus[],
       name,
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
@@ -80,13 +80,13 @@ export class QueueController {
   @ApiQuery({ name: 'startDate', required: false, description: 'Filter by job creation start date (YYYY-MM-DD)' })
   @ApiQuery({ name: 'endDate', required: false, description: 'Filter by job creation end date (YYYY-MM-DD)' })
   async getPendingRahatBeneficiaryJobs(
-    @Query('status') status?: string,
+    @Query('status') status?: string[],
     @Query('name') name?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string
   ) {
     const filters = {
-      status: status as JobStatus,
+      status: status as JobStatus[],
       name,
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
@@ -110,13 +110,13 @@ export class QueueController {
   @ApiQuery({ name: 'startDate', required: false, description: 'Filter by job creation start date (YYYY-MM-DD)' })
   @ApiQuery({ name: 'endDate', required: false, description: 'Filter by job creation end date (YYYY-MM-DD)' })
   async getPendingMetaTxnJobs(
-    @Query('status') status?: string,
+    @Query('status') status?: string[],
     @Query('name') name?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string
   ) {
     const filters = {
-      status: status as JobStatus,
+      status: status as JobStatus[],
       name,
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
