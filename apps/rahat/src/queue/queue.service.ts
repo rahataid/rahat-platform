@@ -29,7 +29,7 @@ export class QueueService {
 
   async getJobs(queue: Queue, filters: JobFilterOptions = {}) {
     const { status, name, startDate, endDate } = filters;
-    const jobs = await queue.getJobs([status || 'failed', 'waiting', 'active', 'completed', 'delayed']);
+    const jobs = await queue.getJobs(status ? [status] : ['failed', 'waiting', 'active', 'completed', 'delayed']);
 
     // Apply additional filters on the jobs
     const filteredJobs = jobs
