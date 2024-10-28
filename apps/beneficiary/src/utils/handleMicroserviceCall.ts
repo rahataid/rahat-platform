@@ -14,8 +14,6 @@ export async function handleMicroserviceCall<TRequest, TResponse>(
   try {
     // Convert Observable to Promise and wait for the response
     const response = await lastValueFrom(client);
-    console.log('response', response);
-
     // If onSuccess callback is provided, call it with the response
     if (onSuccess) {
       await onSuccess(response);
