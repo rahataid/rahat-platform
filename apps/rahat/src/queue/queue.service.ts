@@ -52,6 +52,7 @@ export class QueueService {
         finishedOn: job.finishedOn,
         progress: job.progress,
         returnvalue: job.returnvalue,
+        status: job.getState()
 
       }));
   }
