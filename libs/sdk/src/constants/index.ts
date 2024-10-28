@@ -261,6 +261,7 @@ export const MS_ACTIONS = {
     UPDATE_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.update',
     CREATE_BULK_DISBURSEMENT: 'rpProject.disbursement.bulkCreate',
     CREATE_CAMPAIGN: 'rpProject.campaign.create',
+    UPDATE_CAMPAIGN: 'rpProject.campaign.update',
     CREATE_AUDIENCE: 'rpProject.campaign.create_audience',
     CREATE_BULK_AUDIENCE: 'rpProject.campaign.create_bulk_audience',
     GET_ALL_CAMPAIGN: 'rpProject.campaign.get',

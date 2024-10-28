@@ -74,6 +74,8 @@ export const rpActions: ProjectActionFunc = {
   //campaign start
   [MS_ACTIONS.RPPROJECT.CREATE_CAMPAIGN]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.CAMPAIGN.CREATE_CAMPAIGN, uuid }, payload),
+  [MS_ACTIONS.RPPROJECT.UPDATE_CAMPAIGN]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.CAMPAIGN.UPDATE_CAMPAIGN, uuid }, payload),
   [MS_ACTIONS.RPPROJECT.GET_ALL_CAMPAIGN]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.CAMPAIGN.LIST_CAMPAIGN, uuid }, payload),
   [MS_ACTIONS.RPPROJECT.GET_CAMPAIGN]: (uuid, payload, sendCommand) =>
