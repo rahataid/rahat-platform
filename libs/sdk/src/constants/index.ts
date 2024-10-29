@@ -11,6 +11,7 @@ export const BQUEUE = {
   RAHAT_PROJECT: 'RAHAT.PROJECT',
   RAHAT_BENEFICIARY: 'RAHAT.BENEFICIARY',
   HOST: 'RAHAT.HOST',
+  META_TXN: 'RAHAT.META_TXN'
 };
 
 export const UserRoles = {
@@ -260,6 +261,7 @@ export const MS_ACTIONS = {
     UPDATE_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.update',
     CREATE_BULK_DISBURSEMENT: 'rpProject.disbursement.bulkCreate',
     CREATE_CAMPAIGN: 'rpProject.campaign.create',
+    UPDATE_CAMPAIGN: 'rpProject.campaign.update',
     CREATE_AUDIENCE: 'rpProject.campaign.create_audience',
     CREATE_BULK_AUDIENCE: 'rpProject.campaign.create_bulk_audience',
     GET_ALL_CAMPAIGN: 'rpProject.campaign.get',
@@ -274,6 +276,7 @@ export const MS_ACTIONS = {
     UPDATE_REDEMPTION: 'rpProject.updateRedemption',
     LIST_REDEMPTION: 'rpProject.listRedemption',
     GET_VENDOR_REDEMPTION: 'rpProject.vendorRedemption',
+    GET_REDEMPTION: 'rpProject.getRedemption',
     GENERATE_OTP_HASH: 'rpProject.generateOtpHash',
     GET_OFFLINE_BENEFICIARIES: 'rpProject.getOfflineBeneficiaries',
     SYNC_OFFLINE_BENEFICIARIES: 'rpProject.syncOfflineBeneficiaries',
@@ -287,10 +290,18 @@ export const MS_ACTIONS = {
     GET_BENEFICIARIES_DISBURSEMENTS: 'rpProject.beneficiaries.getDisbursements',
     UPDATE_OFFLINE: 'rpProject.offlineBeneficiaries.update',
     GET_UNSYNCED_BENEFICIARIES: 'rpProject.beneficiaries.getUnsynced',
+    GET_UNSYNCED_BENEFICIARY_GROUP: 'rpProject.beneficiary.group.get_unsynced',
     // TODO: move to kenya specific actions
     CREATE_WALKIN: 'rpProject.walkin.create',
     GET_WALKIN: 'rpProject.walkin.get',
     GET_ALL_WALKIN: 'rpProject.walkin.getAll',
     CREATE_BULK_WALKIN_BENEFICIARIES: 'rpProject.walkin.createBulk',
+    LIST_REPORTING: 'rpProject.reporting.list',
+    UPDATE_BENEFICIARY: 'rpProject.beneficiary.update',
+    LIST_BENEFICIARY_REIMBURSEMENTS: 'rpProject.beneficiary.listReimbursements',
+    SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions'
+
   },
-};
+
+
+}

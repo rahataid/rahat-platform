@@ -16,7 +16,7 @@ import {
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto,
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
   BeneficiaryConstants,
@@ -25,25 +25,27 @@ import {
   BQUEUE,
   generateRandomWallet,
   ProjectContants,
-  TPIIData,
+  TPIIData
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
-import { JobOptions, Queue } from 'bull';
-import { randomUUID, UUID } from 'crypto';
+import { Queue } from 'bull';
+import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import {
   findTempBenefGroups,
   validateDupicatePhone,
-  validateDupicateWallet,
+  validateDupicateWallet
 } from '../processors/processor.utils';
+import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
+import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { createListQuery } from './helpers';
 import { VerificationService } from './verification.service';
-import { createBatches } from '../utils/array';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 const BATCH_SIZE = 20;
+
 
 @Injectable()
 export class BeneficiaryService {
@@ -217,21 +219,21 @@ export class BeneficiaryService {
 
     let where: any = projectUUID
       ? {
-          deletedAt: null,
-          BeneficiaryProject:
-            projectUUID === 'NOT_ASSGNED'
-              ? {
-                  none: {},
-                }
-              : {
-                  some: {
-                    projectId: projectUUID,
-                  },
-                },
-        }
+        deletedAt: null,
+        BeneficiaryProject:
+          projectUUID === 'NOT_ASSGNED'
+            ? {
+              none: {},
+            }
+            : {
+              some: {
+                projectId: projectUUID,
+              },
+            },
+      }
       : {
-          deletedAt: null,
-        };
+        deletedAt: null,
+      };
 
     if (startDate && endDate) {
       where.createdAt = { gte: new Date(startDate), lte: new Date(endDate) };
@@ -317,6 +319,7 @@ export class BeneficiaryService {
     //     pii: true
     //   }
     // })
+    console.log('data', data)
 
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
@@ -471,7 +474,11 @@ export class BeneficiaryService {
 
   async findOneByPhone(phone: string) {
     const piiData = await this.rsprisma.beneficiaryPii.findFirst({
-      where: { phone },
+      where: {
+        phone: {
+          contains: phone,
+        },
+      },
     });
     if (!piiData) return null;
     const beneficiary = await this.rsprisma.beneficiary.findUnique({
@@ -939,33 +946,98 @@ export class BeneficiaryService {
     });
   }
 
+
+
   async createBulkWithQueue(
     beneficiaries: CreateBeneficiaryDto[],
     allData?: any
   ) {
     let uniqueGroupKeys = [];
+    const ignoreExisting = allData?.ignoreExisting;
+    const validateBeneficiaries = async (
+      batch: CreateBeneficiaryDto[],
+      prisma: PrismaService
+    ) => {
+
+      const walletAddresses = batch
+        .map((beneficiary) => beneficiary.walletAddress)
+        .filter(Boolean);
+
+      // Find duplicate phone numbers
+      const duplicatePhones = await checkPhoneNumber(batch, prisma);
+      // Find duplicate wallet addresses if provided
+      const duplicateWallets =
+        walletAddresses.length > 0
+          ? await checkWalletAddress(batch, prisma)
+          : [];
+
+      console.log(`
+        Found ${duplicatePhones.length} existing beneficiaries phone numbers i: ${duplicatePhones.join(', ')}
+        Found ${duplicateWallets.length} existing beneficiaries wallet addresses: ${duplicateWallets.join(', ')}
+        `)
+
+      if (!ignoreExisting) {
+        if (duplicatePhones.length > 0) {
+          throw new RpcException(
+            `Duplicate phone numbers: ${duplicatePhones.join(', ')}`
+          );
+        }
+
+        if (duplicateWallets.length > 0) {
+          throw new RpcException(
+            `Duplicate wallet addresses: ${duplicateWallets.join(', ')}`
+          );
+        }
+      } else {
+        // Filter out duplicates if `ignoreExisting` is true
+        return batch.filter(
+          (beneficiary) =>
+            !duplicatePhones.includes(beneficiary.piiData.phone) &&
+            !duplicateWallets.includes(beneficiary.walletAddress)
+        );
+      }
+
+      return batch;
+    };
+
+    const filteredBeneficiaries = await validateBeneficiaries(
+      beneficiaries,
+      this.prisma
+    );
 
     if (allData?.automatedGroupOption?.createAutomatedGroup === 'true') {
       uniqueGroupKeys = [
         ...new Set(
-          beneficiaries.map(
+          filteredBeneficiaries.map(
             (b) => b[allData?.automatedGroupOption?.groupKey.toLowerCase()]
           )
         ),
       ];
+      // Utility function to sanitize input by removing special characters
 
-      // group creation based on dynamic data
+
+
+      // Sanitize and map uniqueGroupKeys to groupData
       const groupData = uniqueGroupKeys.map((g) => ({
-        name: g,
+        name: sanitizeNonAlphaNumericValue(g),
       }));
+
+      console.log('groupData', { groupData });
 
       await this.prisma.beneficiaryGroup.createManyAndReturn({
         data: groupData,
         skipDuplicates: true,
+
       });
     }
     // Break beneficiaries into batches
-    const batches = createBatches(beneficiaries, BATCH_SIZE);
+    const batches = createBatches(filteredBeneficiaries, BATCH_SIZE);
+
+    console.log(`Creating ${batches.length} batches of beneficiaries.
+    Total beneficiaries: ${filteredBeneficiaries.length}
+    Duplicate phone numbers: ${filteredBeneficiaries.length - batches.flat().length}
+    Duplicate wallet addresses: ${filteredBeneficiaries.length - batches.flat().length}
+      `);
 
     const bulkQueueData = batches.map((batch, index) => ({
       name: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE,
@@ -978,7 +1050,7 @@ export class BeneficiaryService {
         automatedGroupOption: allData?.automatedGroupOption,
       },
       opts: {
-        jobId: randomUUID(),
+        // jobId: randomUUID(),
         attempts: 3,
         removeOnComplete: true,
         removeOnFail: true,
@@ -988,7 +1060,6 @@ export class BeneficiaryService {
     // Using addBulk to add multiple jobs to the queue
     await this.beneficiaryQueue.addBulk(bulkQueueData);
 
-    console.log('Total Batches to be created:', batches.length);
     return {
       success: true,
       message: 'Upload in Progress. Data will be listed soon.',
@@ -1071,6 +1142,18 @@ export class BeneficiaryService {
   }
 
   async addGroup(dto: CreateBeneficiaryGroupsDto) {
+
+    const benGroup = await this.prisma.beneficiaryGroup.findFirst({
+      where: {
+        name: dto.name,
+      },
+    });
+
+    if (benGroup) {
+      throw new RpcException('Beneficiary group already exist.');
+
+    }
+
     const group = await this.prisma.beneficiaryGroup.create({
       data: {
         name: dto.name,
@@ -1081,9 +1164,21 @@ export class BeneficiaryService {
       beneficiaryId: d.uuid,
     }));
 
-    return await this.prisma.groupedBeneficiaries.createMany({
-      data: createPayload,
-    });
+    const groupedBeneficiaries =
+      await this.prisma.groupedBeneficiaries.createMany({
+        data: createPayload,
+      });
+
+    //assign to project
+    if (dto?.projectId) {
+      const payload = {
+        beneficiaryGroupId: group.uuid,
+        projectId: dto.projectId,
+      };
+      await (await this.assignBeneficiaryGroupToProject(payload)).toPromise();
+    }
+
+    return groupedBeneficiaries;
   }
 
   async getOneGroup(uuid: string) {
@@ -1135,21 +1230,21 @@ export class BeneficiaryService {
 
     const where = projectUUID
       ? {
-          deletedAt: null,
-          beneficiaryGroupProject:
-            projectUUID === 'NOT_ASSGNED'
-              ? {
-                  none: {},
-                }
-              : {
-                  some: {
-                    projectId: projectUUID,
-                  },
-                },
-        }
+        deletedAt: null,
+        beneficiaryGroupProject:
+          projectUUID === 'NOT_ASSGNED'
+            ? {
+              none: {},
+            }
+            : {
+              some: {
+                projectId: projectUUID,
+              },
+            },
+      }
       : {
-          deletedAt: null,
-        };
+        deletedAt: null,
+      };
 
     const data = await paginate(
       this.prisma.beneficiaryGroup,
@@ -1379,7 +1474,6 @@ export class BeneficiaryService {
 
       //2.Save beneficiary group to project
       await this.saveBeneficiaryGroupToProject(dto);
-
       //3. Sync beneficiary to project
       return this.client.send(
         { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
@@ -1390,52 +1484,7 @@ export class BeneficiaryService {
     }
   }
 
-  // async listTempBeneficiaries(uuid: string, query: ListTempBeneficiariesDto) {
 
-  //   const res = await this.prisma.tempGroup.findUnique({
-  //     where: {
-  //       uuid: uuid
-
-  //     },
-  //     include: {
-  //       TempGroupedBeneficiaries: {
-  //         select: {
-  //           tempBeneficiary: true
-  //         }
-  //       }
-  //     }
-
-  //   })
-  //   if (query && query.page && query.perPage) {
-
-  //     let filter = {} as any;
-  //     if (query.firstName) filter.firstName = { contains: query.firstName, mode: 'insensitive' }
-
-  //     const startIndex = (query.page - 1) * query.perPage;
-  //     const endIndex = query.page * query.perPage;
-  //     const paginatedBeneficiaries = res.TempGroupedBeneficiaries.slice(
-  //       startIndex,
-  //       endIndex,
-  //     )
-  //     console.log(paginatedBeneficiaries);
-  //     const total = res.TempGroupedBeneficiaries.length;
-  //     const lastPage = Math.ceil(total / query.perPage);
-
-  //     const meta = {
-  //       total,
-  //       lastPage,
-  //       currentPage: query.page,
-  //       perPage: query.perPage,
-  //     };
-
-  //     return {
-  //       ...res,
-  //       beneficiariesGroup: paginatedBeneficiaries,
-  //       meta,
-  //     };
-  //   }
-  //   return res;
-  // }
 
   async listTempBeneficiaries(uuid: string, query: ListTempBeneficiariesDto) {
     const res = await this.prisma.tempGroup.findUnique({
@@ -1688,4 +1737,32 @@ export class BeneficiaryService {
       },
     });
   }
+}
+
+async function checkPhoneNumber(
+  beneficiaries: CreateBeneficiaryDto[],
+  prisma: PrismaService
+): Promise<string[]> {
+  const phoneNumbers = beneficiaries.map(
+    (beneficiary) => beneficiary.piiData.phone
+  );
+  const duplicates = await prisma.beneficiaryPii.findMany({
+    where: { phone: { in: phoneNumbers } },
+    select: { phone: true },
+  });
+  return duplicates.map((dup) => dup.phone);
+}
+
+async function checkWalletAddress(
+  beneficiaries: CreateBeneficiaryDto[],
+  prisma: PrismaService
+): Promise<string[]> {
+  const walletAddresses = beneficiaries.map(
+    (beneficiary) => beneficiary.walletAddress
+  );
+  const duplicates = await prisma.beneficiary.findMany({
+    where: { walletAddress: { in: walletAddresses } },
+    select: { walletAddress: true },
+  });
+  return duplicates.map((dup) => dup.walletAddress);
 }

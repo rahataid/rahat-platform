@@ -1,3 +1,4 @@
+import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
@@ -8,20 +9,21 @@ import {
 } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
+  BQUEUE,
   MS_ACTIONS,
   MS_TIMEOUT,
   ProjectEvents,
   ProjectJobs,
 } from '@rahataid/sdk';
 import { BeneficiaryType, KoboBeneficiaryStatus } from '@rahataid/sdk/enums';
+import { JOBS } from '@rahataid/sdk/project/project.events';
 import { PrismaService } from '@rumsan/prisma';
+import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { switchMap, tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
 import { createExtrasAndPIIData, splitCoordinates } from '../utils';
-import { ERC2771FORWARDER } from '../utils/contracts';
 import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
-import { createContractSigner } from '../utils/web3';
 import {
   aaActions,
   beneficiaryActions,
@@ -42,8 +44,9 @@ export class ProjectService {
     private prisma: PrismaService,
     private eventEmitter: EventEmitter2,
     private requestContextService: RequestContextService,
-    @Inject('RAHAT_CLIENT') private readonly client: ClientProxy
-  ) {}
+    @Inject('RAHAT_CLIENT') private readonly client: ClientProxy,
+    @InjectQueue(BQUEUE.META_TXN) private readonly metaTransactionQueue: Queue
+  ) { }
 
   async create(data: CreateProjectDto) {
     // TODO: refactor to proper validator
@@ -144,9 +147,6 @@ export class ProjectService {
     user: any
   ) {
     try {
-      // console.log("here")
-      // const user = this.requestContextService.getUser()
-      // console.log("user", user)
 
       const requiresUser = userRequiredActions.has(action);
 
@@ -161,25 +161,23 @@ export class ProjectService {
             this.sendWhatsAppMsg(response, cmd, payload);
           })
         );
+
     } catch (err) {
       console.log('Err', err);
     }
   }
 
-  async executeMetaTxRequest(params: any) {
-    const { metaTxRequest } = params;
-    const forwarderContract = await createContractSigner(
-      ERC2771FORWARDER,
-      process.env.ERC2771_FORWARDER_ADDRESS
+  async executeMetaTxRequest(params: any, uuid: string, trigger?: any) {
+    const payload: any = { params, uuid };
+
+    if (trigger) payload.trigger = trigger;
+
+    const res = await this.metaTransactionQueue.add(
+      JOBS.META_TRANSACTION.ADD_QUEUE,
+      payload
     );
 
-    metaTxRequest.gas = BigInt(metaTxRequest.gas);
-    metaTxRequest.nonce = BigInt(metaTxRequest.nonce);
-    metaTxRequest.value = BigInt(metaTxRequest.value);
-    const tx = await forwarderContract.execute(metaTxRequest);
-    const res = await tx.wait();
-
-    return { txHash: res.hash, status: res.status };
+    return { txHash: res.data.hash, status: res.data.status };
   }
 
   async sendSucessMessage(uuid, payload) {
@@ -191,20 +189,19 @@ export class ProjectService {
       .pipe(timeout(MS_TIMEOUT));
   }
 
-  async handleProjectActions({ uuid, action, payload, user }) {
-    console.log({ uuid, action, payload });
+  async handleProjectActions({ uuid, action, payload, trigger, user }) {
     //Note: This is a temporary solution to handle metaTx actions
     const metaTxActions = {
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () =>
-        await this.executeMetaTxRequest(payload),
+        await this.executeMetaTxRequest(payload, uuid, trigger),
       [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () =>
-        await this.executeMetaTxRequest(payload),
+        await this.executeMetaTxRequest(payload, uuid, trigger),
       [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () =>
         await this.sendSucessMessage(uuid, payload),
       [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () =>
-        await this.executeMetaTxRequest(payload),
+        await this.executeMetaTxRequest(payload, uuid, trigger),
       [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () =>
-        await this.executeMetaTxRequest(payload),
+        await this.executeMetaTxRequest(payload, uuid, trigger),
     };
 
     const actions = {
