@@ -229,6 +229,7 @@ export class ProjectService {
 
   async importKoboBeneficiary(uuid: UUID, data: any) {
     const benef: any = this.mapKoboFields(data);
+    console.log("KOBO data", data);
     if (!benef.phone) throw new Error('Phone number is required!');
     if (benef.gender) benef.gender = benef.gender.toUpperCase();
     if (benef.type) benef.type = benef.type.toUpperCase();
