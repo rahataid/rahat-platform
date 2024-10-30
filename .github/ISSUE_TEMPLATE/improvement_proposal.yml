@@ -3,6 +3,7 @@ description: Propose a new feature or improvement for the Rahat platform
 title: '[RIP???]: '
 label: 'Feature Title 🏷️'
 description: A short, clear title for your proposal
+
 body:
   - type: markdown
     attributes:
