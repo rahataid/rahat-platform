@@ -1,0 +1,74 @@
+name: Rahat Improvement Proposal 🚀
+description: Propose a new feature or improvement for the Rahat platform
+title: '[Feature]: '
+labels: [':rocket: Feature Request']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🌟 Thank you for taking the time to contribute to Rahat! 
+        Please complete the sections below to submit your improvement proposal.
+
+  - type: input
+    id: title
+    attributes:
+      label: 'Feature Title 🏷️'
+      description: A short, clear title for your proposal.
+
+  - type: textarea
+    id: abstract
+    attributes:
+      label: 'Abstract 🧠'
+      description: Provide a concise summary of the feature or improvement. Think of this as your proposal’s “elevator pitch.”
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 'Motivation 💡'
+      description: Why is this feature necessary? Explain the problem it solves and how it will benefit Rahat.
+    validations:
+      required: true
+
+  - type: textarea
+    id: pitch
+    attributes:
+      label: 'Pitch 🎯'
+      description: Why does this feature belong in Rahat? Describe its value and potential impact on users.
+    validations:
+      required: true
+
+  - type: textarea
+    id: example_usage
+    attributes:
+      label: 'Example Usage (Optional) 🛠️'
+      description: Provide a practical example of how this feature would be used to help reviewers visualize its application.
+
+  - type: textarea
+    id: technical_specification
+    attributes:
+      label: 'Technical Specification (Optional) ⚙️'
+      description: Detail any technical information on how the feature will be implemented (APIs, dependencies, architecture).
+      
+  - type: textarea
+    id: path_to_achieve
+    attributes:
+      label: 'Path to Achieve 🚧'
+      description: Outline the roadmap or key milestones required to implement the feature, including any timelines if applicable.
+
+  - type: textarea
+    id: miscellaneous
+    attributes:
+      label: 'Miscellaneous (Optional) 📝'
+      description: Add any other relevant information not covered in the above sections.
+
+  - type: markdown
+    attributes:
+      value: |
+        ### 🛑 Guidelines for Common Proposals
+        
+        Please note that the following types of proposals generally do not make it to the core Rahat platform:
+        
+        - Changes to the default reporter (consider custom reporters instead)
+        - Adjustments to node/jsdom test environments (use custom environments where necessary)
