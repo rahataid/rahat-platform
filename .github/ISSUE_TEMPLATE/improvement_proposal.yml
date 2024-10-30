@@ -1,8 +1,7 @@
 name: Rahat Improvement Proposal 🚀
 description: Propose a new feature or improvement for the Rahat platform
-title: '[RIP???]: '
-label: 'Feature Title 🏷️'
-description: A short, clear title for your proposal
+title: '[RIP]: '
+labels: [':rocket: Feature Request']
 
 body:
   - type: markdown
