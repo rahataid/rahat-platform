@@ -10,6 +10,7 @@ import {
 import {
   BeneficiaryJobs,
   BQUEUE,
+  genRandomPhone,
   MS_ACTIONS,
   MS_TIMEOUT,
   ProjectEvents,
@@ -227,12 +228,15 @@ export class ProjectService {
     );
   }
 
+  // TODO: fix cambodia specific country code
   async importKoboBeneficiary(uuid: UUID, data: any) {
     const benef: any = this.mapKoboFields(data);
     console.log("KOBO data", data);
-    if (!benef.phone) throw new Error('Phone number is required!');
-    if (benef.gender) benef.gender = benef.gender.toUpperCase();
     if (benef.type) benef.type = benef.type.toUpperCase();
+    if (benef.type !== 'LEAD') benef.phone = genRandomPhone('88');
+    if (!benef.phone) throw new Error('Phone number is required!');
+
+    if (benef.gender) benef.gender = benef.gender.toUpperCase();
     if (benef.age) benef.age = parseInt(benef.age);
     if (benef.leadInterests) {
       benef.leadInterests = benef.leadInterests
