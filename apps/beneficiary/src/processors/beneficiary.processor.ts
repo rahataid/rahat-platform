@@ -324,12 +324,6 @@ export class BeneficiaryProcessor {
               );
             });
 
-            this.eventEmitter.emit(
-              BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-              {
-                projectUuid: projectUUID,
-              }
-            );
 
             const assignPromises = insertedBeneficiaries.map((b) => {
               const projectPayload = {
@@ -407,6 +401,13 @@ export class BeneficiaryProcessor {
         );
         throw new RpcException(`Batch ${batchNumber} failed: ${error.message}`);
       });
+
+    this.eventEmitter.emit(
+      BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
+      {
+        projectUuid: projectUUID,
+      }
+    );
 
     return {
       success: true,
