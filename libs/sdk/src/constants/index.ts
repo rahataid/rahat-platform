@@ -76,6 +76,10 @@ export const MS_ACTIONS = {
       UPDATE_IS_VERIFIED: 'cambodia.vendor.update_is_verified',
       ASSIGN_TO_PROJECT: 'cambodia.vendor.assign_to_project',
     },
+
+    COMMUNICATION: {
+      LIST: 'cambodia.communication.list',
+    }
   },
 
   PROJECT: {
