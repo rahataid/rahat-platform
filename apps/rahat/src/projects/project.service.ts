@@ -23,7 +23,7 @@ import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { switchMap, tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
-import { createExtrasAndPIIData, splitCoordinates } from '../utils';
+import { createExtrasAndPIIData } from '../utils';
 import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import {
   aaActions,
@@ -231,7 +231,6 @@ export class ProjectService {
   // TODO: fix cambodia specific country code
   async importKoboBeneficiary(uuid: UUID, data: any) {
     const benef: any = this.mapKoboFields(data);
-    console.log("KOBO data", data);
     if (benef.type) benef.type = benef.type.toUpperCase();
     if (benef.type !== 'LEAD') benef.phone = genRandomPhone('88');
     if (!benef.phone) throw new Error('Phone number is required!');
@@ -244,50 +243,76 @@ export class ProjectService {
         .map((item: string) => item.trim().toUpperCase());
     }
     benef.phone = `+${benef.phone}`;
-    const coords = splitCoordinates(benef.coordinates);
-    const beneficiary = { ...benef, ...coords };
-    const payload = createExtrasAndPIIData(beneficiary);
+    // const coords = splitCoordinates(benef.coordinates);
+    const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
+    const extrasPayload = {
+      meta: benef.meta,
+      province: benef.province,
+      district: benef.district,
+      wardNo: benef.wardNo
+    }
+
+    const koboPayload = {
+      name: piiData.name,
+      phone: piiData.phone,
+      gender: benef.gender,
+      age: benef.age,
+      type: benef.type,
+      leadInterests: benef.leadInterests,
+      extras: extrasPayload
+    }
     // 1. Save to Kobo Import Logs
     const row = await this.prisma.koboBeneficiary.create({
-      data: beneficiary,
+      data: koboPayload,
     });
     const piiExist = await this.checkPiiPhone(benef.phone);
+    console.log({ piiExist });
     if (piiExist) {
-      const { piiData, ...rest } = payload;
-      return this.client
-        .send(
-          { cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE_DISCARDED, uuid },
-          { ...piiData, ...rest }
-        )
-        .pipe(timeout(MS_TIMEOUT));
+      const discardedPayload = {
+        ...piiData,
+        age: benef.age,
+        gender: benef.gender,
+        extras: { ...extrasPayload, type: benef.type, leadInterests: benef.leadInterests },
+      }
+      return this.saveToDiscarded(uuid, discardedPayload);
     }
     // 2. Save to Beneficiary and PII
-    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, payload).pipe(
+    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, { piiData, ...rest }).pipe(
       timeout(MS_TIMEOUT),
       switchMap((response) => {
-        const payload = {
+        const cambodiaPayload = {
           uuid: response.uuid,
           phone: benef.phone,
           walletAddress: response.walletAddress,
-          type: response.extras?.type || 'UNKNOWN',
-          extras: response.extras,
+          type: benef?.type || 'UNKNOWN',
+          leadInterests: benef?.leadInterests || [],
+          extras: extrasPayload,
         };
         // 3. Send to project MS
         return this.client
-          .send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, payload)
+          .send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, cambodiaPayload)
           .pipe(
             timeout(MS_TIMEOUT),
             tap((response) => {
               // 4. Update status and addToProject
               return this.addToProjectAndUpdate({
                 projectId: uuid,
-                beneficiaryId: payload.uuid,
+                beneficiaryId: response.uuid,
                 importId: row.uuid,
               });
             })
           );
       })
     );
+  }
+
+  async saveToDiscarded(uuid: string, discardedPayload: any) {
+    return this.client
+      .send(
+        { cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE_DISCARDED, uuid },
+        discardedPayload
+      )
+      .pipe(timeout(MS_TIMEOUT));
   }
 
   async addToProjectAndUpdate({ projectId, beneficiaryId, importId }) {

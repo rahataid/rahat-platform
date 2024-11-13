@@ -1,20 +1,20 @@
 {
   "contracts": {
     "RahatAccessManager": {
-      "address": "0xBc6b040954Af8588Ee82c13FCE425a9A7595e21c",
-      "startBlock": 16997933
+      "address": "0x030a4078ecf32EE2EdC27337E8d54FD333C0A9b4",
+      "startBlock": 17810543
     },
     "RahatTreasury": {
-      "address": "0x23d5bEFDD857Ee8e9f6AE9444148e14E0CB13a07",
-      "startBlock": 16997942
+      "address": "0x81101C277c025A2390b30255359399EB59150056",
+      "startBlock": 17810551
     },
     "RahatToken": {
-      "address": "0x30eEf48324e0f995a049F5D215E5a352ab60AeBb",
-      "startBlock": 16997946
+      "address": "0xa6f0Ba7fE016c0079282A683386e5c9dAE990Cdc",
+      "startBlock": 17810555
     },
     "ERC2771Forwarder": {
-      "address": "0xa8F4c0a33172B351dA1C9e4CC32F98c192Ab9a25",
-      "startBlock": 16997938
+      "address": "0x3C60c01E29845B0925f23e04Df0351Ce65c85e67",
+      "startBlock": 17810547
     }
   },
   "chainSettings": {
