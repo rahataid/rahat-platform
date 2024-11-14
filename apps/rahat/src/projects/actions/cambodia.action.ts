@@ -40,6 +40,9 @@ export const CAMBODIA_JOBS = {
     UPDATE_IS_VERIFIED: 'rahat.jobs.vendor.update_is_verified',
     LIST_BY_PROJECT: 'rahat.jobs.vendor.list_by_project',
   },
+  COMMUNICATION: {
+    LIST: 'rahat.jobs.communication.list',
+  }
 };
 
 export const cambodiaActions: ProjectActionFunc = {
@@ -138,4 +141,6 @@ export const cambodiaActions: ProjectActionFunc = {
     sendCommand({ cmd: CAMBODIA_JOBS.CHW.UPDATE, uuid }, payload),
   [MS_ACTIONS.CAMBODIA.CHW.DELETE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.CHW.DELETE, uuid }, payload),
+  [MS_ACTIONS.CAMBODIA.COMMUNICATION.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: CAMBODIA_JOBS.COMMUNICATION.LIST, uuid }, payload),
 };
