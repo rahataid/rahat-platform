@@ -4,6 +4,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
 import {
   CreateProjectDto,
+  TestKoboImportDto,
   UpdateProjectDto,
   UpdateProjectStatusDto,
 } from '@rahataid/extensions';
@@ -225,6 +226,60 @@ export class ProjectService {
     }
     return await actionFunc(uuid, payload, (...args) =>
       this.sendCommand(args[0], args[1], args[2], this.client, action, user)
+    );
+  }
+
+  // ======Only for testing=======
+  async importTestBeneficiary(uuid: string, dto: TestKoboImportDto) {
+    dto.phone = `+${dto.phone}`;
+    const { piiData, type, ...rest } = createExtrasAndPIIData(dto);
+    const extrasPayload = {
+      meta: dto.meta,
+      province: dto.province,
+      district: dto.district,
+      wardNo: dto.wardNo
+    }
+    const piiExist = await this.checkPiiPhone(dto.phone);
+    if (piiExist) throw new Error('Phone number already exists!');
+    const koboPayload = {
+      name: piiData.name,
+      phone: piiData.phone,
+      gender: dto.gender,
+      age: dto.age,
+      type: dto.type,
+      leadInterests: dto.leadInterests,
+      extras: extrasPayload
+    }
+    const row = await this.prisma.koboBeneficiary.create({
+      data: koboPayload,
+    });
+
+    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, { piiData, ...rest }).pipe(
+      timeout(MS_TIMEOUT),
+      switchMap((response) => {
+        const cambodiaPayload = {
+          uuid: response.uuid,
+          phone: dto.phone,
+          walletAddress: response.walletAddress,
+          type: dto?.type || 'UNKNOWN',
+          leadInterests: dto?.leadInterests || [],
+          extras: extrasPayload,
+        };
+        // 3. Send to project MS
+        return this.client
+          .send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, cambodiaPayload)
+          .pipe(
+            timeout(MS_TIMEOUT),
+            tap((response) => {
+              // 4. Update status and addToProject
+              return this.addToProjectAndUpdate({
+                projectId: uuid,
+                beneficiaryId: response.uuid,
+                importId: row.uuid,
+              });
+            })
+          );
+      })
     );
   }
 
