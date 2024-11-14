@@ -88,8 +88,8 @@ export const users: Array<{
 }> = [
     {
       id: 1,
-      name: 'Raghav Kattel',
-      email: 'raghav.kattel@rumsan.net',
+      name: 'Rumsan Admin',
+      email: 'rumsan@mailinator.com',
       wallet: '0xAC6bFaf10e89202c293dD795eCe180BBf1430d7B',
     },
 
@@ -118,7 +118,7 @@ export const auths: Array<{
       id: 1,
       userId: 1,
       service: Service.EMAIL,
-      serviceId: 'raghav.kattel@rumsan.net',
+      serviceId: 'rumsan@mailinator.com',
     },
 
   ];
