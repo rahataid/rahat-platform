@@ -15,6 +15,7 @@ export const CAMBODIA_JOBS = {
     LIST_BY_VENDOR: 'rahat.jobs.chw.list_by_vendor',
   },
   BENEFICIARY: {
+    VALIDATE_CONVERSION: 'rahat.jobs.beneficiary.validate_conversion',
     STATS: 'rahat.jobs.beneficiary.stats',
     CREATE_DISCARDED: 'rahat.jobs.beneficiary.create_discarded',
     CREATE: 'rahat.jobs.beneficiary.create',
@@ -109,6 +110,10 @@ export const cambodiaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.LIST]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.LIST, uuid }, payload),
+
+
+  [MS_ACTIONS.CAMBODIA.BENEFICIARY.VALIDATE_CONVERSION]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.VALIDATE_CONVERSION, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.LIST_DISCARDED]: (
     uuid,
