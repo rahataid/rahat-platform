@@ -44,6 +44,7 @@ export const MS_ACTIONS = {
   CAMBODIA: {
     APP: { STATS: 'cambodia.app.stats' },
     BENEFICIARY: {
+      VALIDATE_CONVERSION: 'camboadia.beneficiary.validate_conversion',
       STATS: 'cambodia.beneficiary.stats',
       LEAD_CONVERSION: 'cambodia.beneficiary.lead_conversion',
       CREATE: 'cambodia.beneficiary.create',
@@ -76,6 +77,10 @@ export const MS_ACTIONS = {
       UPDATE_IS_VERIFIED: 'cambodia.vendor.update_is_verified',
       ASSIGN_TO_PROJECT: 'cambodia.vendor.assign_to_project',
     },
+
+    COMMUNICATION: {
+      LIST: 'cambodia.communication.list',
+    }
   },
 
   PROJECT: {
