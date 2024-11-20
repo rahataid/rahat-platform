@@ -4,6 +4,7 @@ import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
 export const CAMBODIA_JOBS = {
   APP: {
     STATS: 'rahat.jobs.app.stats',
+    LINE_STATS: 'rahat.jobs.app.line_stats'
   },
   CHW: {
     STATS: 'rahat.jobs.chw.stats',
@@ -148,4 +149,6 @@ export const cambodiaActions: ProjectActionFunc = {
     sendCommand({ cmd: CAMBODIA_JOBS.CHW.DELETE, uuid }, payload),
   [MS_ACTIONS.CAMBODIA.COMMUNICATION.LIST]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.COMMUNICATION.LIST, uuid }, payload),
+  [MS_ACTIONS.CAMBODIA.APP.LINE_STATS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: CAMBODIA_JOBS.APP.LINE_STATS, uuid }, payload),
 };
