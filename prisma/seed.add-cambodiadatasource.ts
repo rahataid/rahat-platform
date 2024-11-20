@@ -106,52 +106,6 @@ const projectStats = (uuid: string, url: string) => {
       {
         fields: [
           {
-            type: 'line',
-            props: {},
-            title: 'No. of Leads Recived',
-            colSpan: 1,
-            dataMap: `LEADS_RECEIVED_PER_WEEK`,
-            dataSrc: 'source3',
-            rowSpan: 1,
-          },
-          {
-            type: 'line',
-            props: {},
-            title: 'No. of Lead Converted',
-            colSpan: 1,
-            dataMap: `LEADS_CONVERTED_PER_WEEK`,
-            dataSrc: 'source3',
-            rowSpan: 1,
-          },
-
-        ],
-      },
-      {
-        fields: [
-
-          {
-            type: 'line',
-            props: {},
-            title: 'No. of Sales by Health Workers',
-            colSpan: 2,
-            dataMap: `SALES_PER_WEEK`,
-            dataSrc: 'source3',
-            rowSpan: 1,
-          },
-          {
-            type: 'line',
-            props: {},
-            title: 'No. of Footfall',
-            colSpan: 2,
-            dataMap: `FOOTFALLS_PER_WEEK`,
-            dataSrc: 'source3',
-            rowSpan: 1,
-          },
-        ],
-      },
-      {
-        fields: [
-          {
             type: 'donut',
             props: {},
             title: 'Consumer Type',

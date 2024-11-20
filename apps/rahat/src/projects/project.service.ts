@@ -149,7 +149,7 @@ export class ProjectService {
     user: any
   ) {
     try {
-
+      console.log("CMD", cmd);
       const requiresUser = userRequiredActions.has(action);
 
       return client
