@@ -151,6 +151,9 @@ export class ProjectService {
     try {
       console.log("CMD", cmd);
       const requiresUser = userRequiredActions.has(action);
+      console.log({ requiresUser });
+      console.log("Payload", payload);
+      console.log("User", user);
 
       return client
         .send(cmd, {
