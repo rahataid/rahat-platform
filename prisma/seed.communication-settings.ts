@@ -11,8 +11,8 @@ const main = async () => {
         name: "COMMUNICATION",
         dataType: "OBJECT",
         value: {
-          URL: "http://localhost:3333/v1",
-          APP_ID: "xyz"
+          URL: "https://connect.rumsan.net/v1",
+          APP_ID: "cm378lkmm0ctrsahfcw0iy3kz"
         },
         requiredFields: ["URL", "APP_ID"]
       }

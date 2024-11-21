@@ -123,7 +123,6 @@ export const rpActions: ProjectActionFunc = {
   [MS_ACTIONS.RPPROJECT.GET_VENDOR_REDEMPTION]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.GET_VENDOR_REDEMPTION, uuid }, payload),
 
-
   [MS_ACTIONS.RPPROJECT.SYNC_OFFLINE_BENEFICIARIES]: (uuid, payload, sendCommand) =>
     sendCommand(
       {
