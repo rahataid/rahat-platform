@@ -13,7 +13,7 @@ const JOBS = {
     }
 }
 
-export const combodiaActions: ProjectActionFunc = {
+export const cambodiaActions: ProjectActionFunc = {
 
     [MS_ACTIONS.CHW.CREATE]: (uuid, payload, sendCommand) =>
         sendCommand(

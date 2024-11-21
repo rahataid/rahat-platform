@@ -14,10 +14,11 @@ import { PrismaService } from '@rumsan/prisma';
 import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
+import { splitCoordinates } from '../utils';
 import { ERC2771FORWARDER } from '../utils/contracts';
 import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import { createContractSigner } from '../utils/web3';
-import { aaActions, beneficiaryActions, c2cActions, combodiaActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
+import { aaActions, beneficiaryActions, c2cActions, cambodiaActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 @Injectable()
@@ -189,7 +190,7 @@ export class ProjectService {
 
 
     const actions = {
-      ...combodiaActions,
+      ...cambodiaActions,
       ...projectActions,
       ...elActions,
       ...aaActions,
@@ -211,13 +212,30 @@ export class ProjectService {
   }
 
   async importKoboBeneficiary(uuid: UUID, data: any) {
-    const mappedData = this.mapKoboFields(data);
-    console.log('KoboData=>', mappedData);
-    // Save to temp table
-    // Send to projectMS
-    // Update temp table
-    await this.sendTestMsg(uuid);
-    return mappedData;
+    const benef: any = this.mapKoboFields(data);
+    if (benef.gender) benef.gender = benef.gender.toUpperCase();
+    if (benef.type) benef.type = benef.type.toUpperCase();
+    if (benef.age) benef.age = parseInt(benef.age);
+    if (benef.leadInterests) {
+      benef.leadInterests = benef.leadInterests.split(' ').map((item: string) => item.trim().toUpperCase());
+    }
+    const coords = splitCoordinates(benef.coordinates);
+    const beneficiary = { ...benef, ...coords };
+    if (beneficiary.coordinates) delete beneficiary.coordinates;
+    // 1. Save to TEMP_DB
+    const row = await this.prisma.koboBeneficiary.create({
+      data: beneficiary
+    })
+    // 2. Send to project MS
+    // 3. Update status
+    return this.prisma.koboBeneficiary.update({
+      where: {
+        id: row.id
+      },
+      data: {
+        status: 'SUCCESS'
+      }
+    })
   }
 
   mapKoboFields(payload: any) {

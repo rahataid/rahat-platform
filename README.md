@@ -1,3 +1,19 @@
+## 🚨 Important Notice
+
+We have reverted to the original repository for the **Rahat Platform** for all future development and maintenance. This repository was originally forked to facilitate the conversion of the project into a monorepo.
+
+### 🆕 Original Repository
+
+🔗 [rahat-platform](https://github.com/rahataid/rahat-platform)
+
+### ℹ️ What Does This Mean?
+
+- 📄 This repository is now **read-only**.
+- 🛠️ No new issues, pull requests, or updates will be accepted here.
+- 🚀 All future development and updates will take place in the original repository.
+
+---
+
 ## Core Repository Overview
 
 ### Purpose and Structure
