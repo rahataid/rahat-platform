@@ -28,7 +28,7 @@ export class BeneficiaryController {
     private readonly utilService: BeneficiaryUtilsService,
     private readonly statsService: BeneficiaryStatService,
     private readonly verificationService: VerificationService
-  ) {}
+  ) { }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE })
   async create(@Payload() createBeneficiaryDto: CreateBeneficiaryDto) {

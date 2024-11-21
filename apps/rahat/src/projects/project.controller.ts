@@ -17,6 +17,7 @@ import {
   CreateProjectDto,
   ListProjectBeneficiaryDto,
   ProjectCommunicationDto,
+  TestKoboImportDto,
   UpdateProjectDto,
   UpdateProjectStatusDto,
 } from '@rahataid/extensions';
@@ -46,7 +47,7 @@ export class ProjectController {
     private readonly projectService: ProjectService,
     @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy,
     @Inject('BEN_CLIENT') private readonly benClient: ClientProxy
-  ) {}
+  ) { }
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -189,5 +190,11 @@ export class ProjectController {
   @ApiParam({ name: 'uuid', required: true })
   testMsg(@Param('uuid') uuid: UUID) {
     return this.projectService.sendTestMsg(uuid);
+  }
+
+  @Post('/:uuid/kobo-import-simulate')
+  @ApiParam({ name: 'uuid', required: true })
+  koboImportSimulate(@Param('uuid') uuid: UUID, @Body() dto: TestKoboImportDto) {
+    return this.projectService.importTestBeneficiary(uuid, dto);
   }
 }

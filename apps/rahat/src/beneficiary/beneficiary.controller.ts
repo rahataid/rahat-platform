@@ -50,9 +50,10 @@ import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, throwError, timeout } from 'rxjs';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
-import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
-import { DocParser } from './parser';
 import { removeSpaces } from '../utils';
+import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
+import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
+import { DocParser } from './parser';
 
 function getDateInfo(dateString) {
   try {
@@ -78,7 +79,7 @@ export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue
-  ) {}
+  ) { }
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -190,8 +191,6 @@ export class BeneficiaryController {
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const projectId = req.body['projectId'];
     const beneficiaries = await DocParser(docType, file.buffer);
-    console.log('projectId', projectId);
-    console.log('beneficiaries', beneficiaries);
     const beneficiariesMapped = beneficiaries.map((b) => ({
       birthDate: b['Birth Date']
         ? new Date(b['Birth Date']).toISOString()
@@ -216,7 +215,6 @@ export class BeneficiaryController {
         },
       },
     }));
-    console.log('beneficiariesMapped', beneficiariesMapped);
 
     return this.client
       .send(
@@ -242,34 +240,70 @@ export class BeneficiaryController {
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const projectId = req.body['projectId'];
     const automatedGroupOption = req.body['automatedGroupOption'];
-    console.log('queueData', automatedGroupOption);
     const beneficiaries = await DocParser(docType, file.buffer);
-    const beneficiariesMapped = beneficiaries.map((b) => ({
-      birthDate: b['Birth Date']
-        ? new Date(b['Birth Date']).toISOString()
+    // Utility function to sanitize input keys by trimming whitespace
+    function sanitizeKey(key: string): string {
+      return key.trim();
+    }
+
+    const beneficiariesWithSanitizedKeys = beneficiaries.map((b) => {
+      const sanitizedBeneficiary = {};
+      for (const key in b) {
+        sanitizedBeneficiary[sanitizeKey(key)] = b[key];
+      }
+      return sanitizedBeneficiary;
+    }
+    );
+
+
+    // Map the beneficiaries to the format expected by the microservice
+
+
+    const beneficiariesMapped = beneficiariesWithSanitizedKeys.map((b) => ({
+      birthDate: b[sanitizeKey('Birth Date')]
+        ? new Date(b[sanitizeKey('Birth Date')]).toISOString()
         : null,
-      internetStatus: b['Internet Status*'],
-      bankedStatus: b['Bank Status*'],
-      location: b['Location'],
-      phoneStatus: b['Phone Status*'],
-      notes: b['Notes'],
-      gender: b['Gender*'],
-      latitude: b['Latitude'],
-      longitude: b['Longitude'],
-      age: b['Age'] || null,
-      walletAddress: b['Wallet Address'],
+      internetStatus: b[sanitizeKey('Internet Status*')],
+      bankedStatus: b[sanitizeKey('Bank Status*')],
+      location: trimNonAlphaNumericValue(b[sanitizeKey('Location')]),
+      phoneStatus: b[sanitizeKey('Phone Status*')],
+      notes: b[sanitizeKey('Notes')],
+      gender: b[sanitizeKey('Gender*')],
+      latitude: b[sanitizeKey('Latitude')],
+      longitude: b[sanitizeKey('Longitude')],
+      age: b[sanitizeKey('Age')] || null,
+      walletAddress: b[sanitizeKey('Wallet Address')],
       piiData: {
-        name: b['Name*'] || 'Unknown',
-        phone: removeSpaces(b['Whatsapp Number*'] || b['Phone Number*']),
+        name: b[sanitizeKey('Name*')] || 'Unknown',
+        phone: removeSpaces(
+          b[sanitizeKey('Whatsapp Number*')] ||
+          b[sanitizeKey('Phone Number*')] ||
+          b[sanitizeKey('Phone Number')] ||
+          b[sanitizeKey('Phone number')]
+        ),
         extras: {},
       },
     }));
+
+
+
+
+    const uniquePhoneNumberedBeneficiaries = beneficiariesMapped.filter(
+      (b, index, self) =>
+        index ===
+        self.findIndex(
+          (t) => t.piiData.phone === b.piiData.phone
+        )
+    );
+
+
+    console.log(`Trying to upload ${beneficiariesMapped.length} beneficiaries through queue. Unique phone numbers: ${uniquePhoneNumberedBeneficiaries.length}, Duplicate phone numbers: ${beneficiariesMapped.length - uniquePhoneNumberedBeneficiaries.length}`);
 
     return handleMicroserviceCall({
       client: this.client.send(
         { cmd: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE },
         {
-          data: beneficiariesMapped,
+          data: uniquePhoneNumberedBeneficiaries,
           projectUUID: projectId,
           ignoreExisting: true,
           automatedGroupOption,

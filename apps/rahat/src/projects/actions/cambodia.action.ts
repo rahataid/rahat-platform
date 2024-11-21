@@ -4,6 +4,7 @@ import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
 export const CAMBODIA_JOBS = {
   APP: {
     STATS: 'rahat.jobs.app.stats',
+    LINE_STATS: 'rahat.jobs.app.line_stats'
   },
   CHW: {
     STATS: 'rahat.jobs.chw.stats',
@@ -15,6 +16,7 @@ export const CAMBODIA_JOBS = {
     LIST_BY_VENDOR: 'rahat.jobs.chw.list_by_vendor',
   },
   BENEFICIARY: {
+    VALIDATE_CONVERSION: 'rahat.jobs.beneficiary.validate_conversion',
     STATS: 'rahat.jobs.beneficiary.stats',
     CREATE_DISCARDED: 'rahat.jobs.beneficiary.create_discarded',
     CREATE: 'rahat.jobs.beneficiary.create',
@@ -40,6 +42,9 @@ export const CAMBODIA_JOBS = {
     UPDATE_IS_VERIFIED: 'rahat.jobs.vendor.update_is_verified',
     LIST_BY_PROJECT: 'rahat.jobs.vendor.list_by_project',
   },
+  COMMUNICATION: {
+    LIST: 'rahat.jobs.communication.list',
+  }
 };
 
 export const cambodiaActions: ProjectActionFunc = {
@@ -107,6 +112,10 @@ export const cambodiaActions: ProjectActionFunc = {
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.LIST]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.LIST, uuid }, payload),
 
+
+  [MS_ACTIONS.CAMBODIA.BENEFICIARY.VALIDATE_CONVERSION]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.VALIDATE_CONVERSION, uuid }, payload),
+
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.LIST_DISCARDED]: (
     uuid,
     payload,
@@ -138,4 +147,8 @@ export const cambodiaActions: ProjectActionFunc = {
     sendCommand({ cmd: CAMBODIA_JOBS.CHW.UPDATE, uuid }, payload),
   [MS_ACTIONS.CAMBODIA.CHW.DELETE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.CHW.DELETE, uuid }, payload),
+  [MS_ACTIONS.CAMBODIA.COMMUNICATION.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: CAMBODIA_JOBS.COMMUNICATION.LIST, uuid }, payload),
+  [MS_ACTIONS.CAMBODIA.APP.LINE_STATS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: CAMBODIA_JOBS.APP.LINE_STATS, uuid }, payload),
 };

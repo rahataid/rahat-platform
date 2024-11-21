@@ -5,16 +5,18 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { CreateBeneficiaryDto } from '@rahataid/extensions';
 import {
+  BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
   generateRandomWallet,
-  ProjectContants,
+  ProjectContants
 } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { Job } from 'bull';
 import { randomUUID, UUID } from 'crypto';
 import { splitBeneficiaryPII } from '../beneficiary/helpers';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
+import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
 import {
   findTempBenefGroups,
   validateDupicatePhone,
@@ -31,7 +33,7 @@ export class BeneficiaryProcessor {
     private readonly prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private eventEmitter: EventEmitter2
-  ) {}
+  ) { }
 
   @Process(BeneficiaryJobs.UPDATE_STATS)
   async sample(job: Job<any>) {
@@ -220,6 +222,13 @@ export class BeneficiaryProcessor {
           const insertedBeneficiaries =
             await txn.beneficiary.createManyAndReturn({
               data: beneficiariesData,
+            }).catch((error) => {
+              console.error(
+                `Failed to insert beneficiaries: ${error.message}`
+              );
+              throw new RpcException(
+                `Failed to insert beneficiaries: ${error.message}`
+              );
             });
 
           // // Retrieve inserted beneficiaries for linking PII data
@@ -248,14 +257,15 @@ export class BeneficiaryProcessor {
 
           // for automated grouping
           let createdBenGroups;
-          if (automatedGroupOption?.groupKey) {
+          if (automatedGroupOption.groupKey) {
             const uniqueGroup = [
               ...new Set(
                 beneficiaries.map(
-                  (b) => b[automatedGroupOption?.groupKey.toLowerCase()]
+                  (b) => b[trimNonAlphaNumericValue(automatedGroupOption?.groupKey).toLowerCase()]
                 )
               ),
             ];
+
 
             const groups = await txn.beneficiaryGroup.findMany({
               where: {
@@ -264,12 +274,13 @@ export class BeneficiaryProcessor {
                 },
               },
             });
+            console.log('groups', groups)
 
             const beneficiaryGroupData = insertedBeneficiaries.map((b) => {
               const beneficiaryId = b.uuid;
               const beneficiaryGroupId = groups.find(
                 (g) =>
-                  g.name === b[automatedGroupOption?.groupKey.toLowerCase()]
+                  g.name === b[trimNonAlphaNumericValue(automatedGroupOption?.groupKey).toLowerCase()]
               ).uuid;
               return {
                 beneficiaryId,
@@ -286,6 +297,13 @@ export class BeneficiaryProcessor {
                   beneficiaryGroup: true,
                   uuid: true,
                 },
+              }).catch((error) => {
+                console.error(
+                  `Failed to insert beneficiaries: ${error.message}`
+                );
+                throw new RpcException(
+                  `Failed to insert beneficiaries: ${error.message}`
+                );
               });
           }
 
@@ -297,14 +315,15 @@ export class BeneficiaryProcessor {
                 beneficiaryId: uuid,
                 projectId: projectUUID,
               })),
+            }).catch((error) => {
+              console.error(
+                `Failed to assign beneficiaries to project: ${error.message}`
+              );
+              throw new RpcException(
+                `Failed to assign beneficiaries to project: ${error.message}`
+              );
             });
 
-            // this.eventEmitter.emit(
-            //   BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-            //   {
-            //     projectUuid: projectUUID,
-            //   }
-            // );
 
             const assignPromises = insertedBeneficiaries.map((b) => {
               const projectPayload = {
@@ -317,7 +336,6 @@ export class BeneficiaryProcessor {
 
                 isVerified: b?.isVerified,
               };
-              console.log('projectPayload', projectPayload);
               return handleMicroserviceCall({
                 client: this.client.send(
                   { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUUID },
@@ -377,11 +395,19 @@ export class BeneficiaryProcessor {
         }
       )
       .catch((error) => {
+        console.log('Error importing Beneficiaries', error)
         console.error(
           `Failed to process batch ${batchNumber}: ${error.message}`
         );
         throw new RpcException(`Batch ${batchNumber} failed: ${error.message}`);
       });
+
+    this.eventEmitter.emit(
+      BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
+      {
+        projectUuid: projectUUID,
+      }
+    );
 
     return {
       success: true,

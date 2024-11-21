@@ -17,14 +17,16 @@ export const createExtrasAndPIIData = (beneficiary: any) => {
     email,
     age,
     gender,
-    latitude,
-    longitude,
+    province,
+    district,
+    wardNo,
     meta,
+    type,
     ...rest
   } = beneficiary;
-  const extras = { ...rest, meta };
+  const extras = { ...rest, province, district, wardNo, meta };
   const piiData = { name, phone, email };
-  const payload = { age, gender, latitude, longitude, piiData, extras };
+  const payload = { type, age, gender, piiData, extras };
   return payload;
 };
 export function removeSpaces(phoneNumber: string): string {
