@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
-import { PrismaService } from '@rumsan/prisma';
+import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { SettingDataType } from '@rumsan/sdk/enums';
+import { UUID } from 'crypto';
 
+const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
 function getDataType(
   value: string | number | boolean | object,
@@ -29,6 +32,75 @@ export class AppService {
   constructor(
     private readonly prisma: PrismaService
   ) { }
+
+
+  // ========Auth app services==========
+  async createAuthApps(dto: CreateAuthAppDto) {
+    return this.prisma.authApp.create({
+      data: dto
+    })
+  }
+
+  async listAuthApps(query: ListAuthAppsDto) {
+    let filter = {};
+    if (query.name) {
+      filter = {
+        name: {
+          contains: query.name,
+          mode: 'insensitive'
+        }
+      }
+    }
+    return paginate(
+      this.prisma.authApp,
+      {
+        where: filter,
+      },
+      {
+        page: query.page,
+        perPage: query.perPage,
+      }
+    );
+  }
+
+
+  async getAuthApp(uuid: UUID) {
+    return this.prisma.authApp.findUnique({
+      where: { uuid }
+    })
+  }
+
+  async getByAddress(address: string) {
+    const row = await this.prisma.authApp.findUnique({
+      where: { address, deletedAt: null }
+    });
+    if (!row) return null;
+    // Generate and update nonce message
+    const nonceMessage = new Date().getTime().toString();
+    return this.prisma.authApp.update({
+      where: { address },
+      data: { nonceMessage }
+    });
+  }
+
+  async updateAuthApp(uuid: UUID, dto: UpdateAuthAppDto) {
+    return this.prisma.authApp.update({
+      where: { uuid },
+      data: dto
+    })
+  }
+
+  async softDeleteAuthApp(uuid: UUID) {
+    return this.prisma.authApp.update({
+      where: { uuid },
+      data: {
+        deletedAt: new Date()
+      }
+    })
+  }
+
+  // =====End of Auth app services==========
+
   async createRahatAppSettings(
     createSettingDto: CreateSettingDto,
   ) {
@@ -102,5 +174,13 @@ export class AppService {
     });
 
     return newSetting;
+  }
+
+  async getCommunicationSettings() {
+    return this.prisma.setting.findMany({
+      where: {
+        name: "COMMUNICATION"
+      }
+    })
   }
 }

@@ -8,7 +8,8 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
@@ -16,18 +17,29 @@ import {
   CreateProjectDto,
   ListProjectBeneficiaryDto,
   ProjectCommunicationDto,
+  TestKoboImportDto,
   UpdateProjectDto,
-  UpdateProjectStatusDto
+  UpdateProjectStatusDto,
 } from '@rahataid/extensions';
-import { ACTIONS, APP, BeneficiaryJobs, MS_TIMEOUT, ProjectJobs } from '@rahataid/sdk';
+import {
+  ACTIONS,
+  APP,
+  BeneficiaryJobs,
+  MS_TIMEOUT,
+  ProjectJobs,
+} from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
-import { AbilitiesGuard, CheckAbilities, JwtGuard, SUBJECTS } from "@rumsan/user";
+import {
+  AbilitiesGuard,
+  CheckAbilities,
+  JwtGuard,
+  SUBJECTS,
+} from '@rumsan/user';
 import { UUID } from 'crypto';
+import { Request } from 'express';
 import { timeout } from 'rxjs/operators';
 import { ProjectService } from './project.service';
 
-@ApiBearerAuth(APP.JWT_BEARER)
-@UseGuards(JwtGuard, AbilitiesGuard)
 @Controller('projects')
 @ApiTags('Projects')
 export class ProjectController {
@@ -37,17 +49,24 @@ export class ProjectController {
     @Inject('BEN_CLIENT') private readonly benClient: ClientProxy
   ) { }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
   @Post()
   create(@Body() createProjectDto: CreateProjectDto) {
     return this.projectService.create(createProjectDto);
   }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
   @Get()
   list() {
     return this.projectService.list();
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
   @Get(':uuid')
   @ApiParam({ name: 'uuid', required: true })
@@ -55,6 +74,8 @@ export class ProjectController {
     return this.projectService.findOne(uuid);
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
   @ApiParam({ name: 'uuid', required: true })
   @Patch(':uuid')
@@ -65,6 +86,8 @@ export class ProjectController {
     return this.projectService.update(uuid, updateProjectDto);
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
   @ApiParam({ name: 'uuid', required: true })
   @Patch(':uuid/status')
@@ -75,13 +98,16 @@ export class ProjectController {
     return this.projectService.updateStatus(uuid, data);
   }
 
-
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
   @Delete(':uuid')
   remove(@Param('uuid') uuid: UUID) {
     return this.projectService.remove(uuid);
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: true })
   @Get(':uuid/beneficiaries')
@@ -91,7 +117,8 @@ export class ProjectController {
       .pipe(timeout(5000));
   }
 
-
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/settings')
@@ -101,23 +128,27 @@ export class ProjectController {
       .pipe(timeout(5000));
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
   projectActions(
     @Param('uuid') uuid: UUID,
     @Body() data: ProjectCommunicationDto,
+    @Req() request: Request
   ) {
     const response = this.projectService.handleProjectActions({
       uuid,
       ...data,
+      user: request.user,
     });
     return response;
   }
 
   //list project specific stats
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
-  @ApiParam({ name: 'uuid', required: true })
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @ApiParam({ name: 'uuid', required: true })
   @Get(':uuid/stats')
   projectStats(@Param('uuid') uuid: UUID) {
     return this.benClient
@@ -136,12 +167,10 @@ export class ProjectController {
   //Get datasource for entire project
   // @Get('statsSources')
   // statsSource() {
-  //   return this.benClient
-  //     .send({ cmd: BeneficiaryJobs.GET_ALL_STATS }, {})
-  //     .pipe(timeout(MS_TIMEOUT));
-  // }
 
   //list project specific stats sources
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: false })
   @Get(':uuid/statsSources')
@@ -151,5 +180,21 @@ export class ProjectController {
       .pipe(timeout(MS_TIMEOUT));
   }
 
+  @Post('/:uuid/kobo-import')
+  @ApiParam({ name: 'uuid', required: true })
+  importFromKobo(@Param('uuid') uuid: UUID, @Body() data: any) {
+    return this.projectService.importKoboBeneficiary(uuid, data);
+  }
 
-} 
+  @Post('/:uuid/test')
+  @ApiParam({ name: 'uuid', required: true })
+  testMsg(@Param('uuid') uuid: UUID) {
+    return this.projectService.sendTestMsg(uuid);
+  }
+
+  @Post('/:uuid/kobo-import-simulate')
+  @ApiParam({ name: 'uuid', required: true })
+  koboImportSimulate(@Param('uuid') uuid: UUID, @Body() dto: TestKoboImportDto) {
+    return this.projectService.importTestBeneficiary(uuid, dto);
+  }
+}

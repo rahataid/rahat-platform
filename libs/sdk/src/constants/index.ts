@@ -11,6 +11,7 @@ export const BQUEUE = {
   RAHAT_PROJECT: 'RAHAT.PROJECT',
   RAHAT_BENEFICIARY: 'RAHAT.BENEFICIARY',
   HOST: 'RAHAT.HOST',
+  META_TXN: 'RAHAT.META_TXN'
 };
 
 export const UserRoles = {
@@ -32,6 +33,7 @@ export const SUBJECTS = {
   BENEFICIARY: 'beneficiary',
   PROJECT: 'project',
   VENDOR: 'vendor',
+  PUBLIC: 'public',
 };
 
 export const APP = {
@@ -39,6 +41,48 @@ export const APP = {
 };
 
 export const MS_ACTIONS = {
+  CAMBODIA: {
+    APP: { STATS: 'cambodia.app.stats', LINE_STATS: 'cambodia.app.line_stats' },
+    BENEFICIARY: {
+      VALIDATE_CONVERSION: 'camboadia.beneficiary.validate_conversion',
+      STATS: 'cambodia.beneficiary.stats',
+      LEAD_CONVERSION: 'cambodia.beneficiary.lead_conversion',
+      CREATE: 'cambodia.beneficiary.create',
+      LIST: 'cambodia.beneficiary.list',
+      LIST_DISCARDED: 'cambodia.beneficiary.list_discarded',
+      GET: 'cambodia.beneficiary.get',
+      DELETE: 'cambodia.beneficiary.delete',
+      ADD_TO_PROJECT: 'cambodia.beneficiary.add_to_project',
+    },
+    CHW: {
+      STATS: 'cambodia.chw.stats',
+      CREATE: 'cambodia.chw.create',
+      LIST: 'cambodia.chw.list',
+      GET: 'cambodia.chw.get',
+      UPDATE: 'cambodia.chw.update',
+      DELETE: 'cambodia.chw.delete',
+      LIST_BY_VENDOR: 'cambodia.chw.list_by_vendor',
+    },
+    COMMISISION_SCHEME: {
+      CREATE: 'cambodia.commission_scheme.create',
+      LIST: 'cambodia.commission_scheme.list',
+      GET_CURRENT: 'cambodia.commission_scheme.get_current',
+    },
+    VENDOR: {
+      STATS: 'cambodia.vendor.stats',
+      HEALTH_WORKERS: 'cambodia.vendor.health_workers',
+      LEAD_CONVERSIONS: 'cambodia.vendor.lead_conversions',
+      LIST: 'cambodia.vendor.list',
+      GET: 'cambodia.vendor.get',
+      UPDATE_IS_VERIFIED: 'cambodia.vendor.update_is_verified',
+      ASSIGN_TO_PROJECT: 'cambodia.vendor.assign_to_project',
+    },
+
+    COMMUNICATION: {
+      LIST: 'cambodia.communication.list',
+    }
+  },
+
   PROJECT: {
     SETUP: 'project.setup',
   },
@@ -59,6 +103,9 @@ export const MS_ACTIONS = {
     REGISTER: 'vendor.register',
     ASSIGN_TO_PROJECT: 'vendor.assign_to_project',
     LIST_BY_PROJECT: 'vendor.list_by_project',
+    UPDATE_IS_VERIFIED: 'vendor.update_is_verified',
+    LIST: 'vendor.list',
+    GET_BY_UUID: 'vendor.get_by_uuid',
   },
   USER: {},
   ELPROJECT: {
@@ -84,7 +131,7 @@ export const MS_ACTIONS = {
   },
   AAPROJECT: {
     RIVER_STATIONS: {
-      GET_DHM: 'aaProject.riverStations.getDhm'
+      GET_DHM: 'aaProject.riverStations.getDhm',
     },
     WATER_LEVELS: {
       GET_DHM: 'aaProject.waterLevels.getDhm',
@@ -101,20 +148,22 @@ export const MS_ACTIONS = {
     ACTIVITIES: {
       GET_ONE: 'aaProject.activities.getOne',
       GET_ALL: 'aaProject.activities.getAll',
+      GET_HAVING_COMMS: 'aaProject.activities.getHavingComms',
       ADD: 'aaProject.activities.add',
       REMOVE: 'aaProject.activities.remove',
       UPDATE: 'aaProject.activities.update',
       UPDATE_STATUS: 'aaProject.activities.updateStatus',
-    },
-    COMMUNICATION: {
-      ADD: 'aaProject.activities.communication.add',
-      TRIGGER: 'aaProject.activities.communication.trigger',
-      COMMUNICATION_LOGS: 'aa.jobs.communication.getCommunicationLogs',
+      COMMUNICATION: {
+        TRIGGER: 'aaProject.activities.communication.trigger',
+        SESSION_LOGS: 'aa.activities.communication.sessionLogs',
+        RETRY_FAILED: 'aa.activities.communication.retryFailed',
+        GET_STATS: 'aa.activities.communication.getStats',
+      },
     },
     ACTIVITY_CATEGORIES: {
       GET_ALL: 'aaProject.activityCategories.getAll',
       ADD: 'aaProject.activityCategories.add',
-      REMOVE: 'aaProject.activityCategories.remove'
+      REMOVE: 'aaProject.activityCategories.remove',
     },
     HAZARD_TYPES: {
       GET_ALL: 'aaProject.hazardTypes.getAll',
@@ -139,7 +188,7 @@ export const MS_ACTIONS = {
       DELETE_GROUP: 'aaProject.stakeholders.deleteGroup',
     },
     CONTRACT: {
-      INCREASE_BUDEGET: 'aaProject.contract.increase_budget'
+      INCREASE_BUDEGET: 'aaProject.contract.increase_budget',
     },
     BENEFICIARY: {
       ADD_GROUP: 'aaProject.beneficiary.addGroup',
@@ -147,12 +196,13 @@ export const MS_ACTIONS = {
       GET_ONE_GROUP: 'aaProject.beneficiary.getOneGroup',
       ASSIGN_TOKEN_TO_GROUP: 'aaProject.beneficiary.assign_token_to_group',
       RESERVE_TOKEN_TO_GROUP: 'aaProject.beneficiary.reserve_token_to_group',
-      GET_ALL_TOKEN_RESERVATION: 'aaProject.beneficiary.get_all_token_reservation',
-      GET_ONE_TOKEN_RESERVATION: 'aaProject.beneficiary.get_one_token_reservation',
-      GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats'
+      GET_ALL_TOKEN_RESERVATION:
+        'aaProject.beneficiary.get_all_token_reservation',
+      GET_ONE_TOKEN_RESERVATION:
+        'aaProject.beneficiary.get_one_token_reservation',
+      GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats',
     },
     STATS: {
-      GET_COMMS: 'aaProject.stats.getComms',
       GET_ALL: 'aaProject.stats.getAll',
       GET_ONE: 'aaProject.stats.getOne',
     },
@@ -162,7 +212,7 @@ export const MS_ACTIONS = {
       GET_ONE: 'aaProject.dailyMonitoring.getOne',
       UPDATE: 'aaProject.dailyMonitoring.update',
       REMOVE: 'aaProject.dailyMonitoring.remove',
-    }
+    },
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',
@@ -176,6 +226,7 @@ export const MS_ACTIONS = {
     //TEMP SOLUTION
     CREATE_SAFE_TRANSACTION: 'c2cProject.createSafeTransaction',
     GET_SAFE_TRANSACTION: 'c2cProject.getSafeTransaction',
+    GET_SAFE_PENDING: 'c2cProject.getSafePending',
     CREATE_CAMPAIGN: 'c2cProject.campaign.create',
     CREATE_AUDIENCE: 'c2cProject.campaign.create_audience',
     GET_ALL_CAMPAIGN: 'c2cProject.campaign.get',
@@ -203,8 +254,6 @@ export const MS_ACTIONS = {
     TRIGGER_CAMPAIGN: 'cvaProject.campaign.trigger',
     GET_ALL_COMMUNICATION_LOGS: 'cvaProject.campaign.communication_logs',
     GET_ALL_COMMUNICATION_STATS: 'cvaProject.campaign.communication_stats',
-
-
   },
   RPPROJECT: {
     CREATE_DISBURSEMENT: 'rpProject.disbursement.create',
@@ -217,7 +266,9 @@ export const MS_ACTIONS = {
     UPDATE_DISBURSEMENT_PLAN: 'rpProject.disbursementPlan.update',
     CREATE_BULK_DISBURSEMENT: 'rpProject.disbursement.bulkCreate',
     CREATE_CAMPAIGN: 'rpProject.campaign.create',
+    UPDATE_CAMPAIGN: 'rpProject.campaign.update',
     CREATE_AUDIENCE: 'rpProject.campaign.create_audience',
+    CREATE_BULK_AUDIENCE: 'rpProject.campaign.create_bulk_audience',
     GET_ALL_CAMPAIGN: 'rpProject.campaign.get',
     GET_CAMPAIGN: 'rpProject.campaign.getOne',
     GET_ALL_TRANSPORT: 'rpProject.campaign.get_transport',
@@ -225,9 +276,37 @@ export const MS_ACTIONS = {
     TRIGGER_CAMPAIGN: 'rpProject.campaign.trigger',
     GET_ALL_COMMUNICATION_LOGS: 'rpProject.campaign.communication_logs',
     GET_ALL_COMMUNICATION_STATS: 'rpProject.campaign.communication_stats',
+    GET_CAMPAIGN_LOG: 'rpProject.campaign.log',
     REQUEST_REDEMPTION: 'rpProject.requestRedemption',
     UPDATE_REDEMPTION: 'rpProject.updateRedemption',
     LIST_REDEMPTION: 'rpProject.listRedemption',
     GET_VENDOR_REDEMPTION: 'rpProject.vendorRedemption',
-  }
-};
+    GET_REDEMPTION: 'rpProject.getRedemption',
+    GENERATE_OTP_HASH: 'rpProject.generateOtpHash',
+    GET_OFFLINE_BENEFICIARIES: 'rpProject.getOfflineBeneficiaries',
+    SYNC_OFFLINE_BENEFICIARIES: 'rpProject.syncOfflineBeneficiaries',
+    GET_OFFLINE_VENDORS: 'rpProject.getOfflineVendors',
+    GET_OFFLINE_SINGLE_VENDOR: 'rpProject.getOfflineSingleVendor',
+    SAVE_SYNCED_BENEFICIARIES_TO_VENDOR:
+      'rpProject.saveSyncedBeneficiariesToVendor',
+    ADD_GROUP: 'rpProject.beneficiary.addGroup',
+    GET_ALL_GROUPS: 'rpProject.beneficiary.getAllGroups',
+    GET_ONE_GROUP: 'rpProject.beneficiary.getOneGroup',
+    GET_BENEFICIARIES_DISBURSEMENTS: 'rpProject.beneficiaries.getDisbursements',
+    UPDATE_OFFLINE: 'rpProject.offlineBeneficiaries.update',
+    GET_UNSYNCED_BENEFICIARIES: 'rpProject.beneficiaries.getUnsynced',
+    GET_UNSYNCED_BENEFICIARY_GROUP: 'rpProject.beneficiary.group.get_unsynced',
+    // TODO: move to kenya specific actions
+    CREATE_WALKIN: 'rpProject.walkin.create',
+    GET_WALKIN: 'rpProject.walkin.get',
+    GET_ALL_WALKIN: 'rpProject.walkin.getAll',
+    CREATE_BULK_WALKIN_BENEFICIARIES: 'rpProject.walkin.createBulk',
+    LIST_REPORTING: 'rpProject.reporting.list',
+    UPDATE_BENEFICIARY: 'rpProject.beneficiary.update',
+    LIST_BENEFICIARY_REIMBURSEMENTS: 'rpProject.beneficiary.listReimbursements',
+    SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions'
+
+  },
+
+
+}

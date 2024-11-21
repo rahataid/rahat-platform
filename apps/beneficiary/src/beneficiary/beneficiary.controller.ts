@@ -1,6 +1,7 @@
 import { Controller, Inject, Param } from '@nestjs/common';
 import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import {
+  addBulkBeneficiaryToProject,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ImportTempBenefDto,
@@ -9,7 +10,6 @@ import {
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto,
-  addBulkBeneficiaryToProject
 } from '@rahataid/extensions';
 
 import {
@@ -53,12 +53,33 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
   createBulk(@Payload() data) {
-    return this.service.createBulk(data);
+    const payloadData = Array.isArray(data?.data) ? data?.data : data?.payload;
+
+    return this.service.createBulk(
+      payloadData,
+      data?.projectUUID,
+      data?.data?.walkinBulk
+    );
+  }
+
+  @MessagePattern({
+    cmd: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE,
+  })
+  createBulkWithQueue(@Payload() queueData) {
+    const payloadData = Array.isArray(queueData?.data)
+      ? queueData?.data
+      : queueData?.payload;
+    return this.service.createBulkWithQueue(payloadData, queueData);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST })
   async list(dto: ListBeneficiaryDto) {
     return this.service.list(dto);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.LEAD_CONVERSION_BENEFICIARY })
+  async leadConversions(dto: ListBeneficiaryDto) {
+    return this.service.listBeneficiaryPiiByWalletAddress(dto);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_BY_PROJECT })
@@ -97,8 +118,6 @@ export class BeneficiaryController {
     console.log(payload, 'payload in project add');
     return this.service.assignBeneficiaryToProject(payload);
   }
-
-
 
   @MessagePattern({ cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT })
   async bulkAssignToProject(payload: any) {
@@ -146,46 +165,46 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_BEN_VENDOR_COUNT })
   getTotalCount(data) {
-    return this.service.getTotalCount(data)
+    return this.service.getTotalCount(data);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_PROJECT_SPECIFIC })
   getProjectSpecific(data) {
-    return this.service.getProjectSpecificData(data)
+    return this.service.getProjectSpecificData(data);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_TABLE_STATS })
   getTableStats() {
-    return this.statsService.getTableStats()
+    return this.statsService.getTableStats();
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ADD_GROUP })
   addGroup(payload: CreateBeneficiaryGroupsDto) {
-    console.log(payload);
-    return this.service.addGroup(payload)
+    return this.service.addGroup(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP })
   getGroup(uuid: string) {
-    return this.service.getOneGroup(uuid)
+    return this.service.getOneGroup(uuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.REMOVE_ONE_GROUP })
   removeGroup(uuid: string) {
-    return this.service.removeOneGroup(uuid)
+    return this.service.removeOneGroup(uuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_GROUPS })
   getAllGroups(dto: ListBeneficiaryGroupDto) {
-    return this.service.getAllGroups(dto)
+    return this.service.getAllGroups(dto);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE_GROUP })
-  updateGroup(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryGroupDto) {
-    const groupUUID = uuid ? uuid : dto?.uuid
-    console.log(groupUUID, 'groupUUID');
-    console.log(dto, 'dto');
-    return this.service.updateGroup(groupUUID, dto)
+  updateGroup(
+    @Param('uuid') uuid: UUID,
+    @Payload() dto: UpdateBeneficiaryGroupDto
+  ) {
+    const groupUUID = uuid ? uuid : dto?.uuid;
+    return this.service.updateGroup(groupUUID, dto);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT })
@@ -203,7 +222,9 @@ export class BeneficiaryController {
     return this.service.getOneGroupByProject(uuid);
   }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL })
+  @MessagePattern({
+    cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL,
+  })
   async importBeneficiariesFromTool(data: any) {
     console.log(data, 'data in import tool');
     return this.service.importBeneficiariesFromTool(data);
@@ -211,7 +232,6 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY })
   async listTempBeneficiaries(data: any) {
-
     return this.service.listTempBeneficiaries(data.uuid, data.query);
   }
 
@@ -232,7 +252,6 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_STATS })
   async getAllStats() {
-    console.log("data sources here reached")
     return this.service.allDataSource();
   }
 }

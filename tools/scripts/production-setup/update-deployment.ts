@@ -1,11 +1,10 @@
 import { PrismaService } from '@rumsan/prisma';
-import { SettingsService } from '@rumsan/settings';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { ContractArtifacts, ContractDetails } from '../types/contract';
-dotenv.config({ path: `${__dirname}/.env` });
+dotenv.config({ path: `${__dirname}/.env.setup` });
 
 function getDeploymentFile() {
   const directoryPath = join(__dirname, 'deployments');
@@ -30,14 +29,11 @@ const contractNames = [
 ];
 
 const prisma = new PrismaService();
-const settings = new SettingsService(prisma);
 
 class DeploymentUpdater {
-  projectUUID: string;
   deploymentSettings: any;
 
   constructor() {
-    this.projectUUID = process.env.PROJECT_ID as string
     this.deploymentSettings = getDeploymentFile();
   }
 
@@ -66,26 +62,46 @@ class DeploymentUpdater {
   public async addBlockchainSettings() {
     console.log("Adding Blockchain settings")
 
-    await settings.create({
+    // await settings.create({
+    //   name: 'Blockchain',
+    //   value: this.deploymentSettings.chainSettings,
+    //   isPrivate: false
+    // });
+
+    const data = {
       name: 'Blockchain',
       value: this.deploymentSettings.chainSettings,
       isPrivate: false
-    });
+    };
+
+    const url = `${process.env.RAHAT_CORE_URL}/v1/settings`;
+    await axios.post(url, data);
     console.log("Blockchain settings Added")
+
 
   }
 
   public async addGraphSettings() {
     console.log("Subgraph url adding")
     const formattedURL = this.deploymentSettings.subgraphUrl
-    await settings.create({
+    const url = `${process.env.RAHAT_CORE_URL}/v1/settings`;
+    // await settings.create({
+    //   name: 'SUBGRAPH_URL',
+    //   value: {
+    //     url: formattedURL
+    //   },
+    //   isPrivate: false
+    // })
+
+    const data = {
       name: 'SUBGRAPH_URL',
-      value: {
-        url: formattedURL
-      },
+      value: { URL: formattedURL },
       isPrivate: false
-    })
+    };
+
+    await axios.post(url, data);
     console.log("Subgraph url added")
+
 
   }
 
@@ -139,7 +155,8 @@ class DeploymentUpdater {
       isPrivate: false
     };
 
-    await settings.create(data);
+    const url = `${process.env.RAHAT_CORE_URL}/v1/settings`;
+    await axios.post(url, data);
     console.log("Contract settings Added")
 
   }

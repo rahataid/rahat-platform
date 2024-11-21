@@ -1,0 +1,44 @@
+meta {
+  name: create-group-beneficiary
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/beneficiaries/groups
+  body: json
+  auth: none
+}
+
+assert {
+  res.status: eq 201
+  res.body.success: eq true
+}
+
+script:pre-request {
+  const { faker } = require("@faker-js/faker");
+  const { benefUUIDs } = require('./temp/beneficiary-data.json');
+  const { access_token } = require("./temp/auth-data.json");
+
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+
+  const name = faker.person.fullName();
+  req.setBody({
+    name,
+    beneficiaries: [
+      {
+        uuid: benefUUIDs[0]
+      },
+      {
+        uuid: benefUUIDs[1]
+      }
+    ]
+  })
+}
+
+tests {
+  test('should add the beneficiaries in a group', async () => {
+    const result = res.getBody();
+    expect(res.body.data).to.equal(result.data);
+  });
+}

@@ -204,6 +204,23 @@ enum TokenDataType {
 }
 
 // ++++++++++++++++++ END: @rumsan/settings +++++++++++++++++++++++++++
+
+model AuthApp {
+  id           Int     @id @default(autoincrement())
+  uuid         String  @unique @default(uuid())
+  address      String  @unique
+  name         String
+  description  String?
+  nonceMessage String?
+
+  createdBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
+
+  @@map("tbl_auth_apps")
+}
+
 // ++++++++++++++++++ START: @rahat/beneficiaries +++++++++++++++++++++++++++
 
 model Beneficiary {
@@ -230,6 +247,7 @@ model Beneficiary {
   BeneficiaryProject   BeneficiaryProject[]
   groupedBeneficiaries GroupedBeneficiaries[]
 
+  @@index([deletedAt])
   @@map("tbl_beneficiaries")
 }
 
@@ -248,6 +266,9 @@ model GroupedBeneficiaries {
   deletedAt DateTime?
 
   @@unique([beneficiaryGroupId, beneficiaryId], name: "beneficiaryGroupIdentifier")
+  @@index([beneficiaryGroupId])
+  @@index([beneficiaryId])
+  @@index([deletedAt])
   @@map("tbl_grouped_beneficiaries")
 }
 
@@ -264,6 +285,7 @@ model BeneficiaryGroup {
   groupedBeneficiaries    GroupedBeneficiaries[]
   beneficiaryGroupProject BeneficiaryGroupProject[]
 
+  @@index([deletedAt])
   @@map("tbl_beneficiaries_group")
 }
 
@@ -282,6 +304,9 @@ model BeneficiaryGroupProject {
   deletedAt DateTime?
 
   @@unique([projectId, beneficiaryGroupId], name: "beneficiaryGroupProjectIdentifier")
+  @@index([projectId])
+  @@index([beneficiaryGroupId])
+  @@index([deletedAt])
   @@map("tbl_beneficiaries_gorup_projects")
 }
 
@@ -300,6 +325,9 @@ model BeneficiaryProject {
   deletedAt DateTime?
 
   @@unique([projectId, beneficiaryId], name: "beneficiaryProjectIdentifier")
+  @@index([projectId])
+  @@index([beneficiaryId])
+  @@index([deletedAt])
   @@map("tbl_beneficiaries_projects")
 }
 
@@ -417,6 +445,7 @@ model ProjectVendors {
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
   deletedAt DateTime?
+  extras    Json?     @db.JsonB()
 
   @@unique([projectId, vendorId], name: "projectVendorIdentifier")
   @@map("tbl_projects_vendors")
@@ -516,6 +545,40 @@ model TempBeneficiary {
   TempGroupedBeneficiaries TempBeneficiaryGroup[]
 
   @@map("tbl_temp_beneficiaries")
+}
+
+enum KoboBeneficiaryType {
+  SALE
+  LEAD
+  HOME_VISIT
+}
+
+enum KoboBeneficiaryStatus {
+  PENDING
+  FAILED
+  SUCCESS
+}
+
+model KoboBeneficiary {
+  id                       Int                    @id @default(autoincrement())
+  uuid                     String                 @unique @default(uuid()) @db.Uuid()
+  name                     String
+  gender                   Gender                 @default(UNKNOWN)
+  type                     KoboBeneficiaryType    @default(SALE)
+  status                   KoboBeneficiaryStatus  @default(PENDING)
+  phone                    String
+  age                      Int?
+  email                    String?
+  wallet                   String?
+  leadInterests            String[]
+  extras                    Json?                  @db.JsonB()
+
+
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime?              @updatedAt()
+  deletedAt                DateTime?
+
+  @@map("tbl_kobo_beneficiaries")
 }
 
 model TempGroup {

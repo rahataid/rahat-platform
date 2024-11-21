@@ -12,6 +12,7 @@ import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
 import { UUID } from 'crypto';
 import { Address, isAddress } from 'viem';
+import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -34,12 +35,22 @@ export class VendorsService {
       if (!role) throw new Error('Role not found');
       // Add to User table
       const { service, ...rest } = dto;
-      if (dto?.email) {
+      if (dto?.email || dto?.phone) {
         const userData = await prisma.user.findFirst({
-          where: { email: dto.email }
-        })
-        if (userData) throw new Error("Email must be unique");
+          where: {
+            OR: [
+              { email: dto.email },
+              { phone: dto.phone }
+            ]
+          }
+        });
+
+        if (userData) {
+          if (userData?.email === dto.email) throw new Error("Email must be unique");
+          if (userData?.phone === dto.phone) throw new Error("Phone Number must be unique");
+        }
       }
+
       const user = await prisma.user.create({ data: rest });
       // Add to UserRole table
       const userRolePayload = { userId: user.id, roleId: role.id };
@@ -88,35 +99,52 @@ export class VendorsService {
       walletAddress: vendorUser.wallet,
     };
 
-
-
     const assigned = await this.getVendorAssignedToProject(vendorId, projectId)
-
 
     if (assigned)
       throw new RpcException(
         new BadRequestException('Vendor already assigned to the project!')
       );
     // //2. Save vendor to project
-    await this.prisma.projectVendors.create({
-      data: {
-        projectId,
-        vendorId: vendorId,
+    // await this.prisma.projectVendors.create({
+    //   data: {
+    //     projectId,
+    //     vendorId: vendorId,
+    //   },
+    // });
+
+
+    const response = await handleMicroserviceCall({
+      client: this.client.send(
+        {
+          cmd: VendorJobs.ADD_TO_PROJECT,
+          uuid: projectId,
+        },
+        {
+          ...projectPayload,
+          vendor: vendorUser || null,
+        }
+      ),
+      onSuccess: async (projectResponse) => {
+        const createRes = await this.prisma.projectVendors.create({
+          data: {
+            projectId,
+            vendorId,
+            extras: {
+              projectVendorIdentifier: projectResponse.id
+            }
+          }
+        });
+        console.log('Vendor successfully assigned to the project:', createRes);
+      },
+      onError: (error) => {
+        console.error('Error syncing vendor to project:', error);
       },
     });
 
 
-    // //3. sync vendor to Project
-    return this.client.send(
-      {
-        cmd: VendorJobs.ADD_TO_PROJECT,
-        uuid: projectId,
-      },
-      {
-        ...projectPayload,
-        vendor: vendorUser || null
-      }
-    );
+
+    return response;
   }
 
   async getVendorAssignedToProject(vendorId: string, projectId: string) {
@@ -149,8 +177,9 @@ export class VendorsService {
         Project: true,
       },
     });
+    const vendorIdentifier = projectData[0]?.extras;
     const projects = projectData.map((project) => project.Project);
-    const userdata = { ...data, projects };
+    const userdata = { ...data, projects, vendorIdentifier };
     return userdata;
   }
 
@@ -194,7 +223,6 @@ export class VendorsService {
         createdAt: 'desc',
       },
     });
-    console.log('vendData', venData)
     return this.client.send({
       cmd: VendorJobs.LIST,
       uuid: projectId
@@ -276,7 +304,7 @@ export class VendorsService {
         }
       })
       const extras = dto?.extras;
-      const userExtras = Object(user?.extras)
+      const userExtras = Object(user?.extras || {})
 
       dto.extras = { ...extras, ...userExtras }
 
@@ -300,6 +328,16 @@ export class VendorsService {
   }
 
 
+  async getVendorByUuid(dto: { projectId: string, vendorId: string }) {
+    return this.prisma.projectVendors.findUnique({
+      where: {
+        projectVendorIdentifier: dto
+      },
+      include: {
+        User: true
+      }
+    })
+  }
 
 }
 

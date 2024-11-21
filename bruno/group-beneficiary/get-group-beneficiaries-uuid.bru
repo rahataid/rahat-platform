@@ -1,0 +1,44 @@
+meta {
+  name: get-group-beneficiaries-uuid
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{url}}/beneficiaries/groups/{{uuid}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data: isJson
+}
+
+script:pre-request {
+  const { access_token } = require("./temp/auth-data.json");
+  const { groupData } = require("./temp/group-data.json");
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+  
+  const url = bru.getEnvVar('url');
+  req.setUrl(`${url}/beneficiaries/groups/${groupData.uuid}`); 
+}
+
+tests {
+  var groupDetails = res.getBody().data;
+  bru.setVar("group-details", groupDetails);
+  bru.setVar("group-uuid", groupDetails.uuid);
+  
+  test('should return group details using uuid', async () => {
+    const result = res.getBody();
+    expect(res.body.data).to.equal(result.data);
+    expect(res.body.data).to.have.property('id');
+    expect(res.body.data).to.have.property('uuid');
+    expect(res.body.data).to.have.property('name');
+    expect(res.body.data).to.have.property('createdAt');
+    expect(res.body.data).to.have.property('updatedAt');
+    expect(res.body.data).to.have.property('deletedAt');
+    expect(res.body.data).to.have.property('groupedBeneficiaries');
+  }); 
+}

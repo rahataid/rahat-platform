@@ -1,0 +1,83 @@
+meta {
+  name: create-bulk-beneficiaries
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/beneficiaries/bulk
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 201
+  res.body.success: eq true
+  res.body.data.beneficiariesData: isArray
+}
+
+script:pre-request {
+  const { faker } = require("@faker-js/faker");
+  const { access_token } = require('./temp/auth-data.json');
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+  
+  const walletAddress = faker.finance.ethereumAddress();
+  const gender = "FEMALE";
+  const birthDate = faker.date.birthdate().toISOString();
+  const age = 26;
+  const location = faker.location.city();
+  const latitude = faker.location.latitude();
+  const longitude = faker.location.longitude();
+  const extras = {
+    email : faker.internet.email(),
+    hasCitizenship : faker.datatype.boolean(),
+    passportNumber : faker.number.int({ min:10000 })
+  };
+  const notes = faker.number.int({ min : 1000000 }).toString();
+  const bankedStatus = "BANKED";
+  const internetStatus = "NO_INTERNET";
+  const phoneStatus = "FEATURE_PHONE";
+  const piiData = {
+    name : faker.person.fullName(),
+    phone : faker.phone.number(),
+    extras: {
+      bank: faker.string.alpha(),
+      account: faker.finance.accountNumber()
+    }
+  };
+  
+  req.setBody([
+    {
+      walletAddress,
+      gender,
+      birthDate,
+      age,
+      location,
+      latitude,
+      longitude,
+      extras,
+      notes,
+      bankedStatus,
+      internetStatus,
+      phoneStatus,
+      piiData
+    }
+  ])
+}
+
+script:post-response {
+  const createFile = require('./createFile');
+  const resData = res.getBody().data;
+
+  const data = { "benefUUIDs": [resData.beneficiariesData[0].uuid] }
+  createFile(data, 'beneficiary-data.json');
+}
+
+tests {
+  test('should create new beneficiaries in bulk', async () => {
+    const data = res.getBody();
+    expect(res.body.data).to.have.property('count');
+    expect(res.body.data).to.have.property('beneficiariesData');
+    expect(res.body.data).to.equal(data.data);
+  });
+}

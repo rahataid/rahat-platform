@@ -1,0 +1,35 @@
+meta {
+  name: get-beneficiary-walletAddress
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{url}}/beneficiaries/wallet/{{wallet-address}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data: isJson
+}
+
+script:pre-request {
+  const { access_token } = require('./temp/auth-data.json');
+  const { beneficiaryData } = require('./temp/beneficiary-data.json');
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+
+  const url = bru.getEnvVar('url');
+  req.setUrl(`${url}/beneficiaries/wallet/${beneficiaryData.walletAddress}`);
+}
+
+tests {
+  test('should return detail of beneficiary using wallet address', async () => {
+    const result = res.getBody();
+    expect(res.body.data).to.equal(result.data);
+    expect(res.body.data.walletAddress).to.equal(result.data.walletAddress); 
+    expect(res.body.data).to.have.property('walletAddress');
+  }); 
+}
