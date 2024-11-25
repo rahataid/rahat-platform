@@ -560,23 +560,18 @@ enum KoboBeneficiaryStatus {
 }
 
 model KoboBeneficiary {
-  id               Int                   @id @default(autoincrement())
-  uuid             String                @unique @default(uuid()) @db.Uuid()
-  name             String
-  healthWorkerName String?
-  gender           Gender                @default(UNKNOWN)
-  type             KoboBeneficiaryType   @default(SALE)
-  status           KoboBeneficiaryStatus @default(PENDING)
-  phone            String
-  age              Int?
-  email            String?
-  wallet           String?
-  latitude         Float?
-  longitude        Float?
-  altitude         Float?
-  accuracy         Float?
-  leadInterests    String[]
-  meta             Json?                 @db.JsonB()
+  id                       Int                    @id @default(autoincrement())
+  uuid                     String                 @unique @default(uuid()) @db.Uuid()
+  name                     String
+  gender                   Gender                 @default(UNKNOWN)
+  type                     KoboBeneficiaryType    @default(SALE)
+  status                   KoboBeneficiaryStatus  @default(PENDING)
+  phone                    String
+  age                      Int?
+  email                    String?
+  wallet                   String?
+  leadInterests            String[]
+  extras                    Json?                  @db.JsonB()
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()

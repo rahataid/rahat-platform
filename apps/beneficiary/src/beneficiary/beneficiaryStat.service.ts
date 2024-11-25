@@ -1,24 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { StatsService } from '@rahat/stats';
+import { MS_TIMEOUT, ProjectContants } from '@rahataid/sdk';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
+import { timeout } from 'rxjs';
 import { hasKey } from '../utils/objectUtil';
+import { RahatTokenAbi } from '../utils/rahatToken';
 import { mapVulnerabilityStatusCount } from '../utils/vulnerabilityCountHelpers';
+import { createContractReader } from '../utils/web3';
 
 const REPORTING_FIELD = {
   FAMILY_MEMBER_BANK_ACCOUNT: "is_there_any_family_member_who_has_an_active_bank_account",
   TYPE_OF_PHONE_SET: "type_of_phone_set"
 }
 
+
+
 @Injectable()
 export class BeneficiaryStatService {
   constructor(
     protected prisma: PrismaService,
-    private readonly statsService: StatsService
+    private readonly statsService: StatsService,
+    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
 
   async getTableStats() {
     return await this.prisma.stats.findMany({});
   }
+
 
   async calculateGenderStats(projectUuid?: string) {
     let filter = {};
@@ -288,6 +298,48 @@ export class BeneficiaryStatService {
     return { count: await this.prisma.beneficiary.count({ where: filter }) };
   }
 
+  async totalVendors(projectUuid?: string) {
+    let filter = {};
+
+    // Add filter if projectUuid is provided
+    if (projectUuid) {
+      const vendorId = await this.prisma.projectVendors
+        .findMany({
+          where: {
+            projectId: projectUuid,
+          },
+          select: {
+            vendorId: true,
+          },
+        })
+        .then((projectVen) =>
+          projectVen.map((data: any) => data?.vendorId)
+        );
+
+      filter = {
+        uuid: {
+          in: vendorId || [],
+        },
+      };
+
+    }
+
+    // Todo: Calculate total
+    return { count: await this.prisma.user.count({ where: filter }) };
+  }
+
+  async getTotalVoucher() {
+
+    const settings = new SettingsService(this.prisma);
+    const contractSettings = await settings.getByName('CONTRACTS')
+
+    const rahatTokenAddress = contractSettings.value['RAHATTOKEN'].ADDRESS;
+
+    const tokenContract = await createContractReader(RahatTokenAbi, rahatTokenAddress)
+
+    return tokenContract.totalSupply();
+  }
+
   async calculateMapStats() {
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
@@ -421,7 +473,8 @@ export class BeneficiaryStatService {
       phoneAvailabilityStats,
       vulnerabilityCountStats,
       casteCountStats,
-      phoneTypeStats
+      phoneTypeStats,
+      totalVendors
     ] = await Promise.all([
       this.calculateGenderStats(),
       this.calculateBankedStatusStats(),
@@ -434,8 +487,11 @@ export class BeneficiaryStatService {
       this.calculatePhoneAvailabilityStats(),
       this.calculateVulnerabilityCountStats(),
       this.calculateCountByCasteStats(),
-      this.calculatePhoneTypeStats()
+      this.calculatePhoneTypeStats(),
+      this.totalVendors()
     ]);
+
+    this.getTotalVoucher()
 
     return {
       gender,
@@ -449,11 +505,13 @@ export class BeneficiaryStatService {
       phoneAvailabilityStats,
       vulnerabilityCountStats,
       casteCountStats,
-      phoneTypeStats
+      phoneTypeStats,
+      totalVendors
     };
   }
   async calculateProjectStats(projectUuid: string) {
-    const [gender, bankedStatus, internetStatus, phoneStatus, total, age] =
+
+    const [gender, bankedStatus, internetStatus, phoneStatus, total, age, totalVendors] =
       await Promise.all([
         this.calculateGenderStats(projectUuid),
         this.calculateBankedStatusStats(projectUuid),
@@ -461,6 +519,7 @@ export class BeneficiaryStatService {
         this.calculatePhoneStatusStats(projectUuid),
         this.totalBeneficiaries(projectUuid),
         this.calculateAgeStats(projectUuid),
+        this.totalVendors(projectUuid),
       ]);
 
     return {
@@ -470,6 +529,8 @@ export class BeneficiaryStatService {
       phoneStatus,
       total,
       age,
+      totalVendors,
+
     };
   }
 
@@ -518,7 +579,8 @@ export class BeneficiaryStatService {
       phoneAvailabilityStats,
       vulnerabilityCountStats,
       casteCountStats,
-      phoneTypeStats
+      phoneTypeStats,
+      totalVendors
     } = await this.calculateAllStats();
 
     const rangedAge = await this.calculateRangedAge(age);
@@ -584,9 +646,14 @@ export class BeneficiaryStatService {
         data: phoneTypeStats,
         group: 'beneficiary',
       }),
+      this.statsService.save({
+        name: 'vendor_total',
+        data: totalVendors,
+        group: 'vendor'
+      })
     ]);
     if (projectUuid) {
-      const { gender, bankedStatus, internetStatus, phoneStatus, total, age } =
+      const { gender, bankedStatus, internetStatus, phoneStatus, total, age, totalVendors } =
         await this.calculateProjectStats(projectUuid);
       const rangedAge = await this.calculateRangedAge(age);
       await Promise.all([
@@ -620,9 +687,32 @@ export class BeneficiaryStatService {
           data: rangedAge,
           group: projectUuid,
         }),
+        this.statsService.save({
+          name: 'vendor_total',
+          data: totalVendors,
+          group: projectUuid
+        }),
+        this.statsService.save({
+          name: 'voucher_total',
+          data: await this.getTotalVoucher(),
+          group: projectUuid
+        })
       ]);
+
+
+      const projectStats = await this.client.send({ cmd: "rahat.jobs.reporting.list", uuid: projectUuid }, {})
+        .pipe(timeout(MS_TIMEOUT)).toPromise();
+
+      projectStats.forEach((stat) => {
+        this.statsService.save({
+          name: stat.name,
+          data: stat.data,
+          group: projectUuid
+        })
+      })
     }
 
-    return { gender, bankedStatus, internetStatus, phoneStatus };
+    return { gender, bankedStatus, internetStatus, phoneStatus, total };
   }
 }
+

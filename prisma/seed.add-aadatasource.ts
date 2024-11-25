@@ -11,6 +11,7 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
+
 const projectStats = (url: string) => {
   return {
     dataSources: {
@@ -98,7 +99,7 @@ const projectStats = (url: string) => {
             props: {},
             title: 'Household Bank Status',
             colSpan: 1,
-            dataMap: `BENEFICIARY_BANKEDSTATUS`,
+            dataMap: `BENEFICIARY_BANKEDSTATUS_NEW`,
             dataSrc: 'source2',
             rowSpan: 1,
           },
@@ -107,7 +108,7 @@ const projectStats = (url: string) => {
             props: {},
             title: 'Type of Phone',
             colSpan: 1,
-            dataMap: `BENEFICIARY_PHONESTATUS`,
+            dataMap: `BENEFICIARY_PHONE_TYPE_STATS`,
             dataSrc: 'source2',
             rowSpan: 1,
           },

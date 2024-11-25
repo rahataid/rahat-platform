@@ -17,8 +17,10 @@ import { ExternalAppGuard } from '../decorators';
 import { GrievanceModule } from '../grievance/grievance.module';
 import { ListenersModule } from '../listeners/listeners.module';
 import { OfframpModule } from '../offramp/offramp.module';
+import { MetaTxnProcessorsModule } from '../processors/meta-transaction/metaTransaction.module';
 import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
+import { QueueModule } from '../queue/queue.module';
 import { RequestContextModule } from '../request-context/request-context.module';
 import { TokenModule } from '../token/token.module';
 import { UploadModule } from '../upload/upload.module';
@@ -37,6 +39,11 @@ import { AppService } from './app.service';
           host: configService.get('REDIS_HOST'),
           port: configService.get('REDIS_PORT'),
           password: configService.get('REDIS_PASSWORD'),
+
+        },
+        settings: {
+          stalledInterval: 30000, // Time (ms) to check for stalled jobs, default is 30 seconds.
+          lockDuration: 60000, // Time (ms) for a job to finish before considering it stalled, default is 30 seconds.
         },
       }),
       inject: [ConfigService],
@@ -48,12 +55,14 @@ import { AppService } from './app.service';
     ProjectModule,
     StatsModule,
     ProcessorsModule,
+    MetaTxnProcessorsModule,
     UploadModule,
     GrievanceModule,
     TokenModule,
     SettingsModule,
     OfframpModule,
-    RequestContextModule
+    RequestContextModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, {

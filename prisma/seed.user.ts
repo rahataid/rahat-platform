@@ -90,24 +90,10 @@ export const users: Array<{
       id: 1,
       name: 'Rumsan Admin',
       email: 'rumsan@mailinator.com',
-      wallet: '0x75f598874DC39E364846d577CEde48d50378aC40'
-    },
-    {
-      id: 2,
-      name: 'Manjik Admin',
-      email: 'manjik@mailinator.com',
-      wallet: '0xcDEe632FB1Ba1B3156b36cc0bDabBfd821305e06'
-    },
-    {
-      id: 3,
-      name: 'Ms Manager',
       wallet: '0xAC6bFaf10e89202c293dD795eCe180BBf1430d7B',
     },
-    {
-      id: 4,
-      name: 'Mr User',
-      email: 'user@mailinator.com',
-    },
+
+
   ];
 
 export const userRoles: Array<{
@@ -119,16 +105,6 @@ export const userRoles: Array<{
       id: 1,
       userId: 1,
       roleId: 1,
-    },
-    {
-      id: 2,
-      userId: 2,
-      roleId: 2,
-    },
-    {
-      id: 3,
-      userId: 3,
-      roleId: 3,
     },
   ];
 
@@ -144,30 +120,7 @@ export const auths: Array<{
       service: Service.EMAIL,
       serviceId: 'rumsan@mailinator.com',
     },
-    {
-      id: 2,
-      userId: 2,
-      service: Service.EMAIL,
-      serviceId: 'manjik@mailinator.com',
-    },
-    {
-      id: 3,
-      userId: 2,
-      service: Service.WALLET,
-      serviceId: '0xcDEe632FB1Ba1B3156b36cc0bDabBfd821305e06',
-    },
-    {
-      id: 4,
-      userId: 3,
-      service: Service.WALLET,
-      serviceId: '0xAC6bFaf10e89202c293dD795eCe180BBf1430d7B',
-    },
-    {
-      id: 5,
-      userId: 4,
-      service: Service.EMAIL,
-      serviceId: 'user@mailinator.com',
-    },
+
   ];
 
 const projectTypes: Array<{

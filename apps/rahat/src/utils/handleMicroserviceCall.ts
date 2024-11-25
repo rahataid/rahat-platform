@@ -2,8 +2,8 @@ import { lastValueFrom, Observable } from 'rxjs';
 
 interface MicroserviceOptions<TRequest, TResponse> {
   client: Observable<TResponse>;
-  onSuccess?: (response: TResponse) => Promise<void> | void;
-  onError?: (error: any) => Promise<void> | void;
+  onSuccess?: (response: TResponse) => Promise<void> | void | any;
+  onError?: (error: any) => Promise<void> | void | any;
 }
 
 export async function handleMicroserviceCall<TRequest, TResponse>(
