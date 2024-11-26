@@ -15,14 +15,15 @@ datasource db {
 
 // =================== User Module ==================
 model User {
-  id     Int     @id @default(autoincrement())
-  uuid   String  @unique @default(uuid())
-  name   String?
-  gender Gender  @default(UNKNOWN)
-  email  String?
-  phone  String?
-  wallet String?
-  extras Json?   @db.JsonB()
+  id        Int     @id @default(autoincrement())
+  uuid      String  @unique @default(uuid())
+  name      String?
+  gender    Gender  @default(UNKNOWN)
+  email     String?
+  phone     String?
+  wallet    String?
+  extras    Json?   @db.JsonB()
+  sessionId String?
 
   Auth          Auth[]
   UserRole      UserRole[]
@@ -32,8 +33,8 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
   deletedAt DateTime?
-  createdBy Int?
-  updatedBy Int?
+  createdBy String?
+  updatedBy String?
 
   grievances Grievance[] @relation("UserGrievances")
 
