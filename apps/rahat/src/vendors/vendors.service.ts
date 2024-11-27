@@ -211,10 +211,20 @@ export class VendorsService {
 
   async listProjectVendor(dto) {
     const { projectId } = dto;
+    const q = {
+      projectId
+    };
+    if (dto.name) {
+      q['User'] = {
+        name: {
+          contains: dto.name,
+          mode: 'insensitive'
+        }
+      }
+    }
+
     const venData = await this.prisma.projectVendors.findMany({
-      where: {
-        projectId,
-      },
+      where: q,
       include: {
         Project: true,
         User: true,
