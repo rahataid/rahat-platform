@@ -27,8 +27,7 @@ export class VendorsService {
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
-
-    return await this.prisma.$transaction(async (prisma) => {
+    const vendor = await this.prisma.$transaction(async (prisma) => {
       const role = await prisma.role.findFirst({
         where: { name: UserRoles.VENDOR },
       });
@@ -75,6 +74,9 @@ export class VendorsService {
       });
       return user;
     });
+
+    return vendor
+
   }
 
   async assignToProject(dto: VendorAddToProjectDto) {
@@ -142,7 +144,21 @@ export class VendorsService {
       },
     });
 
-
+    await handleMicroserviceCall({
+      client: this.client.send(
+        { cmd: 'rahat.jobs.projects.calculate_stats' },
+        {
+          projectUUID: projectId,
+        }
+      ),
+      onSuccess(response) {
+        console.log('Microservice response', response);
+        return response;
+      },
+      onError(error) {
+        throw new RpcException('Microservice call failed: ' + error.message);
+      },
+    });
 
     return response;
   }
