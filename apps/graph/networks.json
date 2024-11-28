@@ -31,20 +31,20 @@
   },
   "mainnet": {
     "RahatAccessManager": {
-      "address": "0xB196d55391e37A6b9E2726A2350Ce04202bd83ee",
-      "startBlock": 12
+      "address": "0xBdF1b96e7ec422e5400e4Bb8122543ddfC197203",
+      "startBlock": 19
     },
     "ERC2771Forwarder": {
-      "address": "0xd07E9998B72435AC34401328AD8029a4178daF4f",
-      "startBlock": 14
+      "address": "0x5e6cf02246df4007f9fA9D1a4B9b42b0f95833B9",
+      "startBlock": 21
     },
     "RahatTreasury": {
-      "address": "0x87bD5e4dBFB1e664B88E3958109223f311CbA1d4",
-      "startBlock": 16
+      "address": "0x5068536f8E28C9896fb91E028ACaF9c01399161C",
+      "startBlock": 24
     },
     "RahatToken": {
-      "address": "0xD93a0B98e311F0817d290316E7AbD924c6CEdee1",
-      "startBlock": 18
+      "address": "0xe09cB611be963c262594168C94F35487b0b1605E",
+      "startBlock": 26
     }
   },
   "base-sepolia": {
