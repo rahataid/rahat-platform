@@ -61,6 +61,14 @@ export class VendorsController {
     return this.vendorService.updateVendor(dto, uuid)
   }
 
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  @Patch('remove/:uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async remove(@Param('uuid') uuid: UUID) {
+    return this.vendorService.removeVendor(uuid)
+  }
+
   ///microservice
   @MessagePattern({ cmd: VendorJobs.GET_REDEMPTION_VENDORS })
   listRedemptionVendors(data) {

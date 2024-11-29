@@ -189,6 +189,9 @@ export class VendorsService {
         Role: {
           name: UserRoles.VENDOR,
         },
+        User: {
+          deletedAt: null,
+        }
       },
       include: {
         User: {
@@ -212,7 +215,8 @@ export class VendorsService {
   async listProjectVendor(dto) {
     const { projectId } = dto;
     const q = {
-      projectId
+      projectId,
+      deletedAt: null
     };
     if (dto.name) {
       q['User'] = {
@@ -303,7 +307,7 @@ export class VendorsService {
   async updateVendor(dto, uuid) {
     if (dto?.email) {
       const userData = await this.prisma.user.findFirst({
-        where: { email: dto.email }
+        where: { email: dto.email, NOT: { uuid } },
       })
       if (userData) throw new Error("Email must be unique");
     }
@@ -320,6 +324,28 @@ export class VendorsService {
 
     }
     const result = await this.usersService.update(uuid, dto);
+
+    return this.client.send({ cmd: VendorJobs.UPDATE }, result);
+  }
+
+  async removeVendor(uuid: UUID) {
+    const isVendor = await this.prisma.user.findFirst({
+      where: {
+        uuid
+      }
+    })
+    if (!isVendor) throw new Error('Data not Found');
+
+    const result = await this.usersService.delete(uuid);
+    // await this.prisma.projectVendors.updateMany({
+    //   where: {
+    //     vendorId: uuid
+    //   },
+    //   data: {
+    //     deletedAt: new Date()
+    //   }
+    // })
+
     return result;
 
   }
