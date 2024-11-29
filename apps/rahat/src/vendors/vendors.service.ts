@@ -209,6 +209,9 @@ export class VendorsService {
             },
           },
         },
+        orderBy: {
+          createdAt: 'desc',
+        },
       },
       {
         page: dto.page,
