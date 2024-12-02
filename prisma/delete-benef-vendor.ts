@@ -55,47 +55,49 @@ async function deleteBenefData(beneficiaries: any[]) {
 }
 
 async function deleteVendorData(vendors: any[]) {
+    for (let v of vendors) {
 
-    const currentVendor = await prisma.user.findUnique({
-        where: {
-            uuid: "b09c2f53-3f3f-47ad-9c7c-079e593cbf06"
-        }, select: { id: true, uuid: true, name: true }
-    });
-    console.log("CurrentVendor:", currentVendor);
-    if (!currentVendor) return;
+        const currentVendor = await prisma.user.findUnique({
+            where: {
+                uuid: v.vendorId
+            }, select: { id: true, uuid: true, name: true }
+        });
+        console.log("CurrentVendor:", currentVendor);
+        if (!currentVendor) return;
 
-    // 1. Delete from project
-    await prisma.projectVendors.deleteMany({
-        where: {
-            vendorId: currentVendor.uuid
-        }
-    });
-    console.log("Delete from project");
+        // 1. Delete from project
+        await prisma.projectVendors.deleteMany({
+            where: {
+                vendorId: currentVendor.uuid
+            }
+        });
+        console.log("Delete from project");
 
-    // // 2. Delete From Auth
-    await prisma.auth.deleteMany({
-        where: {
-            userId: currentVendor?.id
-        }
-    });
-    console.log("Delete from auth");
+        // // 2. Delete From Auth
+        await prisma.auth.deleteMany({
+            where: {
+                userId: currentVendor?.id
+            }
+        });
+        console.log("Delete from auth");
 
-    // 3. Delete from UserRole
-    await prisma.userRole.deleteMany({
-        where: {
-            userId: currentVendor?.id
-        }
-    });
-    console.log("Delete from userole");
+        // 3. Delete from UserRole
+        await prisma.userRole.deleteMany({
+            where: {
+                userId: currentVendor?.id
+            }
+        });
+        console.log("Delete from userole");
 
 
-    // 4. Delete from User
-    await prisma.user.delete({
-        where: {
-            id: currentVendor?.id
-        }
-    });
-    console.log("Delete from user");
+        // 4. Delete from User
+        await prisma.user.delete({
+            where: {
+                id: currentVendor?.id
+            }
+        });
+        console.log("Delete from user");
+    }
 
 }
 
