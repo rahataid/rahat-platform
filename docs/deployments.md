@@ -104,7 +104,11 @@ This document outlines the steps required to deploy **Rahat Core** and associate
    - Execute the `update-deployment.ts` script to update the project database with the deployed contracts and blockchain configurations.
 
 9. **Run Project Specific Scripts:**
+
    - If there are any project specific scripts execute those scripts as per details mentioned in project Readme .
+
+10. **Update the Rahat Claim Address:**
+    - If the project requires the otp server update the `contractToListen` value with Rahat Claim address after contract deployments.
 
 ---
 
