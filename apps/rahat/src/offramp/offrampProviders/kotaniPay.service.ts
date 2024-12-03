@@ -96,6 +96,7 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
       senders_amount: data.amount,
       senders_address: data.senderAddress
     })
+    console.log('response', response)
     return { data: response.data };
   }
 
@@ -110,6 +111,21 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
     // Implementation goes here
     const client = await this.getKotaniPayAxiosClient(data.uuid);
     const response = await client.get(`/offramp/${data.payload.requestUuid}`);
+    // console.log('response', response)
+    return { data: response.data };
+  }
+
+  async getOfframpDetails(data: any): Promise<any> {
+    // Implementation goes here
+    const client = await this.getKotaniPayAxiosClient(data.uuid);
+    const response = await client.get(`/offramp/${data.payload.requestUuid}`);
+    return { data: response.data };
+  }
+
+  async getSupportedChains(data: any): Promise<any> {
+    // Implementation goes here
+    const client = await this.getKotaniPayAxiosClient(data.uuid);
+    const response = await client.get('/offramp/crypto-to-fiat/supported-chains');
     return { data: response.data };
   }
 
@@ -119,6 +135,8 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
     'create-fiat-wallet': this.createFiatWallet.bind(this),
     'get-fiat-wallet': this.getFiatWallet.bind(this),
     'check-offramp-status': this.checkOfframpStatus.bind(this),
+    'get-offramp-details': this.checkOfframpStatus.bind(this),
+    'get-supported-chains': this.getSupportedChains.bind(this),
     // Add more Kotani Pay actions here
   };
 }
