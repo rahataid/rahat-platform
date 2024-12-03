@@ -32,7 +32,7 @@ export class VendorsService {
     private readonly authService: AuthsService,
     private readonly usersService: UsersService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
-  ) { }
+  ) {}
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
@@ -83,8 +83,7 @@ export class VendorsService {
       return user;
     });
 
-    return vendor
-
+    return vendor;
   }
 
   async assignToProject(dto: VendorAddToProjectDto) {
@@ -348,6 +347,21 @@ export class VendorsService {
       dto.extras = { ...extras, ...userExtras };
     }
     const result = await this.usersService.update(uuid, dto);
+    const isAssigned = await this.prisma.projectVendors.findFirst({
+      where: {
+        vendorId: uuid,
+      },
+    });
+    if (!isAssigned) return result;
+
+    await this.prisma.projectVendors.updateMany({
+      where: {
+        vendorId: uuid,
+      },
+      data: {
+        updatedAt: new Date(),
+      },
+    });
 
     return this.client.send({ cmd: VendorJobs.UPDATE }, result);
   }
@@ -357,20 +371,25 @@ export class VendorsService {
       where: {
         uuid,
       },
+      include: {
+        VendorProject: true,
+      },
     });
     if (!isVendor) throw new Error('Data not Found');
 
     const result = await this.usersService.delete(uuid);
-    // await this.prisma.projectVendors.updateMany({
-    //   where: {
-    //     vendorId: uuid
-    //   },
-    //   data: {
-    //     deletedAt: new Date()
-    //   }
-    // })
 
-    return result;
+    if (isVendor.VendorProject.length < 1) return result;
+    await this.prisma.projectVendors.updateMany({
+      where: {
+        vendorId: uuid,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    return this.client.send({ cmd: VendorJobs.REMOVE }, result.uuid);
   }
 
   async getVendorClaimStats(dto) {
