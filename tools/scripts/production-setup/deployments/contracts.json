@@ -1,24 +1,24 @@
 {
   "contracts": {
     "RahatAccessManager": {
-      "address": "0x030a4078ecf32EE2EdC27337E8d54FD333C0A9b4",
-      "startBlock": 17810543
+      "address": "0x59de52bc26218DE0aDd1B158459d83fa2F409855",
+      "startBlock": 18501506
     },
     "RahatTreasury": {
-      "address": "0x81101C277c025A2390b30255359399EB59150056",
-      "startBlock": 17810551
+      "address": "0x36da6C03d4a89982582230461BD6E586c1923d6b",
+      "startBlock": 18501514
     },
     "RahatToken": {
-      "address": "0xa6f0Ba7fE016c0079282A683386e5c9dAE990Cdc",
-      "startBlock": 17810555
+      "address": "0x6A2Ac220060A277C1f37Cb1BC9b9259730280D8e",
+      "startBlock": 18501518
     },
     "ERC2771Forwarder": {
-      "address": "0x3C60c01E29845B0925f23e04Df0351Ce65c85e67",
-      "startBlock": 17810547
+      "address": "0xAAf06232582B43DAbE73Cc8aB7d97cf3D4289f31",
+      "startBlock": 18501510
     }
   },
   "chainSettings": {
-    "rpcUrl": "https://base-sepolia.g.alchemy.com/v2/DWIg24dRnbm436fI1SP9fc4HVdr3xTZu",
+    "rpcUrl": "https://base-sepolia.g.alchemy.com/v2/QDCmOvFT118Of31RIv35kEn79gEi7_tH",
     "chainName": "Base sepolia",
     "nativeCurrency": {
       "name": "ETH",

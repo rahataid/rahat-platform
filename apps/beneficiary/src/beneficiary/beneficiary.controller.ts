@@ -248,4 +248,9 @@ export class BeneficiaryController {
   async getAllStats() {
     return this.service.allDataSource();
   }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.CALCULATE_STATS })
+  async syncProjectStats(payload) {
+    return this.service.syncProjectStats(payload.projectUUID)
+  }
 }
