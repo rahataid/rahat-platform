@@ -51,9 +51,13 @@ export class OfframpController {
     return this.offrampService.findAllOfframpRequests();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.offrampService.findOne(+id);
+  @Get('/single')
+  findOne(@Body() payload: {
+    uuid?: string;
+    id?: number;
+    requestId?: string;
+  }) {
+    return this.offrampService.findOne(payload);
   }
 
   // @Patch(':id')

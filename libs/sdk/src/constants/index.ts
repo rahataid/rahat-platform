@@ -44,7 +44,7 @@ export const MS_ACTIONS = {
   CAMBODIA: {
     APP: { STATS: 'cambodia.app.stats', LINE_STATS: 'cambodia.app.line_stats' },
     BENEFICIARY: {
-      VALIDATE_CONVERSION: 'camboadia.beneficiary.validate_conversion',
+      VALIDATE_CONVERSION: 'cambodia.beneficiary.validate_conversion',
       STATS: 'cambodia.beneficiary.stats',
       LEAD_CONVERSION: 'cambodia.beneficiary.lead_conversion',
       CREATE: 'cambodia.beneficiary.create',

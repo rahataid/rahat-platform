@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { CreateOfframpProviderDto, CreateOfframpRequestDto, ExecuteOfframpRequestDto, ListOfframpProviderDto, ListOfframpRequestDto, ProviderActionDto } from '@rahataid/extensions';
 import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
 import { KotaniPayService } from './offrampProviders/kotaniPay.service';
@@ -145,8 +146,21 @@ export class OfframpService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} offramp`;
+  findOne(payload: {
+    uuid?: string;
+    id?: number;
+    requestId?: string;
+
+  }) {
+    const where: Prisma.OfframpRequestWhereInput = {};
+    if (payload.uuid) where.uuid = payload.uuid;
+    if (payload.id) where.id = payload.id;
+    if (payload.requestId) where.requestId = payload.requestId;
+    console.log('where', where)
+
+    return this.prisma.offrampRequest.findFirst({
+      where
+    });
   }
 
   update(id: number, updateOfframpDto: any) {

@@ -35,8 +35,9 @@ export class MetaTransationProcessor {
 
         try {
             if (trigger) {
-                await this.client.send({ cmd: trigger.event_name, uuid: trigger.projectUuid }, { payload: trigger.payload })
+                await this.client.send({ cmd: trigger.event_name, uuid: trigger.projectUuid }, { ...trigger.payload })
                     .pipe(timeout(MS_TIMEOUT)).toPromise();
+
             }
         } catch (error) {
             console.log(error)

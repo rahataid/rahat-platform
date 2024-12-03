@@ -305,9 +305,11 @@ export class ProjectService {
     const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
     const extrasPayload = {
       meta: benef.meta,
-      province: benef.province,
-      district: benef.district,
-      wardNo: benef.wardNo
+      occupation: benef.occupation || 'UNKNOWN',
+      province: benef.province || 'UNKNOWN',
+      district: benef.district || 'UNKNOWN',
+      commune: benef.commune || 'UNKNOWN',
+      village: benef.village || 'UNKNOWN',
     }
 
     const koboPayload = {
