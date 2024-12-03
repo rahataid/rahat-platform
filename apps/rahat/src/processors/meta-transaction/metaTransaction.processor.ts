@@ -17,7 +17,7 @@ export class MetaTransationProcessor {
     async processMetaTxn(job: any) {
         this.logger.log(`Added job ${job.id} to queue`)
         await sleep(3000);
-        const { params, trigger, spreadPayload = false } = job.data;
+        const { params, trigger } = job.data;
 
         const { metaTxRequest } = params;
 
@@ -36,7 +36,7 @@ export class MetaTransationProcessor {
         let triggerData = {
             payload: trigger.payload
         }
-        if (spreadPayload) triggerData = { ...trigger.payload }
+        if (trigger.spreadPayload) triggerData = { ...trigger.payload }
 
         try {
             if (trigger) {
