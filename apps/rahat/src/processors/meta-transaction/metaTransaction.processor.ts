@@ -17,7 +17,7 @@ export class MetaTransationProcessor {
     async processMetaTxn(job: any) {
         this.logger.log(`Added job ${job.id} to queue`)
         await sleep(3000);
-        const { params, trigger } = job.data;
+        const { params, trigger, spreadPayload = false } = job.data;
 
         const { metaTxRequest } = params;
 
@@ -33,9 +33,14 @@ export class MetaTransationProcessor {
         const tx = await forwarderContract.execute(metaTxRequest);
         const res = await tx.wait();
 
+        let triggerData = {
+            payload: trigger.payload
+        }
+        if (spreadPayload) triggerData = { ...trigger.payload }
+
         try {
             if (trigger) {
-                await this.client.send({ cmd: trigger.event_name, uuid: trigger.projectUuid }, { ...trigger.payload })
+                await this.client.send({ cmd: trigger.event_name, uuid: trigger.projectUuid }, triggerData)
                     .pipe(timeout(MS_TIMEOUT)).toPromise();
 
             }
