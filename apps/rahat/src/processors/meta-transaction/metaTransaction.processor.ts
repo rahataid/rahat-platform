@@ -34,9 +34,9 @@ export class MetaTransationProcessor {
         const res = await tx.wait();
 
         let triggerData = {
-            payload: trigger.payload
+            payload: trigger?.payload
         }
-        if (trigger.spreadPayload) triggerData = { ...trigger.payload }
+        if (trigger?.spreadPayload) triggerData = { ...trigger?.payload }
 
         try {
             if (trigger) {
