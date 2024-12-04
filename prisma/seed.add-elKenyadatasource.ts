@@ -69,9 +69,9 @@ const projectStats = (uuid: string, url: string) => {
           {
             type: 'dataCard',
             props: {},
-            title: 'Total Vouchers',
+            title: 'Total Voucher Assigned',
             colSpan: 1,
-            dataMap: `VOUCHER_TOTAL_ID_${uuid}`,
+            dataMap: `TOTAL_VOUCHER_ASSIGNED_ID_${uuid}`,
             dataSrc: 'source2',
             rowSpan: 1,
             icon: 'Ticket',
@@ -79,7 +79,7 @@ const projectStats = (uuid: string, url: string) => {
           {
             type: 'dataCard',
             props: {},
-            title: 'Total Redeemed Vouchers',
+            title: 'Total Beneficiary Vouchers Redeemed',
             colSpan: 1,
             dataMap: `TOTAL_REDEMPTION_ID_${uuid}`,
             dataSrc: 'source2',
@@ -89,7 +89,7 @@ const projectStats = (uuid: string, url: string) => {
           {
             type: 'dataCard',
             props: {},
-            title: 'Total Reimbursed Vouchers',
+            title: 'Total Vendor Vouchers Claimed',
             colSpan: 1,
             dataMap: `TOTAL_APPROVED_REIMBURSEMENT_ID_${uuid}`,
             dataSrc: 'source2',
