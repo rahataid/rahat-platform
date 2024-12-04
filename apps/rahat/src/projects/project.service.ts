@@ -305,9 +305,11 @@ export class ProjectService {
         .split(' ')
         .map((item: string) => item.trim().toUpperCase());
     }
+    console.log({ NODE_ENV })
     if (NODE_ENV === 'production') {
       benef.phone = `${CAMBODIA_COUNTRY_CODE}${benef.phone}`;
     } else benef.phone = `+${benef.phone}`;
+    console.log("Beneficiary Phone", benef.phone);
 
     const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
     const extrasPayload = {
