@@ -32,7 +32,7 @@ export class VendorsService {
     private readonly authService: AuthsService,
     private readonly usersService: UsersService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
-  ) { }
+  ) {}
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
@@ -83,8 +83,7 @@ export class VendorsService {
       return user;
     });
 
-    return vendor
-
+    return vendor;
   }
 
   async assignToProject(dto: VendorAddToProjectDto) {
@@ -348,11 +347,26 @@ export class VendorsService {
       dto.extras = { ...extras, ...userExtras };
     }
     const result = await this.usersService.update(uuid, dto);
+    const isAssigned = await this.prisma.projectVendors.findFirst({
+      where: {
+        vendorId: uuid,
+      },
+    });
+    if (!isAssigned) return result;
+
+    await this.prisma.projectVendors.updateMany({
+      where: {
+        vendorId: uuid,
+      },
+      data: {
+        updatedAt: new Date(),
+      },
+    });
 
     return this.client.send({ cmd: VendorJobs.UPDATE }, result);
   }
 
-  async removeVendor(uuid: UUID) {
+  async removeVendor(uuid: UUID, projectId?: UUID) {
     const isVendor = await this.prisma.user.findFirst({
       where: {
         uuid,
@@ -360,17 +374,28 @@ export class VendorsService {
     });
     if (!isVendor) throw new Error('Data not Found');
 
-    const result = await this.usersService.delete(uuid);
-    // await this.prisma.projectVendors.updateMany({
-    //   where: {
-    //     vendorId: uuid
-    //   },
-    //   data: {
-    //     deletedAt: new Date()
-    //   }
-    // })
+    if (!projectId) {
+      const result = await this.usersService.delete(uuid);
+      return result;
+    }
 
-    return result;
+    const isProjectVendor = await this.prisma.projectVendors.findFirst({
+      where: {
+        projectId: projectId,
+        vendorId: uuid,
+      },
+    });
+
+    if (!isProjectVendor) throw new Error('Project vendor not found');
+
+    await this.prisma.projectVendors.deleteMany({
+      where: {
+        projectId: projectId,
+        vendorId: uuid,
+      },
+    });
+
+    return this.client.send({ cmd: VendorJobs.REMOVE }, uuid);
   }
 
   async getVendorClaimStats(dto) {
