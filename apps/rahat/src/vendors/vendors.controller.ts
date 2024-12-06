@@ -71,10 +71,13 @@ export class VendorsController {
 
   // @ApiBearerAuth(APP.JWT_BEARER)
   // @UseGuards(JwtGuard, AbilitiesGuard)
-  @Patch('remove/:uuid')
-  @ApiParam({ name: 'uuid', required: true })
-  async remove(@Param('uuid') uuid: UUID) {
-    return this.vendorService.removeVendor(uuid);
+  @Patch('remove/:vendorId')
+  @ApiParam({ name: 'vendorId', required: true })
+  async removeVendor(
+    @Param('vendorId') vendorId: UUID,
+    @Body('projectId') projectId?: UUID
+  ) {
+    return this.vendorService.removeVendor(vendorId, projectId);
   }
 
   ///microservice
