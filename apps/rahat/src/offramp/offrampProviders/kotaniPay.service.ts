@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { ProviderActionDto } from '@rahataid/extensions';
 import { KotaniPayExecutionData } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
@@ -57,7 +58,7 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
       phone_number: data.payload.phone_number,
       network: data.payload.network,
       account_name: data.payload.account_name
-    });
+    })
 
     return { data: response.data };
   }
@@ -71,12 +72,17 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
 
   async createFiatWallet(data: ProviderActionDto) {
     const client = await this.getKotaniPayAxiosClient(data.uuid);
-    const response = await client.post('/wallet/fiat', {
-      currency: data.payload.currency,
-      name: data.payload.name,
-    })
-    console.log({ response });
-    return { data: response.data };
+    try {
+      const response = await client.post('/wallet/fiat', {
+        currency: data.payload.currency,
+        name: data.payload.name,
+      })
+      console.log({ response });
+      return { data: response.data };
+    } catch (error) {
+      return { data: error.response.data };
+    }
+
   }
 
   async getFiatWallet(data: ProviderActionDto) {
@@ -95,9 +101,14 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
       token: data.token,
       senders_amount: data.amount,
       senders_address: data.senderAddress
-    })
-    console.log('response', response)
-    return { data: response.data };
+    }).catch(e => {
+      throw new RpcException(e.response.data);
+    });
+    console.log('response', response);
+    if (response instanceof RpcException) {
+      throw response;
+    }
+    return { data: response.data as any };
   }
 
   async executeOfframpRequest(providerUuid: string, data: KotaniPayExecutionData): Promise<any> {
@@ -129,6 +140,13 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
     return { data: response.data };
   }
 
+  async getCustomerWalletByPhone(data: any): Promise<any> {
+    // Implementation goes here
+    const client = await this.getKotaniPayAxiosClient(data.uuid);
+    const response = await client.get(`/customer/mobile-money/phone/${data.payload.phone_number}`);
+    return { data: response.data };
+  }
+
   kotaniPayActions = {
     'create-customer-mobile-wallet': this.createCustomerMobileMoneyWallet.bind(this),
     'list-customer-mobile-wallet': this.listCustomerMobileMoneyWallet.bind(this),
@@ -137,6 +155,7 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
     'check-offramp-status': this.checkOfframpStatus.bind(this),
     'get-offramp-details': this.checkOfframpStatus.bind(this),
     'get-supported-chains': this.getSupportedChains.bind(this),
+    'get-customer-wallet-by-phone': this.getCustomerWalletByPhone.bind(this),
     // Add more Kotani Pay actions here
   };
 }
