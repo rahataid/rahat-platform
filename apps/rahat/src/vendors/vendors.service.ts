@@ -366,30 +366,36 @@ export class VendorsService {
     return this.client.send({ cmd: VendorJobs.UPDATE }, result);
   }
 
-  async removeVendor(uuid: UUID) {
+  async removeVendor(uuid: UUID, projectId?: UUID) {
     const isVendor = await this.prisma.user.findFirst({
       where: {
         uuid,
       },
-      include: {
-        VendorProject: true,
-      },
     });
     if (!isVendor) throw new Error('Data not Found');
 
-    const result = await this.usersService.delete(uuid);
+    if (!projectId) {
+      const result = await this.usersService.delete(uuid);
+      return result;
+    }
 
-    if (isVendor.VendorProject.length < 1) return result;
-    await this.prisma.projectVendors.updateMany({
+    const isProjectVendor = await this.prisma.projectVendors.findFirst({
       where: {
+        projectId: projectId,
         vendorId: uuid,
-      },
-      data: {
-        deletedAt: new Date(),
       },
     });
 
-    return this.client.send({ cmd: VendorJobs.REMOVE }, result.uuid);
+    if (!isProjectVendor) throw new Error('Project vendor not found');
+
+    await this.prisma.projectVendors.deleteMany({
+      where: {
+        projectId: projectId,
+        vendorId: uuid,
+      },
+    });
+
+    return this.client.send({ cmd: VendorJobs.REMOVE }, uuid);
   }
 
   async getVendorClaimStats(dto) {
