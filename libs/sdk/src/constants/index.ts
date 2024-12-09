@@ -42,7 +42,7 @@ export const APP = {
 
 export const MS_ACTIONS = {
   CAMBODIA: {
-    APP: { STATS: 'cambodia.app.stats', LINE_STATS: 'cambodia.app.line_stats' },
+    APP: { STATS: 'cambodia.app.stats', LINE_STATS: 'cambodia.app.line_stats', BROAD_CAST_STATUS_COUNT: 'cambodia.app.broadcast_status_count' },
     BENEFICIARY: {
       VALIDATE_CONVERSION: 'cambodia.beneficiary.validate_conversion',
       STATS: 'cambodia.beneficiary.stats',
