@@ -1,7 +1,16 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 // import * as jwt from '@nestjs/jwt';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { GetVendorOtp, VendorAddToProjectDto, VendorRegisterDto } from '@rahataid/extensions';
+import {
+  GetVendorOtp,
+  VendorAddToProjectDto,
+  VendorRegisterDto,
+} from '@rahataid/extensions';
 import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
@@ -12,6 +21,7 @@ import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
 import { UUID } from 'crypto';
 import { Address, isAddress } from 'viem';
+import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -22,24 +32,32 @@ export class VendorsService {
     private readonly authService: AuthsService,
     private readonly usersService: UsersService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
-  ) { }
+  ) {}
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
-
-    return await this.prisma.$transaction(async (prisma) => {
+    const vendor = await this.prisma.$transaction(async (prisma) => {
       const role = await prisma.role.findFirst({
         where: { name: UserRoles.VENDOR },
       });
       if (!role) throw new Error('Role not found');
       // Add to User table
       const { service, ...rest } = dto;
-      if (dto?.email) {
+      if (dto?.email || dto?.phone) {
         const userData = await prisma.user.findFirst({
-          where: { email: dto.email }
-        })
-        if (userData) throw new Error("Email must be unique");
+          where: {
+            OR: [{ email: dto.email }, { phone: dto.phone }],
+          },
+        });
+
+        if (userData) {
+          if (userData?.email === dto.email)
+            throw new Error('Email must be unique');
+          if (userData?.phone === dto.phone)
+            throw new Error('Phone Number must be unique');
+        }
       }
+
       const user = await prisma.user.create({ data: rest });
       // Add to UserRole table
       const userRolePayload = { userId: user.id, roleId: role.id };
@@ -59,11 +77,13 @@ export class VendorsService {
           userId: +user.id,
           service: Service.WALLET,
           serviceId: dto.wallet,
-          details: dto.extras
+          details: dto.extras,
         },
       });
       return user;
     });
+
+    return vendor;
   }
 
   async assignToProject(dto: VendorAddToProjectDto) {
@@ -88,43 +108,73 @@ export class VendorsService {
       walletAddress: vendorUser.wallet,
     };
 
-
-
-    const assigned = await this.getVendorAssignedToProject(vendorId, projectId)
-
+    const assigned = await this.getVendorAssignedToProject(vendorId, projectId);
 
     if (assigned)
       throw new RpcException(
         new BadRequestException('Vendor already assigned to the project!')
       );
     // //2. Save vendor to project
-    await this.prisma.projectVendors.create({
-      data: {
-        projectId,
-        vendorId: vendorId,
+    // await this.prisma.projectVendors.create({
+    //   data: {
+    //     projectId,
+    //     vendorId: vendorId,
+    //   },
+    // });
+
+    const response = await handleMicroserviceCall({
+      client: this.client.send(
+        {
+          cmd: VendorJobs.ADD_TO_PROJECT,
+          uuid: projectId,
+        },
+        {
+          ...projectPayload,
+          vendor: vendorUser || null,
+        }
+      ),
+      onSuccess: async (projectResponse) => {
+        const createRes = await this.prisma.projectVendors.create({
+          data: {
+            projectId,
+            vendorId,
+            extras: {
+              projectVendorIdentifier: projectResponse.id,
+            },
+          },
+        });
+        console.log('Vendor successfully assigned to the project:', createRes);
+      },
+      onError: (error) => {
+        console.error('Error syncing vendor to project:', error);
       },
     });
 
-
-    // //3. sync vendor to Project
-    return this.client.send(
-      {
-        cmd: VendorJobs.ADD_TO_PROJECT,
-        uuid: projectId,
+    await handleMicroserviceCall({
+      client: this.client.send(
+        { cmd: 'rahat.jobs.projects.calculate_stats' },
+        {
+          projectUUID: projectId,
+        }
+      ),
+      onSuccess(response) {
+        console.log('Microservice response', response);
+        return response;
       },
-      {
-        ...projectPayload,
-        vendor: vendorUser || null
-      }
-    );
+      onError(error) {
+        throw new RpcException('Microservice call failed: ' + error.message);
+      },
+    });
+
+    return response;
   }
 
   async getVendorAssignedToProject(vendorId: string, projectId: string) {
     return this.prisma.projectVendors.findUnique({
       where: { projectVendorIdentifier: { vendorId, projectId } },
       include: {
-        User: true
-      }
+        User: true,
+      },
     });
   }
 
@@ -134,12 +184,11 @@ export class VendorsService {
         Role: {
           name: UserRoles.VENDOR,
         },
-      }
-    })
+      },
+    });
   }
 
   async getVendor(id: UUID | Address) {
-
     const data = isAddress(id)
       ? await this.prisma.user.findFirst({ where: { wallet: id } })
       : await this.prisma.user.findUnique({ where: { uuid: id } });
@@ -149,43 +198,63 @@ export class VendorsService {
         Project: true,
       },
     });
+    const vendorIdentifier = projectData[0]?.extras;
     const projects = projectData.map((project) => project.Project);
-    const userdata = { ...data, projects };
+    const userdata = { ...data, projects, vendorIdentifier };
     return userdata;
   }
 
   async listVendor(dto) {
-    return paginate(this.prisma.userRole, {
-      where: {
-        Role: {
-          name: UserRoles.VENDOR,
+    return paginate(
+      this.prisma.userRole,
+      {
+        where: {
+          Role: {
+            name: UserRoles.VENDOR,
+          },
+          User: {
+            deletedAt: null,
+          },
         },
-      },
-      include: {
-        User: {
-          include: {
-            VendorProject: {
-              include: {
-                Project: true,
+        include: {
+          User: {
+            include: {
+              VendorProject: {
+                include: {
+                  Project: true,
+                },
               },
             },
           },
         },
-      }
-    },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      },
       {
         page: dto.page,
-        perPage: dto.perPage
+        perPage: dto.perPage,
       }
     );
   }
 
   async listProjectVendor(dto) {
     const { projectId } = dto;
+    const q = {
+      projectId,
+      deletedAt: null,
+    };
+    if (dto.name) {
+      q['User'] = {
+        name: {
+          contains: dto.name,
+          mode: 'insensitive',
+        },
+      };
+    }
+
     const venData = await this.prisma.projectVendors.findMany({
-      where: {
-        projectId,
-      },
+      where: q,
       include: {
         Project: true,
         User: true,
@@ -194,12 +263,13 @@ export class VendorsService {
         createdAt: 'desc',
       },
     });
-    console.log('vendData', venData)
-    return this.client.send({
-      cmd: VendorJobs.LIST,
-      uuid: projectId
-    },
-      venData)
+    return this.client.send(
+      {
+        cmd: VendorJobs.LIST,
+        uuid: projectId,
+      },
+      venData
+    );
   }
 
   async listRedemptionVendor(data) {
@@ -207,46 +277,42 @@ export class VendorsService {
     const vendorData = await this.prisma.user.findMany({
       where: {
         uuid: {
-          in: uuids
-        }
-      }
+          in: uuids,
+        },
+      },
     });
-    const combinedData = data.data.map(item => {
-      const matchedData = vendorData.find(vendor => vendor.uuid === item.vendorId);
+    const combinedData = data.data.map((item) => {
+      const matchedData = vendorData.find(
+        (vendor) => vendor.uuid === item.vendorId
+      );
       return {
         ...item,
-        Vendor:
-        {
+        Vendor: {
           ...item.Vendor,
-          ...matchedData
-        }
-      }
+          ...matchedData,
+        },
+      };
     });
-    return { data: combinedData, meta: data.meta }
-
+    return { data: combinedData, meta: data.meta };
   }
 
   async getOtp(dto: GetVendorOtp, rdetails) {
-    return this.authService.getOtp(dto, rdetails)
-
-
+    return this.authService.getOtp(dto, rdetails);
   }
 
   async verifyOtp(dto, rdetails) {
     const res = await this.authService.loginByOtp(dto, rdetails);
-    console.log(res)
+    console.log(res);
     if (res.accessToken) {
-      return this.getUserDetails(dto)
-
+      return this.getUserDetails(dto);
     }
-
   }
 
   async getUserDetails(dto) {
     const challengeData = decryptChallenge(
       getSecret(),
       dto.challenge,
-      CONSTANTS.CLIENT_TOKEN_LIFETIME,
+      CONSTANTS.CLIENT_TOKEN_LIFETIME
     );
     if (!challengeData.address)
       throw new ForbiddenException('Invalid credentials in challenge!');
@@ -255,52 +321,107 @@ export class VendorsService {
     }
     const auth = await this.authService.getByServiceId(
       challengeData.address,
-      dto.service as Service,
+      dto.service as Service
     );
 
-    const user = await this.authService.getUserById(auth.userId)
-    return user
+    const user = await this.authService.getUserById(auth.userId);
+    return user;
   }
 
   async updateVendor(dto, uuid) {
     if (dto?.email) {
       const userData = await this.prisma.user.findFirst({
-        where: { email: dto.email }
-      })
-      if (userData) throw new Error("Email must be unique");
+        where: { email: dto.email, NOT: { uuid } },
+      });
+      if (userData) throw new Error('Email must be unique');
     }
     if (dto.extras) {
       const user = await this.prisma.user.findUnique({
         where: {
-          uuid
-        }
-      })
+          uuid,
+        },
+      });
       const extras = dto?.extras;
-      const userExtras = Object(user?.extras)
+      const userExtras = Object(user?.extras || {});
 
-      dto.extras = { ...extras, ...userExtras }
-
+      dto.extras = { ...extras, ...userExtras };
     }
     const result = await this.usersService.update(uuid, dto);
-    return result;
+    const isAssigned = await this.prisma.projectVendors.findFirst({
+      where: {
+        vendorId: uuid,
+      },
+    });
+    if (!isAssigned) return result;
 
+    await this.prisma.projectVendors.updateMany({
+      where: {
+        vendorId: uuid,
+      },
+      data: {
+        updatedAt: new Date(),
+      },
+    });
+
+    return this.client.send({ cmd: VendorJobs.UPDATE }, result);
+  }
+
+  async removeVendor(uuid: UUID, projectId?: UUID) {
+    const isVendor = await this.prisma.user.findFirst({
+      where: {
+        uuid,
+      },
+    });
+    if (!isVendor) throw new Error('Data not Found');
+
+    if (!projectId) {
+      const result = await this.usersService.delete(uuid);
+      return result;
+    }
+
+    const isProjectVendor = await this.prisma.projectVendors.findFirst({
+      where: {
+        projectId: projectId,
+        vendorId: uuid,
+      },
+    });
+
+    if (!isProjectVendor) throw new Error('Project vendor not found');
+
+    await this.prisma.projectVendors.deleteMany({
+      where: {
+        projectId: projectId,
+        vendorId: uuid,
+      },
+    });
+
+    return this.client.send({ cmd: VendorJobs.REMOVE }, uuid);
   }
 
   async getVendorClaimStats(dto) {
-    const { projectId } = dto
+    const { projectId } = dto;
     const projectVendors = await this.prisma.projectVendors.findMany({
       where: {
-        projectId
+        projectId,
       },
       select: {
-        User: true
-      }
+        User: true,
+      },
     });
-    return this.client.send({ cmd: VendorJobs.GET_VENDOR_STATS, uuid: projectId }, projectVendors)
+    return this.client.send(
+      { cmd: VendorJobs.GET_VENDOR_STATS, uuid: projectId },
+      projectVendors
+    );
   }
 
-
-
+  async getVendorByUuid(dto: { projectId: string; vendorId: string }) {
+    return this.prisma.projectVendors.findUnique({
+      where: {
+        projectVendorIdentifier: dto,
+      },
+      include: {
+        User: true,
+      },
+    });
+  }
 }
-
-

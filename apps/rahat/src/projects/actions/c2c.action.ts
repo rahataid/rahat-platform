@@ -67,6 +67,16 @@ export const c2cActions: ProjectActionFunc = {
       payload,
       500000
     ),
+
+  [MS_ACTIONS.C2CProject.GET_SAFE_PENDING]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.GET_SAFE_PENDING, uuid },
+      payload,
+      500000
+    ),
+
+
+
   //campaign start
   [MS_ACTIONS.C2CProject.CREATE_CAMPAIGN]: (uuid, payload, sendCommand) =>
     sendCommand(

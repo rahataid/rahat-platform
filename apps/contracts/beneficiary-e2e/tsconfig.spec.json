@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "module": "commonjs",
+    "target": "es6",
+    "types": ["jest", "node"],
+    "esModuleInterop": true
+  },
+  "include": ["jest.config.ts", "src/**/*.ts"]
+}

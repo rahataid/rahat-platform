@@ -13,7 +13,7 @@ import {
   Req,
   UploadedFile,
   UseGuards,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -29,7 +29,7 @@ import {
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto,
-  ValidateWalletDto
+  ValidateWalletDto,
 } from '@rahataid/extensions';
 import {
   APP,
@@ -37,13 +37,22 @@ import {
   BQUEUE,
   Enums,
   MS_TIMEOUT,
-  TFile
+  TFile,
 } from '@rahataid/sdk';
-import { AbilitiesGuard, ACTIONS, CheckAbilities, JwtGuard, SUBJECTS } from '@rumsan/user';
+import {
+  AbilitiesGuard,
+  ACTIONS,
+  CheckAbilities,
+  JwtGuard,
+  SUBJECTS,
+} from '@rumsan/user';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, throwError, timeout } from 'rxjs';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
+import { removeSpaces } from '../utils';
+import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
+import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
 import { DocParser } from './parser';
 
 function getDateInfo(dateString) {
@@ -66,7 +75,6 @@ function getDateInfo(dateString) {
 
 @Controller('beneficiaries')
 @ApiTags('Beneficiaries')
-
 export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
@@ -86,9 +94,14 @@ export class BeneficiaryController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('temp/:uuid')
   @ApiParam({ name: 'uuid', required: true })
-  async listTempBenef(@Param('uuid') uuid: UUID, @Query() query: ListTempBeneficiariesDto) {
-
-    return this.client.send({ cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY }, { uuid, query });
+  async listTempBenef(
+    @Param('uuid') uuid: UUID,
+    @Query() query: ListTempBeneficiariesDto
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.LIST_TEMP_BENEFICIARY },
+      { uuid, query }
+    );
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -115,25 +128,24 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.STATS }, {});
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
   @Get('statsSource')
   async getStatsSource() {
     return this.client.send({ cmd: BeneficiaryJobs.GET_ALL_STATS }, {});
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('table-stats')
   async getTableStats() {
     return this.client.send({ cmd: BeneficiaryJobs.GET_TABLE_STATS }, {});
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post()
   async create(@Body() dto: CreateBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
@@ -181,10 +193,12 @@ export class BeneficiaryController {
   async upload(@UploadedFile() file: TFile, @Req() req: Request) {
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
+    const projectId = req.body['projectId'];
     const beneficiaries = await DocParser(docType, file.buffer);
-
     const beneficiariesMapped = beneficiaries.map((b) => ({
-      birthDate: new Date(b['Birth Date']).toISOString() || null,
+      birthDate: b['Birth Date']
+        ? new Date(b['Birth Date']).toISOString()
+        : null,
       internetStatus: b['Internet Status*'],
       bankedStatus: b['Bank Status*'],
       location: b['Location'],
@@ -196,8 +210,8 @@ export class BeneficiaryController {
       age: b['Age'] || null,
       walletAddress: b['Wallet Address'],
       piiData: {
-        name: b['Name*'],
-        phone: b['Whatsapp Number*'],
+        name: b['Name*'] || 'Unknown',
+        phone: b['Whatsapp Number*'] || b['Phone Number*'],
         extras: {
           isAdult:
             getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age*']) > 18,
@@ -207,7 +221,10 @@ export class BeneficiaryController {
     }));
 
     return this.client
-      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, beneficiariesMapped)
+      .send(
+        { cmd: BeneficiaryJobs.CREATE_BULK },
+        { data: beneficiariesMapped, projectUUID: projectId }
+      )
       .pipe(
         catchError((error) => {
           console.log('error', error);
@@ -215,6 +232,114 @@ export class BeneficiaryController {
         })
       )
       .pipe(timeout(MS_TIMEOUT));
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Post('upload-queue')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadWithQueue(@UploadedFile() file: TFile, @Req() req: Request) {
+    const docType: Enums.UploadFileType =
+      req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
+    const projectId = req.body['projectId'];
+    const automatedGroupOption = req.body['automatedGroupOption'];
+    const beneficiaries = await DocParser(docType, file.buffer);
+    // Utility function to sanitize input keys by trimming whitespace
+    function sanitizeKey(key: string): string {
+      return key.trim();
+    }
+
+    const beneficiariesWithSanitizedKeys = beneficiaries.map((b) => {
+      const sanitizedBeneficiary = {};
+      for (const key in b) {
+        sanitizedBeneficiary[sanitizeKey(key)] = b[key];
+      }
+      return sanitizedBeneficiary;
+    }
+    );
+
+
+    // Map the beneficiaries to the format expected by the microservice
+
+
+    const beneficiariesMapped = beneficiariesWithSanitizedKeys.map((b) => ({
+      birthDate: b[sanitizeKey('Birth Date')]
+        ? new Date(b[sanitizeKey('Birth Date')]).toISOString()
+        : null,
+      internetStatus: b[sanitizeKey('Internet Status*')],
+      bankedStatus: b[sanitizeKey('Bank Status*')],
+      location: trimNonAlphaNumericValue(b[sanitizeKey('Location')]),
+      phoneStatus: b[sanitizeKey('Phone Status*')],
+      notes: b[sanitizeKey('Notes')],
+      gender: b[sanitizeKey('Gender*')],
+      latitude: b[sanitizeKey('Latitude')],
+      longitude: b[sanitizeKey('Longitude')],
+      age: b[sanitizeKey('Age')] || null,
+      walletAddress: b[sanitizeKey('Wallet Address')],
+      piiData: {
+        name: b[sanitizeKey('Name*')] || 'Unknown',
+        phone: removeSpaces(
+          b[sanitizeKey('Whatsapp Number*')] ||
+          b[sanitizeKey('Phone Number*')] ||
+          b[sanitizeKey('Phone Number')] ||
+          b[sanitizeKey('Phone number')]
+        ),
+        extras: {},
+      },
+    }));
+
+
+
+
+    const uniquePhoneNumberedBeneficiaries = beneficiariesMapped.filter(
+      (b, index, self) =>
+        index ===
+        self.findIndex(
+          (t) => t.piiData.phone === b.piiData.phone
+        )
+    );
+
+
+    console.log(`Trying to upload ${beneficiariesMapped.length} beneficiaries through queue. Unique phone numbers: ${uniquePhoneNumberedBeneficiaries.length}, Duplicate phone numbers: ${beneficiariesMapped.length - uniquePhoneNumberedBeneficiaries.length}`);
+
+    return handleMicroserviceCall({
+      client: this.client.send(
+        { cmd: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE },
+        {
+          data: uniquePhoneNumberedBeneficiaries,
+          projectUUID: projectId,
+          ignoreExisting: true,
+          automatedGroupOption,
+        }
+      ),
+      onError(error) {
+        console.log('error', error);
+        return throwError(() => new BadRequestException(error.message));
+      },
+      onSuccess(response) {
+        // console.log('response', response)
+        return response;
+      },
+    });
+
+    // return this.client
+    //   .send({ cmd: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE }, {
+    //     data: beneficiariesMapped, projectUUID: projectId,
+
+    //   })
+    //   .pipe(
+    //     catchError((error) => {
+    //       console.log('error', error);
+    //       return throwError(() => new BadRequestException(error.message));
+    //     })
+    //   )
+    //   .pipe(timeout(MS_TIMEOUT)).toPromise()
+
+    // return {
+    //   success: true,
+    //   message: 'Upload in progress. Will start appearing once completed.'
+    // }
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -293,7 +418,6 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
   }
 
-
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
@@ -301,7 +425,6 @@ export class BeneficiaryController {
   async createGroup(@Body() dto: CreateBeneficiaryGroupsDto) {
     return this.client.send({ cmd: BeneficiaryJobs.ADD_GROUP }, dto);
   }
-
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -311,7 +434,6 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET_ALL_GROUPS }, dto);
   }
 
-
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
@@ -320,7 +442,6 @@ export class BeneficiaryController {
   async getOneGroup(@Param('uuid') uuid: UUID) {
     return this.client.send({ cmd: BeneficiaryJobs.GET_ONE_GROUP }, uuid);
   }
-
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -336,8 +457,14 @@ export class BeneficiaryController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Patch('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
-  async updateGroup(@Param('uuid') uuid: UUID, @Body() dto: UpdateBeneficiaryGroupDto) {
-    return this.client.send({ cmd: BeneficiaryJobs.UPDATE_GROUP }, { uuid, ...dto });
+  async updateGroup(
+    @Param('uuid') uuid: UUID,
+    @Body() dto: UpdateBeneficiaryGroupDto
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.UPDATE_GROUP },
+      { uuid, ...dto }
+    );
   }
 
   @Post('import-tools')
@@ -357,6 +484,9 @@ export class BeneficiaryController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post('import-temp')
   async importTempBeneficiaries(@Body() dto: ImportTempBenefDto) {
-    return this.client.send({ cmd: BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES }, dto);
+    return this.client.send(
+      { cmd: BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES },
+      dto
+    );
   }
 }

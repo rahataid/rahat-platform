@@ -1,17 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { StatsService } from '@rahat/stats';
+import { MS_TIMEOUT, ProjectContants } from '@rahataid/sdk';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
+import { timeout } from 'rxjs';
+import { hasKey } from '../utils/objectUtil';
+import { RahatTokenAbi } from '../utils/rahatToken';
+import { mapVulnerabilityStatusCount } from '../utils/vulnerabilityCountHelpers';
+import { createContractReader } from '../utils/web3';
+
+const REPORTING_FIELD = {
+  FAMILY_MEMBER_BANK_ACCOUNT: "is_there_any_family_member_who_has_an_active_bank_account",
+  TYPE_OF_PHONE_SET: "type_of_phone_set"
+}
+
+
 
 @Injectable()
 export class BeneficiaryStatService {
   constructor(
     protected prisma: PrismaService,
-    private readonly statsService: StatsService
+    private readonly statsService: StatsService,
+    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
 
   async getTableStats() {
     return await this.prisma.stats.findMany({});
   }
+
 
   async calculateGenderStats(projectUuid?: string) {
     let filter = {};
@@ -129,6 +146,54 @@ export class BeneficiaryStatService {
     }));
   }
 
+  async calculateBankedStatusStatsNew() {
+    const data = await this.prisma.beneficiary.findMany({
+      where: { deletedAt: null },
+      select: {
+        extras: true
+      }
+    });
+
+    let myData = {};
+
+
+    for (let d of data) {
+      const extras = d?.extras ?? null;
+      if (
+        extras &&
+        hasKey(extras, REPORTING_FIELD.FAMILY_MEMBER_BANK_ACCOUNT) &&
+        typeof extras[REPORTING_FIELD.FAMILY_MEMBER_BANK_ACCOUNT] === 'string' &&
+        extras[REPORTING_FIELD.FAMILY_MEMBER_BANK_ACCOUNT]
+          .toUpperCase()
+          .trim() === 'YES'
+      ) {
+        if (myData['Banked']) {
+          myData['Banked'] += 1;
+        } else myData['Banked'] = 1;
+      }
+      if (
+        extras &&
+        extras &&
+        hasKey(extras, REPORTING_FIELD.FAMILY_MEMBER_BANK_ACCOUNT) &&
+        typeof extras[REPORTING_FIELD.FAMILY_MEMBER_BANK_ACCOUNT] === 'string' &&
+        extras[REPORTING_FIELD.FAMILY_MEMBER_BANK_ACCOUNT]
+          .toUpperCase()
+          .trim() === 'NO'
+      ) {
+        if (myData['UnBanked']) {
+          myData['UnBanked'] += 1;
+        } else myData['UnBanked'] = 1;
+      }
+    }
+
+    const result = Object.keys(myData).map((d) => ({
+      id: d,
+      count: myData[d],
+    }));
+
+    return result;
+  };
+
   async calculateInternetStatusStats(projectUuid?: string) {
     let filter = {};
 
@@ -233,28 +298,219 @@ export class BeneficiaryStatService {
     return { count: await this.prisma.beneficiary.count({ where: filter }) };
   }
 
+  async totalVendors(projectUuid?: string) {
+    let filter = {};
+
+    // Add filter if projectUuid is provided
+    if (projectUuid) {
+      const vendorId = await this.prisma.projectVendors
+        .findMany({
+          where: {
+            projectId: projectUuid,
+          },
+          select: {
+            vendorId: true,
+          },
+        })
+        .then((projectVen) =>
+          projectVen.map((data: any) => data?.vendorId)
+        );
+
+      filter = {
+        uuid: {
+          in: vendorId || [],
+        },
+      };
+
+    }
+
+    // Todo: Calculate total
+    return { count: await this.prisma.user.count({ where: filter }) };
+  }
+
+  async getTotalVoucher() {
+
+    const settings = new SettingsService(this.prisma);
+    const contractSettings = await settings.getByName('CONTRACTS')
+
+    const rahatTokenAddress = contractSettings.value['RAHATTOKEN'].ADDRESS;
+
+    const tokenContract = await createContractReader(RahatTokenAbi, rahatTokenAddress)
+
+    return tokenContract.totalSupply();
+  }
+
+  async calculateMapStats() {
+    const beneficiaries = await this.prisma.beneficiary.findMany({
+      where: {
+        deletedAt: null,
+        latitude: { not: null },
+        longitude: { not: null },
+      },
+      include: { pii: true },
+    });
+    const data = beneficiaries?.map((b) => ({
+      name: b.pii.name,
+      latitude: b.latitude,
+      longitude: b.longitude,
+    }));
+
+    return data;
+  }
+
+  filterAndCountPhoneStatus(data) {
+    let unPhonedCount = 0;
+    let phonedCount = 0;
+
+    data.forEach((record) => {
+      const phoneNumber = record.phone;
+      if (phoneNumber.startsWith('999')) {
+        unPhonedCount += 1;
+      } else {
+        phonedCount += 1;
+      }
+    });
+
+    return [
+      { id: 'Phoned', count: phonedCount },
+      { id: 'UnPhoned', count: unPhonedCount },
+    ];
+  }
+
+  async calculatePhoneTypeStats() {
+    return await this.calculateExtrasStats(REPORTING_FIELD.TYPE_OF_PHONE_SET)
+  }
+
+  async calculateExtrasStats(fieldName: string) {
+    const data = await this.prisma.beneficiary.findMany({
+      where: {
+        extras: { path: [fieldName], not: null },
+      },
+      select: { extras: true },
+    });
+    if (!data) return [];
+    const myData = {};
+    // Calculate count for each value
+    data.forEach((item: any) => {
+      const value = item.extras[fieldName];
+      if (myData[value]) {
+        myData[value] += 1;
+      } else {
+        myData[value] = 1;
+      }
+    });
+    const result = Object.keys(myData).map((d) => ({
+      id: d,
+      count: myData[d],
+    }));
+    return result.filter((f) => f.id.toLocaleUpperCase() !== 'NO');
+  }
+
+  async calculatePhoneAvailabilityStats() {
+    const results = await this.prisma.beneficiaryPii.findMany({});
+    const finalResult = this.filterAndCountPhoneStatus(results);
+    return finalResult;
+  }
+
+  async calculateVulnerabilityCountStats() {
+    const benef = await this.prisma.beneficiary.findMany({
+      where: { deletedAt: null },
+    });
+    const myData = mapVulnerabilityStatusCount(benef);
+    return Object.keys(myData).map((d) => ({
+      id: d,
+      count: myData[d],
+    }));
+  }
+
+  countByCaste(array) {
+    return array.reduce((result, currentValue) => {
+      const casteValue = currentValue.extras.caste;
+      if (casteValue) {
+        if (!result[casteValue]) {
+          result[casteValue] = 0;
+        }
+        result[casteValue]++;
+      }
+      return result;
+    }, {});
+  }
+
+  async calculateCountByCasteStats() {
+    const results = await this.prisma.beneficiary.findMany({
+      where: {
+        extras: {
+          path: ['caste'],
+          not: null || '',
+        },
+      },
+      select: {
+        uuid: true,
+        extras: true,
+      },
+    });
+
+    const casteCounts = this.countByCaste(results);
+    const resultArray = Object.keys(casteCounts).map((key) => {
+      return {
+        id: key,
+        count: casteCounts[key],
+      };
+    });
+    return resultArray;
+  }
+
   async calculateAllStats() {
-    const [gender, bankedStatus, internetStatus, phoneStatus, total, age] =
-      await Promise.all([
-        this.calculateGenderStats(),
-        this.calculateBankedStatusStats(),
-        this.calculateInternetStatusStats(),
-        this.calculatePhoneStatusStats(),
-        this.totalBeneficiaries(),
-        this.calculateAgeStats(),
-      ]);
+    const [
+      gender,
+      bankedStatus,
+      bankedStatusNew,
+      internetStatus,
+      phoneStatus,
+      total,
+      age,
+      mapStats,
+      phoneAvailabilityStats,
+      vulnerabilityCountStats,
+      casteCountStats,
+      phoneTypeStats,
+      totalVendors
+    ] = await Promise.all([
+      this.calculateGenderStats(),
+      this.calculateBankedStatusStats(),
+      this.calculateBankedStatusStatsNew(),
+      this.calculateInternetStatusStats(),
+      this.calculatePhoneStatusStats(),
+      this.totalBeneficiaries(),
+      this.calculateAgeStats(),
+      this.calculateMapStats(),
+      this.calculatePhoneAvailabilityStats(),
+      this.calculateVulnerabilityCountStats(),
+      this.calculateCountByCasteStats(),
+      this.calculatePhoneTypeStats(),
+      this.totalVendors()
+    ]);
+
 
     return {
       gender,
       bankedStatus,
+      bankedStatusNew,
       internetStatus,
       phoneStatus,
       total,
-      age
+      age,
+      mapStats,
+      phoneAvailabilityStats,
+      vulnerabilityCountStats,
+      casteCountStats,
+      phoneTypeStats,
+      totalVendors
     };
   }
   async calculateProjectStats(projectUuid: string) {
-    const [gender, bankedStatus, internetStatus, phoneStatus, total, age] =
+
+    const [gender, bankedStatus, internetStatus, phoneStatus, total, age, totalVendors] =
       await Promise.all([
         this.calculateGenderStats(projectUuid),
         this.calculateBankedStatusStats(projectUuid),
@@ -262,6 +518,7 @@ export class BeneficiaryStatService {
         this.calculatePhoneStatusStats(projectUuid),
         this.totalBeneficiaries(projectUuid),
         this.calculateAgeStats(projectUuid),
+        this.totalVendors(projectUuid),
       ]);
 
     return {
@@ -270,7 +527,9 @@ export class BeneficiaryStatService {
       internetStatus,
       phoneStatus,
       total,
-      age
+      age,
+      totalVendors,
+
     };
   }
 
@@ -283,11 +542,11 @@ export class BeneficiaryStatService {
 
   async calculateRangedAge(ages: any) {
     let range = [
-      { id: "0-20", count: 0 },
-      { id: "20-40", count: 0 },
-      { id: "40-60", count: 0 },
-      { id: "60+", count: 0 },
-    ]
+      { id: '0-20', count: 0 },
+      { id: '20-40', count: 0 },
+      { id: '40-60', count: 0 },
+      { id: '60+', count: 0 },
+    ];
     ages.map((age) => {
       if (age.id >= 0 && age.id <= 20) {
         range[0].count = range[0].count + age.count;
@@ -301,14 +560,27 @@ export class BeneficiaryStatService {
       if (age.id > 60) {
         range[3].count = range[3].count + age.count;
       }
-    })
+    });
 
     return range;
   }
 
   async saveAllStats(projectUuid?: string) {
-    const { gender, bankedStatus, internetStatus, phoneStatus, total, age } =
-      await this.calculateAllStats();
+    const {
+      gender,
+      bankedStatus,
+      bankedStatusNew,
+      internetStatus,
+      phoneStatus,
+      total,
+      age,
+      mapStats,
+      phoneAvailabilityStats,
+      vulnerabilityCountStats,
+      casteCountStats,
+      phoneTypeStats,
+      totalVendors
+    } = await this.calculateAllStats();
 
     const rangedAge = await this.calculateRangedAge(age);
 
@@ -329,6 +601,11 @@ export class BeneficiaryStatService {
         group: 'beneficiary',
       }),
       this.statsService.save({
+        name: 'beneficiary_bankedStatus_new',
+        data: bankedStatusNew,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
         name: 'beneficiary_internetStatus',
         data: internetStatus,
         group: 'beneficiary',
@@ -343,11 +620,41 @@ export class BeneficiaryStatService {
         data: rangedAge,
         group: 'beneficiary',
       }),
+      this.statsService.save({
+        name: 'beneficiary_map_stats',
+        data: mapStats,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'beneficiary_phone_availability_stats',
+        data: phoneAvailabilityStats,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'beneficiary_vulnerability_count_stats',
+        data: vulnerabilityCountStats,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'beneficiary_caste_count_stats',
+        data: casteCountStats,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'beneficiary_phone_type_stats',
+        data: phoneTypeStats,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'vendor_total',
+        data: totalVendors,
+        group: 'vendor'
+      })
     ]);
     if (projectUuid) {
-      const { gender, bankedStatus, internetStatus, phoneStatus, total, age } =
+      const { gender, bankedStatus, internetStatus, phoneStatus, total, age, totalVendors } =
         await this.calculateProjectStats(projectUuid);
-      const rangedAge = await this.calculateRangedAge(age)
+      const rangedAge = await this.calculateRangedAge(age);
       await Promise.all([
         this.statsService.save({
           name: 'beneficiary_total',
@@ -379,9 +686,33 @@ export class BeneficiaryStatService {
           data: rangedAge,
           group: projectUuid,
         }),
+        this.statsService.save({
+          name: 'vendor_total',
+          data: totalVendors,
+          group: projectUuid
+        }),
+        //PROJECT VOUCHER SHOULD BE CALCUATED IN PROJECT
+        // this.statsService.save({
+        //   name: 'voucher_total',
+        //   data: await this.getTotalVoucher(),
+        //   group: projectUuid
+        // })
       ]);
+
+
+      const projectStats = await this.client.send({ cmd: "rahat.jobs.reporting.list", uuid: projectUuid }, {})
+        .pipe(timeout(MS_TIMEOUT)).toPromise();
+
+      projectStats.forEach((stat) => {
+        this.statsService.save({
+          name: stat.name,
+          data: stat.data,
+          group: projectUuid
+        })
+      })
     }
 
-    return { gender, bankedStatus, internetStatus, phoneStatus };
+    return { gender, bankedStatus, internetStatus, phoneStatus, total };
   }
 }
+

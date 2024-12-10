@@ -1,0 +1,30 @@
+meta {
+  name: get-project
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{url}}/projects
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data: isArray 
+}
+
+script:pre-request {
+  const { access_token } = require('./temp/auth-data.json');
+  req.setHeader("Authorization",`Bearer ${access_token}`);
+}
+
+tests {
+  test('should return lists of project', async () => {
+    const result = res.getBody().data;
+    expect(res.body.data).to.equal(result);
+    expect(result.every(item => typeof item === 'object')).to.equal(true);
+  });
+}

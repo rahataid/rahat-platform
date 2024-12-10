@@ -12,6 +12,7 @@ dist
 tmp
 /out-tsc
 /tools/dev-tools/data
+/tools/config
 
 # dependencies
 node_modules
@@ -62,3 +63,5 @@ accounts.json
 cache
 typechain-types
 
+# bruno-testcase
+temp
