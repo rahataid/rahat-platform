@@ -105,27 +105,33 @@ export class OfframpService {
       customer_key: data.data.customer_key
     }
     console.log({ executionData });
-    const { data: kotaniPayResponse } = await this.kotaniPayService.executeOfframpRequest(providerUuid, executionData).catch((error) => {
-      console.log({ error });
-      throw new BadRequestException(error.message);
-    });
-    console.log({ kotaniPayResponse });
+    try {
+      const { data: kotaniPayResponse } = await this.kotaniPayService.executeOfframpRequest(providerUuid, executionData)
 
-    const transaction = await this.prisma.offrampTransaction.create({
-      data: {
-        txHash: data.data.transaction_hash,
-        chain: data.data.chain,
-        token: data.data.token,
-        walletId: data.data.wallet_id,
-        customerKey: data.data.customer_key,
-        referenceId: kotaniPayResponse.data.reference_id,
-        offrampRequest: {
-          connect: { id: request.id }
+
+      console.log({ kotaniPayResponse });
+
+      const transaction = await this.prisma.offrampTransaction.create({
+        data: {
+          txHash: data.data.transaction_hash,
+          chain: data.data.chain,
+          token: data.data.token,
+          walletId: data.data.wallet_id,
+          customerKey: data.data.customer_key,
+          referenceId: kotaniPayResponse.data.reference_id,
+          offrampRequest: {
+            connect: { id: request.id }
+          }
         }
-      }
-    });
+      });
 
-    return { transaction, kotaniPayResponse };
+      return { transaction, kotaniPayResponse };
+    } catch (error) {
+      console.log({ error });
+
+    }
+
+
     // const { data: kotaniPayResponse } = await this.kotaniPayService.executeOfframpRequest(providerUuid, offrampRequestData);
     // return this.prisma.offrampRequest.update({
     //   where: { id: offrampRequestData.id },
