@@ -3,7 +3,8 @@ export const EVENTS = {
   BENEFICIARY_CREATED: 'beneficiary.created',
   BENEFICIARY_REMOVED: 'beneficiary.removed',
   BENEFICIARY_UPDATED: 'beneficiary.updated',
-  BENEFICIARY_ASSIGNED_TO_PROJECT: 'beneficiary.projectAssigned'
+  BENEFICIARY_ASSIGNED_TO_PROJECT: 'beneficiary.projectAssigned',
+  VENDORS_CREATED: 'vendors.created',
 };
 
 export const JOBS = {
@@ -63,5 +64,6 @@ export const JOBS = {
   REMOVE_ONE_GROUP: 'rahat.jobs.beneficiary.remove_one_group',
   GET_STATS: 'rahat.jobs.projects.get_stats',
   GET_ALL_STATS: 'rahat.jobs.projects.get_all_stats',
+  CALCULATE_STATS: 'rahat.jobs.projects.calculate_stats',
   IMPORT_BENEFICIARY_LARGE_QUEUE: 'rahat.jobs.beneficiary.import_beneficiary_large_queue',
 };

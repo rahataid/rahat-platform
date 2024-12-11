@@ -40,6 +40,10 @@ import {
 import { CAMBODIA_JOBS } from './actions/cambodia.action';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const CAMBODIA_COUNTRY_CODE = '+855';
+
 @Injectable()
 export class ProjectService {
   constructor(
@@ -286,6 +290,7 @@ export class ProjectService {
     );
   }
 
+
   // TODO: fix cambodia specific country code
   async importKoboBeneficiary(uuid: UUID, data: any) {
     const benef: any = this.mapKoboFields(data);
@@ -300,8 +305,12 @@ export class ProjectService {
         .split(' ')
         .map((item: string) => item.trim().toUpperCase());
     }
-    benef.phone = `+${benef.phone}`;
-    // const coords = splitCoordinates(benef.coordinates);
+    console.log({ NODE_ENV })
+    if (NODE_ENV === 'production') {
+      benef.phone = `${CAMBODIA_COUNTRY_CODE}${benef.phone}`;
+    } else benef.phone = `+${benef.phone}`;
+    console.log("Beneficiary Phone", benef.phone);
+
     const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
     const extrasPayload = {
       meta: benef.meta,

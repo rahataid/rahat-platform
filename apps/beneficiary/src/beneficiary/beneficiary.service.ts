@@ -812,7 +812,7 @@ export class BeneficiaryService {
     projectUuid?: string,
     conditional?: boolean
   ) {
-    return this.prisma.$transaction(async (prm) => {
+    const result = await this.prisma.$transaction(async (prm) => {
       // Validate phone numbers are present and unique
       if (!dtos.every((dto) => dto.piiData.phone)) {
         throw new RpcException('Phone number is required');
@@ -897,13 +897,13 @@ export class BeneficiaryService {
             projectId: projectUuid,
           })),
         });
-
-        this.eventEmitter.emit(
-          BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-          {
-            projectUuid: projectUuid,
-          }
-        );
+        //CANNOT CALCULATE DUE TO TRANSACTION
+        // this.eventEmitter.emit(
+        //   BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
+        //   {
+        //     projectUuid: projectUuid,
+        //   }
+        // );
         const assignPromises = insertedBeneficiariesWithPii.map(
           (b) => {
             const projectPayload = {
@@ -932,11 +932,6 @@ export class BeneficiaryService {
         await Promise.all(assignPromises);
       }
 
-      // Emit an event after beneficiaries are created
-      this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
-        projectUuid,
-      });
-
       // Return success response
       return {
         success: true,
@@ -944,8 +939,25 @@ export class BeneficiaryService {
         beneficiaries: insertedBeneficiariesWithPii,
       };
     });
+    if (projectUuid) {
+      this.eventEmitter.emit(
+        BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
+        {
+          projectUuid: projectUuid,
+        }
+      );
+    }
+    // Emit an event after beneficiaries are created
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
+      projectUuid,
+    });
+    return result
   }
-
+  async syncProjectStats(projectUuid) {
+    return await this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
+      projectUuid,
+    });
+  }
 
 
   async createBulkWithQueue(
@@ -1765,4 +1777,8 @@ async function checkWalletAddress(
     select: { walletAddress: true },
   });
   return duplicates.map((dup) => dup.walletAddress);
+
+
 }
+
+
