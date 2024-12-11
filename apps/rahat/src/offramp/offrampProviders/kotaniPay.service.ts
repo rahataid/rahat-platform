@@ -114,14 +114,14 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
   async executeOfframpRequest(providerUuid: string, data: KotaniPayExecutionData): Promise<any> {
     const client = await this.getKotaniPayAxiosClient(providerUuid);
     const response = await client.post('/offramp/crypto-to-fiat/mobile-money', data)
+    console.log('response', response)
     return { data: response.data };
   }
 
   async checkOfframpStatus(data: any): Promise<any> {
-    console.log('data', data)
     // Implementation goes here
     const client = await this.getKotaniPayAxiosClient(data.uuid);
-    const response = await client.get(`/offramp/${data.payload.requestUuid}`);
+    const response = await client.get(`/offramp/crypto-to-fiat/mobile-money/status/${data.payload.referenceId}`);
     // console.log('response', response)
     return { data: response.data };
   }
@@ -137,6 +137,7 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
     // Implementation goes here
     const client = await this.getKotaniPayAxiosClient(data.uuid);
     const response = await client.get('/offramp/crypto-to-fiat/supported-chains');
+    console.log('response', response)
     return { data: response.data };
   }
 

@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { CreateOfframpProviderDto, CreateOfframpRequestDto, ExecuteOfframpRequestDto, ListOfframpProviderDto, ListOfframpRequestDto, ProviderActionDto } from '@rahataid/extensions';
+import { CreateOfframpProviderDto, CreateOfframpRequestDto, ListOfframpProviderDto, ListOfframpRequestDto, ProviderActionDto } from '@rahataid/extensions';
 import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
 import { KotaniPayService } from './offrampProviders/kotaniPay.service';
 
@@ -84,7 +84,7 @@ export class OfframpService {
   }
 
   //TODO: Geenralize the offramp request execution
-  async executeOfframpRequest(executeOfframpData: ExecuteOfframpRequestDto) {
+  async executeOfframpRequest(executeOfframpData: any) {
     console.log({ executeOfframpData });
     const { providerUuid, requestUuid, ...data } = executeOfframpData;
     const request = await this.prisma.offrampRequest.findUnique({
@@ -92,7 +92,6 @@ export class OfframpService {
         uuid: requestUuid
       }
     });
-    console.log({ request });
     if (!request) {
       throw new BadRequestException('Offramp request not found');
     }
