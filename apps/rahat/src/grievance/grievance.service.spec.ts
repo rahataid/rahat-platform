@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GrievanceService } from './grievance.service';
-import { PrismaService, paginator } from "@rumsan/prisma";
-import { createGrievanceDTO, deletedGrievance, expectedGrievance, grievanceQuery, grievancesList, updatedGrievance, userId } from './testFixtureData2';
-import { ChangeGrievanceStatusDTO, ListGrievanceDTO } from '@rahataid/extensions';
+import { ChangeGrievanceStatusDTO } from '@rahataid/extensions';
 import { GrievanceStatus } from '@rahataid/sdk';
+import { PrismaService } from "@rumsan/prisma";
+import { GrievanceController } from './grievance.controller';
+import { GrievanceService } from './grievance.service';
+import { createGrievanceDTO, deletedGrievance, expectedGrievance, grievancesList, updatedGrievance, userId } from './testFixtureData2';
 
 // const mockPaginator = jest.fn();
 // jest.mock('@rumsan/prisma', () => ({
@@ -13,16 +14,24 @@ import { GrievanceStatus } from '@rahataid/sdk';
 describe('GrievanceService', () => {
   let service: GrievanceService;
   let prisma: PrismaService;
+  let controller: GrievanceController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      controllers: [GrievanceController],
       providers: [
         GrievanceService,
         {
           provide: PrismaService,
           useValue: {
             grievance: {
-              create: jest.fn(),
+              create: jest.fn().mockResolvedValue({
+                ...expectedGrievance,
+                uuid: 'generated-uuid',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                deletedAt: null,
+              }),
               update: jest.fn(),
               findUnique: jest.fn(),
               delete: jest.fn(),
@@ -35,6 +44,7 @@ describe('GrievanceService', () => {
 
     service = module.get<GrievanceService>(GrievanceService);
     prisma = module.get<PrismaService>(PrismaService);
+    controller = module.get<GrievanceController>(GrievanceController);
   });
 
   // it('should return list of paginated grievances as per query', async () => {
@@ -80,9 +90,16 @@ describe('GrievanceService', () => {
 
   describe("create new grievance", () => {
     it('should create a new grievance', async () => {
-      (prisma.grievance.create as jest.Mock).mockResolvedValue(expectedGrievance);
-      const result = await service.createGrievance(createGrievanceDTO, userId);
-      expect(prisma.grievance.create).toHaveBeenCalledWith({
+      const mockRequest = {
+        user: {
+          id: userId, // Set the user ID here
+        },
+      };
+      const prismaGrievanceCreateMock = jest.spyOn(prisma.grievance, 'create')
+      const result = await controller.create(createGrievanceDTO, mockRequest);
+
+      //const result = await service.createGrievance(createGrievanceDTO, userId);
+      expect(prismaGrievanceCreateMock).toHaveBeenCalledWith({
         data: {
           title: createGrievanceDTO.title,
           description: createGrievanceDTO.description,
@@ -102,8 +119,15 @@ describe('GrievanceService', () => {
           status: GrievanceStatus.NEW
         }
       })
-      expect(result).toEqual(expectedGrievance);
-    }); 
+      expect(result).toEqual({
+        ...expectedGrievance,
+        uuid: 'generated-uuid',
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
+        deletedAt: null,
+      });
+      prismaGrievanceCreateMock.mockRestore();
+    });
   });
 
   describe("get specific grievance", () => {
@@ -128,13 +152,13 @@ describe('GrievanceService', () => {
 
   describe('update grievance fields', () => {
     it('should update the grievance status using uuid', async () => {
-      const uuid  = process.env.GRIEVANCE_UUID;
+      const uuid = process.env.GRIEVANCE_UUID;
       const data = { status: 'NEW' } as ChangeGrievanceStatusDTO;
       jest.spyOn(prisma.grievance, 'update').mockResolvedValue(updatedGrievance);
       const result = await service.changeStatus(uuid, data);
       expect(prisma.grievance.update).toHaveBeenCalledWith({
-        where: {uuid},
-        data: {status: data.status}
+        where: { uuid },
+        data: { status: data.status }
       });
       expect(result).toEqual(updatedGrievance);
     });
