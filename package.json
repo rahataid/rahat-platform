@@ -50,7 +50,6 @@
     "generate:mnemonic": "ts-node ./tools/scripts/misc/mn.ts",
     "contracts:coverage": "cd ./apps/contracts && hardhat coverage",
     "contracts:test": "cd ./apps/contracts && hardhat test",
-    "test:e2e": "jest --config ./apps/beneficiary-e2e/jest.config.ts",
     "test": "jest",
     "bruno:test": "cd bruno && bru run --env local",
     "bruno:coverage": "cd bruno && bru run --env local --output results.json"
