@@ -85,6 +85,7 @@ export const MS_ACTIONS = {
 
   PROJECT: {
     SETUP: 'project.setup',
+    REFRESH_REPORTING_STATS: 'project.refresh_reporting_stats',
   },
   BENEFICIARY: {
     CREATE: 'beneficiary.create',

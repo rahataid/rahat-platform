@@ -89,4 +89,6 @@ export const settingActions: ProjectActionFunc = {
 export const projectActions: ProjectActionFunc = {
   [MS_ACTIONS.PROJECT.SETUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.PROJECT_SETUP, uuid }, payload),
+  [MS_ACTIONS.PROJECT.REFRESH_REPORTING_STATS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.REPORTING_REFRESH, uuid }, payload),
 };
