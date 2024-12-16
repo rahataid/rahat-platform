@@ -23,12 +23,16 @@ import {
 } from '@rahataid/extensions';
 import { ACTIONS, APP, BeneficiaryJobs, MS_TIMEOUT, ProjectJobs, TFile } from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
-import { AbilitiesGuard, CheckAbilities, JwtGuard, SUBJECTS } from "@rumsan/user";
+import {
+  AbilitiesGuard,
+  CheckAbilities,
+  JwtGuard,
+  SUBJECTS,
+} from '@rumsan/user';
 import { UUID } from 'crypto';
 import { memoryStorage } from 'multer';
 import { timeout } from 'rxjs/operators';
 import { ProjectService } from './project.service';
-
 
 @Controller('projects')
 @ApiTags('Projects')
@@ -107,7 +111,6 @@ export class ProjectController {
       .pipe(timeout(5000));
   }
 
-
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
@@ -163,10 +166,6 @@ export class ProjectController {
   //Get datasource for entire project
   // @Get('statsSources')
   // statsSource() {
-  //   return this.benClient
-  //     .send({ cmd: BeneficiaryJobs.GET_ALL_STATS }, {})
-  //     .pipe(timeout(MS_TIMEOUT));
-  // }
 
   //list project specific stats sources
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -180,6 +179,10 @@ export class ProjectController {
       .pipe(timeout(MS_TIMEOUT));
   }
 
-
+  // @Post('/:uuid/kobo-import')
+  // @ApiParam({ name: 'uuid', required: true })
+  // importFromKobo(@Param('uuid') uuid: UUID, @Body() data: any) {
+  //   return this.projectService.importKoboBeneficiary(uuid, data);
+  // }
 
 }

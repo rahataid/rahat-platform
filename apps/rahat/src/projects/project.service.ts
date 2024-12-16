@@ -1,32 +1,53 @@
+import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateProjectDto, UpdateProjectDto, UpdateProjectStatusDto } from '@rahataid/extensions';
+import {
+  CreateProjectDto,
+  UpdateProjectDto,
+  UpdateProjectStatusDto
+} from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
+  BQUEUE,
   MS_ACTIONS,
   MS_TIMEOUT,
   ProjectEvents,
   ProjectJobs
 } from '@rahataid/sdk';
 import { BeneficiaryType } from '@rahataid/sdk/enums';
+import { JOBS } from '@rahataid/sdk/project/project.events';
 import { PrismaService } from '@rumsan/prisma';
+import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
-import { ERC2771FORWARDER } from '../utils/contracts';
-import { createContractSigner } from '../utils/web3';
-import { aaActions, beneficiaryActions, c2cActions, cvaActions, elActions, projectActions, settingActions, vendorActions } from './actions';
+import {
+  aaActions,
+  beneficiaryActions,
+  c2cActions,
+  cambodiaActions,
+  cvaActions,
+  elActions,
+  projectActions,
+  settingActions,
+  vendorActions,
+} from './actions';
 import { rpActions } from './actions/rp.action';
 import { stellarActions } from './actions/stellar.action';
 import { userRequiredActions } from './actions/user-required.action';
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const CAMBODIA_COUNTRY_CODE = '+855';
+
 @Injectable()
 export class ProjectService {
   constructor(
     private prisma: PrismaService,
     private eventEmitter: EventEmitter2,
     private requestContextService: RequestContextService,
-    @Inject('RAHAT_CLIENT') private readonly client: ClientProxy
+    @Inject('RAHAT_CLIENT') private readonly client: ClientProxy,
+    @InjectQueue(BQUEUE.META_TXN) private readonly metaTransactionQueue: Queue
   ) { }
 
   async create(data: CreateProjectDto) {
@@ -80,7 +101,7 @@ export class ProjectService {
       where: {
         uuid,
       },
-      data
+      data,
     });
   }
 
@@ -105,13 +126,8 @@ export class ProjectService {
       );
     }
     //send message to all admin
-    if (
-      response?.id &&
-      cmd?.cmd === ProjectJobs.REQUEST_REDEMPTION
-    ) {
-      this.eventEmitter.emit(
-        ProjectEvents.REQUEST_REDEMPTION
-      );
+    if (response?.id && cmd?.cmd === ProjectJobs.REQUEST_REDEMPTION) {
+      this.eventEmitter.emit(ProjectEvents.REQUEST_REDEMPTION);
     }
     if (
       response?.vendordata?.length > 0 &&
@@ -120,68 +136,81 @@ export class ProjectService {
       this.eventEmitter.emit(
         ProjectEvents.UPDATE_REDEMPTION,
         response.vendordata
-
       );
     }
-
   }
 
-  async sendCommand(cmd, payload, timeoutValue = MS_TIMEOUT, client: ClientProxy, action: string) {
-    const user = this.requestContextService.getUser()
-    const requiresUser = userRequiredActions.has(action)
+  async sendCommand(
+    cmd,
+    payload,
+    timeoutValue = MS_TIMEOUT,
+    client: ClientProxy,
+    action: string,
+    user: any
+  ) {
+    try {
+      console.log("CMD", cmd);
+      const requiresUser = userRequiredActions.has(action);
+      console.log({ requiresUser });
+      console.log("Payload", payload);
+      console.log("User", user);
 
-    return client.send(cmd, {
-      ...payload,
-      ...(requiresUser && { user })
-    }).pipe(
-      timeout(timeoutValue),
-      tap((response) => {
-        this.sendWhatsAppMsg(response, cmd, payload)
+      return client
+        .send(cmd, {
+          ...payload,
+          ...(requiresUser && { user }),
+        })
+        .pipe(
+          timeout(timeoutValue),
+          tap((response) => {
+            this.sendWhatsAppMsg(response, cmd, payload);
+          })
+        );
 
-      })
-    );
+    } catch (err) {
+      console.log('Err', err);
+    }
   }
 
-  async executeMetaTxRequest(params: any) {
-    const { metaTxRequest } = params;
-    const forwarderContract = await createContractSigner(
-      ERC2771FORWARDER,
-      process.env.ERC2771_FORWARDER_ADDRESS
+  async executeMetaTxRequest(params: any, uuid: string, trigger?: any) {
+    const payload: any = { params, uuid };
+
+    if (trigger) payload.trigger = trigger;
+
+    const res = await this.metaTransactionQueue.add(
+      JOBS.META_TRANSACTION.ADD_QUEUE,
+      payload
     );
 
-    metaTxRequest.gas = BigInt(metaTxRequest.gas);
-    metaTxRequest.nonce = BigInt(metaTxRequest.nonce);
-    metaTxRequest.value = BigInt(metaTxRequest.value);
-    const tx = await forwarderContract.execute(metaTxRequest);
-    const res = await tx.wait();
-
-    return { txHash: res.hash, status: res.status };
+    return { txHash: res.data.hash, status: res.data.status };
   }
 
   async sendSucessMessage(uuid, payload) {
-    const { benId } = payload
+    const { benId } = payload;
 
-    this.eventEmitter.emit(
-      ProjectEvents.REDEEM_VOUCHER,
-      benId
-    );
-    return this.client.send({ cmd: 'rahat.jobs.project.voucher_claim', uuid }, {}).pipe(timeout(MS_TIMEOUT))
-
+    this.eventEmitter.emit(ProjectEvents.REDEEM_VOUCHER, benId);
+    return this.client
+      .send({ cmd: 'rahat.jobs.project.voucher_claim', uuid }, {})
+      .pipe(timeout(MS_TIMEOUT));
   }
 
-  async handleProjectActions({ uuid, action, payload }) {
-    console.log({ uuid, action, payload })
+  async handleProjectActions({ uuid, action, payload, trigger, user }) {
     //Note: This is a temporary solution to handle metaTx actions
     const metaTxActions = {
-      [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
-      [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () => await this.executeMetaTxRequest(payload),
-      [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () => await this.sendSucessMessage(uuid, payload),
-      [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () => await this.executeMetaTxRequest(payload),
-      [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () => await this.executeMetaTxRequest(payload),
+      [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () =>
+        await this.executeMetaTxRequest(payload, uuid, trigger),
+      [MS_ACTIONS.ELPROJECT.PROCESS_OTP]: async () =>
+        await this.executeMetaTxRequest(payload, uuid, trigger),
+      [MS_ACTIONS.ELPROJECT.SEND_SUCCESS_MESSAGE]: async () =>
+        await this.sendSucessMessage(uuid, payload),
+      [MS_ACTIONS.ELPROJECT.ASSIGN_DISCOUNT_VOUCHER]: async () =>
+        await this.executeMetaTxRequest(payload, uuid, trigger),
+      [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION]: async () =>
+        await this.executeMetaTxRequest(payload, uuid, trigger),
     };
 
-
     const actions = {
+      ...cambodiaActions,
       ...projectActions,
       ...elActions,
       ...aaActions,
@@ -195,13 +224,15 @@ export class ProjectService {
       ...stellarActions
     };
 
-
     const actionFunc = actions[action];
     if (!actionFunc) {
       throw new Error('Please provide a valid action!');
     }
-    return await actionFunc(uuid, payload, (...args) => this.sendCommand(args[0], args[1], args[2], this.client, action));
+    return await actionFunc(uuid, payload, (...args) =>
+      this.sendCommand(args[0], args[1], args[2], this.client, action, user)
+    );
   }
 
 }
+
 

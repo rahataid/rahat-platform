@@ -66,6 +66,12 @@ export const vendorActions: ProjectActionFunc = {
       { cmd: VendorJobs.LIST_BY_PROJECT },
       { projectId: uuid, ...payload }
     ),
+
+  [MS_ACTIONS.VENDOR.GET_BY_UUID]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: VendorJobs.GET_BY_UUID },
+      { projectId: uuid, ...payload }
+    ),
 };
 
 export const settingActions: ProjectActionFunc = {

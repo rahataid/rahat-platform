@@ -1,5 +1,4 @@
 import { PrismaService } from '@rumsan/prisma';
-import { SettingsService } from '@rumsan/settings';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
 import { existsSync, readFileSync } from 'fs';
@@ -30,7 +29,6 @@ const contractNames = [
 ];
 
 const prisma = new PrismaService();
-const settings = new SettingsService(prisma);
 
 class DeploymentUpdater {
   deploymentSettings: any;
@@ -77,7 +75,7 @@ class DeploymentUpdater {
     };
 
     const url = `${process.env.RAHAT_CORE_URL}/v1/settings`;
-    await axios.post(url, this.deploymentSettings.chainSettings);
+    await axios.post(url, data);
     console.log("Blockchain settings Added")
 
 
@@ -166,8 +164,8 @@ class DeploymentUpdater {
 async function main() {
   const deploymentUpdater = new DeploymentUpdater();
 
-  // await deploymentUpdater.addContractSettings();
-  // await deploymentUpdater.addBlockchainSettings();
+  await deploymentUpdater.addContractSettings();
+  await deploymentUpdater.addBlockchainSettings();
   await deploymentUpdater.addGraphSettings();
   // await deploymentUpdater.addTreasurySettings();
 

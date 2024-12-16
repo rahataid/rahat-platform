@@ -547,6 +547,40 @@ model TempBeneficiary {
   @@map("tbl_temp_beneficiaries")
 }
 
+enum KoboBeneficiaryType {
+  SALE
+  LEAD
+  HOME_VISIT
+}
+
+enum KoboBeneficiaryStatus {
+  PENDING
+  FAILED
+  SUCCESS
+}
+
+model KoboBeneficiary {
+  id                       Int                    @id @default(autoincrement())
+  uuid                     String                 @unique @default(uuid()) @db.Uuid()
+  name                     String
+  gender                   Gender                 @default(UNKNOWN)
+  type                     KoboBeneficiaryType    @default(SALE)
+  status                   KoboBeneficiaryStatus  @default(PENDING)
+  phone                    String
+  age                      Int?
+  email                    String?
+  wallet                   String?
+  leadInterests            String[]
+  extras                    Json?                  @db.JsonB()
+
+
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime?              @updatedAt()
+  deletedAt                DateTime?
+
+  @@map("tbl_kobo_beneficiaries")
+}
+
 model TempGroup {
   id                       Int                    @id @default(autoincrement())
   uuid                     String                 @unique @default(uuid()) @db.Uuid()

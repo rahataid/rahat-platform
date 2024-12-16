@@ -4,7 +4,6 @@ import * as readline from 'readline';
 
 const prisma = new PrismaService();
 const prismaClient = new PrismaClient();
-
 // Setup readline interface
 const rl = readline.createInterface({
   input: process.stdin,
