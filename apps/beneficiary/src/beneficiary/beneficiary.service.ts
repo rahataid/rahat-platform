@@ -1285,27 +1285,7 @@ export class BeneficiaryService {
                   name: true,
                 },
               },
-              deletedAt: true,
-            },
-            where: {
-              deletedAt: null,
-            },
-          },
-          groupedBeneficiaries: {
-            select: {
-              Beneficiary: {
-                select: {
-                  id: true,
-                  uuid: true,
-                  pii: {
-                    select: {
-                      name: true,
-                      phone: true,
-                    },
-                  },
-                },
-              },
-              deletedAt: true,
+              deletedAt: true, where
             },
             where: {
               deletedAt: null,
