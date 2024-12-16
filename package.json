@@ -29,6 +29,8 @@
     "seed:contracts": "ts-node ./tools/scripts/local-setup/web3_setup/projectSeed.ts",
     "seed:network": "ts-node ./tools/scripts/local-setup/web3_setup/networkSeed.ts",
     "seed:settings": "ts-node ./tools/scripts/local-setup/web3_setup/settingsSeed.ts",
+    "deploy:prodcontracts": "ts-node ./tools/scripts/production-setup/_setup-deployment.ts",
+    "update:prodsettings": "ts-node ./tools/scripts/production-setup/update-deployment.ts",
     "geteth": "ts-node tools/scripts/misc/getEth.ts",
     "contracts:compile": "cd ./apps/contracts && hardhat compile",
     "graph:codegen": "cd ./apps/graph && graph codegen",
@@ -48,7 +50,6 @@
     "generate:mnemonic": "ts-node ./tools/scripts/misc/mn.ts",
     "contracts:coverage": "cd ./apps/contracts && hardhat coverage",
     "contracts:test": "cd ./apps/contracts && hardhat test",
-    "test:e2e": "jest --config ./apps/beneficiary-e2e/jest.config.ts",
     "test": "jest",
     "bruno:test": "cd bruno && bru run --env local",
     "bruno:coverage": "cd bruno && bru run --env local --output results.json"
