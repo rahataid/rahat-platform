@@ -1285,12 +1285,12 @@ export class BeneficiaryService {
                   name: true,
                 },
               },
-              deletedAt: true, where
+              deletedAt: true,
             },
             where: {
               deletedAt: null,
             },
-          },
+          }
         },
         orderBy,
       },
