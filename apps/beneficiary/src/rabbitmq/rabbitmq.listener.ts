@@ -1,4 +1,3 @@
-import { Process } from '@nestjs/bull';
 import { Controller } from '@nestjs/common';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 
@@ -20,7 +19,6 @@ export class RabbitMQListener {
   }
 
   @MessagePattern('beneficiary.bulk_add.event')
-  @Process('beneficiary.bulk_add.event')
   handleAddBulkBeneficiaries(@Payload() data: any, @Ctx() context: RmqContext) {
     console.log('Received Event for beneficiaries:', data, context.getMessage());
     // Add logic to process the event
