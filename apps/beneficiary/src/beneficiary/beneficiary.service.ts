@@ -30,13 +30,13 @@ import {
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import {
   findTempBenefGroups,
   validateDupicatePhone,
   validateDupicateWallet
 } from '../processors/processor.utils';
+import { RabbitMQService } from '../rabbitmq/rabbitmq.service';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
@@ -56,7 +56,9 @@ export class BeneficiaryService {
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
     private eventEmitter: EventEmitter2,
-    private readonly verificationService: VerificationService
+    private readonly verificationService: VerificationService,
+    private readonly rabbitMQService: RabbitMQService
+
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -812,146 +814,160 @@ export class BeneficiaryService {
     projectUuid?: string,
     conditional?: boolean
   ) {
-    const result = await this.prisma.$transaction(async (prm) => {
-      // Validate phone numbers are present and unique
-      if (!dtos.every((dto) => dto.piiData.phone)) {
-        throw new RpcException('Phone number is required');
-      }
 
-      const duplicatePhones = await this.checkPhoneNumber(dtos);
-      if (duplicatePhones.length > 0) {
-        throw new RpcException(
-          `${duplicatePhones.join(', ')} - Phone numbers must be unique`
-        );
-      }
 
-      // Validate wallet addresses are unique if provided
-      const walletAddresses = dtos
-        .map((dto) => dto.walletAddress)
-        .filter(Boolean);
-      if (walletAddresses.length > 0) {
-        const duplicateWallets = await this.checkWalletAddress(dtos);
-        if (duplicateWallets.length > 0) {
-          throw new RpcException('Wallet addresses must be unique');
-        }
-      }
 
-      // Pre-generate UUIDs and wallet addresses if necessary
-      dtos.forEach((dto) => {
-        dto.uuid = dto.uuid || uuidv4();
-        dto.walletAddress = dto.walletAddress || generateRandomWallet().address;
-      });
 
-      // Separate PII data and beneficiary data for insertion
-      const beneficiariesData = dtos.map(({ piiData, ...data }) => data);
-      const piiDataList = dtos.map(({ uuid, piiData }) => ({
-        ...piiData,
-        uuid,
-      }));
+    await this.rabbitMQService.emitBulkInBatch('beneficiary.bulk_add.event', dtos, 1)//BATCH_SIZE);
 
-      // Insert beneficiaries in bulk
-      await prm.beneficiary
-        .createMany({ data: beneficiariesData })
-        .catch((e) => {
-          throw new RpcException(e.message);
-        });
 
-      // Retrieve inserted beneficiaries for linking PII data
-      const insertedBeneficiaries = await prm.beneficiary.findMany({
-        where: { uuid: { in: dtos.map((dto) => dto.uuid) } },
-      });
 
-      // Map PII data with correct beneficiary IDs
-      const piiBulkInsertData = piiDataList.map((piiData) => {
-        const beneficiary = insertedBeneficiaries.find(
-          (b) => b.uuid === piiData.uuid
-        );
-        return {
-          beneficiaryId: beneficiary.id,
-          ...piiData,
-          uuid: undefined, // Remove the temporary UUID field
-        };
-      });
 
-      // Insert PII data in bulk
-      if (piiBulkInsertData.length > 0) {
-        const sanitizedPiiData = piiBulkInsertData.map((pii) => ({
-          ...pii,
-          phone: pii.phone ? pii.phone.toString() : null,
-        }));
-        await prm.beneficiaryPii.createMany({ data: sanitizedPiiData });
-      }
-
-      // Retrieve inserted beneficiaries with their PII data
-      const insertedBeneficiariesWithPii = await prm.beneficiary.findMany({
-        where: { uuid: { in: dtos.map((dto) => dto.uuid) } },
-        include: { pii: true },
-      });
-
-      // Assign beneficiaries to the project if a projectUuid is provided
-      // && conditional
-      if (projectUuid) {
-        await prm.beneficiaryProject.createMany({
-          data: insertedBeneficiariesWithPii.map(({ uuid }) => ({
-            beneficiaryId: uuid,
-            projectId: projectUuid,
-          })),
-        });
-        //CANNOT CALCULATE DUE TO TRANSACTION
-        // this.eventEmitter.emit(
-        //   BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-        //   {
-        //     projectUuid: projectUuid,
-        //   }
-        // );
-        const assignPromises = insertedBeneficiariesWithPii.map(
-          (b) => {
-            const projectPayload = {
-              uuid: b.uuid,
-              walletAddress: b.walletAddress,
-              extras: b?.extras || null,
-              type: BeneficiaryConstants.Types.ENROLLED,
-              isVerified: b?.isVerified,
-            };
-            return handleMicroserviceCall({
-              client: this.client.send(
-                { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUuid },
-                projectPayload
-              ),
-              onSuccess(response) {
-                console.log('response', response);
-              },
-              onError(error) {
-                console.log('error', error);
-                throw new RpcException(error.message);
-              },
-            });
-          }
-          //   this.assignBeneficiaryToProject({ beneficiaryId: b.uuid, projectId: projectUuid })
-        );
-        await Promise.all(assignPromises);
-      }
-
-      // Return success response
-      return {
-        success: true,
-        count: dtos.length,
-        beneficiaries: insertedBeneficiariesWithPii,
-      };
-    });
-    if (projectUuid) {
-      this.eventEmitter.emit(
-        BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-        {
-          projectUuid: projectUuid,
-        }
-      );
+    return {
+      success: true,
+      count: dtos.length,
+      beneficiaries: [],
     }
-    // Emit an event after beneficiaries are created
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
-      projectUuid,
-    });
-    return result
+    // const result = await this.prisma.$transaction(async (prm) => {
+    //   // Validate phone numbers are present and unique
+    //   if (!dtos.every((dto) => dto.piiData.phone)) {
+    //     throw new RpcException('Phone number is required');
+    //   }
+
+    //   const duplicatePhones = await this.checkPhoneNumber(dtos);
+    //   if (duplicatePhones.length > 0) {
+    //     throw new RpcException(
+    //       `${duplicatePhones.join(', ')} - Phone numbers must be unique`
+    //     );
+    //   }
+
+    //   // Validate wallet addresses are unique if provided
+    //   const walletAddresses = dtos
+    //     .map((dto) => dto.walletAddress)
+    //     .filter(Boolean);
+    //   if (walletAddresses.length > 0) {
+    //     const duplicateWallets = await this.checkWalletAddress(dtos);
+    //     if (duplicateWallets.length > 0) {
+    //       throw new RpcException('Wallet addresses must be unique');
+    //     }
+    //   }
+
+    //   // Pre-generate UUIDs and wallet addresses if necessary
+    //   dtos.forEach((dto) => {
+    //     dto.uuid = dto.uuid || uuidv4();
+    //     dto.walletAddress = dto.walletAddress || generateRandomWallet().address;
+    //   });
+
+    //   // Separate PII data and beneficiary data for insertion
+    //   const beneficiariesData = dtos.map(({ piiData, ...data }) => data);
+    //   const piiDataList = dtos.map(({ uuid, piiData }) => ({
+    //     ...piiData,
+    //     uuid,
+    //   }));
+
+    //   // Insert beneficiaries in bulk
+    //   await prm.beneficiary
+    //     .createMany({ data: beneficiariesData })
+    //     .catch((e) => {
+    //       throw new RpcException(e.message);
+    //     });
+
+    //   // Retrieve inserted beneficiaries for linking PII data
+    //   const insertedBeneficiaries = await prm.beneficiary.findMany({
+    //     where: { uuid: { in: dtos.map((dto) => dto.uuid) } },
+    //   });
+
+    //   // Map PII data with correct beneficiary IDs
+    //   const piiBulkInsertData = piiDataList.map((piiData) => {
+    //     const beneficiary = insertedBeneficiaries.find(
+    //       (b) => b.uuid === piiData.uuid
+    //     );
+    //     return {
+    //       beneficiaryId: beneficiary.id,
+    //       ...piiData,
+    //       uuid: undefined, // Remove the temporary UUID field
+    //     };
+    //   });
+
+    //   // Insert PII data in bulk
+    //   if (piiBulkInsertData.length > 0) {
+    //     const sanitizedPiiData = piiBulkInsertData.map((pii) => ({
+    //       ...pii,
+    //       phone: pii.phone ? pii.phone.toString() : null,
+    //     }));
+    //     await prm.beneficiaryPii.createMany({ data: sanitizedPiiData });
+    //   }
+
+    //   // Retrieve inserted beneficiaries with their PII data
+    //   const insertedBeneficiariesWithPii = await prm.beneficiary.findMany({
+    //     where: { uuid: { in: dtos.map((dto) => dto.uuid) } },
+    //     include: { pii: true },
+    //   });
+
+    //   // Assign beneficiaries to the project if a projectUuid is provided
+    //   // && conditional
+    //   if (projectUuid) {
+    //     await prm.beneficiaryProject.createMany({
+    //       data: insertedBeneficiariesWithPii.map(({ uuid }) => ({
+    //         beneficiaryId: uuid,
+    //         projectId: projectUuid,
+    //       })),
+    //     });
+    //     //CANNOT CALCULATE DUE TO TRANSACTION
+    //     // this.eventEmitter.emit(
+    //     //   BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
+    //     //   {
+    //     //     projectUuid: projectUuid,
+    //     //   }
+    //     // );
+    //     const assignPromises = insertedBeneficiariesWithPii.map(
+    //       (b) => {
+    //         const projectPayload = {
+    //           uuid: b.uuid,
+    //           walletAddress: b.walletAddress,
+    //           extras: b?.extras || null,
+    //           type: BeneficiaryConstants.Types.ENROLLED,
+    //           isVerified: b?.isVerified,
+    //         };
+    //         return handleMicroserviceCall({
+    //           client: this.client.send(
+    //             { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUuid },
+    //             projectPayload
+    //           ),
+    //           onSuccess(response) {
+    //             console.log('response', response);
+    //           },
+    //           onError(error) {
+    //             console.log('error', error);
+    //             throw new RpcException(error.message);
+    //           },
+    //         });
+    //       }
+    //       //   this.assignBeneficiaryToProject({ beneficiaryId: b.uuid, projectId: projectUuid })
+    //     );
+    //     await Promise.all(assignPromises);
+    //   }
+
+    //   // Return success response
+    //   return {
+    //     success: true,
+    //     count: dtos.length,
+    //     beneficiaries: insertedBeneficiariesWithPii,
+    //   };
+    // });
+    // if (projectUuid) {
+    //   this.eventEmitter.emit(
+    //     BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
+    //     {
+    //       projectUuid: projectUuid,
+    //     }
+    //   );
+    // }
+    // // Emit an event after beneficiaries are created
+    // this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
+    //   projectUuid,
+    // });
+    // return result
   }
   async syncProjectStats(projectUuid) {
     return await this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {

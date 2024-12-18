@@ -220,6 +220,7 @@ export class BeneficiaryController {
       },
     }));
 
+
     return this.client
       .send(
         { cmd: BeneficiaryJobs.CREATE_BULK },

@@ -81,6 +81,8 @@
     "@rumsan/user": "3.0.159",
     "@urql/core": "^5.0.4",
     "abitype": "^1.0.1",
+    "amqp-connection-manager": "^4.1.14",
+    "amqplib": "^0.10.5",
     "axios": "^1.6.7",
     "body-parser": "^1.20.2",
     "bull": "^4.12.2",

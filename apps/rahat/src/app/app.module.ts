@@ -20,6 +20,7 @@ import { MetaTxnProcessorsModule } from '../processors/meta-transaction/metaTran
 import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
 import { QueueModule } from '../queue/queue.module';
+import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
 import { RequestContextModule } from '../request-context/request-context.module';
 import { TokenModule } from '../token/token.module';
 import { UploadModule } from '../upload/upload.module';
@@ -29,6 +30,7 @@ import { AppService } from './app.service';
 
 @Module({
   imports: [
+
     ConfigModule.forRoot({ isGlobal: true }),
     BeneficiaryModule,
     BullModule.forRootAsync({
@@ -61,6 +63,8 @@ import { AppService } from './app.service';
     SettingsModule,
     RequestContextModule,
     QueueModule,
+    RabbitMQModule
+
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, {
