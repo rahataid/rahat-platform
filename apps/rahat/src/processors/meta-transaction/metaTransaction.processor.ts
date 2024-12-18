@@ -33,10 +33,16 @@ export class MetaTransationProcessor {
         const tx = await forwarderContract.execute(metaTxRequest);
         const res = await tx.wait();
 
+        let triggerData = {
+            payload: trigger?.payload
+        }
+        if (trigger?.spreadPayload) triggerData = { ...trigger?.payload }
+
         try {
             if (trigger) {
-                await this.client.send({ cmd: trigger.event_name, uuid: trigger.projectUuid }, { payload: trigger.payload })
+                await this.client.send({ cmd: trigger.event_name, uuid: trigger.projectUuid }, triggerData)
                     .pipe(timeout(MS_TIMEOUT)).toPromise();
+
             }
         } catch (error) {
             console.log(error)

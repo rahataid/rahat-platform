@@ -473,7 +473,6 @@ export class BeneficiaryStatService {
       this.totalVendors()
     ]);
 
-    this.getTotalVoucher()
 
     return {
       gender,
@@ -675,11 +674,12 @@ export class BeneficiaryStatService {
           data: totalVendors,
           group: projectUuid
         }),
-        this.statsService.save({
-          name: 'voucher_total',
-          data: await this.getTotalVoucher(),
-          group: projectUuid
-        })
+        //PROJECT VOUCHER SHOULD BE CALCUATED IN PROJECT
+        // this.statsService.save({
+        //   name: 'voucher_total',
+        //   data: await this.getTotalVoucher(),
+        //   group: projectUuid
+        // })
       ]);
 
 

@@ -770,7 +770,6 @@ export class BeneficiaryService {
   }
 
 
-
   async createBulkWithQueue(
     beneficiaries: CreateBeneficiaryDto[],
     allData?: any
@@ -1101,27 +1100,7 @@ export class BeneficiaryService {
             where: {
               deletedAt: null,
             },
-          },
-          groupedBeneficiaries: {
-            select: {
-              Beneficiary: {
-                select: {
-                  id: true,
-                  uuid: true,
-                  pii: {
-                    select: {
-                      name: true,
-                      phone: true,
-                    },
-                  },
-                },
-              },
-              deletedAt: true,
-            },
-            where: {
-              deletedAt: null,
-            },
-          },
+          }
         },
         orderBy,
       },
@@ -1586,4 +1565,8 @@ async function checkWalletAddress(
     select: { walletAddress: true },
   });
   return duplicates.map((dup) => dup.walletAddress);
+
+
 }
+
+
