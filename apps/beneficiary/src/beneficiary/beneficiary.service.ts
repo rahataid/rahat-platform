@@ -1290,27 +1290,7 @@ export class BeneficiaryService {
             where: {
               deletedAt: null,
             },
-          },
-          groupedBeneficiaries: {
-            select: {
-              Beneficiary: {
-                select: {
-                  id: true,
-                  uuid: true,
-                  pii: {
-                    select: {
-                      name: true,
-                      phone: true,
-                    },
-                  },
-                },
-              },
-              deletedAt: true,
-            },
-            where: {
-              deletedAt: null,
-            },
-          },
+          }
         },
         orderBy,
       },
