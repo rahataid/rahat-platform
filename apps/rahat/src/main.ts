@@ -6,7 +6,7 @@ import * as bodyParser from 'body-parser';
 
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
+import { NestApplication, NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -20,7 +20,10 @@ import { loggerInstance } from './logger/winston.logger';
 // import { GlobalExceptionFilter } from './utils/exceptions/rpcException.filter';
 
 async function bootstrap() {
+  const _logger = new Logger(NestApplication.name)
   const configService = new ConfigService();
+
+
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, {
     logger: WinstonModule.createLogger({
       instance: loggerInstance,
@@ -77,10 +80,10 @@ async function bootstrap() {
 
   await app.startAllMicroservices();
   await app.listen(port);
-  Logger.log(
+  _logger.log(
     `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
   );
-  Logger.log(`Swagger UI: http://localhost:${port}/swagger`);
+  _logger.log(`Swagger UI: http://localhost:${port}/swagger`);
 }
 
 bootstrap();
