@@ -770,6 +770,11 @@ export class BeneficiaryService {
   }
 
 
+  async syncProjectStats(projectUuid) {
+    return await this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
+      projectUuid,
+    });
+  }
   async createBulkWithQueue(
     beneficiaries: CreateBeneficiaryDto[],
     allData?: any
