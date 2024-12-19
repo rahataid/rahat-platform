@@ -52,10 +52,10 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
   createBulk(@Payload() data) {
-    const payloadData = Array.isArray(data?.data) ? data?.data : data?.payload;
+    // const payloadData = Array.isArray(data?.data) ? data?.data : data?.payload;
 
     return this.service.createBulk(
-      payloadData,
+      data,
       data?.projectUUID,
       data?.data?.walkinBulk
     );

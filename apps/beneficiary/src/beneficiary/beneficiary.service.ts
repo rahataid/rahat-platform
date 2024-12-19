@@ -349,7 +349,7 @@ export class BeneficiaryService {
     );
 
     // Assign beneficiary to project while creating. Useful when a beneficiary is created from inside a project
-    if (projectUUIDs.length) {
+    if (projectUUIDs && projectUUIDs.length) {
       await this.beneficiaryUtilsService.assignToProjects(
         createdBeneficiary.uuid,
         projectUUIDs
