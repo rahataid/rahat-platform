@@ -38,6 +38,7 @@ import {
   vendorActions,
 } from './actions';
 import { CAMBODIA_JOBS } from './actions/cambodia.action';
+import { commsActions } from './actions/comms.action';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 
@@ -225,6 +226,7 @@ export class ProjectService {
       ...c2cActions,
       ...cvaActions,
       ...rpActions,
+      ...commsActions
     };
 
     const actionFunc = actions[action];
