@@ -23,7 +23,6 @@ model User {
   phone     String?
   wallet    String?
   extras    Json?   @db.JsonB()
-  sessionId String?
 
   Auth          Auth[]
   UserRole      UserRole[]
