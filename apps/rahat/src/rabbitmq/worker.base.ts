@@ -16,7 +16,8 @@ export abstract class BaseWorker<T> {
   constructor(
     protected readonly queueUtilsService: QueueUtilsService,
     private readonly queueName: string,
-    private readonly defaultBatchSize = 10
+    private readonly defaultBatchSize = 10,
+    private readonly acknowledgeMode: 'individual' | 'batch' = 'individual' // Default mode
   ) { }
 
   async initializeWorker(channel: ConfirmChannel): Promise<void> {
@@ -52,52 +53,52 @@ export abstract class BaseWorker<T> {
     const messageBatch = batch.map((item) => item.message);
 
     try {
-      this.logger.log(`Processing batch of size ${batchSize}`);
-      await this.queueUtilsService.processItemsWithAck(
-        dataBatch,
-        async (item) => await this.processItem(item),
-        (item) => {
-          try {
-            const message = messageBatch.find(
-              (m) => JSON.stringify(item) === JSON.stringify(JSON.parse(m.content.toString()).data)
-            );
-            if (message) {
-              this.channel.ack(message);
-              this.logger.log(`Acknowledged message: ${JSON.stringify(item)}`);
-            }
-          } catch (error) {
-            this.logger.error(`Error acknowledging message: ${JSON.stringify(item)} - ${error}`);
-          }
-        },
-        (item) => {
-          try {
-            const message = messageBatch.find(
-              (m) => JSON.stringify(item) === JSON.stringify(JSON.parse(m.content.toString()).data)
-            );
-            if (message) {
-              this.channel.nack(message, false, true); // Requeue the message
-              this.logger.warn(`Nacked and requeued message: ${JSON.stringify(item)}`);
-            }
-          } catch (error) {
-            this.logger.error(`Error negatively acknowledging message: ${JSON.stringify(item)} - ${error}`);
-          }
+      this.logger.log(`Processing batch of size ${batchSize} with items: ${JSON.stringify(dataBatch)}`);
+      await this.processItem(dataBatch);
+
+      if (this.acknowledgeMode === 'batch') {
+        // Acknowledge the last message in the batch to confirm the entire batch
+        const lastMessage = messageBatch[messageBatch.length - 1];
+        if (lastMessage) {
+          this.channel.ack(lastMessage, true);
+          this.logger.log(`Batch of size ${batchSize} acknowledged successfully.`);
         }
-      );
-      this.logger.log(`Batch of size ${batchSize} processed successfully.`);
+      } else {
+        // Acknowledge messages individually
+        messageBatch.forEach((message) => {
+          try {
+            this.channel.ack(message);
+          } catch (error) {
+            this.logger.error(`Error acknowledging message: ${JSON.stringify(message)} - ${error}`);
+          }
+        });
+        this.logger.log(`Batch of size ${batchSize} processed and acknowledged individually.`);
+      }
     } catch (error) {
       this.logger.error(`Error processing batch of size ${batchSize}:`, error);
-      for (const message of messageBatch) {
-        try {
-          this.channel.nack(message, false, true); // Requeue on failure
-          this.logger.warn(`Message requeued due to batch processing error: ${message}`);
-        } catch (nackError) {
-          this.logger.error(`Failed to nack message during batch error handling: ${nackError}`);
+
+      // Requeue messages based on acknowledgment mode
+      if (this.acknowledgeMode === 'batch') {
+        const lastMessage = messageBatch[messageBatch.length - 1];
+        if (lastMessage) {
+          try {
+            this.channel.nack(lastMessage, true, true);
+            this.logger.warn(`Batch of size ${batchSize} negatively acknowledged and requeued.`);
+          } catch (nackError) {
+            this.logger.error(`Failed to nack batch during error handling: ${nackError}`);
+          }
         }
+      } else {
+        messageBatch.forEach((message) => {
+          try {
+            this.channel.nack(message, false, true);
+          } catch (nackError) {
+            this.logger.error(`Failed to nack message during batch error handling: ${nackError}`);
+          }
+        });
       }
     }
   }
 
-
-  protected abstract processItem(item: T): Promise<void>; // Abstract for business logic
+  protected abstract processItem(items: T[]): Promise<void>; // Abstract for business logic
 }
-
