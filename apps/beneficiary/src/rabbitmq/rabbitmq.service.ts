@@ -1,38 +1,49 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { createBatches } from '../utils/array';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
+import { ConfirmChannel } from 'amqplib';
 
 @Injectable()
 export class RabbitMQService {
+  private readonly logger = new Logger(RabbitMQService.name);
+  private channelWrapper: ChannelWrapper;
+
   constructor(
-    @Inject('rabbit-mq-module') private readonly client: ClientProxy,
-  ) { }
-
-  getClient() {
-    return this.client;
+    @Inject('AMQP_CONNECTION') private readonly connection: AmqpConnectionManager,
+  ) {
+    this.channelWrapper = this.connection.createChannel({
+      json: true,
+      setup: async (channel: ConfirmChannel) => {
+        // Setup logic if needed
+      },
+    });
   }
 
-  // Emit a message (fire-and-forget)
-  async emitMessage(pattern: string, payload: any) {
-    console.log(`Sending event to RabbitMQ with pattern: ${pattern}`, payload);
-    return this.client.emit(pattern, payload).toPromise();
-  }
-
-  // Send a message and receive a response
-  async sendMessage(pattern: string, payload: any) {
-    console.log(`Sending RPC request to RabbitMQ with pattern: ${pattern}`, payload);
-    return this.client.send(pattern, payload).toPromise();
-  }
-
-  async emitBulkInBatch(pattern: string, payloads: any[], batchSize = 100) {
-    const batches = createBatches(payloads, batchSize);
-    console.log(`Divided into ${batches.length} batches of size ${batchSize}`);
-
-    for (const batch of batches) {
-      console.log(`Sending batch:`, batch);
-      this.client.emit(pattern, batch)
+  // Publish a message
+  async publishToQueue(queue: string, message: any): Promise<void> {
+    try {
+      await this.channelWrapper.addSetup(async (channel: ConfirmChannel) => {
+        await channel.assertQueue(queue, { durable: true });
+        channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)));
+        this.logger.log(`Message published to queue: ${queue}`);
+      });
+    } catch (error) {
+      this.logger.error(`Failed to publish message to queue ${queue}:`, error);
     }
+  }
 
-    console.log('All batches sent successfully.');
+  // Publish messages in batches
+  async publishBatchToQueue(queue: string, messages: any[], batchSize = 10): Promise<void> {
+    for (let i = 0; i < messages.length; i += batchSize) {
+      const batch = messages.slice(i, i + batchSize);
+      try {
+        await this.channelWrapper.addSetup(async (channel: ConfirmChannel) => {
+          await channel.assertQueue(queue, { durable: true });
+          batch.forEach((msg, i) => channel.sendToQueue(queue, { ...msg, i }));
+        });
+        this.logger.log(`Batch of ${batch.length} messages published to queue: ${queue}`);
+      } catch (error) {
+        this.logger.error(`Failed to publish batch to queue ${queue}:`, error);
+      }
+    }
   }
 }

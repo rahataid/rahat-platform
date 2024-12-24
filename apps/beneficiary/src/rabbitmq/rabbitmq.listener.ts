@@ -1,26 +1,33 @@
-import { Controller } from '@nestjs/common';
+// src/modules/rabbitmq/rabbitmq.listener.ts
+import { Controller, OnModuleInit } from '@nestjs/common';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 
 @Controller()
+export class RabbitMQListener implements OnModuleInit {
+  private isListenerInitialized = false;
 
-export class RabbitMQListener {
-  @MessagePattern('example.event') // Listens to events with pattern 'example.event'
-  handleEvent(@Payload() data: any, @Ctx() context: RmqContext) {
-    context.getMessage()
-    console.log('Received Event:', data, context.getMessage());
-    // Add logic to process the event
+  async onModuleInit() {
+    console.log('RabbitMQ Listener initialized.');
+    this.isListenerInitialized = true;
   }
 
-  @MessagePattern('example.rpc') // Handles RPC calls with pattern 'example.rpc'
-  handleRpc(@Payload() data: any) {
-    console.log('Received RPC:', data);
-    // Respond to the RPC call
-    return { message: 'Response from RabbitMQListener' };
+  @MessagePattern('example.event') // Listens to events with pattern 'example.event'
+  handleEvent(@Payload() data: any, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+    console.log('Received Event:', data);
+
+    channel.ack(originalMsg); // Acknowledge the message
   }
 
   @MessagePattern('beneficiary.bulk_add.event')
   handleAddBulkBeneficiaries(@Payload() data: any, @Ctx() context: RmqContext) {
-    console.log('Received Event for beneficiaries:', data, context.getMessage());
-    // Add logic to process the event
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+
+    console.log('Processing bulk beneficiaries:', data);
+    channel.ack(originalMsg);
+
+    return { message: 'Processed bulk beneficiaries' };
   }
 }

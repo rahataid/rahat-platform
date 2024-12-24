@@ -9,14 +9,16 @@ export class RabbitMQController {
   @Get('emit')
   async emitMessage() {
     const data = { message: 'Hello RabbitMQ!' };
-    await this.rabbitMQService.emitMessage('example.event', data);
+    await this.rabbitMQService.publishBatchToQueue('beneficiary-queue', [
+      Array(100).fill(data),
+    ]);
     return 'Message emitted!';
   }
 
   @Get('send')
   async sendMessage() {
     const data = { message: 'Hello RabbitMQ!' };
-    const response = await this.rabbitMQService.sendMessage('example.rpc', data);
+    const response = await this.rabbitMQService.publishBatchToQueue('example.rpc', [data]);
     return { response };
   }
 }

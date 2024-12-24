@@ -818,7 +818,8 @@ export class BeneficiaryService {
 
 
 
-    await this.rabbitMQService.emitBulkInBatch('beneficiary.bulk_add.event', dtos, 1)//BATCH_SIZE);
+    console.log('dtos', dtos)
+    await this.rabbitMQService.publishBatchToQueue('beneficiary-queue', dtos, 1)//BATCH_SIZE);
 
 
 

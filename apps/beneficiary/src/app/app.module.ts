@@ -7,7 +7,7 @@ import { SettingsModule } from '@rumsan/extensions/settings';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ListenersModule } from '../listeners/listener.module';
 import { ProcessorsModule } from '../processors/processor.module';
-import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
+// import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
 import { VendorsModule } from '../vendors/vendors.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -39,7 +39,14 @@ import { AppService } from './app.service';
     ListenersModule,
     SettingsModule,
     ProcessorsModule,
-    RabbitMQModule
+    // RabbitMQModule.register({
+    //   urls: ['amqp://guest:guest@localhost'],
+    //   queues: [
+    //     { name: 'rabbit-mq-rahat', durable: true },
+    //     { name: 'beneficiary-queue', durable: true },
+    //   ],
+    // }),
+    // WorkerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

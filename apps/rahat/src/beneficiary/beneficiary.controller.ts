@@ -55,10 +55,17 @@ import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
 import { DocParser } from './parser';
 
-function getDateInfo(dateString) {
+function getDateInfo(dateString: string) {
+  if (!dateString) {
+    return null;
+  }
+
   try {
-    // const [day, month, year] = dateString.split("/");
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+
     return {
       date: date.toISOString(),
       year: date.getFullYear(),

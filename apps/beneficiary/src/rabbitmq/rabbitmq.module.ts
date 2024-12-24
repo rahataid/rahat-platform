@@ -1,28 +1,35 @@
-import { Global, Module } from '@nestjs/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { DynamicModule, Global, Module, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import * as amqp from 'amqp-connection-manager';
 import { RabbitMQController } from './rabbitmq.controller';
-import { RabbitMQListener } from './rabbitmq.listener';
 import { RabbitMQService } from './rabbitmq.service';
+import { BeneficiaryWorker } from './worker-ben';
 
 @Global()
-@Module({
-  imports: [
-    ClientsModule.register([
-      {
-        name: 'rabbit-mq-module',
-        transport: Transport.RMQ,
-        options: {
-          urls: ['amqp://guest:guest@localhost'],
-          queue: 'rabbit-mq-rahat',
-          queueOptions: {
-            durable: true,
-          },
-        },
-      },
-    ]),
-  ],
-  providers: [RabbitMQService, RabbitMQListener],
-  controllers: [RabbitMQListener, RabbitMQController],
-  exports: [RabbitMQService,], // Export RabbitMQService for use in other modules
-})
-export class RabbitMQModule { }
+@Module({})
+export class RabbitMQModule implements OnModuleInit, OnModuleDestroy {
+  static register(options: {
+    urls: string[];
+    queues: { name: string; durable: boolean }[];
+  }): DynamicModule {
+    const amqpProvider = {
+      provide: 'AMQP_CONNECTION',
+      useFactory: () => amqp.connect(options.urls),
+    };
+
+    return {
+      module: RabbitMQModule,
+      imports: [],
+      controllers: [RabbitMQController],
+      providers: [amqpProvider, RabbitMQService, BeneficiaryWorker],
+      exports: [amqpProvider],
+    };
+  }
+
+  async onModuleInit() {
+    console.log('RabbitMQ Module initialized.');
+  }
+
+  async onModuleDestroy() {
+    console.log('RabbitMQ Module destroyed.');
+  }
+}
