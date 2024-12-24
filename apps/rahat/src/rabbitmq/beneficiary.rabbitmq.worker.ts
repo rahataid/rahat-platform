@@ -12,7 +12,7 @@ export class BeneficiaryWorker extends BaseWorker<any> implements OnModuleInit {
     @Inject('AMQP_CONNECTION') private readonly connection: AmqpConnectionManager,
     queueUtilsService: QueueUtilsService
   ) {
-    super(queueUtilsService, 'beneficiary-queue', 10, 'batch'); // Queue name and default batch size
+    super(queueUtilsService, 'beneficiary-queue', 'batch'); // Queue name and default batch size
   }
 
   private channelWrapper: ChannelWrapper;
@@ -41,11 +41,11 @@ export class BeneficiaryWorker extends BaseWorker<any> implements OnModuleInit {
   }
 
   protected async processItem(item: any): Promise<void> {
-    this.logger.log(`Processing beneficiary: ${JSON.stringify(item)}`);
+    this.logger.log(`Processing beneficiary: ${JSON.stringify(item, null, 2)}`);
 
     // Add business login here
     await new Promise((resolve) => setTimeout(resolve, 100)); // Simulate async processing
-    this.logger.log(`Beneficiary processed: ${JSON.stringify(item)}`);
+    this.logger.log(`Beneficiary processed: ${JSON.stringify(item, null, 2)}`);
   }
 
 

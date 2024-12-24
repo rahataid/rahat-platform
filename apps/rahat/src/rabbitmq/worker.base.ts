@@ -16,8 +16,8 @@ export abstract class BaseWorker<T> {
   constructor(
     protected readonly queueUtilsService: QueueUtilsService,
     private readonly queueName: string,
+    private readonly acknowledgeMode: 'individual' | 'batch' = 'individual', // Default mode,
     private readonly defaultBatchSize = 10,
-    private readonly acknowledgeMode: 'individual' | 'batch' = 'individual' // Default mode
   ) { }
 
   async initializeWorker(channel: ConfirmChannel): Promise<void> {
@@ -54,9 +54,9 @@ export abstract class BaseWorker<T> {
 
     try {
       this.logger.log(`Processing batch of size ${batchSize} with items: ${JSON.stringify(dataBatch)}`);
-      await this.processItem(dataBatch);
 
       if (this.acknowledgeMode === 'batch') {
+        await this.processItem(dataBatch);
         // Acknowledge the last message in the batch to confirm the entire batch
         const lastMessage = messageBatch[messageBatch.length - 1];
         if (lastMessage) {
@@ -64,8 +64,10 @@ export abstract class BaseWorker<T> {
           this.logger.log(`Batch of size ${batchSize} acknowledged successfully.`);
         }
       } else {
+
         // Acknowledge messages individually
-        messageBatch.forEach((message) => {
+        messageBatch.forEach(async (message) => {
+          await this.processItem((message.content.toString()));
           try {
             this.channel.ack(message);
           } catch (error) {
