@@ -43,10 +43,9 @@ export class BeneficiaryWorker extends BaseWorker<Record<string, any>[]> impleme
   protected async processItem(item): Promise<void> {
     // this.logger.log(`Processing beneficiary: ${JSON.stringify(item, null, 2)}`);
     console.log(
-      `Last Batch Index: ${item[0].batchIndex}, Batch Size: ${item[0].batchSize}, Beneficiary: ${JSON.stringify(item.)}`
+      `Last Batch Index: ${item[0]?.batchIndex}, Batch Size: ${item[0].batchSize}, Beneficiary: ${JSON.stringify(item)}`
     )
 
-    // this.prisma.create(item.data);
 
     // Add business login here
     return await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async processing
