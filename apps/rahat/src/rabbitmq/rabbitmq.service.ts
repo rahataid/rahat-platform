@@ -38,7 +38,7 @@ export class RabbitMQService {
         await this.channelWrapper.addSetup(async (channel: ConfirmChannel) => {
           await channel.assertQueue(queue, { durable: true });
           batch.forEach((msg) => {
-            channel.sendToQueue(queue, Buffer.from(JSON.stringify({ data: msg, batchSize })), { persistent: true });
+            channel.sendToQueue(queue, Buffer.from(JSON.stringify({ data: msg, batchSize, batchIndex: i })), { persistent: true });
           });
         });
         this.logger.log(`Batch of ${batch.length} messages published to queue: ${queue}`);

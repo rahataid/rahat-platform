@@ -7,12 +7,12 @@ import { BaseWorker } from "./worker.base";
 
 @Global()
 @Injectable()
-export class BeneficiaryWorker extends BaseWorker<any> implements OnModuleInit {
+export class BeneficiaryWorker extends BaseWorker<Record<string, any>[]> implements OnModuleInit {
   constructor(
     @Inject('AMQP_CONNECTION') private readonly connection: AmqpConnectionManager,
     queueUtilsService: QueueUtilsService
   ) {
-    super(queueUtilsService, 'beneficiary-queue', 'batch'); // Queue name and default batch size
+    super(queueUtilsService, 'beneficiary-queue', 10, 'batch', connection); // Queue name and default batch size
   }
 
   private channelWrapper: ChannelWrapper;
@@ -40,12 +40,17 @@ export class BeneficiaryWorker extends BaseWorker<any> implements OnModuleInit {
     }
   }
 
-  protected async processItem(item: any): Promise<void> {
-    this.logger.log(`Processing beneficiary: ${JSON.stringify(item, null, 2)}`);
+  protected async processItem(item): Promise<void> {
+    // this.logger.log(`Processing beneficiary: ${JSON.stringify(item, null, 2)}`);
+    console.log(
+      `Last Batch Index: ${item[0].batchIndex}, Batch Size: ${item[0].batchSize}, Beneficiary: ${JSON.stringify(item.)}`
+    )
+
+    // this.prisma.create(item.data);
 
     // Add business login here
-    await new Promise((resolve) => setTimeout(resolve, 100)); // Simulate async processing
-    this.logger.log(`Beneficiary processed: ${JSON.stringify(item, null, 2)}`);
+    return await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async processing
+    // this.logger.log(`Beneficiary processed: ${JSON.stringify(item, null, 2)}`);
   }
 
 

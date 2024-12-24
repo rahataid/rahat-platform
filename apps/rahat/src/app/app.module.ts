@@ -20,7 +20,6 @@ import { MetaTxnProcessorsModule } from '../processors/meta-transaction/metaTran
 import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
 import { QueueModule } from '../queue/queue.module';
-import { BeneficiaryWorker } from '../rabbitmq/beneficiary.rabbitmq.worker';
 import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
 import { WorkerModule } from '../rabbitmq/worker.module';
 import { RequestContextModule } from '../request-context/request-context.module';
@@ -68,8 +67,8 @@ import { AppService } from './app.service';
     RabbitMQModule.register({
       urls: ['amqp://guest:guest@localhost'],
       queues: [
-        { name: 'rabbit-mq-rahat', durable: true, worker: BeneficiaryWorker },
-        { name: 'beneficiary-queue', durable: true, worker: BeneficiaryWorker },
+        { name: 'rabbit-mq-rahat', durable: true, },
+        { name: 'beneficiary-queue', durable: true, },
       ],
     }),
     WorkerModule,

@@ -9,20 +9,20 @@ import { RabbitMQService } from './rabbitmq.service';
 export class RabbitMQModule implements OnModuleInit, OnModuleDestroy {
   static register(options: {
     urls: string[];
-    queues: { name: string; durable: boolean, worker: any }[];
+    queues: { name: string; durable: boolean, worker?: any }[];
   }): DynamicModule {
     const amqpProvider = {
       provide: 'AMQP_CONNECTION',
       useFactory: () => amqp.connect(options.urls),
     };
 
-    const workerProviders = options.queues.map(queue => queue.worker);
+    // const workerProviders = options.queues.map(queue => queue.worker);
 
     return {
       module: RabbitMQModule,
       imports: [],
       controllers: [RabbitMQController],
-      providers: [amqpProvider, QueueUtilsService, RabbitMQService, ...workerProviders],
+      providers: [amqpProvider, QueueUtilsService, RabbitMQService,],
       exports: [amqpProvider],
     };
   }

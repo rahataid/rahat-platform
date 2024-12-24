@@ -16,7 +16,7 @@ export class RabbitMQController {
       name: item.name + index, email: `email@${index}.com`
     }));
     console.log('dataBatched', dataBatched)
-    await this.rabbitMQService.publishBatchToQueue('beneficiary-queue', dataBatched, 10);
+    await this.rabbitMQService.publishBatchToQueue('beneficiary-queue', dataBatched, 100);
     return 'Message emitted!';
   }
 
