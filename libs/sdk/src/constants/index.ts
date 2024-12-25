@@ -223,6 +223,9 @@ export const MS_ACTIONS = {
     GET_DISBURSEMENT_TRANSACTIONS: 'c2cProject.disbursement.transactions.get',
     GET_DISBURESEMENT_APPROVALS: 'c2cProject.disbursement.approvals.get',
     UPDATE_DISBURSEMENT: 'c2cProject.disbursement.update',
+    ADD_GROUP: 'c2cProject.beneficiary.addGroup',
+    GET_ALL_GROUPS: 'c2cProject.beneficiary.getAllGroups',
+    GET_ONE_GROUP: 'c2cProject.beneficiary.getOneGroup',
     //TEMP SOLUTION
     CREATE_SAFE_TRANSACTION: 'c2cProject.createSafeTransaction',
     GET_SAFE_TRANSACTION: 'c2cProject.getSafeTransaction',
@@ -231,6 +234,7 @@ export const MS_ACTIONS = {
     CREATE_AUDIENCE: 'c2cProject.campaign.create_audience',
     GET_ALL_CAMPAIGN: 'c2cProject.campaign.get',
     GET_CAMPAIGN: 'c2cProject.campaign.getOne',
+    GET_CAMPAIGN_LOG: 'c2cProject.campaign.log',
     GET_ALL_TRANSPORT: 'c2cProject.campaign.get_transport',
     GET_ALL_AUDIENCE: 'c2cProject.campaign.get_audience',
     TRIGGER_CAMPAIGN: 'c2cProject.campaign.trigger',
