@@ -18,6 +18,7 @@ import {
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
+import { RabbitMQService } from '@rahataid/queues/rabbitmq';
 import {
   BeneficiaryConstants,
   BeneficiaryEvents,
@@ -31,12 +32,12 @@ import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { isAddress } from 'viem';
+import { BENEFICIARY_QUEUE } from '../constants';
 import {
   findTempBenefGroups,
   validateDupicatePhone,
   validateDupicateWallet
 } from '../processors/processor.utils';
-import { RabbitMQService } from '../rabbitmq/rabbitmq.service';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
@@ -818,8 +819,15 @@ export class BeneficiaryService {
 
 
 
-    console.log('dtos', dtos)
-    await this.rabbitMQService.publishBatchToQueue('beneficiary-queue', dtos, 1)//BATCH_SIZE);
+    const dataForQueue = dtos.map((dto) => ({
+      data: dto,
+      projectUUID: projectUuid,
+      ignoreExisting: conditional,
+      // automatedGroupOption: automatedGroupOption,
+    }));
+    console.log('dataForQueue', dataForQueue)
+
+    await this.rabbitMQService.publishBatchToQueue(BENEFICIARY_QUEUE, dataForQueue, 1)//BATCH_SIZE);
 
 
 

@@ -20,8 +20,6 @@ import { MetaTxnProcessorsModule } from '../processors/meta-transaction/metaTran
 import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
 import { QueueModule } from '../queue/queue.module';
-import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
-import { WorkerModule } from '../rabbitmq/worker.module';
 import { RequestContextModule } from '../request-context/request-context.module';
 import { TokenModule } from '../token/token.module';
 import { UploadModule } from '../upload/upload.module';
@@ -64,15 +62,15 @@ import { AppService } from './app.service';
     SettingsModule,
     RequestContextModule,
     QueueModule,
-    RabbitMQModule.register({
-      urls: ['amqp://guest:guest@localhost'],
-      queues: [
-        { name: 'rabbit-mq-rahat', durable: true, },
-        { name: 'beneficiary-queue', durable: true, },
-      ],
-    }),
-    WorkerModule,
-
+    // RabbitMQModule.register({
+    //   workerModuleProvider: WorkerModule.register([
+    //     { provide: 'BeneficiaryWorker1', useClass: BeneficiaryWorker },
+    //     { provide: 'BeneficiaryWorker2', useClass: BeneficiaryWorker },
+    //   ]),
+    //   ampqProviderName: AMQP_CONNECTION,
+    //   urls: ['amqp://guest:guest@localhost'],
+    //   queues: queueOptions
+    // }),
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, {
