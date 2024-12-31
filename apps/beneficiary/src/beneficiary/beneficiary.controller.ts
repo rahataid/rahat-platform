@@ -114,6 +114,7 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
   async assignToProject(payload: any) {
+    console.log(payload, "is payload");
     return this.service.assignBeneficiaryToProject(payload);
   }
 

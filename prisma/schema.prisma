@@ -244,6 +244,7 @@ model Beneficiary {
   isVerified     Boolean        @default(false)
 
   pii                  BeneficiaryPii?        @relation("BeneficiaryToPii")
+  stellarCw            StellarCW?             @relation("BeneficiaryToStellar")
   BeneficiaryProject   BeneficiaryProject[]
   groupedBeneficiaries GroupedBeneficiaries[]
 
@@ -631,3 +632,17 @@ model Token {
 }
 
 // ===========End Tokens=============
+
+
+// ===========Start Stellar Custodial Wallet=============
+
+model StellarCW {
+  uuid          String        @unique @default(uuid()) @db.Uuid()
+  beneficiaryId Int         @unique
+  beneficiary   Beneficiary @relation("BeneficiaryToStellar", fields: [beneficiaryId], references: [id])
+  stellarPublicAddress String @unique
+
+   @@map("tbl_stellar_cw")
+}
+
+// ===========End Stellar Custodial Wallet=============

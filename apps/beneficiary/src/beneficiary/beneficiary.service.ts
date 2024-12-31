@@ -628,7 +628,8 @@ export class BeneficiaryService {
   }
 
   async assignBeneficiaryToProject(dto: AddToProjectDto) {
-    const { beneficiaryId, projectId } = dto;
+
+    const { beneficiaryId, projectId, chain } = dto;
 
     // get project info
     const project = await this.prisma.project.findUnique({
@@ -642,6 +643,7 @@ export class BeneficiaryService {
       where: { uuid: beneficiaryId },
       include: { pii: true },
     });
+
     const projectPayload = {
       uuid: beneficiaryData.uuid,
       walletAddress: beneficiaryData.walletAddress,
@@ -680,6 +682,11 @@ export class BeneficiaryService {
       projectUuid: projectId,
     });
 
+    // Create a custodial wallet for beneficiary in stellar project
+    // if (chain === 'stellar') {
+    await createCustodialWallet(beneficiaryData.id, this.rsprisma)
+    // }
+
     //3. Sync beneficiary to project
     return handleMicroserviceCall({
       client: this.client.send(
@@ -694,10 +701,7 @@ export class BeneficiaryService {
         throw new RpcException(error.message);
       },
     });
-    // return this.client.send(
-    //   { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
-    //   projectPayload
-    // );
+
   }
 
   async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
@@ -1777,8 +1781,16 @@ async function checkWalletAddress(
     select: { walletAddress: true },
   });
   return duplicates.map((dup) => dup.walletAddress);
+}
 
-
+async function createCustodialWallet(beneficiaryId: number, prisma: PrismaService) {
+  // Create custodial wallet without stellar public address (Wallet will be created and updated later)
+  return await prisma.stellarCW.create({
+    data: {
+      beneficiaryId,
+      stellarPublicAddress: ''
+    }
+  })
 }
 
 
