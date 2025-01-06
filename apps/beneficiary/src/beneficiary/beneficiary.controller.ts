@@ -253,4 +253,9 @@ export class BeneficiaryController {
   async syncProjectStats(payload) {
     return this.service.syncProjectStats(payload.projectUUID)
   }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.DELETE_BENEFICIARY_AND_PII })
+  async deleteBenefAndPii(payload: any) {
+    return this.service.deleteBenefAndPii(payload);
+  }
 }

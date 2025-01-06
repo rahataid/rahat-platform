@@ -1542,6 +1542,13 @@ export class BeneficiaryService {
       },
     });
   }
+
+
+  async deleteBenefAndPii(payload: any) {
+
+    return this.delete(payload.benefId);
+
+  }
 }
 
 async function checkPhoneNumber(

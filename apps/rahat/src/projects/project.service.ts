@@ -387,13 +387,20 @@ export class ProjectService {
   }
 
   async addToProjectAndUpdate({ projectId, beneficiaryId, importId }) {
-    await this.updateImportStatus(importId, KoboBeneficiaryStatus.SUCCESS);
-    return this.prisma.beneficiaryProject.create({
-      data: {
-        beneficiaryId: beneficiaryId,
-        projectId: projectId,
-      },
+    const beneficiaryExists = await this.prisma.beneficiary.findUnique({
+      where: { uuid: beneficiaryId },
     });
+    if (beneficiaryExists) {
+      await this.updateImportStatus(importId, KoboBeneficiaryStatus.SUCCESS);
+
+      return this.prisma.beneficiaryProject.create({
+        data: {
+          beneficiaryId: beneficiaryId,
+          projectId: projectId,
+        },
+      });
+    }
+
   }
 
   async updateImportStatus(uuid: string, status: KoboBeneficiaryStatus) {
