@@ -121,6 +121,7 @@ export class BeneficiaryProcessor {
       totalBatches: number;
       automatedGroupOption: {
         groupKey: string;
+        createAutomatedGroup: boolean
       };
     }>
   ) {
@@ -132,6 +133,8 @@ export class BeneficiaryProcessor {
       totalBatches,
       automatedGroupOption,
     } = job.data;
+
+
     // const canProceed = await canProcessJob(job, this.logger);
     // if (!canProceed) {
     //   return; // Stop processing if the queue is busy
@@ -143,6 +146,14 @@ export class BeneficiaryProcessor {
       batch: CreateBeneficiaryDto[],
       prisma: PrismaService
     ) => {
+      // console.log(batch);
+      // {
+      //   birthDate: null,
+      //   location: 'jhyalas',
+      //   gender: 'MALE',
+      //   age: null,
+      //   piiData: { name: 'Ravi', phone: '+254739132136', extras: [Object] }
+      // }
       const phoneNumbers = batch.map(
         (beneficiary) => beneficiary.piiData.phone
       );
@@ -213,6 +224,7 @@ export class BeneficiaryProcessor {
           const beneficiariesData = filteredBatch.map(
             ({ piiData, ...data }) => data
           );
+
           const piiDataList = filteredBatch.map(({ uuid, piiData }) => ({
             ...piiData,
             uuid,
@@ -230,7 +242,7 @@ export class BeneficiaryProcessor {
                 `Failed to insert beneficiaries: ${error.message}`
               );
             });
-
+          // console.log(insertedBeneficiaries);
           // // Retrieve inserted beneficiaries for linking PII data
           // const insertedBeneficiaries = await txn.beneficiary.findMany({
           //   where: {
@@ -257,7 +269,7 @@ export class BeneficiaryProcessor {
 
           // for automated grouping
           let createdBenGroups;
-          if (automatedGroupOption.groupKey) {
+          if (automatedGroupOption.createAutomatedGroup) {
             const uniqueGroup = [
               ...new Set(
                 beneficiaries.map(
@@ -324,7 +336,6 @@ export class BeneficiaryProcessor {
               );
             });
 
-
             const assignPromises = insertedBeneficiaries.map((b) => {
               const projectPayload = {
                 uuid: b.uuid,
@@ -336,6 +347,10 @@ export class BeneficiaryProcessor {
 
                 isVerified: b?.isVerified,
               };
+              // console.log("projectPayload", b);
+              console.log("asd", projectPayload);
+
+              // return "sda"
               return handleMicroserviceCall({
                 client: this.client.send(
                   { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUUID },
