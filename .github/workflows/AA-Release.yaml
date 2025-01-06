@@ -6,8 +6,8 @@ env:
   CI: false
 
 jobs:
-  rahat-ui:
-    name: rahat-ui
+ rahat-platform:
+    name: rahat-platform
     runs-on: ubuntu-latest
     if: startsWith(github.ref_name, 'release/') && github.event_name == 'workflow_dispatch'
 
