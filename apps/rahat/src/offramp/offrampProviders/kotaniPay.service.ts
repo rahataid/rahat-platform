@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { ProviderActionDto } from '@rahataid/extensions';
 import { KotaniPayExecutionData } from '@rahataid/sdk';
@@ -16,20 +16,22 @@ type TCreate = {
   token: string;
   amount: number;
   senderAddress: string;
-}
+};
 
 type TCheck = {
   referenceId: string;
-}
-
+};
 
 @Injectable()
-export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecutionData, TCheck> {
+export class KotaniPayService
+  implements OfframpService<TCreate, KotaniPayExecutionData, TCheck> {
   constructor(private readonly prisma: PrismaService) { }
 
-  private async getProviderConfig(uuid: string): Promise<OfframpProviderConfig> {
+  private async getProviderConfig(
+    uuid: string
+  ): Promise<OfframpProviderConfig> {
     const offrampProvider = await this.prisma.offrampProvider.findUnique({
-      where: { uuid }
+      where: { uuid },
     });
 
     if (!offrampProvider) {
@@ -46,8 +48,8 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
       baseURL: baseUrl,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      }
+        Authorization: `Bearer ${apiKey}`,
+      },
     });
   }
 
@@ -57,10 +59,12 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
       country_code: data.payload.country_code,
       phone_number: data.payload.phone_number,
       network: data.payload.network,
-      account_name: data.payload.account_name
+      account_name: data.payload.account_name,
+    }).catch((e) => {
+      throw new BadRequestException(e.response.data);
     })
 
-    return { data: response.data };
+    return response.data;
   }
 
   async listCustomerMobileMoneyWallet(data: ProviderActionDto) {
@@ -76,34 +80,37 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
       const response = await client.post('/wallet/fiat', {
         currency: data.payload.currency,
         name: data.payload.name,
-      })
+      });
       console.log({ response });
       return { data: response.data };
     } catch (error) {
       return { data: error.response.data };
     }
-
   }
 
   async getFiatWallet(data: ProviderActionDto) {
     console.log({ data });
     const client = await this.getKotaniPayAxiosClient(data.uuid);
     const response = await client.get('/wallet/fiat');
-    console.log({ response });
     return { data: response.data.data };
   }
 
-  async createOfframpRequest(providerUuid: string, data: TCreate): Promise<any> {
+  async createOfframpRequest(
+    providerUuid: string,
+    data: TCreate
+  ): Promise<any> {
     // Implementation goes here
     const client = await this.getKotaniPayAxiosClient(providerUuid);
-    const response = await client.post('/offramp/crypto-to-fiat/mobile-money/request', {
-      chain: data.chain,
-      token: data.token,
-      senders_amount: data.amount,
-      senders_address: data.senderAddress
-    }).catch(e => {
-      throw new RpcException(e.response.data);
-    });
+    const response = await client
+      .post('/offramp/crypto-to-fiat/mobile-money/request', {
+        chain: data.chain,
+        token: data.token,
+        senders_amount: data.amount,
+        senders_address: data.senderAddress,
+      })
+      .catch((e) => {
+        throw new RpcException(e.response.data);
+      });
     console.log('response', response);
     if (response instanceof RpcException) {
       throw response;
@@ -111,17 +118,24 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
     return { data: response.data as any };
   }
 
-  async executeOfframpRequest(providerUuid: string, data: KotaniPayExecutionData): Promise<any> {
+  async executeOfframpRequest(
+    providerUuid: string,
+    data: KotaniPayExecutionData
+  ): Promise<any> {
     const client = await this.getKotaniPayAxiosClient(providerUuid);
-    const response = await client.post('/offramp/crypto-to-fiat/mobile-money', data)
-    console.log('response', response)
-    return { data: response.data };
+
+    const response = await client.post('/offramp', data).catch((e) => {
+      throw new BadRequestException(e.response.data);
+    });
+    return response;
   }
 
   async checkOfframpStatus(data: any): Promise<any> {
     // Implementation goes here
     const client = await this.getKotaniPayAxiosClient(data.uuid);
-    const response = await client.get(`/offramp/crypto-to-fiat/mobile-money/status/${data.payload.referenceId}`);
+    const response = await client.get(
+      `/offramp/crypto-to-fiat/mobile-money/status/${data.payload.referenceId}`
+    );
     // console.log('response', response)
     return { data: response.data };
   }
@@ -136,21 +150,27 @@ export class KotaniPayService implements OfframpService<TCreate, KotaniPayExecut
   async getSupportedChains(data: any): Promise<any> {
     // Implementation goes here
     const client = await this.getKotaniPayAxiosClient(data.uuid);
-    const response = await client.get('/offramp/crypto-to-fiat/supported-chains');
-    console.log('response', response)
+    const response = await client.get(
+      '/offramp/crypto-to-fiat/supported-chains'
+    );
+    console.log('response', response);
     return { data: response.data };
   }
 
   async getCustomerWalletByPhone(data: any): Promise<any> {
     // Implementation goes here
     const client = await this.getKotaniPayAxiosClient(data.uuid);
-    const response = await client.get(`/customer/mobile-money/phone/${data.payload.phone_number}`);
+    const response = await client.get(
+      `/customer/mobile-money/phone/${data.payload.phone_number}`
+    );
     return { data: response.data };
   }
 
   kotaniPayActions = {
-    'create-customer-mobile-wallet': this.createCustomerMobileMoneyWallet.bind(this),
-    'list-customer-mobile-wallet': this.listCustomerMobileMoneyWallet.bind(this),
+    'create-customer-mobile-wallet':
+      this.createCustomerMobileMoneyWallet.bind(this),
+    'list-customer-mobile-wallet':
+      this.listCustomerMobileMoneyWallet.bind(this),
     'create-fiat-wallet': this.createFiatWallet.bind(this),
     'get-fiat-wallet': this.getFiatWallet.bind(this),
     'check-offramp-status': this.checkOfframpStatus.bind(this),

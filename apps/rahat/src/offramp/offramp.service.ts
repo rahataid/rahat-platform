@@ -92,24 +92,50 @@ export class OfframpService {
         uuid: requestUuid
       }
     });
+    console.log('reference', request)
     if (!request) {
       throw new BadRequestException('Offramp request not found');
     }
+    // const executionData = {
+    //   chain: data.data.chain,
+    //   token: data.data.token,
+    //   transaction_hash: data.data.transaction_hash,
+    //   wallet_id: data.data.wallet_id,
+    //   request_id: data.data.request_id,
+    //   customer_key: data.data.customer_key,
+    //   preview: true
+    // }
+    // const v = {
+    //   "mobileMoneyReceiver": {
+    //     "networkProvider": "MTN",
+    //     "phoneNumber": "+233542851111",
+    //     "accountName": "Patrick Oduro"
+    //   },
+    //   "currency": "KES",
+    //   "chain": "BASE",
+    //   "token": "USDC",
+    //   "cryptoAmount": 1,
+    //   "referenceId": "123456",
+    //   "senderAddress": "0TQdKsMayR5xcEKrE6jDixUQ74xtTEA9euo"
+    // }
+
     const executionData = {
+      mobileMoneyReceiver: data.data.mobileMoneyReceiver,
+      senderAddress: data.data.senderAddress,
       chain: data.data.chain,
       token: data.data.token,
-      transaction_hash: data.data.transaction_hash,
-      wallet_id: data.data.wallet_id,
-      request_id: data.data.request_id,
-      customer_key: data.data.customer_key
+      cryptoAmount: +data.data.cryptoAmount,
+      currency: data.data.currency,
+      referenceId: request.requestId
     }
-    console.log({ executionData });
+    console.log(JSON.stringify(executionData, null, 2));
     try {
       const { data: kotaniPayResponse } = await this.kotaniPayService.executeOfframpRequest(providerUuid, executionData)
 
 
-      console.log({ kotaniPayResponse });
-
+      if (!kotaniPayResponse.success) {
+        throw new BadRequestException(kotaniPayResponse.message);
+      }
       const transaction = await this.prisma.offrampTransaction.create({
         data: {
           txHash: data.data.transaction_hash,
@@ -117,7 +143,7 @@ export class OfframpService {
           token: data.data.token,
           walletId: data.data.wallet_id,
           customerKey: data.data.customer_key,
-          referenceId: kotaniPayResponse.data.reference_id,
+          referenceId: kotaniPayResponse.reference_id,
           offrampRequest: {
             connect: { id: request.id }
           }
@@ -126,7 +152,8 @@ export class OfframpService {
 
       return { transaction, kotaniPayResponse };
     } catch (error) {
-      console.log({ error });
+      console.log(error.response);
+      throw new BadRequestException(error.response.message);
 
     }
 
