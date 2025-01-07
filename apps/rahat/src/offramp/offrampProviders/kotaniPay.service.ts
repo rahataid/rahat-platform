@@ -134,7 +134,7 @@ export class KotaniPayService
     // Implementation goes here
     const client = await this.getKotaniPayAxiosClient(data.uuid);
     const response = await client.get(
-      `/offramp/crypto-to-fiat/mobile-money/status/${data.payload.referenceId}`
+      `/offramp/${data.payload.referenceId}`
     );
     // console.log('response', response)
     return { data: response.data };

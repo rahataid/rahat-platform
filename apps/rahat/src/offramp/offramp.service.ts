@@ -132,10 +132,6 @@ export class OfframpService {
     try {
       const { data: kotaniPayResponse } = await this.kotaniPayService.executeOfframpRequest(providerUuid, executionData)
 
-
-      if (!kotaniPayResponse.success) {
-        throw new BadRequestException(kotaniPayResponse.message);
-      }
       const transaction = await this.prisma.offrampTransaction.create({
         data: {
           txHash: data.data.transaction_hash,
