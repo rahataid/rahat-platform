@@ -62,6 +62,7 @@ export const MS_ACTIONS = {
       UPDATE: 'cambodia.chw.update',
       DELETE: 'cambodia.chw.delete',
       LIST_BY_VENDOR: 'cambodia.chw.list_by_vendor',
+      VALIDATE_HEALTH_WORKER: 'cambodia.chw.validate_health_worker',
     },
     COMMISISION_SCHEME: {
       CREATE: 'cambodia.commission_scheme.create',
