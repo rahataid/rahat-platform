@@ -85,6 +85,7 @@ export const MS_ACTIONS = {
 
   PROJECT: {
     SETUP: 'project.setup',
+    REFRESH_REPORTING_STATS: 'project.refresh_reporting_stats',
   },
   BENEFICIARY: {
     CREATE: 'beneficiary.create',
@@ -238,6 +239,7 @@ export const MS_ACTIONS = {
     GET_ALL_TRANSPORT: 'c2cProject.campaign.get_transport',
     GET_ALL_AUDIENCE: 'c2cProject.campaign.get_audience',
     TRIGGER_CAMPAIGN: 'c2cProject.campaign.trigger',
+    GET_CAMPAIGN_LOG: 'c2cProject.campaign.log',
     GET_ALL_COMMUNICATION_LOGS: 'c2cProject.campaign.communication_logs',
     GET_ALL_COMMUNICATION_STATS: 'c2cProject.campaign.communication_stats',
   },

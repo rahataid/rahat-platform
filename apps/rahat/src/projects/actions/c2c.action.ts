@@ -130,6 +130,7 @@ export const c2cActions: ProjectActionFunc = {
     sendCommand({ cmd: ProjectJobs.CAMPAIGN.GET_CAMPAIGN_LOG, uuid }, payload),
   //campaign end
 
+
   // **** Beneficiary Groups **** //
   [MS_ACTIONS.C2CProject.ADD_GROUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.BENEFICIARY.ADD_GROUP, uuid }, payload),

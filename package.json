@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "rahat": "set NODE_ENV=development && npx nx serve rahat",
+    "compodoc": "npx compodoc -p tsconfig.doc.json",
     "rahat:prod": "set NODE_ENV=production && npx nx serve rahat",
     "beneficiary": "set NODE_ENV=development && npx nx serve beneficiary",
     "serve:apps": "nx run-many -p rahat beneficiary --targets=serve",
@@ -114,6 +115,7 @@
   },
   "devDependencies": {
     "@atixlabs/hardhat-time-n-mine": "^0.0.5",
+    "@compodoc/compodoc": "^1.1.26",
     "@faker-js/faker": "^8.4.1",
     "@graphprotocol/graph-cli": "^0.82.0",
     "@nestjs/schematics": "^10.1.1",
