@@ -146,14 +146,6 @@ export class BeneficiaryProcessor {
       batch: CreateBeneficiaryDto[],
       prisma: PrismaService
     ) => {
-      // console.log(batch);
-      // {
-      //   birthDate: null,
-      //   location: 'jhyalas',
-      //   gender: 'MALE',
-      //   age: null,
-      //   piiData: { name: 'Ravi', phone: '+254739132136', extras: [Object] }
-      // }
       const phoneNumbers = batch.map(
         (beneficiary) => beneficiary.piiData.phone
       );
@@ -347,10 +339,6 @@ export class BeneficiaryProcessor {
 
                 isVerified: b?.isVerified,
               };
-              // console.log("projectPayload", b);
-              console.log("asd", projectPayload);
-
-              // return "sda"
               return handleMicroserviceCall({
                 client: this.client.send(
                   { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUUID },

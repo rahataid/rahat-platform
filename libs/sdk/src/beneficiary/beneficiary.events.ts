@@ -66,4 +66,5 @@ export const JOBS = {
   GET_ALL_STATS: 'rahat.jobs.projects.get_all_stats',
   CALCULATE_STATS: 'rahat.jobs.projects.calculate_stats',
   IMPORT_BENEFICIARY_LARGE_QUEUE: 'rahat.jobs.beneficiary.import_beneficiary_large_queue',
+  DELETE_BENEFICIARY_AND_PII: 'rahat.jobs.beneficiary.delete_beneficiary_and_pii',
 };
