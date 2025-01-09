@@ -48,7 +48,7 @@
     "prisma:generate:watch": "npx prisma generate --watch",
     "generate:mnemonic": "ts-node ./tools/scripts/misc/mn.ts",
     "contracts:coverage": "cd ./apps/contracts && hardhat coverage",
-    "contracts:test": "cd ./apps/contracts && hardhat test",
+    "contracts:test": "cd ./libs/contracts && hardhat test",
     "contracts:compile": "cd ./libs/contracts && hardhat compile",
     "test": "jest",
     "bruno:test": "cd bruno && bru run --env local",
