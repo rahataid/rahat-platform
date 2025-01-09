@@ -17,6 +17,7 @@ export const CAMBODIA_JOBS = {
     UPDATE: 'rahat.jobs.chw.update',
     DELETE: 'rahat.jobs.chw.delete',
     LIST_BY_VENDOR: 'rahat.jobs.chw.list_by_vendor',
+    VALIDATE_HEALTH_WORKER: 'rahat.jobs.app.validate_health_worker',
   },
   BENEFICIARY: {
     VALIDATE_CONVERSION: 'rahat.jobs.beneficiary.validate_conversion',
@@ -173,6 +174,13 @@ export const cambodiaActions: ProjectActionFunc = {
     return (
 
       sendCommand({ cmd: CAMBODIA_JOBS.APP.TRIGGER_COMMUNICATION, uuid }, payload)
+    )
+  },
+  [MS_ACTIONS.CAMBODIA.CHW.VALIDATE_HEALTH_WORKER]: (uuid, payload, sendCommand) => {
+    console.log(uuid);
+    return (
+
+      sendCommand({ cmd: CAMBODIA_JOBS.CHW.VALIDATE_HEALTH_WORKER, uuid }, payload)
     )
   }
 };
