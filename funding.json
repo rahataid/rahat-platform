@@ -23,7 +23,7 @@
             },
             "repositoryUrl": {
                 "url": "https://github.com/rahataid/rahat-project-aa",
-                "wellKnown": "https://github.com/rahataid/rahat-project-aa/.well-known/funding-manifest-urls"
+                "wellKnown": "https://github.com/rahataid/rahat-project-aa/blob/main/.well-known/funding-manifest-urls"
             },
             "licenses": [
                 "spdx:MPL-2.0"
@@ -44,7 +44,7 @@
             },
             "repositoryUrl": {
                 "url": "https://github.com/rahataid/rahat-project-c2c",
-                "wellKnown": "https://github.com/rahataid/rahat-project-c2c/.well-known/funding-manifest-urls"
+                "wellKnown": "https://github.com/rahataid/rahat-project-c2c/blob/main/.well-known/funding-manifest-urls"
             },
             "licenses": [
                 "spdx:MPL-2.0"
