@@ -1,0 +1,221 @@
+{
+    "version": "v1.0.0",
+    "entity": {
+        "type": "organisation",
+        "role": "owner",
+        "name": "Rahat",
+        "email": "team@rumsan.com",
+        "phone": "+9779705069368",
+        "description": "Rahat, developed by Rumsan, is an open-source suite of blockchain-based digital financial resilience tools tailored for humanitarian agencies to aid marginalized communities worldwide. By leveraging blockchain technology, Rahat ensures transparent, secure, and efficient distribution of financial aid and resources. Through partnerships with national and international organizations, Rahat has successfully impacted over 47,000 households, streamlining aid delivery and fostering financial inclusion. Its open-source approach promotes collaboration and innovation, enabling scalable solutions to address global humanitarian challenges.",
+        "webpageUrl": {
+            "url": "https://rahat.io/",
+            "wellKnown": "https://rahat.io/.well-known/funding-manifest-urls"
+        }
+    },
+    "projects": [
+        {
+            "guid": "rahat-anticipatory-action",
+            "name": "Anticipatory Action Platform ",
+            "description": "Rahat's anticipatory action platform uses blockchain technology, including smart contracts and multisig wallets, to improve disaster preparedness and response. By integrating local weather forecasts, the platform establishes automated triggers for early warnings and pre-disaster financial aid distribution, ensuring timely and efficient support to vulnerable communities.",
+            "webpageUrl": {
+                "url": "https://rahat.io/",
+                "wellKnown": "https://rahat.io/.well-known/funding-manifest-urls"
+            },
+            "repositoryUrl": {
+                "url": "https://github.com/rahataid/rahat-project-aa",
+                "wellKnown": "https://github.com/rahataid/rahat-project-aa/.well-known/funding-manifest-urls"
+            },
+            "licenses": [
+                "spdx:MPL-2.0"
+            ],
+            "tags": [
+                "climate",
+                "disaster",
+                "humanitarian-aid"
+            ]
+        },
+        {
+            "guid": "rahat-crypto-to-crypto",
+            "name": "Crypto Aid Transfer Platform",
+            "description": "Rahat enables direct aid transfers in cryptocurrencies like USDC to beneficiaries' wallets, reducing intermediaries and ensuring timely financial support for marginalized communities while enhancing accountability in humanitarian aid.",
+            "webpageUrl": {
+                "url": "https://rahat.io/",
+                "wellKnown": "https://rahat.io/.well-known/funding-manifest-urls"
+            },
+            "repositoryUrl": {
+                "url": "https://github.com/rahataid/rahat-project-c2c",
+                "wellKnown": "https://github.com/rahataid/rahat-project-c2c/.well-known/funding-manifest-urls"
+            },
+            "licenses": [
+                "spdx:MPL-2.0"
+            ],
+            "tags": [
+                "finance",
+                "humanitarian-aid",
+                "blockchain"
+            ]
+        },
+        {
+            "guid": "rahat-core",
+            "name": "Core Rahat",
+            "description": "\"\nRahat Open-Core is a foundational blockchain-based open-source repository designed for managing the flow of funds. It provides a flexible framework where additional tools, such as beneficiary enrollment, communication systems, and more, can be seamlessly integrated, enabling customizable solutions for humanitarian aid and financial resilience.\"",
+            "webpageUrl": {
+                "url": "https://rahat.io/",
+                "wellKnown": "https://rahat.io/.well-known/funding-manifest-urls"
+            },
+            "repositoryUrl": {
+                "url": "https://github.com/rahataid/rahat-platform"
+            },
+            "licenses": [
+                "spdx:MPL-2.0"
+            ],
+            "tags": [
+                "finance",
+                "humanitarian-aid",
+                "blockchain"
+            ]
+        }
+    ],
+    "funding": {
+        "channels": [
+            {
+                "guid": "rahat-bank",
+                "type": "bank",
+                "description": "Bank Name: Citizen Bank International Limited Account Number: 0222100000655201 \nAccount Name: Rumsan Associates Pvt Ltd Currency: USD \nSwift Code: CTZNNPKA \nBranch: Narayangopal Chowk Branch"
+            },
+            {
+                "guid": "rahat-wallet",
+                "type": "other",
+                "address": "0xb291F15266A525d389A467af383041753fba007e",
+                "description": "Ethereum Wallet. \n\nFor more information, team@rumsan.com"
+            }
+        ],
+        "plans": [
+            {
+                "guid": "hosting-monthly",
+                "status": "active",
+                "name": "Hosting support",
+                "description": "\"Cloud Services\nPR Request Rabbit AI\nDNS\nOther third party services\"",
+                "amount": 199.93,
+                "currency": "USD",
+                "frequency": "monthly",
+                "channels": [
+                    "rahat-bank",
+                    "rahat-wallet"
+                ]
+            },
+            {
+                "guid": "r-n-d",
+                "status": "inactive",
+                "name": "Research and Development",
+                "description": "Support research into expanding Rahat's role in humanitarian aid, like microloans for marginalized communities, insurance solutions, and other innovative financial services",
+                "amount": 8500,
+                "currency": "USD",
+                "frequency": "one-time",
+                "channels": [
+                    "rahat-bank",
+                    "rahat-wallet"
+                ]
+            },
+            {
+                "guid": "dev-rels",
+                "status": "inactive",
+                "name": "Dev Relationship - Salary",
+                "description": "This will cover Dev relationship coordinator's 100% fee for a year working on open source project. ",
+                "amount": 1500,
+                "currency": "USD",
+                "frequency": "monthly",
+                "channels": [
+                    "rahat-bank",
+                    "rahat-wallet"
+                ]
+            },
+            {
+                "guid": "opensource-community-manager",
+                "status": "active",
+                "name": "Opensource Community Manager - Salary",
+                "description": "This will cover opensource community coordinator's 50% of her salary for the year.",
+                "amount": 500,
+                "currency": "USD",
+                "frequency": "monthly",
+                "channels": [
+                    "rahat-bank",
+                    "rahat-wallet"
+                ]
+            },
+            {
+                "guid": "developer-salary",
+                "status": "active",
+                "name": "Developer - Salary",
+                "description": "This will cover 25% the cost of two full-stack developers working on the Rahat core open source project.",
+                "amount": 2500,
+                "currency": "USD",
+                "frequency": "monthly",
+                "channels": [
+                    "rahat-bank",
+                    "rahat-wallet"
+                ]
+            },
+            {
+                "guid": "opensource-event",
+                "status": "active",
+                "name": "Rahat Opensource Workshops",
+                "description": "This will cover internal and external open source workshops and hackathons focused on open source.",
+                "amount": 12000,
+                "currency": "USD",
+                "frequency": "one-time",
+                "channels": [
+                    "rahat-bank",
+                    "rahat-wallet"
+                ]
+            },
+            {
+                "guid": "simulation",
+                "status": "active",
+                "name": "Rahat Simulation Test",
+                "description": "This will cover Rahat pilot and test program.",
+                "amount": 10000,
+                "currency": "USD",
+                "frequency": "one-time",
+                "channels": [
+                    "rahat-bank",
+                    "rahat-wallet"
+                ]
+            }
+        ],
+        "history": [
+            {
+                "year": 2021,
+                "income": 107688,
+                "expenses": 107275,
+                "taxes": 198,
+                "currency": "USD",
+                "description": "Developed Rahat, an aid delivery management platform, with funding from the UNICEF Office of Innovation (OOI) to create a proof of concept."
+            },
+            {
+                "year": 2017,
+                "income": 192127,
+                "expenses": 172400,
+                "taxes": 4621,
+                "currency": "USD",
+                "description": "Secured continued funding from UNICEF OOI to expand and enhance the platform."
+            },
+            {
+                "year": 2023,
+                "income": 274666,
+                "expenses": 231639,
+                "taxes": 2926,
+                "currency": "USD",
+                "description": "Received support from the GSMA Innovation Fund and MIT Solve to further scale the platform's reach and impact."
+            },
+            {
+                "year": 2024,
+                "income": 566039,
+                "expenses": 430906,
+                "taxes": 13104,
+                "currency": "USD",
+                "description": "Onboarded B2B clients while securing follow-up funding from UNICEF Venture, GSR Foundation, and Stellar Development Foundation to drive growth and sustainability."
+            }
+        ]
+    }
+}
