@@ -14,27 +14,6 @@
     },
     "projects": [
         {
-            "guid": "rahat-anticipatory-action",
-            "name": "Anticipatory Action Platform ",
-            "description": "Rahat's anticipatory action platform uses blockchain technology, including smart contracts and multisig wallets, to improve disaster preparedness and response. By integrating local weather forecasts, the platform establishes automated triggers for early warnings and pre-disaster financial aid distribution, ensuring timely and efficient support to vulnerable communities.",
-            "webpageUrl": {
-                "url": "https://rahat.io/",
-                "wellKnown": "https://rahat.io/.well-known/funding-manifest-urls"
-            },
-            "repositoryUrl": {
-                "url": "https://github.com/rahataid/rahat-project-aa",
-                "wellKnown": "https://github.com/rahataid/rahat-project-aa/blob/main/.well-known/funding-manifest-urls"
-            },
-            "licenses": [
-                "spdx:MPL-2.0"
-            ],
-            "tags": [
-                "climate",
-                "disaster",
-                "humanitarian-aid"
-            ]
-        },
-        {
             "guid": "rahat-crypto-to-crypto",
             "name": "Crypto Aid Transfer Platform",
             "description": "Rahat enables direct aid transfers in cryptocurrencies like USDC to beneficiaries' wallets, reducing intermediaries and ensuring timely financial support for marginalized communities while enhancing accountability in humanitarian aid.",
