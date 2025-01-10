@@ -4,13 +4,11 @@ pragma solidity 0.8.20;
 //ERC20 Tokens
 import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol';
 import '../interfaces/IRahatToken.sol';
-import '../libraries/AbstractOwner.sol';
 import '@openzeppelin/contracts/access/manager/AccessManaged.sol';
 import '@openzeppelin/contracts/metatx/ERC2771Forwarder.sol';
 import '@openzeppelin/contracts/metatx/ERC2771Context.sol';
 
 contract RahatToken is
-  AbstractOwner,
   ERC20,
   ERC20Burnable,
   IRahatToken,
