@@ -28,6 +28,7 @@ export const JOBS = {
   GET_ALL_STATS: 'rahat.jobs.project.get_all_stats',
   REQUEST_CLAIM: 'rahat.jobs.project.request_claim',
   GET_VENDOR_STATS: 'rahat.jobs.project.get_vendor_stats',
+  REPORTING_REFRESH: 'rahat.jobs.reporting.refresh',
 
   DISBURSEMENT_PLAN: {
     CREATE_DISBURSEMENT: 'rahat.jobs.disbursement.create',
