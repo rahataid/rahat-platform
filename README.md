@@ -1,3 +1,4 @@
+
 ## Core Repository Overview
 
 ### Purpose and Structure
@@ -66,7 +67,7 @@ Before you begin, ensure your system has the following dependencies installed:
 
    Rahat currently supports the following projects:
 
-   - [rahat-project-el](https://github.com/rahataid/rahat-project-el)
+   - [rahat-project-c2c](https://github.com/rahataid/rahat-project-c2c)
 
    Clone the project you want to run and follow the instructions in its README.md file.
 
