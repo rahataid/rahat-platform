@@ -241,6 +241,7 @@ export const MS_ACTIONS = {
     GET_CAMPAIGN_LOG: 'c2cProject.campaign.log',
     GET_ALL_COMMUNICATION_LOGS: 'c2cProject.campaign.communication_logs',
     GET_ALL_COMMUNICATION_STATS: 'c2cProject.campaign.communication_stats',
+    LIST_REPORTING: 'c2cProject.reporting.list',
   },
   CVAProject: {
     UPDATE_STATUS: 'cvaProject.updateStatus',
