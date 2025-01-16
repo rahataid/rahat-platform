@@ -264,15 +264,15 @@ export class VendorsService {
         createdAt: 'desc',
       },
     });
-    return venData
-    // return this.client.send(
-    //   {
-    //     cmd: VendorJobs.LIST,
-    //     uuid: projectId,
-    //   },
+    // return venData
+    return this.client.send(
+      {
+        cmd: VendorJobs.LIST,
+        uuid: projectId,
+      },
 
-    //   venData
-    // );
+      venData
+    );
   }
 
   async listRedemptionVendor(data) {
