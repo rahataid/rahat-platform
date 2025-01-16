@@ -12,6 +12,7 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { GlobalCustomExceptionFilter } from '@rahataid/extensions';
 import { APP } from '@rahataid/sdk';
+import { ResponseTransformInterceptor } from '@rumsan/extensions/interceptors';
 import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app/app.module';
 import { loggerInstance } from './logger/winston.logger';
@@ -54,7 +55,7 @@ async function bootstrap() {
     })
   );
   app.useGlobalFilters(new GlobalCustomExceptionFilter());
-  // app.useGlobalInterceptors(new ResponseTransformInterceptor());
+  app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
 
   const port = process.env.PORT || 3333;
