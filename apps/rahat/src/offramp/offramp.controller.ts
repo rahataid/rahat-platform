@@ -52,7 +52,7 @@ export class OfframpController {
   }
 
   @Get('/single')
-  findOne(@Body() payload: {
+  findOne(@Query() payload: {
     uuid?: string;
     id?: number;
     requestId?: string;

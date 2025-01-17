@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
 import { ProviderActionDto } from '@rahataid/extensions';
 import { KotaniPayExecutionData } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
@@ -109,12 +108,9 @@ export class KotaniPayService
         senders_address: data.senderAddress,
       })
       .catch((e) => {
-        throw new RpcException(e.response.data);
+        throw new BadRequestException(e.response.data);
       });
-    console.log('response', response);
-    if (response instanceof RpcException) {
-      throw response;
-    }
+
     return { data: response.data as any };
   }
 
@@ -125,9 +121,13 @@ export class KotaniPayService
     const client = await this.getKotaniPayAxiosClient(providerUuid);
 
     const response = await client.post('/offramp', data).catch((e) => {
+      console.log('e', e)
       throw new BadRequestException(e.response.data);
     });
-    return response;
+
+
+    console.log('response', response)
+    return response.data.data;
   }
 
   async checkOfframpStatus(data: any): Promise<any> {
@@ -163,7 +163,20 @@ export class KotaniPayService
     const response = await client.get(
       `/customer/mobile-money/phone/${data.payload.phone_number}`
     );
-    return { data: response.data };
+    const offrampTransactionsBywallet = await this.prisma.offrampTransaction.findMany({
+      where: {
+        customerKey: response.data?.data.customer_key
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+    return {
+      data: {
+        ...response.data,
+        transaction: offrampTransactionsBywallet
+      }
+    };
   }
 
   kotaniPayActions = {

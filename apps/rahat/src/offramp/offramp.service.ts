@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { CreateOfframpProviderDto, CreateOfframpRequestDto, ListOfframpProviderDto, ListOfframpRequestDto, ProviderActionDto } from '@rahataid/extensions';
 import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
 import { KotaniPayService } from './offrampProviders/kotaniPay.service';
@@ -87,7 +86,7 @@ export class OfframpService {
   async executeOfframpRequest(executeOfframpData: any) {
     console.log({ executeOfframpData });
     const { providerUuid, requestUuid, ...data } = executeOfframpData;
-    const request = await this.prisma.offrampRequest.findUnique({
+    const request = await this.prisma.offrampRequest.findUniqueOrThrow({
       where: {
         uuid: requestUuid
       }
@@ -124,7 +123,7 @@ export class OfframpService {
       senderAddress: data.data.senderAddress,
       chain: data.data.chain,
       token: data.data.token,
-      cryptoAmount: +data.data.cryptoAmount,
+      cryptoAmount: +data.data.cryptoAmount * 100,
       currency: data.data.currency,
       referenceId: request.requestId
     }
@@ -134,12 +133,12 @@ export class OfframpService {
 
       const transaction = await this.prisma.offrampTransaction.create({
         data: {
-          txHash: data.data.transaction_hash,
+          txHash: data.data.transaction_hash || '',
           chain: data.data.chain,
           token: data.data.token,
           walletId: data.data.wallet_id,
           customerKey: data.data.customer_key,
-          referenceId: kotaniPayResponse.reference_id,
+          referenceId: executionData.referenceId,
           offrampRequest: {
             connect: { id: request.id }
           }
@@ -178,17 +177,23 @@ export class OfframpService {
     uuid?: string;
     id?: number;
     requestId?: string;
-
   }) {
-    const where: Prisma.OfframpRequestWhereInput = {};
-    if (payload.uuid) where.uuid = payload.uuid;
-    if (payload.id) where.id = payload.id;
-    if (payload.requestId) where.requestId = payload.requestId;
-    console.log('where', where)
-
-    return this.prisma.offrampRequest.findFirst({
-      where
-    });
+    if (payload.uuid) {
+      return this.prisma.offrampRequest.findUniqueOrThrow({
+        where: { uuid: payload.uuid }
+      });
+    }
+    if (payload.id) {
+      return this.prisma.offrampRequest.findUniqueOrThrow({
+        where: { id: payload.id }
+      });
+    }
+    if (payload.requestId) {
+      return this.prisma.offrampRequest.findUniqueOrThrow({
+        where: { requestId: payload.requestId }
+      });
+    }
+    throw new BadRequestException('Must provide either uuid, id or requestId');
   }
 
   update(id: number, updateOfframpDto: any) {
