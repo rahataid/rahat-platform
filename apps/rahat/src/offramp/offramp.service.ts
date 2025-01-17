@@ -123,7 +123,7 @@ export class OfframpService {
       senderAddress: data.data.senderAddress,
       chain: data.data.chain,
       token: data.data.token,
-      cryptoAmount: +data.data.cryptoAmount * 100,
+      cryptoAmount: +data.data.cryptoAmount,
       currency: data.data.currency,
       referenceId: request.requestId
     }
