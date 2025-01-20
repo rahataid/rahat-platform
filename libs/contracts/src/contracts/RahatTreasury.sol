@@ -66,7 +66,7 @@ contract RahatTreasury is
     uint256 _initialSupply,
     address _to,
     address _manager
-  ) public returns (address) {
+  ) public restricted returns (address) {
     RahatToken _token = new RahatToken(
       _name,
       _symbol,
@@ -83,7 +83,7 @@ contract RahatTreasury is
     return _tokenAddress;
   }
 
-  function mintToken(address _token, uint256 _amount) public {
+  function mintToken(address _token, uint256 _amount) public restricted {
     RahatToken(_token).mint(address(this), _amount);
   }
 
@@ -91,7 +91,7 @@ contract RahatTreasury is
     address _token,
     address _approveAddress,
     uint256 _amount
-  ) public {
+  ) public restricted {
     require(_token != address(0), 'token address cannot be zero');
     require(_approveAddress != address(0), 'approve address cannot be zero');
     require(_amount > 0, 'amount cannot be zero');
@@ -106,7 +106,7 @@ contract RahatTreasury is
     address _token,
     address _receiver,
     uint256 _amount
-  ) public {
+  ) public restricted {
     require(_token != address(0), 'token address cannot be zero');
     require(_receiver != address(0), 'approve address cannot be zero');
     require(_amount > 0, 'amount cannot be zero');
