@@ -29,10 +29,12 @@ import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import {
   aaActions,
   beneficiaryActions,
+  beneficiaryGroupActions,
   c2cActions,
   cambodiaActions,
   cvaActions,
   elActions,
+  groupActions,
   projectActions,
   settingActions,
   vendorActions,
@@ -215,6 +217,8 @@ export class ProjectService {
     };
 
     const actions = {
+      ...groupActions,
+      ...beneficiaryGroupActions,
       ...cambodiaActions,
       ...projectActions,
       ...elActions,

@@ -41,6 +41,17 @@ export const APP = {
 };
 
 export const MS_ACTIONS = {
+  GROUP: {
+    CREATE: 'group.create',
+    LIST: 'group.list',
+    GET: 'group.get'
+  },
+  BENEFICIARY_GROUP: {
+    BULK_ASSIGN: 'beneficiary_group.bulk_assign',
+    LIST: 'beneficiary_group.list',
+    LIST_BY_GROUP: 'beneficiary_group.list_by_group',
+  }
+  ,
   CAMBODIA: {
     APP: { STATS: 'cambodia.app.stats', LINE_STATS: 'cambodia.app.line_stats', BROAD_CAST_STATUS_COUNT: 'cambodia.app.broadcast_status_count', PROJECT_SETTINGS: 'cambodia.app.project_settings', TRIGGER_COMMUNICATION: 'cambodia.app.trigger_communication', },
     BENEFICIARY: {
