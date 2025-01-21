@@ -9,6 +9,16 @@ export const EVENTS = {
 };
 
 export const JOBS = {
+  GROUP: {
+    CREATE: 'rahat.jobs.group.create',
+    LIST: 'rahat.jobs.group.list',
+    GET: 'rahat.jobs.group.get',
+  },
+  BENEFICIARY_GROUP: {
+    BULK_ASSIGN: 'rahat.jobs.beneficiary_group.bulk_assign',
+    LIST: 'rahat.jobs.beneficiary_group.list',
+    LIST_BY_GROUP: 'rahat.jobs.beneficiary_group.lis_by_group',
+  },
   PROJECT_CREATE: 'project.create',
   PROJECT_UPDATE: 'project.update',
   PROJECT_DELETE: 'project.delete',

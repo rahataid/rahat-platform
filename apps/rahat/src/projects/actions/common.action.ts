@@ -92,3 +92,23 @@ export const projectActions: ProjectActionFunc = {
   [MS_ACTIONS.PROJECT.REFRESH_REPORTING_STATS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.REPORTING_REFRESH, uuid }, payload),
 };
+
+export const groupActions: ProjectActionFunc = {
+  [MS_ACTIONS.GROUP.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.GROUP.CREATE, uuid }, payload),
+  [MS_ACTIONS.GROUP.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.GROUP.LIST, uuid }, payload),
+  [MS_ACTIONS.GROUP.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.GROUP.GET, uuid }, payload),
+};
+
+export const beneficiaryGroupActions: ProjectActionFunc = {
+  [MS_ACTIONS.BENEFICIARY_GROUP.BULK_ASSIGN]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY_GROUP.BULK_ASSIGN, uuid }, payload),
+  [MS_ACTIONS.BENEFICIARY_GROUP.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY_GROUP.LIST, uuid }, payload),
+  [MS_ACTIONS.BENEFICIARY_GROUP.LIST_BY_GROUP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY_GROUP.LIST_BY_GROUP, uuid }, payload),
+};
+
+

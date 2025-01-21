@@ -29,15 +29,18 @@ import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import {
   aaActions,
   beneficiaryActions,
+  beneficiaryGroupActions,
   c2cActions,
   cambodiaActions,
   cvaActions,
   elActions,
+  groupActions,
   projectActions,
   settingActions,
   vendorActions,
 } from './actions';
 import { CAMBODIA_JOBS } from './actions/cambodia.action';
+import { commsActions } from './actions/comms.action';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 
@@ -214,6 +217,8 @@ export class ProjectService {
     };
 
     const actions = {
+      ...groupActions,
+      ...beneficiaryGroupActions,
       ...cambodiaActions,
       ...projectActions,
       ...elActions,
@@ -225,6 +230,7 @@ export class ProjectService {
       ...c2cActions,
       ...cvaActions,
       ...rpActions,
+      ...commsActions
     };
 
     const actionFunc = actions[action];
@@ -385,13 +391,20 @@ export class ProjectService {
   }
 
   async addToProjectAndUpdate({ projectId, beneficiaryId, importId }) {
-    await this.updateImportStatus(importId, KoboBeneficiaryStatus.SUCCESS);
-    return this.prisma.beneficiaryProject.create({
-      data: {
-        beneficiaryId: beneficiaryId,
-        projectId: projectId,
-      },
+    const beneficiaryExists = await this.prisma.beneficiary.findUnique({
+      where: { uuid: beneficiaryId },
     });
+    if (beneficiaryExists) {
+      await this.updateImportStatus(importId, KoboBeneficiaryStatus.SUCCESS);
+
+      return this.prisma.beneficiaryProject.create({
+        data: {
+          beneficiaryId: beneficiaryId,
+          projectId: projectId,
+        },
+      });
+    }
+
   }
 
   async updateImportStatus(uuid: string, status: KoboBeneficiaryStatus) {

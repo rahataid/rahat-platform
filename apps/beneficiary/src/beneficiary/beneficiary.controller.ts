@@ -1,5 +1,5 @@
-import { Controller, Inject, Param } from '@nestjs/common';
-import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
+import { Controller, Param } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   addBulkBeneficiaryToProject,
   CreateBeneficiaryDto,
@@ -13,19 +13,19 @@ import {
 } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
-  ProjectContants,
-  ValidateWallet,
+  ValidateWallet
 } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
+import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
 import { VerificationService } from './verification.service';
 
 @Controller()
 export class BeneficiaryController {
   constructor(
-    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly service: BeneficiaryService,
+    private readonly utilService: BeneficiaryUtilsService,
     private readonly statsService: BeneficiaryStatService,
     private readonly verificationService: VerificationService
   ) { }
@@ -52,10 +52,10 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
   createBulk(@Payload() data) {
-    const payloadData = Array.isArray(data?.data) ? data?.data : data?.payload;
+    // const payloadData = Array.isArray(data?.data) ? data?.data : data?.payload;
 
     return this.service.createBulk(
-      payloadData,
+      data,
       data?.projectUUID,
       data?.data?.walkinBulk
     );
@@ -114,7 +114,7 @@ export class BeneficiaryController {
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
   async assignToProject(payload: any) {
-    return this.service.assignBeneficiaryToProject(payload);
+    return this.utilService.assignBeneficiaryToProject(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT })
@@ -252,5 +252,10 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.CALCULATE_STATS })
   async syncProjectStats(payload) {
     return this.service.syncProjectStats(payload.projectUUID)
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.DELETE_BENEFICIARY_AND_PII })
+  async deleteBenefAndPii(payload: any) {
+    return this.service.deleteBenefAndPii(payload);
   }
 }
