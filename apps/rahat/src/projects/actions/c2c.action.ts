@@ -141,4 +141,6 @@ export const c2cActions: ProjectActionFunc = {
   [MS_ACTIONS.C2CProject.GET_ONE_GROUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.BENEFICIARY.GET_ONE_GROUP, uuid }, payload),
 
+  [MS_ACTIONS.C2CProject.LIST_REPORTING]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.REPORTING.LIST, uuid }, payload),
 }
