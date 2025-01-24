@@ -42,7 +42,7 @@ export const APP = {
 
 export const MS_ACTIONS = {
   CAMBODIA: {
-    APP: { STATS: 'cambodia.app.stats', LINE_STATS: 'cambodia.app.line_stats', BROAD_CAST_STATUS_COUNT: 'cambodia.app.broadcast_status_count' },
+    APP: { STATS: 'cambodia.app.stats', LINE_STATS: 'cambodia.app.line_stats', BROAD_CAST_STATUS_COUNT: 'cambodia.app.broadcast_status_count', PROJECT_SETTINGS: 'cambodia.app.project_settings', TRIGGER_COMMUNICATION: 'cambodia.app.trigger_communication', },
     BENEFICIARY: {
       VALIDATE_CONVERSION: 'cambodia.beneficiary.validate_conversion',
       STATS: 'cambodia.beneficiary.stats',
@@ -223,6 +223,9 @@ export const MS_ACTIONS = {
     GET_DISBURSEMENT_TRANSACTIONS: 'c2cProject.disbursement.transactions.get',
     GET_DISBURESEMENT_APPROVALS: 'c2cProject.disbursement.approvals.get',
     UPDATE_DISBURSEMENT: 'c2cProject.disbursement.update',
+    ADD_GROUP: 'c2cProject.beneficiary.addGroup',
+    GET_ALL_GROUPS: 'c2cProject.beneficiary.getAllGroups',
+    GET_ONE_GROUP: 'c2cProject.beneficiary.getOneGroup',
     //TEMP SOLUTION
     CREATE_SAFE_TRANSACTION: 'c2cProject.createSafeTransaction',
     GET_SAFE_TRANSACTION: 'c2cProject.getSafeTransaction',
@@ -231,6 +234,7 @@ export const MS_ACTIONS = {
     CREATE_AUDIENCE: 'c2cProject.campaign.create_audience',
     GET_ALL_CAMPAIGN: 'c2cProject.campaign.get',
     GET_CAMPAIGN: 'c2cProject.campaign.getOne',
+    GET_CAMPAIGN_LOG: 'c2cProject.campaign.log',
     GET_ALL_TRANSPORT: 'c2cProject.campaign.get_transport',
     GET_ALL_AUDIENCE: 'c2cProject.campaign.get_audience',
     TRIGGER_CAMPAIGN: 'c2cProject.campaign.trigger',
@@ -314,5 +318,22 @@ export const MS_ACTIONS = {
     ADD_TRUSTLINE: 'rpProject.stellar.addTrustline',
     FAUCET: 'rpProject.stellar.faucet',
     TRANSACTION: 'rpProject.stellar.transactions'
-  }
-};
+  },
+  COMMS: {
+    CREATE_CAMPAIGN: 'comms.campaign.create',
+    UPDATE_CAMPAIGN: 'comms.campaign.update',
+    CREATE_AUDIENCE: 'comms.campaign.create_audience',
+    CREATE_BULK_AUDIENCE: 'comms.campaign.create_bulk_audience',
+    GET_ALL_CAMPAIGN: 'comms.campaign.get',
+    GET_CAMPAIGN: 'comms.campaign.getOne',
+    GET_ALL_TRANSPORT: 'comms.campaign.get_transport',
+    GET_ALL_AUDIENCE: 'comms.campaign.get_audience',
+    TRIGGER_CAMPAIGN: 'comms.campaign.trigger',
+    GET_ALL_COMMUNICATION_LOGS: 'comms.campaign.communication_logs',
+    GET_ALL_COMMUNICATION_STATS: 'comms.campaign.communication_stats',
+    GET_CAMPAIGN_LOG: 'comms.campaign.log',
+    ADD_GROUP: 'comms.beneficiary.addGroup',
+    GET_ALL_GROUPS: 'comms.beneficiary.getAllGroups',
+    GET_ONE_GROUP: 'comms.beneficiary.getOneGroup',
+  },
+}

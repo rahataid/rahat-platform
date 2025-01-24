@@ -6,6 +6,8 @@ export const CAMBODIA_JOBS = {
     STATS: 'rahat.jobs.app.stats',
     LINE_STATS: 'rahat.jobs.app.line_stats',
     BROADCAST_STATUS_COUNT: 'rahat.jobs.app.broadcast_status_count',
+    PROJECT_SETTINGS: 'rahat.jobs.app.project_settings',
+    TRIGGER_COMMUNICATION: 'rahat.jobs.app.trigger_communication',
   },
   CHW: {
     STATS: 'rahat.jobs.chw.stats',
@@ -158,5 +160,20 @@ export const cambodiaActions: ProjectActionFunc = {
 
       sendCommand({ cmd: CAMBODIA_JOBS.APP.BROADCAST_STATUS_COUNT, uuid }, payload)
     )
+  },
+  [MS_ACTIONS.CAMBODIA.APP.PROJECT_SETTINGS]: (uuid, payload, sendCommand) => {
+    console.log(uuid);
+    return (
+
+      sendCommand({ cmd: CAMBODIA_JOBS.APP.PROJECT_SETTINGS, uuid }, payload)
+    )
+  },
+  [MS_ACTIONS.CAMBODIA.APP.TRIGGER_COMMUNICATION]: (uuid, payload, sendCommand) => {
+    console.log(uuid);
+    return (
+
+      sendCommand({ cmd: CAMBODIA_JOBS.APP.TRIGGER_COMMUNICATION, uuid }, payload)
+    )
   }
 };
+

@@ -4,24 +4,28 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
 import {
   CreateProjectDto,
+  TestKoboImportDto,
   UpdateProjectDto,
-  UpdateProjectStatusDto
+  UpdateProjectStatusDto,
 } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
   BQUEUE,
+  genRandomPhone,
   MS_ACTIONS,
   MS_TIMEOUT,
   ProjectEvents,
-  ProjectJobs
+  ProjectJobs,
 } from '@rahataid/sdk';
-import { BeneficiaryType } from '@rahataid/sdk/enums';
+import { BeneficiaryType, KoboBeneficiaryStatus } from '@rahataid/sdk/enums';
 import { JOBS } from '@rahataid/sdk/project/project.events';
 import { PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { tap, timeout } from 'rxjs';
+import { switchMap, tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
+import { createExtrasAndPIIData } from '../utils';
+import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import {
   aaActions,
   beneficiaryActions,
@@ -33,6 +37,8 @@ import {
   settingActions,
   vendorActions,
 } from './actions';
+import { CAMBODIA_JOBS } from './actions/cambodia.action';
+import { commsActions } from './actions/comms.action';
 import { rpActions } from './actions/rp.action';
 import { stellarActions } from './actions/stellar.action';
 import { userRequiredActions } from './actions/user-required.action';
@@ -221,7 +227,8 @@ export class ProjectService {
       ...c2cActions,
       ...cvaActions,
       ...rpActions,
-      ...stellarActions
+      ...stellarActions,
+      ...commsActions
     };
 
     const actionFunc = actions[action];
@@ -233,6 +240,201 @@ export class ProjectService {
     );
   }
 
+  // ======Only for testing=======
+  async importTestBeneficiary(uuid: string, dto: TestKoboImportDto) {
+    dto.phone = `+${dto.phone}`;
+    const { piiData, type, ...rest } = createExtrasAndPIIData(dto);
+    const extrasPayload = {
+      meta: dto.meta,
+      province: dto.province,
+      district: dto.district,
+      wardNo: dto.wardNo
+    }
+    const piiExist = await this.checkPiiPhone(dto.phone);
+    if (piiExist) throw new Error('Phone number already exists!');
+    const koboPayload = {
+      name: piiData.name,
+      phone: piiData.phone,
+      gender: dto.gender,
+      age: dto.age,
+      type: dto.type,
+      leadInterests: dto.leadInterests,
+      extras: extrasPayload
+    }
+    const row = await this.prisma.koboBeneficiary.create({
+      data: koboPayload,
+    });
+
+    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, { piiData, ...rest }).pipe(
+      timeout(MS_TIMEOUT),
+      switchMap((response) => {
+        const cambodiaPayload = {
+          uuid: response.uuid,
+          phone: dto.phone,
+          walletAddress: response.walletAddress,
+          type: dto?.type || 'UNKNOWN',
+          leadInterests: dto?.leadInterests || [],
+          extras: extrasPayload,
+        };
+        // 3. Send to project MS
+        return this.client
+          .send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, cambodiaPayload)
+          .pipe(
+            timeout(MS_TIMEOUT),
+            tap((response) => {
+              // 4. Update status and addToProject
+              return this.addToProjectAndUpdate({
+                projectId: uuid,
+                beneficiaryId: response.uuid,
+                importId: row.uuid,
+              });
+            })
+          );
+      })
+    );
+  }
+
+
+  // TODO: fix cambodia specific country code
+  async importKoboBeneficiary(uuid: UUID, data: any) {
+    const benef: any = this.mapKoboFields(data);
+    if (benef.type) benef.type = benef.type.toUpperCase();
+    if (benef.type !== 'LEAD') benef.phone = genRandomPhone('88');
+    if (!benef.phone) throw new Error('Phone number is required!');
+
+    if (benef.gender) benef.gender = benef.gender.toUpperCase();
+    if (benef.age) benef.age = parseInt(benef.age);
+    if (benef.leadInterests) {
+      benef.leadInterests = benef.leadInterests
+        .split(' ')
+        .map((item: string) => item.trim().toUpperCase());
+    }
+    console.log({ NODE_ENV })
+    if (NODE_ENV === 'production') {
+      benef.phone = `${CAMBODIA_COUNTRY_CODE}${benef.phone}`;
+    } else benef.phone = `+${benef.phone}`;
+    console.log("Beneficiary Phone", benef.phone);
+
+    const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
+    const extrasPayload = {
+      meta: benef.meta,
+      occupation: benef.occupation || 'UNKNOWN',
+      province: benef.province || 'UNKNOWN',
+      district: benef.district || 'UNKNOWN',
+      commune: benef.commune || 'UNKNOWN',
+      village: benef.village || 'UNKNOWN',
+    }
+
+    const koboPayload = {
+      name: piiData.name,
+      phone: piiData.phone,
+      gender: benef.gender,
+      age: benef.age,
+      type: benef.type,
+      leadInterests: benef.leadInterests,
+      extras: extrasPayload
+    }
+    // 1. Save to Kobo Import Logs
+    const row = await this.prisma.koboBeneficiary.create({
+      data: koboPayload,
+    });
+    const piiExist = await this.checkPiiPhone(benef.phone);
+    console.log({ piiExist });
+    if (piiExist) {
+      const discardedPayload = {
+        ...piiData,
+        age: benef.age,
+        gender: benef.gender,
+        extras: { ...extrasPayload, type: benef.type, leadInterests: benef.leadInterests },
+      }
+      return this.saveToDiscarded(uuid, discardedPayload);
+    }
+    // 2. Save to Beneficiary and PII
+    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, { piiData, ...rest }).pipe(
+      timeout(MS_TIMEOUT),
+      switchMap((response) => {
+        const cambodiaPayload = {
+          uuid: response.uuid,
+          phone: benef.phone,
+          walletAddress: response.walletAddress,
+          type: benef?.type || 'UNKNOWN',
+          leadInterests: benef?.leadInterests || [],
+          extras: extrasPayload,
+        };
+        // 3. Send to project MS
+        return this.client
+          .send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, cambodiaPayload)
+          .pipe(
+            timeout(MS_TIMEOUT),
+            tap((response) => {
+              // 4. Update status and addToProject
+              return this.addToProjectAndUpdate({
+                projectId: uuid,
+                beneficiaryId: response.uuid,
+                importId: row.uuid,
+              });
+            })
+          );
+      })
+    );
+  }
+
+  async saveToDiscarded(uuid: string, discardedPayload: any) {
+    return this.client
+      .send(
+        { cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE_DISCARDED, uuid },
+        discardedPayload
+      )
+      .pipe(timeout(MS_TIMEOUT));
+  }
+
+  async addToProjectAndUpdate({ projectId, beneficiaryId, importId }) {
+    await this.updateImportStatus(importId, KoboBeneficiaryStatus.SUCCESS);
+    return this.prisma.beneficiaryProject.create({
+      data: {
+        beneficiaryId: beneficiaryId,
+        projectId: projectId,
+      },
+    });
+  }
+
+  async updateImportStatus(uuid: string, status: KoboBeneficiaryStatus) {
+    return this.prisma.koboBeneficiary.update({
+      where: {
+        uuid: uuid,
+      },
+      data: {
+        status,
+      },
+    });
+  }
+
+  async checkPiiPhone(phone: string) {
+    return this.prisma.beneficiaryPii.findUnique({
+      where: {
+        phone,
+      },
+    });
+  }
+
+  mapKoboFields(payload: any) {
+    const mappedPayload = {};
+    const meta = {};
+
+    for (const key in payload) {
+      if (KOBO_FIELD_MAPPINGS[key]) {
+        mappedPayload[KOBO_FIELD_MAPPINGS[key]] = payload[key];
+      } else {
+        meta[key] = payload[key];
+      }
+    }
+    return { ...mappedPayload, meta };
+  }
+
+  async sendTestMsg(uuid: UUID) {
+    console.log({ uuid });
+    return this.client
+      .send({ cmd: 'rahat.jobs.test', uuid }, { msg: 'This is test msg!' })
+      .pipe(timeout(MS_TIMEOUT));
+  }
 }
-
-

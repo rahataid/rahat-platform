@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors
@@ -18,6 +19,7 @@ import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   CreateProjectDto,
   ListProjectBeneficiaryDto,
+  TestKoboImportDto,
   UpdateProjectDto,
   UpdateProjectStatusDto
 } from '@rahataid/extensions';
@@ -30,6 +32,7 @@ import {
   SUBJECTS,
 } from '@rumsan/user';
 import { UUID } from 'crypto';
+import { Request } from 'express';
 import { memoryStorage } from 'multer';
 import { timeout } from 'rxjs/operators';
 import { ProjectService } from './project.service';
@@ -131,6 +134,7 @@ export class ProjectController {
   projectActions(
     @Param('uuid') uuid: UUID,
     @Body() data: any,
+    @Req() request: Request,
     @UploadedFile() file?: TFile
   ) {
 
@@ -141,6 +145,8 @@ export class ProjectController {
     const response = this.projectService.handleProjectActions({
       uuid,
       ...fileData,
+      ...data,
+      user: request.user,
     });
     return response;
   }
@@ -185,4 +191,15 @@ export class ProjectController {
   //   return this.projectService.importKoboBeneficiary(uuid, data);
   // }
 
+  @Post('/:uuid/test')
+  @ApiParam({ name: 'uuid', required: true })
+  testMsg(@Param('uuid') uuid: UUID) {
+    return this.projectService.sendTestMsg(uuid);
+  }
+
+  @Post('/:uuid/kobo-import-simulate')
+  @ApiParam({ name: 'uuid', required: true })
+  koboImportSimulate(@Param('uuid') uuid: UUID, @Body() dto: TestKoboImportDto) {
+    return this.projectService.importTestBeneficiary(uuid, dto);
+  }
 }

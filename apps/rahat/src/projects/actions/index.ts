@@ -6,3 +6,6 @@ export { elActions } from './el.action';
 export { cambodiaActions } from './cambodia.action';
 export { cvaActions } from './cva.action';
 
+export { commsActions } from './comms.action';
+
+

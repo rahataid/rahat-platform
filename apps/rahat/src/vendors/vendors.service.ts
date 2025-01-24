@@ -32,7 +32,7 @@ export class VendorsService {
     private readonly authService: AuthsService,
     private readonly usersService: UsersService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
-  ) {}
+  ) { }
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
@@ -263,13 +263,15 @@ export class VendorsService {
         createdAt: 'desc',
       },
     });
-    return this.client.send(
-      {
-        cmd: VendorJobs.LIST,
-        uuid: projectId,
-      },
-      venData
-    );
+    return venData
+    // return this.client.send(
+    //   {
+    //     cmd: VendorJobs.LIST,
+    //     uuid: projectId,
+    //   },
+
+    //   venData
+    // );
   }
 
   async listRedemptionVendor(data) {

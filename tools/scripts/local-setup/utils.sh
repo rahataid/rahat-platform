@@ -93,6 +93,7 @@ contract_setup(){
 }
 
 graph_setup() {
+    pnpm graph:codegen
     pnpm graph:create-local
     graph_url=$(pnpm graph:deploy-local | grep -o 'http://[^ ]*' | tail -1)
     export graph_url
