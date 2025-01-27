@@ -15,7 +15,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
@@ -143,9 +143,9 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET_TABLE_STATS }, {});
   }
 
-  // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
-  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post()
   async create(@Body() dto: CreateBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
@@ -175,13 +175,9 @@ export class BeneficiaryController {
       ...b,
       birthDate: b.birthDate ? new Date(b.birthDate).toISOString() : null,
     }));
+
     return this.client
       .send({ cmd: BeneficiaryJobs.CREATE_BULK }, data)
-      .pipe(
-        catchError((error) =>
-          throwError(() => new RpcException(error.response))
-        )
-      )
       .pipe(timeout(MS_TIMEOUT));
   }
 
@@ -244,7 +240,13 @@ export class BeneficiaryController {
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const projectId = req.body['projectId'];
     const automatedGroupOption = req.body['automatedGroupOption'];
+    automatedGroupOption.createAutomatedGroup = JSON.parse(
+      automatedGroupOption.createAutomatedGroup
+    );
+    console.log(automatedGroupOption);
     const beneficiaries = await DocParser(docType, file.buffer);
+
+
     // Utility function to sanitize input keys by trimming whitespace
     function sanitizeKey(key: string): string {
       return key.trim();
@@ -272,24 +274,38 @@ export class BeneficiaryController {
       location: trimNonAlphaNumericValue(b[sanitizeKey('Location')]),
       phoneStatus: b[sanitizeKey('Phone Status*')],
       notes: b[sanitizeKey('Notes')],
-      gender: b[sanitizeKey('Gender*')],
+      gender: b[sanitizeKey('Gender*')] || b[sanitizeKey('Gender')],
       latitude: b[sanitizeKey('Latitude')],
       longitude: b[sanitizeKey('Longitude')],
       age: b[sanitizeKey('Age')] || null,
       walletAddress: b[sanitizeKey('Wallet Address')],
       piiData: {
-        name: b[sanitizeKey('Name*')] || 'Unknown',
+        name: b[sanitizeKey('Name*')] || b[sanitizeKey('Beneficiary Name')] || 'Unknown',
         phone: removeSpaces(
           b[sanitizeKey('Whatsapp Number*')] ||
           b[sanitizeKey('Phone Number*')] ||
           b[sanitizeKey('Phone Number')] ||
+          b[sanitizeKey('Beneficiary Phone Number')] ||
           b[sanitizeKey('Phone number')]
         ),
-        extras: {},
+      },
+      extras: {
+        healthWorker: b[sanitizeKey('Health Worker Username')] || "Unknown",
+        type: b[sanitizeKey('Type')] || null,
+        phone: removeSpaces(
+          b[sanitizeKey('Phone Number*')] ||
+          b[sanitizeKey('Beneficiary Phone Number')] ||
+          b[sanitizeKey('Phone number')] || null
+        ),
+        visionCenter: b[sanitizeKey('Vision Center Name')] || null,
+        reasonForLead: b[sanitizeKey('Reason For Lead')] || null,
+        village: b[sanitizeKey('Village')] || null,
+        commune: b[sanitizeKey('Commune')] || null,
+        district: b[sanitizeKey('District')] || null,
+        province: b[sanitizeKey('Province')] || null,
+        occupation: b[sanitizeKey('Occupation')] || null,
       },
     }));
-
-
 
 
     const uniquePhoneNumberedBeneficiaries = beneficiariesMapped.filter(
@@ -299,6 +315,11 @@ export class BeneficiaryController {
           (t) => t.piiData.phone === b.piiData.phone
         )
     );
+
+    // uniquePhoneNumberedBeneficiaries.forEach((beneficiary) => {
+    //   console.log(beneficiary, beneficiary.piiData.extras);
+    // });
+    // return "sda"
 
 
     console.log(`Trying to upload ${beneficiariesMapped.length} beneficiaries through queue. Unique phone numbers: ${uniquePhoneNumberedBeneficiaries.length}, Duplicate phone numbers: ${beneficiariesMapped.length - uniquePhoneNumberedBeneficiaries.length}`);
