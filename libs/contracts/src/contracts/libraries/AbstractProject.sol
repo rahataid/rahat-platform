@@ -176,11 +176,11 @@ abstract contract AbstractProject is
    * @param _from The address from which the tokens are being transferred.
    * @param _amount The amount of tokens to accept.
    */
-  function _acceptToken(
+  function acceptToken(
     address _tokenAddress,
     address _from,
     uint256 _amount
-  ) internal restricted {
+  ) public restricted {
     IERC20(_tokenAddress).safeTransferFrom(_from, address(this), _amount);
     _tokenBudgetIncrease(_tokenAddress, _amount);
     emit TokenReceived(_tokenAddress, _from, _amount);

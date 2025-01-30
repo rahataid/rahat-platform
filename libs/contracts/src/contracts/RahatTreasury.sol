@@ -20,6 +20,7 @@ contract RahatTreasury is
   AccessManaged,
   ERC2771Context
 {
+  using SafeERC20 for RahatToken;
   using EnumerableSet for EnumerableSet.AddressSet;
 
   event TokenCreated(address indexed tokenAddress);
@@ -113,7 +114,7 @@ contract RahatTreasury is
 
     RahatToken token = RahatToken(_token);
     token.mint(address(this), _amount);
-    token.transfer(_receiver, _amount);
+    token.safeTransfer(_receiver, _amount);
     emit TokenMintedAndApproved(_token, _receiver, _amount);
   }
 

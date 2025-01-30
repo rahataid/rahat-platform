@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './AbstractOwner.sol';
 
 /**
@@ -11,6 +12,8 @@ import './AbstractOwner.sol';
  * to enforce ownership restrictions on these actions.
  */
 abstract contract AbstractTokenActions is AbstractOwner {
+  using SafeERC20 for IERC20;
+
   /**
    * @dev Transfers tokens from the contract to a specified address.
    * @param _token The address of the token to transfer.
@@ -24,7 +27,7 @@ abstract contract AbstractTokenActions is AbstractOwner {
     address _to,
     uint256 _amount
   ) public virtual OnlyOwner {
-    IERC20(_token).transfer(_to, _amount);
+    IERC20(_token).safeTransfer(_to, _amount);
   }
 
   /**
@@ -56,7 +59,7 @@ abstract contract AbstractTokenActions is AbstractOwner {
     address _from,
     uint256 _amount
   ) public virtual OnlyOwner {
-    IERC20(_token).transferFrom(_from, address(this), _amount);
+    IERC20(_token).safeTransferFrom(_from, address(this), _amount);
   }
 
   /**
@@ -74,7 +77,7 @@ abstract contract AbstractTokenActions is AbstractOwner {
     address _to,
     uint256 _amount
   ) public virtual OnlyOwner {
-    IERC20(_token).transferFrom(_from, _to, _amount);
+    IERC20(_token).safeTransferFrom(_from, _to, _amount);
   }
 
   /**
