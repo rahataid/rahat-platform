@@ -16,6 +16,7 @@ import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ExternalAppGuard } from '../decorators';
 import { GrievanceModule } from '../grievance/grievance.module';
 import { ListenersModule } from '../listeners/listeners.module';
+import { OfframpModule } from '../offramp/offramp.module';
 import { MetaTxnProcessorsModule } from '../processors/meta-transaction/metaTransaction.module';
 import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
@@ -59,6 +60,7 @@ import { AppService } from './app.service';
     GrievanceModule,
     TokenModule,
     SettingsModule,
+    OfframpModule,
     RequestContextModule,
     QueueModule,
   ],

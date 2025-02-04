@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "rahat": "set NODE_ENV=development && npx nx serve rahat",
+    "compodoc": "npx compodoc -p tsconfig.doc.json",
     "rahat:prod": "set NODE_ENV=production && npx nx serve rahat",
     "beneficiary": "set NODE_ENV=development && npx nx serve beneficiary",
     "serve:apps": "nx run-many -p rahat beneficiary --targets=serve",
@@ -69,6 +70,7 @@
     "@nestjs/microservices": "^10.3.3",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.3.3",
+    "@rumsan/rabbitmq": "^0.0.1",
     "@nestjs/platform-fastify": "^10.3.3",
     "@nestjs/swagger": "^7.3.0",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
@@ -110,10 +112,14 @@
     "viem": "^2.8.4",
     "winston": "^3.11.0",
     "xlsx": "^0.18.5",
-    "zlib": "^1.0.5"
+    "zlib": "^1.0.5",
+    "@types/amqplib": "^0.10.6",
+    "amqp-connection-manager": "^4.1.14",
+    "amqplib": "^0.10.5"
   },
   "devDependencies": {
     "@atixlabs/hardhat-time-n-mine": "^0.0.5",
+    "@compodoc/compodoc": "^1.1.26",
     "@faker-js/faker": "^8.4.1",
     "@graphprotocol/graph-cli": "^0.82.0",
     "@nestjs/schematics": "^10.1.1",
