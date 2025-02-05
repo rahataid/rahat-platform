@@ -85,7 +85,7 @@ export class BeneficiaryStatService {
         );
 
       if (beneficiaryIds.length > 0) {
-        filter.uuid = beneficiaryIds;
+        filter.uuid = { in: beneficiaryIds };
       }
     }
 
