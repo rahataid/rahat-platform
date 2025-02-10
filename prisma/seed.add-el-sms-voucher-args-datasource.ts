@@ -40,6 +40,16 @@ const projectStats = (uuid: string, url: string) => {
             rowSpan: 1,
             icon: 'HousePlus',
           },
+          {
+            type: 'dataCard',
+            props: {},
+            title: 'Total Inactive Consumers',
+            colSpan: 1,
+            dataMap: `NOT_REDEEM_STATS_ID_${uuid}`,
+            dataSrc: 'source2',
+            rowSpan: 1,
+            icon: 'User-Round-X',
+          },
         ],
       },
       {
