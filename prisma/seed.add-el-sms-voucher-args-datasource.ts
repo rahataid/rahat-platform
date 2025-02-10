@@ -48,7 +48,7 @@ const projectStats = (uuid: string, url: string) => {
             dataMap: `NOT_REDEEM_STATS_ID_${uuid}`,
             dataSrc: 'source2',
             rowSpan: 1,
-            icon: 'User-Round-X',
+            icon: 'UserRoundX',
           },
         ],
       },
