@@ -55,7 +55,7 @@ export class BeneficiaryController {
     // const payloadData = Array.isArray(data?.data) ? data?.data : data?.payload;
 
     return this.service.createBulk(
-      data,
+      data?.payload,
       data?.projectUUID,
       data?.data?.walkinBulk
     );
