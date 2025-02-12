@@ -197,7 +197,7 @@ abstract contract AbstractProject is
     uint _amount,
     address _withdrawAddress
   ) internal restricted {
-    if (_tokenBudget[_tokenAddress] > _amount)
+    if (_tokenBudget[_tokenAddress] >= _amount)
       _tokenBudgetDecrease(_tokenAddress, _amount);
     IERC20(_tokenAddress).safeTransfer(_withdrawAddress, _amount);
     emit TokenTransfer(_tokenAddress, address(_withdrawAddress), _amount);
