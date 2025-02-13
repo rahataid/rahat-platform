@@ -279,6 +279,12 @@ export const rpActions: ProjectActionFunc = {
   [MS_ACTIONS.RPPROJECT.LIST_REPORTING]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.REPORTING.LIST, uuid }, payload),
 
+  [MS_ACTIONS.RPPROJECT.LIST_EYE_CHECKEUP_LINE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.REPORTING.LIST_EYE_CHECKEUP_LINE, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.LIST_PURCHASE_OF_GLASSESS_LINE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.REPORTING.LIST_PURCHASE_OF_GLASSESS_LINE, uuid }, payload),
+
   [MS_ACTIONS.RPPROJECT.GET_REDEMPTION]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.GET_REDEMPTION, uuid }, payload),
 

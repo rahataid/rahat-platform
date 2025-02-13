@@ -324,8 +324,9 @@ export const MS_ACTIONS = {
     LIST_REPORTING: 'rpProject.reporting.list',
     UPDATE_BENEFICIARY: 'rpProject.beneficiary.update',
     LIST_BENEFICIARY_REIMBURSEMENTS: 'rpProject.beneficiary.listReimbursements',
-    SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions'
-
+    SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions',
+    LIST_EYE_CHECKEUP_LINE: 'rpProject.reporting.list_eye_checkup_line',
+    LIST_PURCHASE_OF_GLASSESS_LINE: 'rpProject.reporting.list_purchase_of_glassess',
   },
   COMMS: {
     CREATE_CAMPAIGN: 'comms.campaign.create',

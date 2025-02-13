@@ -99,7 +99,7 @@ const projectStats = (uuid: string, url: string) => {
             type: 'bar',
             props: { horizontal: false, xaxisLabels: true },
             title: 'Consumer Age Group',
-            colSpan: 4,
+            colSpan: 1,
             dataMap: `BENEFICIARY_AGE_RANGE_ID_${uuid}`,
             dataSrc: 'source2',
             rowSpan: 1,
