@@ -127,6 +127,8 @@ export const rpActions: ProjectActionFunc = {
     sendCommand({ cmd: ProjectJobs.UPDATE_REDEMPTION, uuid }, payload),
   [MS_ACTIONS.RPPROJECT.LIST_REDEMPTION]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.LIST_REDEMPTION, uuid }, payload),
+  [MS_ACTIONS.RPPROJECT.GET_BENEFICIARY_REDEMPTION]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.GET_BENEFICIARY_REDEMPTION, uuid }, payload),
   [MS_ACTIONS.RPPROJECT.GET_VENDOR_REDEMPTION]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.GET_VENDOR_REDEMPTION, uuid }, payload),
 

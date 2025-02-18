@@ -301,6 +301,7 @@ export const MS_ACTIONS = {
     REQUEST_REDEMPTION: 'rpProject.requestRedemption',
     UPDATE_REDEMPTION: 'rpProject.updateRedemption',
     LIST_REDEMPTION: 'rpProject.listRedemption',
+    GET_BENEFICIARY_REDEMPTION: 'rpProject.getBeneficiaryRedemption',
     GET_VENDOR_REDEMPTION: 'rpProject.vendorRedemption',
     GET_REDEMPTION: 'rpProject.getRedemption',
     GENERATE_OTP_HASH: 'rpProject.generateOtpHash',
