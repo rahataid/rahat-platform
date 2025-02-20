@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateOfframpProviderDto, CreateOfframpRequestDto, ListOfframpProviderDto, ListOfframpRequestDto, ProviderActionDto } from '@rahataid/extensions';
 import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
+import { randomUUID } from 'crypto';
 import { KotaniPayService } from './offrampProviders/kotaniPay.service';
 
 
@@ -85,38 +86,16 @@ export class OfframpService {
   //TODO: Geenralize the offramp request execution
   async executeOfframpRequest(executeOfframpData: any) {
     console.log({ executeOfframpData });
-    const { providerUuid, requestUuid, ...data } = executeOfframpData;
-    const request = await this.prisma.offrampRequest.findUniqueOrThrow({
-      where: {
-        uuid: requestUuid
-      }
-    });
-    console.log('reference', request)
-    if (!request) {
-      throw new BadRequestException('Offramp request not found');
-    }
-    // const executionData = {
-    //   chain: data.data.chain,
-    //   token: data.data.token,
-    //   transaction_hash: data.data.transaction_hash,
-    //   wallet_id: data.data.wallet_id,
-    //   request_id: data.data.request_id,
-    //   customer_key: data.data.customer_key,
-    //   preview: true
+    const { providerUuid, ...data } = executeOfframpData;
+    // const request = await this.prisma.offrampRequest.findUniqueOrThrow({
+    //   where: {
+    //     uuid: requestUuid
+    //   }
+    // });
+    // if (!request) {
+    // throw new BadRequestException('Offramp request not found');
     // }
-    // const v = {
-    //   "mobileMoneyReceiver": {
-    //     "networkProvider": "MTN",
-    //     "phoneNumber": "+233542851111",
-    //     "accountName": "Patrick Oduro"
-    //   },
-    //   "currency": "KES",
-    //   "chain": "BASE",
-    //   "token": "USDC",
-    //   "cryptoAmount": 1,
-    //   "referenceId": "123456",
-    //   "senderAddress": "0TQdKsMayR5xcEKrE6jDixUQ74xtTEA9euo"
-    // }
+
 
     const executionData = {
       mobileMoneyReceiver: data.data.mobileMoneyReceiver,
@@ -125,11 +104,12 @@ export class OfframpService {
       token: data.data.token,
       cryptoAmount: +data.data.cryptoAmount,
       currency: data.data.currency,
-      referenceId: request.requestId
+      referenceId: randomUUID()
     }
     console.log(JSON.stringify(executionData, null, 2));
     try {
       const { data: kotaniPayResponse } = await this.kotaniPayService.executeOfframpRequest(providerUuid, executionData)
+      console.log('kota', kotaniPayResponse)
 
       const transaction = await this.prisma.offrampTransaction.create({
         data: {
@@ -140,14 +120,33 @@ export class OfframpService {
           customerKey: data.data.customer_key,
           referenceId: executionData.referenceId,
           offrampRequest: {
-            connect: { id: request.id }
+            connectOrCreate: {
+              where: {
+                requestId: executionData.referenceId
+              },
+              create: {
+                chain: data.data.chain,
+                token: data.data.token,
+                senderAddress: data.data.senderAddress,
+                amount: +data.data.cryptoAmount,
+                requestId: executionData.referenceId,
+                escrowAddress: kotaniPayResponse?.escrow_address,
+                status: 'PENDING',
+                extras: {
+                  mobileMoneyReceiver: executionData.mobileMoneyReceiver,
+                  currency: executionData.currency,
+                  cryptoAmount: executionData.cryptoAmount
+                }
+
+              }
+            }
           }
         }
       });
 
       return { transaction, kotaniPayResponse };
     } catch (error) {
-      console.log(error.response);
+      console.log(error);
       throw new BadRequestException(error.response.message);
 
     }

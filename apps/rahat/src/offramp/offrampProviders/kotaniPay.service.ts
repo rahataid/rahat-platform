@@ -88,7 +88,6 @@ export class KotaniPayService
   }
 
   async getFiatWallet(data: ProviderActionDto) {
-    console.log({ data });
     const client = await this.getKotaniPayAxiosClient(data.uuid);
     const response = await client.get('/wallet/fiat');
     return { data: response.data.data };
@@ -111,6 +110,8 @@ export class KotaniPayService
         throw new BadRequestException(e.response.data);
       });
 
+    console.log('THis is the response from off', response)
+
     return { data: response.data as any };
   }
 
@@ -126,8 +127,7 @@ export class KotaniPayService
     });
 
 
-    console.log('response', response)
-    return response.data.data;
+    return response.data;
   }
 
   async checkOfframpStatus(data: any): Promise<any> {
