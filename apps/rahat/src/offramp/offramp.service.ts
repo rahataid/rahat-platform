@@ -51,7 +51,6 @@ export class OfframpService {
   }
 
   async providerActions(data: ProviderActionDto) {
-    console.log({ data });
 
     const offrampProvider = await this.getProviderById(data.uuid);
     if (!offrampProvider) {
