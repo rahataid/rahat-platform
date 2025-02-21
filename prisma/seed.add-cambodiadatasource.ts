@@ -14,7 +14,6 @@ const rl = readline.createInterface({
 const projectStats = (uuid: string, url: string) => {
   return {
     dataSources: {
-
       source3: {
         type: 'url',
         args: {
