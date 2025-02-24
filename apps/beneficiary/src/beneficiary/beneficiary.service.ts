@@ -771,7 +771,10 @@ export class BeneficiaryService {
       };
     } catch (e) {
       console.log(e);
-      throw new RpcException(e)
+      return {
+        success: false
+      }
+      // throw new RpcException(e)
 
     }
   }

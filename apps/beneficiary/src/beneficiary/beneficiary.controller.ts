@@ -46,8 +46,8 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_PHONE })
-  async getBeneficiaryByPhone(wallet: string) {
-    return this.service.findOneByPhone(wallet);
+  async getBeneficiaryByPhone(phone: string) {
+    return this.service.findOneByPhone(phone);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
