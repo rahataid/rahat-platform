@@ -46,8 +46,8 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_PHONE })
-  async getBeneficiaryByPhone(wallet: string) {
-    return this.service.findOneByPhone(wallet);
+  async getBeneficiaryByPhone(phone: string) {
+    return this.service.findOneByPhone(phone);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
@@ -55,8 +55,8 @@ export class BeneficiaryController {
     // const payloadData = Array.isArray(data?.data) ? data?.data : data?.payload;
 
     return this.service.createBulk(
-      data,
-      data?.projectUUID,
+      data?.payload,
+      data?.data?.projectUUID,
       data?.data?.walkinBulk
     );
   }
