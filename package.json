@@ -70,6 +70,7 @@
     "@nestjs/microservices": "^10.3.3",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.3.3",
+    "@rumsan/rabbitmq": "^0.0.1",
     "@nestjs/platform-fastify": "^10.3.3",
     "@nestjs/swagger": "^7.3.0",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
@@ -111,7 +112,10 @@
     "viem": "^2.8.4",
     "winston": "^3.11.0",
     "xlsx": "^0.18.5",
-    "zlib": "^1.0.5"
+    "zlib": "^1.0.5",
+    "@types/amqplib": "^0.10.6",
+    "amqp-connection-manager": "^4.1.14",
+    "amqplib": "^0.10.5"
   },
   "devDependencies": {
     "@atixlabs/hardhat-time-n-mine": "^0.0.5",
