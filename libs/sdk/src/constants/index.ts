@@ -1,3 +1,5 @@
+import { RabbitMQModuleOptions } from '@rumsan/rabbitmq';
+
 export const APP_JOBS = {
   EMAIL: 'email',
   SLACK: 'slack',
@@ -110,6 +112,7 @@ export const MS_ACTIONS = {
     ASSGIN_GROUP_TO_PROJECT: 'beneficiary.assign_group_to_project',
     BULK_ASSIGN_TO_PROJECT: 'beneficiary.bulk_assign',
     LIST_BY_PROJECT: 'beneficiary.list_by_project',
+    LIST_FULL_DATA_BY_PROJECT: 'beneficiary.list_full_data_by_project',
     GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',
   },
   VENDOR: {
@@ -298,6 +301,7 @@ export const MS_ACTIONS = {
     REQUEST_REDEMPTION: 'rpProject.requestRedemption',
     UPDATE_REDEMPTION: 'rpProject.updateRedemption',
     LIST_REDEMPTION: 'rpProject.listRedemption',
+    GET_BENEFICIARY_REDEMPTION: 'rpProject.getBeneficiaryRedemption',
     GET_VENDOR_REDEMPTION: 'rpProject.vendorRedemption',
     GET_REDEMPTION: 'rpProject.getRedemption',
     GENERATE_OTP_HASH: 'rpProject.generateOtpHash',
@@ -322,8 +326,9 @@ export const MS_ACTIONS = {
     LIST_REPORTING: 'rpProject.reporting.list',
     UPDATE_BENEFICIARY: 'rpProject.beneficiary.update',
     LIST_BENEFICIARY_REIMBURSEMENTS: 'rpProject.beneficiary.listReimbursements',
-    SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions'
-
+    SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions',
+    LIST_EYE_CHECKEUP_LINE: 'rpProject.reporting.list_eye_checkup_line',
+    LIST_PURCHASE_OF_GLASSESS_LINE: 'rpProject.reporting.list_purchase_of_glassess',
   },
   COMMS: {
     CREATE_CAMPAIGN: 'comms.campaign.create',
@@ -343,3 +348,16 @@ export const MS_ACTIONS = {
     GET_ONE_GROUP: 'comms.beneficiary.getOneGroup',
   },
 }
+
+
+export const RABBIT_MQ = {
+  AMQP_CONNECTION: 'AMQP_CONNECTION',
+  CT_BENEFICIARY_EXPORT: 'CT_BENEFICIARY_EXPORT',
+};
+export const queueOptions: RabbitMQModuleOptions['queues'] = [
+  {
+    name: RABBIT_MQ.CT_BENEFICIARY_EXPORT,
+    durable: true,
+    options: {},
+  },
+];
