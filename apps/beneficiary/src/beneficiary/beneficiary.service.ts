@@ -27,6 +27,7 @@ import {
   TPIIData
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
+import { EVENTS } from '@rumsan/user';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -773,6 +774,22 @@ export class BeneficiaryService {
   async syncProjectStats(projectUuid) {
     return await this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
       projectUuid,
+    });
+  }
+
+
+  async sendDisbursementCreatedEmail(payload) {
+    const ben = await this.prisma.beneficiary.findUnique({
+      where: {
+        walletAddress: payload.walletAddress
+      },
+      include: {
+        pii: true
+      }
+    })
+    return await this.eventEmitter.emit(EVENTS.DISBURSEMENT_CREATED, {
+      amount: payload.amount,
+      email: ben.pii.email
     });
   }
   async createBulkWithQueue(
