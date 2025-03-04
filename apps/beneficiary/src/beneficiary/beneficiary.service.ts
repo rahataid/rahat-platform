@@ -27,7 +27,6 @@ import {
   TPIIData
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
-import { EVENTS } from '@rumsan/user';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -787,7 +786,7 @@ export class BeneficiaryService {
         pii: true
       }
     })
-    return await this.eventEmitter.emit(EVENTS.DISBURSEMENT_CREATED, {
+    return await this.eventEmitter.emit(BeneficiaryEvents.DISBURSEMENT_CREATED, {
       amount: payload.amount,
       email: ben.pii.email
     });

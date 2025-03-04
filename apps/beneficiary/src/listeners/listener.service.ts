@@ -63,7 +63,7 @@ export class ListenersService {
     );
   }
 
-  @OnEvent(EVENTS.DISBURSEMENT_CREATED)
+  @OnEvent(BeneficiaryEvents.DISBURSEMENT_CREATED)
   async sendDisbursementEmail(data: any) {
     this.emailService.sendEmail(
       data.email,
