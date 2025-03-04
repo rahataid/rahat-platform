@@ -786,6 +786,7 @@ export class BeneficiaryService {
         pii: true
       }
     })
+    if (!ben.pii.email) throw new RpcException("Email not found")
     return await this.eventEmitter.emit(BeneficiaryEvents.DISBURSEMENT_CREATED, {
       amount: payload.amount,
       email: ben.pii.email

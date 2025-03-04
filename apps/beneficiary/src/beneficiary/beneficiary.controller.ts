@@ -254,7 +254,7 @@ export class BeneficiaryController {
     return this.service.syncProjectStats(payload.projectUUID)
   }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.CALCULATE_STATS })
+  @MessagePattern({ cmd: BeneficiaryJobs.SEND_DISBURSEMENT_CREATED_EMAIL })
   async sendDisbursementCreatedEmail(payload) {
     return this.service.sendDisbursementCreatedEmail(payload)
   }
