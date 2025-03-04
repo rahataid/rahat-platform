@@ -5,6 +5,7 @@ export const EVENTS = {
   BENEFICIARY_UPDATED: 'beneficiary.updated',
   BENEFICIARY_ASSIGNED_TO_PROJECT: 'beneficiary.projectAssigned',
   VENDORS_CREATED: 'vendors.created',
+  DISBURSEMENT_CREATED: 'disbursement.created'
 };
 
 export const JOBS = {
