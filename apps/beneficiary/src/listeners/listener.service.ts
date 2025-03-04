@@ -63,6 +63,33 @@ export class ListenersService {
     );
   }
 
-
+  @OnEvent(EVENTS.DISBURSEMENT_CREATED)
+  async sendDisbursementEmail(data: any) {
+    this.emailService.sendEmail(
+      data.email,
+      'USDC Received',
+      'USDC Received',
+      `
+        <div style="max-width:800px;max-height: 600px;overflow:auto;line-height:2;background: #333333;">
+          <div style="margin:50px auto;width:70%;padding:40px 40px; border: 1px solid #fff; border-radius: 12px;">
+            <div style="text-align: center;">
+              <img src='https://assets.rumsan.net/rumsan-group/rahat-logo-white.png' width="250" title="stage4all" alt="stage4all">
+            </div>
+            <div style="color:#fff; text-align: center;">
+              <h4 style="font-size:1.3em;">You have succefully received ${data.amount} USDC</h4>
+            </div>
+         
+            <hr style=" border-top: 1px solid rgb(73, 72, 72)" />
+            <div style="color:#fff!important">
+              <p>
+                Regards,<br />
+                Team Rahat
+              </p>
+            </div>
+          </div>
+        </div>
+      `
+    );
+  }
 
 }
