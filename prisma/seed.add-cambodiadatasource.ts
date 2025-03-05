@@ -108,7 +108,7 @@ const projectStats = (uuid: string, url: string) => {
           {
             type: 'donut',
             props: {},
-            title: 'Consumer Type',
+            title: 'All Wearers Breakdown',
             colSpan: 1,
             dataMap: `CONSUMER_TYPE`,
             dataSrc: 'source3',
