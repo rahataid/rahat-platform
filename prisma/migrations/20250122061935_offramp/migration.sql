@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "tbl_users" ALTER COLUMN "createdBy" SET DATA TYPE TEXT,
+ALTER COLUMN "updatedBy" SET DATA TYPE TEXT;
