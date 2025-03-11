@@ -80,6 +80,7 @@ const projectStats = (uuid: string, url: string) => {
             dataMap: 'TOTAL_LEADS',
             dataSrc: 'source3',
             rowSpan: 1,
+            isHref: true
           },
           {
             icon: 'Ticket',
