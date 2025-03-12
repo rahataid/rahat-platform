@@ -347,6 +347,22 @@ export const MS_ACTIONS = {
     GET_ALL_GROUPS: 'comms.beneficiary.getAllGroups',
     GET_ONE_GROUP: 'comms.beneficiary.getOneGroup',
   },
+
+  MS_TRIGGERS: {
+    DEV_ONLY: 'ms.triggers.devOnly',
+    GET_ALL: 'ms.triggers.getAll',
+    GET_ONE: 'ms.triggers.getOne',
+    ADD: 'ms.triggers.add',
+    REMOVE: 'ms.triggers.remove',
+    ACTIVATE: 'ms.triggers.activate',
+  },
+  MS_PHASES: {
+    GET_ONE: 'ms.phases.getOne',
+    GET_ALL: 'ms.phases.getAll',
+    GET_STATS: 'ms.phases.getStats',
+    ADD_TRIGGERS: 'ms.phases.addTriggers',
+    REVERT_PHASE: 'ms.phases.revertPhase',
+  },
 }
 
 
