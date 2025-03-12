@@ -372,6 +372,21 @@ export const MS_ACTIONS = {
     GET_DHM: 'ms.waterLevels.getDhm',
     GET_GLOFAS: 'ms.waterLevels.getGlofas',
   },
+  MS_ACTIVITIES: {
+    GET_ONE: 'ms.activities.getOne',
+    GET_ALL: 'ms.activities.getAll',
+    GET_HAVING_COMMS: 'ms.activities.getHavingComms',
+    ADD: 'ms.activities.add',
+    REMOVE: 'ms.activities.remove',
+    UPDATE: 'ms.activities.update',
+    UPDATE_STATUS: 'ms.activities.updateStatus',
+    COMMUNICATION: {
+      TRIGGER: 'ms.activities.communication.trigger',
+      SESSION_LOGS: 'ms.activities.communication.sessionLogs',
+      RETRY_FAILED: 'ms.activities.communication.retryFailed',
+      GET_STATS: 'ms.activities.communication.getStats',
+    },
+  },
 }
 
 

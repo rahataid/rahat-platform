@@ -26,6 +26,21 @@ export const MS_TRIGGERS_JOBS = {
     GET_DHM: 'ms.jobs.waterLevels.getDhm',
     GET_GLOFAS: 'ms.jobs.waterLevels.getGlofas',
   },
+  ACTIVITIES: {
+    GET_ONE: 'ms.jobs.activities.getOne',
+    GET_ALL: 'ms.jobs.activities.getAll',
+    GET_HAVING_COMMS: 'ms.jobs.activities.getHavingComms',
+    ADD: 'ms.jobs.activities.add',
+    REMOVE: 'ms.jobs.activities.remove',
+    UPDATE: 'ms.jobs.activities.update',
+    UPDATE_STATUS: 'ms.jobs.activities.updateStatus',
+    COMMUNICATION: {
+      // TRIGGER: 'ms.jobs.activity.communication.trigger',
+      // SESSION_LOGS: 'ms.jobs.activities.communication.sessionLogs',
+      // RETRY_FAILED: 'ms.jobs.activities.communication.retryFailed',
+      GET_STATS: 'ms.jobs.activities.communication.getStats',
+    },
+  },
 }
 
 
@@ -80,4 +95,48 @@ export const msTriggerActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: MS_TRIGGERS_JOBS.WATER_LEVELS.GET_GLOFAS, uuid }, payload),
   // **** river stations end ******//
+
+
+
+  // **** activities start ******//
+  // [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.SESSION_LOGS]: (uuid, payload, sendCommand) =>
+  //   sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.SESSION_LOGS, uuid }, payload),
+
+
+  // [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.RETRY_FAILED]: (uuid, payload, sendCommand) =>
+  //   sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.RETRY_FAILED, uuid }, payload),
+
+  // [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.TRIGGER]: (uuid, payload, sendCommand) =>
+  //   sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.TRIGGER, uuid }, payload),
+
+  [MS_ACTIONS.MS_ACTIVITIES.ADD]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.ADD, uuid }, payload),
+
+  [MS_ACTIONS.MS_ACTIVITIES.REMOVE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.REMOVE, uuid }, payload),
+
+  [MS_ACTIONS.MS_ACTIVITIES.GET_ALL]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.GET_ALL, uuid }, payload),
+
+  [MS_ACTIONS.MS_ACTIVITIES.GET_HAVING_COMMS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.GET_HAVING_COMMS, uuid }, payload),
+
+  [MS_ACTIONS.MS_ACTIVITIES.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.GET_ONE, uuid }, payload),
+
+  [MS_ACTIONS.MS_ACTIVITIES.UPDATE_STATUS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.UPDATE_STATUS, uuid }, payload),
+
+  [MS_ACTIONS.MS_ACTIVITIES.UPDATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.UPDATE, uuid }, payload),
+
+  [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.GET_STATS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.GET_STATS, uuid }, payload),
+  // **** activities end ******//
 };
