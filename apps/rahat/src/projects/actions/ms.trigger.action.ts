@@ -46,7 +46,9 @@ export const MS_TRIGGERS_JOBS = {
 
 export const msTriggerActions: ProjectActionFunc = {
 
-  ["triggers.add"]: (uuid, payload, sendCommand) => sendCommand({ cmd: "test.trigger", uuid: "a83e3867-de4b-4c20-b955-3d84875bc423" }, payload),
+  ["triggers.try"]: (uuid, payload, sendCommand) => {
+    return sendCommand({ cmd: "try.trigger" }, payload)
+  },
 
   // **** triggers start ******//
   [MS_ACTIONS.MS_TRIGGERS.ADD]: (uuid, payload, sendCommand) =>
