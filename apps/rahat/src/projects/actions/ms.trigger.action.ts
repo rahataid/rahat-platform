@@ -19,7 +19,13 @@ export const MS_TRIGGERS_JOBS = {
     ADD_TRIGGERS: 'ms.jobs.phases.addTriggers',
     REVERT_PHASE: 'ms.jobs.phases.revertPhase',
   },
-
+  RIVER_STATIONS: {
+    GET_DHM: 'ms.jobs.riverStations.getDhm',
+  },
+  WATER_LEVELS: {
+    GET_DHM: 'ms.jobs.waterLevels.getDhm',
+    GET_GLOFAS: 'ms.jobs.waterLevels.getGlofas',
+  },
 }
 
 
@@ -59,4 +65,19 @@ export const msTriggerActions: ProjectActionFunc = {
     sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.REVERT_PHASE, uuid }, payload),
   // // **** phases end ******//
 
+
+  // **** river stations start ******//
+
+  [MS_ACTIONS.MS_RIVER_STATIONS.GET_DHM]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.RIVER_STATIONS.GET_DHM, uuid }, payload),
+
+  [MS_ACTIONS.MS_WATER_LEVELS.GET_DHM]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.WATER_LEVELS.GET_DHM, uuid }, payload),
+
+  [MS_ACTIONS.MS_WATER_LEVELS.GET_GLOFAS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: MS_TRIGGERS_JOBS.WATER_LEVELS.GET_GLOFAS, uuid }, payload),
+  // **** river stations end ******//
 };

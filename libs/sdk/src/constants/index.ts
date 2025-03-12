@@ -363,6 +363,15 @@ export const MS_ACTIONS = {
     ADD_TRIGGERS: 'ms.phases.addTriggers',
     REVERT_PHASE: 'ms.phases.revertPhase',
   },
+
+
+  MS_RIVER_STATIONS: {
+    GET_DHM: 'ms.riverStations.getDhm',
+  },
+  MS_WATER_LEVELS: {
+    GET_DHM: 'ms.waterLevels.getDhm',
+    GET_GLOFAS: 'ms.waterLevels.getGlofas',
+  },
 }
 
 
