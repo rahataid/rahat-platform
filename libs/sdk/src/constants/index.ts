@@ -387,6 +387,19 @@ export const MS_ACTIONS = {
       GET_STATS: 'ms.activities.communication.getStats',
     },
   },
+  MS_CATEGORIES: {
+    GET_ALL: 'ms.activityCategories.getAll',
+    ADD: 'ms.activityCategories.add',
+    REMOVE: 'ms.activityCategories.remove',
+  },
+
+  MS_DAILY_MONITORING: {
+    ADD: 'ms.dailyMonitoring.add',
+    GET_ALL: 'ms.dailyMonitoring.getAll',
+    GET_ONE: 'ms.dailyMonitoring.getOne',
+    UPDATE: 'ms.dailyMonitoring.update',
+    REMOVE: 'ms.dailyMonitoring.remove',
+  },
 }
 
 

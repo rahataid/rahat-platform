@@ -41,6 +41,19 @@ export const MS_TRIGGERS_JOBS = {
       GET_STATS: 'ms.jobs.activities.communication.getStats',
     },
   },
+
+  CATEGORIES: {
+    GET_ALL: 'ms.jobs.categories.getAll',
+    ADD: 'ms.jobs.categories.add',
+    REMOVE: 'ms.jobs.categories.remove',
+  },
+  DAILY_MONITORING: {
+    ADD: 'ms.jobs.dailyMonitoring.add',
+    GET_ALL: 'ms.jobs.dailyMonitoring.getAll',
+    GET_ONE: 'ms.jobs.dailyMonitoring.getOne',
+    UPDATE: 'ms.jobs.dailyMonitoring.update',
+    REMOVE: 'ms.jobs.dailyMonitoring.remove',
+  },
 }
 
 
@@ -141,4 +154,60 @@ export const msTriggerActions: ProjectActionFunc = {
   [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.GET_STATS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.GET_STATS, uuid }, payload),
   // **** activities end ******//
+
+
+
+
+  // **** activity categories start ******//
+  [MS_ACTIONS.MS_CATEGORIES.GET_ALL]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: MS_TRIGGERS_JOBS.CATEGORIES.GET_ALL, uuid }, payload),
+
+  [MS_ACTIONS.MS_CATEGORIES.ADD]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: MS_TRIGGERS_JOBS.CATEGORIES.ADD, uuid }, payload),
+
+  [MS_ACTIONS.MS_CATEGORIES.REMOVE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: MS_TRIGGERS_JOBS.CATEGORIES.REMOVE, uuid }, payload),
+
+  // [MS_ACTIONS.AAPROJECT.HAZARD_TYPES.GET_ALL]: (uuid, payload, sendCommand) =>
+  //   sendCommand({ cmd: AAJobs.HAZARD_TYPES.GET_ALL, uuid }, payload),
+  // **** activity categories end ******//
+
+
+
+  [MS_ACTIONS.MS_DAILY_MONITORING.ADD]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.ADD, uuid }, payload),
+
+  [MS_ACTIONS.MS_DAILY_MONITORING.GET_ALL]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.GET_ALL, uuid }, payload),
+
+  [MS_ACTIONS.MS_DAILY_MONITORING.GET_ONE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.GET_ONE, uuid }, payload),
+
+  [MS_ACTIONS.MS_DAILY_MONITORING.UPDATE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.UPDATE, uuid }, payload),
+
+  [MS_ACTIONS.MS_DAILY_MONITORING.REMOVE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.REMOVE, uuid }, payload),
+  // **** daily monitoring end ****//
 };
