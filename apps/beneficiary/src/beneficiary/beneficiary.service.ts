@@ -775,6 +775,23 @@ export class BeneficiaryService {
       projectUuid,
     });
   }
+
+
+  async sendDisbursementCreatedEmail(payload) {
+    const ben = await this.prisma.beneficiary.findUnique({
+      where: {
+        walletAddress: payload.walletAddress
+      },
+      include: {
+        pii: true
+      }
+    })
+    if (!ben.pii.email) throw new RpcException("Email not found")
+    return await this.eventEmitter.emit(BeneficiaryEvents.DISBURSEMENT_CREATED, {
+      amount: payload.amount,
+      email: ben.pii.email
+    });
+  }
   async createBulkWithQueue(
     beneficiaries: CreateBeneficiaryDto[],
     allData?: any

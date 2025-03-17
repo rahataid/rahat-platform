@@ -254,6 +254,11 @@ export class BeneficiaryController {
     return this.service.syncProjectStats(payload.projectUUID)
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.SEND_DISBURSEMENT_CREATED_EMAIL })
+  async sendDisbursementCreatedEmail(payload) {
+    return this.service.sendDisbursementCreatedEmail(payload)
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.DELETE_BENEFICIARY_AND_PII })
   async deleteBenefAndPii(payload: any) {
     return this.service.deleteBenefAndPii(payload);
