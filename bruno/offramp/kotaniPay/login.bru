@@ -1,0 +1,20 @@
+meta {
+  name: login
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{url}}/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  accept: application/json
+  content-type: application/json
+}
+
+body:json {
+   { "email": "raghav.kattel@rumsan.net" } 
+}
