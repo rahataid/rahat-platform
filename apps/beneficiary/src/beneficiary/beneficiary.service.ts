@@ -28,6 +28,7 @@ import {
   ProjectContants,
   TPIIData
 } from '@rahataid/sdk';
+import { EVMWallet } from '@rahataid/wallet';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -39,12 +40,15 @@ import {
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
+import { FileWalletStorage } from '../utils/walletStorage';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
+
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 const BATCH_SIZE = 20;
-
+const storage = new FileWalletStorage();
+const evmWallet = new EVMWallet("", storage);
 
 @Injectable()
 export class BeneficiaryService {
@@ -329,10 +333,10 @@ export class BeneficiaryService {
 
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
     const { piiData, projectUUIDs, ...data } = dto;
-    let { walletAddress } = data;
-    walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(
-      walletAddress
-    );
+
+    if (!storage.isInitialized()) storage.init();
+    const wallet = await evmWallet.createWallet();
+    const walletAddress = wallet.getWalletKeys().address;
 
     if (!piiData.phone) throw new RpcException('Phone number is required');
     await this.beneficiaryUtilsService.ensureUniquePhone(
