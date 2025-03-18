@@ -1,11 +1,11 @@
 meta {
-  name: get-integrator
+  name: Generate API Key
   type: http
-  seq: 6
+  seq: 8
 }
 
 get {
-  url: {{url}}/integrator
+  url: {{url}}/auth/api-key/secure
   body: none
   auth: none
 }
