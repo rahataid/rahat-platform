@@ -1,0 +1,15 @@
+meta {
+  name: API Key Generate
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{url}}/auth/api-key/secure
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjdkOGNmNWJiM2ViNmZmYmY5ZTY0NDFkIiwic2Vzc2lvbl9pZCI6IjZlZTc1ZTBlYjgxNDU3OGI4YTg2NmZkOTYyYmU0MTZhIiwidG9rZW5faWQiOiJHNkM3dzdteSIsImlhdCI6MTc0MjI2MjE1NCwiZXhwIjoxNzQyMjY4MTU0fQ.vXuLHVVLp3bNoQnYvoCaizYg44JIT4gXSTwOXaJ91uI
+}
