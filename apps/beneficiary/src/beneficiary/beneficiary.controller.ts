@@ -46,8 +46,8 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_PHONE })
-  async getBeneficiaryByPhone(phone: string) {
-    return this.service.findOneByPhone(phone);
+  async getBeneficiaryByPhone(payload: { phone: string, projectUUID: string }) {
+    return this.service.findOneByPhone(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
