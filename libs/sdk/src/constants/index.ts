@@ -355,6 +355,7 @@ export const MS_ACTIONS = {
     ADD: 'ms.triggers.add',
     REMOVE: 'ms.triggers.remove',
     ACTIVATE: 'ms.triggers.activate',
+    GET_BY_LOCATION: 'ms.triggers.getByLocation',
   },
   MS_PHASES: {
     GET_ONE: 'ms.phases.getOne',
@@ -362,6 +363,7 @@ export const MS_ACTIONS = {
     GET_STATS: 'ms.phases.getStats',
     ADD_TRIGGERS: 'ms.phases.addTriggers',
     REVERT_PHASE: 'ms.phases.revertPhase',
+    GET_BY_LOCATION: 'ms.phases.getByLocation',
   },
 
 

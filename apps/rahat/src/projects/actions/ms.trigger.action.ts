@@ -18,6 +18,7 @@ export const MS_TRIGGERS_JOBS = {
     GET_STATS: 'ms.jobs.phases.getStats',
     ADD_TRIGGERS: 'ms.jobs.phases.addTriggers',
     REVERT_PHASE: 'ms.jobs.phases.revertPhase',
+    GET_BY_LOCATION: 'ms.jobs.phases.getByLocation',
   },
   RIVER_STATIONS: {
     GET_DHM: 'ms.jobs.riverStations.getDhm',
@@ -67,6 +68,9 @@ export const msTriggerActions: ProjectActionFunc = {
   [MS_ACTIONS.MS_TRIGGERS.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: MS_TRIGGERS_JOBS.TRIGGER.ADD, uuid }, payload),
 
+  [MS_ACTIONS.MS_TRIGGERS.REMOVE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.TRIGGER.REMOVE, uuid }, payload),
+
   [MS_ACTIONS.MS_TRIGGERS.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: MS_TRIGGERS_JOBS.TRIGGER.GET_ALL, uuid }, payload),
 
@@ -75,6 +79,10 @@ export const msTriggerActions: ProjectActionFunc = {
 
   [MS_ACTIONS.MS_TRIGGERS.ACTIVATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: MS_TRIGGERS_JOBS.TRIGGER.ACTIVATE, uuid }, payload),
+
+
+  [MS_ACTIONS.MS_TRIGGERS.GET_BY_LOCATION]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.TRIGGER.GET_BY_LOCATION, uuid }, payload),
 
   // **** triggers end ******//
 
@@ -93,6 +101,10 @@ export const msTriggerActions: ProjectActionFunc = {
 
   [MS_ACTIONS.MS_PHASES.REVERT_PHASE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.REVERT_PHASE, uuid }, payload),
+
+  [MS_ACTIONS.MS_PHASES.GET_BY_LOCATION]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.GET_BY_LOCATION, uuid }, payload),
+
   // // **** phases end ******//
 
 
@@ -114,15 +126,15 @@ export const msTriggerActions: ProjectActionFunc = {
 
 
   // **** activities start ******//
-  // [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.SESSION_LOGS]: (uuid, payload, sendCommand) =>
-  //   sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.SESSION_LOGS, uuid }, payload),
+  [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.SESSION_LOGS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.SESSION_LOGS, uuid }, payload),
 
 
   // [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.RETRY_FAILED]: (uuid, payload, sendCommand) =>
   //   sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.RETRY_FAILED, uuid }, payload),
 
-  [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.TRIGGER]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.TRIGGER, uuid }, payload),
+  // [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.TRIGGER]: (uuid, payload, sendCommand) =>
+  //   sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.TRIGGER, uuid }, payload),
 
   [MS_ACTIONS.MS_ACTIVITIES.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.ADD, uuid }, payload),
@@ -182,6 +194,8 @@ export const msTriggerActions: ProjectActionFunc = {
   // **** activity categories end ******//
 
 
+
+  // **** daily monitoring start ****//
 
   [MS_ACTIONS.MS_DAILY_MONITORING.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.ADD, uuid }, payload),
