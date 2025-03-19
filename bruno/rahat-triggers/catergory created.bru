@@ -1,0 +1,25 @@
+meta {
+  name: catergory created
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.activityCategories.add",
+    "payload": {
+      "name": "Johnh Doessss",
+       "appId" : "{{appId}}"
+    }
+  }
+}

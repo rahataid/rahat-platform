@@ -358,6 +358,7 @@ export const MS_ACTIONS = {
     GET_BY_LOCATION: 'ms.triggers.getByLocation',
   },
   MS_PHASES: {
+    CREATE: "ms.phases.create",
     GET_ONE: 'ms.phases.getOne',
     GET_ALL: 'ms.phases.getAll',
     GET_STATS: 'ms.phases.getStats',

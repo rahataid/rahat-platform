@@ -13,6 +13,7 @@ export const MS_TRIGGERS_JOBS = {
   },
 
   PHASES: {
+    CREATE: 'ms.jobs.phases.create',
     GET_ONE: 'ms.jobs.phases.getOne',
     GET_ALL: 'ms.jobs.phases.getAll',
     GET_STATS: 'ms.jobs.phases.getStats',
@@ -87,6 +88,11 @@ export const msTriggerActions: ProjectActionFunc = {
   // **** triggers end ******//
 
   // // **** phases start ******//
+
+
+  [MS_ACTIONS.MS_PHASES.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.CREATE, uuid }, payload),
+
   [MS_ACTIONS.MS_PHASES.GET_ONE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.GET_ONE, uuid }, payload),
 
