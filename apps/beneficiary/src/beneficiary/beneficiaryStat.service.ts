@@ -85,7 +85,7 @@ export class BeneficiaryStatService {
         );
 
       if (beneficiaryIds.length > 0) {
-        filter.uuid = beneficiaryIds;
+        filter.uuid = { in: beneficiaryIds };
       }
     }
 
@@ -102,7 +102,6 @@ export class BeneficiaryStatService {
       count: stat._count.age,
     }));
   }
-
   async calculateBankedStatusStats(projectUuid?: string) {
     const filter: any = {};
 
