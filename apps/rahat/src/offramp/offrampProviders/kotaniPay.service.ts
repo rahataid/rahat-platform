@@ -163,6 +163,7 @@ export class KotaniPayService
     const response = await client.get(
       `/customer/mobile-money/phone/${data.payload.phone_number}`
     );
+
     const offrampTransactionsBywallet = await this.prisma.offrampTransaction.findMany({
       where: {
         customerKey: response.data?.data.customer_key
@@ -171,6 +172,39 @@ export class KotaniPayService
         createdAt: 'desc'
       }
     })
+    const kotanipayStatusCheck = await this.checkOfframpStatus({
+      uuid: data.uuid,
+      payload: {
+        referenceId: offrampTransactionsBywallet[0]?.referenceId
+      }
+    })
+    const transactionStatus = kotanipayStatusCheck.data.data.status
+
+    const mapTransactionStatus = {
+      "PENDING": "PENDING",
+      "PROCESSING": "PENDING",
+      "SUCCESSFUL": "COMPLETED"
+
+    }
+
+    if (transactionStatus !== offrampTransactionsBywallet[0]?.status) {
+      await this.prisma.offrampTransaction.updateMany({
+        where: {
+          customerKey: response.data?.data.customer_key
+        },
+        data: {
+          status: mapTransactionStatus[transactionStatus] || transactionStatus,
+          txHash: kotanipayStatusCheck.data.data.transactionHash,
+
+        }
+      })
+      offrampTransactionsBywallet[0].status = mapTransactionStatus[transactionStatus] || transactionStatus
+    }
+
+
+
+
+    console.log('transactionStatus', kotanipayStatusCheck)
     return {
       data: {
         ...response.data,
