@@ -1,0 +1,26 @@
+meta {
+  name: list project specific activities
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.activities.listProjectSpecific",
+    "payload": {
+       "page" : 1,
+      "perPage": 20,
+      "appId": "{{appId}}"
+    }
+  }
+}

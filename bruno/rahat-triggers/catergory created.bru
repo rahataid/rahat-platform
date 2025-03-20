@@ -18,8 +18,13 @@ body:json {
   {
     "action": "ms.activityCategories.add",
     "payload": {
-      "name": "Johnh Doessss",
+      "name": "Johnh Doesssss",
        "appId" : "{{appId}}"
     }
   }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
 }

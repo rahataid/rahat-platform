@@ -31,6 +31,7 @@ export const MS_TRIGGERS_JOBS = {
   ACTIVITIES: {
     GET_ONE: 'ms.jobs.activities.getOne',
     GET_ALL: 'ms.jobs.activities.getAll',
+    LIST_PROJECT_SPECIFIC: 'ms.jobs.activities.listProjectSpecific',
     GET_HAVING_COMMS: 'ms.jobs.activities.getHavingComms',
     ADD: 'ms.jobs.activities.add',
     REMOVE: 'ms.jobs.activities.remove',
@@ -150,6 +151,9 @@ export const msTriggerActions: ProjectActionFunc = {
 
   [MS_ACTIONS.MS_ACTIVITIES.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.GET_ALL, uuid }, payload),
+
+  [MS_ACTIONS.MS_ACTIVITIES.LIST_PROJECT_SPECIFIC]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.LIST_PROJECT_SPECIFIC, uuid }, payload),
 
   [MS_ACTIONS.MS_ACTIVITIES.GET_HAVING_COMMS]: (
     uuid,

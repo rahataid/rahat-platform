@@ -1,0 +1,25 @@
+meta {
+  name: List forecast data sources based on the water level
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.waterLevels.getDhm",
+    "payload": {
+      "page": 1 ,
+      "perPage": 11
+    }
+  }
+}

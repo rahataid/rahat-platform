@@ -383,6 +383,7 @@ export const MS_ACTIONS = {
     REMOVE: 'ms.activities.remove',
     UPDATE: 'ms.activities.update',
     UPDATE_STATUS: 'ms.activities.updateStatus',
+    LIST_PROJECT_SPECIFIC: 'ms.activities.listProjectSpecific',
     COMMUNICATION: {
       TRIGGER: 'ms.activities.communication.trigger',
       SESSION_LOGS: 'ms.activities.communication.sessionLogs',
