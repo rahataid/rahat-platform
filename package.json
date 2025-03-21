@@ -53,7 +53,8 @@
     "contracts:test": "cd ./apps/contracts && hardhat test",
     "test": "jest",
     "bruno:test": "cd bruno && bru run --env local",
-    "bruno:coverage": "cd bruno && bru run --env local --output results.json"
+    "bruno:coverage": "cd bruno && bru run --env local --output results.json",
+    "add:stats": "npx ts-node prisma/unified-stats-script.ts"
   },
   "private": true,
   "dependencies": {

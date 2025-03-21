@@ -1,460 +1,115 @@
 /**
  * unified-stats-script.ts
  *
- * A single script that uses Inquirer to prompt:
- *  - Base URL
- *  - Core vs. Project
- *  - (If Project) Project Type
- *  - (If Project) Project UUID
- *
- * Then creates stats with Prisma in your `stats` table.
- *
  * Usage:
  *   ts-node unified-stats-script.ts
  *
- * Make sure you have installed: npm i inquirer
+ * Make sure you have in your package.json dependencies:
+ *   "@prisma/client": "^some_version",
+ *   "inquirer": "^some_version"
+ *
+ * Also ensure you have TypeScript >=4.7 if using "assert { type: 'json' }" ESM imports:
+ *   "module": "NodeNext" or "nodenext" in your tsconfig
  */
 
 import { PrismaClient } from '@prisma/client';
-import { PrismaService } from '@rumsan/prisma'; // If you need it
+import fs from 'fs';
 import inquirer from 'inquirer';
+import path from 'path';
 
-// If you only need a single Prisma client:
-const prismaClient = new PrismaClient();
+const aaConfig = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'stats-configs', 'aa.json'), 'utf-8')
+);
+const coreConfig = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'stats-configs', 'core.json'), 'utf-8')
+);
+const elKenyaConfig = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'stats-configs', 'el-kenya.json'), 'utf-8')
+);
+const smsVoucherConfig = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'stats-configs', 'sms-voucher.json'), 'utf-8')
+);
 
-/**
- * For a minimal approach, remove this and just use "prismaClient".
- * Or if you want the custom PrismaService from @rumsan/prisma,
- * keep it as well. They can both point to the same DB.
- */
-const prismaService = new PrismaService();
 
-/**
- * Build stats for "core" environment
- */
-function buildCoreStats(baseUrl: string) {
-  return {
-    dataSources: {
-      source2: {
-        type: 'url',
-        args: {
-          // For core, we fetch stats from e.g. /v1/beneficiaries/stats
-          url: `${baseUrl}/v1/beneficiaries/stats`,
-        },
-        data: [],
-      },
-    },
-    ui: [
-      {
-        fields: [
-          {
-            type: 'dataCard',
-            props: {},
-            title: 'Total Beneficiaries',
-            colSpan: 1,
-            dataMap: 'BENEFICIARY_TOTAL',
-            dataSrc: 'source2',
-            rowSpan: 1,
-            icon: 'UsersRound',
-          },
-        ],
-      },
-      {
-        fields: [
-          {
-            type: 'donut',
-            props: {},
-            title: 'Total Beneficiaries',
-            colSpan: 1,
-            dataMap: 'BENEFICIARY_GENDER',
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            type: 'donut',
-            props: {},
-            title: 'Household Phone Availability',
-            colSpan: 1,
-            dataMap: 'BENEFICIARY_PHONE_AVAILABILITY_STATS',
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            type: 'donut',
-            props: {},
-            title: 'Household Bank Status',
-            colSpan: 1,
-            dataMap: 'BENEFICIARY_BANKEDSTATUS',
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-        ],
-      },
-      {
-        title: '',
-        fields: [
-          {
-            type: 'donut',
-            props: {},
-            title: 'Type of Phone',
-            colSpan: 1,
-            dataMap: 'BENEFICIARY_PHONESTATUS',
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-        ],
-      },
-      {
-        title: 'Beneficiaries GPS Location',
-        fields: [
-          {
-            type: 'map',
-            props: {},
-            title: '',
-            colSpan: 3,
-            dataMap: 'BENEFICIARY_MAP_STATS',
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-        ],
-      },
-    ],
-  };
-}
 
-/**
- * Build stats for "aa" environment (placeholder example).
- */
-function buildAAStats(uuid: string, baseUrl: string) {
-  return {
-    dataSources: {
-      mySource: {
-        type: 'url',
-        args: {
-          url: `${baseUrl}/v1/projects/${uuid}/stats`,
-        },
-        data: [],
-      },
-    },
-    ui: [
-      {
-        fields: [
-          {
-            type: 'dataCard',
-            props: {},
-            title: 'Total Something for AA',
-            colSpan: 1,
-            dataMap: `AA_TOTAL_ID_${uuid}`,
-            dataSrc: 'mySource',
-            rowSpan: 1,
-            icon: 'UsersRound',
-          },
-        ],
-      },
-    ],
-  };
-}
 
-/**
- * Build stats for "el-kenya" environment
- */
-function buildElKenyaStats(uuid: string, baseUrl: string) {
-  return {
-    dataSources: {
-      source2: {
-        type: 'url',
-        args: {
-          url: `${baseUrl}/v1/projects/${uuid}/stats`,
-        },
-        data: [],
-      },
-      source3: {
-        type: 'url',
-        args: {
-          url: `${baseUrl}/v1/projects/${uuid}/actions`,
-          apiCallData: {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'rpProject.reporting.list',
-              payload: {},
-            }),
-          },
-        },
-        data: [],
-      },
-    },
-    ui: [
-      {
-        fields: [
-          {
-            type: 'dataCard',
-            props: {},
-            title: 'Total Beneficiaries',
-            colSpan: 1,
-            dataMap: `BENEFICIARY_TOTAL_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-            icon: 'UsersRound',
-          },
-          {
-            type: 'dataCard',
-            props: {},
-            title: 'Total Vision Centers/Hospitals',
-            colSpan: 1,
-            dataMap: `VENDOR_TOTAL_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-            icon: 'HousePlus',
-          },
-        ],
-      },
-      {
-        fields: [
-          {
-            type: 'dataCard',
-            props: {},
-            title: 'Total Voucher Assigned',
-            colSpan: 1,
-            dataMap: `TOTAL_VOUCHER_ASSIGNED_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-            icon: 'Ticket',
-          },
-          {
-            type: 'dataCard',
-            props: {},
-            title: 'Total Beneficiary Vouchers Redeemed',
-            colSpan: 1,
-            dataMap: `TOTAL_REDEMPTION_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-            icon: 'Ticket',
-          },
-          {
-            type: 'dataCard',
-            props: {},
-            title: 'Total Vendor Vouchers Claimed',
-            colSpan: 1,
-            dataMap: `TOTAL_APPROVED_REIMBURSEMENT_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-            icon: 'Ticket',
-          },
-        ],
-      },
-      {
-        fields: [
-          {
-            type: 'donut',
-            props: {},
-            title: 'Total Beneficiaries',
-            colSpan: 1,
-            dataMap: `BENEFICIARY_TYPE_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            type: 'donut',
-            props: {},
-            title: 'Total Vouchers',
-            colSpan: 1,
-            dataMap: `TOTAL_VOUCHER_REDEEM_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            type: 'donut',
-            props: {},
-            title: 'Total Redeemed Vouchers',
-            colSpan: 1,
-            dataMap: `REDEMPTION_STATS_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            type: 'donut',
-            props: {},
-            title: 'Total Reimbursement',
-            colSpan: 1,
-            dataMap: `REIMBURSEMENT_STATS_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-        ],
-      },
-      {
-        fields: [
-          {
-            type: 'line',
-            props: {},
-            title: 'No. of Redemptions/per week',
-            colSpan: 1,
-            dataMap: '',
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-        ],
-      },
-    ],
-  };
-}
+// or if using node 16 or commonjs, do require() or readFile + JSON.parse
+// e.g. const coreConfig = require('./stats-configs/core.json');
 
-/**
- * Build stats for "sms-voucher" environment
- */
-function buildSMSVoucherStats(uuid: string, baseUrl: string) {
-  return {
-    dataSources: {
-      source2: {
-        type: 'url',
-        args: {
-          url: `${baseUrl}/v1/projects/${uuid}/stats`,
-        },
-        data: [],
-      },
-      source3: {
-        type: 'url',
-        args: {
-          url: `${baseUrl}/v1/projects/${uuid}/actions`,
-          apiCallData: {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'rpProject.reporting.list',
-              payload: {},
-            }),
-          },
-        },
-        data: [],
-      },
-    },
-    ui: [
-      {
-        fields: [
-          {
-            icon: 'UsersRound',
-            type: 'dataCard',
-            props: {},
-            title: 'Total Consumers',
-            colSpan: 1,
-            dataMap: `BENEFICIARY_TOTAL_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            icon: 'HousePlus',
-            type: 'dataCard',
-            props: {},
-            title: 'Total Vendors',
-            colSpan: 1,
-            dataMap: `VENDOR_TOTAL_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            icon: 'User-Round-X',
-            type: 'dataCard',
-            props: {},
-            title: 'Total Inactive Consumers',
-            colSpan: 1,
-            dataMap: `NOT_REDEEM_STATS_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-        ],
-      },
-      {
-        fields: [
-          {
-            type: 'donut',
-            props: {},
-            title: 'Consumer Gender',
-            colSpan: 1,
-            dataMap: `BENEFICIARY_GENDER_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            type: 'donut',
-            props: {},
-            title: 'Voucher Usage Type',
-            colSpan: 1,
-            dataMap: `VOUCHER_USAGE_TYPE_STATS_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            type: 'donut',
-            props: {},
-            title: 'Glass Purchase Type',
-            colSpan: 1,
-            dataMap: `REDEMPTION_STATS_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-          {
-            type: 'donut',
-            props: {},
-            title: 'Consent Provided',
-            colSpan: 1,
-            dataMap: `CONSENT_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-        ],
-      },
-      {
-        fields: [
-          {
-            type: 'bar',
-            props: {
-              horizontal: false,
-              xaxisLabels: true,
-            },
-            title: 'Consumer Age Group',
-            colSpan: 4,
-            dataMap: `BENEFICIARY_AGE_RANGE_ID_${uuid}`,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
-        ],
-      },
-    ],
-  };
-}
+const prisma = new PrismaClient();
 
-/**
- * All project stats builder functions in one record,
- * mapped by the "project type" name
- */
-const projectStatsBuilders: Record<
-  string,
-  (uuid: string, baseUrl: string) => any
-> = {
-  aa: buildAAStats,
-  'el-kenya': buildElKenyaStats,
-  'sms-voucher': buildSMSVoucherStats,
-  // Add more if you have them
+// A record to map "aa", "el-kenya", "sms-voucher" => their raw JSON
+const projectConfigMap: Record<string, any> = {
+  'aa': aaConfig,
+  'el-kenya': elKenyaConfig,
+  'sms-voucher': smsVoucherConfig,
 };
 
 /**
- * Main script
+ * For "core" environment, we use the loaded `coreConfig`,
+ * and set the single dataSource URL to baseUrl + '/v1/beneficiaries/stats'
  */
+function buildCoreStats(baseUrl: string) {
+  // clone the JSON so we don't mutate the original
+  const finalCore = JSON.parse(JSON.stringify(coreConfig));
+
+  // fill in the URL
+  if (finalCore.dataSources.source2) {
+    finalCore.dataSources.source2.args.url = `${baseUrl}/v1/beneficiaries/stats`;
+  }
+
+  return finalCore;
+}
+
+/**
+ * For "project" environment, we take the chosen type (aa, el-kenya, etc.),
+ * clone its config, fill in the data source URLs, and do a string replacement for __uuid
+ */
+function buildProjectStats(
+  projectType: string,
+  projectUUID: string,
+  baseUrl: string
+) {
+  // clone
+  const configObj = JSON.parse(JSON.stringify(projectConfigMap[projectType]));
+
+  // fill in dataSource(s)
+  if (configObj.dataSources.source2) {
+    configObj.dataSources.source2.args.url = `${baseUrl}/v1/projects/${projectUUID}/stats`;
+  }
+  if (configObj.dataSources.source3) {
+    configObj.dataSources.source3.args.url = `${baseUrl}/v1/projects/${projectUUID}/actions`;
+  }
+
+  // recursively fix dataMaps that contain __uuid
+  for (const section of configObj.ui) {
+    for (const field of section.fields) {
+      if (typeof field.dataMap === 'string' && field.dataMap.includes('__uuid')) {
+        field.dataMap = field.dataMap.replace('__uuid', projectUUID);
+      }
+      // If needed, also do for "title" or other properties
+      if (typeof field.title === 'string' && field.title.includes('__uuid')) {
+        field.title = field.title.replace('__uuid', projectUUID);
+      }
+    }
+  }
+
+  return configObj;
+}
+
 async function main() {
   try {
-    // Step A: ask for base URL
+    // Step 1: ask for baseUrl
     const { baseUrl } = await inquirer.prompt([
       {
         type: 'input',
         name: 'baseUrl',
         message: 'Enter base URL (without /v1):',
-        validate: (input: string) =>
-          !!input || 'Please provide a valid base URL.',
+        validate: (val) => !!val || 'Please provide a base URL',
       },
     ]);
 
-    // Step B: ask if "core" or "project"
+    // Step 2: ask if "core" or "project"
     const { environment } = await inquirer.prompt([
       {
         type: 'list',
@@ -465,66 +120,68 @@ async function main() {
     ]);
 
     if (environment === 'core') {
-      // Build the core stats
+      // Build final object
       const data = buildCoreStats(baseUrl);
-      await prismaClient.stats.create({
+
+      // Insert
+      await prisma.stats.create({
         data: {
-          name: 'DASHBOARD_SOURCE',
+          name: 'DASHBOARD_SOURCE', // or any naming convention for core
           data,
           group: 'source',
         },
       });
-      console.log('Successfully created Core stats in `stats` table.');
+
+      console.log('Core stats created successfully!');
+
     } else {
       // environment === 'project'
-      // Step C: ask which project type
-      const projectTypes = Object.keys(projectStatsBuilders); // e.g. ["aa","el-kenya","sms-voucher"]
+      // Step 3: pick which project type
       const { selectedType } = await inquirer.prompt([
         {
           type: 'list',
           name: 'selectedType',
-          message: 'Select a project type:',
-          choices: projectTypes,
+          message: 'Select project type:',
+          choices: Object.keys(projectConfigMap),
         },
       ]);
 
-      // Step D: ask for project UUID
+      // Step 4: user enters project UUID
       const { projectUUID } = await inquirer.prompt([
         {
           type: 'input',
           name: 'projectUUID',
           message: 'Enter project UUID:',
-          validate: (input: string) =>
-            !!input || 'Please provide a valid project UUID.',
+          validate: (val) => !!val || 'Please enter a project UUID',
         },
       ]);
 
-      const builderFn = projectStatsBuilders[selectedType];
-      const data = builderFn(projectUUID, baseUrl);
+      // Build final object
+      const data = buildProjectStats(selectedType, projectUUID, baseUrl);
 
       // Insert
-      await prismaClient.stats.create({
+      await prisma.stats.create({
         data: {
           name: `DASHBOARD_SOURCE_${projectUUID}`,
           data,
           group: `source_${projectUUID}`,
         },
       });
+
       console.log(
-        `Successfully created ${selectedType} stats for project UUID ${projectUUID}.`
+        `Project stats for "${selectedType}" with UUID "${projectUUID}" created successfully!`
       );
     }
 
-    // done
   } catch (error) {
-    console.error('Error during script:', error);
+    console.error('Script error:', error);
   } finally {
-    await prismaClient.$disconnect();
+    await prisma.$disconnect();
   }
 }
 
 // Run
 main().catch((err) => {
-  console.error('Main error:', err);
+  console.error('Main catch error:', err);
   process.exit(1);
 });
