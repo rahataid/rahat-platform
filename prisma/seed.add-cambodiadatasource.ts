@@ -14,7 +14,6 @@ const rl = readline.createInterface({
 const projectStats = (uuid: string, url: string) => {
   return {
     dataSources: {
-
       source3: {
         type: 'url',
         args: {
@@ -50,34 +49,9 @@ const projectStats = (uuid: string, url: string) => {
             icon: 'HousePlus',
             type: 'dataCard',
             props: {},
-            title: 'Total Villagers Referred',
-            colSpan: 1,
-            dataMap: 'TOTAL_LEADS',
-            dataSrc: 'source3',
-            rowSpan: 1,
-          },
-          {
-            icon: 'HousePlus',
-            type: 'dataCard',
-            props: {},
             title: 'Total Eye Checkup in VC',
             colSpan: 1,
             dataMap: 'TOTAL_LEAD_CONVERTED',
-            dataSrc: 'source3',
-            rowSpan: 1,
-          },
-        ],
-      },
-
-      {
-        fields: [
-          {
-            icon: 'UsersRound',
-            type: 'dataCard',
-            props: {},
-            title: 'Total Health Workers',
-            colSpan: 1,
-            dataMap: 'TOTAL_HEALTH_WORKERS',
             dataSrc: 'source3',
             rowSpan: 1,
           },
@@ -85,9 +59,25 @@ const projectStats = (uuid: string, url: string) => {
             icon: 'Ticket',
             type: 'dataCard',
             props: {},
-            title: 'Total Vision Centers',
+            title: 'Health Workers Sales',
             colSpan: 1,
-            dataMap: 'TOTAL_VENDORS',
+            dataMap: 'HEALTH_WORKER_SALES',
+            dataSrc: 'source3',
+            rowSpan: 1,
+          },
+
+        ],
+      },
+
+      {
+        fields: [
+          {
+            icon: 'HousePlus',
+            type: 'dataCard',
+            props: {},
+            title: 'Total Villagers Referred',
+            colSpan: 1,
+            dataMap: 'TOTAL_LEADS',
             dataSrc: 'source3',
             rowSpan: 1,
           },
@@ -98,6 +88,16 @@ const projectStats = (uuid: string, url: string) => {
             title: 'Total Eyewear Dispensed in VC',
             colSpan: 1,
             dataMap: 'TOTAL_EYEWEAR_DISPENSED',
+            dataSrc: 'source3',
+            rowSpan: 1,
+          },
+          {
+            icon: 'UsersRound',
+            type: 'dataCard',
+            props: {},
+            title: 'Total Health Workers',
+            colSpan: 1,
+            dataMap: 'TOTAL_HEALTH_WORKERS',
             dataSrc: 'source3',
             rowSpan: 1,
           },

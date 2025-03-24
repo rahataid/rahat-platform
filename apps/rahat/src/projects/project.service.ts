@@ -307,7 +307,7 @@ export class ProjectService {
     if (!benef.phone) throw new Error('Phone number is required!');
 
     if (benef.gender) {
-      if (benef.gender === 'Others') benef.gender = 'OTHER';
+      if (benef.gender.toUpperCase() === 'OTHERS') benef.gender = 'OTHER';
       benef.gender = benef.gender.toUpperCase();
     }
     if (benef.age) benef.age = parseInt(benef.age);
