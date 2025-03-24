@@ -77,8 +77,21 @@ export class OfframpService {
     console.log({ createOfframpData });
     const { providerUuid, ...offrampRequestData } = createOfframpData;
     const { data: kotaniPayResponse } = await this.kotaniPayService.createOfframpRequest(providerUuid, offrampRequestData);
+    const offrampExists = await this.prisma.offrampRequest.findUnique({
+      where: {
+        requestId: kotaniPayResponse?.data.request_id
+      }
+    });
+    if (offrampExists) {
+      throw new BadRequestException('Offramp request already exists');
+    }
     return this.prisma.offrampRequest.create({
-      data: { ...offrampRequestData, requestId: kotaniPayResponse?.data.request_id, escrowAddress: kotaniPayResponse?.data.escrow_address }
+
+      data: {
+        ...offrampRequestData,
+        requestId: kotaniPayResponse?.data.request_id,
+        escrowAddress: kotaniPayResponse?.data.escrow_address
+      }
     })
   }
 
