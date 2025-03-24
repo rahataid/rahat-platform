@@ -193,6 +193,7 @@ export const MS_ACTIONS = {
     },
     STAKEHOLDERS: {
       GET_ALL: 'aaProject.stakeholders.getAll',
+      GET_ONE: "aaProject.stakeholders.getOne",
       ADD: 'aaProject.stakeholders.add',
       REMOVE: 'aaProject.stakeholders.remove',
       UPDATE: 'aaProject.stakeholders.update',
