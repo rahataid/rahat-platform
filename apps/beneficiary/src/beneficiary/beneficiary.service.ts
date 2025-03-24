@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -36,7 +38,6 @@ import {
   validateDupicateWallet
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
-import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
@@ -690,83 +691,94 @@ export class BeneficiaryService {
     projectUuid?: string,
     conditional?: boolean
   ) {
-    this.beneficiaryUtilsService.ensurePhoneNumbers(dtos);
-    for (const dto of dtos) {
-      await this.beneficiaryUtilsService.ensureUniquePhone(
-        dto.piiData.phone.toString()
-      );
-      dto.walletAddress =
-        await this.beneficiaryUtilsService.ensureValidWalletAddress(
-          dto.walletAddress
+    try {
+      this.beneficiaryUtilsService.ensurePhoneNumbers(dtos);
+      for (const dto of dtos) {
+        await this.beneficiaryUtilsService.ensureUniquePhone(
+          dto.piiData.phone.toString()
         );
-      dto.uuid = dto.uuid || uuidv4();
-    }
+        dto.walletAddress =
+          await this.beneficiaryUtilsService.ensureValidWalletAddress(
+            dto.walletAddress
+          );
+        dto.uuid = dto.uuid || uuidv4();
+      }
 
-    const { beneficiariesData, piiDataList } =
-      this.beneficiaryUtilsService.prepareBulkInsertData(dtos);
+      const { beneficiariesData, piiDataList } =
+        this.beneficiaryUtilsService.prepareBulkInsertData(dtos);
 
-    // Insert beneficiaries in bulk
-    const insertedBeneficiariesWithPii =
-      await this.beneficiaryUtilsService.insertBeneficiariesAndPIIData(
-        beneficiariesData,
-        piiDataList,
-        dtos
-      );
+      // Insert beneficiaries in bulk
+      const insertedBeneficiariesWithPii =
+        await this.beneficiaryUtilsService.insertBeneficiariesAndPIIData(
+          beneficiariesData,
+          piiDataList,
+          dtos
+        );
 
-    // Assign beneficiaries to the project if a projectUuid is provided
-    // && conditional
-    if (projectUuid) {
-      await this.prisma.beneficiaryProject.createMany({
-        data: insertedBeneficiariesWithPii.map(({ uuid }) => ({
-          beneficiaryId: uuid,
-          projectId: projectUuid,
-        })),
+      // Assign beneficiaries to the project if a projectUuid is provided
+      // && conditional
+      if (projectUuid) {
+        await this.prisma.beneficiaryProject.createMany({
+          data: insertedBeneficiariesWithPii.map(({ uuid }) => ({
+            beneficiaryId: uuid,
+            projectId: projectUuid,
+          })),
+        });
+
+        this.eventEmitter.emit(
+          BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
+          {
+            projectUuid: projectUuid,
+          }
+        );
+        //COMMENTING THIS BECAUSE ALREADY ADDED TO PROJECT 
+
+        // const assignPromises = insertedBeneficiariesWithPii.map(
+        //   (b) => {
+        //     const projectPayload = {
+        //       uuid: b.uuid,
+        //       walletAddress: b.walletAddress,
+        //       extras: b?.extras || null,
+        //       type: BeneficiaryConstants.Types.ENROLLED,
+        //       isVerified: b?.isVerified,
+        //     };
+        // return handleMicroserviceCall({
+        //   client: this.client.send(
+        //     { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUuid },
+        //     projectPayload
+        //  ),
+        //   onSuccess(response) {
+        //         console.log('response', response);
+        //       },
+        //       onError(error) {
+        //         console.log('error', error);
+        //         throw new RpcException(error.message);
+        //       },
+        //     });
+        // }
+        //   this.assignBeneficiaryGroupToProject({ beneficiaryId: b.uuid, projectId: projectUuid })
+        // );
+        // await Promise.all(assignPromises);
+      }
+
+      this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
+        projectUuid,
       });
 
-      this.eventEmitter.emit(
-        BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-        {
-          projectUuid: projectUuid,
-        }
-      );
-      const assignPromises = insertedBeneficiariesWithPii.map(
-        (b) => {
-          const projectPayload = {
-            uuid: b.uuid,
-            walletAddress: b.walletAddress,
-            extras: b?.extras || null,
-            type: BeneficiaryConstants.Types.ENROLLED,
-            isVerified: b?.isVerified,
-          };
-          return handleMicroserviceCall({
-            client: this.client.send(
-              { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUuid },
-              projectPayload
-            ),
-            onSuccess(response) {
-              console.log('response', response);
-            },
-            onError(error) {
-              console.log('error', error);
-              throw new RpcException(error.message);
-            },
-          });
-        }
-        //   this.assignBeneficiaryToProject({ beneficiaryId: b.uuid, projectId: projectUuid })
-      );
-      await Promise.all(assignPromises);
+      // Return some form of success indicator, as createMany does not return the records themselves
+      return {
+        success: true,
+        count: dtos.length,
+        beneficiariesData: insertedBeneficiariesWithPii,
+      };
+    } catch (e) {
+      console.log(e);
+      return {
+        success: false
+      }
+      // throw new RpcException(e)
+
     }
-
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
-      projectUuid,
-    });
-
-    // Return some form of success indicator, as createMany does not return the records themselves
-    return {
-      success: true,
-      count: dtos.length,
-      beneficiariesData: insertedBeneficiariesWithPii,
-    };
   }
 
 
