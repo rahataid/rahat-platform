@@ -72,24 +72,22 @@ export class ListenersService {
       'USDC Received',
       'USDC Received',
       `
-        <div style="max-width:800px;max-height: 600px;overflow:auto;line-height:2;background: #333333;">
-          <div style="margin:50px auto;width:70%;padding:40px 40px; border: 1px solid #fff; border-radius: 12px;">
-            <div style="text-align: center;">
-              <img src='https://assets.rumsan.net/rumsan-group/rahat-logo-white.png' width="250" title="stage4all" alt="stage4all">
-            </div>
-            <div style="color:#fff; text-align: center;">
-              <h4 style="font-size:1.3em;">You have succefully received ${data.amount} USDC</h4>
-            </div>
-         
-            <hr style=" border-top: 1px solid rgb(73, 72, 72)" />
-            <div style="color:#fff!important">
-              <p>
-                Regards,<br />
-                Team Rahat
-              </p>
-            </div>
+       <div style="max-width: 600px; margin: 40px auto; padding: 30px; background: #1E1E1E; border-radius: 12px; box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1); font-family: Arial, sans-serif; text-align: center;">
+          <div style="margin-bottom: 20px;">
+            <img src="https://assets.rumsan.net/rumsan-group/rahat-logo-white.png" width="200" alt="Rahat Logo">
           </div>
+          <h4 style="color: #ffffff; font-size: 1.4em; font-weight: 600; margin-bottom: 15px;">
+            You have successfully received <span style="color: #00FFAA;">${data.amount} USDC</span>
+          </h4>
+          <p style="color: #bbbbbb; font-size: 1em; margin-bottom: 25px;">
+            If you want to convert your funds to local currency, you can use our <a href="https://bit.ly/rahat-offramping" style="color: #00FFAA; text-decoration: none; font-weight: 600;">off-ramping service</a>.
+          </p>
+          <hr style="border-top: 1px solid #444;">
+          <p style="color: #bbbbbb; font-size: 0.9em; margin-top: 20px;">
+            Regards,<br> Team Rahat
+          </p>
         </div>
+
       `
     );
   }

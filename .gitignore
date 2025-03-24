@@ -6,6 +6,7 @@
 !.env.setup.example
 play
 .npmrc
+env.*
 
 # compiled output
 dist
