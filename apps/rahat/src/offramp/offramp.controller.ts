@@ -62,7 +62,7 @@ export class OfframpController {
   }
 
   @Get('transactions')
-  findTransactions(@Body() payload: {
+  findTransactions(@Query() payload: {
     uuid?: string;
     id?: number;
     requestId?: string;
