@@ -44,6 +44,11 @@ export const beneficiaryActions: ProjectActionFunc = {
       { cmd: BeneficiaryJobs.LIST, uuid },
       { projectId: uuid, ...payload }
     ),
+  [MS_ACTIONS.BENEFICIARY.GET_ONE_BENEFICARY]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.GET_ONE_BENEFICIARY, uuid },
+      { projectId: uuid, ...payload }
+    ),
   [MS_ACTIONS.BENEFICIARY.LIST_FULL_DATA_BY_PROJECT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.LIST_FULL_DATA, uuid },
