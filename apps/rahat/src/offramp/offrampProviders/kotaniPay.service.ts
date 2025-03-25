@@ -187,7 +187,7 @@ export class KotaniPayService
 
     }
 
-    if (transactionStatus !== offrampTransactionsBywallet[0]?.status) {
+    if (transactionStatus !== offrampTransactionsBywallet[0]?.status && !((offrampTransactionsBywallet[0].extras as Record<string, any>)?.transactionHash)) {
       await this.prisma.offrampTransaction.updateMany({
         where: {
           customerKey: response.data?.data.customer_key
@@ -195,6 +195,10 @@ export class KotaniPayService
         data: {
           status: mapTransactionStatus[transactionStatus] || transactionStatus,
           txHash: kotanipayStatusCheck.data.data.transactionHash,
+          extras: {
+            ...(typeof offrampTransactionsBywallet[0]?.extras === 'object' && offrampTransactionsBywallet[0]?.extras !== null ? offrampTransactionsBywallet[0].extras : {}),
+            ...kotanipayStatusCheck.data.data
+          }
 
         }
       })

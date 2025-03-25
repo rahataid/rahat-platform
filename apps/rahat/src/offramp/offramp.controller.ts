@@ -60,6 +60,19 @@ export class OfframpController {
     return this.offrampService.findOne(payload);
   }
 
+  @Get('transactions')
+  findAllTransactions(@Body() payload: {
+    uuid?: string;
+    id?: number;
+    requestId?: string;
+    status?: string;
+    page?: number;
+    perPage?: number;
+    walletAddress?: string;
+  }) {
+    return this.offrampService.findAllTransactions(payload);
+  }
+
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateOfframpDto: any) {
   //   return this.offrampService.update(+id, updateOfframpDto);

@@ -214,4 +214,59 @@ export class OfframpService {
   remove(id: number) {
     return `This action removes a #${id} offramp`;
   }
+
+  async findAllTransactions(payload: {
+    uuid?: string;
+    id?: number;
+    requestId?: string;
+    page?: number;
+    perPage?: number;
+    walletAddress?: string;
+  }) {
+    console.log('payload', payload)
+    const where = {
+      deletedAt: null
+    };
+    if (payload.uuid) {
+      where['offrampRequest'] = {
+        uuid: payload.uuid
+      }
+    }
+    if (payload.id) {
+      where['offrampRequest'] = {
+        id: payload.id
+      }
+    }
+    if (payload.requestId) {
+      where['offrampRequest'] = {
+        requestId: payload.requestId
+      }
+    }
+
+    if (payload.walletAddress) {
+      const ben = await this.prisma.beneficiary.findUnique({
+        where: {
+          walletAddress: payload.walletAddress
+        },
+        include: {
+          pii: true
+        }
+      });
+      if (ben) {
+        console.log('ben', ben)
+      }
+      // where['offrampRequest'] = {
+    }
+    console.log('where', where)
+
+    return paginate(this.prisma.offrampTransaction, {
+      where,
+      include: {
+        offrampRequest: true
+      }
+    }, {
+      page: payload.page || 1,
+      perPage: payload.perPage || 20,
+    });
+  }
 }
