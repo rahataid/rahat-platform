@@ -88,6 +88,12 @@ export class BeneficiaryController {
     return this.service.listBenefByProject(data);
   }
 
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_BENEFICIARY })
+  async findOneBeneficiary(data: any) {
+    return this.service.findOneBeneficiary(data);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_PII })
   async listPiiData(dto: any) {
     return this.service.listPiiData(dto);
