@@ -7,6 +7,7 @@ import {
   Query
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { OfframpStatus } from '@prisma/client';
 import { CreateOfframpProviderDto, CreateOfframpRequestDto, ListOfframpProviderDto, ProviderActionDto } from '@rahataid/extensions';
 import { OfframpService } from './offramp.service';
 
@@ -59,6 +60,20 @@ export class OfframpController {
   }) {
     return this.offrampService.findOne(payload);
   }
+
+  @Get('transactions')
+  findTransactions(@Body() payload: {
+    uuid?: string;
+    id?: number;
+    requestId?: string;
+    status?: OfframpStatus;
+    page?: number;
+    perPage?: number;
+    senderAddress?: string;
+  }) {
+    return this.offrampService.getOfframpTransactions(payload);
+  }
+
 
 
 

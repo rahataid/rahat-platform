@@ -1,11 +1,11 @@
 meta {
   name: Get Offramp Transactions
   type: http
-  seq: 8
+  seq: 4
 }
 
 post {
-  url: {{url}}/offramps/providers/actions
+  url: {{url}}/offramps/transactions
   body: json
   auth: bearer
 }
@@ -16,10 +16,6 @@ auth:bearer {
 
 body:json {
   {
-      "uuid": "5a47f0bb-c430-44cb-9388-5d5653b4275f",
-      "action": "get-offramp-transactions",
-      "payload": {
-         "senderAddress":"0x3ad456d3753bba798dbcf1073d111a2f12b0fed2"
-      }
+    "senderAddress": "0x3ad456d3753bba798dbcf1073d111a2f12b0fed2"
   }
 }

@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { OfframpStatus, Prisma } from '@prisma/client';
 import { CreateOfframpProviderDto, CreateOfframpRequestDto, ListOfframpProviderDto, ListOfframpRequestDto, ProviderActionDto } from '@rahataid/extensions';
 import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
 import { randomUUID } from 'crypto';
@@ -215,58 +216,72 @@ export class OfframpService {
     return `This action removes a #${id} offramp`;
   }
 
-  async findAllTransactions(payload: {
-    uuid?: string;
-    id?: number;
-    requestId?: string;
-    page?: number;
-    perPage?: number;
-    walletAddress?: string;
-  }) {
-    console.log('payload', payload)
-    const where = {
-      deletedAt: null
+  async getOfframpTransactions(
+    payload: {
+      uuid?: string;
+      id?: number;
+      requestId?: string;
+      status?: OfframpStatus;
+      page?: number;
+      perPage?: number;
+      senderAddress?: string;
+
+    }) {
+    const where: Prisma.OfframpTransactionWhereInput = {
+      deletedAt: null,
     };
-    if (payload.uuid) {
-      where['offrampRequest'] = {
-        uuid: payload.uuid
-      }
-    }
+
+    // Filter by ID
     if (payload.id) {
-      where['offrampRequest'] = {
-        id: payload.id
-      }
-    }
-    if (payload.requestId) {
-      where['offrampRequest'] = {
-        requestId: payload.requestId
-      }
+      where.id = payload.id;
     }
 
-    if (payload.walletAddress) {
-      const ben = await this.prisma.beneficiary.findUnique({
-        where: {
-          walletAddress: payload.walletAddress
-        },
-        include: {
-          pii: true
-        }
-      });
-      if (ben) {
-        console.log('ben', ben)
-      }
-      // where['offrampRequest'] = {
+    // Filter by UUID
+    if (payload.uuid) {
+      where.uuid = payload.uuid;
     }
+
+    // Filter by requestId
+    if (payload.requestId) {
+      where.requestId = payload.requestId;
+    }
+
+    // Filter by status
+    if (payload.status) {
+      where.status = payload.status;
+    }
+
+    // Filter by a JSON key "senderAddress" inside `extras`
+    if (payload.senderAddress) {
+
+      where.extras = {
+        path: ['senderAddress'],
+        // todo : check if this is correct
+        string_contains: payload.senderAddress.toLowerCase()
+      };
+    }
+
     console.log('where', where)
 
-    return paginate(this.prisma.offrampTransaction, {
+    // Compute pagination
+    const page = payload.page ?? 1;
+    const perPage = payload.perPage ?? 10;
+
+    return paginate<any, Prisma.OfframpTransactionFindManyArgs>(this.prisma.offrampTransaction, {
       where,
-      include: {
-        offrampRequest: true
-      }
+      orderBy: { createdAt: 'desc' },
+
     }, {
-      page: payload.page || 1,
-      perPage: payload.perPage || 20,
+      page,
+      perPage,
     });
+
+    // return this.prisma.offrampTransaction.findMany({
+    //   where,
+    //   orderBy: { createdAt: 'desc' },
+    //   take: perPage,
+    //   skip: (page - 1) * perPage,
+    // });
   }
+
 }

@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { OfframpStatus, Prisma } from '@prisma/client';
 import { ProviderActionDto } from '@rahataid/extensions';
 import { KotaniPayExecutionData } from '@rahataid/sdk';
 import { paginator, PrismaService } from '@rumsan/prisma';
@@ -241,92 +240,7 @@ export class KotaniPayService
     }
   }
 
-  async getOfframpTransactions(data: {
-    uuid: string;
 
-
-    payload: {
-      uuid?: string;
-      id?: number;
-      requestId?: string;
-      status?: OfframpStatus;
-      page?: number;
-      perPage?: number;
-      senderAddress?: string;
-    }
-  }) {
-    const where: Prisma.OfframpTransactionWhereInput = {
-      deletedAt: null,
-    };
-    const payload = data.payload || {}
-
-    // Filter by ID
-    if (payload.id) {
-      where.id = payload.id;
-    }
-
-    // Filter by UUID
-    if (data.uuid) {
-      where.uuid = payload.uuid;
-    }
-
-    // Filter by requestId
-    if (payload.requestId) {
-      where.requestId = payload.requestId;
-    }
-
-    // Filter by status
-    if (payload.status) {
-      where.status = payload.status;
-    }
-    console.log('data', data.payload)
-
-    // Filter by a JSON key "senderAddress" inside `extras`
-    if (payload.senderAddress) {
-      // Fetch all transactions to filter by senderAddress
-      // const allTransaction = await this.prisma.offrampTransaction.findMany({
-      // });
-      // console.log('allTransaction', allTransaction)
-
-      // const filteredTransactions = allTransaction.filter((transaction) => {
-      //   const extras = transaction.extras as { senderAddress?: string };
-      //   return extras?.senderAddress.toLowerCase() === payload.senderAddress.toLowerCase();
-      // });
-      // console.log('filteredTransactions', filteredTransactions)
-      // if (filteredTransactions.length > 0) {
-      //   where.id = { in: filteredTransactions.map((transaction) => transaction.id) };
-      // }
-
-
-      where.extras = {
-        path: ['senderAddress'],
-        // todo : check if this is correct
-        string_contains: payload.senderAddress.toLowerCase()
-      };
-    }
-
-    console.log('where', where)
-
-    // Compute pagination
-    const page = payload.page ?? 1;
-    const perPage = payload.perPage ?? 10;
-
-    return paginate<any, Prisma.OfframpTransactionFindManyArgs>(this.prisma.offrampTransaction, {
-      where,
-      orderBy: { createdAt: 'desc' },
-
-    }, {
-      page,
-      perPage,
-    });
-
-    // return this.prisma.offrampTransaction.findMany({
-    //   where,
-    //   orderBy: { createdAt: 'desc' },
-    //   take: perPage,
-    //   skip: (page - 1) * perPage,
-    // });
-  }
 
 
 
@@ -341,7 +255,7 @@ export class KotaniPayService
     'get-offramp-details': this.checkOfframpStatus.bind(this),
     'get-supported-chains': this.getSupportedChains.bind(this),
     'get-customer-wallet-by-phone': this.getCustomerWalletByPhone.bind(this),
-    'get-offramp-transactions': this.getOfframpTransactions.bind(this),
+
     // Add more Kotani Pay actions here
   };
 }
