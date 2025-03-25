@@ -1,9 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { OfframpStatus, Prisma } from '@prisma/client';
 import { ProviderActionDto } from '@rahataid/extensions';
 import { KotaniPayExecutionData } from '@rahataid/sdk';
-import { PrismaService } from '@rumsan/prisma';
+import { paginator, PrismaService } from '@rumsan/prisma';
 import axios, { AxiosInstance } from 'axios';
 import { OfframpService } from './offrampService.interface'; // Adjust the import path as needed
+
+const paginate = paginator({ perPage: 20 });
 
 interface OfframpProviderConfig {
   baseUrl: string;
@@ -157,65 +160,175 @@ export class KotaniPayService
     return { data: response.data };
   }
 
-  async getCustomerWalletByPhone(data: any): Promise<any> {
-    // Implementation goes here
-    const client = await this.getKotaniPayAxiosClient(data.uuid);
-    const response = await client.get(
-      `/customer/mobile-money/phone/${data.payload.phone_number}`
-    );
+  async getCustomerWalletByPhone(data) {
+    try {
+      // Fetch the KotaniPay Axios client using the provided UUID
+      const client = await this.getKotaniPayAxiosClient(data.uuid);
 
-    const offrampTransactionsBywallet = await this.prisma.offrampTransaction.findMany({
-      where: {
-        customerKey: response.data?.data.customer_key
-      },
-      orderBy: {
-        createdAt: 'desc'
+      // Retrieve customer wallet data by phone number
+      const response = await client.get(`/customer/mobile-money/phone/${data.payload.phone_number}`);
+      const customerKey = response.data?.data?.customer_key;
+      if (!customerKey) {
+        throw new Error('Customer key not found in response');
       }
-    })
-    const kotanipayStatusCheck = await this.checkOfframpStatus({
-      uuid: data.uuid,
-      payload: {
-        referenceId: offrampTransactionsBywallet[0]?.referenceId
-      }
-    })
-    const transactionStatus = kotanipayStatusCheck.data.data.status
 
-    const mapTransactionStatus = {
-      "PENDING": "PENDING",
-      "PROCESSING": "PENDING",
-      "SUCCESSFUL": "COMPLETED"
+      // Fetch all offramp transactions for the customer, ordered by creation date (most recent first)
+      const offrampTransactions = await this.prisma.offrampTransaction.findMany({
+        where: { customerKey },
+        orderBy: { createdAt: 'desc' },
+      });
 
-    }
+      // If transactions exist, update the status of the most recent one
+      if (offrampTransactions.length > 0) {
+        const transaction = offrampTransactions[0];
+        const mapTransactionStatus = {
+          PENDING: 'PENDING',
+          PROCESSING: 'PENDING',
+          SUCCESSFUL: 'COMPLETED',
+        };
 
-    if (transactionStatus !== offrampTransactionsBywallet[0]?.status && !((offrampTransactionsBywallet[0].extras as Record<string, any>)?.transactionHash)) {
-      await this.prisma.offrampTransaction.updateMany({
-        where: {
-          customerKey: response.data?.data.customer_key
-        },
-        data: {
-          status: mapTransactionStatus[transactionStatus] || transactionStatus,
-          txHash: kotanipayStatusCheck.data.data.transactionHash,
-          extras: {
-            ...(typeof offrampTransactionsBywallet[0]?.extras === 'object' && offrampTransactionsBywallet[0]?.extras !== null ? offrampTransactionsBywallet[0].extras : {}),
-            ...kotanipayStatusCheck.data.data
+        try {
+          // Check the status of the most recent transaction using its referenceId
+          const statusCheck = await this.checkOfframpStatus({
+            uuid: data.uuid,
+            payload: { referenceId: transaction.referenceId },
+          });
+          const transactionStatus = statusCheck.data.data.status;
+          const mappedStatus = mapTransactionStatus[transactionStatus] || transactionStatus;
+
+          // Update extras only if there are changes
+          const currentExtras = typeof transaction.extras === 'object' && transaction.extras !== null ? transaction.extras : {};
+          const newExtras = {
+            ...currentExtras,
+            ...(statusCheck.data.data as object),
+          };
+          if (JSON.stringify(newExtras) !== JSON.stringify(currentExtras)) {
+            await this.prisma.offrampTransaction.update({
+              where: { id: transaction.id },
+              data: { extras: newExtras },
+            });
+            transaction.extras = newExtras; // Reflect the update in memory
           }
 
+          // Update status and txHash only if the status has changed
+          if (mappedStatus !== transaction.status) {
+            await this.prisma.offrampTransaction.update({
+              where: { id: transaction.id },
+              data: {
+                status: mappedStatus,
+                txHash: statusCheck.data.data.transactionHash,
+              },
+            });
+            transaction.status = mappedStatus; // Reflect the update in memory
+            transaction.txHash = statusCheck.data.data.transactionHash;
+          }
+        } catch (error) {
+          console.error(`Error updating transaction ${transaction.id}:`, error.message);
+          throw error; // Propagate the error to be handled by the outer catch
         }
-      })
-      offrampTransactionsBywallet[0].status = mapTransactionStatus[transactionStatus] || transactionStatus
+      }
+
+      // Return the customer wallet data along with all transactions
+      return {
+        data: {
+          ...response.data.data,
+          transactions: offrampTransactions,
+        },
+      };
+    } catch (error) {
+      console.error('Error in getCustomerWalletByPhone:', error.message);
+      throw new Error(`Failed to retrieve customer wallet: ${error.message}`);
+    }
+  }
+
+  async getOfframpTransactions(data: {
+    uuid: string;
+
+
+    payload: {
+      uuid?: string;
+      id?: number;
+      requestId?: string;
+      status?: OfframpStatus;
+      page?: number;
+      perPage?: number;
+      senderAddress?: string;
+    }
+  }) {
+    const where: Prisma.OfframpTransactionWhereInput = {
+      deletedAt: null,
+    };
+    const payload = data.payload || {}
+
+    // Filter by ID
+    if (payload.id) {
+      where.id = payload.id;
     }
 
+    // Filter by UUID
+    if (data.uuid) {
+      where.uuid = payload.uuid;
+    }
+
+    // Filter by requestId
+    if (payload.requestId) {
+      where.requestId = payload.requestId;
+    }
+
+    // Filter by status
+    if (payload.status) {
+      where.status = payload.status;
+    }
+    console.log('data', data.payload)
+
+    // Filter by a JSON key "senderAddress" inside `extras`
+    if (payload.senderAddress) {
+      // Fetch all transactions to filter by senderAddress
+      // const allTransaction = await this.prisma.offrampTransaction.findMany({
+      // });
+      // console.log('allTransaction', allTransaction)
+
+      // const filteredTransactions = allTransaction.filter((transaction) => {
+      //   const extras = transaction.extras as { senderAddress?: string };
+      //   return extras?.senderAddress.toLowerCase() === payload.senderAddress.toLowerCase();
+      // });
+      // console.log('filteredTransactions', filteredTransactions)
+      // if (filteredTransactions.length > 0) {
+      //   where.id = { in: filteredTransactions.map((transaction) => transaction.id) };
+      // }
 
 
+      where.extras = {
+        path: ['senderAddress'],
+        // todo : check if this is correct
+        string_contains: payload.senderAddress.toLowerCase()
+      };
+    }
 
-    console.log('transactionStatus', kotanipayStatusCheck)
-    return {
-      data: {
-        ...response.data,
-        transaction: offrampTransactionsBywallet
-      }
-    };
+    console.log('where', where)
+
+    // Compute pagination
+    const page = payload.page ?? 1;
+    const perPage = payload.perPage ?? 10;
+
+    return paginate<any, Prisma.OfframpTransactionFindManyArgs>(this.prisma.offrampTransaction, {
+      where,
+      orderBy: { createdAt: 'desc' },
+
+    }, {
+      page,
+      perPage,
+    });
+
+    // return this.prisma.offrampTransaction.findMany({
+    //   where,
+    //   orderBy: { createdAt: 'desc' },
+    //   take: perPage,
+    //   skip: (page - 1) * perPage,
+    // });
   }
+
+
 
   kotaniPayActions = {
     'create-customer-mobile-wallet':
@@ -228,6 +341,7 @@ export class KotaniPayService
     'get-offramp-details': this.checkOfframpStatus.bind(this),
     'get-supported-chains': this.getSupportedChains.bind(this),
     'get-customer-wallet-by-phone': this.getCustomerWalletByPhone.bind(this),
+    'get-offramp-transactions': this.getOfframpTransactions.bind(this),
     // Add more Kotani Pay actions here
   };
 }
