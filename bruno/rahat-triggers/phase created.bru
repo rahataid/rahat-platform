@@ -18,15 +18,25 @@ body:json {
   {
     "action": "ms.phases.create",
     "payload": {
-      "name": "READINESS",
+      "name": "PREPAREDNESS",
       "requiredMandatoryTriggers": 0,
       "requiredOptionalTriggers": 0,
       "receivedMandatoryTriggers": 0,
       "receivedOptionalTriggers": 0,
       "canRevert": false,
       "canTriggerPayout": false,
-      "location": "Karnali at chisapani",
-      "appId": "{{appId}}"
+      "river_basin": "karnali",
+      "source": "DHM",
+  //     "appId": "{{appId}}",
+      "activeYear": "2081/01/01"
     }
   }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("phaseId", responseData.data?.uuid);
+  
+  
+  
 }
