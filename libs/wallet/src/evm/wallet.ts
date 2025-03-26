@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { IConnectedWallet, IWalletManager, WalletStorage } from "../types";
+import { ChainType, IConnectedWallet, IWalletManager, WalletStorage } from "../types";
 import { ConnectedWallet } from "./connectedWallet";
 
 export class EVMWallet implements IWalletManager {
@@ -21,8 +21,8 @@ export class EVMWallet implements IWalletManager {
         this.chainId = network.chainId;
     }
 
-    async connect(walletAddress: string): Promise<IConnectedWallet> {
-        const keys = await this.storage.getKey(walletAddress);
+    async connect(walletAddress: string, blockchain: ChainType): Promise<IConnectedWallet> {
+        const keys = await this.storage.getKey(walletAddress, blockchain);
         if (!keys) throw new Error('Wallet not found');
         const newWalletInstance = new ConnectedWallet(keys, this.rpcUrl);
         return newWalletInstance;

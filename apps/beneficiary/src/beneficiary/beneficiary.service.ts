@@ -28,7 +28,6 @@ import {
   ProjectContants,
   TPIIData
 } from '@rahataid/sdk';
-import { EVMWallet } from '@rahataid/wallet';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -40,15 +39,12 @@ import {
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
-import { FileWalletStorage } from '../utils/walletStorage';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 const BATCH_SIZE = 20;
-const storage = new FileWalletStorage();
-const evmWallet = new EVMWallet("", storage);
 
 @Injectable()
 export class BeneficiaryService {
@@ -269,7 +265,6 @@ export class BeneficiaryService {
     //     pii: true
     //   }
     // })
-    console.log('data', data)
 
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
@@ -334,9 +329,11 @@ export class BeneficiaryService {
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
     const { piiData, projectUUIDs, ...data } = dto;
 
-    if (!storage.isInitialized()) storage.init();
-    const wallet = await evmWallet.createWallet();
-    const walletAddress = wallet.getWalletKeys().address;
+    // Todo: remove wallet address while creating a beneficiary
+    let { walletAddress } = data;
+    walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(
+      walletAddress
+    );
 
     if (!piiData.phone) throw new RpcException('Phone number is required');
     await this.beneficiaryUtilsService.ensureUniquePhone(
@@ -460,8 +457,10 @@ export class BeneficiaryService {
 
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
     const { type, referrerBeneficiary, referrerVendor, ...rest } = dto;
+
     // 1. Create Beneficiary
     const benef = await this.create(rest, projectUid);
+
     const projectPayload = {
       uuid: benef.uuid,
       referrerVendor: referrerVendor || '',
@@ -470,10 +469,12 @@ export class BeneficiaryService {
       extras: dto?.extras || null,
       type: type || BeneficiaryConstants.Types.ENROLLED,
     };
+
     // Clear referrer fields if the beneficiary is ENROLLED
     if (type === BeneficiaryConstants.Types.ENROLLED) {
       delete projectPayload.referrerBeneficiary;
       delete projectPayload.referrerVendor;
+      delete projectPayload.type;
     }
 
     // 2. Save Beneficiary to Project

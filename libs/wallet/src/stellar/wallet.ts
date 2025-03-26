@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { Keypair } from 'stellar-sdk';
-import { IWalletManager, WalletStorage } from "../types.js";
-import { ConnectedWallet } from "./connectedWallet.js";
+import { ChainType, IWalletManager, WalletStorage } from "../types";
+import { ConnectedWallet } from "./connectedWallet";
 
 export class StellarWallet implements IWalletManager {
     blockchainType = "STELLAR";
@@ -17,8 +17,8 @@ export class StellarWallet implements IWalletManager {
         await this.storage.init();
     }
 
-    async connect(walletAddess: string): Promise<ConnectedWallet> {
-        const keys = await this.storage.getKey(walletAddess);
+    async connect(walletAddess: string, blockchain: ChainType): Promise<ConnectedWallet> {
+        const keys = await this.storage.getKey(walletAddess, blockchain);
         if (!keys) throw new Error('Wallet not found')
         const newWalletInstance = new ConnectedWallet(keys, this.rpcUrl);
         return newWalletInstance;
@@ -28,10 +28,13 @@ export class StellarWallet implements IWalletManager {
         const mnemonic = ethers.Mnemonic.fromEntropy(ethers.randomBytes(16));
         const hdPath = "m/44'/148'/0'/0/0";
         const wallet = ethers.HDNodeWallet.fromMnemonic(mnemonic, hdPath);
+        const privateKeyHex = wallet.privateKey.slice(2);
+        const privateKeyBuffer = Buffer.from(privateKeyHex, "hex");
+        const stellarKeypair = Keypair.fromRawEd25519Seed(privateKeyBuffer);
         const walletKeys = {
             address: wallet.address,
-            privateKey: wallet.privateKey,
-            publicKey: wallet.publicKey,
+            privateKey: stellarKeypair.secret(),
+            publicKey: stellarKeypair.publicKey(),
             mnemonic: wallet.mnemonic?.phrase,
             blockchain: this.blockchainType
         }

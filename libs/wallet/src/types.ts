@@ -13,7 +13,7 @@ export interface WalletConfig {
 export interface WalletStorage {
     init(): Promise<void>; //initialize the storage connection
     saveKey(key: WalletKeys): Promise<void>;
-    getKey(address: string): Promise<WalletKeys | null>;
+    getKey(address: string, blockchain: string): Promise<WalletKeys | null>;
     deleteWallet?(address: string): Promise<void>; // rethink?
 }
 
@@ -37,5 +37,7 @@ export interface IWalletManager {
     init(): Promise<void>;
     createWallet(): Promise<IConnectedWallet>;
     importWallet(privateKey: string): Promise<IConnectedWallet>;
-    connect(walletAddress: string): Promise<IConnectedWallet>;
+    connect(walletAddress: string, blockchain: ChainType): Promise<IConnectedWallet>;
 }
+
+export type ChainType = 'stellar' | 'evm'

@@ -36,8 +36,25 @@ model User {
   updatedBy String?
 
   grievances Grievance[] @relation("UserGrievances")
+  wallets UserWallets[]
 
   @@map("tbl_users")
+}
+
+model UserWallets {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  chain     String
+  address   String
+  privateKey String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
+
+  user    User   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, chain])
+  @@map("tbl_users_wallets")
 }
 
 enum Gender {
@@ -425,7 +442,7 @@ model Vendors {
   email     String?
   phone     String?
   location  String?
-  wallet    String?
+  wallet    String? // Todo: Remove this after wallet integration
   extras    Json?     @db.JsonB()
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -433,6 +450,8 @@ model Vendors {
 
   @@map("tbl_vendors")
 }
+
+
 
 model ProjectVendors {
   id        Int     @id @default(autoincrement())
