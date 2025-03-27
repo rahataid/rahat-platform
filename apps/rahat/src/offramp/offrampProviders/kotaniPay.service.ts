@@ -60,6 +60,7 @@ export class KotaniPayService
         phone: data.payload.country_code + data.payload.phone_number,
       },
     });
+    console.log('isBeneficiary', isBeneficiary)
     if (!isBeneficiary) {
       throw new BadRequestException(
         'Should be a valid beneficiary in order to proceed.'
