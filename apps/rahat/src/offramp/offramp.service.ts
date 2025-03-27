@@ -77,6 +77,15 @@ export class OfframpService {
   async createOfframpRequest(createOfframpData: CreateOfframpRequestDto) {
     console.log({ createOfframpData });
     const { providerUuid, ...offrampRequestData } = createOfframpData;
+    const isBeneficiary = await this.prisma.beneficiary.findUnique({
+      where: {
+        walletAddress: offrampRequestData?.senderAddress
+      }
+
+    })
+    if (!isBeneficiary) {
+      throw new BadRequestException('Should be a valid beneficiary in order to proceed.')
+    }
     const { data: kotaniPayResponse } = await this.kotaniPayService.createOfframpRequest(providerUuid, offrampRequestData);
     const offrampExists = await this.prisma.offrampRequest.findUnique({
       where: {
