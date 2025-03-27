@@ -55,12 +55,14 @@ export class KotaniPayService
   }
 
   async createCustomerMobileMoneyWallet(data: ProviderActionDto) {
+    const phone = data.payload.phone_number
+    console.log('phone', phone)
     const isBeneficiary = await this.prisma.beneficiaryPii.findFirst({
       where: {
-        phone: data.payload.country_code + data.payload.phone_number,
+        phone
       },
     });
-    console.log('isBeneficiary', isBeneficiary)
+    console.log('isBeneficiary==>>offramp create wallet', isBeneficiary)
     if (!isBeneficiary) {
       throw new BadRequestException(
         'Should be a valid beneficiary in order to proceed.'
