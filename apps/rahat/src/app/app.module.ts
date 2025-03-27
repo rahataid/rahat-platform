@@ -11,8 +11,7 @@ import { PrismaService } from '@rumsan/prisma';
 import {
   AuthsModule,
   RSUserModule,
-  RolesModule,
-  UsersModule,
+  RolesModule
 } from '@rumsan/user';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ExternalAppGuard } from '../decorators';
@@ -26,6 +25,7 @@ import { QueueModule } from '../queue/queue.module';
 import { RequestContextModule } from '../request-context/request-context.module';
 import { TokenModule } from '../token/token.module';
 import { UploadModule } from '../upload/upload.module';
+import { UsersModule } from '../users/users.module';
 import { AppUsersModule } from '../vendors/vendors.module';
 import { WalletModule } from '../wallet/wallet.module';
 import { AppController } from './app.controller';
