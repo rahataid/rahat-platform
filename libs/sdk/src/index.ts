@@ -10,4 +10,5 @@ export * from './settings/settings.types';
 export * from './types';
 export * from './utils';
 export * from './vendor';
+export * from './wallet';
 

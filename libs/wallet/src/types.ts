@@ -40,4 +40,4 @@ export interface IWalletManager {
     connect(walletAddress: string, blockchain: ChainType): Promise<IConnectedWallet>;
 }
 
-export type ChainType = 'stellar' | 'evm'
+export type ChainType = 'stellar' | 'evm' | 'eth'

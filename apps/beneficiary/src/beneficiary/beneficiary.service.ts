@@ -136,6 +136,22 @@ export class BeneficiaryService {
     return data;
   }
 
+
+  async findOneBeneficiary(data: any) {
+    const getBeneficiaryByWallet = await this.prisma.beneficiary.findUnique({
+      where: {
+        walletAddress: data.walletAddress,
+      },
+      include: {
+        pii: true,
+
+      }
+    })
+
+
+    const { pii, ...rest } = getBeneficiaryByWallet
+    return { piiData: pii, projectData: rest, ...data }
+  }
   async listBeneficiaryPiiByWalletAddress(data: any) {
     if (!data?.data?.length) return data;
     return this.prisma.beneficiary.findMany({
@@ -325,6 +341,7 @@ export class BeneficiaryService {
     }
     return mergedData;
   }
+
 
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
     const { piiData, projectUUIDs, ...data } = dto;
@@ -736,7 +753,7 @@ export class BeneficiaryService {
             projectUuid: projectUuid,
           }
         );
-        //COMMENTING THIS BECAUSE ALREADY ADDED TO PROJECT 
+        //COMMENTING THIS BECAUSE ALREADY ADDED TO PROJECT
 
         // const assignPromises = insertedBeneficiariesWithPii.map(
         //   (b) => {
