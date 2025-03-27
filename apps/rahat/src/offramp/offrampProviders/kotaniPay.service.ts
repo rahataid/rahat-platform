@@ -180,11 +180,7 @@ export class KotaniPayService
       // If transactions exist, update the status of the most recent one
       if (offrampTransactions.length > 0) {
         const transaction = offrampTransactions[0];
-        const mapTransactionStatus = {
-          PENDING: 'PENDING',
-          PROCESSING: 'PENDING',
-          SUCCESSFUL: 'COMPLETED',
-        };
+
 
         try {
           // Check the status of the most recent transaction using its referenceId
@@ -193,7 +189,7 @@ export class KotaniPayService
             payload: { referenceId: transaction.referenceId },
           });
           const transactionStatus = statusCheck.data.data.status;
-          const mappedStatus = mapTransactionStatus[transactionStatus] || transactionStatus;
+          const mappedStatus = transactionStatus;
 
           // Update extras only if there are changes
           const currentExtras = typeof transaction.extras === 'object' && transaction.extras !== null ? transaction.extras : {};
