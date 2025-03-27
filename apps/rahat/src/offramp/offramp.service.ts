@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { OfframpStatus, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { CreateOfframpProviderDto, CreateOfframpRequestDto, ListOfframpProviderDto, ListOfframpRequestDto, ProviderActionDto } from '@rahataid/extensions';
 import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
 import { randomUUID } from 'crypto';
@@ -221,7 +221,7 @@ export class OfframpService {
       uuid?: string;
       id?: number;
       requestId?: string;
-      status?: OfframpStatus;
+      status?: string;
       page?: number;
       perPage?: number;
       senderAddress?: string;
