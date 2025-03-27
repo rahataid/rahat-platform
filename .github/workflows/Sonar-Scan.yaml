@@ -1,6 +1,9 @@
 name: Sonarqube Code Analysis Sonarqube
 on:
   push:
+    branches:
+      - main
+      - dev
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:  
