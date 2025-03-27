@@ -1,7 +1,7 @@
 meta {
-  name: phase  getAll
+  name: phase  getOne
   type: http
-  seq: 5
+  seq: 4
 }
 
 post {
@@ -16,12 +16,13 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.phases.getAll",
+    "action": "ms.phases.getOne",
     "payload": {
-     // "appId": "{{appId}}"
-  //     "name": "PREPAREDNESS"
+      "appId": "{{appId}}",
+      "uuid": "69f80f09-fe06-404f-935b-68198fe8de4b",
+      "name": "PREPAREDNESS",
   //     "source": "GLOFAS"
-  //     "river_basin": "kar"
+      "river_basin": "repti"
     }
   }
 }

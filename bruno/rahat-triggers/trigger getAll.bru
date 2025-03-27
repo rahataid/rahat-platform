@@ -1,7 +1,7 @@
 meta {
-  name: list activities
+  name: trigger getAll
   type: http
-  seq: 7
+  seq: 15
 }
 
 post {
@@ -16,10 +16,12 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.activities.getAll",
+    "action": "ms.triggers.getAll",
     "payload": {
-       "page" : 1,
-      "perPage": 10
+     // "appId": "{{appId}}"
+  //     "name": "PREPAREDNESS"
+  //     "source": "GLOFAS"
+  //     "river_basin": "kar"
     }
   }
 }
