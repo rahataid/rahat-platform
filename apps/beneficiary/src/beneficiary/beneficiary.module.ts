@@ -17,6 +17,20 @@ import { BeneficiaryStatService } from './beneficiaryStat.service';
 import { VerificationService } from './verification.service';
 @Module({
   imports: [
+    ClientsModule.registerAsync([
+      {
+        name: 'RAHAT_CLIENT',
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.REDIS,
+          options: {
+            host: configService.get('REDIS_HOST'),
+            port: configService.get('REDIS_PORT'),
+            password: configService.get('REDIS_PASSWORD'),
+          },
+        }),
+        inject: [ConfigService],
+      }
+    ]),
     ClientsModule.register([
       {
         name: ProjectContants.ELClient,

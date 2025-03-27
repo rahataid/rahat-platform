@@ -32,7 +32,7 @@ export class StellarWallet implements IWalletManager {
         const privateKeyBuffer = Buffer.from(privateKeyHex, "hex");
         const stellarKeypair = Keypair.fromRawEd25519Seed(privateKeyBuffer);
         const walletKeys = {
-            address: wallet.address,
+            address: stellarKeypair.publicKey(),
             privateKey: stellarKeypair.secret(),
             publicKey: stellarKeypair.publicKey(),
             mnemonic: wallet.mnemonic?.phrase,

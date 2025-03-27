@@ -326,6 +326,7 @@ export class BeneficiaryService {
     return mergedData;
   }
 
+
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
     const { piiData, projectUUIDs, ...data } = dto;
 
