@@ -1,0 +1,40 @@
+name: Sonarqube Code Analysis Sonarqube
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:  
+  
+jobs:
+  client-sonarqube:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Import Secrets
+      uses: hashicorp/vault-action@v2.4.0
+      with:
+        url: ${{ secrets.VAULT_URL }}
+        token: ${{ secrets.VAULT_TOKEN }}
+        secrets: |
+            github/data/general/sonarqube sonar_url | SONAR_HOST_URL ;
+            github/data/general/sonarqube sonar_token | SONAR_TOKEN ;
+
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 20.10.0
+
+    - name: Install dependencies
+      run: |
+        npm install -g pnpm
+        pnpm install
+
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v4.2.1
+      with:
+        args: >
+          -Dsonar.projectKey=rahat-platform
+      env:
+        SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
