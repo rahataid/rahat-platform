@@ -1,0 +1,26 @@
+meta {
+  name: list daily monitoring based on location
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.dailyMonitoring.getAll",
+    "payload": {
+       "page" : 1,
+      "perPage": 10,
+      "location" : "karnali"
+    }
+  }
+}

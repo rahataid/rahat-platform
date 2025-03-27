@@ -37,6 +37,7 @@ import {
   cvaActions,
   elActions,
   groupActions,
+  msTriggerActions,
   projectActions,
   settingActions,
   vendorActions,
@@ -232,7 +233,8 @@ export class ProjectService {
       ...c2cActions,
       ...cvaActions,
       ...rpActions,
-      ...commsActions
+      ...commsActions,
+      ...msTriggerActions
     };
 
     const actionFunc = actions[action];
@@ -242,6 +244,7 @@ export class ProjectService {
     return await actionFunc(uuid, payload, (...args) =>
       this.sendCommand(args[0], args[1], args[2], this.client, action, user)
     );
+
   }
 
   // ======Only for testing=======

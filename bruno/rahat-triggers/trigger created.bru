@@ -1,0 +1,40 @@
+meta {
+  name: trigger created
+  type: http
+  seq: 14
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.triggers.add",
+    "payload": {
+    "repeatKey": "unique-repeat-key",
+    "title": "Trigger Title",
+    "repeatEvery": "Every day",
+    "triggerStatement": {
+      "condition": "value",
+      "anotherCondition": true
+    },
+    "triggerDocuments": {
+      "documentKey": "documentValue",
+      "documentUrl": "https://example.com/document.pdf"
+    },
+    "notes": "Some notes about the trigger",
+    "phaseId": "123e4567-e89b-12d3-a456-426614174000",
+    "isMandatory": true,
+    "isTriggered": false,
+    "triggeredBy": "user-id",
+    "triggeredAt": "2023-01-01T00:00:00.000Z"
+    }
+  }
+}

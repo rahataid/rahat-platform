@@ -1,0 +1,36 @@
+meta {
+  name: login-by-otp
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/auth/otp
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "address": "rumsan@mailinator.com",
+    "service": "EMAIL",
+    "clientId": "105cd449-53f6-44e4-85f3-feaa7d762ffa"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.success: eq true
+}
+
+script:post-response {
+  const response = res.getBody().data;
+  bru.setVar('challenge', response.challenge);
+}
+
+tests {
+  test('should return accessToken', async () => {
+    const responseData = res.getBody().data;
+    expect(responseData).to.have.property('accessToken');
+  });
+}
