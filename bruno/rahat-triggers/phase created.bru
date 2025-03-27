@@ -1,0 +1,32 @@
+meta {
+  name: phase created
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.phases.create",
+    "payload": {
+      "name": "READINESS",
+      "requiredMandatoryTriggers": 0,
+      "requiredOptionalTriggers": 0,
+      "receivedMandatoryTriggers": 0,
+      "receivedOptionalTriggers": 0,
+      "canRevert": false,
+      "canTriggerPayout": false,
+      "location": "Karnali at chisapani",
+      "appId": "{{appId}}"
+    }
+  }
+}
