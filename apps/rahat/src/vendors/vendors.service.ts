@@ -78,7 +78,7 @@ export class VendorsService {
       });
       if (dto.service === Service.WALLET) return user;
       // Create user wallet 
-      const userWallets = await this.walletService.create(['evm', 'stellar']);
+      const userWallets = await this.walletService.create(['eth', 'stellar']);
       await prisma.userWallets.createMany({
         data: userWallets.map(wallet => ({
           userId: +user.id,
