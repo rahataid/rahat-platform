@@ -303,11 +303,14 @@ export class ProjectService {
     if (benef.type) benef.type = benef.type.toUpperCase();
     if (benef.type !== 'LEAD') benef.phone = genRandomPhone('88');
     if (!benef.phone) throw new Error('Phone number is required!');
-
+    console.log("Benef. before sanitization", benef);
     if (benef.gender) {
-      if (benef.gender.toUpperCase() === 'OTHERS') benef.gender = 'OTHER';
-      benef.gender = benef.gender.toUpperCase();
+      const bGender = benef.gender.toUpperCase();
+      console.log({ bGender })
+      if (bGender === 'OTHERS') benef.gender = 'OTHER';
+      else benef.gender = bGender;
     }
+    console.log("Benef. after sanitization", benef);
     if (benef.age) benef.age = parseInt(benef.age);
     if (benef.leadInterests) {
       benef.leadInterests = benef.leadInterests
