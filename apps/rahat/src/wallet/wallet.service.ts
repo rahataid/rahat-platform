@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ChainType, EVMWallet, StellarWallet, WalletKeys } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
-import { PrismaService } from '@rumsan/prisma';
 import { FileWalletStorage } from './storages/fs.storage';
 
 @Injectable()
 export class WalletService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly settings: SettingsService
+  ) { }
 
   // Right now this only work for 1 chain, need to modify logic of chain settings to include both
   async create(chains: ChainType[]) {
@@ -31,19 +32,20 @@ export class WalletService {
   }
 
   // Utilities
+  // THESE NEEDS TO BE OPTIMIZED, cant init() everytime
   async createethWallets() {
-    const settings = new SettingsService(this.prisma);
-    const evmChain = await settings.getByName("CHAIN_SETTINGS");
-    const evmWallet = new EVMWallet(evmChain.value.rpcUrls.default.http[0] as string, new FileWalletStorage());
+    const evmChain = await this.settings.getByName("CHAIN_SETTINGS");
+    const evmChainValue = evmChain.value as { rpcUrls: { default: { http: string[] } } };
+    const evmWallet = new EVMWallet(evmChainValue.rpcUrls.default.http[0] || 'https://base-sepolia-rpc.publicnode.com', new FileWalletStorage());
     await evmWallet.init();
     const walletKeys = (await evmWallet.createWallet()).getWalletKeys();
     return walletKeys;
   }
 
   async createstellarWallets() {
-    const settings = new SettingsService(this.prisma);
-    const stellarChain = await settings.getByName("CHAIN_SETTINGS");
-    const stellarWallet = new StellarWallet(stellarChain.value.rpcUrls.default.http as string, new FileWalletStorage());
+    const stellarChain = await this.settings.getByName("CHAIN_SETTINGS");
+    const stellarChainValue = stellarChain.value as { rpcUrls: { default: { http: string } } };
+    const stellarWallet = new StellarWallet(stellarChainValue.rpcUrls.default.http || 'https://stellar-soroban-public.nodies.app', new FileWalletStorage());
     await stellarWallet.init();
     const walletKeys = (await stellarWallet.createWallet()).getWalletKeys();
     return walletKeys;
