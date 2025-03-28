@@ -21,8 +21,6 @@ export class UsersService extends RSUserService {
         const randomWallet = ethers.Wallet.createRandom();
         console.log('Random wallet address:', randomWallet.address);
         userData.wallet = randomWallet.address;
-        // console.log(this.walletService)
-        //  userData.wallet = (await this.walletService.createethWallets()).address;
         return super.create(userData).catch((error) => {
             console.error('Error creating user:', error);
             throw error;
@@ -31,7 +29,6 @@ export class UsersService extends RSUserService {
 
     // getById(userId: number) {
     //     console.log('Getting user by ID:', userId);
-    //     // Custom implementation
     //     return super.getById(userId);
     // }
 
