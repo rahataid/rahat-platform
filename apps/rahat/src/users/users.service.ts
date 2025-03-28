@@ -7,6 +7,8 @@ import { ethers } from 'ethers';
 
 @Injectable()
 export class UsersService extends RSUserService {
+
+    //Not required to define it if there is no extra initialization
     constructor(
         protected readonly prisma: PrismaService,
         protected readonly eventEmitter: EventEmitter2,
