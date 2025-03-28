@@ -85,16 +85,16 @@ export class OfframpService {
   async createOfframpRequest(createOfframpData: CreateOfframpRequestDto) {
     console.log({ createOfframpData });
     const { providerUuid, ...offrampRequestData } = createOfframpData;
-    const isBeneficiary = await this.prisma.beneficiary.findUnique({
-      where: {
-        walletAddress: offrampRequestData?.senderAddress?.toLowerCase(),
-      },
-    });
-    if (!isBeneficiary) {
-      throw new BadRequestException(
-        'Should be a valid beneficiary in order to proceed.'
-      );
-    }
+    // const isBeneficiary = await this.prisma.beneficiary.findUnique({
+    //   where: {
+    //     walletAddress: offrampRequestData?.senderAddress?.toLowerCase(),
+    //   },
+    // });
+    // if (!isBeneficiary) {
+    //   throw new BadRequestException(
+    //     'Should be a valid beneficiary in order to proceed.'
+    //   );
+    // }
     const { data: kotaniPayResponse } =
       await this.kotaniPayService.createOfframpRequest(
         providerUuid,
@@ -133,19 +133,19 @@ export class OfframpService {
       currency: data.data.currency,
       referenceId: randomUUID(),
     };
-    const isBeneficiary = await this.prisma.beneficiary.findFirst({
-      where: {
-        walletAddress: {
-          equals: executionData.senderAddress,
-          mode: 'insensitive',
-        },
-      },
-    });
-    if (!isBeneficiary) {
-      throw new BadRequestException(
-        'Should be a valid beneficiary in order to proceed.'
-      );
-    }
+    // const isBeneficiary = await this.prisma.beneficiary.findFirst({
+    //   where: {
+    //     walletAddress: {
+    //       equals: executionData.senderAddress,
+    //       mode: 'insensitive',
+    //     },
+    //   },
+    // });
+    // if (!isBeneficiary) {
+    //   throw new BadRequestException(
+    //     'Should be a valid beneficiary in order to proceed.'
+    //   );
+    // }
     console.log(JSON.stringify(executionData, null, 2));
     try {
       const { data: kotaniPayResponse } =
