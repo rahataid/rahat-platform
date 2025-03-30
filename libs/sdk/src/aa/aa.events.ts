@@ -13,6 +13,7 @@ export const JOBS = {
     ADD: 'aa.jobs.triggers.add',
     REMOVE: 'aa.jobs.triggers.remove',
     ACTIVATE: 'aa.jobs.triggers.activate',
+    TEST: 'aa.jobs.test.disburse'
   },
   ACTIVITIES: {
     GET_ONE: 'aa.jobs.activities.getOne',

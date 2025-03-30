@@ -161,6 +161,7 @@ export const MS_ACTIONS = {
       ADD: 'aaProject.triggers.add',
       REMOVE: 'aaProject.triggers.remove',
       ACTIVATE: 'aaProject.triggers.activate',
+      TEST: 'aaProject.disbursement.test'
     },
     ACTIVITIES: {
       GET_ONE: 'aaProject.activities.getOne',
