@@ -690,13 +690,20 @@ export class BeneficiaryService {
     try {
       this.beneficiaryUtilsService.ensurePhoneNumbers(dtos);
       for (const dto of dtos) {
-        await this.beneficiaryUtilsService.ensureUniquePhone(
-          dto.piiData.phone.toString()
-        );
-        dto.walletAddress =
-          await this.beneficiaryUtilsService.ensureValidWalletAddress(
-            dto.walletAddress
-          );
+        try {
+          await this.beneficiaryUtilsService.ensureUniquePhone(dto.piiData.phone.toString());
+        } catch (error) {
+          console.log(`Skipping entry due to duplicate phone: ${dto.piiData.phone}`);
+          continue;
+        }
+
+        try {
+          dto.walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(dto.walletAddress);
+        } catch (error) {
+          console.log(`Skipping entry due to duplicate/invalid wallet address: ${dto.walletAddress}`);
+          continue;
+        }
+
         dto.uuid = dto.uuid || uuidv4();
       }
 
