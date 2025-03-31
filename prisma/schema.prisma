@@ -665,7 +665,7 @@ model OfframpRequest {
   amount        Float
   requestId     String?             @unique
   escrowAddress String?
-  status        OfframpStatus       @default(PENDING)
+  status        String       @default("PENDING")
   transaction   OfframpTransaction? @relation("RequestTransaction")
   extras        Json?               @db.JsonB()
   createdAt     DateTime            @default(now())
@@ -687,7 +687,7 @@ model OfframpTransaction {
   chain          String?
   token          String?
   referenceId    String?
-  status         OfframpStatus  @default(PENDING)
+  status         String  @default("PENDING")
   extras         Json?          @db.JsonB()
   createdAt      DateTime       @default(now())
   updatedAt      DateTime?      @updatedAt()

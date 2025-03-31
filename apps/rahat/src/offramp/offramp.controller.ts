@@ -62,6 +62,22 @@ export class OfframpController {
     return this.offrampService.findOne(payload);
   }
 
+  @Get('transactions')
+  findTransactions(@Query() payload: {
+    uuid?: string;
+    id?: number;
+    requestId?: string;
+    status?: string;
+    page?: number;
+    perPage?: number;
+    senderAddress?: string;
+  }) {
+    return this.offrampService.getOfframpTransactions(payload);
+  }
+
+
+
+
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateOfframpDto: any) {
   //   return this.offrampService.update(+id, updateOfframpDto);

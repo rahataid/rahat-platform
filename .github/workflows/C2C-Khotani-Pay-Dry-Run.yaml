@@ -1,4 +1,4 @@
-name: C2C Khotani Pat Dry Run CI/CD
+name: C2C Khotani Pay Dry Run CI/CD
 on:
   workflow_dispatch:
 
