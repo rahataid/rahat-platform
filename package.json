@@ -79,7 +79,7 @@
     "@rumsan/rabbitmq": "^0.0.1",
     "@rumsan/sdk": "0.0.46",
     "@rumsan/prisma": "1.0.132",
-    "@rumsan/extensions": "0.0.33",
+    "@rumsan/extensions": "0.0.34",
     "@rumsan/user": "3.0.164",
     "@types/amqplib": "^0.10.6",
     "@urql/core": "^5.0.4",
