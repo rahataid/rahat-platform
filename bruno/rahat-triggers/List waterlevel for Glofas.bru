@@ -1,7 +1,7 @@
 meta {
-  name: trigger getAll
+  name: List waterlevel for Glofas
   type: http
-  seq: 18
+  seq: 15
 }
 
 post {
@@ -16,12 +16,10 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.triggers.getAll",
+    "action": "ms.waterLevels.getGlofas",
     "payload": {
-     // "appId": "{{appId}}"
-  //     "name": "PREPAREDNESS"
-  //     "source": "GLOFAS"
-  //     "river_basin": "kar"
+      "page": 1 ,
+      "perPage": 11
     }
   }
 }
