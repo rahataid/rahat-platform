@@ -3,7 +3,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateUserDto, ListRoleDto } from '@rumsan/extensions/dtos';
 import { PrismaService } from '@rumsan/prisma';
 import { UsersService as RSUserService } from '@rumsan/user';
-import { ethers } from 'ethers';
+import { WalletService } from '../wallet/wallet.service';
 
 @Injectable()
 export class UsersService extends RSUserService {
@@ -12,13 +12,15 @@ export class UsersService extends RSUserService {
     constructor(
         protected readonly prisma: PrismaService,
         protected readonly eventEmitter: EventEmitter2,
+        protected readonly walletService: WalletService,
     ) {
         super(prisma, eventEmitter);
     }
 
+    // TODO: get current prefered chain from settings
     async create(userData: CreateUserDto) {
         console.log('Creating a new user with a random wallet address');
-        const randomWallet = ethers.Wallet.createRandom();
+        const randomWallet = await this.walletService.createstellarWallets();
         console.log('Random wallet address:', randomWallet.address);
         userData.wallet = randomWallet.address;
         return super.create(userData).catch((error) => {

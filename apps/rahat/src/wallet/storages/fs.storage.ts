@@ -5,7 +5,7 @@ import * as path from 'path';
 export class FileWalletStorage implements WalletStorage {
     private storageDir: string;
 
-    constructor(storageDir: string = './wallet_storage') {
+    constructor(storageDir = './wallet_storage') {
         this.storageDir = storageDir;
     }
 

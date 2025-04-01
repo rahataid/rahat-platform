@@ -7,6 +7,6 @@ import { WalletService } from './wallet.service';
   imports: [SettingsModule],
   controllers: [WalletController],
   providers: [WalletService],
-  exports: [WalletService] // Export WalletService so it can be used in other modules
+  exports: [WalletService]
 })
 export class WalletModule { }

@@ -10,17 +10,22 @@ import { UsersService } from './users.service';
     imports: [
         PrismaModule,
         WalletModule,
-        RSUserModule.register({ provide: RSUserService, useClass: UsersService })
+        RSUserModule.register([
+            { provide: RSUserService, useClass: UsersService },
+            WalletService,
+        ]),
     ],
     providers: [
         PrismaService,
         EventEmitter2,
         WalletService,
-        { provide: RSUserService, useClass: UsersService },],
+        { provide: RSUserService, useClass: UsersService },
+    ],
     exports: [
         PrismaService,
         EventEmitter2,
         WalletService,
-        { provide: RSUserService, useClass: UsersService }]
+        { provide: RSUserService, useClass: UsersService },
+    ],
 })
 export class UsersModule { }
