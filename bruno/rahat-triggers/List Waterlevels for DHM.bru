@@ -1,7 +1,7 @@
 meta {
-  name: trigger getAll
+  name: List Waterlevels for DHM
   type: http
-  seq: 18
+  seq: 13
 }
 
 post {
@@ -16,12 +16,10 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.triggers.getAll",
+    "action": "ms.waterLevels.getDhm",
     "payload": {
-     // "appId": "{{appId}}"
-  //     "name": "PREPAREDNESS"
-  //     "source": "GLOFAS"
-  //     "river_basin": "kar"
+      "page": 1 ,
+      "perPage": 11
     }
   }
 }
