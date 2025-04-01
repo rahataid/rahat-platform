@@ -689,6 +689,7 @@ export class BeneficiaryService {
   ) {
     try {
       this.beneficiaryUtilsService.ensurePhoneNumbers(dtos);
+      const validDtos: CreateBeneficiaryDto[] = [];
       for (const dto of dtos) {
         try {
           await this.beneficiaryUtilsService.ensureUniquePhone(dto.piiData.phone.toString());
@@ -705,17 +706,18 @@ export class BeneficiaryService {
         }
 
         dto.uuid = dto.uuid || uuidv4();
+        validDtos.push(dto);
       }
 
       const { beneficiariesData, piiDataList } =
-        this.beneficiaryUtilsService.prepareBulkInsertData(dtos);
+        this.beneficiaryUtilsService.prepareBulkInsertData(validDtos);
 
       // Insert beneficiaries in bulk
       const insertedBeneficiariesWithPii =
         await this.beneficiaryUtilsService.insertBeneficiariesAndPIIData(
           beneficiariesData,
           piiDataList,
-          dtos
+          validDtos
         );
 
       // Assign beneficiaries to the project if a projectUuid is provided
@@ -771,7 +773,7 @@ export class BeneficiaryService {
       // Return some form of success indicator, as createMany does not return the records themselves
       return {
         success: true,
-        count: dtos.length,
+        count: validDtos.length,
         beneficiariesData: insertedBeneficiariesWithPii,
       };
     } catch (e) {
