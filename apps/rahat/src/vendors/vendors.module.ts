@@ -4,7 +4,9 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
-import { AuthsModule, UsersModule } from '@rumsan/user';
+import { PrismaService } from '@rumsan/prisma';
+import { AuthsModule } from '@rumsan/user';
+import { UsersModule } from '../users/users.module';
 import { WalletModule } from '../wallet/wallet.module';
 import { WalletService } from '../wallet/wallet.service';
 import { VendorsController } from './vendors.controller';
@@ -32,6 +34,6 @@ import { VendorsService } from './vendors.service';
     WalletModule
   ],
   controllers: [VendorsController],
-  providers: [VendorsService, WalletService]
+  providers: [VendorsService, WalletService, PrismaService]
 })
 export class AppUsersModule { }

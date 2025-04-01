@@ -4,6 +4,8 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE, BeneficiaryConstants } from '@rahataid/sdk';
+import { WalletInterceptor } from '../wallet/interceptor/wallet.interceptor';
+import { WalletService } from '../wallet/wallet.service';
 import { BeneficiaryController } from './beneficiary.controller';
 
 @Module({
@@ -26,6 +28,6 @@ import { BeneficiaryController } from './beneficiary.controller';
     }),
   ],
   controllers: [BeneficiaryController],
-  providers: [],
+  providers: [WalletInterceptor, WalletService],
 })
 export class BeneficiaryModule { }

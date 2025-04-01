@@ -30,7 +30,8 @@ export class BeneficiaryUtilsService {
     private readonly prismaService: PrismaService,
     private eventEmitter: EventEmitter2,
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
-    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
+    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
+    private readonly settings: SettingsService
   ) { }
 
   buildWhereClause(dto: ListBeneficiaryDto): Record<string, any> {
@@ -302,8 +303,7 @@ export class BeneficiaryUtilsService {
   }
 
   async getChainName(): Promise<string> {
-    const settings = new SettingsService(this.prismaService);
-    const contractSettings = await settings.getByName('CHAIN_SETTINGS');
+    const contractSettings = await this.settings.getByName('CHAIN_SETTINGS');
     return contractSettings.value.nativeCurrency.symbol;
   }
 }
