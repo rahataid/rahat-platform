@@ -46,16 +46,21 @@ export const MS_ACTIONS = {
   GROUP: {
     CREATE: 'group.create',
     LIST: 'group.list',
-    GET: 'group.get'
+    GET: 'group.get',
   },
   BENEFICIARY_GROUP: {
     BULK_ASSIGN: 'beneficiary_group.bulk_assign',
     LIST: 'beneficiary_group.list',
     LIST_BY_GROUP: 'beneficiary_group.list_by_group',
-  }
-  ,
+  },
   CAMBODIA: {
-    APP: { STATS: 'cambodia.app.stats', LINE_STATS: 'cambodia.app.line_stats', BROAD_CAST_STATUS_COUNT: 'cambodia.app.broadcast_status_count', PROJECT_SETTINGS: 'cambodia.app.project_settings', TRIGGER_COMMUNICATION: 'cambodia.app.trigger_communication', },
+    APP: {
+      STATS: 'cambodia.app.stats',
+      LINE_STATS: 'cambodia.app.line_stats',
+      BROAD_CAST_STATUS_COUNT: 'cambodia.app.broadcast_status_count',
+      PROJECT_SETTINGS: 'cambodia.app.project_settings',
+      TRIGGER_COMMUNICATION: 'cambodia.app.trigger_communication',
+    },
     BENEFICIARY: {
       VALIDATE_CONVERSION: 'cambodia.beneficiary.validate_conversion',
       STATS: 'cambodia.beneficiary.stats',
@@ -94,7 +99,7 @@ export const MS_ACTIONS = {
 
     COMMUNICATION: {
       LIST: 'cambodia.communication.list',
-    }
+    },
   },
 
   PROJECT: {
@@ -114,7 +119,7 @@ export const MS_ACTIONS = {
     LIST_BY_PROJECT: 'beneficiary.list_by_project',
     LIST_FULL_DATA_BY_PROJECT: 'beneficiary.list_full_data_by_project',
     GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',
-    GET_ONE_BENEFICARY: "beneficiary.get_one_beneficiary",
+    GET_ONE_BENEFICARY: 'beneficiary.get_one_beneficiary',
   },
   VENDOR: {
     REGISTER: 'vendor.register',
@@ -194,7 +199,7 @@ export const MS_ACTIONS = {
     },
     STAKEHOLDERS: {
       GET_ALL: 'aaProject.stakeholders.getAll',
-      GET_ONE: "aaProject.stakeholders.getOne",
+      GET_ONE: 'aaProject.stakeholders.getOne',
       ADD: 'aaProject.stakeholders.add',
       REMOVE: 'aaProject.stakeholders.remove',
       UPDATE: 'aaProject.stakeholders.update',
@@ -330,7 +335,8 @@ export const MS_ACTIONS = {
     LIST_BENEFICIARY_REIMBURSEMENTS: 'rpProject.beneficiary.listReimbursements',
     SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions',
     LIST_EYE_CHECKEUP_LINE: 'rpProject.reporting.list_eye_checkup_line',
-    LIST_PURCHASE_OF_GLASSESS_LINE: 'rpProject.reporting.list_purchase_of_glassess',
+    LIST_PURCHASE_OF_GLASSESS_LINE:
+      'rpProject.reporting.list_purchase_of_glassess',
   },
   COMMS: {
     CREATE_CAMPAIGN: 'comms.campaign.create',
@@ -360,7 +366,7 @@ export const MS_ACTIONS = {
     GET_BY_LOCATION: 'ms.triggers.getByLocation',
   },
   MS_PHASES: {
-    CREATE: "ms.phases.create",
+    CREATE: 'ms.phases.create',
     GET_ONE: 'ms.phases.getOne',
     GET_ALL: 'ms.phases.getAll',
     GET_STATS: 'ms.phases.getStats',
@@ -369,13 +375,16 @@ export const MS_ACTIONS = {
     GET_BY_LOCATION: 'ms.phases.getByLocation',
   },
 
-
   MS_RIVER_STATIONS: {
     GET_DHM: 'ms.riverStations.getDhm',
   },
   MS_WATER_LEVELS: {
     GET_DHM: 'ms.waterLevels.getDhm',
     GET_GLOFAS: 'ms.waterLevels.getGlofas',
+  },
+  MS_RAINFALL_LEVELS: {
+    GET_DHM: 'ms.rainfallLevels.getDhm',
+    GET_GLOFAS: 'ms.rainfallLevels.getGlofas',
   },
   MS_ACTIVITIES: {
     GET_ONE: 'ms.activities.getOne',
@@ -406,8 +415,7 @@ export const MS_ACTIONS = {
     UPDATE: 'ms.dailyMonitoring.update',
     REMOVE: 'ms.dailyMonitoring.remove',
   },
-}
-
+};
 
 export const RABBIT_MQ = {
   AMQP_CONNECTION: 'AMQP_CONNECTION',
