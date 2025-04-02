@@ -1,7 +1,7 @@
 meta {
-  name: trigger created
+  name: trigger activate
   type: http
-  seq: 10
+  seq: 11
 }
 
 post {
@@ -24,8 +24,7 @@ body:json {
     "triggerStatement": {
       "isManualTrigger": true,
        "maxLeadTimeDays": "10",
-        "minLeadTimeDays": "10",
-      "type": "Manual"
+        "minLeadTimeDays": "10"
     },
     "triggerDocuments": {
       "documentKey": "documentValue",
