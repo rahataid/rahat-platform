@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { CreateUserDto, ListRoleDto } from '@rumsan/extensions/dtos';
+import { CreateUserDto, ListUserDto } from '@rumsan/extensions/dtos';
 import { PrismaService } from '@rumsan/prisma';
 import { UsersService as RSUserService } from '@rumsan/user';
 import { WalletService } from '../wallet/wallet.service';
@@ -29,19 +29,13 @@ export class UsersService extends RSUserService {
         });
     }
 
-    // getById(userId: number) {
-    //     console.log('Getting user by ID:', userId);
-    //     return super.getById(userId);
-    // }
-
-    async list(dto: ListRoleDto) {
+    async getWallets(dto: ListUserDto) {
         console.log('Listing users');
         const userListData = await super.list(dto);
-        userListData.data = userListData.data.map((user) => {
-            delete user.extras;
-            return user;
+        const wallets = userListData.data.map((user) => {
+            return { name: user.name, wallet: user.wallet };
         });
-        return userListData;
+        return wallets;
 
     }
 

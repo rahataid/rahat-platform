@@ -4,8 +4,8 @@ import { PrismaModule, PrismaService } from '@rumsan/prisma';
 import { UsersModule as RSUserModule, UsersService as RSUserService } from '@rumsan/user'; // Import UsersModule and UsersService
 import { WalletModule } from '../wallet/wallet.module';
 import { WalletService } from '../wallet/wallet.service';
+import { CustomUsersController } from './users.controller';
 import { UsersService } from './users.service';
-
 @Module({
     imports: [
         PrismaModule,
@@ -15,17 +15,20 @@ import { UsersService } from './users.service';
             WalletService,
         ]),
     ],
+    controllers: [
+        CustomUsersController,
+    ],
     providers: [
         PrismaService,
         EventEmitter2,
         WalletService,
-        { provide: RSUserService, useClass: UsersService },
+        UsersService
     ],
     exports: [
         PrismaService,
         EventEmitter2,
         WalletService,
-        { provide: RSUserService, useClass: UsersService },
+        UsersService
     ],
 })
 export class UsersModule { }

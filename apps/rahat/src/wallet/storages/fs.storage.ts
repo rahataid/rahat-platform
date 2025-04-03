@@ -10,11 +10,10 @@ export class FileWalletStorage implements WalletStorage {
     }
 
     async init() {
-        console.log("Making new directory")
-        try {
+        const dirExists = await fs.stat(this.storageDir).then(() => true).catch(() => false);
+        if (!dirExists) {
+            console.log("Making new directory");
             await fs.mkdir(this.storageDir, { recursive: true });
-        } catch (error) {
-            console.error('Error creating storage directory:', error);
         }
     }
 
@@ -38,9 +37,10 @@ export class FileWalletStorage implements WalletStorage {
 
     async isInitialized() {
         try {
-            await fs.readdir(this.storageDir);
-            return true;
+            const dirExists = await fs.stat(this.storageDir).then(() => true).catch(() => false);
+            return dirExists;
         } catch (error) {
+            console.error('Error checking if storage directory is initialized:', error);
             return false;
         }
     }

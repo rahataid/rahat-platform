@@ -17,12 +17,13 @@ import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
-import { AuthsService, UsersService } from '@rumsan/user';
+import { AuthsService } from '@rumsan/user';
 import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
 import { UUID } from 'crypto';
 import { Address, isAddress } from 'viem';
+import { UsersService } from '../users/users.service';
 import { WalletService } from '../wallet/wallet.service';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
