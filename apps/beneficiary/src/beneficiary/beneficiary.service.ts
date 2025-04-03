@@ -427,30 +427,28 @@ export class BeneficiaryService {
     return data;
   }
 
-  async findOneByPhone(phone: string) {
-    const piiData = await this.rsprisma.beneficiaryPii.findFirst({
+  async findOneByPhone(payload: { phone: string, projectUUID: string }) {
+    const beneficiary = await this.prisma.beneficiary.findFirst({
       where: {
-        phone: {
-          contains: phone,
-        },
-      },
-    });
-    if (!piiData) return null;
-
-    const beneficiary = await this.rsprisma.beneficiary.findUnique({
-      where: { id: piiData.beneficiaryId },
-      include: {
-        BeneficiaryProject: {
-          include: {
-            Project: true,
+        AND: [
+          {
+            BeneficiaryProject: {
+              some: {
+                projectId: payload.projectUUID
+              }
+            }
           },
-        },
+          {
+            pii: {
+              phone: payload.phone,
+            },
+          }
+        ],
       },
-    });
+    })
 
     if (!beneficiary) return null;
 
-    beneficiary.piiData = piiData;
     return beneficiary;
   }
 
@@ -693,26 +691,35 @@ export class BeneficiaryService {
   ) {
     try {
       this.beneficiaryUtilsService.ensurePhoneNumbers(dtos);
+      const validDtos: CreateBeneficiaryDto[] = [];
       for (const dto of dtos) {
-        await this.beneficiaryUtilsService.ensureUniquePhone(
-          dto.piiData.phone.toString()
-        );
-        dto.walletAddress =
-          await this.beneficiaryUtilsService.ensureValidWalletAddress(
-            dto.walletAddress
-          );
+        try {
+          await this.beneficiaryUtilsService.ensureUniquePhone(dto.piiData.phone.toString());
+        } catch (error) {
+          console.log(`Skipping entry due to duplicate phone: ${dto.piiData.phone}`);
+          continue;
+        }
+
+        try {
+          dto.walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(dto.walletAddress);
+        } catch (error) {
+          console.log(`Skipping entry due to duplicate/invalid wallet address: ${dto.walletAddress}`);
+          continue;
+        }
+
         dto.uuid = dto.uuid || uuidv4();
+        validDtos.push(dto);
       }
 
       const { beneficiariesData, piiDataList } =
-        this.beneficiaryUtilsService.prepareBulkInsertData(dtos);
+        this.beneficiaryUtilsService.prepareBulkInsertData(validDtos);
 
       // Insert beneficiaries in bulk
       const insertedBeneficiariesWithPii =
         await this.beneficiaryUtilsService.insertBeneficiariesAndPIIData(
           beneficiariesData,
           piiDataList,
-          dtos
+          validDtos
         );
 
       // Assign beneficiaries to the project if a projectUuid is provided
@@ -768,7 +775,7 @@ export class BeneficiaryService {
       // Return some form of success indicator, as createMany does not return the records themselves
       return {
         success: true,
-        count: dtos.length,
+        count: validDtos.length,
         beneficiariesData: insertedBeneficiariesWithPii,
       };
     } catch (e) {
