@@ -82,4 +82,9 @@ export const JOBS = {
     UPDATE: 'aa.jobs.dailyMonitoring.update',
     REMOVE: 'aa.jobs.dailyMonitoring.remove',
   },
+  STELLAR: {
+    GET_WALLET_BY_PHONE: 'aa.jobs.stellar.getWalletByPhone',
+    SEND_OTP: 'aa.jobs.stellar.sendOtp',
+    DISBURSE: 'aa.jobs.stellar.disburse'
+  }
 };

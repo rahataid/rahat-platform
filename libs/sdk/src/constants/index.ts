@@ -232,6 +232,11 @@ export const MS_ACTIONS = {
       UPDATE: 'aaProject.dailyMonitoring.update',
       REMOVE: 'aaProject.dailyMonitoring.remove',
     },
+    STELLAR: {
+      DISBURSE: 'aa.stellar.disburse',
+      SEND_OTP: 'aa.stellar.sendOtp',
+      GET_WALLET_BY_PHONE: 'aaProject.stellar.getWalletByPhone'
+    }
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',

@@ -1,14 +1,70 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ChainType, EVMWallet, StellarWallet, WalletKeys } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { FileWalletStorage } from './storages/fs.storage';
 
 @Injectable()
-export class WalletService {
-  constructor(private readonly prisma: PrismaService) { }
+export class WalletService implements OnModuleInit {
+  private evmWallet: EVMWallet | null = null; // Singleton instance for EVMWallet
+  private stellarWallet: StellarWallet | null = null; // Singleton instance for StellarWallet
 
-  // Right now this only work for 1 chain, need to modify logic of chain settings to include both
+  constructor(private readonly settings: SettingsService, private readonly prisma: PrismaService) { }
+
+  // Called when the module is initialized
+  async onModuleInit() {
+    await this.initializeEvmWallet();
+    await this.initializeStellarWallet();
+  }
+
+  // Initialize EVMWallet
+  private async initializeEvmWallet() {
+    const evmChain = await this.settings.getByName('CHAIN_SETTINGS');
+    const evmChainValue = evmChain.value as { rpcUrls: { default: { http: string[] } } };
+    this.evmWallet = new EVMWallet(
+      evmChainValue.rpcUrls.default.http[0] || 'https://base-sepolia-rpc.publicnode.com',
+      new FileWalletStorage()
+    );
+    await this.evmWallet.init(); // Initialize the wallet
+  }
+
+  // Initialize StellarWallet
+  private async initializeStellarWallet() {
+    const stellarChain = await this.settings.getByName('CHAIN_SETTINGS');
+    const stellarChainValue = stellarChain.value as { rpcUrls: { default: { http: string } } };
+    this.stellarWallet = new StellarWallet(
+      stellarChainValue.rpcUrls.default.http || 'https://stellar-soroban-public.nodies.app',
+      new FileWalletStorage()
+    );
+    await this.stellarWallet.init(); // Initialize the wallet
+  }
+
+  private getEvmWallet(): EVMWallet {
+    if (!this.evmWallet) {
+      throw new Error('EVMWallet is not initialized');
+    }
+    return this.evmWallet;
+  }
+
+  private getStellarWallet(): StellarWallet {
+    if (!this.stellarWallet) {
+      throw new Error('StellarWallet is not initialized');
+    }
+    return this.stellarWallet;
+  }
+
+  async createethWallets(): Promise<WalletKeys> {
+    const evmWallet = this.getEvmWallet();
+    const walletKeys = (await evmWallet.createWallet()).getWalletKeys();
+    return walletKeys;
+  }
+
+  async createstellarWallets() {
+    const stellarWallet = this.getStellarWallet();
+    const walletKeys = (await stellarWallet.createWallet()).getWalletKeys();
+    return walletKeys;
+  }
+
   async create(chains: ChainType[]) {
     const chainWallets = await Promise.all(
       chains.map(async (chain: ChainType) => {
@@ -26,27 +82,25 @@ export class WalletService {
     return chainWallets;
   }
 
+  async getWalletByPhone(phoneNumber: string) {
+    const result = await this.prisma.beneficiaryPii.findUnique({
+      where: { phone: phoneNumber },
+      select: {
+        beneficiary: {
+          select: { walletAddress: true },
+        },
+      },
+    });
+
+    if (!result) {
+      throw new Error("Beneficiary not found");
+    }
+
+    return result.beneficiary.walletAddress;
+  }
+
   signAndSend() {
     return `This action returns all wallet`;
-  }
-
-  // Utilities
-  async createethWallets() {
-    const settings = new SettingsService(this.prisma);
-    const evmChain = await settings.getByName("CHAIN_SETTINGS");
-    const evmWallet = new EVMWallet(evmChain.value.rpcUrls.default.http[0] as string, new FileWalletStorage());
-    await evmWallet.init();
-    const walletKeys = (await evmWallet.createWallet()).getWalletKeys();
-    return walletKeys;
-  }
-
-  async createstellarWallets() {
-    const settings = new SettingsService(this.prisma);
-    const stellarChain = await settings.getByName("CHAIN_SETTINGS");
-    const stellarWallet = new StellarWallet(stellarChain.value.rpcUrls.default.http as string, new FileWalletStorage());
-    await stellarWallet.init();
-    const walletKeys = (await stellarWallet.createWallet()).getWalletKeys();
-    return walletKeys;
   }
 
   getFunctionByName(chain: string): string {

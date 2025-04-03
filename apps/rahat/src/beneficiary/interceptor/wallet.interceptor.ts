@@ -5,46 +5,37 @@ import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { WalletService } from '../wallet.service';
+import { WalletService } from '../../wallet/wallet.service';
 
 @Injectable()
 export class WalletInterceptor implements NestInterceptor {
     constructor(
         private readonly prismaService: PrismaService,
         private readonly walletService: WalletService,
-        private readonly settings: SettingsService
     ) { }
 
     async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
-        const ctx = context.switchToRpc();
-        const data = ctx.getData();
+        const request = context.switchToHttp().getRequest();
+        const data = request.body;
 
-        try {
-            const walletAddress = await this.ensureValidWalletAddress(data.walletAddress);
-            const chain = await this.getChainName();
+        const walletAddress = await this.ensureValidWalletAddress(data.walletAddress);
 
-            const modifiedData = {
-                ...data,
+        request.body.walletAddress = walletAddress;
+
+        return next.handle().pipe(
+            map(response => ({
+                ...response,
                 walletAddress,
-                chain,
-            };
+            }))
+        );
 
-            return next.handle().pipe(
-                map(response => ({
-                    ...response,
-                    walletAddress
-                }))
-            );
-        } catch (error) {
-            throw error instanceof RpcException ? error : new RpcException('Wallet processing failed');
-        }
     }
 
     private async ensureValidWalletAddress(walletAddress?: string): Promise<string> {
         const chain = await this.getChainName();
 
         if (!walletAddress) {
-            const result = this.walletService.create([chain])
+            const result = await this.walletService.create([chain])
             return result[0].address;
         }
 
@@ -61,7 +52,8 @@ export class WalletInterceptor implements NestInterceptor {
     }
 
     private async getChainName(): Promise<ChainType> {
-        const contractSettings = await this.settings.getByName('CHAIN_SETTINGS');
+        const settings = new SettingsService(this.prismaService);
+        const contractSettings = await settings.getByName('CHAIN_SETTINGS');
         return contractSettings.value.nativeCurrency.symbol;
     }
 }

@@ -55,7 +55,7 @@ import { CheckHeaders, ExternalAppGuard } from '../decorators';
 import { removeSpaces } from '../utils';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
-import { WalletInterceptor } from '../wallet/interceptor/wallet.interceptor';
+import { WalletInterceptor } from './interceptor/wallet.interceptor';
 import { DocParser } from './parser';
 
 function getDateInfo(dateString) {
@@ -146,11 +146,11 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET_TABLE_STATS }, {});
   }
 
-  @UseInterceptors(WalletInterceptor)
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post()
+  @UseInterceptors(WalletInterceptor)
   async create(@Body() dto: CreateBeneficiaryDto) {
     console.log(dto);
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
