@@ -58,7 +58,7 @@ export class ProjectService {
     private requestContextService: RequestContextService,
     @Inject('RAHAT_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.META_TXN) private readonly metaTransactionQueue: Queue
-  ) { }
+  ) {}
 
   async create(data: CreateProjectDto) {
     // TODO: refactor to proper validator
@@ -159,11 +159,11 @@ export class ProjectService {
     user: any
   ) {
     try {
-      console.log("CMD", cmd);
+      console.log('CMD', cmd);
       const requiresUser = userRequiredActions.has(action);
       console.log({ requiresUser });
-      console.log("Payload", payload);
-      console.log("User", user);
+      console.log('Payload', payload);
+      console.log('User', user);
 
       return client
         .send(cmd, {
@@ -176,7 +176,6 @@ export class ProjectService {
             this.sendWhatsAppMsg(response, cmd, payload);
           })
         );
-
     } catch (err) {
       console.log('Err', err);
     }
@@ -234,7 +233,7 @@ export class ProjectService {
       ...cvaActions,
       ...rpActions,
       ...commsActions,
-      ...msTriggerActions
+      ...msTriggerActions,
     };
 
     const actionFunc = actions[action];
@@ -244,7 +243,6 @@ export class ProjectService {
     return await actionFunc(uuid, payload, (...args) =>
       this.sendCommand(args[0], args[1], args[2], this.client, action, user)
     );
-
   }
 
   // ======Only for testing=======
@@ -255,8 +253,8 @@ export class ProjectService {
       meta: dto.meta,
       province: dto.province,
       district: dto.district,
-      wardNo: dto.wardNo
-    }
+      wardNo: dto.wardNo,
+    };
     const piiExist = await this.checkPiiPhone(dto.phone);
     if (piiExist) throw new Error('Phone number already exists!');
     const koboPayload = {
@@ -266,41 +264,45 @@ export class ProjectService {
       age: dto.age,
       type: dto.type,
       leadInterests: dto.leadInterests,
-      extras: extrasPayload
-    }
+      extras: extrasPayload,
+    };
     const row = await this.prisma.koboBeneficiary.create({
       data: koboPayload,
     });
 
-    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, { piiData, ...rest }).pipe(
-      timeout(MS_TIMEOUT),
-      switchMap((response) => {
-        const cambodiaPayload = {
-          uuid: response.uuid,
-          phone: dto.phone,
-          walletAddress: response.walletAddress,
-          type: dto?.type || 'UNKNOWN',
-          leadInterests: dto?.leadInterests || [],
-          extras: extrasPayload,
-        };
-        // 3. Send to project MS
-        return this.client
-          .send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, cambodiaPayload)
-          .pipe(
-            timeout(MS_TIMEOUT),
-            tap((response) => {
-              // 4. Update status and addToProject
-              return this.addToProjectAndUpdate({
-                projectId: uuid,
-                beneficiaryId: response.uuid,
-                importId: row.uuid,
-              });
-            })
-          );
-      })
-    );
+    return this.client
+      .send({ cmd: BeneficiaryJobs.CREATE }, { piiData, ...rest })
+      .pipe(
+        timeout(MS_TIMEOUT),
+        switchMap((response) => {
+          const cambodiaPayload = {
+            uuid: response.uuid,
+            phone: dto.phone,
+            walletAddress: response.walletAddress,
+            type: dto?.type || 'UNKNOWN',
+            leadInterests: dto?.leadInterests || [],
+            extras: extrasPayload,
+          };
+          // 3. Send to project MS
+          return this.client
+            .send(
+              { cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid },
+              cambodiaPayload
+            )
+            .pipe(
+              timeout(MS_TIMEOUT),
+              tap((response) => {
+                // 4. Update status and addToProject
+                return this.addToProjectAndUpdate({
+                  projectId: uuid,
+                  beneficiaryId: response.uuid,
+                  importId: row.uuid,
+                });
+              })
+            );
+        })
+      );
   }
-
 
   // TODO: fix cambodia specific country code
   async importKoboBeneficiary(uuid: UUID, data: any) {
@@ -319,11 +321,11 @@ export class ProjectService {
         .split(' ')
         .map((item: string) => item.trim().toUpperCase());
     }
-    console.log({ NODE_ENV })
+    console.log({ NODE_ENV });
     if (NODE_ENV === 'production') {
       benef.phone = `${CAMBODIA_COUNTRY_CODE}${benef.phone}`;
     } else benef.phone = `+${benef.phone}`;
-    console.log("Beneficiary Phone", benef.phone);
+    console.log('Beneficiary Phone', benef.phone);
 
     const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
     const extrasPayload = {
@@ -333,7 +335,7 @@ export class ProjectService {
       district: benef.district || 'UNKNOWN',
       commune: benef.commune || 'UNKNOWN',
       village: benef.village || 'UNKNOWN',
-    }
+    };
 
     const koboPayload = {
       name: piiData.name,
@@ -342,8 +344,8 @@ export class ProjectService {
       age: benef.age,
       type: benef.type,
       leadInterests: benef.leadInterests,
-      extras: extrasPayload
-    }
+      extras: extrasPayload,
+    };
     // 1. Save to Kobo Import Logs
     const row = await this.prisma.koboBeneficiary.create({
       data: koboPayload,
@@ -355,38 +357,47 @@ export class ProjectService {
         ...piiData,
         age: benef.age,
         gender: benef.gender,
-        extras: { ...extrasPayload, type: benef.type, leadInterests: benef.leadInterests },
-      }
+        extras: {
+          ...extrasPayload,
+          type: benef.type,
+          leadInterests: benef.leadInterests,
+        },
+      };
       return this.saveToDiscarded(uuid, discardedPayload);
     }
     // 2. Save to Beneficiary and PII
-    return this.client.send({ cmd: BeneficiaryJobs.CREATE }, { piiData, ...rest }).pipe(
-      timeout(MS_TIMEOUT),
-      switchMap((response) => {
-        const cambodiaPayload = {
-          uuid: response.uuid,
-          phone: benef.phone,
-          walletAddress: response.walletAddress,
-          type: benef?.type || 'UNKNOWN',
-          leadInterests: benef?.leadInterests || [],
-          extras: extrasPayload,
-        };
-        // 3. Send to project MS
-        return this.client
-          .send({ cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid }, cambodiaPayload)
-          .pipe(
-            timeout(MS_TIMEOUT),
-            tap((response) => {
-              // 4. Update status and addToProject
-              return this.addToProjectAndUpdate({
-                projectId: uuid,
-                beneficiaryId: response.uuid,
-                importId: row.uuid,
-              });
-            })
-          );
-      })
-    );
+    return this.client
+      .send({ cmd: BeneficiaryJobs.CREATE }, { piiData, ...rest })
+      .pipe(
+        timeout(MS_TIMEOUT),
+        switchMap((response) => {
+          const cambodiaPayload = {
+            uuid: response.uuid,
+            phone: benef.phone,
+            walletAddress: response.walletAddress,
+            type: benef?.type || 'UNKNOWN',
+            leadInterests: benef?.leadInterests || [],
+            extras: extrasPayload,
+          };
+          // 3. Send to project MS
+          return this.client
+            .send(
+              { cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid },
+              cambodiaPayload
+            )
+            .pipe(
+              timeout(MS_TIMEOUT),
+              tap((response) => {
+                // 4. Update status and addToProject
+                return this.addToProjectAndUpdate({
+                  projectId: uuid,
+                  beneficiaryId: response.uuid,
+                  importId: row.uuid,
+                });
+              })
+            );
+        })
+      );
   }
 
   async saveToDiscarded(uuid: string, discardedPayload: any) {
@@ -412,7 +423,6 @@ export class ProjectService {
         },
       });
     }
-
   }
 
   async updateImportStatus(uuid: string, status: KoboBeneficiaryStatus) {
