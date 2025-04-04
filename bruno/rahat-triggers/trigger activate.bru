@@ -1,7 +1,7 @@
 meta {
   name: trigger activate
   type: http
-  seq: 11
+  seq: 12
 }
 
 post {
@@ -16,9 +16,9 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.triggers.add",
+    "action": "ms.triggers.activate",
     "payload": {
-    "repeatKey": "unique-repeat-key",
+    "repeatKey": "113118e7-afe4-446e-a1bf-acd470988aa0",
     "title": "Trigger Title",
     "repeatEvery": "Every day",
     "triggerStatement": {

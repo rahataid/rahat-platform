@@ -1,7 +1,7 @@
 meta {
-  name: list daily monitoring
+  name: getOne activitie
   type: http
-  seq: 15
+  seq: 9
 }
 
 post {
@@ -16,11 +16,10 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.dailyMonitoring.getAll",
+    "action": "ms.activities.getAll",
     "payload": {
        "page" : 1,
-      "perPage": 10,
-      "appId" : "{{appId}}"
+      "perPage": 99
     }
   }
 }

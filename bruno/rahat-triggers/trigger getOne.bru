@@ -1,7 +1,7 @@
 meta {
-  name: list daily monitoring
+  name: trigger getOne
   type: http
-  seq: 15
+  seq: 14
 }
 
 post {
@@ -16,11 +16,9 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.dailyMonitoring.getAll",
+    "action": "ms.triggers.getOne",
     "payload": {
-       "page" : 1,
-      "perPage": 10,
-      "appId" : "{{appId}}"
+    "repeatKey": "rahat.jobs.schedule.add:3fca76f0-0cfe-4c27-b1f2-e49b1158aabb::30000"
     }
   }
 }
