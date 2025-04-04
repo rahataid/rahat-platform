@@ -54,6 +54,7 @@ export class WalletInterceptor implements NestInterceptor {
     private async getChainName(): Promise<ChainType> {
         const settings = new SettingsService(this.prismaService);
         const contractSettings = await settings.getByName('CHAIN_SETTINGS');
-        return contractSettings.value.nativeCurrency.symbol;
+        const contractValue = contractSettings?.value as { nativeCurrency?: { symbol?: string } };
+        return (contractValue?.nativeCurrency?.symbol as ChainType) || 'evm';
     }
 }
