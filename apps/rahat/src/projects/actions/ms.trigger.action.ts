@@ -7,7 +7,6 @@ export const MS_TRIGGERS_JOBS = {
     GET_ALL: 'ms.jobs.triggers.getAll',
     GET_ONE: 'ms.jobs.triggers.getOne',
     ADD: 'ms.jobs.triggers.add',
-    UPDATE: 'ms.jobs.triggers.update',
     REMOVE: 'ms.jobs.triggers.remove',
     ACTIVATE: 'ms.jobs.triggers.activate',
     GET_BY_LOCATION: 'ms.jobs.triggers.getByLocation',
@@ -89,11 +88,6 @@ export const msTriggerActions: ProjectActionFunc = {
   [MS_ACTIONS.MS_TRIGGERS.GET_ONE]: (uuid, payload, sendCommand) => {
     payload.appId = uuid;
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.TRIGGER.GET_ONE }, payload);
-  },
-
-  [MS_ACTIONS.MS_TRIGGERS.UPDATE]: (uuid, payload, sendCommand) => {
-    payload.appId = uuid;
-    return sendCommand({ cmd: MS_TRIGGERS_JOBS.TRIGGER.UPDATE }, payload);
   },
 
   [MS_ACTIONS.MS_TRIGGERS.ACTIVATE]: (uuid, payload, sendCommand) => {

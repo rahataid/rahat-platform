@@ -45,15 +45,35 @@ export const aaActions: ProjectActionFunc = {
   // **** river stations end ******//
 
   // **** activities start ******//
-  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.SESSION_LOGS]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.ACTIVITIES.COMMUNICATION.SESSION_LOGS, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.SESSION_LOGS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.ACTIVITIES.COMMUNICATION.SESSION_LOGS, uuid },
+      payload
+    ),
 
+  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.RETRY_FAILED]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.ACTIVITIES.COMMUNICATION.RETRY_FAILED, uuid },
+      payload
+    ),
 
-  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.RETRY_FAILED]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.ACTIVITIES.COMMUNICATION.RETRY_FAILED, uuid }, payload),
-
-  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.TRIGGER]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.ACTIVITIES.COMMUNICATION.TRIGGER, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.TRIGGER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.ACTIVITIES.COMMUNICATION.TRIGGER, uuid },
+      payload
+    ),
 
   [MS_ACTIONS.AAPROJECT.ACTIVITIES.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.ACTIVITIES.ADD, uuid }, payload),
@@ -82,8 +102,15 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.ACTIVITIES.UPDATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.ACTIVITIES.UPDATE, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.GET_STATS]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.ACTIVITIES.COMMUNICATION.GET_STATS, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.GET_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.ACTIVITIES.COMMUNICATION.GET_STATS, uuid },
+      payload
+    ),
   // **** activities end ******//
 
   // **** activity categories start ******//
