@@ -218,6 +218,10 @@ export class BeneficiaryController {
   async getOneGroupByProject(uuid: UUID) {
     return this.service.getOneGroupByProject(uuid);
   }
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_GROUP_BY_UUID })
+  async listGroupByUuid(uuid: UUID[]) {
+    return this.service.listGroupByUUid(uuid);
+  }
 
   @MessagePattern({
     cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL,
