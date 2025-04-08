@@ -7,8 +7,6 @@ import { BQUEUE, ProjectContants } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { AuthsModule } from '@rumsan/user';
 import { UsersModule } from '../users/users.module';
-import { WalletModule } from '../wallet/wallet.module';
-import { WalletService } from '../wallet/wallet.service';
 import { VendorsController } from './vendors.controller';
 import { VendorsService } from './vendors.service';
 
@@ -30,10 +28,9 @@ import { VendorsService } from './vendors.service';
       name: BQUEUE.RAHAT
     }),
     AuthsModule,
-    UsersModule,
-    WalletModule
+    UsersModule
   ],
   controllers: [VendorsController],
-  providers: [VendorsService, WalletService, PrismaService]
+  providers: [VendorsService, PrismaService]
 })
 export class AppUsersModule { }
