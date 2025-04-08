@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE } from '@rahataid/sdk';
 import { SettingsModule } from '@rumsan/extensions/settings';
-import { UsersModule } from '@rumsan/user';
+import { UsersModule } from '../users/users.module';
 import { DevService } from '../utils/develop.service';
 import { EmailService } from './email.service';
 import { ListenersService } from './listeners.service';

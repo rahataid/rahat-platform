@@ -161,6 +161,7 @@ export const MS_ACTIONS = {
       ADD: 'aaProject.triggers.add',
       REMOVE: 'aaProject.triggers.remove',
       ACTIVATE: 'aaProject.triggers.activate',
+      TEST: 'aaProject.disbursement.test'
     },
     ACTIVITIES: {
       GET_ONE: 'aaProject.activities.getOne',
@@ -231,6 +232,11 @@ export const MS_ACTIONS = {
       UPDATE: 'aaProject.dailyMonitoring.update',
       REMOVE: 'aaProject.dailyMonitoring.remove',
     },
+    STELLAR: {
+      DISBURSE: 'aa.stellar.disburse',
+      SEND_OTP: 'aa.stellar.sendOtp',
+      GET_WALLET_BY_PHONE: 'aaProject.stellar.getWalletByPhone'
+    }
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',

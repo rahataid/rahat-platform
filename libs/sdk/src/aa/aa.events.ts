@@ -13,6 +13,7 @@ export const JOBS = {
     ADD: 'aa.jobs.triggers.add',
     REMOVE: 'aa.jobs.triggers.remove',
     ACTIVATE: 'aa.jobs.triggers.activate',
+    TEST: 'aa.jobs.test.disburse'
   },
   ACTIVITIES: {
     GET_ONE: 'aa.jobs.activities.getOne',
@@ -81,4 +82,9 @@ export const JOBS = {
     UPDATE: 'aa.jobs.dailyMonitoring.update',
     REMOVE: 'aa.jobs.dailyMonitoring.remove',
   },
+  STELLAR: {
+    GET_WALLET_BY_PHONE: 'aa.jobs.stellar.getWalletByPhone',
+    SEND_OTP: 'aa.jobs.stellar.sendOtp',
+    DISBURSE: 'aa.jobs.stellar.disburse'
+  }
 };
