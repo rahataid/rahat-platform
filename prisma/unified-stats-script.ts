@@ -85,11 +85,11 @@ function buildProjectStats(
   for (const section of configObj.ui) {
     for (const field of section.fields) {
       if (typeof field.dataMap === 'string' && field.dataMap.includes('__uuid')) {
-        field.dataMap = field.dataMap.replace('__uuid', projectUUID);
+        field.dataMap = field.dataMap.replace('__uuid', `_${projectUUID}`);
       }
       // If needed, also do for "title" or other properties
       if (typeof field.title === 'string' && field.title.includes('__uuid')) {
-        field.title = field.title.replace('__uuid', projectUUID);
+        field.title = field.title.replace('__uuid', `_${projectUUID}`);
       }
     }
   }
