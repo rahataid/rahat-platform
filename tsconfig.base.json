@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@rahat-os/contracts": ["libs/contracts/src/index.ts"],
       "@rahat/stats": ["libs/stats/src/index.ts"],
       "@rahataid/contracts": ["libs/contracts/src/index.ts"],
       "@rahataid/extensions": ["libs/extensions/src/index.ts"],
