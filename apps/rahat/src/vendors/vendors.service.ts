@@ -17,12 +17,13 @@ import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
-import { AuthsService, UsersService } from '@rumsan/user';
+import { AuthsService } from '@rumsan/user';
 import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
 import { UUID } from 'crypto';
 import { Address, isAddress } from 'viem';
+import { UsersService } from '../users/users.service';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -44,7 +45,7 @@ export class VendorsService {
       });
       if (!role) throw new Error('Role not found');
       // Add to User table
-      const { service, ...rest } = dto;
+      const { service, wallet, ...rest } = dto;
       if (dto?.email || dto?.phone) {
         const userData = await prisma.user.findFirst({
           where: {
@@ -60,7 +61,8 @@ export class VendorsService {
         }
       }
 
-      const user = await prisma.user.create({ data: rest });
+      const user = await prisma.user.create({ data: { ...rest, wallet } });
+
       // Add to UserRole table
       const userRolePayload = { userId: user.id, roleId: role.id };
       await prisma.userRole.create({ data: userRolePayload });
@@ -74,6 +76,7 @@ export class VendorsService {
         },
       });
       if (dto.service === Service.WALLET) return user;
+
       await prisma.auth.create({
         data: {
           userId: +user.id,
@@ -85,7 +88,6 @@ export class VendorsService {
       return user;
     });
 
-    console.log(vendor);
     return vendor;
   }
 

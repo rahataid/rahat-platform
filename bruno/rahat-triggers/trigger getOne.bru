@@ -1,7 +1,7 @@
 meta {
-  name: List forecast data sources based on the water level
+  name: trigger getOne
   type: http
-  seq: 13
+  seq: 14
 }
 
 post {
@@ -16,10 +16,9 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.waterLevels.getGlofas",
+    "action": "ms.triggers.getOne",
     "payload": {
-      "page": 1 ,
-      "perPage": 11
+    "repeatKey": "rahat.jobs.schedule.add:3fca76f0-0cfe-4c27-b1f2-e49b1158aabb::30000"
     }
   }
 }

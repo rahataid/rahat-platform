@@ -1,7 +1,7 @@
 meta {
   name: trigger created
   type: http
-  seq: 14
+  seq: 11
 }
 
 post {
@@ -18,23 +18,48 @@ body:json {
   {
     "action": "ms.triggers.add",
     "payload": {
-    "repeatKey": "unique-repeat-key",
-    "title": "Trigger Title",
-    "repeatEvery": "Every day",
-    "triggerStatement": {
-      "condition": "value",
-      "anotherCondition": true
-    },
-    "triggerDocuments": {
-      "documentKey": "documentValue",
-      "documentUrl": "https://example.com/document.pdf"
-    },
-    "notes": "Some notes about the trigger",
-    "phaseId": "123e4567-e89b-12d3-a456-426614174000",
-    "isMandatory": true,
-    "isTriggered": false,
-    "triggeredBy": "user-id",
-    "triggeredAt": "2023-01-01T00:00:00.000Z"
+      "triggers": [
+        {
+          "repeatKey": "unique-repeat-key",
+          "title": "This is another one",
+          "repeatEvery": "Every day",
+          "triggerStatement": {
+            "isManualTrigger": true,
+            "maxLeadTimeDays": "10",
+            "minLeadTimeDays": "10",
+            "type": "GOLAS"
+          },
+          "triggerDocuments": {
+            "documentKey": "documentValue",
+            "documentUrl": "https://example.com/document.pdf"
+          },
+          "notes": "Some notes about the trigger",
+          "phaseId": "5f428423-80a6-4d86-a282-e98d76b727ec",
+          "isMandatory": true,
+          "isTriggered": false,
+          "dataSource": "DHM"
+        },
+         {
+          "repeatKey": "unique-repeat-key",
+          "title": "This is manual trigger",
+          "repeatEvery": "Every day",
+          "triggerStatement": {
+            "isManualTrigger": true,
+            "maxLeadTimeDays": "10",
+            "minLeadTimeDays": "10",
+            "type": "MANUAL"
+          },
+          "triggerDocuments": {
+            "documentKey": "documentValue",
+            "documentUrl": "https://example.com/document.pdf"
+          },
+          "notes": "Some notes about the trigger",
+          "phaseId": "5f428423-80a6-4d86-a282-e98d76b727ec",
+          "isMandatory": true,
+          "isTriggered": false,
+          "dataSource": "MANUAL"
+        }
+      ]
     }
   }
 }

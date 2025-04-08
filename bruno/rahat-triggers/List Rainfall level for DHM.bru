@@ -1,0 +1,25 @@
+meta {
+  name: List Rainfall level for DHM
+  type: http
+  seq: 20
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.rainfallLevels.getDhm",
+    "payload": {
+      "page": 1 ,
+      "perPage": 11
+    }
+  }
+}
