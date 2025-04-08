@@ -66,14 +66,16 @@ typechain-types
 # bruno-testcase
 temp
 
-node_modules
-.env
-
-# Hardhat files
-
 /libs/contracts/build
 # TypeChain files
+
+# Hardhat files
+/cache
+/libs/contracts/artifacts
+/build
+# TypeChain files
 /typechain
+/typechain-types
 
 # solidity-coverage files
 /coverage

@@ -1,11 +1,11 @@
-name: Feature Audit CI/CD
+name: Stellar Platform CI/CD
 on:
   push:
     branches:
-      - 'feature/audit'
+      - 'stellar-platform'
   pull_request:
     branches:
-      - 'feature/audit'
+      - 'stellar-platform'
   workflow_dispatch:
 
 env:
@@ -21,9 +21,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # - name: import env file
-      #   run: |
-      #     touch ./.npmrc && echo "$env_npmrc" >> ./.npmrc
+      - name: import env file
+        run: |
+          touch ./.npmrc && echo "$env_npmrc" >> ./.npmrc
 
       - uses: actions/setup-node@v3
         with:
@@ -55,7 +55,7 @@ jobs:
           file: Dockerfile.beneficiary
           # push: ${{ github.event_name == 'push' && 'true' || 'false' }}
           push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-          tags: esatya/rahat-platform-beneficiary:feature-audit 
+          tags: esatya/rahat-platform-beneficiary:stellar-platform
 
       # Rahat Image
       - name: build && push rahat
@@ -66,4 +66,4 @@ jobs:
           file: Dockerfile.rahat
           # push: ${{ github.event_name == 'push' && 'true' || 'false' }}
           push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-          tags: esatya/rahat-platform-rahat:feature-audit 
+          tags: esatya/rahat-platform-rahat:stellar-platform
