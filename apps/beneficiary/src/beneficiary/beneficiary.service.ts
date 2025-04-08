@@ -344,13 +344,7 @@ export class BeneficiaryService {
 
 
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
-    const { piiData, projectUUIDs, ...data } = dto;
-
-    // Todo: remove wallet address while creating a beneficiary
-    let { walletAddress } = data;
-    walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(
-      walletAddress
-    );
+    const { piiData, projectUUIDs, walletAddress, ...data } = dto;
 
     if (!piiData.phone) throw new RpcException('Phone number is required');
     await this.beneficiaryUtilsService.ensureUniquePhone(

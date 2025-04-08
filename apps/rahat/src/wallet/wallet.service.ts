@@ -99,9 +99,14 @@ export class WalletService implements OnModuleInit {
     return result.beneficiary.walletAddress;
   }
 
-  signAndSend() {
-    return `This action returns all wallet`;
+  async getSecretByWallet(walletAddress: string, chain: ChainType) {
+    if (!walletAddress) {
+      throw new Error("Wallet address not found");
+    }
+    const storage = new FileWalletStorage();
+    return storage.getKey(walletAddress, chain);
   }
+
 
   getFunctionByName(chain: string): string {
     const functionName = `create${chain}Wallets` as keyof this;

@@ -1,0 +1,53 @@
+meta {
+  name: create-project-action
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/v1/projects/{{projectUuid}}/actions
+  body: json
+  auth: none
+}
+
+assert {
+  res.status: eq 201
+  res.body.success: eq true
+  res.body.data: isJson
+}
+
+script:pre-request {
+  const { access_token } = require('./temp/auth-data.json');
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+  
+  // Assuming projectUuid is stored from a previous request or environment
+  const projectUuid = require('./temp/project-data.json').projectUuid;
+  
+  req.setBody({
+    action: "aa.stellar.disburse",
+    payload: {
+      dName: "manzikdat",
+      phoneNumber: "+9779841602388"
+    }
+  });
+}
+
+script:post-response {
+  const createFile = require('./createFile');
+  const resData = res.getBody().data;
+
+  const data = { 
+    actionId: resData.actionId || resData.id,
+    timestamp: new Date().toISOString()
+  };
+  createFile(data, 'action-data.json');
+}
+
+tests {
+  test('should create new project action successfully', async () => {
+    const data = res.getBody();
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.an('object');
+    expect(res.body.data).to.equal(data.data);
+  });
+}
