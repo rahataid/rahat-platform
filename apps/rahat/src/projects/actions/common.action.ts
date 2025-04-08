@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
   BeneficiaryJobs,
   MS_ACTIONS,
@@ -40,6 +42,16 @@ export const beneficiaryActions: ProjectActionFunc = {
   [MS_ACTIONS.BENEFICIARY.LIST_BY_PROJECT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.LIST, uuid },
+      { projectId: uuid, ...payload }
+    ),
+  [MS_ACTIONS.BENEFICIARY.GET_ONE_BENEFICARY]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.GET_ONE_BENEFICIARY, uuid },
+      { projectId: uuid, ...payload }
+    ),
+  [MS_ACTIONS.BENEFICIARY.LIST_FULL_DATA_BY_PROJECT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.LIST_FULL_DATA, uuid },
       { projectId: uuid, ...payload }
     ),
   [MS_ACTIONS.BENEFICIARY.GET_PROJECT_SPECIFIC]: (uuid, payload, sendCommand) =>
@@ -89,4 +101,26 @@ export const settingActions: ProjectActionFunc = {
 export const projectActions: ProjectActionFunc = {
   [MS_ACTIONS.PROJECT.SETUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.PROJECT_SETUP, uuid }, payload),
+  [MS_ACTIONS.PROJECT.REFRESH_REPORTING_STATS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.REPORTING_REFRESH, uuid }, payload),
 };
+
+export const groupActions: ProjectActionFunc = {
+  [MS_ACTIONS.GROUP.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.GROUP.CREATE, uuid }, payload),
+  [MS_ACTIONS.GROUP.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.GROUP.LIST, uuid }, payload),
+  [MS_ACTIONS.GROUP.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.GROUP.GET, uuid }, payload),
+};
+
+export const beneficiaryGroupActions: ProjectActionFunc = {
+  [MS_ACTIONS.BENEFICIARY_GROUP.BULK_ASSIGN]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY_GROUP.BULK_ASSIGN, uuid }, payload),
+  [MS_ACTIONS.BENEFICIARY_GROUP.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY_GROUP.LIST, uuid }, payload),
+  [MS_ACTIONS.BENEFICIARY_GROUP.LIST_BY_GROUP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY_GROUP.LIST_BY_GROUP, uuid }, payload),
+};
+
+

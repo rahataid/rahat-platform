@@ -1,0 +1,25 @@
+meta {
+  name: list activities
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.activities.getAll",
+    "payload": {
+       "page" : 1,
+      "perPage": 10
+    }
+  }
+}

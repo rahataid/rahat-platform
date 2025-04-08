@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
@@ -13,12 +15,13 @@ import {
   BeneficiaryEvents,
   BeneficiaryJobs,
   BeneficiaryPayload,
-  generateRandomWallet,
-  ProjectContants,
   MicroserviceOptions,
+  ProjectContants,
+  WalletJobs
 } from '@rahataid/sdk';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService } from '@rumsan/prisma';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { isAddress } from 'viem';
 
 @Injectable()
@@ -26,8 +29,10 @@ export class BeneficiaryUtilsService {
   constructor(
     private readonly prismaService: PrismaService,
     private eventEmitter: EventEmitter2,
-    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
-  ) {}
+    @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
+    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
+    private readonly settings: SettingsService
+  ) { }
 
   buildWhereClause(dto: ListBeneficiaryDto): Record<string, any> {
     const { projectId, startDate, endDate } = dto;
@@ -75,8 +80,11 @@ export class BeneficiaryUtilsService {
   }
 
   async ensureValidWalletAddress(walletAddress?: string): Promise<string> {
+    const chain = await this.getChainName()
     if (!walletAddress) {
-      return generateRandomWallet().address;
+      const observable = this.walletClient.send({ cmd: WalletJobs.CREATE }, [chain.toLowerCase()]);
+      const result = await firstValueFrom(observable);
+      return result[0].address;
     }
 
     const existingBeneficiary = await this.prismaService.beneficiary.findUnique(
@@ -86,9 +94,11 @@ export class BeneficiaryUtilsService {
     );
 
     if (existingBeneficiary) {
+      console.log('Wallet address already exists');
       throw new RpcException('Wallet address already exists');
     }
     if (!isAddress(walletAddress)) {
+      console.log('Wallet should be valid Ethereum Address');
       throw new RpcException('Wallet should be valid Ethereum Address');
     }
     return walletAddress;
@@ -104,6 +114,8 @@ export class BeneficiaryUtilsService {
       where: { phone },
     });
     if (existingPiiData) {
+      console.log('Phone number should be unique');
+
       throw new RpcException('Phone number should be unique');
     }
   }
@@ -288,5 +300,13 @@ export class BeneficiaryUtilsService {
         throw error;
       }
     }
+  }
+
+  async getChainName(): Promise<string> {
+    const contractSettings = await this.settings.getByName('CHAIN_SETTINGS');
+    const value = typeof contractSettings.value === 'string'
+      ? JSON.parse(contractSettings.value)
+      : contractSettings.value;
+    return value.nativeCurrency?.symbol;
   }
 }

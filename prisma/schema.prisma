@@ -23,6 +23,8 @@ model User {
   phone     String?
   wallet    String?
   extras    Json?   @db.JsonB()
+  notes     String? @db.Text()
+  sessionId String?
 
   Auth          Auth[]
   UserRole      UserRole[]
@@ -36,9 +38,26 @@ model User {
   updatedBy String?
 
   grievances Grievance[] @relation("UserGrievances")
+  // wallets    UserWallets[]
 
   @@map("tbl_users")
 }
+
+// model UserWallets {
+//   id         Int       @id @default(autoincrement())
+//   userId     Int
+//   chain      String
+//   address    String
+//   privateKey String
+//   createdAt  DateTime  @default(now())
+//   updatedAt  DateTime? @updatedAt()
+//   deletedAt  DateTime?
+
+//   user User @relation(fields: [userId], references: [id])
+
+//   @@unique([userId, chain])
+//   @@map("tbl_users_wallets")
+// }
 
 enum Gender {
   MALE
@@ -425,7 +444,7 @@ model Vendors {
   email     String?
   phone     String?
   location  String?
-  wallet    String?
+  wallet    String? // Todo: Remove this after wallet integration
   extras    Json?     @db.JsonB()
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -560,23 +579,22 @@ enum KoboBeneficiaryStatus {
 }
 
 model KoboBeneficiary {
-  id                       Int                    @id @default(autoincrement())
-  uuid                     String                 @unique @default(uuid()) @db.Uuid()
-  name                     String
-  gender                   Gender                 @default(UNKNOWN)
-  type                     KoboBeneficiaryType    @default(SALE)
-  status                   KoboBeneficiaryStatus  @default(PENDING)
-  phone                    String
-  age                      Int?
-  email                    String?
-  wallet                   String?
-  leadInterests            String[]
-  extras                    Json?                  @db.JsonB()
+  id            Int                   @id @default(autoincrement())
+  uuid          String                @unique @default(uuid()) @db.Uuid()
+  name          String
+  gender        Gender                @default(UNKNOWN)
+  type          KoboBeneficiaryType   @default(SALE)
+  status        KoboBeneficiaryStatus @default(PENDING)
+  phone         String
+  age           Int?
+  email         String?
+  wallet        String?
+  leadInterests String[]
+  extras        Json?                 @db.JsonB()
 
-
-  createdAt                DateTime               @default(now())
-  updatedAt                DateTime?              @updatedAt()
-  deletedAt                DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
 
   @@map("tbl_kobo_beneficiaries")
 }
@@ -631,3 +649,73 @@ model Token {
 }
 
 // ===========End Tokens=============
+
+// region: @rahat/offramp
+
+model OfframpProvider {
+  id          Int       @id @default(autoincrement())
+  uuid        String    @unique @default(uuid())
+  name        String    @unique()
+  description String?
+  config      Json      @db.JsonB()
+  extras      Json?     @db.JsonB()
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt()
+  deletedAt   DateTime?
+  createdBy   Int?
+  updatedBy   Int?
+
+  @@map("tbl_offramp_providers")
+}
+
+enum OfframpStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model OfframpRequest {
+  id            Int                 @id @default(autoincrement())
+  uuid          String              @unique @default(uuid())
+  chain         String
+  token         String
+  senderAddress String
+  amount        Float
+  requestId     String?             @unique
+  escrowAddress String?
+  status        OfframpStatus       @default(PENDING)
+  transaction   OfframpTransaction? @relation("RequestTransaction")
+  extras        Json?               @db.JsonB()
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime?           @updatedAt()
+  deletedAt     DateTime?
+  createdBy     Int?
+  updatedBy     Int?
+
+  @@map("tbl_offramps")
+}
+
+model OfframpTransaction {
+  id             Int            @id @default(autoincrement())
+  uuid           String         @unique @default(uuid())
+  requestId      String         @unique
+  txHash         String
+  walletId       String?
+  customerKey    String?
+  chain          String?
+  token          String?
+  referenceId    String?
+  status         OfframpStatus  @default(PENDING)
+  extras         Json?          @db.JsonB()
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime?      @updatedAt()
+  deletedAt      DateTime?
+  createdBy      Int?
+  updatedBy      Int?
+  offrampRequest OfframpRequest @relation("RequestTransaction", fields: [requestId], references: [requestId])
+
+  @@map("tbl_offramp_transactions")
+}
+
+// endregion: @rahat/offramp

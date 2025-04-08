@@ -1,0 +1,56 @@
+meta {
+  name: activity created
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.activities.add",
+    "payload": {
+      "title": "Activity title",
+      "leadTime": "2023-01-01",
+      "responsibility": "responsibility",
+      "source": "source",
+  //     "phaseId": "{{phaseId}}",
+      "phaseId": "69f80f09-fe06-404f-935b-68198fe8de4b",
+  //     "categoryId": "{{categoryId}}",
+      "categoryId": "ce76b189-feb5-481b-aad5-54ac0a67129a",
+      "description": "description",
+      "manager": { 
+        "id": "adfasdfasdf", // <----
+        "name": "test",
+        "email": "test@gmail.com",
+        "phone": "9801234567"
+      },
+      "notes": "notes",
+      "status": "NOT_STARTED",
+      "activityDocuments": {
+        "key": "value"
+      },
+      "activityCommunication": [
+        {
+          "message": "this is a  test mesage for  trigger communication ",
+          "groupUID": "f7b9f1b4-bb8b-4f5c-a306-a69a583a7514",
+          "transportId": "d24v5w0ffz52hjt3ltknp7ci",
+          "communicationId": "5007e15a-a492-474d-9814-0e9d063a9623"
+        }
+      ],
+      "isAutomated": false,
+      "isDeleted": false,
+      "completedBy": "user-id",
+      "differenceInTriggerAndActivityCompletion": "2 days"
+  //     "appId": "{{appId}}"
+    }
+  }
+}

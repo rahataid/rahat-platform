@@ -1,3 +1,5 @@
+import { RabbitMQModuleOptions } from '@rumsan/rabbitmq';
+
 export const APP_JOBS = {
   EMAIL: 'email',
   SLACK: 'slack',
@@ -41,6 +43,17 @@ export const APP = {
 };
 
 export const MS_ACTIONS = {
+  GROUP: {
+    CREATE: 'group.create',
+    LIST: 'group.list',
+    GET: 'group.get'
+  },
+  BENEFICIARY_GROUP: {
+    BULK_ASSIGN: 'beneficiary_group.bulk_assign',
+    LIST: 'beneficiary_group.list',
+    LIST_BY_GROUP: 'beneficiary_group.list_by_group',
+  }
+  ,
   CAMBODIA: {
     APP: { STATS: 'cambodia.app.stats', LINE_STATS: 'cambodia.app.line_stats', BROAD_CAST_STATUS_COUNT: 'cambodia.app.broadcast_status_count', PROJECT_SETTINGS: 'cambodia.app.project_settings', TRIGGER_COMMUNICATION: 'cambodia.app.trigger_communication', },
     BENEFICIARY: {
@@ -62,6 +75,7 @@ export const MS_ACTIONS = {
       UPDATE: 'cambodia.chw.update',
       DELETE: 'cambodia.chw.delete',
       LIST_BY_VENDOR: 'cambodia.chw.list_by_vendor',
+      VALIDATE_HEALTH_WORKER: 'cambodia.chw.validate_health_worker',
     },
     COMMISISION_SCHEME: {
       CREATE: 'cambodia.commission_scheme.create',
@@ -85,6 +99,7 @@ export const MS_ACTIONS = {
 
   PROJECT: {
     SETUP: 'project.setup',
+    REFRESH_REPORTING_STATS: 'project.refresh_reporting_stats',
   },
   BENEFICIARY: {
     CREATE: 'beneficiary.create',
@@ -97,7 +112,9 @@ export const MS_ACTIONS = {
     ASSGIN_GROUP_TO_PROJECT: 'beneficiary.assign_group_to_project',
     BULK_ASSIGN_TO_PROJECT: 'beneficiary.bulk_assign',
     LIST_BY_PROJECT: 'beneficiary.list_by_project',
+    LIST_FULL_DATA_BY_PROJECT: 'beneficiary.list_full_data_by_project',
     GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',
+    GET_ONE_BENEFICARY: "beneficiary.get_one_beneficiary",
   },
   VENDOR: {
     REGISTER: 'vendor.register',
@@ -144,6 +161,7 @@ export const MS_ACTIONS = {
       ADD: 'aaProject.triggers.add',
       REMOVE: 'aaProject.triggers.remove',
       ACTIVATE: 'aaProject.triggers.activate',
+      TEST: 'aaProject.disbursement.test'
     },
     ACTIVITIES: {
       GET_ONE: 'aaProject.activities.getOne',
@@ -177,6 +195,7 @@ export const MS_ACTIONS = {
     },
     STAKEHOLDERS: {
       GET_ALL: 'aaProject.stakeholders.getAll',
+      GET_ONE: "aaProject.stakeholders.getOne",
       ADD: 'aaProject.stakeholders.add',
       REMOVE: 'aaProject.stakeholders.remove',
       UPDATE: 'aaProject.stakeholders.update',
@@ -213,6 +232,11 @@ export const MS_ACTIONS = {
       UPDATE: 'aaProject.dailyMonitoring.update',
       REMOVE: 'aaProject.dailyMonitoring.remove',
     },
+    STELLAR: {
+      DISBURSE: 'aa.stellar.disburse',
+      SEND_OTP: 'aa.stellar.sendOtp',
+      GET_WALLET_BY_PHONE: 'aaProject.stellar.getWalletByPhone'
+    }
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',
@@ -240,6 +264,7 @@ export const MS_ACTIONS = {
     TRIGGER_CAMPAIGN: 'c2cProject.campaign.trigger',
     GET_ALL_COMMUNICATION_LOGS: 'c2cProject.campaign.communication_logs',
     GET_ALL_COMMUNICATION_STATS: 'c2cProject.campaign.communication_stats',
+    LIST_REPORTING: 'c2cProject.reporting.list',
   },
   CVAProject: {
     UPDATE_STATUS: 'cvaProject.updateStatus',
@@ -284,6 +309,7 @@ export const MS_ACTIONS = {
     REQUEST_REDEMPTION: 'rpProject.requestRedemption',
     UPDATE_REDEMPTION: 'rpProject.updateRedemption',
     LIST_REDEMPTION: 'rpProject.listRedemption',
+    GET_BENEFICIARY_REDEMPTION: 'rpProject.getBeneficiaryRedemption',
     GET_VENDOR_REDEMPTION: 'rpProject.vendorRedemption',
     GET_REDEMPTION: 'rpProject.getRedemption',
     GENERATE_OTP_HASH: 'rpProject.generateOtpHash',
@@ -308,8 +334,9 @@ export const MS_ACTIONS = {
     LIST_REPORTING: 'rpProject.reporting.list',
     UPDATE_BENEFICIARY: 'rpProject.beneficiary.update',
     LIST_BENEFICIARY_REIMBURSEMENTS: 'rpProject.beneficiary.listReimbursements',
-    SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions'
-
+    SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions',
+    LIST_EYE_CHECKEUP_LINE: 'rpProject.reporting.list_eye_checkup_line',
+    LIST_PURCHASE_OF_GLASSESS_LINE: 'rpProject.reporting.list_purchase_of_glassess',
   },
   COMMS: {
     CREATE_CAMPAIGN: 'comms.campaign.create',
@@ -328,4 +355,74 @@ export const MS_ACTIONS = {
     GET_ALL_GROUPS: 'comms.beneficiary.getAllGroups',
     GET_ONE_GROUP: 'comms.beneficiary.getOneGroup',
   },
+
+  MS_TRIGGERS: {
+    DEV_ONLY: 'ms.triggers.devOnly',
+    GET_ALL: 'ms.triggers.getAll',
+    GET_ONE: 'ms.triggers.getOne',
+    ADD: 'ms.triggers.add',
+    REMOVE: 'ms.triggers.remove',
+    ACTIVATE: 'ms.triggers.activate',
+    GET_BY_LOCATION: 'ms.triggers.getByLocation',
+  },
+  MS_PHASES: {
+    CREATE: "ms.phases.create",
+    GET_ONE: 'ms.phases.getOne',
+    GET_ALL: 'ms.phases.getAll',
+    GET_STATS: 'ms.phases.getStats',
+    ADD_TRIGGERS: 'ms.phases.addTriggers',
+    REVERT_PHASE: 'ms.phases.revertPhase',
+    GET_BY_LOCATION: 'ms.phases.getByLocation',
+  },
+
+
+  MS_RIVER_STATIONS: {
+    GET_DHM: 'ms.riverStations.getDhm',
+  },
+  MS_WATER_LEVELS: {
+    GET_DHM: 'ms.waterLevels.getDhm',
+    GET_GLOFAS: 'ms.waterLevels.getGlofas',
+  },
+  MS_ACTIVITIES: {
+    GET_ONE: 'ms.activities.getOne',
+    GET_ALL: 'ms.activities.getAll',
+    GET_HAVING_COMMS: 'ms.activities.getHavingComms',
+    ADD: 'ms.activities.add',
+    REMOVE: 'ms.activities.remove',
+    UPDATE: 'ms.activities.update',
+    UPDATE_STATUS: 'ms.activities.updateStatus',
+    LIST_PROJECT_SPECIFIC: 'ms.activities.listProjectSpecific',
+    COMMUNICATION: {
+      TRIGGER: 'ms.activities.communication.trigger',
+      SESSION_LOGS: 'ms.activities.communication.sessionLogs',
+      RETRY_FAILED: 'ms.activities.communication.retryFailed',
+      GET_STATS: 'ms.activities.communication.getStats',
+    },
+  },
+  MS_CATEGORIES: {
+    GET_ALL: 'ms.activityCategories.getAll',
+    ADD: 'ms.activityCategories.add',
+    REMOVE: 'ms.activityCategories.remove',
+  },
+
+  MS_DAILY_MONITORING: {
+    ADD: 'ms.dailyMonitoring.add',
+    GET_ALL: 'ms.dailyMonitoring.getAll',
+    GET_ONE: 'ms.dailyMonitoring.getOne',
+    UPDATE: 'ms.dailyMonitoring.update',
+    REMOVE: 'ms.dailyMonitoring.remove',
+  },
 }
+
+
+export const RABBIT_MQ = {
+  AMQP_CONNECTION: 'AMQP_CONNECTION',
+  CT_BENEFICIARY_EXPORT: 'CT_BENEFICIARY_EXPORT',
+};
+export const queueOptions: RabbitMQModuleOptions['queues'] = [
+  {
+    name: RABBIT_MQ.CT_BENEFICIARY_EXPORT,
+    durable: true,
+    options: {},
+  },
+];

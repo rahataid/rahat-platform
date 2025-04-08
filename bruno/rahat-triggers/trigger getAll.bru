@@ -1,0 +1,27 @@
+meta {
+  name: trigger getAll
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.triggers.getAll",
+    "payload": {
+     // "appId": "{{appId}}"
+  //     "name": "PREPAREDNESS"
+  //     "source": "GLOFAS"
+  //     "river_basin": "kar"
+    }
+  }
+}

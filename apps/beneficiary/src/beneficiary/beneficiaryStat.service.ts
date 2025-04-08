@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { StatsService } from '@rahat/stats';
@@ -85,7 +87,7 @@ export class BeneficiaryStatService {
         );
 
       if (beneficiaryIds.length > 0) {
-        filter.uuid = beneficiaryIds;
+        filter.uuid = { in: beneficiaryIds };
       }
     }
 
@@ -525,23 +527,28 @@ export class BeneficiaryStatService {
   async calculateRangedAge(ages: any) {
     const range = [
       { id: '0-20', count: 0 },
-      { id: '20-40', count: 0 },
-      { id: '40-60', count: 0 },
-      { id: '60+', count: 0 },
+      { id: '21-40', count: 0 },
+      { id: '41-60', count: 0 },
+      { id: '61-80', count: 0 },
+      { id: '80+', count: 0 },
     ];
+
     ages.forEach((age) => {
       const { id, count } = age;
       if (id >= 0 && id <= 20) {
         range[0].count += count;
       }
-      if (id > 20 && id <= 40) {
+      if (id >= 21 && id <= 40) {
         range[1].count += count;
       }
-      if (id > 40 && id <= 60) {
+      if (id >= 41 && id <= 60) {
         range[2].count += count;
       }
-      if (id > 60) {
+      if (id >= 61 && id <= 80) {
         range[3].count += count;
+      }
+      if (id > 80) {
+        range[4].count += count;
       }
     });
 

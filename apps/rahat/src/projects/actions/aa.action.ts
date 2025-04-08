@@ -1,4 +1,6 @@
-import { AAJobs, MS_ACTIONS } from '@rahataid/sdk';
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import { AAJobs, MS_ACTIONS, WalletJobs } from '@rahataid/sdk';
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
 
 export const aaActions: ProjectActionFunc = {
@@ -24,6 +26,8 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.TRIGGERS.ACTIVATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.TRIGGERS.ACTIVATE, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.TRIGGERS.TEST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.TRIGGERS.TEST, uuid }, payload),
   // **** triggers end ******//
 
   // **** river stations start ******//
@@ -134,6 +138,10 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STAKEHOLDERS.GET_ALL, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STAKEHOLDERS.GET_ONE, uuid }, payload),
+
   // **** stakeholders end ******//
 
   // **** Stakeholders groups ******//
@@ -269,4 +277,23 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.DAILY_MONITORING.REMOVE, uuid }, payload),
   // **** daily monitoring end ****//
+
+  // **** Stellar start **** //
+  [MS_ACTIONS.AAPROJECT.STELLAR.DISBURSE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.DISBURSE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.SEND_OTP]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.SEND_OTP, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_WALLET_BY_PHONE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: WalletJobs.GET_WALLET_BY_PHONE }, payload),
 };

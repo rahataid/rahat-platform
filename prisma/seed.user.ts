@@ -93,7 +93,6 @@ export const users: Array<{
       wallet: '0xAC6bFaf10e89202c293dD795eCe180BBf1430d7B',
     },
 
-
   ];
 
 export const userRoles: Array<{

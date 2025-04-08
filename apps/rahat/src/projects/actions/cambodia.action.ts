@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { MS_ACTIONS } from '@rahataid/sdk';
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
 
@@ -17,6 +19,7 @@ export const CAMBODIA_JOBS = {
     UPDATE: 'rahat.jobs.chw.update',
     DELETE: 'rahat.jobs.chw.delete',
     LIST_BY_VENDOR: 'rahat.jobs.chw.list_by_vendor',
+    VALIDATE_HEALTH_WORKER: 'rahat.jobs.app.validate_health_worker',
   },
   BENEFICIARY: {
     VALIDATE_CONVERSION: 'rahat.jobs.beneficiary.validate_conversion',
@@ -51,6 +54,12 @@ export const CAMBODIA_JOBS = {
 };
 
 export const cambodiaActions: ProjectActionFunc = {
+
+
+  ["cambodia.app.test"]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: "rahat.jobs.test", uuid }, payload),
+
+
   [MS_ACTIONS.CAMBODIA.APP.STATS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.APP.STATS, uuid }, payload),
 
@@ -173,6 +182,13 @@ export const cambodiaActions: ProjectActionFunc = {
     return (
 
       sendCommand({ cmd: CAMBODIA_JOBS.APP.TRIGGER_COMMUNICATION, uuid }, payload)
+    )
+  },
+  [MS_ACTIONS.CAMBODIA.CHW.VALIDATE_HEALTH_WORKER]: (uuid, payload, sendCommand) => {
+    console.log(uuid);
+    return (
+
+      sendCommand({ cmd: CAMBODIA_JOBS.CHW.VALIDATE_HEALTH_WORKER, uuid }, payload)
     )
   }
 };

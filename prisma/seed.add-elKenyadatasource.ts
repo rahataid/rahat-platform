@@ -136,15 +136,7 @@ const projectStats = (uuid: string, url: string) => {
             dataSrc: 'source2',
             rowSpan: 1,
           },
-          {
-            type: 'donut',
-            props: { horizontal: true, xaxisLabels: false },
-            title: 'Total Reimbursment',
-            colSpan: 1,
-            dataMap: ``,
-            dataSrc: 'source2',
-            rowSpan: 1,
-          },
+
         ],
       },
       {
@@ -163,6 +155,8 @@ const projectStats = (uuid: string, url: string) => {
     ],
   };
 };
+
+
 
 const main = async () => {
   rl.question('Enter project UUID: ', (projectUUID) => {

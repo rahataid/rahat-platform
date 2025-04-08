@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 /**
  * This is not a production server yet!
  * This is only a minimal backend to get started.
@@ -10,9 +12,8 @@ import { NestApplication, NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { GlobalCustomExceptionFilter } from '@rahataid/extensions/utils';
+import { GlobalCustomExceptionFilter, ResponseTransformInterceptor } from '@rahataid/extensions';
 import { APP } from '@rahataid/sdk';
-import { ResponseTransformInterceptor } from '@rumsan/extensions/interceptors';
 import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app/app.module';
 import { loggerInstance } from './logger/winston.logger';

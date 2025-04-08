@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Controller, Param } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
@@ -46,8 +48,8 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_PHONE })
-  async getBeneficiaryByPhone(wallet: string) {
-    return this.service.findOneByPhone(wallet);
+  async getBeneficiaryByPhone(phone: string) {
+    return this.service.findOneByPhone(phone);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
@@ -55,8 +57,8 @@ export class BeneficiaryController {
     // const payloadData = Array.isArray(data?.data) ? data?.data : data?.payload;
 
     return this.service.createBulk(
-      data,
-      data?.projectUUID,
+      data?.payload,
+      data?.data?.projectUUID,
       data?.data?.walkinBulk
     );
   }
@@ -84,6 +86,12 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_BY_PROJECT })
   async listByProject(data: any) {
     return this.service.listBenefByProject(data);
+  }
+
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_BENEFICIARY })
+  async findOneBeneficiary(data: any) {
+    return this.service.findOneBeneficiary(data);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_PII })
@@ -252,5 +260,10 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.CALCULATE_STATS })
   async syncProjectStats(payload) {
     return this.service.syncProjectStats(payload.projectUUID)
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.DELETE_BENEFICIARY_AND_PII })
+  async deleteBenefAndPii(payload: any) {
+    return this.service.deleteBenefAndPii(payload);
   }
 }

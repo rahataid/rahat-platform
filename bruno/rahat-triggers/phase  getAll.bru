@@ -1,0 +1,27 @@
+meta {
+  name: phase  getAll
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.phases.getAll",
+    "payload": {
+     // "appId": "{{appId}}"
+  //     "name": "PREPAREDNESS"
+  //     "source": "GLOFAS"
+  //     "river_basin": "kar"
+    }
+  }
+}

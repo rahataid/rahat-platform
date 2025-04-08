@@ -19,6 +19,8 @@ export const JOBS = {
   GET_BY_PHONE: 'rahat.jobs.beneficiary.get_by_phone',
   GET_TABLE_STATS: 'rahat.jobs.beneficiary.get_from_stats_table',
   LIST: 'rahat.jobs.beneficiary.list',
+  GET_ONE_BENEFICIARY: 'rahat.jobs.beneficiary.find_one_beneficiary',
+  LIST_FULL_DATA: 'rahat.jobs.beneficiary.list_full_data',
   LEAD_CONVERSION_BENEFICIARY: 'rahat.jobs.lead_conversion_beneficiary',
   LIST_PROJECT_PII: 'rahat.jobs.beneficiary.list_project_pii',
   REMOVE: 'rahat.jobs.beneficiary.remove',
@@ -38,6 +40,7 @@ export const JOBS = {
   VALIDATE_WALLET: 'rahat.jobs.beneficiary.validate_wallet',
   VERIFY_SIGNATURE: 'rahat.jobs.beneficiary.verify_signature',
   LIST_BY_PROJECT: 'rahat.jobs.beneficiary.list_by_project',
+  LIST_BY_PROJECT_FIND_ONE_BENEFICIARY: " rahat.jobs.beneficiary.list_by_project_find_one_beneficiary",
   LIST_GROUP_BY_PROJECT: 'rahat.jobs.beneficiary.list_group_by_project',
   GET_ONE_GROUP_BY_PROJECT: 'rahat.jobs.beneficiary.get_one_group_by_project',
   VENDOR_REFERRAL: 'rahat.jobs.beneficiary.get_referred',
@@ -66,4 +69,5 @@ export const JOBS = {
   GET_ALL_STATS: 'rahat.jobs.projects.get_all_stats',
   CALCULATE_STATS: 'rahat.jobs.projects.calculate_stats',
   IMPORT_BENEFICIARY_LARGE_QUEUE: 'rahat.jobs.beneficiary.import_beneficiary_large_queue',
+  DELETE_BENEFICIARY_AND_PII: 'rahat.jobs.beneficiary.delete_beneficiary_and_pii',
 };
