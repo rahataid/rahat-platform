@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
   Body,
   Controller,
@@ -7,7 +9,6 @@ import {
   Query
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { OfframpStatus } from '@prisma/client';
 import { CreateOfframpProviderDto, CreateOfframpRequestDto, ListOfframpProviderDto, ProviderActionDto } from '@rahataid/extensions';
 import { OfframpService } from './offramp.service';
 
@@ -66,7 +67,7 @@ export class OfframpController {
     uuid?: string;
     id?: number;
     requestId?: string;
-    status?: OfframpStatus;
+    status?: string;
     page?: number;
     perPage?: number;
     senderAddress?: string;

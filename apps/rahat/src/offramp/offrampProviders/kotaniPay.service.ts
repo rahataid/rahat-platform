@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ProviderActionDto } from '@rahataid/extensions';
 import { KotaniPayExecutionData } from '@rahataid/sdk';
@@ -55,6 +57,19 @@ export class KotaniPayService
   }
 
   async createCustomerMobileMoneyWallet(data: ProviderActionDto) {
+    const phone = data.payload.phone_number
+    console.log('phone', phone)
+    // const isBeneficiary = await this.prisma.beneficiaryPii.findFirst({
+    //   where: {
+    //     phone
+    //   },
+    // });
+    // console.log('isBeneficiary==>>offramp create wallet', isBeneficiary)
+    // if (!isBeneficiary) {
+    //   throw new BadRequestException(
+    //     'Should be a valid beneficiary in order to proceed.'
+    //   );
+    // }
     const client = await this.getKotaniPayAxiosClient(data.uuid);
     const response = await client.post('/customer/mobile-money', {
       country_code: data.payload.country_code,
@@ -180,11 +195,7 @@ export class KotaniPayService
       // If transactions exist, update the status of the most recent one
       if (offrampTransactions.length > 0) {
         const transaction = offrampTransactions[0];
-        const mapTransactionStatus = {
-          PENDING: 'PENDING',
-          PROCESSING: 'PENDING',
-          SUCCESSFUL: 'COMPLETED',
-        };
+
 
         try {
           // Check the status of the most recent transaction using its referenceId
@@ -193,7 +204,7 @@ export class KotaniPayService
             payload: { referenceId: transaction.referenceId },
           });
           const transactionStatus = statusCheck.data.data.status;
-          const mappedStatus = mapTransactionStatus[transactionStatus] || transactionStatus;
+          const mappedStatus = transactionStatus;
 
           // Update extras only if there are changes
           const currentExtras = typeof transaction.extras === 'object' && transaction.extras !== null ? transaction.extras : {};

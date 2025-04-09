@@ -4,7 +4,7 @@ meta {
   seq: 4
 }
 
-post {
+get {
   url: {{url}}/offramps/transactions
   body: json
   auth: bearer
@@ -12,10 +12,4 @@ post {
 
 auth:bearer {
   token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcklkIjo0LCJ1dWlkIjoiOTVhZGVjZmYtNjE1Yi00MjE5LWJmYjEtYTlmNTBlMzllNzNlIiwibmFtZSI6IlJhZ2hhdiBLYXR0ZWwiLCJlbWFpbCI6InJhZ2hhdi5rYXR0ZWxAcnVtc2FuLm5ldCIsInBob25lIjpudWxsLCJ3YWxsZXQiOiIweDgyQ0MyMEQ2YjEwMjE0MGU5YjU4QUU3NUFBYjZmYTkzMDA4ZDEyNjAiLCJyb2xlcyI6WyJBZG1pbiJdLCJwZXJtaXNzaW9ucyI6W3siYWN0aW9uIjoibWFuYWdlIiwic3ViamVjdCI6ImFsbCIsImludmVydGVkIjpmYWxzZSwiY29uZGl0aW9ucyI6bnVsbH1dLCJpYXQiOjE3NDI5MTk5ODUsImV4cCI6MTc0MzUyNDc4NX0.4nR9GZCRMm3JkL4VMcM4zZDm9C-INLXI360__fA_RHY
-}
-
-body:json {
-  {
-    "senderAddress": "0x3ad456d3753bba798dbcf1073d111a2f12b0fed2"
-  }
 }

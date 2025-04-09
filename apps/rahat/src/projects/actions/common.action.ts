@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
   BeneficiaryJobs,
   MS_ACTIONS,
@@ -40,6 +42,11 @@ export const beneficiaryActions: ProjectActionFunc = {
   [MS_ACTIONS.BENEFICIARY.LIST_BY_PROJECT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.LIST, uuid },
+      { projectId: uuid, ...payload }
+    ),
+  [MS_ACTIONS.BENEFICIARY.LIST_FULL_DATA_BY_PROJECT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.LIST_FULL_DATA, uuid },
       { projectId: uuid, ...payload }
     ),
   [MS_ACTIONS.BENEFICIARY.GET_PROJECT_SPECIFIC]: (uuid, payload, sendCommand) =>

@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Controller, Param } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
@@ -46,8 +48,8 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_PHONE })
-  async getBeneficiaryByPhone(wallet: string) {
-    return this.service.findOneByPhone(wallet);
+  async getBeneficiaryByPhone(payload: { phone: string, projectUUID: string }) {
+    return this.service.findOneByPhone(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
@@ -55,8 +57,8 @@ export class BeneficiaryController {
     // const payloadData = Array.isArray(data?.data) ? data?.data : data?.payload;
 
     return this.service.createBulk(
-      data,
-      data?.projectUUID,
+      data?.payload,
+      data?.data?.projectUUID,
       data?.data?.walkinBulk
     );
   }
@@ -215,6 +217,10 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP_BY_PROJECT })
   async getOneGroupByProject(uuid: UUID) {
     return this.service.getOneGroupByProject(uuid);
+  }
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_GROUP_BY_UUID })
+  async listGroupByUuid(uuid: UUID[]) {
+    return this.service.listGroupByUUid(uuid);
   }
 
   @MessagePattern({
