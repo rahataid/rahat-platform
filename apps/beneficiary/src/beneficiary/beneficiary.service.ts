@@ -888,7 +888,7 @@ export class BeneficiaryService {
       this.prisma
     );
 
-    if (allData?.automatedGroupOption?.createAutomatedGroup === 'true') {
+    if (allData?.automatedGroupOption?.createAutomatedGroup === true) {
       uniqueGroupKeys = [
         ...new Set(
           filteredBeneficiaries.map(
