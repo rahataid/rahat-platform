@@ -62,7 +62,7 @@ export class BeneficiaryProcessor {
       if (dupliPhones.length)
         throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
       const dupliWallets = await validateDupicateWallet(
-        this.prisma,
+        this.prisma as any,
         beneficiaries
       );
       if (dupliWallets.length)
