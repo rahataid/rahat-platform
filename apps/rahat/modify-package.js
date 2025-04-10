@@ -28,6 +28,7 @@ try {
 
   packageData.prisma = {
     seed: 'prisma/seed.ts',
+    schema: 'prisma/schema',
   };
 
   // Write the updated package.json back to the file
