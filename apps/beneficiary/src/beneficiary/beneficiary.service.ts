@@ -759,7 +759,7 @@ export class BeneficiaryService {
             projectUuid: projectUuid,
           }
         );
-        //COMMENTING THIS BECAUSE ALREADY ADDED TO PROJECT 
+        //COMMENTING THIS BECAUSE ALREADY ADDED TO PROJECT
 
         // const assignPromises = insertedBeneficiariesWithPii.map(
         //   (b) => {
@@ -1479,7 +1479,7 @@ export class BeneficiaryService {
 
   async importBeneficiariesFromTool(data: any) {
     const dataFromBuffer = Buffer.from(data);
-    const bufferString = dataFromBuffer.toString('utf-8');
+    const bufferString = dataFromBuffer.toString('utf-8'); 1570
     const jsonData = JSON.parse(bufferString) || null;
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
@@ -1562,16 +1562,16 @@ export class BeneficiaryService {
   }
 
   async importTempBeneficiaries(dto: ImportTempBenefDto) {
-    const groups = await findTempBenefGroups(this.prisma, dto.groupUUID);
+    const groups = await findTempBenefGroups(this.prisma as any, dto.groupUUID);
     if (!groups.length) throw new Error('No groups found!');
     const beneficiaries = groups.map((f) => f.tempBeneficiary);
     if (!beneficiaries.length) throw new Error('No benficiaries found!');
 
-    const dupliPhones = await validateDupicatePhone(this.prisma, beneficiaries);
+    const dupliPhones = await validateDupicatePhone(this.prisma as any, beneficiaries);
     if (dupliPhones.length)
       throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
     const dupliWallets = await validateDupicateWallet(
-      this.prisma,
+      this.prisma as any,
       beneficiaries
     );
     if (dupliWallets.length)
