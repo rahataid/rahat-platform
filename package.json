@@ -103,7 +103,6 @@
     "nest-winston": "^1.9.4",
     "nodemailer": "^6.9.11",
     "passport-jwt": "^4.0.1",
-    "prisma": "5.15.1",
     "qrcode": "^1.5.3",
     "readline": "^1.3.0",
     "reflect-metadata": "^0.1.14",
