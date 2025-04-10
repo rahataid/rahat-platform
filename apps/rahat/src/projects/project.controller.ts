@@ -143,7 +143,7 @@ export class ProjectController {
     const response = this.projectService.handleProjectActions({
       uuid,
       ...data,
-      user: request.user,
+      user: (request as any)?.user,
     });
     return response;
   }
