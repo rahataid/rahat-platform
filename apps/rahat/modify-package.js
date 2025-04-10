@@ -19,9 +19,9 @@ try {
 
   packageData.dependencies = {
     ...packageData.dependencies,
-    prisma: '^5.22.0',
+    prisma: '6.3.1',
     'ts-node': '^10.9.1',
-    '@prisma/client': '^5.22.0',
+    '@prisma/client': '6.3.1',
     dotenv: '16.4.5',
     readline: '1.3.0',
   };
