@@ -167,6 +167,7 @@
     "includedScripts": []
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.user.ts"
+    "seed": "ts-node prisma/seed.user.ts",
+    "schema": "prisma/schema"
   }
 }
