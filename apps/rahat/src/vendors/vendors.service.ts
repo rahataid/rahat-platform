@@ -191,9 +191,10 @@ export class VendorsService {
     });
   }
 
-  async getVendor(id: UUID | Address) {
+  async getVendor(id: UUID | Address,
+  ) {
     const data = isAddress(id)
-      ? await this.prisma.user.findFirst({ where: { wallet: id } })
+      ? await this.prisma.user.findUnique({ where: { wallet: id } })
       : await this.prisma.user.findUnique({ where: { uuid: id } });
     const projectData = await this.prisma.projectVendors.findMany({
       where: { vendorId: data.uuid },
