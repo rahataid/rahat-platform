@@ -26,6 +26,9 @@ const coreConfig = JSON.parse(
 const elKenyaConfig = JSON.parse(
   fs.readFileSync(path.join(__dirname, 'stats-configs', 'el-kenya.json'), 'utf-8')
 );
+const elCambodiaConfig = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'stats-configs', 'el-cambodia.json'), 'utf-8')
+);
 const smsVoucherConfig = JSON.parse(
   fs.readFileSync(path.join(__dirname, 'stats-configs', 'sms-voucher.json'), 'utf-8')
 );
@@ -36,13 +39,16 @@ const smsVoucherConfig = JSON.parse(
 // or if using node 16 or commonjs, do require() or readFile + JSON.parse
 // e.g. const coreConfig = require('./stats-configs/core.json');
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'],
+});
 
 // A record to map "aa", "el-kenya", "sms-voucher" => their raw JSON
 const projectConfigMap: Record<string, any> = {
   'aa': aaConfig,
   'el-kenya': elKenyaConfig,
   'sms-voucher': smsVoucherConfig,
+  'el-cambodia': elCambodiaConfig,
 };
 
 /**
