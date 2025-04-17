@@ -200,11 +200,13 @@ export class VendorsService {
       where: { vendorId: data.uuid },
       include: {
         Project: true,
-        User: true,
+        User: true
       },
     });
-    const userdata = { ...data, ...projectData };
-    return userdata;
+    // const vendorIdentifier = projectData[0]?.extras;
+    // const projects = projectData.map((project) => project.Project);
+    // const userdata = { ...data, projects, vendorIdentifier };
+    return projectData;
   }
 
   async listVendor(dto) {
