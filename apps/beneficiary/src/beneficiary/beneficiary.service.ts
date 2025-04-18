@@ -42,9 +42,9 @@ import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
+
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 const BATCH_SIZE = 20;
-
 
 @Injectable()
 export class BeneficiaryService {
@@ -281,7 +281,6 @@ export class BeneficiaryService {
     //     pii: true
     //   }
     // })
-    console.log('data', data)
 
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
@@ -343,8 +342,11 @@ export class BeneficiaryService {
     return mergedData;
   }
 
+
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
     const { piiData, projectUUIDs, ...data } = dto;
+
+    // Todo: remove wallet address while creating a beneficiary
     let { walletAddress } = data;
     walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(
       walletAddress
@@ -472,8 +474,10 @@ export class BeneficiaryService {
 
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
     const { type, referrerBeneficiary, referrerVendor, ...rest } = dto;
+
     // 1. Create Beneficiary
     const benef = await this.create(rest, projectUid);
+
     const projectPayload = {
       uuid: benef.uuid,
       referrerVendor: referrerVendor || '',
@@ -482,10 +486,12 @@ export class BeneficiaryService {
       extras: dto?.extras || null,
       type: type || BeneficiaryConstants.Types.ENROLLED,
     };
+
     // Clear referrer fields if the beneficiary is ENROLLED
     if (type === BeneficiaryConstants.Types.ENROLLED) {
       delete projectPayload.referrerBeneficiary;
       delete projectPayload.referrerVendor;
+      delete projectPayload.type;
     }
 
     // 2. Save Beneficiary to Project
