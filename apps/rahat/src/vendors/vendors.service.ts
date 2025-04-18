@@ -191,7 +191,8 @@ export class VendorsService {
     });
   }
 
-  async getVendor(id: UUID | Address) {
+  async getVendor(id: UUID | Address,
+  ) {
     const data = isAddress(id)
       ? await this.prisma.user.findFirst({ where: { wallet: id } })
       : await this.prisma.user.findUnique({ where: { uuid: id } });
@@ -199,12 +200,13 @@ export class VendorsService {
       where: { vendorId: data.uuid },
       include: {
         Project: true,
+        User: true
       },
     });
-    const vendorIdentifier = projectData[0]?.extras;
-    const projects = projectData.map((project) => project.Project);
-    const userdata = { ...data, projects, vendorIdentifier };
-    return userdata;
+    // const vendorIdentifier = projectData[0]?.extras;
+    // const projects = projectData.map((project) => project.Project);
+    // const userdata = { ...data, projects, vendorIdentifier };
+    return projectData;
   }
 
   async listVendor(dto) {
