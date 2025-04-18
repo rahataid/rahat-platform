@@ -1,7 +1,7 @@
 meta {
-  name: List waterlevel for Glofas
+  name: getOne sources
   type: http
-  seq: 26
+  seq: 22
 }
 
 post {
@@ -16,10 +16,9 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.waterLevels.getGlofas",
+    "action": "ms.sources.getOne",
     "payload": {
-      "page": 1 ,
-      "perPage": 11
+     "uuid": "5facb0a6-bbc0-4a4e-9b8f-6f75d13c8b07"
     }
   }
 }

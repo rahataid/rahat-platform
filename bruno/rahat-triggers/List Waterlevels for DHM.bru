@@ -1,7 +1,7 @@
 meta {
   name: List Waterlevels for DHM
   type: http
-  seq: 19
+  seq: 24
 }
 
 post {
@@ -18,8 +18,10 @@ body:json {
   {
     "action": "ms.waterLevels.getDhm",
     "payload": {
-      "page": 1 ,
-      "perPage": 11
+      "riverBasin": "Mahakali",
+      "type": "HOURLY",
+      "from": "2025/04/01",
+      "to": "2025/04/04"
     }
   }
 }

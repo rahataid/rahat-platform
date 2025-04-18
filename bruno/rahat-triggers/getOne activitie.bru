@@ -1,7 +1,7 @@
 meta {
   name: getOne activitie
   type: http
-  seq: 9
+  seq: 7
 }
 
 post {
@@ -16,10 +16,11 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.activities.getAll",
+    "action": "ms.activities.getOne",
     "payload": {
        "page" : 1,
-      "perPage": 99
+      "perPage": 99,
+      "uuid": "0311f155-0fe4-47dc-90ae-0378e0c4e39c"
     }
   }
 }
