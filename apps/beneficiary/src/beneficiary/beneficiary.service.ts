@@ -466,6 +466,9 @@ export class BeneficiaryService {
           }
         ],
       },
+      include: {
+        pii: true,
+      },
     })
 
     if (!beneficiary) return null;
