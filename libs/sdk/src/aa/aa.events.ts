@@ -85,7 +85,7 @@ export const JOBS = {
   STELLAR: {
     GET_WALLET_BY_PHONE: 'aa.jobs.stellar.getWalletByPhone',
     SEND_OTP: 'aa.jobs.stellar.sendOtp',
-    VERIFY_OTP: 'aa.jobs.stellar.verifyOtp',
+    SEND_ASSET_TO_VENDOR: 'aa.jobs.stellar.sendAssetToVendor',
     DISBURSE: 'aa.jobs.stellar.disburse'
   }
 };

@@ -17,13 +17,13 @@ import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
-import { AuthsService, UsersService } from '@rumsan/user';
+import { AuthsService } from '@rumsan/user';
 import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
 import { UUID } from 'crypto';
 import { Address, isAddress } from 'viem';
-import { WalletService } from '../wallet/wallet.service';
+import { UsersService } from '../users/users.service';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -34,7 +34,6 @@ export class VendorsService {
     private readonly prisma: PrismaService,
     private readonly authService: AuthsService,
     private readonly usersService: UsersService,
-    private readonly walletService: WalletService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
 
@@ -77,14 +76,6 @@ export class VendorsService {
         },
       });
       if (dto.service === Service.WALLET) return user;
-      // Create user wallet 
-      const userWallets = await this.walletService.create(['eth', 'stellar']);
-      await prisma.userWallets.createMany({
-        data: userWallets.map(wallet => ({
-          userId: +user.id,
-          ...wallet
-        })),
-      });
 
       await prisma.auth.create({
         data: {

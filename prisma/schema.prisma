@@ -37,27 +37,27 @@ model User {
   createdBy String?
   updatedBy String?
 
-  grievances Grievance[]   @relation("UserGrievances")
-  wallets    UserWallets[]
+  grievances Grievance[] @relation("UserGrievances")
+  // wallets    UserWallets[]
 
   @@map("tbl_users")
 }
 
-model UserWallets {
-  id         Int       @id @default(autoincrement())
-  userId     Int
-  chain      String
-  address    String
-  privateKey String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime? @updatedAt()
-  deletedAt  DateTime?
+// model UserWallets {
+//   id         Int       @id @default(autoincrement())
+//   userId     Int
+//   chain      String
+//   address    String
+//   privateKey String
+//   createdAt  DateTime  @default(now())
+//   updatedAt  DateTime? @updatedAt()
+//   deletedAt  DateTime?
 
-  user User @relation(fields: [userId], references: [id])
+//   user User @relation(fields: [userId], references: [id])
 
-  @@unique([userId, chain])
-  @@map("tbl_users_wallets")
-}
+//   @@unique([userId, chain])
+//   @@map("tbl_users_wallets")
+// }
 
 enum Gender {
   MALE

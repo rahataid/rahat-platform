@@ -291,11 +291,11 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.SEND_OTP, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.STELLAR.VERIFY_OTP]: (
+  [MS_ACTIONS.AAPROJECT.STELLAR.SEND_ASSET]: (
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.STELLAR.VERIFY_OTP, uuid }, payload),
+  ) => sendCommand({ cmd: AAJobs.STELLAR.SEND_ASSET_TO_VENDOR, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.STELLAR.GET_WALLET_BY_PHONE]: (
     uuid,

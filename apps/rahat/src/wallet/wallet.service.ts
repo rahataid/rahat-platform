@@ -107,6 +107,11 @@ export class WalletService implements OnModuleInit {
     return storage.getKey(walletAddress, chain);
   }
 
+  async getSecretByPhone(phoneNumber: string, chain: ChainType) {
+    const walletAddress = await this.getWalletByPhone(phoneNumber);
+    return this.getSecretByWallet(walletAddress, chain);
+  }
+
 
   getFunctionByName(chain: string): string {
     const functionName = `create${chain}Wallets` as keyof this;

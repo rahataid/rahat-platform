@@ -148,7 +148,6 @@ export class BeneficiaryService {
       }
     })
 
-
     const { pii, ...rest } = getBeneficiaryByWallet
     return { piiData: pii, projectData: rest, ...data }
   }
@@ -201,7 +200,7 @@ export class BeneficiaryService {
   async processBenfGroups(data: any) {
     const groups = [];
     for (const d of data) {
-      const data = await this.prisma.beneficiaryGroup.findUnique({
+      const datas = await this.prisma.beneficiaryGroup.findUnique({
         where: {
           uuid: d?.uuid,
         },
@@ -215,9 +214,27 @@ export class BeneficiaryService {
               },
             },
           },
+          groupedBeneficiaries: {
+            where: {
+              deletedAt: null,
+            },
+            select: {
+              Beneficiary: {
+                select: {
+                  uuid: true,
+                  walletAddress: true,
+                  pii: {
+                    select: {
+                      phone: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       });
-      groups.push(data);
+      groups.push(datas);
     }
     return groups;
   }
@@ -1316,6 +1333,7 @@ export class BeneficiaryService {
       );
     } catch (err) {
       console.log(err);
+      return err;
     }
   }
 

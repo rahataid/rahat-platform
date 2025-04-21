@@ -302,6 +302,9 @@ export class BeneficiaryUtilsService {
 
   async getChainName(): Promise<string> {
     const contractSettings = await this.settings.getByName('CHAIN_SETTINGS');
-    return contractSettings.value.nativeCurrency.symbol;
+    const value = typeof contractSettings.value === 'string'
+      ? JSON.parse(contractSettings.value)
+      : contractSettings.value;
+    return value.nativeCurrency?.symbol;
   }
 }

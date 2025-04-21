@@ -235,7 +235,7 @@ export const MS_ACTIONS = {
     STELLAR: {
       DISBURSE: 'aa.stellar.disburse',
       SEND_OTP: 'aa.stellar.sendOtp',
-      VERIFY_OTP: 'aa.stellar.verifyOtp',
+      SEND_ASSET: 'aa.stellar.sendAsset',
       GET_WALLET_BY_PHONE: 'aaProject.stellar.getWalletByPhone'
     }
   },
