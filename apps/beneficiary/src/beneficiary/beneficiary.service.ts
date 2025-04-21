@@ -472,8 +472,13 @@ export class BeneficiaryService {
     })
 
     if (!beneficiary) return null;
+    let piiData = null;
+    if (beneficiary.pii) {
+      piiData = beneficiary.pii;
+      delete beneficiary.pii;
+    }
 
-    return beneficiary;
+    return { ...beneficiary, piiData };
   }
 
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
