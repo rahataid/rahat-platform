@@ -1,26 +1,28 @@
 {
-    "name": "@workspace/wallet",
-    "type": "module",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "scripts": {
-        "dev": "tsc --watch",
-        "build": "tsc",
-        "test": "jest --config jest.config.cjs",
-        "test:watch": "jest --config jest.config.cjs --watch"
-    },
-    "exports": {
-        ".": "./src/index.ts"
-    },
-    "devDependencies": {
-        "@workspace/typescript-config": "workspace:*",
-        "typescript": "latest",
-        "@types/jest": "^29.5.0",
-        "jest": "^29.5.0",
-        "ts-jest": "^29.1.0"
-    },
-    "dependencies": {
-        "ethers": "6.13.5",
-        "stellar-sdk": "^13.1.0"
-    }
+  "name": "@rahataid/wallet",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "test": "jest --config jest.config.cjs",
+    "test:watch": "jest --config jest.config.cjs --watch"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@workspace/typescript-config": "workspace:*",
+    "typescript": "latest",
+    "@types/jest": "^29.5.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0",
+    "ethers": "6.13.5",
+    "stellar-sdk": "^13.1.0"
+  },
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "typings": "./src/index.d.ts"
 }
