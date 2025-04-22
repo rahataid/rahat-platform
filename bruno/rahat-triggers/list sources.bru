@@ -1,7 +1,7 @@
 meta {
-  name: List forecast data sources based on the river station
+  name: list sources
   type: http
-  seq: 23
+  seq: 21
 }
 
 post {
@@ -16,9 +16,9 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.riverStations.getDhm",
+    "action": "ms.sources.getAll",
     "payload": {
-
+     
     }
   }
 }

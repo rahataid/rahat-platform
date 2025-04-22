@@ -1,0 +1,41 @@
+meta {
+  name: activity status update
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.activities.updateStatus",
+    "payload": {
+      "uuid": "0311f155-0fe4-47dc-90ae-0378e0c4e39c",
+      "title": "Release the fund AASAP",
+      "leadTime": "2023-01-01",
+      "responsibility": "responsibility",
+      "source": "source",
+      "notes": "notes",
+      "status": "COMPLETED",
+      "activityDocuments": [
+        {
+          "fileName": "1743837385472-diagram-export-4-1-2025-2_50_01-PM.png",
+          "mediaURL": "https://rahat-rumsan.s3.us-east-1.amazonaws.com/aa/dev/QmToBxJLodxMYPMfi3wFPbbNzCtbah7Hqo79uegfTvLPY8"
+        },
+        {
+          "fileName": "1743837409317-diagram-export-4-1-2025-2_51_13-PM.png",
+          "mediaURL": "https://rahat-rumsan.s3.us-east-1.amazonaws.com/aa/dev/QmaUXRkrrP7nJnQgTP1N2g3q5z3TEuzcYEyFSvdQGYwqQZ"
+        }
+      ]
+      
+    }
+  }
+}

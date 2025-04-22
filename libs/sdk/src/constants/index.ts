@@ -361,7 +361,10 @@ export const MS_ACTIONS = {
     GET_ALL_GROUPS: 'comms.beneficiary.getAllGroups',
     GET_ONE_GROUP: 'comms.beneficiary.getOneGroup',
   },
-
+  MS_SOURCES: {
+    GETALL: 'ms.sources.getAll',
+    GETONE: 'ms.sources.getOne',
+  },
   MS_TRIGGERS: {
     DEV_ONLY: 'ms.triggers.devOnly',
     GET_ALL: 'ms.triggers.getAll',

@@ -70,6 +70,21 @@ export class ProjectController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
+  @Post('actions')
+  msActions(
+    @Body() data: ProjectCommunicationDto,
+    @Req() request: Request
+  ) {
+    const response = this.projectService.handleMsActions({
+      ...data,
+      user: request.user,
+    });
+    return response;
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
   @Get(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   findOne(@Param('uuid') uuid: UUID) {

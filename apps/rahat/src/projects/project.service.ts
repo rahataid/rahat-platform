@@ -58,7 +58,7 @@ export class ProjectService {
     private requestContextService: RequestContextService,
     @Inject('RAHAT_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.META_TXN) private readonly metaTransactionQueue: Queue
-  ) {}
+  ) { }
 
   async create(data: CreateProjectDto) {
     // TODO: refactor to proper validator
@@ -201,6 +201,26 @@ export class ProjectService {
     return this.client
       .send({ cmd: 'rahat.jobs.project.voucher_claim', uuid }, {})
       .pipe(timeout(MS_TIMEOUT));
+  }
+
+  /*
+    This function is needed to handle generic actions in the offline AA app
+    without depending on a specific project UUID. It allows us to provide
+    responses for actions that are not tied to a particular project, making
+    the system more flexible and adaptable for such use cases.
+  */
+  async handleMsActions({ action, payload, user }) {
+    const actions = {
+      ...msTriggerActions,
+    };
+
+    const actionFunc = actions[action];
+    if (!actionFunc) {
+      throw new Error('Please provide a valid action!');
+    }
+    return await actionFunc(null, payload, (...args) =>
+      this.sendCommand(args[0], args[1], args[2], this.client, action, user)
+    );
   }
 
   async handleProjectActions({ uuid, action, payload, trigger, user }) {
