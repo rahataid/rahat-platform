@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ChainType, EVMWallet, StellarWallet, WalletKeys } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
@@ -6,6 +6,7 @@ import { FileWalletStorage } from './storages/fs.storage';
 
 @Injectable()
 export class WalletService implements OnModuleInit {
+  private readonly logger = new Logger(WalletService.name);
   private evmWallet: EVMWallet | null = null; // Singleton instance for EVMWallet
   private stellarWallet: StellarWallet | null = null; // Singleton instance for StellarWallet
 
@@ -19,10 +20,14 @@ export class WalletService implements OnModuleInit {
 
   // Initialize EVMWallet
   private async initializeEvmWallet() {
+    this.logger.log('Initializing EVMWallet...');
     const evmChain = await this.settings.getByName('CHAIN_SETTINGS');
-    const evmChainValue = evmChain.value as { rpcUrls: { default: { http: string[] } } };
+    const evmChainValue = evmChain?.value as { rpcUrls: { default: { http: string[] } } } || {
+      rpcUrls: { default: { http: ['https://base-sepolia-rpc.publicnode.com'] } },
+    };
+
     this.evmWallet = new EVMWallet(
-      evmChainValue.rpcUrls.default.http[0] || 'https://base-sepolia-rpc.publicnode.com',
+      evmChainValue.rpcUrls.default.http[0],
       new FileWalletStorage()
     );
     await this.evmWallet.init(); // Initialize the wallet
@@ -30,10 +35,14 @@ export class WalletService implements OnModuleInit {
 
   // Initialize StellarWallet
   private async initializeStellarWallet() {
+    this.logger.log('Initializing StellarWallet...');
     const stellarChain = await this.settings.getByName('CHAIN_SETTINGS');
-    const stellarChainValue = stellarChain.value as { rpcUrls: { default: { http: string } } };
+    const stellarChainValue = stellarChain?.value as { rpcUrls: { default: { http: string } } } || {
+      rpcUrls: { default: { http: 'https://stellar-soroban-public.nodies.app' } },
+    };
+
     this.stellarWallet = new StellarWallet(
-      stellarChainValue.rpcUrls.default.http || 'https://stellar-soroban-public.nodies.app',
+      stellarChainValue.rpcUrls.default.http,
       new FileWalletStorage()
     );
     await this.stellarWallet.init(); // Initialize the wallet
