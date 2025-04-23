@@ -27,7 +27,7 @@ import { VendorsService } from './vendors.service';
 @ApiTags('Vendors')
 @Controller('vendors')
 export class VendorsController {
-  constructor(private readonly vendorService: VendorsService) {}
+  constructor(private readonly vendorService: VendorsService) { }
 
   @Post('')
   registerVendor(@Body() dto: VendorRegisterDto) {
@@ -51,8 +51,9 @@ export class VendorsController {
 
   @ApiParam({ name: 'id', required: true })
   @Get('/:id')
-  getVendor(@Param('id') id: UUID | Address) {
-    return this.vendorService.getVendor(id);
+  getVendor(@Param('id') id: UUID | Address,
+  ) {
+    return this.vendorService.getVendor(id,);
   }
 
   @Post('/getOtp')
