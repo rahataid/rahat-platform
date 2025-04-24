@@ -109,7 +109,7 @@ const projectStats = (uuid: string, url: string) => {
           {
             type: 'donut',
             props: {},
-            title: 'All Wearers Breakdown',
+            title: 'Total Wearers Breakdown',
             colSpan: 1,
             dataMap: `CONSUMER_TYPE`,
             dataSrc: 'source3',
