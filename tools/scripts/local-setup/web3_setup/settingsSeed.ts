@@ -10,7 +10,6 @@ const prismaClient = new PrismaClient({
 const prisma = new PrismaService();
 const settings = new SettingsService(prisma);
 const subGraphURL = process.argv[2];
-const SETTINGS_DB_NAME = 'RP_DEV';
 
 class SettingsSeed extends commonLib {
   constructor() {

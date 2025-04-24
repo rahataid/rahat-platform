@@ -1,0 +1,27 @@
+meta {
+  name: Get Activity Communication Session
+  type: http
+  seq: 28
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.activities.communication.sessionLogs",
+    "payload": {
+      "activityId": "0311f155-0fe4-47dc-90ae-0378e0c4e39c",
+      "communicationId": "c075dc8f-7ce2-4e0e-b9d4-69f4a8953437"
+    }
+  }
+  
+  
+}

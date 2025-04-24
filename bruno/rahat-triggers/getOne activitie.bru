@@ -1,0 +1,26 @@
+meta {
+  name: getOne activitie
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.activities.getOne",
+    "payload": {
+       "page" : 1,
+      "perPage": 99,
+      "uuid": "0311f155-0fe4-47dc-90ae-0378e0c4e39c"
+    }
+  }
+}

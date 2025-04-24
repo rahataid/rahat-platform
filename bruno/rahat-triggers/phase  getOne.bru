@@ -1,0 +1,27 @@
+meta {
+  name: phase  getOne
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.phases.getOne",
+    "payload": {
+  //     "appId": "{{appId}}",
+      "uuid": "5f428423-80a6-4d86-a282-e98d76b727ec"
+  //     "phase": "PREPAREDNESS"
+  //     "source": "GLOFAS"
+    }
+  }
+}

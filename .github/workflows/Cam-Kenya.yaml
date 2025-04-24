@@ -1,11 +1,11 @@
-name: Stage AA CI/CD
+name: Cam Kenya CI/CD
 on:
   push:
     branches:
-      - 'stage-aa'
+      - 'cam-ken_merge'
   pull_request:
     branches:
-      - 'stage-aa'
+      - 'cam-ken_merge'
   workflow_dispatch:
 
 env:
@@ -55,7 +55,7 @@ jobs:
           file: Dockerfile.beneficiary
           # push: ${{ github.event_name == 'push' && 'true' || 'false' }}
           push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-          tags: esatya/rahat-platform-beneficiary:stage-aa
+          tags: esatya/rahat-platform-beneficiary:cam-ken
 
       # Rahat Image
       - name: build && push rahat
@@ -66,4 +66,4 @@ jobs:
           file: Dockerfile.rahat
           # push: ${{ github.event_name == 'push' && 'true' || 'false' }}
           push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-          tags: esatya/rahat-platform-rahat:stage-aa
+          tags: esatya/rahat-platform-rahat:cam-ken

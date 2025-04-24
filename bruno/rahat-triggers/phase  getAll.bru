@@ -1,7 +1,7 @@
 meta {
   name: phase  getAll
   type: http
-  seq: 4
+  seq: 5
 }
 
 post {
@@ -18,7 +18,13 @@ body:json {
   {
     "action": "ms.phases.getAll",
     "payload": {
-      "appId": "{{appId}}"
+     // "appId": "{{appId}}"
+  //     "name": "PREPAREDNESS"
+  //     "source": "GLOFAS"
+  //     "river_basin": "kar"
+      "riverBasin": "Karnali",
+      "activeYear": "2024"
+  //     "name": "PROJECTINFO"
     }
   }
 }

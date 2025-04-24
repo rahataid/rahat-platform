@@ -1,7 +1,7 @@
 meta {
   name: activity created
   type: http
-  seq: 5
+  seq: 6
 }
 
 post {
@@ -18,31 +18,44 @@ body:json {
   {
     "action": "ms.activities.add",
     "payload": {
-      "title": "Activity title",
+      "title": "Release the fund AASAP",
       "leadTime": "2023-01-01",
       "responsibility": "responsibility",
       "source": "source",
-      "phaseId": "{{phaseId}}",
-      "categoryId": "{{categoryId}}",
-      "description": "description",
+      //     "phaseId": "{{phaseId}}",
+      "phaseId": "5f428423-80a6-4d86-a282-e98d76b727ec",
+      //     "categoryId": "{{categoryId}}",
+      "categoryId": "01de4432-c4df-43c5-9266-597a4595c6e7",
+      "description": "This is for testing document description",
+      "manager": {
+        "id": "adfasdfasdf", // <----
+        "name": "test",
+        "email": "test@gmail.com",
+        "phone": "9801234567"
+      },
       "notes": "notes",
       "status": "NOT_STARTED",
-      "activityDocuments": {
-        "key": "value"
-      },
-      "activityCommunication": [
+      "activityDocuments": [
         {
-          "message": "this is a  test mesage for  trigger communication ",
-          "groupUID": "f7b9f1b4-bb8b-4f5c-a306-a69a583a7514",
-          "transportId": "d24v5w0ffz52hjt3ltknp7ci",
-          "communicationId": "5007e15a-a492-474d-9814-0e9d063a9623"
+          "fileName": "1743837385472-diagram-export-4-1-2025-2_50_01-PM.png",
+          "mediaURL": "https://rahat-rumsan.s3.us-east-1.amazonaws.com/aa/dev/QmToBxJLodxMYPMfi3wFPbbNzCtbah7Hqo79uegfTvLPY8"
+        },
+        {
+          "fileName": "1743837409317-diagram-export-4-1-2025-2_51_13-PM.png",
+          "mediaURL": "https://rahat-rumsan.s3.us-east-1.amazonaws.com/aa/dev/QmaUXRkrrP7nJnQgTP1N2g3q5z3TEuzcYEyFSvdQGYwqQZ"
         }
+      ],
+      "activityCommunication": [
+      {
+          "groupType": "STAKEHOLDERS",
+          "groupId": "e3b72d53-2d82-4989-b58c-bf669c7721ce",
+          "transportId": "ajcxar4dlq6vzod3wrtjrneu",
+          "message": "This is a test message from rahat-triggers teams."
+      }
       ],
       "isAutomated": false,
       "isDeleted": false,
-      "completedBy": "user-id",
-      "differenceInTriggerAndActivityCompletion": "2 days",
-      "appId": "{{appId}}"
+      "differenceInTriggerAndActivityCompletion": "2 days"
     }
   }
 }

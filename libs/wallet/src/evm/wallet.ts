@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import { ChainType, IConnectedWallet, IWalletManager, WalletStorage } from "../types";
 import { ConnectedWallet } from "./connectedWallet";
+import { MemoryWalletStorage } from "../storages/memory.storage";
 
 export class EVMWallet implements IWalletManager {
     blockchainType = "EVM";
@@ -9,9 +10,9 @@ export class EVMWallet implements IWalletManager {
     provider?: ethers.Provider;
     chainId?: bigint;
 
-    constructor(rpcUrl: string, storage: WalletStorage) {
+    constructor(rpcUrl: string, storage?: WalletStorage) {
         this.rpcUrl = rpcUrl
-        this.storage = storage
+        this.storage = storage || new MemoryWalletStorage()
         this.provider = new ethers.JsonRpcProvider(rpcUrl);
     }
     async init() {

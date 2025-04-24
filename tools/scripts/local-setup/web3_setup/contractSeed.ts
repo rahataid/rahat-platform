@@ -14,7 +14,7 @@ const corePrisma = new PrismaClient({
 const prisma = new PrismaService();
 const settings = new SettingsService(prisma);
 
-const contractName = [
+const contractNames = [
   'ERC2771Forwarder',
   'RahatAccessManager',
   'RahatTreasury',
@@ -49,7 +49,7 @@ class SeedProject extends commonLib {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  public async deployRahatPayrollContracts() {
+  public async deployCoreContracts() {
     const deployerAccount = this.getDeployerWallet();
 
 
@@ -119,14 +119,15 @@ class SeedProject extends commonLib {
   public async addContractSettings() {
     const contracts = await this.getDeployedContractDetails(
       'contracts',
-      contractName
+      contractNames
     );
     // console.log('contracts', contracts);
     const data = {
-      name: 'Contracts',
+      name: 'CONTRACTS',
       value: contracts,
       isPrivate: false,
     };
+    console.log(data)
 
     return await settings.create(data);
   }
@@ -135,7 +136,7 @@ class SeedProject extends commonLib {
 
 async function main() {
   const seedProject = new SeedProject();
-  await seedProject.deployRahatPayrollContracts();
+  //await seedProject.deployCoreContracts();
   await seedProject.addContractSettings();
 
   // await seedProject.updateProjectContractAddress();

@@ -1,7 +1,7 @@
 meta {
   name: phase created
   type: http
-  seq: 3
+  seq: 4
 }
 
 post {
@@ -25,8 +25,18 @@ body:json {
       "receivedOptionalTriggers": 0,
       "canRevert": false,
       "canTriggerPayout": false,
-      "location": "Karnali at chisapani",
-      "appId": "{{appId}}"
+      "river_basin": "karnali", // location
+      "source": "DHM",
+      "appId": "{{appId}}",
+      "activeYear": "2025"
     }
   }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("phaseId", responseData.data?.uuid);
+  
+  
+  
 }

@@ -89,7 +89,7 @@ rm_modules() {
 
 contract_setup(){
     pnpm seed:contracts
-    pnpm seed:network $current_dir
+    pnpm seed:graph $current_dir
 }
 
 graph_setup() {

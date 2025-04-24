@@ -1,16 +1,18 @@
 import { ethers } from "ethers";
 import { Keypair } from 'stellar-sdk';
+import { MemoryWalletStorage } from "../storages/memory.storage";
 import { ChainType, IWalletManager, WalletStorage } from "../types";
 import { ConnectedWallet } from "./connectedWallet";
+
 
 export class StellarWallet implements IWalletManager {
     blockchainType = "STELLAR";
     rpcUrl: string;
     storage: WalletStorage
 
-    constructor(rpcUrl: string, storage: WalletStorage) {
+    constructor(rpcUrl: string, storage?: WalletStorage) {
         this.rpcUrl = rpcUrl
-        this.storage = storage
+        this.storage = storage || new MemoryWalletStorage()
     }
 
     async init() {
