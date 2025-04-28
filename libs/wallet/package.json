@@ -8,7 +8,10 @@
     "test:watch": "jest --config jest.config.cjs --watch"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
+    }
   },
   "devDependencies": {
     "typescript": "latest",
