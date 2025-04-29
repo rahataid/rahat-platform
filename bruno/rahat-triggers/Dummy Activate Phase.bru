@@ -1,7 +1,7 @@
 meta {
-  name: list sources
+  name: Dummy Activate Phase
   type: http
-  seq: 23
+  seq: 5
 }
 
 post {
@@ -16,9 +16,9 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.sources.getAll",
+    "action": "ms.phases.activate",
     "payload": {
-     
+      "phaseUuid": "1388aecb-e759-4ee3-b77e-13b3f750b6f5"
     }
   }
 }

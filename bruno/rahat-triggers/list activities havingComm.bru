@@ -1,0 +1,32 @@
+meta {
+  name: list activities havingComm
+  type: http
+  seq: 30
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "action": "ms.activities.getHavingComms",
+      "payload": {
+          "page": 1,
+          "perPage": 10,
+          "filters": {
+  //             "title": "QA multiple"
+  //             "phase": "ACTIVATION",
+              "status": "COMPLETED"
+          },
+          "activeYear": "2024",
+          "riverBasin": "Mahakali"
+      }
+  }
+}
