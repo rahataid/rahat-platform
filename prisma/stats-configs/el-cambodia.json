@@ -1,0 +1,88 @@
+{
+  "dataSources": {
+    "source3": {
+      "type": "url",
+      "args": {
+        "url": "",
+        "apiCallData": {
+          "method": "POST",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": "{\"action\":\"cambodia.app.stats\",\"payload\":{}}"
+        }
+      },
+      "data": []
+    }
+  },
+  "ui": [
+    {
+      "fields": [
+        {
+          "icon": "UsersRound",
+          "type": "dataCard",
+          "props": {},
+          "title": "Total Wearers",
+          "colSpan": 1,
+          "dataMap": "TOTAL_CONSUMERS",
+          "dataSrc": "source3",
+          "rowSpan": 1
+        },
+        {
+          "icon": "HousePlus",
+          "type": "dataCard",
+          "props": {},
+          "title": "Total Eye Checkup in VC",
+          "colSpan": 1,
+          "dataMap": "TOTAL_LEAD_CONVERTED",
+          "dataSrc": "source3",
+          "rowSpan": 1
+        },
+        {
+          "icon": "Ticket",
+          "type": "dataCard",
+          "props": {},
+          "title": "Health Workers Sales",
+          "colSpan": 1,
+          "dataMap": "HEALTH_WORKER_SALES",
+          "dataSrc": "source3",
+          "rowSpan": 1
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "icon": "HousePlus",
+          "type": "dataCard",
+          "props": {},
+          "title": "Total Villagers Referred",
+          "colSpan": 1,
+          "dataMap": "TOTAL_LEADS",
+          "dataSrc": "source3",
+          "rowSpan": 1
+        },
+        {
+          "icon": "Ticket",
+          "type": "dataCard",
+          "props": {},
+          "title": "Total Eyewear Dispensed in VC",
+          "colSpan": 1,
+          "dataMap": "TOTAL_EYEWEAR_DISPENSED",
+          "dataSrc": "source3",
+          "rowSpan": 1
+        },
+        {
+          "icon": "UsersRound",
+          "type": "dataCard",
+          "props": {},
+          "title": "Total Health Workers",
+          "colSpan": 1,
+          "dataMap": "TOTAL_HEALTH_WORKERS",
+          "dataSrc": "source3",
+          "rowSpan": 1
+        }
+      ]
+    }
+  ]
+}
