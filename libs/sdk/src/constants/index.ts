@@ -384,6 +384,7 @@ export const MS_ACTIONS = {
     ADD_TRIGGERS: 'ms.phases.addTriggers',
     REVERT_PHASE: 'ms.phases.revertPhase',
     GET_BY_LOCATION: 'ms.phases.getByLocation',
+    ACTIVATE: 'ms.phases.activate',
   },
 
   MS_RIVER_STATIONS: {
