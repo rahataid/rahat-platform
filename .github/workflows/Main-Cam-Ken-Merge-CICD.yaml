@@ -117,5 +117,5 @@ jobs:
           git config user.email "sandab@rumsan.net"
           git add ${{ env.BENEFICIARY_MANIFEST_FILE }}
           git add ${{ env.PLATFORM_MANIFEST_FILE }}
-          git commit -m "runner: Update Rahat Main Cam Ken Merge UI image tag to main_cam-ken_merge-${{ needs.deploy.outputs.sha_short }}"
+          git commit -m "runner: Update Rahat Main Cam Ken Merge Platform image tag to main_cam-ken_merge-${{ needs.deploy.outputs.sha_short }}"
           git push origin main
