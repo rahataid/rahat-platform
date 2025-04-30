@@ -241,7 +241,10 @@ export const MS_ACTIONS = {
       DISBURSE: 'aa.stellar.disburse',
       SEND_OTP: 'aa.stellar.sendOtp',
       SEND_ASSET: 'aa.stellar.sendAsset',
-      GET_WALLET_BY_PHONE: 'aaProject.stellar.getWalletByPhone'
+      GET_WALLET_BY_PHONE: 'aaProject.stellar.getWalletByPhone',
+      ADD_ONCHAIN_TRIGGER: 'aa.stellar.addTriggerOnChain',
+      GET_STELLAR_STATS: 'aa.stellar.getStellarStats',
+      GET_TRANSACTIONS: 'aa.stellar.getTransactions',
     }
   },
   C2CProject: {

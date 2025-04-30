@@ -86,6 +86,9 @@ export const JOBS = {
     GET_WALLET_BY_PHONE: 'aa.jobs.stellar.getWalletByPhone',
     SEND_OTP: 'aa.jobs.stellar.sendOtp',
     SEND_ASSET_TO_VENDOR: 'aa.jobs.stellar.sendAssetToVendor',
-    DISBURSE: 'aa.jobs.stellar.disburse'
+    DISBURSE: 'aa.jobs.stellar.disburse',
+    ADD_ONCHAIN_TRIGGER: 'aa.jobs.stellar.addTriggerOnChain',
+    GET_STELLAR_STATS: 'aa.jobs.stellar.getStellarStats',
+    GET_TRANSACTIONS: 'aa.jobs.stellar.getTransactions',
   }
 };

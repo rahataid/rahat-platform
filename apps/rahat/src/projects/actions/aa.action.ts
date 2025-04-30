@@ -329,4 +329,22 @@ export const aaActions: ProjectActionFunc = {
     payload,
     sendCommand
   ) => sendCommand({ cmd: WalletJobs.GET_WALLET_BY_PHONE }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.ADD_ONCHAIN_TRIGGER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.ADD_ONCHAIN_TRIGGER, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_STELLAR_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_STELLAR_STATS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_TRANSACTIONS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_TRANSACTIONS, uuid }, payload),
 };
