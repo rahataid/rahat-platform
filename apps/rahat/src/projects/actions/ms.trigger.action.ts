@@ -21,6 +21,7 @@ export const MS_TRIGGERS_JOBS = {
     ADD_TRIGGERS: 'ms.jobs.phases.addTriggers',
     REVERT_PHASE: 'ms.jobs.phases.revertPhase',
     GET_BY_LOCATION: 'ms.jobs.phases.getByLocation',
+    ACTIVATE: 'ms.jobs.phases.activate',
   },
   RIVER_STATIONS: {
     GET_DHM: 'ms.jobs.riverStations.getDhm',
@@ -119,7 +120,7 @@ export const msTriggerActions: ProjectActionFunc = {
   [MS_ACTIONS.MS_TRIGGERS.UPDATE]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
 
-    return sendCommand({ cmd: MS_TRIGGERS_JOBS.TRIGGER.UPDATE }, payload)
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.TRIGGER.UPDATE }, payload);
   },
 
   // **** triggers end ******//
@@ -170,6 +171,10 @@ export const msTriggerActions: ProjectActionFunc = {
     );
   },
 
+  [MS_ACTIONS.MS_PHASES.ACTIVATE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.ACTIVATE }, payload);
+  },
   // // **** phases end ******//
 
   // **** river stations start ******//
@@ -219,13 +224,19 @@ export const msTriggerActions: ProjectActionFunc = {
   [MS_ACTIONS.MS_RAINFALL_LEVELS.GET_DHM]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
 
-    return sendCommand({ cmd: MS_TRIGGERS_JOBS.RAINFALL_LEVELS.GET_DHM }, payload)
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.RAINFALL_LEVELS.GET_DHM },
+      payload
+    );
   },
 
   [MS_ACTIONS.MS_RAINFALL_LEVELS.GET_GLOFAS]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
 
-    return sendCommand({ cmd: MS_TRIGGERS_JOBS.RAINFALL_LEVELS.GET_GLOFAS }, payload)
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.RAINFALL_LEVELS.GET_GLOFAS },
+      payload
+    );
   },
   // **** river stations end ******//
 
