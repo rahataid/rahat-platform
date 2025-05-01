@@ -26,11 +26,13 @@ import {
   BeneficiaryJobs,
   BQUEUE,
   ProjectContants,
-  TPIIData
+  TPIIData,
+  WalletJobs
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
+import { firstValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
   findTempBenefGroups,
@@ -54,6 +56,7 @@ export class BeneficiaryService {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
+    @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
     private eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
     private readonly beneficiaryUtilsService: BeneficiaryUtilsService
@@ -1473,7 +1476,13 @@ export class BeneficiaryService {
     const jsonData = JSON.parse(bufferString) || null;
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
-    const beneficiaryData = beneficiaries.map((d: any) => {
+    const beneficiaryData = beneficiaries.map(async (d: any) => {
+      const chain = await this.beneficiaryUtilsService.getChainName()
+      if (!d.walletAddress || d.walletAddress === '') {
+        const observable = this.walletClient.send({ cmd: WalletJobs.CREATE }, [chain.toLowerCase()]);
+        const result = await firstValueFrom(observable);
+        d.walletAddress = result[0]?.address;
+      }
       return {
         firstName: d.firstName,
         lastName: d.lastName,
