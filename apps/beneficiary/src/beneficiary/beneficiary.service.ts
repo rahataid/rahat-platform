@@ -1478,11 +1478,10 @@ export class BeneficiaryService {
     const { groupName, beneficiaries } = jsonData;
     const beneficiaryData = beneficiaries.map(async (d: any) => {
       const chain = await this.beneficiaryUtilsService.getChainName()
-      if (!d.walletAddress || d.walletAddress === '') {
-        const observable = this.walletClient.send({ cmd: WalletJobs.CREATE }, [chain.toLowerCase()]);
-        const result = await firstValueFrom(observable);
-        d.walletAddress = result[0]?.address;
-      }
+      const observable = this.walletClient.send({ cmd: WalletJobs.CREATE }, [chain.toLowerCase()]);
+      const result = await firstValueFrom(observable);
+      d.walletAddress = result[0]?.address;
+
       return {
         firstName: d.firstName,
         lastName: d.lastName,
