@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ChainType, EVMWallet, StellarWallet, WalletKeys } from '@rahataid/wallet';
+import { BulkCreateWallet, ChainType, EVMWallet, StellarWallet, WalletKeys } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { FileWalletStorage } from './storages/fs.storage';
@@ -89,6 +89,23 @@ export class WalletService implements OnModuleInit {
       })
     );
     return chainWallets;
+  }
+
+  async createBulk(chains: BulkCreateWallet) {
+    let walletAddresses;
+    for (let i = 0; i < chains.count; i++) {
+      const functionName = this.getFunctionByName(chains.chain);
+      const walletFn = this[functionName].bind(this) as () => Promise<WalletKeys>;
+      const wallet = await walletFn();
+
+      walletAddresses.push({
+        chain: chains.chain,
+        address: wallet.address,
+        privateKey: wallet.privateKey,
+      })
+    }
+
+    return walletAddresses;
   }
 
   async getWalletByPhone(phoneNumber: string) {

@@ -1476,12 +1476,14 @@ export class BeneficiaryService {
     const jsonData = JSON.parse(bufferString) || null;
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
-    const beneficiaryData = beneficiaries.map(async (d: any) => {
-      const chain = await this.beneficiaryUtilsService.getChainName()
-      if (!d.walletAddress || d.walletAddress === '') {
-        const observable = this.walletClient.send({ cmd: WalletJobs.CREATE }, [chain.toLowerCase()]);
-        const result = await firstValueFrom(observable);
-        d.walletAddress = result[0]?.address;
+
+    const chain = await this.beneficiaryUtilsService.getChainName()
+    const observable = this.walletClient.send({ cmd: WalletJobs.CREATE_BULK }, [chain.toLowerCase()]);
+    const walletAddresses = await firstValueFrom(observable);
+
+    const beneficiaryData = beneficiaries.map(async (d: any, index: number) => {
+      if (chain.toLowerCase() == 'stellar') {
+        d.walletAddress = walletAddresses[index]?.address;
       }
       return {
         firstName: d.firstName,
