@@ -1471,9 +1471,11 @@ export class BeneficiaryService {
   }
 
   async importBeneficiariesFromTool(data: any) {
+    console.log("🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ data:", data)
     const dataFromBuffer = Buffer.from(data);
     const bufferString = dataFromBuffer.toString('utf-8');
     const jsonData = JSON.parse(bufferString) || null;
+    console.log("🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ jsonData:", jsonData)
 
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
