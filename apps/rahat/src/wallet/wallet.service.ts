@@ -92,18 +92,26 @@ export class WalletService implements OnModuleInit {
   }
 
   async createBulk(chains: BulkCreateWallet) {
-    let walletAddresses;
+
+    // Initialize walletAddresses as an array
+    const walletPromises = [];
+
+    // Create array of promises for wallet creation
     for (let i = 0; i < chains.count; i++) {
       const functionName = this.getFunctionByName(chains.chain);
       const walletFn = this[functionName].bind(this) as () => Promise<WalletKeys>;
-      const wallet = await walletFn();
-
-      walletAddresses.push({
-        chain: chains.chain,
-        address: wallet.address,
-        privateKey: wallet.privateKey,
-      })
+      walletPromises.push(walletFn());
     }
+
+    // Wait for all wallets to be created
+    const wallets = await Promise.all(walletPromises);
+
+    // Map wallets to desired output format
+    const walletAddresses = wallets.map(wallet => ({
+      chain: chains.chain,
+      address: wallet.address,
+      privateKey: wallet.privateKey,
+    }));
 
     return walletAddresses;
   }

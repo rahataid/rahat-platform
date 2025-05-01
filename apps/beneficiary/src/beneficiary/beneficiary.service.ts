@@ -32,7 +32,6 @@ import {
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { firstValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
   findTempBenefGroups,
@@ -40,6 +39,7 @@ import {
   validateDupicateWallet
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
+import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
@@ -1474,16 +1474,35 @@ export class BeneficiaryService {
     const dataFromBuffer = Buffer.from(data);
     const bufferString = dataFromBuffer.toString('utf-8');
     const jsonData = JSON.parse(bufferString) || null;
+
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
 
-    const chain = await this.beneficiaryUtilsService.getChainName()
-    const observable = this.walletClient.send({ cmd: WalletJobs.CREATE_BULK }, [chain.toLowerCase()]);
-    const walletAddresses = await firstValueFrom(observable);
+    const chain = await this.beneficiaryUtilsService.getChainName();
+    const walletAddress = await handleMicroserviceCall({
+      client: this.walletClient.send(
+        { cmd: WalletJobs.CREATE_BULK }, { chain: chain.toLowerCase(), count: beneficiaries.length }
+      ),
+      onSuccess: (response) => {
+        console.log(
+          `Response`, response
+        );
+        return response;
+      },
+      onError(error) {
+        console.log(
+          'Error assiging Beneficiaries to project.',
+          error
+        );
+        throw new RpcException(error.message);
+      },
+    })
 
-    const beneficiaryData = beneficiaries.map(async (d: any, index: number) => {
+
+    const beneficiaryData = await Promise.all(beneficiaries.map(async (d: any, index: number) => {
+
       if (chain.toLowerCase() == 'stellar') {
-        d.walletAddress = walletAddresses[index]?.address;
+        d.walletAddress = walletAddress[index]?.address;
       }
       return {
         firstName: d.firstName,
@@ -1503,7 +1522,9 @@ export class BeneficiaryService {
         notes: d.notes || null,
         extras: d.extras || null,
       };
-    });
+    }))
+
+    console.log(beneficiaryData)
     const tempBenefPhone = await this.listTempBenefPhone();
     return this.prisma.$transaction(async (txn) => {
       // 1. Upsert temp group by name
