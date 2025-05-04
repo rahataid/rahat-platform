@@ -1,6 +1,6 @@
 {
   "name": "@rahataid/wallet",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
@@ -10,6 +10,7 @@
   "exports": {
     ".": {
       "import": "./src/index.js",
+      "require": "./src/index.js",
       "types": "./src/index.d.ts"
     }
   },
