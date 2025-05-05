@@ -12,7 +12,7 @@ const main = async () => {
         dataType: "OBJECT",
         "value": {
           "URL": "https://connect.rumsan.net/api/v1",
-          "APP_ID": "cm8r48qkh00bjibnwiriobrvx"
+          "APP_ID": "cma6q8mbj009j293dcpj8q3xq"
           // Pilot
           // APP_ID: "cm1t9iuny001bsahfkjy7quia"
         },
