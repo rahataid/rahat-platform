@@ -1,0 +1,31 @@
+meta {
+  name: Create Payment - Widget
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/api/v2/payment
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "type": "widget",
+      "merchant_key": "{{mcnt_key}}",
+      "order_currency": "USD",
+      "order_amount": 10,
+      "payer_id": "steven.chan@triple-a.io"
+  }
+}
+
+tests {
+  // set the access token
+  bru.setVar('page_token', res.getBody().access_token);
+  bru.setVar('page_pmt_ref_num', res.getBody().payment_reference);
+}

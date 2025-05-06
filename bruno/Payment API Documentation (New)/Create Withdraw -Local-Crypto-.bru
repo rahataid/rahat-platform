@@ -1,0 +1,33 @@
+meta {
+  name: Create Withdraw -Local-Crypto-
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{base_url}}/api/v1/payout/withdraw/local/crypto
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "merchant_key": "{{merchant_key}}",
+      "email": "steven.chan@triple-a.io",
+      "withdraw_currency": "SGD",
+      "withdraw_amount": 3.00,
+      "crypto_currency": "testBTC",
+      "remarks": "some remarks here!",
+      "notify_url": "https://webhook.site/a423876c-b890-4503-8bf4-82c208e2bbd5",
+      "notify_secret": "hello123!"
+  }
+}
+
+tests {
+  // set the access token
+  bru.setVar('l2c_wdrw_pyt_ref_num', res.getBody().payout_reference);
+}

@@ -1,0 +1,30 @@
+meta {
+  name: Create Refund Local
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{base_url}}/api/v1/payout/refund/local
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "payment_reference": "{{local_pmt_ref_num}}",
+      "email": "steven.chan@triple-a.io",
+      "refund_amount": 0.5,
+      "remarks": "some remarks here!",
+      "notify_url": "https://webhook.site/f1904b4a-18ae-4062-b1b0-f7f61f037423"
+  }
+}
+
+tests {
+  // set the access token
+  bru.setVar('l2c_rfnd_pyt_ref_num', res.getBody().payout_reference);
+}
