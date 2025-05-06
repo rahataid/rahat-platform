@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
 import {
   BadRequestException,
@@ -408,10 +410,17 @@ export class BeneficiaryController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
-  @Get('phone/:phone')
+  @Get('phone/:phone/:projectUUID')
   @ApiParam({ name: 'phone', required: true })
-  async getBeneficiaryByPhone(@Param('phone') phone: string) {
-    return this.client.send({ cmd: BeneficiaryJobs.GET_BY_PHONE }, phone);
+  @ApiParam({ name: 'projectUUID', required: true })
+  async getBeneficiaryByPhone(
+    @Param('phone') phone: string,
+    @Param('projectUUID') projectUUID: string
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.GET_BY_PHONE },
+      { phone, projectUUID }
+    );
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)

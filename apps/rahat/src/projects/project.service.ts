@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -304,7 +306,10 @@ export class ProjectService {
     if (benef.type !== 'LEAD') benef.phone = genRandomPhone('88');
     if (!benef.phone) throw new Error('Phone number is required!');
 
-    if (benef.gender) benef.gender = benef.gender.toUpperCase();
+    if (benef.gender) {
+      if (benef.gender.toUpperCase() === 'OTHERS') benef.gender = 'OTHER';
+      benef.gender = benef.gender.toUpperCase();
+    }
     if (benef.age) benef.age = parseInt(benef.age);
     if (benef.leadInterests) {
       benef.leadInterests = benef.leadInterests

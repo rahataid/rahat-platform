@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Controller, Param } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
@@ -46,8 +48,8 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_PHONE })
-  async getBeneficiaryByPhone(phone: string) {
-    return this.service.findOneByPhone(phone);
+  async getBeneficiaryByPhone(payload: { phone: string, projectUUID: string }) {
+    return this.service.findOneByPhone(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
@@ -216,6 +218,10 @@ export class BeneficiaryController {
   async getOneGroupByProject(uuid: UUID) {
     return this.service.getOneGroupByProject(uuid);
   }
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_GROUP_BY_UUID })
+  async listGroupByUuid(uuid: UUID[]) {
+    return this.service.listGroupByUUid(uuid);
+  }
 
   @MessagePattern({
     cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL,
@@ -252,6 +258,11 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.CALCULATE_STATS })
   async syncProjectStats(payload) {
     return this.service.syncProjectStats(payload.projectUUID)
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.SEND_DISBURSEMENT_CREATED_EMAIL })
+  async sendDisbursementCreatedEmail(payload) {
+    return this.service.sendDisbursementCreatedEmail(payload)
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.DELETE_BENEFICIARY_AND_PII })
