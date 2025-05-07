@@ -432,6 +432,7 @@ export const MS_ACTIONS = {
     GET_ONE: 'ms.dailyMonitoring.getOne',
     UPDATE: 'ms.dailyMonitoring.update',
     REMOVE: 'ms.dailyMonitoring.remove',
+    DELETE: 'ms.dailyMonitoring.delete',
   },
 };
 
