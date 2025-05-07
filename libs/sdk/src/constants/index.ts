@@ -243,6 +243,8 @@ export const MS_ACTIONS = {
       SEND_ASSET: 'aa.stellar.sendAsset',
       GET_WALLET_BY_PHONE: 'aaProject.stellar.getWalletByPhone',
       ADD_ONCHAIN_TRIGGER: 'aa.stellar.addTriggerOnChain',
+      UPDATE_ONCHAIN_TRIGGER: 'aa.stellar.updateTriggerOnChain',
+      GET_ONCHAIN_TRIGGER: 'aa.stellar.getTriggerOnChain',
       GET_STELLAR_STATS: 'aa.stellar.getStellarStats',
       GET_TRANSACTIONS: 'aa.stellar.getTransactions',
     }

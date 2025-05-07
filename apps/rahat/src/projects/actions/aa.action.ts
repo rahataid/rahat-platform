@@ -336,6 +336,18 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.ADD_ONCHAIN_TRIGGER, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.STELLAR.UPDATE_ONCHAIN_TRIGGER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.UPDATE_ONCHAIN_TRIGGER, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_ONCHAIN_TRIGGER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_ONCHAIN_TRIGGER, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.STELLAR.GET_STELLAR_STATS]: (
     uuid,
     payload,
