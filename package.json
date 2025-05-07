@@ -86,6 +86,7 @@
     "@rumsan/user": "3.0.167",
     "@types/amqplib": "^0.10.6",
     "@urql/core": "^5.0.4",
+    "@usebruno/cli": "^2.1.0",
     "abitype": "^1.0.1",
     "amqp-connection-manager": "^4.1.14",
     "amqplib": "^0.10.5",

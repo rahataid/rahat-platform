@@ -168,7 +168,7 @@ export const MS_ACTIONS = {
       ADD: 'aaProject.triggers.add',
       REMOVE: 'aaProject.triggers.remove',
       ACTIVATE: 'aaProject.triggers.activate',
-      TEST: 'aaProject.disbursement.test'
+      TEST: 'aaProject.disbursement.test',
     },
     ACTIVITIES: {
       GET_ONE: 'aaProject.activities.getOne',
@@ -242,8 +242,12 @@ export const MS_ACTIONS = {
     STELLAR: {
       DISBURSE: 'aa.stellar.disburse',
       SEND_OTP: 'aa.stellar.sendOtp',
-      GET_WALLET_BY_PHONE: 'aaProject.stellar.getWalletByPhone'
-    }
+      SEND_ASSET: 'aa.stellar.sendAsset',
+      GET_WALLET_BY_PHONE: 'aaProject.stellar.getWalletByPhone',
+      ADD_ONCHAIN_TRIGGER: 'aa.stellar.addTriggerOnChain',
+      GET_STELLAR_STATS: 'aa.stellar.getStellarStats',
+      GET_TRANSACTIONS: 'aa.stellar.getTransactions',
+    },
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',
@@ -374,6 +378,7 @@ export const MS_ACTIONS = {
     ADD: 'ms.triggers.add',
     REMOVE: 'ms.triggers.remove',
     ACTIVATE: 'ms.triggers.activate',
+    UPDATE_TRANSACTION: 'ms.triggers.updateTransaction',
     UPDATE: 'ms.triggers.update',
     GET_BY_LOCATION: 'ms.triggers.getByLocation',
   },
@@ -385,6 +390,7 @@ export const MS_ACTIONS = {
     ADD_TRIGGERS: 'ms.phases.addTriggers',
     REVERT_PHASE: 'ms.phases.revertPhase',
     GET_BY_LOCATION: 'ms.phases.getByLocation',
+    ACTIVATE: 'ms.phases.activate',
   },
 
   MS_RIVER_STATIONS: {
