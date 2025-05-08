@@ -297,6 +297,9 @@ export class BeneficiaryStatService {
         .then((projectBen) =>
           projectBen.map((data: any) => data?.beneficiaryId)
         );
+      if (beneficiaryIds.length === 0) {
+        return { count: 0 }
+      }
       if (beneficiaryIds.length > 0) {
         filter.uuid = { in: beneficiaryIds };
       }
