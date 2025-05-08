@@ -1,7 +1,7 @@
 meta {
   name: list daily monitoring
   type: http
-  seq: 18
+  seq: 20
 }
 
 post {
@@ -19,8 +19,7 @@ body:json {
     "action": "ms.dailyMonitoring.getAll",
     "payload": {
        "page" : 1,
-      "perPage": 10,
-      "appId" : "{{appId}}"
+      "perPage": 10
     }
   }
 }

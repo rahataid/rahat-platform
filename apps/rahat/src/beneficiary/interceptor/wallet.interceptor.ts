@@ -1,3 +1,4 @@
+// wallet.interceptor.ts
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { ChainType } from '@rahataid/wallet';
@@ -18,24 +19,35 @@ export class WalletInterceptor implements NestInterceptor {
         const request = context.switchToHttp().getRequest();
         const data = request.body;
 
-        const walletAddress = await this.ensureValidWalletAddress(data.walletAddress);
+        try {
+            if (Array.isArray(data)) {
+                const updatedData = await Promise.all(
+                    data.map(async (item) => {
+                        const walletAddress = await this.ensureValidWalletAddress(item.walletAddress);
+                        return { ...item, walletAddress };
+                    })
+                );
+                request.body = updatedData;
+            } else {
+                const walletAddress = await this.ensureValidWalletAddress(data.walletAddress);
+                request.body.walletAddress = walletAddress;
+            }
 
-        request.body.walletAddress = walletAddress;
-
-        return next.handle().pipe(
-            map(response => ({
-                ...response,
-                walletAddress,
-            }))
-        );
-
+            return next.handle().pipe(
+                map(response => ({
+                    ...response,
+                }))
+            );
+        } catch (error) {
+            throw error instanceof RpcException ? error : new RpcException('Wallet processing failed');
+        }
     }
 
     private async ensureValidWalletAddress(walletAddress?: string): Promise<string> {
         const chain = await this.getChainName();
 
         if (!walletAddress) {
-            const result = await this.walletService.create([chain])
+            const result = await this.walletService.create([chain]);
             return result[0].address;
         }
 
