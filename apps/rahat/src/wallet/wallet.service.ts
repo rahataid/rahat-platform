@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ChainType, EVMWallet, StellarWallet, WalletKeys } from '@rahataid/wallet';
+import { BulkCreateWallet, ChainType, EVMWallet, StellarWallet, WalletKeys } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { FileWalletStorage } from './storages/fs.storage';
@@ -91,6 +91,31 @@ export class WalletService implements OnModuleInit {
     return chainWallets;
   }
 
+  async createBulk(chains: BulkCreateWallet) {
+
+    // Initialize walletAddresses as an array
+    const walletPromises = [];
+
+    // Create array of promises for wallet creation
+    for (let i = 0; i < chains.count; i++) {
+      const functionName = this.getFunctionByName(chains.chain);
+      const walletFn = this[functionName].bind(this) as () => Promise<WalletKeys>;
+      walletPromises.push(walletFn());
+    }
+
+    // Wait for all wallets to be created
+    const wallets = await Promise.all(walletPromises);
+
+    // Map wallets to desired output format
+    const walletAddresses = wallets.map(wallet => ({
+      chain: chains.chain,
+      address: wallet.address,
+      privateKey: wallet.privateKey,
+    }));
+
+    return walletAddresses;
+  }
+
   async getWalletByPhone(phoneNumber: string) {
     const result = await this.prisma.beneficiaryPii.findUnique({
       where: { phone: phoneNumber },
@@ -108,9 +133,19 @@ export class WalletService implements OnModuleInit {
     return result.beneficiary.walletAddress;
   }
 
-  signAndSend() {
-    return `This action returns all wallet`;
+  async getSecretByWallet(walletAddress: string, chain: ChainType) {
+    if (!walletAddress) {
+      throw new Error("Wallet address not found");
+    }
+    const storage = new FileWalletStorage();
+    return storage.getKey(walletAddress, chain);
   }
+
+  async getSecretByPhone(phoneNumber: string, chain: ChainType) {
+    const walletAddress = await this.getWalletByPhone(phoneNumber);
+    return this.getSecretByWallet(walletAddress, chain);
+  }
+
 
   getFunctionByName(chain: string): string {
     const functionName = `create${chain}Wallets` as keyof this;

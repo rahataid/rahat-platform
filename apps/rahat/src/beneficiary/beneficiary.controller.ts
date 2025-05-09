@@ -152,7 +152,6 @@ export class BeneficiaryController {
   @Post()
   @UseInterceptors(WalletInterceptor)
   async create(@Body() dto: CreateBeneficiaryDto) {
-    console.log(dto);
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
 
@@ -174,6 +173,7 @@ export class BeneficiaryController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseInterceptors(WalletInterceptor)
   @Post('bulk')
   async createBulk(@Body() dto: CreateBeneficiaryDto[]) {
     const data = dto.map((b) => ({

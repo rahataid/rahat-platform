@@ -22,7 +22,6 @@ import {
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
-import { isAddress } from 'viem';
 
 @Injectable()
 export class BeneficiaryUtilsService {
@@ -97,10 +96,9 @@ export class BeneficiaryUtilsService {
       console.log('Wallet address already exists');
       throw new RpcException('Wallet address already exists');
     }
-    if (!isAddress(walletAddress)) {
-      console.log('Wallet should be valid Ethereum Address');
-      throw new RpcException('Wallet should be valid Ethereum Address');
-    }
+    // if (!isAddress(walletAddress)) {
+    //   throw new RpcException('Wallet should be valid Ethereum Address');
+    // }
     return walletAddress;
   }
 

@@ -1,0 +1,24 @@
+meta {
+  name: Dummy Activate Phase
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.phases.activate",
+    "payload": {
+      "phaseUuid": "1388aecb-e759-4ee3-b77e-13b3f750b6f5"
+    }
+  }
+}

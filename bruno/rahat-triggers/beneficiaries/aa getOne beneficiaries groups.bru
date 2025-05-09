@@ -1,0 +1,25 @@
+meta {
+  name: aa getOne beneficiaries groups
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+     "action": "aaProject.beneficiary.getOneGroup",
+      "payload": {
+          "uuid": "7d6f3c47-2ff7-42c1-8b99-009b6c5d1362"
+      }
+  }
+  
+}

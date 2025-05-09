@@ -1,0 +1,25 @@
+meta {
+  name: stellar disburse
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.stellar.disburse",
+    "payload": {
+      "dName": "Dipesh Test 2",
+      "groups": []
+    }
+  }
+}

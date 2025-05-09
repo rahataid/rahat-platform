@@ -1,0 +1,38 @@
+meta {
+  name: add daily monitoring
+  type: http
+  seq: 31
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "action": "ms.dailyMonitoring.add",
+      "payload": {
+          "riverBasin": "Mahakali",
+          "data": [
+      {
+          "source": "GLOFAS",
+          "todayGLOFAS": "on",
+          "days3": "off",
+          "days5": "off",
+          "inBetweenTodayUntil7DaysIsThereAnyPossibilityOfPeak": "peak"
+      },
+      {
+          "source": "NCMRWF Deterministic & Probabilistic",
+          "extremeWeatherOutlook": "10",
+          "deterministicsPredictionSystem": "400",
+          "probabilisticPredictionSystem": "120"
+      }
+  ]    }
+  }
+}

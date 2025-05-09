@@ -8,6 +8,7 @@ export const MS_TRIGGERS_JOBS = {
     GET_ONE: 'ms.jobs.triggers.getOne',
     ADD: 'ms.jobs.triggers.add',
     UPDATE: 'ms.jobs.triggers.update',
+    UPDATE_TRANSACTION: 'ms.jobs.triggers.updateTransaction',
     REMOVE: 'ms.jobs.triggers.remove',
     ACTIVATE: 'ms.jobs.triggers.activate',
     GET_BY_LOCATION: 'ms.jobs.triggers.getByLocation',
@@ -21,6 +22,7 @@ export const MS_TRIGGERS_JOBS = {
     ADD_TRIGGERS: 'ms.jobs.phases.addTriggers',
     REVERT_PHASE: 'ms.jobs.phases.revertPhase',
     GET_BY_LOCATION: 'ms.jobs.phases.getByLocation',
+    ACTIVATE: 'ms.jobs.phases.activate',
   },
   RIVER_STATIONS: {
     GET_DHM: 'ms.jobs.riverStations.getDhm',
@@ -61,6 +63,7 @@ export const MS_TRIGGERS_JOBS = {
     GET_ONE: 'ms.jobs.dailyMonitoring.getOne',
     UPDATE: 'ms.jobs.dailyMonitoring.update',
     REMOVE: 'ms.jobs.dailyMonitoring.remove',
+    DELETE: 'ms.jobs.dailyMonitoring.delete',
   },
 };
 
@@ -101,6 +104,15 @@ export const msTriggerActions: ProjectActionFunc = {
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.TRIGGER.ACTIVATE }, payload);
   },
 
+  [MS_ACTIONS.MS_TRIGGERS.UPDATE_TRANSACTION]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.TRIGGER.UPDATE_TRANSACTION },
+      payload
+    );
+  },
+
   [MS_ACTIONS.MS_TRIGGERS.GET_BY_LOCATION]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
 
@@ -119,7 +131,7 @@ export const msTriggerActions: ProjectActionFunc = {
   [MS_ACTIONS.MS_TRIGGERS.UPDATE]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
 
-    return sendCommand({ cmd: MS_TRIGGERS_JOBS.TRIGGER.UPDATE }, payload)
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.TRIGGER.UPDATE }, payload);
   },
 
   // **** triggers end ******//
@@ -170,6 +182,10 @@ export const msTriggerActions: ProjectActionFunc = {
     );
   },
 
+  [MS_ACTIONS.MS_PHASES.ACTIVATE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.ACTIVATE }, payload);
+  },
   // // **** phases end ******//
 
   // **** river stations start ******//
@@ -219,13 +235,19 @@ export const msTriggerActions: ProjectActionFunc = {
   [MS_ACTIONS.MS_RAINFALL_LEVELS.GET_DHM]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
 
-    return sendCommand({ cmd: MS_TRIGGERS_JOBS.RAINFALL_LEVELS.GET_DHM }, payload)
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.RAINFALL_LEVELS.GET_DHM },
+      payload
+    );
   },
 
   [MS_ACTIONS.MS_RAINFALL_LEVELS.GET_GLOFAS]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
 
-    return sendCommand({ cmd: MS_TRIGGERS_JOBS.RAINFALL_LEVELS.GET_GLOFAS }, payload)
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.RAINFALL_LEVELS.GET_GLOFAS },
+      payload
+    );
   },
   // **** river stations end ******//
 
@@ -360,8 +382,7 @@ export const msTriggerActions: ProjectActionFunc = {
   // **** daily monitoring start ****//
   [MS_ACTIONS.MS_DAILY_MONITORING.ADD]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
-
-    return sendCommand({ cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.ADD }, payload);
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.ADD, }, payload,);
   },
 
   [MS_ACTIONS.MS_DAILY_MONITORING.GET_ALL]: (uuid, payload, sendCommand) => {
@@ -396,6 +417,15 @@ export const msTriggerActions: ProjectActionFunc = {
 
     return sendCommand(
       { cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.REMOVE },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_DAILY_MONITORING.DELETE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.DELETE },
       payload
     );
   },

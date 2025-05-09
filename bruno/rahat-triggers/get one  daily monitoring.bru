@@ -1,0 +1,28 @@
+meta {
+  name: get one  daily monitoring
+  type: http
+  seq: 32
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.dailyMonitoring.getOne",
+    "payload": {
+          "uuid": "e1579764-9e11-4223-bcde-7c9fe9397a91"
+      }
+  }
+  
+  
+  
+  
+}
