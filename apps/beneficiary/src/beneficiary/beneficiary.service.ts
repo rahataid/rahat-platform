@@ -426,31 +426,37 @@ export class BeneficiaryService {
     return data;
   }
 
-  async findOneByPhone(phone: string) {
-    const piiData = await this.rsprisma.beneficiaryPii.findFirst({
+  async findOneByPhone(payload: { phone: string, projectUUID: string }) {
+    const beneficiary = await this.prisma.beneficiary.findFirst({
       where: {
-        phone: {
-          contains: phone,
-        },
-      },
-    });
-    if (!piiData) return null;
-
-    const beneficiary = await this.rsprisma.beneficiary.findUnique({
-      where: { id: piiData.beneficiaryId },
-      include: {
-        BeneficiaryProject: {
-          include: {
-            Project: true,
+        AND: [
+          {
+            BeneficiaryProject: {
+              some: {
+                projectId: payload.projectUUID
+              }
+            }
           },
-        },
+          {
+            pii: {
+              phone: payload.phone,
+            },
+          }
+        ],
       },
-    });
+      include: {
+        pii: true,
+      },
+    })
 
     if (!beneficiary) return null;
+    let piiData = null;
+    if (beneficiary.pii) {
+      piiData = beneficiary.pii;
+      delete beneficiary.pii;
+    }
 
-    beneficiary.piiData = piiData;
-    return beneficiary;
+    return { ...beneficiary, piiData };
   }
 
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
