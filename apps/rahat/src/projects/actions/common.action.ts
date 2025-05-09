@@ -99,7 +99,7 @@ export const settingActions: ProjectActionFunc = {
 
   [MS_ACTIONS.SETTINGS.GET]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.PROJECT_SETTINGS_GET },
+      { cmd: ProjectJobs.PROJECT_SETTINGS_GET, uuid },
       { projectId: uuid, ...payload }
     ),
 
