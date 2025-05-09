@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
   Body,
   Controller,
@@ -59,6 +61,22 @@ export class OfframpController {
   }) {
     return this.offrampService.findOne(payload);
   }
+
+  @Get('transactions')
+  findTransactions(@Query() payload: {
+    uuid?: string;
+    id?: number;
+    requestId?: string;
+    status?: string;
+    page?: number;
+    perPage?: number;
+    senderAddress?: string;
+  }) {
+    return this.offrampService.getOfframpTransactions(payload);
+  }
+
+
+
 
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateOfframpDto: any) {

@@ -1,0 +1,33 @@
+meta {
+  name: connect- add transport
+  type: http
+  seq: 4
+}
+
+post {
+  url: https://connect.rumsan.net/api/v1/transports
+  body: json
+  auth: none
+}
+
+headers {
+  accept: */*
+  Content-Type: application/json
+  app: cm8co96xd00bhve4p5225uppu
+}
+
+body:json {
+  {
+    "name": "Email Broadcast",
+    "type": "SMTP",
+    "config": {
+      "host": "smtp.gmail.com",
+          "port": 587,
+          "secure": false,
+          "password": "vjmeewlcfnvvtatz",
+          "username": "team@rumsan.net",
+          "defaultFrom": "team@rumsan.net",
+          "defaultSubject": "This is email broadcast"
+    }
+  }
+}

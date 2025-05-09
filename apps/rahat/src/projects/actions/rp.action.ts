@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { MS_ACTIONS, ProjectJobs } from '@rahataid/sdk';
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
 
@@ -127,6 +129,8 @@ export const rpActions: ProjectActionFunc = {
     sendCommand({ cmd: ProjectJobs.UPDATE_REDEMPTION, uuid }, payload),
   [MS_ACTIONS.RPPROJECT.LIST_REDEMPTION]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.LIST_REDEMPTION, uuid }, payload),
+  [MS_ACTIONS.RPPROJECT.GET_BENEFICIARY_REDEMPTION]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.GET_BENEFICIARY_REDEMPTION, uuid }, payload),
   [MS_ACTIONS.RPPROJECT.GET_VENDOR_REDEMPTION]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.GET_VENDOR_REDEMPTION, uuid }, payload),
 
@@ -278,6 +282,12 @@ export const rpActions: ProjectActionFunc = {
 
   [MS_ACTIONS.RPPROJECT.LIST_REPORTING]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.REPORTING.LIST, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.LIST_EYE_CHECKEUP_LINE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.REPORTING.LIST_EYE_CHECKEUP_LINE, uuid }, payload),
+
+  [MS_ACTIONS.RPPROJECT.LIST_PURCHASE_OF_GLASSESS_LINE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.REPORTING.LIST_PURCHASE_OF_GLASSESS_LINE, uuid }, payload),
 
   [MS_ACTIONS.RPPROJECT.GET_REDEMPTION]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.GET_REDEMPTION, uuid }, payload),
