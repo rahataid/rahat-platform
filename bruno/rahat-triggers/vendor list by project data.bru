@@ -1,0 +1,27 @@
+meta {
+  name: vendor list by project data
+  type: http
+  seq: 30
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "action": "vendor.list_with_project_data",
+      "payload": {
+         "page": 1,
+        "perPage":2,
+        "search":"" 
+      }
+  }
+  
+}

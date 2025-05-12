@@ -19,6 +19,7 @@ import { ExternalAppGuard } from '../decorators';
 import { GrievanceModule } from '../grievance/grievance.module';
 import { ListenersModule } from '../listeners/listeners.module';
 import { OfframpModule } from '../offramp/offramp.module';
+import { OtpModule } from '../otp/otp.module';
 import { MetaTxnProcessorsModule } from '../processors/meta-transaction/metaTransaction.module';
 import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
@@ -54,6 +55,7 @@ import { AppService } from './app.service';
     EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false }),
     ListenersModule,
     AppUsersModule,
+    OtpModule,
     RSUserModule.forRoot([AuthsModule, UsersModule, RolesModule]),
     ProjectModule,
     StatsModule,

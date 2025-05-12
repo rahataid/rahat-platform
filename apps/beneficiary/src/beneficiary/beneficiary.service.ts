@@ -26,7 +26,8 @@ import {
   BeneficiaryJobs,
   BQUEUE,
   ProjectContants,
-  TPIIData
+  TPIIData,
+  WalletJobs
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
@@ -38,6 +39,7 @@ import {
   validateDupicateWallet
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
+import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
@@ -54,6 +56,7 @@ export class BeneficiaryService {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
+    @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
     private eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
     private readonly beneficiaryUtilsService: BeneficiaryUtilsService
@@ -148,7 +151,6 @@ export class BeneficiaryService {
       }
     })
 
-
     const { pii, ...rest } = getBeneficiaryByWallet
     return { piiData: pii, projectData: rest, ...data }
   }
@@ -201,7 +203,7 @@ export class BeneficiaryService {
   async processBenfGroups(data: any) {
     const groups = [];
     for (const d of data) {
-      const data = await this.prisma.beneficiaryGroup.findUnique({
+      const datas = await this.prisma.beneficiaryGroup.findUnique({
         where: {
           uuid: d?.uuid,
         },
@@ -215,9 +217,27 @@ export class BeneficiaryService {
               },
             },
           },
+          groupedBeneficiaries: {
+            where: {
+              deletedAt: null,
+            },
+            select: {
+              Beneficiary: {
+                select: {
+                  uuid: true,
+                  walletAddress: true,
+                  pii: {
+                    select: {
+                      phone: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       });
-      groups.push(data);
+      groups.push(datas);
     }
     return groups;
   }
@@ -344,13 +364,7 @@ export class BeneficiaryService {
 
 
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
-    const { piiData, projectUUIDs, ...data } = dto;
-
-    // Todo: remove wallet address while creating a beneficiary
-    let { walletAddress } = data;
-    walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(
-      walletAddress
-    );
+    const { piiData, projectUUIDs, walletAddress, ...data } = dto;
 
     if (!piiData.phone) throw new RpcException('Phone number is required');
     await this.beneficiaryUtilsService.ensureUniquePhone(
@@ -1322,6 +1336,7 @@ export class BeneficiaryService {
       );
     } catch (err) {
       console.log(err);
+      return err;
     }
   }
 
@@ -1456,12 +1471,41 @@ export class BeneficiaryService {
   }
 
   async importBeneficiariesFromTool(data: any) {
+    console.log("🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ data:", data)
     const dataFromBuffer = Buffer.from(data);
     const bufferString = dataFromBuffer.toString('utf-8');
     const jsonData = JSON.parse(bufferString) || null;
+    console.log("🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ jsonData:", jsonData)
+
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
-    const beneficiaryData = beneficiaries.map((d: any) => {
+
+    const chain = await this.beneficiaryUtilsService.getChainName();
+    const walletAddress = await handleMicroserviceCall({
+      client: this.walletClient.send(
+        { cmd: WalletJobs.CREATE_BULK }, { chain: chain.toLowerCase(), count: beneficiaries.length }
+      ),
+      onSuccess: (response) => {
+        console.log(
+          `Response`, response
+        );
+        return response;
+      },
+      onError(error) {
+        console.log(
+          'Error assiging Beneficiaries to project.',
+          error
+        );
+        throw new RpcException(error.message);
+      },
+    })
+
+
+    const beneficiaryData = await Promise.all(beneficiaries.map(async (d: any, index: number) => {
+
+      if (chain.toLowerCase() == 'stellar') {
+        d.walletAddress = walletAddress[index]?.address;
+      }
       return {
         firstName: d.firstName,
         lastName: d.lastName,
@@ -1480,7 +1524,9 @@ export class BeneficiaryService {
         notes: d.notes || null,
         extras: d.extras || null,
       };
-    });
+    }))
+
+    console.log(beneficiaryData)
     const tempBenefPhone = await this.listTempBenefPhone();
     return this.prisma.$transaction(async (txn) => {
       // 1. Upsert temp group by name
