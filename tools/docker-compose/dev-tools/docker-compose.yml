@@ -16,6 +16,7 @@ services:
     environment:
       - POSTGRES_USER=${PG_USER}
       - POSTGRES_PASSWORD=${PG_PASS}
+    command: postgres -c max_prepared_transactions=100
     volumes:
       - rahat_pg_data:/var/lib/postgresql/data
     ports:

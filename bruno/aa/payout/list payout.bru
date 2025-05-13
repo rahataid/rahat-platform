@@ -1,0 +1,33 @@
+meta {
+  name: list payout
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.payout.list",
+    "payload": {
+      "type": "FSP",
+      "mode": "ONLINE",
+      "status": "PENDING",
+      "groupId": "123e4567-e89b-12d3-a456-426614174000",
+      "payoutProcessorId": "fsp-123"
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
+}

@@ -248,6 +248,13 @@ export const MS_ACTIONS = {
       GET_STELLAR_STATS: 'aa.stellar.getStellarStats',
       GET_TRANSACTIONS: 'aa.stellar.getTransactions',
     },
+    PAYOUT: {
+      ASSIGN_TOKEN: 'aa.payout.assignToken',
+      CREATE: 'aa.payout.create',
+      LIST: 'aa.payout.list',
+      GET: 'aa.payout.get',
+      UPDATE: 'aa.payout.update',
+    },
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',
