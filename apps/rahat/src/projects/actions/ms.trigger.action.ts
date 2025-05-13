@@ -63,6 +63,7 @@ export const MS_TRIGGERS_JOBS = {
     GET_ONE: 'ms.jobs.dailyMonitoring.getOne',
     UPDATE: 'ms.jobs.dailyMonitoring.update',
     REMOVE: 'ms.jobs.dailyMonitoring.remove',
+    DELETE: 'ms.jobs.dailyMonitoring.delete',
   },
 };
 
@@ -381,8 +382,7 @@ export const msTriggerActions: ProjectActionFunc = {
   // **** daily monitoring start ****//
   [MS_ACTIONS.MS_DAILY_MONITORING.ADD]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
-
-    return sendCommand({ cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.ADD }, payload);
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.ADD, }, payload,);
   },
 
   [MS_ACTIONS.MS_DAILY_MONITORING.GET_ALL]: (uuid, payload, sendCommand) => {
@@ -417,6 +417,15 @@ export const msTriggerActions: ProjectActionFunc = {
 
     return sendCommand(
       { cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.REMOVE },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_DAILY_MONITORING.DELETE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.DELETE },
       payload
     );
   },

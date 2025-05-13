@@ -13,4 +13,6 @@ export const JOBS = {
   REMOVE: 'rahat.jobs.vendor.remove',
   GET_VENDOR_STATS: 'rahat.jobs.get_project_vendor_stats',
   GET_BY_UUID: 'rahat.jobs.vendor.get.uuid',
+  LIST_WITH_PROJECT_DATA: 'rahat.jobs.vendor.list_with_project_data',
+
 };

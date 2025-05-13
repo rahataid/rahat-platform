@@ -128,6 +128,8 @@ export const MS_ACTIONS = {
     UPDATE_IS_VERIFIED: 'vendor.update_is_verified',
     LIST: 'vendor.list',
     GET_BY_UUID: 'vendor.get_by_uuid',
+    LIST_WITH_PROJECT_DATA: "vendor.list_with_project_data"
+
   },
   USER: {},
   ELPROJECT: {
@@ -433,6 +435,7 @@ export const MS_ACTIONS = {
     GET_ONE: 'ms.dailyMonitoring.getOne',
     UPDATE: 'ms.dailyMonitoring.update',
     REMOVE: 'ms.dailyMonitoring.remove',
+    DELETE: 'ms.dailyMonitoring.delete',
   },
 };
 

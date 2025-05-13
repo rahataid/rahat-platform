@@ -1,7 +1,7 @@
 meta {
-  name: list daily monitoring
+  name: get one  daily monitoring
   type: http
-  seq: 20
+  seq: 32
 }
 
 post {
@@ -16,10 +16,13 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.dailyMonitoring.getAll",
+    "action": "ms.dailyMonitoring.getOne",
     "payload": {
-       "page" : 1,
-      "perPage": 10
-    }
+          "uuid": "e1579764-9e11-4223-bcde-7c9fe9397a91"
+      }
   }
+  
+  
+  
+  
 }
