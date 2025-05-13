@@ -90,5 +90,12 @@ export const JOBS = {
     ADD_ONCHAIN_TRIGGER: 'aa.jobs.stellar.addTriggerOnChain',
     GET_STELLAR_STATS: 'aa.jobs.stellar.getStellarStats',
     GET_TRANSACTIONS: 'aa.jobs.stellar.getTransactions',
+  },
+  PAYOUT: {
+    ASSIGN_TOKEN: 'aa.jobs.payout.assignToken',
+    CREATE: 'aa.jobs.payout.create',
+    LIST: 'aa.jobs.payout.list',
+    GET: 'aa.jobs.payout.get',
+    UPDATE: 'aa.jobs.payout.update',
   }
 };

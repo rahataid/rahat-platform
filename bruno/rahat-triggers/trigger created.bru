@@ -18,10 +18,9 @@ body:json {
   {
     "action": "ms.triggers.add",
     "payload": {
-      "triggers": [
-        {
-          "repeatKey": "unique-repeat-key",
-          "title": "This is another one",
+  //     "triggers": [
+  //       {
+          "title": "test1",
           "repeatEvery": "Every day",
           "triggerStatement": {
             "isManualTrigger": true,
@@ -33,31 +32,12 @@ body:json {
             "documentUrl": "https://example.com/document.pdf"
           },
           "notes": "Some notes about the trigger",
-          "phaseId": "5f428423-80a6-4d86-a282-e98d76b727ec",
+          "phaseId": "c6169c0e-12b0-4e8e-927c-3992a959df1d",
           "isMandatory": true,
           "isTriggered": false,
           "source": "MANUAL"
-        },
-         {
-          "repeatKey": "unique-repeat-key",
-          "title": "This is manual trigger",
-          "repeatEvery": "Every day",
-          "triggerStatement": {
-            "isManualTrigger": true,
-            "maxLeadTimeDays": "10",
-            "minLeadTimeDays": "10"
-          },
-          "triggerDocuments": {
-            "documentKey": "documentValue",
-            "documentUrl": "https://example.com/document.pdf"
-          },
-          "notes": "Some notes about the trigger",
-          "phaseId": "5f428423-80a6-4d86-a282-e98d76b727ec",
-          "isMandatory": true,
-          "isTriggered": false,
-          "source": "DHM"
-        }
-      ]
+  //       }
+  //     ]
     }
   }
 }
