@@ -359,4 +359,10 @@ export const aaActions: ProjectActionFunc = {
     payload,
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.GET_TRANSACTIONS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_WALLET_BALANCE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_WALLET_BALANCE, uuid }, payload),
 };

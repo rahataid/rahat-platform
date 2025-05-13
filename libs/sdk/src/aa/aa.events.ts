@@ -92,5 +92,6 @@ export const JOBS = {
     GET_ONCHAIN_TRIGGER: 'aa.jobs.stellar.getTriggerOnChain',
     GET_STELLAR_STATS: 'aa.jobs.stellar.getStellarStats',
     GET_TRANSACTIONS: 'aa.jobs.stellar.getTransactions',
+    GET_WALLET_BALANCE: 'aa.jobs.stellar.getWalletBalance',
   }
 };
