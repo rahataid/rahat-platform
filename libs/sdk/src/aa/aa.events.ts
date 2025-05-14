@@ -93,5 +93,6 @@ export const JOBS = {
     GET_STELLAR_STATS: 'aa.jobs.stellar.getStellarStats',
     GET_TRANSACTIONS: 'aa.jobs.stellar.getTransactions',
     GET_WALLET_BALANCE: 'aa.jobs.stellar.getWalletBalance',
+    GET_VENDOR_STATS: 'aa.jobs.stellar.getVendorStats',
   }
 };

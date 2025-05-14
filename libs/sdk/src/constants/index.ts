@@ -250,6 +250,7 @@ export const MS_ACTIONS = {
       GET_STELLAR_STATS: 'aa.stellar.getStellarStats',
       GET_TRANSACTIONS: 'aa.stellar.getTransactions',
       GET_WALLET_BALANCE: 'aa.stellar.getWalletBalance',
+      GET_VENDOR_STATS: 'aa.stellar.getVendorStats',
     },
   },
   C2CProject: {
