@@ -1,0 +1,2 @@
+[2025-05-14T12:11:24.633Z] INFO: POST /api/v2/individuals: {"first_name":"R","last_name":"K","email":"raghav.kattel@rumsan.net","country":"US","date_of_birth":"1029-11-21"}
+[2025-05-14T12:11:24.962Z] ERROR: Create sender failed: [object Object]

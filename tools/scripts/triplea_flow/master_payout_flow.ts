@@ -51,7 +51,10 @@ async function runCryptoFlow(config: any, accessToken: string) {
   // 2. Create payout
   let payout_reference = '';
   try {
-    logger.info(`POST /api/v2/payout/withdraw/local/crypto/direct: ${JSON.stringify(payout)}`);
+    logger.info({
+      action: 'POST /api/v2/payout/withdraw/local/crypto/direct',
+      payload: payout
+    });
     const resp = await axios.post(
       `${BASE_URL}/api/v2/payout/withdraw/local/crypto/direct`,
       {
@@ -68,12 +71,21 @@ async function runCryptoFlow(config: any, accessToken: string) {
       },
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
-    logger.info(`Response: ${JSON.stringify(resp.data)}`);
+    logger.info({
+      action: 'Response',
+      status: resp.status,
+      data: resp.data
+    });
     payout_reference = resp.data.payout_reference;
     if (!payout_reference) throw new Error('No payout_reference returned');
     console.log('Payout created:', payout_reference);
   } catch (e: any) {
-    logger.error(`Create payout failed: ${e.response?.data || e.message}`);
+    logger.error({
+      action: 'Create payout failed',
+      status: e.response?.status,
+      data: e.response?.data,
+      message: e.message
+    });
     console.error('Create payout failed:', e.response?.data || e.message);
     process.exit(1);
   }

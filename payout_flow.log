@@ -4,3 +4,5 @@
 [2025-05-14T11:56:51.077Z] ERROR: Create sender failed: [object Object]
 [2025-05-14T11:59:37.688Z] INFO: POST /api/v2/individuals: {"first_name":"R","last_name":"K","email":"raghav.kattel@rumsan.net","country":"US","date_of_birth":"1920-01-22"}
 [2025-05-14T11:59:38.157Z] ERROR: Create sender failed: [object Object]
+[2025-05-14T12:07:22.881Z] INFO: POST /api/v2/payout/withdraw/local/crypto/direct: {"email":"raghav.kattel@rumsan.net","withdraw_currency":"USD","withdraw_amount":"0.001","crypto_currency":"BTC","address":"0xAC6bFaf10e89202c293dD795eCe180BBf1430d7B"}
+[2025-05-14T12:07:23.159Z] ERROR: Create payout failed: [object Object]
