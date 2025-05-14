@@ -1,0 +1,39 @@
+{
+  "flow": "regulated",
+  "senderType": "individual",
+  "sender": {
+    "first_name": "Alice",
+    "last_name": "Smith",
+    "email": "alice@example.com",
+    "country": "US",
+    "date_of_birth": "1990-01-01",
+    "kyc": {
+      "type": "passport",
+      "file_path": "./alice_passport.pdf"
+    }
+  },
+  "recipientType": "company",
+  "recipient": {
+    "company_name": "Bob Corp",
+    "registration_number": "987654321",
+    "country": "US",
+    "email": "bobcorp@example.com"
+  },
+  "destination_account": {
+    "type": "bank_account",
+    "account_number": "123456789",
+    "bank_code": "001",
+    "currency": "USD"
+  },
+  "transfer": {
+    "amount": "100",
+    "currency": "USD"
+  },
+  "payout": {
+    "email": "bob@example.com",
+    "withdraw_currency": "USD",
+    "withdraw_amount": "10",
+    "crypto_currency": "BTC",
+    "address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
+  }
+}

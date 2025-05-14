@@ -1,0 +1,6 @@
+[2025-05-14T11:54:25.946Z] INFO: POST /api/v2/individuals: {"first_name":"R","last_name":"K","email":"raghav.kattel@rumsan.net","country":"US","date_of_birth":"2001-04-14"}
+[2025-05-14T11:54:26.204Z] ERROR: Create sender failed: [object Object]
+[2025-05-14T11:56:50.820Z] INFO: POST /api/v2/individuals: {"first_name":"R","last_name":"K","email":"raghav.kattel@rumsan.net","country":"US","date_of_birth":"1923-01-29"}
+[2025-05-14T11:56:51.077Z] ERROR: Create sender failed: [object Object]
+[2025-05-14T11:59:37.688Z] INFO: POST /api/v2/individuals: {"first_name":"R","last_name":"K","email":"raghav.kattel@rumsan.net","country":"US","date_of_birth":"1920-01-22"}
+[2025-05-14T11:59:38.157Z] ERROR: Create sender failed: [object Object]
