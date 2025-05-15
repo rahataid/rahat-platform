@@ -251,6 +251,14 @@ export const MS_ACTIONS = {
       GET_TRANSACTIONS: 'aa.stellar.getTransactions',
       GET_WALLET_BALANCE: 'aa.stellar.getWalletBalance',
       GET_VENDOR_STATS: 'aa.stellar.getVendorStats',
+      TRUSTLINE: 'aa.stellar.trustline',
+    },
+    PAYOUT: {
+      ASSIGN_TOKEN: 'aa.payout.assignToken',
+      CREATE: 'aa.payout.create',
+      LIST: 'aa.payout.list',
+      GET: 'aa.payout.get',
+      UPDATE: 'aa.payout.update',
     },
   },
   C2CProject: {

@@ -477,6 +477,11 @@ export class BeneficiaryService {
             Project: true,
           },
         },
+        groupedBeneficiaries: {
+          select: {
+            beneficiaryGroupId: true
+          }
+        },
       },
     });
 
