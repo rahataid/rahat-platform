@@ -336,6 +336,12 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.ADD_ONCHAIN_TRIGGER, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.STELLAR.CHECK_TRUSTLINE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.CHECK_TRUSTLINE, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.STELLAR.TRUSTLINE]: (
     uuid,
     payload,
