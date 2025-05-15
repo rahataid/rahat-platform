@@ -4,8 +4,6 @@
  * This is not a production server yet!
  * This is only a minimal backend to get started.
  */
-import * as bodyParser from 'body-parser';
-
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestApplication, NestFactory } from '@nestjs/core';
@@ -14,6 +12,8 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { GlobalCustomExceptionFilter, ResponseTransformInterceptor } from '@rahataid/extensions';
 import { APP } from '@rahataid/sdk';
+import * as bodyParser from 'body-parser';
+import * as helmet from 'helmet';
 import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app/app.module';
 import { loggerInstance } from './logger/winston.logger';
@@ -50,6 +50,12 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '500mb' }));
   app.use(bodyParser.urlencoded({ limit: '500mb', extended: true }));
 
+  app.use(helmet.contentSecurityPolicy({ directives: { defaultSrc: ["'self'"] } }))
+  app.use(helmet.frameguard({ action: 'deny' }))
+  helmet.hsts({ maxAge: 31536000, includeSubDomains: true })
+  helmet.noSniff()
+  helmet.hidePoweredBy()
+
   //must have this if you want to implicit conversion of string to number in dto
   app.useGlobalPipes(
     new ValidationPipe({
@@ -78,6 +84,16 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('swagger', app, document);
   }
+
+  app.use((err, req, res, next) => {
+    if (process.env.NODE_ENV !== 'dev') {
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
+  }
+  )
 
   await app.startAllMicroservices();
   await app.listen(port);

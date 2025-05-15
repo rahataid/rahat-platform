@@ -97,6 +97,7 @@
     "ethers": "6.11.1",
     "express": "^4.19.2",
     "hardhat": "^2.22.6",
+    "helmet": "^8.1.0",
     "http-status-codes": "^2.3.0",
     "inquirer": "^12.3.0",
     "ioredis": "^5.3.2",
