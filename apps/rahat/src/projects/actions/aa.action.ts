@@ -1,6 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import { AAJobs, MS_ACTIONS, WalletJobs } from '@rahataid/sdk';
+import { AAJobs, MS_ACTIONS } from '@rahataid/sdk';
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
 
 export const aaActions: ProjectActionFunc = {
@@ -324,17 +324,41 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.SEND_ASSET_TO_VENDOR, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.STELLAR.GET_WALLET_BY_PHONE]: (
-    uuid,
-    payload,
-    sendCommand
-  ) => sendCommand({ cmd: WalletJobs.GET_WALLET_BY_PHONE }, payload),
+  // [MS_ACTIONS.AAPROJECT.STELLAR.GET_WALLET_BY_PHONE]: (
+  //   uuid,
+  //   payload,
+  //   sendCommand
+  // ) => sendCommand({ cmd: WalletJobs.GET_WALLET_BY_PHONE }, payload),
 
   [MS_ACTIONS.AAPROJECT.STELLAR.ADD_ONCHAIN_TRIGGER]: (
     uuid,
     payload,
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.ADD_ONCHAIN_TRIGGER, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.CHECK_TRUSTLINE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.CHECK_TRUSTLINE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.TRUSTLINE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.FAUCET, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.UPDATE_ONCHAIN_TRIGGER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.UPDATE_ONCHAIN_TRIGGER, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_ONCHAIN_TRIGGER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_ONCHAIN_TRIGGER, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.STELLAR.GET_STELLAR_STATS]: (
     uuid,
@@ -348,6 +372,17 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.GET_TRANSACTIONS, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_WALLET_BALANCE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_WALLET_BALANCE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_VENDOR_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_VENDOR_STATS, uuid }, payload),
   // **** Stellar end **** //
 
   // **** Payout start **** //
