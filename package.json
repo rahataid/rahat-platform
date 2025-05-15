@@ -1,6 +1,6 @@
 {
   "name": "@rahat-os/source",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "license": "MPL-2.0",
   "scripts": {
     "rahat": "set NODE_ENV=development && npx nx serve rahat",
@@ -39,6 +39,7 @@
     "graph:create-local": "cd ./apps/graph && graph create --node http://localhost:8020/ rahat/core",
     "graph:remove-local": "cd ./apps/graph && graph remove --node http://localhost:8020/ rahat/core",
     "graph:deploy-local": "cd ./apps/graph && graph deploy -l v0.0.1 --node http://localhost:8020/ --ipfs http://localhost:5001 --network mainnet  rahat/core",
+    "graph:studio:deploy-bs-s-africa": "cd ./apps/graph && graph deploy --studio --network base-sepolia sms-southafrica",
     "migrate:dev": "prisma migrate dev --preview-feature",
     "migrate:dev:create": "prisma migrate dev --create-only --preview-feature",
     "migrate:reset": "prisma migrate reset --preview-feature",
