@@ -245,8 +245,21 @@ export const MS_ACTIONS = {
       SEND_ASSET: 'aa.stellar.sendAsset',
       GET_WALLET_BY_PHONE: 'aaProject.stellar.getWalletByPhone',
       ADD_ONCHAIN_TRIGGER: 'aa.stellar.addTriggerOnChain',
+      CHECK_TRUSTLINE: 'aa.stellar.checkTrustline',
+      UPDATE_ONCHAIN_TRIGGER: 'aa.stellar.updateTriggerOnChain',
+      GET_ONCHAIN_TRIGGER: 'aa.stellar.getTriggerOnChain',
       GET_STELLAR_STATS: 'aa.stellar.getStellarStats',
       GET_TRANSACTIONS: 'aa.stellar.getTransactions',
+      GET_WALLET_BALANCE: 'aa.stellar.getWalletBalance',
+      GET_VENDOR_STATS: 'aa.stellar.getVendorStats',
+      TRUSTLINE: 'aa.stellar.trustline',
+    },
+    PAYOUT: {
+      ASSIGN_TOKEN: 'aa.payout.assignToken',
+      CREATE: 'aa.payout.create',
+      LIST: 'aa.payout.list',
+      GET: 'aa.payout.get',
+      UPDATE: 'aa.payout.update',
     },
   },
   C2CProject: {
@@ -418,6 +431,7 @@ export const MS_ACTIONS = {
       SESSION_LOGS: 'ms.activities.communication.sessionLogs',
       RETRY_FAILED: 'ms.activities.communication.retryFailed',
       GET_STATS: 'ms.activities.communication.getStats',
+      GET_GROUP_STATS: "ms.triggers.getTransportSessionStatsByGroup"
     },
   },
   MS_CATEGORIES: {

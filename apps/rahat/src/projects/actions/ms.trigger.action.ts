@@ -49,6 +49,7 @@ export const MS_TRIGGERS_JOBS = {
       SESSION_LOGS: 'ms.jobs.activities.communication.sessionLogs',
       // RETRY_FAILED: 'ms.jobs.activities.communication.retryFailed',
       GET_STATS: 'ms.jobs.activities.communication.getStats',
+      GET_STATS_GROUP: "ms.jobs.triggers.getTransportSessionStatsByGroup"
     },
   },
 
@@ -72,6 +73,8 @@ export const msTriggerActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
     return sendCommand({ cmd: 'try.trigger' }, payload);
   },
+
+
 
   // **** triggers start ******//
   [MS_ACTIONS.MS_TRIGGERS.ADD]: (uuid, payload, sendCommand) => {
@@ -430,4 +433,12 @@ export const msTriggerActions: ProjectActionFunc = {
     );
   },
   // **** daily monitoring end ****//
+
+
+
+  // ****group stats by benef and stakeholders ****//
+  [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.GET_GROUP_STATS]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.GET_STATS_GROUP }, payload);
+  },
 };

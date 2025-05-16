@@ -88,7 +88,20 @@ export const JOBS = {
     SEND_ASSET_TO_VENDOR: 'aa.jobs.stellar.sendAssetToVendor',
     DISBURSE: 'aa.jobs.stellar.disburse',
     ADD_ONCHAIN_TRIGGER: 'aa.jobs.stellar.addTriggerOnChain',
+    CHECK_TRUSTLINE: 'aa.jobs.stellar.checkTrustline',
+    UPDATE_ONCHAIN_TRIGGER: 'aa.jobs.stellar.updateTriggerOnChain',
+    GET_ONCHAIN_TRIGGER: 'aa.jobs.stellar.getTriggerOnChain',
     GET_STELLAR_STATS: 'aa.jobs.stellar.getStellarStats',
     GET_TRANSACTIONS: 'aa.jobs.stellar.getTransactions',
+    GET_WALLET_BALANCE: 'aa.jobs.stellar.getWalletBalance',
+    GET_VENDOR_STATS: 'aa.jobs.stellar.getVendorStats',
+    FAUCET: 'aa.jobs.stellar.fundStellarAccount',
+  },
+  PAYOUT: {
+    ASSIGN_TOKEN: 'aa.jobs.payout.assignToken',
+    CREATE: 'aa.jobs.payout.create',
+    LIST: 'aa.jobs.payout.list',
+    GET: 'aa.jobs.payout.get',
+    UPDATE: 'aa.jobs.payout.update',
   }
 };
