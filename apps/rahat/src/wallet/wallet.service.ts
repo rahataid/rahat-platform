@@ -139,6 +139,7 @@ export class WalletService implements OnModuleInit {
       throw new Error("Wallet address not found");
     }
     const storage = new FileWalletStorage();
+    console.log(storage);
     this.logger.log(`Storage: ${JSON.stringify(storage)}`);
     return storage.getKey(walletAddress, chain);
   }
