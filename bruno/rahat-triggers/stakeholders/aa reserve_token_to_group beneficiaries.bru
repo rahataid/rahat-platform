@@ -1,0 +1,29 @@
+meta {
+  name: aa reserve_token_to_group beneficiaries
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aaProject.beneficiary.reserve_token_to_group",
+    "payload": {
+      "dName": "SXYDD",
+      "beneficiaryGroupId": "61c8c701-4806-4050-9cd5-c3d44a8120ad",
+      "numberOfTokens": 10,
+      "totalTokensReserved": 10,
+      "title": "Test by Dipesh"
+    }
+  }
+  
+}
