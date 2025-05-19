@@ -18,12 +18,12 @@ export class FileWalletStorage implements WalletStorage {
     }
 
     async saveKey(keys: WalletKeys) {
-        const filePath = path.join(this.storageDir, `${keys.blockchain}_${keys.address}.json`);
+        const filePath = path.join(this.storageDir, `${keys.blockchain.toLocaleUpperCase()}_${keys.address}.json`);
         await fs.writeFile(filePath, JSON.stringify(keys, null, 2));
     }
     async getKey(address: string, blockchain: ChainType): Promise<WalletKeys | null> {
-        console.log(`Getting key for address: ${address} and blockchain: ${blockchain}`);
-        const filePath = path.join(this.storageDir, `${blockchain}_${address}.json`);
+        console.log(`Getting key for address: ${address.toLocaleUpperCase()} and blockchain: ${blockchain}`);
+        const filePath = path.join(this.storageDir, `${blockchain.toLocaleUpperCase()}_${address}.json`);
         console.log(`Looking for file at path: ${filePath}`);
         // Log all files in storageDir for debugging
         try {
