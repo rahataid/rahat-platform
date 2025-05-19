@@ -5,7 +5,7 @@ import * as path from 'path';
 export class FileWalletStorage implements WalletStorage {
     private storageDir: string;
 
-    constructor(storageDir = './wallet_storage') {
+    constructor(storageDir = path.join(__dirname, 'wallet_storage')) {
         this.storageDir = storageDir;
     }
 
@@ -25,6 +25,13 @@ export class FileWalletStorage implements WalletStorage {
         console.log(`Getting key for address: ${address} and blockchain: ${blockchain}`);
         const filePath = path.join(this.storageDir, `${blockchain}_${address}.json`);
         console.log(`Looking for file at path: ${filePath}`);
+        // Log all files in storageDir for debugging
+        try {
+            const files = await fs.readdir(this.storageDir);
+            console.log(`Files in ${this.storageDir}:`, files);
+        } catch (error) {
+            console.error('Error listing files in storage directory:', error);
+        }
         try {
             const data = await fs.readFile(filePath, 'utf-8');
             console.log('Successfully read wallet file');
