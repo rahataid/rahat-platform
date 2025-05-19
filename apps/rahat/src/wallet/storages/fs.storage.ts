@@ -21,16 +21,20 @@ export class FileWalletStorage implements WalletStorage {
         const filePath = path.join(this.storageDir, `${keys.blockchain}_${keys.address}.json`);
         await fs.writeFile(filePath, JSON.stringify(keys, null, 2));
     }
-
     async getKey(address: string, blockchain: ChainType): Promise<WalletKeys | null> {
+        console.log(`Getting key for address: ${address} and blockchain: ${blockchain}`);
         const filePath = path.join(this.storageDir, `${blockchain}_${address}.json`);
+        console.log(`Looking for file at path: ${filePath}`);
         try {
             const data = await fs.readFile(filePath, 'utf-8');
+            console.log('Successfully read wallet file');
             return JSON.parse(data) as WalletKeys;
         } catch (error) {
             if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+                console.log('Wallet file not found');
                 return null;
             }
+            console.error('Error reading wallet file:', error);
             throw error;
         }
     }
