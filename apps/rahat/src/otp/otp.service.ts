@@ -15,10 +15,15 @@ export class OtpService {
     ) { }
 
     async addOtpToClaim(data: CreateClaimDto) {
-        const useStaticOtp = this.configService.get<boolean>('USE_STATIC_OTP', false);
-        const staticOtp = this.configService.get<string>('STATIC_OTP', '1234');
+        const useStaticOtp = this.getFromSettings('prabhu', 'useStaticOtp')
+        const staticOtp = +this.getFromSettings('prabhu', 'staticOtp')
+        // TODO: Grab tansport id from COMMUNICATION. 
+        // Handle error if transport id is not found
 
-        const otp = useStaticOtp ? staticOtp : await this.getOtp();
+        if (useStaticOtp && staticOtp)
+            this.logger.log(`Using static OTP: ${staticOtp} for phone number: ${data.phoneNumber}`);
+
+        const otp = (useStaticOtp && staticOtp) ? staticOtp : await this.getOtp();
         this.logger.log(`Generated OTP: ${otp} for phone number: ${data.phoneNumber}`);
 
         const message = await this.createMessage(
@@ -65,7 +70,7 @@ export class OtpService {
     async getFromSettings(provider: string, key: string) {
         const settings = new SettingsService(this.prisma);
         const smsSettings: any = await settings.getByName('SMS_SETTINGS')
-        const result = smsSettings.value.find(item => item.provider === "prabhu");
+        const result = smsSettings.value.find(item => item.provider === provider);
         return result[key];
     }
 }
