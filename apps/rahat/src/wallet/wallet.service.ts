@@ -134,15 +134,22 @@ export class WalletService implements OnModuleInit {
   }
 
   async getSecretByWallet(walletAddress: string, chain: ChainType) {
+
     if (!walletAddress) {
       throw new Error("Wallet address not found");
     }
     const storage = new FileWalletStorage();
+    console.log(storage);
+    this.logger.log(`Storage: ${JSON.stringify(storage)}`);
     return storage.getKey(walletAddress, chain);
   }
 
   async getSecretByPhone(phoneNumber: string, chain: ChainType) {
+    this.logger.log(`Getting secret by phone number: ${phoneNumber} and chain: ${chain}`);
+
     const walletAddress = await this.getWalletByPhone(phoneNumber);
+    this.logger.log(`Wallet address: ${walletAddress}`);
+
     return this.getSecretByWallet(walletAddress, chain);
   }
 

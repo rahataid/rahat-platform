@@ -18,10 +18,27 @@ body:json {
   {
     "action": "aa.payout.create",
     "payload": {
-      "name": "General Action",
-       "appId" : "{{appId}}"
+      "type": "FSP",
+      "mode": "ONLINE",
+      "status": "PENDING",
+      "groupId": "a7229049-842e-41a5-acc2-6e04944154aa", 
+      "payoutProcessorId": "afadfsafasf"
     }
   }
+  
+   //   "payload": {
+    //     "type": "VENDOR",
+    //     "mode": "OFFLINE",
+    //     "status": "INITIATED",
+    //     "groupId": "3e1a7704-80c4-4894-94dd-185f3db26582",
+    //     "payoutProcessorId": "24a712e1-7a0f-4326-abc4-2e93b51afd1b",
+    //     "extras": {
+    //       "vendorName": "Local Store",
+    //       "location": "Kathmandu",
+    //       "contactPerson": "John Doe",
+    //       "contactNumber": "+977-1234567890"
+    //     }
+    //   }
 }
 
 script:post-response {
