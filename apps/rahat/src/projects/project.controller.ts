@@ -90,9 +90,9 @@ export class ProjectController {
     return response;
   }
 
-  // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
-  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async upload(@UploadedFile() file: TFile, @Req() req: Request) {
@@ -101,20 +101,10 @@ export class ProjectController {
     const projectId = req.body['projectId'];
 
     const rawData = await DocParser(docType, file.buffer);
-    const data = rawData.map((item) => ({
-      name: item['Name']?.trim() || item['Stakeholders Name']?.trim() || '',
-      designation: item['Designation']?.trim() || '',
-      organization: item['Organization']?.trim() || '',
-      district: item['District']?.trim() || '',
-      municipality: item['Municipality']?.trim() || '',
-      phone: item['Mobile #']?.toString().trim() || item['Phone Number']?.toString().trim() || '',
-      email: item['Email ID']?.trim() || item['Email']?.trim() || ''
-    }));
-
     const response = await this.projectService.handleProjectActions({
       action: req.body['action'],
       uuid: projectId,
-      payload: data,
+      payload: rawData,
       user: null,
       trigger: null,
     });
