@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { RpcException } from '@nestjs/microservices';
 import { CreateClaimDto } from '@rahataid/extensions';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
@@ -11,14 +11,19 @@ export class OtpService {
 
     constructor(
         protected prisma: PrismaService,
-        private configService: ConfigService,
     ) { }
 
     async addOtpToClaim(data: CreateClaimDto) {
-        const useStaticOtp = this.getFromSettings('prabhu', 'useStaticOtp')
-        const staticOtp = +this.getFromSettings('prabhu', 'staticOtp')
-        // TODO: Grab tansport id from COMMUNICATION. 
-        // Handle error if transport id is not found
+        const useStaticOtp = await this.getFromSettings('USE_STATIC_OTP')
+        const staticOtp = +await this.getFromSettings('STATIC_OTP')
+
+        const transportId = await this.getFromSettings('SMS_TRANSPORT_ID')
+        const appId = await this.getFromSettings('APP_ID')
+        const url = await this.getFromSettings('URL')
+
+        if (!transportId || !appId || !url) {
+            throw new RpcException('SMS_TRANSPORT_ID, APP_ID, URL are required')
+        }
 
         if (useStaticOtp && staticOtp)
             this.logger.log(`Using static OTP: ${staticOtp} for phone number: ${data.phoneNumber}`);
@@ -30,10 +35,11 @@ export class OtpService {
             otp,
             data.amount)
         const sms = await this.loadSmsModule();
+
         await sms(data.phoneNumber, message, {
-            appId: this.getFromSettings('prabhu', 'appId'),
-            token: this.getFromSettings('prabhu', 'token'),
-            url: this.getFromSettings('prabhu', 'url')
+            transportId,
+            appId,
+            url
         });
         this.logger.log(`OTP Sent to phone number: ${data.phoneNumber}`);
         return { otp };
@@ -47,7 +53,7 @@ export class OtpService {
         const smsModules = {
             prabhu,
         };
-        const serviceName: string = await this.getFromSettings('prabhu', 'provider') || 'prabhu';
+        const serviceName: string = await this.getFromSettings('provider') || 'prabhu';
 
         const module = smsModules[serviceName];
 
@@ -55,7 +61,7 @@ export class OtpService {
     };
 
     private async createMessage(otp: string | number, amount: string | number) {
-        let message: string = await this.getFromSettings('prabhu', 'message') || 'Hi, your OTP is ${otp} and the amount is ${amount}';
+        let message: string = await this.getFromSettings('message') || 'Hi, your OTP is ${otp} and the amount is ${amount}';
 
         if (message.includes('${amount}')) {
             message = message.replace('${amount}', amount.toString());
@@ -67,12 +73,13 @@ export class OtpService {
         return message;
     }
 
-    async getFromSettings(provider: string, key: string) {
+    async getFromSettings(key: string) {
         const settings = new SettingsService(this.prisma);
-        const smsSettings: any = await settings.getByName('SMS_SETTINGS')
-        const result = smsSettings.value.find(item => item.provider === provider);
-        return result[key];
+        const smsSettings: any = await settings.getSettingsByName('COMMUNICATION')
+        const result = smsSettings.value[key];
+        return result;
     }
+
 }
 
 
