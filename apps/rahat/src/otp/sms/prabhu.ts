@@ -6,7 +6,7 @@ export default async (phone: string, message: string, extras: any) => {
     if (!message) throw new Error('No message was specified');
 
     const data = {
-        transport: await extras.appId,
+        transport: extras.transportId,
         message: {
             content: message,
             meta: {
@@ -22,10 +22,9 @@ export default async (phone: string, message: string, extras: any) => {
         }
     };
 
-    console.log(await extras.url)
-    const response = await axios.post(await extras.url, data, {
+    const response = await axios.post(extras.url, data, {
         headers: {
-            "app-id": await extras.token,
+            "app-id": extras.appId,
             'Content-Type': 'application/json',
         },
     });
