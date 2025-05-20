@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { CreateClaimDto } from '@rahataid/extensions';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
@@ -6,13 +7,20 @@ import prabhu from './sms/prabhu';
 
 @Injectable()
 export class OtpService {
+    private readonly logger = new Logger(OtpService.name);
 
     constructor(
         protected prisma: PrismaService,
+        private configService: ConfigService,
     ) { }
 
     async addOtpToClaim(data: CreateClaimDto) {
-        const otp = await this.getOtp();
+        const useStaticOtp = this.configService.get<boolean>('USE_STATIC_OTP', false);
+        const staticOtp = this.configService.get<string>('STATIC_OTP', '1234');
+
+        const otp = useStaticOtp ? staticOtp : await this.getOtp();
+        this.logger.log(`Generated OTP: ${otp} for phone number: ${data.phoneNumber}`);
+
         const message = await this.createMessage(
             otp,
             data.amount)
@@ -22,6 +30,7 @@ export class OtpService {
             token: this.getFromSettings('prabhu', 'token'),
             url: this.getFromSettings('prabhu', 'url')
         });
+        this.logger.log(`OTP Sent to phone number: ${data.phoneNumber}`);
         return { otp };
     }
 
