@@ -426,6 +426,30 @@ export class BeneficiaryService {
     return data;
   }
 
+  async findPhoneByUUID(uuid: UUID[]) {
+    const beneficiaryIds = await this.rsprisma.beneficiary.findMany({
+      where: {
+        uuid: {
+          in: uuid,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return this.prisma.beneficiaryPii.findMany({
+      where: {
+        beneficiaryId: {
+          in: beneficiaryIds.map((b) => b.id),
+        },
+      },
+      select: {
+        phone: true
+      }
+    });
+  }
+
   async findOneByWallet(walletAddress: string) {
     const [data, piiData] = await Promise.all([
       this.rsprisma.beneficiary.findUnique({
@@ -451,7 +475,6 @@ export class BeneficiaryService {
             : null
         ),
     ]);
-
     if (!data) return null;
 
     data.piiData = piiData || null;
