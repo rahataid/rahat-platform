@@ -90,19 +90,26 @@ export class ProjectController {
     return response;
   }
 
+  /*
+  this endpoint  is used to upload file and parsed the file and send it to  project microservice
+  */
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
-  @Post('upload')
+  @Post(':uuid/upload')
   @UseInterceptors(FileInterceptor('file'))
-  async upload(@UploadedFile() file: TFile, @Req() req: Request) {
+  async upload(@Param('uuid') uuid: UUID, @UploadedFile() file: TFile, @Req() req: Request) {
+    const projectId = uuid
+    const action = req.body['action']
+    if (!action || !projectId) {
+      throw new BadRequestException('Missing action or project id');
+    }
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.EXCEL;
-    const projectId = req.body['projectId'];
 
     const rawData = await DocParser(docType, file.buffer);
     const response = await this.projectService.handleProjectActions({
-      action: req.body['action'],
+      action,
       uuid: projectId,
       payload: rawData,
       user: null,
