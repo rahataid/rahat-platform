@@ -119,7 +119,7 @@ export class ProjectController {
       .pipe(
         catchError((error) => {
           console.log('error', error);
-          return throwError(() => new BadRequestException(error.message));
+          return throwError(() => new BadRequestException(error?.meta?.details || error));
         })
       )
       .pipe(timeout(MS_TIMEOUT));
