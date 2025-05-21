@@ -482,10 +482,35 @@ export class BeneficiaryService {
     return data;
   }
 
-  async findBulkByWallet(walletAddress: string[]) {
-    const beneficiaries = walletAddress.map((walletAddress) => this.findOneByWallet(walletAddress));
-    return Promise.all(beneficiaries);
+  async findBulkByWallet(walletAddresses: string[]) {
+    const [beneficiaries, piiData] = await Promise.all([
+      this.rsprisma.beneficiary.findMany({
+        where: { walletAddress: { in: walletAddresses } },
+        include: {
+          BeneficiaryProject: {
+            include: {
+              Project: true,
+            },
+          },
+        },
+      }),
+      this.rsprisma.beneficiaryPii.findMany({
+        where: {
+          beneficiary: {
+            walletAddress: { in: walletAddresses },
+          },
+        },
+      }),
+    ]);
+
+    const piiMap = new Map(piiData.map((pii) => [pii.beneficiaryId, pii]));
+
+    return beneficiaries.map((beneficiary) => ({
+      ...beneficiary,
+      piiData: piiMap.get(beneficiary.id) || null,
+    }));
   }
+
 
   async findOneByPhone(phone: string) {
     const piiData = await this.rsprisma.beneficiaryPii.findFirst({
