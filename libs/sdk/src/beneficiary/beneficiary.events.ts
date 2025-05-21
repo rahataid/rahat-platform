@@ -17,6 +17,7 @@ export const JOBS = {
   FIND_PHONE_BY_UUID: 'rahat.jobs.beneficiary.find_phone_by_uuid',
   GET_PROJECT_SPECIFIC: 'rahat.jobs.beneficiary.get_project_specific',
   GET_BY_WALLET: 'rahat.jobs.beneficiary.get_by_wallet',
+  GET_BULK_BY_WALLET: 'rahat.jobs.beneficiary.get_bulk_by_wallet',
   GET_BY_PHONE: 'rahat.jobs.beneficiary.get_by_phone',
   GET_TABLE_STATS: 'rahat.jobs.beneficiary.get_from_stats_table',
   LIST: 'rahat.jobs.beneficiary.list',

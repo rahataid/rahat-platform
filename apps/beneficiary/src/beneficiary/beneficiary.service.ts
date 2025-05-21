@@ -482,6 +482,11 @@ export class BeneficiaryService {
     return data;
   }
 
+  async findBulkByWallet(walletAddress: string[]) {
+    const beneficiaries = walletAddress.map((walletAddress) => this.findOneByWallet(walletAddress));
+    return Promise.all(beneficiaries);
+  }
+
   async findOneByPhone(phone: string) {
     const piiData = await this.rsprisma.beneficiaryPii.findFirst({
       where: {
