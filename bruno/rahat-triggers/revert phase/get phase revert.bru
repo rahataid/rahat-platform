@@ -1,0 +1,32 @@
+meta {
+  name: get phase revert
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.revertPhase.getAll",
+    "payload": {
+     "phaseUuid": "dipesh"
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("phaseId", responseData.data?.uuid);
+  
+  
+  
+}

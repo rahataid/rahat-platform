@@ -395,6 +395,10 @@ export const MS_ACTIONS = {
     UPDATE: 'ms.triggers.update',
     GET_BY_LOCATION: 'ms.triggers.getByLocation',
   },
+  MS_REVERT_PHASE: {
+    CREATE: 'ms.revertPhase.create',
+    GET_ALL: 'ms.revertPhase.getAll',
+  },
   MS_PHASES: {
     CREATE: 'ms.phases.create',
     GET_ONE: 'ms.phases.getOne',
