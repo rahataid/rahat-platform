@@ -1,6 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -11,9 +12,12 @@ import {
   Post,
   Query,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   CreateProjectDto,
@@ -27,8 +31,10 @@ import {
   ACTIONS,
   APP,
   BeneficiaryJobs,
+  Enums,
   MS_TIMEOUT,
   ProjectJobs,
+  TFile,
 } from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
 import {
@@ -39,7 +45,9 @@ import {
 } from '@rumsan/user';
 import { UUID } from 'crypto';
 import { Request } from 'express';
-import { timeout } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { catchError, timeout } from 'rxjs/operators';
+import { DocParser } from '../utils/doc-parser';
 import { ProjectService } from './project.service';
 
 @Controller('projects')
@@ -81,6 +89,42 @@ export class ProjectController {
     });
     return response;
   }
+
+  /*
+  this endpoint  is used to upload file and parsed the file and send it to  project microservice
+  */
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Post(':uuid/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async upload(@Param('uuid') uuid: UUID, @UploadedFile() file: TFile, @Req() req: Request) {
+    const projectId = uuid
+    const action = req.body['action']
+    if (!action || !projectId) {
+      throw new BadRequestException('Missing action or project id');
+    }
+    const docType: Enums.UploadFileType =
+      req.body['doctype']?.toUpperCase() || Enums.UploadFileType.EXCEL;
+
+    const rawData = await DocParser(docType, file.buffer);
+    const response = await this.projectService.handleProjectActions({
+      action,
+      uuid: projectId,
+      payload: rawData,
+      user: null,
+      trigger: null,
+    });
+    return response
+      .pipe(
+        catchError((error) => {
+          console.log('error', error);
+          return throwError(() => new BadRequestException(error?.meta?.details || error));
+        })
+      )
+      .pipe(timeout(MS_TIMEOUT));
+  }
+
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
