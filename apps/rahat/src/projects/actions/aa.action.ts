@@ -157,6 +157,9 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STAKEHOLDERS.ADD, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.BULK_ADD]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STAKEHOLDERS.BULK_ADD, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.REMOVE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STAKEHOLDERS.REMOVE, uuid }, payload),
 

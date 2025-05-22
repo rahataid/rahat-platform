@@ -204,6 +204,7 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.stakeholders.getAll',
       GET_ONE: 'aaProject.stakeholders.getOne',
       ADD: 'aaProject.stakeholders.add',
+      BULK_ADD: "aaProject.stakeholders.bulkAdd",
       REMOVE: 'aaProject.stakeholders.remove',
       UPDATE: 'aaProject.stakeholders.update',
       GET_GROUP: 'aaProject.stakeholders.getGroup',
@@ -394,6 +395,10 @@ export const MS_ACTIONS = {
     UPDATE_TRANSACTION: 'ms.triggers.updateTransaction',
     UPDATE: 'ms.triggers.update',
     GET_BY_LOCATION: 'ms.triggers.getByLocation',
+  },
+  MS_REVERT_PHASE: {
+    CREATE: 'ms.revertPhase.create',
+    GET_ALL: 'ms.revertPhase.getAll',
   },
   MS_PHASES: {
     CREATE: 'ms.phases.create',
