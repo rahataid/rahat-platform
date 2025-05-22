@@ -89,15 +89,6 @@ async function bootstrap() {
     SwaggerModule.setup('swagger', app, document);
   }
 
-  app.use((err, req, res, next) => {
-    if (process.env.NODE_ENV !== 'dev') {
-      return res.status(500).json({
-        success: false,
-        message: 'Internal server error',
-      });
-    }
-  }
-  )
 
   await app.startAllMicroservices();
   await app.listen(port);

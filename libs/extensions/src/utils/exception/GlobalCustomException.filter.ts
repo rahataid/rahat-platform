@@ -85,7 +85,8 @@ export class GlobalCustomExceptionFilter
       responseData.message = exception;
     }
 
-
+    delete responseData?.meta;
+    delete responseData?.path;
 
     response.status(responseData?.statusCode).send(responseData);
   }
