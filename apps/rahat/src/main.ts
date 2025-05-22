@@ -31,7 +31,11 @@ async function bootstrap() {
     }),
   });
   const globalPrefix = 'v1';
-  app.enableCors();
+  app.enableCors({
+    origin: [
+      process.env.FRONTEND_URL,
+    ],
+  });
 
   const microservice = app.connectMicroservice<MicroserviceOptions>(
     {
