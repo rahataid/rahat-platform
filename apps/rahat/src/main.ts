@@ -32,9 +32,7 @@ async function bootstrap() {
   });
   const globalPrefix = 'v1';
   app.enableCors({
-    origin: [
-      process.env.FRONTEND_URL,
-    ],
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*',
   });
 
   const microservice = app.connectMicroservice<MicroserviceOptions>(
@@ -88,6 +86,7 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('swagger', app, document);
   }
+
 
 
   await app.startAllMicroservices();
