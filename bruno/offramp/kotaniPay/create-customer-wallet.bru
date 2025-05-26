@@ -1,0 +1,26 @@
+meta {
+  name: create-customer-wallet
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/offramps/providers/actions
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "uuid": "94b6e638-b802-4d11-85ca-724765262a75",
+      "action": "create-customer-mobile-wallet",
+      "payload": {
+          "phone_number": "+254732984456",
+          "country_code": "KE",
+          "network": "MPESA",
+          "account_name": "TT",
+          "phone_code": "+254",
+          "currency": "KES"
+      }
+  }
+}

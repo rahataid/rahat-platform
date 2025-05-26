@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
   Body,
   Controller,
@@ -25,7 +27,7 @@ import { VendorsService } from './vendors.service';
 @ApiTags('Vendors')
 @Controller('vendors')
 export class VendorsController {
-  constructor(private readonly vendorService: VendorsService) {}
+  constructor(private readonly vendorService: VendorsService) { }
 
   @Post('')
   registerVendor(@Body() dto: VendorRegisterDto) {
@@ -49,8 +51,9 @@ export class VendorsController {
 
   @ApiParam({ name: 'id', required: true })
   @Get('/:id')
-  getVendor(@Param('id') id: UUID | Address) {
-    return this.vendorService.getVendor(id);
+  getVendor(@Param('id') id: UUID | Address,
+  ) {
+    return this.vendorService.getVendor(id,);
   }
 
   @Post('/getOtp')

@@ -1,0 +1,27 @@
+{
+  "dataSources": {
+    "mySource": {
+      "type": "url",
+      "args": {
+        "url": ""
+      },
+      "data": []
+    }
+  },
+  "ui": [
+    {
+      "fields": [
+        {
+          "type": "dataCard",
+          "props": {},
+          "title": "Total Something for AA",
+          "colSpan": 1,
+          "dataMap": "",
+          "dataSrc": "mySource",
+          "rowSpan": 1,
+          "icon": "UsersRound"
+        }
+      ]
+    }
+  ]
+}

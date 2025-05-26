@@ -1,3 +1,5 @@
+import { RabbitMQModuleOptions } from '@rumsan/rabbitmq';
+
 export const APP_JOBS = {
   EMAIL: 'email',
   SLACK: 'slack',
@@ -41,8 +43,19 @@ export const APP = {
 };
 
 export const MS_ACTIONS = {
+  GROUP: {
+    CREATE: 'group.create',
+    LIST: 'group.list',
+    GET: 'group.get'
+  },
+  BENEFICIARY_GROUP: {
+    BULK_ASSIGN: 'beneficiary_group.bulk_assign',
+    LIST: 'beneficiary_group.list',
+    LIST_BY_GROUP: 'beneficiary_group.list_by_group',
+  }
+  ,
   CAMBODIA: {
-    APP: { STATS: 'cambodia.app.stats', LINE_STATS: 'cambodia.app.line_stats', BROAD_CAST_STATUS_COUNT: 'cambodia.app.broadcast_status_count', PROJECT_SETTINGS: 'cambodia.app.project_settings', },
+    APP: { STATS: 'cambodia.app.stats', LINE_STATS: 'cambodia.app.line_stats', BROAD_CAST_STATUS_COUNT: 'cambodia.app.broadcast_status_count', PROJECT_SETTINGS: 'cambodia.app.project_settings', TRIGGER_COMMUNICATION: 'cambodia.app.trigger_communication', },
     BENEFICIARY: {
       VALIDATE_CONVERSION: 'cambodia.beneficiary.validate_conversion',
       STATS: 'cambodia.beneficiary.stats',
@@ -62,6 +75,7 @@ export const MS_ACTIONS = {
       UPDATE: 'cambodia.chw.update',
       DELETE: 'cambodia.chw.delete',
       LIST_BY_VENDOR: 'cambodia.chw.list_by_vendor',
+      VALIDATE_HEALTH_WORKER: 'cambodia.chw.validate_health_worker',
     },
     COMMISISION_SCHEME: {
       CREATE: 'cambodia.commission_scheme.create',
@@ -98,6 +112,7 @@ export const MS_ACTIONS = {
     ASSGIN_GROUP_TO_PROJECT: 'beneficiary.assign_group_to_project',
     BULK_ASSIGN_TO_PROJECT: 'beneficiary.bulk_assign',
     LIST_BY_PROJECT: 'beneficiary.list_by_project',
+    LIST_FULL_DATA_BY_PROJECT: 'beneficiary.list_full_data_by_project',
     GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',
   },
   VENDOR: {
@@ -235,12 +250,13 @@ export const MS_ACTIONS = {
     CREATE_AUDIENCE: 'c2cProject.campaign.create_audience',
     GET_ALL_CAMPAIGN: 'c2cProject.campaign.get',
     GET_CAMPAIGN: 'c2cProject.campaign.getOne',
+    GET_CAMPAIGN_LOG: 'c2cProject.campaign.log',
     GET_ALL_TRANSPORT: 'c2cProject.campaign.get_transport',
     GET_ALL_AUDIENCE: 'c2cProject.campaign.get_audience',
     TRIGGER_CAMPAIGN: 'c2cProject.campaign.trigger',
-    GET_CAMPAIGN_LOG: 'c2cProject.campaign.log',
     GET_ALL_COMMUNICATION_LOGS: 'c2cProject.campaign.communication_logs',
     GET_ALL_COMMUNICATION_STATS: 'c2cProject.campaign.communication_stats',
+    LIST_REPORTING: 'c2cProject.reporting.list',
   },
   CVAProject: {
     UPDATE_STATUS: 'cvaProject.updateStatus',
@@ -285,6 +301,7 @@ export const MS_ACTIONS = {
     REQUEST_REDEMPTION: 'rpProject.requestRedemption',
     UPDATE_REDEMPTION: 'rpProject.updateRedemption',
     LIST_REDEMPTION: 'rpProject.listRedemption',
+    GET_BENEFICIARY_REDEMPTION: 'rpProject.getBeneficiaryRedemption',
     GET_VENDOR_REDEMPTION: 'rpProject.vendorRedemption',
     GET_REDEMPTION: 'rpProject.getRedemption',
     GENERATE_OTP_HASH: 'rpProject.generateOtpHash',
@@ -309,9 +326,38 @@ export const MS_ACTIONS = {
     LIST_REPORTING: 'rpProject.reporting.list',
     UPDATE_BENEFICIARY: 'rpProject.beneficiary.update',
     LIST_BENEFICIARY_REIMBURSEMENTS: 'rpProject.beneficiary.listReimbursements',
-    SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions'
-
+    SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions',
+    LIST_EYE_CHECKEUP_LINE: 'rpProject.reporting.list_eye_checkup_line',
+    LIST_PURCHASE_OF_GLASSESS_LINE: 'rpProject.reporting.list_purchase_of_glassess',
   },
-
-
+  COMMS: {
+    CREATE_CAMPAIGN: 'comms.campaign.create',
+    UPDATE_CAMPAIGN: 'comms.campaign.update',
+    CREATE_AUDIENCE: 'comms.campaign.create_audience',
+    CREATE_BULK_AUDIENCE: 'comms.campaign.create_bulk_audience',
+    GET_ALL_CAMPAIGN: 'comms.campaign.get',
+    GET_CAMPAIGN: 'comms.campaign.getOne',
+    GET_ALL_TRANSPORT: 'comms.campaign.get_transport',
+    GET_ALL_AUDIENCE: 'comms.campaign.get_audience',
+    TRIGGER_CAMPAIGN: 'comms.campaign.trigger',
+    GET_ALL_COMMUNICATION_LOGS: 'comms.campaign.communication_logs',
+    GET_ALL_COMMUNICATION_STATS: 'comms.campaign.communication_stats',
+    GET_CAMPAIGN_LOG: 'comms.campaign.log',
+    ADD_GROUP: 'comms.beneficiary.addGroup',
+    GET_ALL_GROUPS: 'comms.beneficiary.getAllGroups',
+    GET_ONE_GROUP: 'comms.beneficiary.getOneGroup',
+  },
 }
+
+
+export const RABBIT_MQ = {
+  AMQP_CONNECTION: 'AMQP_CONNECTION',
+  CT_BENEFICIARY_EXPORT: 'CT_BENEFICIARY_EXPORT',
+};
+export const queueOptions: RabbitMQModuleOptions['queues'] = [
+  {
+    name: RABBIT_MQ.CT_BENEFICIARY_EXPORT,
+    durable: true,
+    options: {},
+  },
+];

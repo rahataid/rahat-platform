@@ -10,7 +10,7 @@ export class StatsService {
     if (data.group !== 'beneficiary') {
       data.name = data.name + '_ID_' + data.group;
     }
-    return this.prismaService.stats.upsert({
+    return this.prismaService["stats"].upsert({
       where: { name: data.name },
       update: data,
       create: data,
@@ -21,24 +21,24 @@ export class StatsService {
     group: string,
     select: { name?: boolean; data?: boolean; group?: boolean } | null = null
   ) {
-    return this.prismaService.stats.findMany({
+    return this.prismaService["stats"].findMany({
       where: { group },
       select,
     });
   }
 
   findAll() {
-    return this.prismaService.stats.findMany();
+    return this.prismaService["stats"].findMany();
   }
 
   findOne(name: string) {
-    return this.prismaService.stats.findUnique({
+    return this.prismaService["stats"].findUnique({
       where: { name },
     });
   }
 
   remove(name: string) {
-    return this.prismaService.stats.delete({
+    return this.prismaService["stats"].delete({
       where: { name },
     });
   }
@@ -50,7 +50,7 @@ export class StatsService {
   //   names: string[]
   //   group?: any;
   // }) {
-  //   const where: Prisma.StatsWhereInput = {
+  //   const where: Prisma["stats"]WhereInput = {
   //     name: {
   //       in: names,
   //     },
@@ -60,7 +60,7 @@ export class StatsService {
   //     where.group = group;
   //   }
   //   console.log('where', where, names, group)
-  //   return this.prismaService.stats.findMany({
+  //   return this.prismaService["stats"].findMany({
   //     where
   //   });
 

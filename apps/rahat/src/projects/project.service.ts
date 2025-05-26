@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -29,15 +31,18 @@ import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import {
   aaActions,
   beneficiaryActions,
+  beneficiaryGroupActions,
   c2cActions,
   cambodiaActions,
   cvaActions,
   elActions,
+  groupActions,
   projectActions,
   settingActions,
   vendorActions,
 } from './actions';
 import { CAMBODIA_JOBS } from './actions/cambodia.action';
+import { commsActions } from './actions/comms.action';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 
@@ -214,6 +219,8 @@ export class ProjectService {
     };
 
     const actions = {
+      ...groupActions,
+      ...beneficiaryGroupActions,
       ...cambodiaActions,
       ...projectActions,
       ...elActions,
@@ -225,6 +232,7 @@ export class ProjectService {
       ...c2cActions,
       ...cvaActions,
       ...rpActions,
+      ...commsActions
     };
 
     const actionFunc = actions[action];
@@ -298,7 +306,10 @@ export class ProjectService {
     if (benef.type !== 'LEAD') benef.phone = genRandomPhone('88');
     if (!benef.phone) throw new Error('Phone number is required!');
 
-    if (benef.gender) benef.gender = benef.gender.toUpperCase();
+    if (benef.gender) {
+      if (benef.gender.toUpperCase() === 'OTHERS') benef.gender = 'OTHER';
+      benef.gender = benef.gender.toUpperCase();
+    }
     if (benef.age) benef.age = parseInt(benef.age);
     if (benef.leadInterests) {
       benef.leadInterests = benef.leadInterests
@@ -385,13 +396,20 @@ export class ProjectService {
   }
 
   async addToProjectAndUpdate({ projectId, beneficiaryId, importId }) {
-    await this.updateImportStatus(importId, KoboBeneficiaryStatus.SUCCESS);
-    return this.prisma.beneficiaryProject.create({
-      data: {
-        beneficiaryId: beneficiaryId,
-        projectId: projectId,
-      },
+    const beneficiaryExists = await this.prisma.beneficiary.findUnique({
+      where: { uuid: beneficiaryId },
     });
+    if (beneficiaryExists) {
+      await this.updateImportStatus(importId, KoboBeneficiaryStatus.SUCCESS);
+
+      return this.prisma.beneficiaryProject.create({
+        data: {
+          beneficiaryId: beneficiaryId,
+          projectId: projectId,
+        },
+      });
+    }
+
   }
 
   async updateImportStatus(uuid: string, status: KoboBeneficiaryStatus) {

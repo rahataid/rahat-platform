@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
   Body,
   Controller,
@@ -141,7 +143,7 @@ export class ProjectController {
     const response = this.projectService.handleProjectActions({
       uuid,
       ...data,
-      user: request.user,
+      user: (request as any)?.user,
     });
     return response;
   }
