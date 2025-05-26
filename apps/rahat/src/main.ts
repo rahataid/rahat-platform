@@ -54,9 +54,10 @@ async function bootstrap() {
 
   app.use(helmet.contentSecurityPolicy({ directives: { defaultSrc: ["'self'"] } }))
   app.use(helmet.frameguard({ action: 'deny' }))
-  helmet.hsts({ maxAge: 31536000, includeSubDomains: true })
-  helmet.noSniff()
-  helmet.hidePoweredBy()
+  app.use(helmet.hsts({ maxAge: 31536000, includeSubDomains: true }))
+  app.use(helmet.noSniff())
+  app.use(helmet.hidePoweredBy());
+
 
   //must have this if you want to implicit conversion of string to number in dto
   app.useGlobalPipes(
