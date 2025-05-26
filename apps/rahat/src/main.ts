@@ -31,6 +31,13 @@ async function bootstrap() {
     }),
   });
   const globalPrefix = 'v1';
+
+  app.use(helmet.contentSecurityPolicy({ directives: { defaultSrc: ["'self'"] } }))
+  app.use(helmet.frameguard({ action: 'deny' }))
+  app.use(helmet.hsts({ maxAge: 31536000, includeSubDomains: true }))
+  app.use(helmet.noSniff())
+  app.use(helmet.hidePoweredBy());
+
   app.enableCors({
     origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*',
   });
@@ -51,12 +58,6 @@ async function bootstrap() {
   // increase limit of payload size
   app.use(bodyParser.json({ limit: '500mb' }));
   app.use(bodyParser.urlencoded({ limit: '500mb', extended: true }));
-
-  app.use(helmet.contentSecurityPolicy({ directives: { defaultSrc: ["'self'"] } }))
-  app.use(helmet.frameguard({ action: 'deny' }))
-  app.use(helmet.hsts({ maxAge: 31536000, includeSubDomains: true }))
-  app.use(helmet.noSniff())
-  app.use(helmet.hidePoweredBy());
 
 
   //must have this if you want to implicit conversion of string to number in dto
