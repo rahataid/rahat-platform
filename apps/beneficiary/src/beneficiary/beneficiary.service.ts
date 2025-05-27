@@ -426,6 +426,30 @@ export class BeneficiaryService {
     return data;
   }
 
+  async findPhoneByUUID(uuid: UUID[]) {
+    const beneficiaryIds = await this.rsprisma.beneficiary.findMany({
+      where: {
+        uuid: {
+          in: uuid,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return this.prisma.beneficiaryPii.findMany({
+      where: {
+        beneficiaryId: {
+          in: beneficiaryIds.map((b) => b.id),
+        },
+      },
+      select: {
+        phone: true
+      }
+    });
+  }
+
   async findOneByWallet(walletAddress: string) {
     const [data, piiData] = await Promise.all([
       this.rsprisma.beneficiary.findUnique({
@@ -451,13 +475,42 @@ export class BeneficiaryService {
             : null
         ),
     ]);
-
     if (!data) return null;
 
     data.piiData = piiData || null;
 
     return data;
   }
+
+  async findBulkByWallet(walletAddresses: string[]) {
+    const [beneficiaries, piiData] = await Promise.all([
+      this.rsprisma.beneficiary.findMany({
+        where: { walletAddress: { in: walletAddresses } },
+        include: {
+          BeneficiaryProject: {
+            include: {
+              Project: true,
+            },
+          },
+        },
+      }),
+      this.rsprisma.beneficiaryPii.findMany({
+        where: {
+          beneficiary: {
+            walletAddress: { in: walletAddresses },
+          },
+        },
+      }),
+    ]);
+
+    const piiMap = new Map(piiData.map((pii) => [pii.beneficiaryId, pii]));
+
+    return beneficiaries.map((beneficiary) => ({
+      ...beneficiary,
+      piiData: piiMap.get(beneficiary.id) || null,
+    }));
+  }
+
 
   async findOneByPhone(phone: string) {
     const piiData = await this.rsprisma.beneficiaryPii.findFirst({
