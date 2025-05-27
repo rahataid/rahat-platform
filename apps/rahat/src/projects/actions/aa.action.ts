@@ -398,6 +398,12 @@ export const aaActions: ProjectActionFunc = {
     payload,
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.GET_VENDOR_STATS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_REDEMPTION_REQUEST]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_REDEMPTION_REQUEST, uuid }, payload),
   // **** Stellar end **** //
 
   // **** Payout start **** //
