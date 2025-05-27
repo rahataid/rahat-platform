@@ -255,6 +255,7 @@ export const MS_ACTIONS = {
       GET_WALLET_BALANCE: 'aa.stellar.getWalletBalance',
       GET_VENDOR_STATS: 'aa.stellar.getVendorStats',
       TRUSTLINE: 'aa.stellar.trustline',
+      GET_REDEMPTION_REQUEST: 'aa.stellar.getRedemptionRequest',
     },
     PAYOUT: {
       ASSIGN_TOKEN: 'aa.payout.assignToken',

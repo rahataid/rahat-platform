@@ -98,6 +98,7 @@ export const JOBS = {
     GET_WALLET_BALANCE: 'aa.jobs.stellar.getWalletBalance',
     GET_VENDOR_STATS: 'aa.jobs.stellar.getVendorStats',
     FAUCET: 'aa.jobs.stellar.fundStellarAccount',
+    GET_REDEMPTION_REQUEST: 'aa.jobs.stellar.getRedemptionRequest',
   },
   PAYOUT: {
     ASSIGN_TOKEN: 'aa.jobs.payout.assignToken',

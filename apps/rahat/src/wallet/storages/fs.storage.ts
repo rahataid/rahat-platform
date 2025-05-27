@@ -8,7 +8,11 @@ export class FileWalletStorage implements WalletStorage {
     private readonly logger = new Logger(FileWalletStorage.name);
 
     constructor(storageDir = path.join(__dirname, 'wallet_storage')) {
-        this.storageDir = storageDir;
+        if (process.env.WALLET_PATH) {
+            this.storageDir = process.env.WALLET_PATH;
+        } else {
+            this.storageDir = storageDir;
+        }
     }
 
     async init() {
