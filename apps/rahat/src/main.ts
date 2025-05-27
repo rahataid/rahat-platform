@@ -16,6 +16,7 @@ import * as bodyParser from 'body-parser';
 import * as helmet from 'helmet';
 import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app/app.module';
+import { PathTraversalGuard } from './decorators';
 import { loggerInstance } from './logger/winston.logger';
 
 // import { GlobalExceptionFilter } from './utils/exceptions/rpcException.filter';
@@ -71,6 +72,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalCustomExceptionFilter());
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
+  app.useGlobalGuards(new PathTraversalGuard());
 
   const port = process.env.PORT || 3333;
 
