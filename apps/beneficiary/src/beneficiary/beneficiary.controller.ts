@@ -42,9 +42,19 @@ export class BeneficiaryController {
     return this.service.findOne(uuid);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.FIND_PHONE_BY_UUID })
+  async findPhoneByUUID(uuid: UUID[]) {
+    return this.service.findPhoneByUUID(uuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_WALLET })
   async getBeneficiaryByWallet(wallet: string) {
     return this.service.findOneByWallet(wallet);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BULK_BY_WALLET })
+  async getBulkBeneficiaryByWallet(wallet: string[]) {
+    return this.service.findBulkByWallet(wallet);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_PHONE })

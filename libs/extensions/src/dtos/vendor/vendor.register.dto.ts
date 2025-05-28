@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { VendorCreateInput } from '@rahataid/sdk';
 import { Service } from '@rumsan/sdk/enums';
-import { IsEthereumAddress, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsObject, IsOptional, IsString } from 'class-validator';
 
 export class VendorRegisterDto implements VendorCreateInput {
   id?: number | undefined;
@@ -30,7 +30,7 @@ export class VendorRegisterDto implements VendorCreateInput {
 
   @ApiProperty({ example: '0x000000000000000000000', required: false })
   @IsString()
-  @IsEthereumAddress()
+  // @IsEthereumAddress()
   wallet: string;
 
   @ApiProperty({ example: { isVendor: true }, required: false })
