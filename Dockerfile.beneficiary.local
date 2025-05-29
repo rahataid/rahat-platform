@@ -1,0 +1,9 @@
+# Install dependencies only when needed
+FROM node:20-alpine3.19 AS base
+WORKDIR /usr/src/app
+RUN npm install -g pnpm@8.14.1
+
+FROM base
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install
+CMD ["pnpm", "beneficiary"]
