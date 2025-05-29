@@ -55,8 +55,16 @@ export class VendorsService {
         if (userData) {
           if (userData?.email === dto.email)
             throw new Error('Email must be unique');
-          if (userData?.phone === dto.phone)
-            throw new Error('Phone Number must be unique');
+          if (userData?.phone === dto.phone) {
+            const result = await prisma.user.update({
+              where: { id: userData.id },
+              data: {
+                ...rest,
+                updatedAt: new Date(),
+              },
+            });
+            return result;
+          }
         }
       }
 
