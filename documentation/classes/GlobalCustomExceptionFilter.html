@@ -516,7 +516,7 @@ export class GlobalCustomExceptionFilter
     const error &#x3D; await validate(object);
     if (error?.length &gt; 0) {
       const messages &#x3D; this.getErrorMessage(error);
-
+      console.log({ messages });
       throw new BadRequestException({
         message: &#x27;Validation Failed&#x27;,
         errors: messages,

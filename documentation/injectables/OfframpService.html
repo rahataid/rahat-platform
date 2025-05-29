@@ -1,0 +1,1417 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>@rahat-os/source documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">@rahat-os/source documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content injectable">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Injectables</li>
+  <li class="breadcrumb-item" >OfframpService</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>apps/rahat/src/offramp/offramp.service.ts</code>
+        </p>
+
+
+
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#createOfframpRequest" >createOfframpRequest</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#executeOfframpRequest" >executeOfframpRequest</a>
+                            </li>
+                            <li>
+                                <a href="#findAllOfframpRequests" >findAllOfframpRequests</a>
+                            </li>
+                            <li>
+                                <a href="#findOne" >findOne</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getOfframpTransactions" >getOfframpTransactions</a>
+                            </li>
+                            <li>
+                                <a href="#getProviderById" >getProviderById</a>
+                            </li>
+                            <li>
+                                <a href="#listProviders" >listProviders</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#providerActions" >providerActions</a>
+                            </li>
+                            <li>
+                                <a href="#registerProvider" >registerProvider</a>
+                            </li>
+                            <li>
+                                <a href="#remove" >remove</a>
+                            </li>
+                            <li>
+                                <a href="#update" >update</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+            <section data-compodoc="block-constructor">
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor(prisma: PrismaService, kotaniPayService: <a href="../injectables/KotaniPayService.html" target="_self">KotaniPayService</a>)</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="19" class="link-to-prism">apps/rahat/src/offramp/offramp.service.ts:19</a></div>
+                            </td>
+                        </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                            <div>
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>prisma</td>
+                                                  
+                                                        <td>
+                                                                    <code>PrismaService</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>kotaniPayService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/KotaniPayService.html" target="_self" >KotaniPayService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</section>
+
+            <section data-compodoc="block-methods">
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="createOfframpRequest"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>createOfframpRequest</b></span>
+                        <a href="#createOfframpRequest"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>createOfframpRequest(createOfframpData: <a href="../classes/CreateOfframpRequestDto.html" target="_self">CreateOfframpRequestDto</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="87"
+                                    class="link-to-prism">apps/rahat/src/offramp/offramp.service.ts:87</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>createOfframpData</td>
+                                            <td>
+                                                            <code><a href="../classes/CreateOfframpRequestDto.html" target="_self" >CreateOfframpRequestDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="executeOfframpRequest"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>executeOfframpRequest</b></span>
+                        <a href="#executeOfframpRequest"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>executeOfframpRequest(executeOfframpData: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="123"
+                                    class="link-to-prism">apps/rahat/src/offramp/offramp.service.ts:123</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>executeOfframpData</td>
+                                            <td>
+                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="findAllOfframpRequests"></a>
+                    <span class="name">
+                        <span ><b>findAllOfframpRequests</b></span>
+                        <a href="#findAllOfframpRequests"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>findAllOfframpRequests(query?: <a href="../classes/ListOfframpRequestDto.html" target="_self">ListOfframpRequestDto</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="205"
+                                    class="link-to-prism">apps/rahat/src/offramp/offramp.service.ts:205</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>query</td>
+                                            <td>
+                                                            <code><a href="../classes/ListOfframpRequestDto.html" target="_self" >ListOfframpRequestDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="findOne"></a>
+                    <span class="name">
+                        <span ><b>findOne</b></span>
+                        <a href="#findOne"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>findOne(payload: <a href="../undefineds/type.html" target="_self">literal type</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="222"
+                                    class="link-to-prism">apps/rahat/src/offramp/offramp.service.ts:222</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>payload</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/typealiases.html#type" target="_self" >literal type</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getOfframpTransactions"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getOfframpTransactions</b></span>
+                        <a href="#getOfframpTransactions"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getOfframpTransactions(payload: <a href="../undefineds/type.html" target="_self">literal type</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="249"
+                                    class="link-to-prism">apps/rahat/src/offramp/offramp.service.ts:249</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>payload</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/typealiases.html#type" target="_self" >literal type</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getProviderById"></a>
+                    <span class="name">
+                        <span ><b>getProviderById</b></span>
+                        <a href="#getProviderById"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getProviderById(uuid: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="57"
+                                    class="link-to-prism">apps/rahat/src/offramp/offramp.service.ts:57</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>uuid</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="listProviders"></a>
+                    <span class="name">
+                        <span ><b>listProviders</b></span>
+                        <a href="#listProviders"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>listProviders(query?: <a href="../classes/ListOfframpProviderDto.html" target="_self">ListOfframpProviderDto</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="32"
+                                    class="link-to-prism">apps/rahat/src/offramp/offramp.service.ts:32</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>query</td>
+                                            <td>
+                                                            <code><a href="../classes/ListOfframpProviderDto.html" target="_self" >ListOfframpProviderDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="providerActions"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>providerActions</b></span>
+                        <a href="#providerActions"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>providerActions(data: <a href="../classes/ProviderActionDto.html" target="_self">ProviderActionDto</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="65"
+                                    class="link-to-prism">apps/rahat/src/offramp/offramp.service.ts:65</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>data</td>
+                                            <td>
+                                                            <code><a href="../classes/ProviderActionDto.html" target="_self" >ProviderActionDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="registerProvider"></a>
+                    <span class="name">
+                        <span ><b>registerProvider</b></span>
+                        <a href="#registerProvider"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>registerProvider(createOfframpDto: <a href="../classes/CreateOfframpProviderDto.html" target="_self">CreateOfframpProviderDto</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="25"
+                                    class="link-to-prism">apps/rahat/src/offramp/offramp.service.ts:25</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>createOfframpDto</td>
+                                            <td>
+                                                            <code><a href="../classes/CreateOfframpProviderDto.html" target="_self" >CreateOfframpProviderDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="remove"></a>
+                    <span class="name">
+                        <span ><b>remove</b></span>
+                        <a href="#remove"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>remove(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="245"
+                                    class="link-to-prism">apps/rahat/src/offramp/offramp.service.ts:245</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>id</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="update"></a>
+                    <span class="name">
+                        <span ><b>update</b></span>
+                        <a href="#update"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>update(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, updateOfframpDto: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="241"
+                                    class="link-to-prism">apps/rahat/src/offramp/offramp.service.ts:241</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>id</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>updateOfframpDto</td>
+                                            <td>
+                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { BadRequestException, Injectable } from &#x27;@nestjs/common&#x27;;
+import { Prisma } from &#x27;@prisma/client&#x27;;
+import {
+  CreateOfframpProviderDto,
+  CreateOfframpRequestDto,
+  ListOfframpProviderDto,
+  ListOfframpRequestDto,
+  ProviderActionDto,
+} from &#x27;@rahataid/extensions&#x27;;
+import { PaginatorTypes, PrismaService, paginator } from &#x27;@rumsan/prisma&#x27;;
+import { randomUUID } from &#x27;crypto&#x27;;
+import { KotaniPayService } from &#x27;./offrampProviders/kotaniPay.service&#x27;;
+
+const paginate: PaginatorTypes.PaginateFunction &#x3D; paginator({ perPage: 20 });
+
+@Injectable()
+export class OfframpService {
+  constructor(
+    private prisma: PrismaService,
+    private kotaniPayService: KotaniPayService
+  ) { }
+
+  registerProvider(createOfframpDto: CreateOfframpProviderDto) {
+    console.log({ createOfframpDto });
+    return this.prisma.offrampProvider.create({
+      data: createOfframpDto,
+    });
+  }
+
+  listProviders(query?: ListOfframpProviderDto) {
+    const where &#x3D; {
+      deletedAt: null,
+    };
+    return paginate(
+      this.prisma.offrampProvider,
+      {
+        where,
+        select: {
+          id: true,
+          uuid: true,
+          name: true,
+          description: true,
+          createdAt: true,
+          updatedAt: true,
+          deletedAt: true,
+          extras: true,
+        },
+      },
+      {
+        page: query.page || 1,
+        perPage: query.perPage || 10,
+      }
+    );
+  }
+  getProviderById(uuid: string) {
+    return this.prisma.offrampProvider.findUnique({
+      where: {
+        uuid,
+      },
+    });
+  }
+
+  async providerActions(data: ProviderActionDto) {
+    const offrampProvider &#x3D; await this.getProviderById(data.uuid);
+    if (!offrampProvider) {
+      throw new BadRequestException(&#x27;Offramp provider not found&#x27;);
+    }
+
+    if (offrampProvider.name &#x3D;&#x3D;&#x3D; &#x27;Kotani Pay&#x27;) {
+      const action &#x3D; this.kotaniPayService.kotaniPayActions[data.action];
+      if (action) {
+        return action(data);
+      }
+    }
+
+    // Handle other providers here
+
+    return {
+      success: false,
+      message: &#x27;Action not found&#x27;,
+      error_code: 404,
+    };
+  }
+
+  async createOfframpRequest(createOfframpData: CreateOfframpRequestDto) {
+    console.log({ createOfframpData });
+    const { providerUuid, ...offrampRequestData } &#x3D; createOfframpData;
+    // const isBeneficiary &#x3D; await this.prisma.beneficiary.findUnique({
+    //   where: {
+    //     walletAddress: offrampRequestData?.senderAddress?.toLowerCase(),
+    //   },
+    // });
+    // if (!isBeneficiary) {
+    //   throw new BadRequestException(
+    //     &#x27;Should be a valid beneficiary in order to proceed.&#x27;
+    //   );
+    // }
+    const { data: kotaniPayResponse } &#x3D;
+      await this.kotaniPayService.createOfframpRequest(
+        providerUuid,
+        offrampRequestData
+      );
+    const offrampExists &#x3D; await this.prisma.offrampRequest.findUnique({
+      where: {
+        requestId: kotaniPayResponse?.data.request_id,
+      },
+    });
+    if (offrampExists) {
+      throw new BadRequestException(&#x27;Offramp request already exists&#x27;);
+    }
+    return this.prisma.offrampRequest.create({
+      data: {
+        ...offrampRequestData,
+        requestId: kotaniPayResponse?.data.request_id,
+        escrowAddress: kotaniPayResponse?.data.escrow_address,
+      },
+    });
+  }
+
+  //TODO: Geenralize the offramp request execution
+  async executeOfframpRequest(executeOfframpData: any) {
+    console.log({ executeOfframpData });
+    const { providerUuid, ...data } &#x3D; executeOfframpData;
+
+
+
+    const executionData &#x3D; {
+      mobileMoneyReceiver: data.data.mobileMoneyReceiver,
+      senderAddress: data.data.senderAddress,
+      chain: data.data.chain,
+      token: data.data.token,
+      cryptoAmount: +data.data.cryptoAmount,
+      currency: data.data.currency,
+      referenceId: randomUUID(),
+    };
+    // const isBeneficiary &#x3D; await this.prisma.beneficiary.findFirst({
+    //   where: {
+    //     walletAddress: {
+    //       equals: executionData.senderAddress,
+    //       mode: &#x27;insensitive&#x27;,
+    //     },
+    //   },
+    // });
+    // if (!isBeneficiary) {
+    //   throw new BadRequestException(
+    //     &#x27;Should be a valid beneficiary in order to proceed.&#x27;
+    //   );
+    // }
+    console.log(JSON.stringify(executionData, null, 2));
+    try {
+      const { data: kotaniPayResponse } &#x3D;
+        await this.kotaniPayService.executeOfframpRequest(
+          providerUuid,
+          executionData
+        );
+      console.log(&#x27;kota&#x27;, kotaniPayResponse);
+
+      const transaction &#x3D; await this.prisma.offrampTransaction.create({
+        data: {
+          txHash: data.data.transaction_hash || &#x27;&#x27;,
+          chain: data.data.chain,
+          token: data.data.token,
+          walletId: data.data.wallet_id,
+          customerKey: data.data.customer_key,
+          referenceId: executionData.referenceId,
+          offrampRequest: {
+            connectOrCreate: {
+              where: {
+                requestId: executionData.referenceId,
+              },
+              create: {
+                chain: data.data.chain,
+                token: data.data.token,
+                senderAddress: data.data.senderAddress,
+                amount: +data.data.cryptoAmount,
+                requestId: executionData.referenceId,
+                escrowAddress: kotaniPayResponse?.escrow_address,
+                status: &#x27;PENDING&#x27;,
+                extras: {
+                  mobileMoneyReceiver: executionData.mobileMoneyReceiver,
+                  currency: executionData.currency,
+                  cryptoAmount: executionData.cryptoAmount,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      return { transaction, kotaniPayResponse };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error.response.message);
+    }
+
+    // const { data: kotaniPayResponse } &#x3D; await this.kotaniPayService.executeOfframpRequest(providerUuid, offrampRequestData);
+    // return this.prisma.offrampRequest.update({
+    //   where: { id: offrampRequestData.id },
+    //   data: { ...offrampRequestData, transactionHash: kotaniPayResponse?.data.transaction_hash }
+    // })
+  }
+
+  findAllOfframpRequests(query?: ListOfframpRequestDto) {
+    const where &#x3D; {
+      deletedAt: null,
+    };
+
+    return paginate(
+      this.prisma.offrampRequest,
+      {
+        where,
+      },
+      {
+        page: query?.page || 1,
+        perPage: query?.perPage || 10,
+      }
+    );
+  }
+
+  findOne(payload: { uuid?: string; id?: number; requestId?: string }) {
+    if (payload.uuid) {
+      return this.prisma.offrampRequest.findUniqueOrThrow({
+        where: { uuid: payload.uuid },
+      });
+    }
+    if (payload.id) {
+      return this.prisma.offrampRequest.findUniqueOrThrow({
+        where: { id: payload.id },
+      });
+    }
+    if (payload.requestId) {
+      return this.prisma.offrampRequest.findUniqueOrThrow({
+        where: { requestId: payload.requestId },
+      });
+    }
+    throw new BadRequestException(&#x27;Must provide either uuid, id or requestId&#x27;);
+  }
+
+  update(id: number, updateOfframpDto: any) {
+    return &#x60;This action updates a #${id} offramp&#x60;;
+  }
+
+  remove(id: number) {
+    return &#x60;This action removes a #${id} offramp&#x60;;
+  }
+
+  async getOfframpTransactions(payload: {
+    uuid?: string;
+    id?: number;
+    requestId?: string;
+    status?: string;
+    page?: number;
+    perPage?: number;
+    senderAddress?: string;
+  }) {
+    const where: Prisma.OfframpTransactionWhereInput &#x3D; {
+      deletedAt: null,
+    };
+
+    // Filter by ID
+    if (payload.id) {
+      where.id &#x3D; payload.id;
+    }
+
+    // Filter by UUID
+    if (payload.uuid) {
+      where.uuid &#x3D; payload.uuid;
+    }
+
+    // Filter by requestId
+    if (payload.requestId) {
+      where.requestId &#x3D; payload.requestId;
+    }
+
+    // Filter by status
+    if (payload.status) {
+      where.status &#x3D; payload.status;
+    }
+
+    // Filter by a JSON key &quot;senderAddress&quot; inside &#x60;extras&#x60;
+    if (payload.senderAddress) {
+      where.extras &#x3D; {
+        path: [&#x27;senderAddress&#x27;],
+        // todo : check if this is correct
+        string_contains: payload.senderAddress.toLowerCase(),
+      };
+    }
+
+    console.log(&#x27;where&#x27;, where);
+
+    // Compute pagination
+    const page &#x3D; payload.page ?? 1;
+    const perPage &#x3D; payload.perPage ?? 10;
+
+    return paginate&lt;any, Prisma.OfframpTransactionFindManyArgs&gt;(
+      this.prisma.offrampTransaction,
+      {
+        where,
+        orderBy: { createdAt: &#x27;desc&#x27; },
+      },
+      {
+        page,
+        perPage,
+      }
+    );
+
+    // return this.prisma.offrampTransaction.findMany({
+    //   where,
+    //   orderBy: { createdAt: &#x27;desc&#x27; },
+    //   take: perPage,
+    //   skip: (page - 1) * perPage,
+    // });
+  }
+}
+</code></pre>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
+            var COMPODOC_CURRENT_PAGE_URL = 'OfframpService.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

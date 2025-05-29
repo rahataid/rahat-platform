@@ -13,9 +13,12 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
 import fs from 'fs';
 import inquirer from 'inquirer';
 import path from 'path';
+// Load environment variables from .env file
+dotenv.config();
 
 const aaConfig = JSON.parse(
   fs.readFileSync(path.join(__dirname, 'stats-configs', 'aa.json'), 'utf-8')
@@ -41,6 +44,7 @@ const smsVoucherConfig = JSON.parse(
 
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
+  datasourceUrl: "postgresql://postgres:Z1N%ve1zoGiEexN^3xNua$AxV@localhost:7655/rahat-cambodia-prod-replicate_core?schema=public&&ssl_mode=disable",
 });
 
 // A record to map "aa", "el-kenya", "sms-voucher" => their raw JSON
