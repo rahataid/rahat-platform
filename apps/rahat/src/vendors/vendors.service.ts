@@ -71,7 +71,7 @@ export class VendorsService {
         data: {
           userId: +user.id,
           service: dto.service as any,
-          serviceId: dto.authWallet ? authWallet.toLocaleLowerCase() : wallet.toLocaleLowerCase(),
+          serviceId: dto.authWallet ? authWallet : wallet,
           details: dto.extras,
         },
       });
