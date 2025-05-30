@@ -5,6 +5,7 @@ export const EVENTS = {
   BENEFICIARY_UPDATED: 'beneficiary.updated',
   BENEFICIARY_ASSIGNED_TO_PROJECT: 'beneficiary.projectAssigned',
   VENDORS_CREATED: 'vendors.created',
+  DISBURSEMENT_CREATED: 'disbursement.created'
 };
 
 export const JOBS = {
@@ -19,6 +20,7 @@ export const JOBS = {
   GET_BY_PHONE: 'rahat.jobs.beneficiary.get_by_phone',
   GET_TABLE_STATS: 'rahat.jobs.beneficiary.get_from_stats_table',
   LIST: 'rahat.jobs.beneficiary.list',
+  LIST_FULL_DATA: 'rahat.jobs.beneficiary.list_full_data',
   LEAD_CONVERSION_BENEFICIARY: 'rahat.jobs.lead_conversion_beneficiary',
   LIST_PROJECT_PII: 'rahat.jobs.beneficiary.list_project_pii',
   REMOVE: 'rahat.jobs.beneficiary.remove',
@@ -40,6 +42,7 @@ export const JOBS = {
   LIST_BY_PROJECT: 'rahat.jobs.beneficiary.list_by_project',
   LIST_GROUP_BY_PROJECT: 'rahat.jobs.beneficiary.list_group_by_project',
   GET_ONE_GROUP_BY_PROJECT: 'rahat.jobs.beneficiary.get_one_group_by_project',
+  LIST_GROUP_BY_UUID: 'rahat.jobs.beneficiary.list_group_by_uuid',
   VENDOR_REFERRAL: 'rahat.jobs.beneficiary.get_referred',
   LIST_REFERRAL: 'rahat.jobs.beneficiary.list_referred',
   LIST_BEN_VENDOR_COUNT: 'rahat.jobs.beneficiary.count_ben_vendor',
@@ -65,6 +68,7 @@ export const JOBS = {
   GET_STATS: 'rahat.jobs.projects.get_stats',
   GET_ALL_STATS: 'rahat.jobs.projects.get_all_stats',
   CALCULATE_STATS: 'rahat.jobs.projects.calculate_stats',
+  SEND_DISBURSEMENT_CREATED_EMAIL: 'rahat.jobs.projects.send_disbursement_created_email',
   IMPORT_BENEFICIARY_LARGE_QUEUE: 'rahat.jobs.beneficiary.import_beneficiary_large_queue',
   DELETE_BENEFICIARY_AND_PII: 'rahat.jobs.beneficiary.delete_beneficiary_and_pii',
 };

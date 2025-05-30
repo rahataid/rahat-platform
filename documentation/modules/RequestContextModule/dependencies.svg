@@ -24,13 +24,13 @@
 <title>cluster_RequestContextModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="130,-70 130,-268 366,-268 366,-70 130,-70"/>
 </g>
-<g id="clust6" class="cluster">
-<title>cluster_RequestContextModule_providers</title>
-<polygon fill="none" stroke="black" points="138,-78 138,-130 358,-130 358,-78 138,-78"/>
-</g>
 <g id="clust4" class="cluster">
 <title>cluster_RequestContextModule_exports</title>
 <polygon fill="none" stroke="black" points="165,-208 165,-260 331,-260 331,-208 165,-208"/>
+</g>
+<g id="clust6" class="cluster">
+<title>cluster_RequestContextModule_providers</title>
+<polygon fill="none" stroke="black" points="138,-78 138,-130 358,-130 358,-78 138,-78"/>
 </g>
 <!-- RequestContextService  -->
 <g id="node1" class="node">

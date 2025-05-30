@@ -175,10 +175,6 @@
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
-                                <a href="#assignBeneficiaryToProject" >assignBeneficiaryToProject</a>
-                            </li>
-                            <li>
-                                    <span class="modifier">Async</span>
                                 <a href="#bulkAssignToProject" >bulkAssignToProject</a>
                             </li>
                             <li>
@@ -204,6 +200,10 @@
                             <li>
                                     <span class="modifier">Async</span>
                                 <a href="#delete" >delete</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#deleteBenefAndPii" >deleteBenefAndPii</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
@@ -267,6 +267,10 @@
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
+                                <a href="#listGroupByUUid" >listGroupByUUid</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#listPiiData" >listPiiData</a>
                             </li>
                             <li>
@@ -318,11 +322,11 @@
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
-                                <a href="#saveBeneficiaryToProject" >saveBeneficiaryToProject</a>
+                                <a href="#saveTempBenefAndGroup" >saveTempBenefAndGroup</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
-                                <a href="#saveTempBenefAndGroup" >saveTempBenefAndGroup</a>
+                                <a href="#sendDisbursementCreatedEmail" >sendDisbursementCreatedEmail</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
@@ -358,12 +362,12 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(prisma: PrismaService, client: <a href="../strings/Client.html" target="_self">ClientProxy</a>, beneficiaryQueue: Queue, eventEmitter: EventEmitter2, verificationService: <a href="../injectables/VerificationService.html" target="_self">VerificationService</a>)</code>
+<code>constructor(prisma: PrismaService, client: <a href="../strings/Client.html" target="_self">ClientProxy</a>, beneficiaryQueue: Queue, eventEmitter: EventEmitter2, verificationService: <a href="../injectables/VerificationService.html" target="_self">VerificationService</a>, beneficiaryUtilsService: <a href="../injectables/BeneficiaryUtilsService.html" target="_self">BeneficiaryUtilsService</a>)</code>
                     </td>
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="52" class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:52</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="51" class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:51</a></div>
                             </td>
                         </tr>
 
@@ -440,6 +444,18 @@
                                                     </td>
                                                     
                                                 </tr>
+                                                <tr>
+                                                        <td>beneficiaryUtilsService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/BeneficiaryUtilsService.html" target="_self" >BeneficiaryUtilsService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
                                         </tbody>
                                     </table>
                             </div>
@@ -476,8 +492,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="499"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:499</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="484"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:484</a></div>
                         </td>
                     </tr>
 
@@ -557,8 +573,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="534"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:534</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="515"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:515</a></div>
                         </td>
                     </tr>
 
@@ -626,8 +642,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1156"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1156</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1035"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1035</a></div>
                         </td>
                     </tr>
 
@@ -762,8 +778,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1725"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1725</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1602"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1602</a></div>
                         </td>
                     </tr>
 
@@ -801,8 +817,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1405"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1405</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1284"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1284</a></div>
                         </td>
                     </tr>
 
@@ -852,75 +868,6 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="assignBeneficiaryToProject"></a>
-                    <span class="name">
-                            <span class="modifier">Async</span>
-                        <span ><b>assignBeneficiaryToProject</b></span>
-                        <a href="#assignBeneficiaryToProject"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>assignBeneficiaryToProject(dto: <a href="../classes/AddToProjectDto.html" target="_self">AddToProjectDto</a>)</code>
-                </td>
-            </tr>
-
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="630"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:630</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>dto</td>
-                                            <td>
-                                                            <code><a href="../classes/AddToProjectDto.html" target="_self" >AddToProjectDto</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
                     <a name="bulkAssignToProject"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -939,8 +886,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="586"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:586</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="565"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:565</a></div>
                         </td>
                     </tr>
 
@@ -1004,8 +951,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1093"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1093</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="972"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:972</a></div>
                         </td>
                     </tr>
 
@@ -1069,8 +1016,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1081"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1081</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="960"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:960</a></div>
                         </td>
                     </tr>
 
@@ -1134,8 +1081,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="384"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:384</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="351"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:351</a></div>
                         </td>
                     </tr>
 
@@ -1215,8 +1162,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="810"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:810</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="716"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:716</a></div>
                         </td>
                     </tr>
 
@@ -1308,8 +1255,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="963"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:963</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="842"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:842</a></div>
                         </td>
                     </tr>
 
@@ -1389,8 +1336,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="743"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:743</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="649"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:649</a></div>
                         </td>
                     </tr>
 
@@ -1440,6 +1387,75 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="deleteBenefAndPii"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>deleteBenefAndPii</b></span>
+                        <a href="#deleteBenefAndPii"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>deleteBenefAndPii(payload: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="1611"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1611</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>payload</td>
+                                            <td>
+                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="deletePIIByBenefUUID"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -1458,8 +1474,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="764"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:764</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="670"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:670</a></div>
                         </td>
                     </tr>
 
@@ -1527,8 +1543,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="437"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:437</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="387"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:387</a></div>
                         </td>
                     </tr>
 
@@ -1589,15 +1605,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findOneByPhone(phone: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findOneByPhone(payload: <a href="../undefineds/type.html" target="_self">literal type</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="475"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:475</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="451"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:451</a></div>
                         </td>
                     </tr>
 
@@ -1618,9 +1634,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>phone</td>
+                                                <td>payload</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/typealiases.html#type" target="_self" >literal type</a></code>
                                             </td>
 
                                             <td>
@@ -1665,8 +1681,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="456"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:456</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="418"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:418</a></div>
                         </td>
                     </tr>
 
@@ -1734,8 +1750,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1238"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1238</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1117"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1117</a></div>
                         </td>
                     </tr>
 
@@ -1803,8 +1819,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1196"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1196</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1075"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1075</a></div>
                         </td>
                     </tr>
 
@@ -1941,8 +1957,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1145"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1145</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1024"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1024</a></div>
                         </td>
                     </tr>
 
@@ -2006,8 +2022,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1124"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1124</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1003"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1003</a></div>
                         </td>
                     </tr>
 
@@ -2070,8 +2086,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1611"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1611</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1488"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1488</a></div>
                         </td>
                     </tr>
 
@@ -2139,8 +2155,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1695"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1695</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1572"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1572</a></div>
                         </td>
                     </tr>
 
@@ -2208,8 +2224,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="209"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:209</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="230"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:230</a></div>
                         </td>
                     </tr>
 
@@ -2466,6 +2482,75 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="listGroupByUUid"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>listGroupByUUid</b></span>
+                        <a href="#listGroupByUUid"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>listGroupByUUid(uuid: UUID[])</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="184"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:184</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>uuid</td>
+                                            <td>
+                                                        <code>UUID[]</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="listPiiData"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -2553,8 +2638,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1106"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1106</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="985"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:985</a></div>
                         </td>
                     </tr>
 
@@ -2617,8 +2702,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1481"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1481</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1360"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1360</a></div>
                         </td>
                     </tr>
 
@@ -2698,8 +2783,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1654"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1654</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1531"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1531</a></div>
                         </td>
                     </tr>
 
@@ -2735,8 +2820,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1593"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1593</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1470"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1470</a></div>
                         </td>
                     </tr>
 
@@ -2804,8 +2889,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="372"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:372</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="339"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:339</a></div>
                         </td>
                     </tr>
 
@@ -2873,8 +2958,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="297"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:297</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="264"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:264</a></div>
                         </td>
                     </tr>
 
@@ -2954,8 +3039,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="360"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:360</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="327"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:327</a></div>
                         </td>
                     </tr>
 
@@ -3023,8 +3108,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="185"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:185</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="206"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:206</a></div>
                         </td>
                     </tr>
 
@@ -3092,8 +3177,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1717"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1717</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1594"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1594</a></div>
                         </td>
                     </tr>
 
@@ -3161,8 +3246,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="776"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:776</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="682"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:682</a></div>
                         </td>
                     </tr>
 
@@ -3230,8 +3315,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1218"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1218</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1097"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1097</a></div>
                         </td>
                     </tr>
 
@@ -3299,8 +3384,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1395"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1395</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1274"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1274</a></div>
                         </td>
                     </tr>
 
@@ -3350,75 +3435,6 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="saveBeneficiaryToProject"></a>
-                    <span class="name">
-                            <span class="modifier">Async</span>
-                        <span ><b>saveBeneficiaryToProject</b></span>
-                        <a href="#saveBeneficiaryToProject"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>saveBeneficiaryToProject(dto: <a href="../classes/AddToProjectDto.html" target="_self">AddToProjectDto</a>)</code>
-                </td>
-            </tr>
-
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="530"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:530</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>dto</td>
-                                            <td>
-                                                            <code><a href="../classes/AddToProjectDto.html" target="_self" >AddToProjectDto</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
                     <a name="saveTempBenefAndGroup"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -3437,8 +3453,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1663"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1663</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1540"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1540</a></div>
                         </td>
                     </tr>
 
@@ -3524,6 +3540,71 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="sendDisbursementCreatedEmail"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>sendDisbursementCreatedEmail</b></span>
+                        <a href="#sendDisbursementCreatedEmail"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>sendDisbursementCreatedEmail(payload)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="828"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:828</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>payload</td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="syncProjectStats"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -3542,8 +3623,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="956"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:956</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="821"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:821</a></div>
                         </td>
                     </tr>
 
@@ -3607,8 +3688,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="703"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:703</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="609"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:609</a></div>
                         </td>
                     </tr>
 
@@ -3688,8 +3769,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="1306"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1306</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="1185"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:1185</a></div>
                         </td>
                     </tr>
 
@@ -3769,8 +3850,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="733"
-                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:733</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="639"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:639</a></div>
                         </td>
                     </tr>
 
@@ -3848,7 +3929,7 @@
             </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="52" class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:52</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="51" class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.service.ts:51</a></div>
                         </td>
                     </tr>
 
@@ -3886,7 +3967,6 @@ import {
   BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
-  generateRandomWallet,
   ProjectContants,
   TPIIData
 } from &#x27;@rahataid/sdk&#x27;;
@@ -3894,16 +3974,14 @@ import { paginator, PaginatorTypes, PrismaService } from &#x27;@rumsan/prisma&#x
 import { Queue } from &#x27;bull&#x27;;
 import { UUID } from &#x27;crypto&#x27;;
 import { v4 as uuidv4 } from &#x27;uuid&#x27;;
-import { isAddress } from &#x27;viem&#x27;;
 import {
   findTempBenefGroups,
   validateDupicatePhone,
   validateDupicateWallet
 } from &#x27;../processors/processor.utils&#x27;;
 import { createBatches } from &#x27;../utils/array&#x27;;
-import { handleMicroserviceCall } from &#x27;../utils/handleMicroserviceCall&#x27;;
 import { sanitizeNonAlphaNumericValue } from &#x27;../utils/sanitize-data&#x27;;
-import { createListQuery } from &#x27;./helpers&#x27;;
+import { BeneficiaryUtilsService } from &#x27;./beneficiary.utils.service&#x27;;
 import { VerificationService } from &#x27;./verification.service&#x27;;
 
 const paginate: PaginatorTypes.PaginateFunction &#x3D; paginator({ perPage: 20 });
@@ -3919,7 +3997,8 @@ export class BeneficiaryService {
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
     private eventEmitter: EventEmitter2,
-    private readonly verificationService: VerificationService
+    private readonly verificationService: VerificationService,
+    private readonly beneficiaryUtilsService: BeneficiaryUtilsService
   ) {
     this.rsprisma &#x3D; this.prisma.rsclient;
   }
@@ -4044,6 +4123,27 @@ export class BeneficiaryService {
       },
     });
   }
+  async listGroupByUUid(uuid: UUID[]) {
+    return await this.prisma.beneficiaryGroup.findMany({
+      where: {
+        uuid: { in: uuid },
+      },
+      include: {
+        groupedBeneficiaries: {
+          where: {
+            deletedAt: null,
+          },
+          include: {
+            Beneficiary: {
+              include: {
+                pii: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 
   async processBenfGroups(data: any) {
     const groups &#x3D; [];
@@ -4073,42 +4173,9 @@ export class BeneficiaryService {
     dto: ListBeneficiaryDto
   ): Promise&lt;PaginatorTypes.PaginatedResult&lt;Beneficiary&gt;&gt; {
     let result &#x3D; null as any;
-    const AND_QUERY &#x3D; createListQuery(dto);
-    const orderBy: Record&lt;string, &#x27;asc&#x27; | &#x27;desc&#x27;&gt; &#x3D; {};
-    orderBy[dto.sort] &#x3D; dto.order;
-    const projectUUID &#x3D; dto.projectId;
-    const startDate &#x3D; dto.startDate;
-    const endDate &#x3D; dto.endDate;
-
-    let where: any &#x3D; projectUUID
-      ? {
-        deletedAt: null,
-        BeneficiaryProject:
-          projectUUID &#x3D;&#x3D;&#x3D; &#x27;NOT_ASSGNED&#x27;
-            ? {
-              none: {},
-            }
-            : {
-              some: {
-                projectId: projectUUID,
-              },
-            },
-      }
-      : {
-        deletedAt: null,
-      };
-
-    if (startDate &amp;&amp; endDate) {
-      where.createdAt &#x3D; { gte: new Date(startDate), lte: new Date(endDate) };
-    }
-
-    if (startDate &amp;&amp; !endDate) {
-      where.createdAt &#x3D; { gte: new Date(startDate) };
-    }
-
-    if (!startDate &amp;&amp; endDate) {
-      where.createdAt &#x3D; { lte: new Date(endDate) };
-    }
+    const { page, perPage, sort, order } &#x3D; dto;
+    const orderBy: Record&lt;string, &#x27;asc&#x27; | &#x27;desc&#x27;&gt; &#x3D; { [sort]: order };
+    const where &#x3D; this.beneficiaryUtilsService.buildWhereClause(dto);
 
     result &#x3D; await paginate(
       this.rsprisma.beneficiary,
@@ -4124,35 +4191,14 @@ export class BeneficiaryService {
         orderBy,
       },
       {
-        page: dto.page,
-        perPage: dto.perPage,
+        page,
+        perPage,
       }
     );
+    result &#x3D; await this.beneficiaryUtilsService.attachPiiData(result);
 
-    const resultData &#x3D; result.data;
-
-    if (resultData.length &gt; 0) {
-      const benfPiiData &#x3D; await this.prisma.beneficiaryPii.findMany({
-        where: {
-          beneficiaryId: {
-            in: resultData?.map((d) &#x3D;&gt; d.id),
-          },
-        },
-      });
-      const piiDataMap &#x3D; new Map();
-      for (const piiData of benfPiiData) {
-        piiDataMap.set(piiData.beneficiaryId, piiData);
-      }
-
-      const mergedData &#x3D; resultData.map((d) &#x3D;&gt; {
-        const piiData &#x3D; piiDataMap.get(d.id);
-        if (piiData) {
-          d.piiData &#x3D; piiData;
-        }
-        return d;
-      });
-      result.data &#x3D; mergedData;
-    }
+    console.timeEnd(&#x27;check&#x27;);
+    console.log(new Date());
 
     return result;
   }
@@ -4246,117 +4292,135 @@ export class BeneficiaryService {
 
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
     const { piiData, projectUUIDs, ...data } &#x3D; dto;
-    if (!data.walletAddress) {
-      data.walletAddress &#x3D; generateRandomWallet().address;
-    }
-    if (data.walletAddress) {
-      const ben &#x3D; await this.prisma.beneficiary.findUnique({
-        where: {
-          walletAddress: data.walletAddress,
-        },
-      });
-      if (ben) throw new RpcException(&#x27;Wallet should be unique&#x27;);
-      const isWallet &#x3D; isAddress(data.walletAddress);
-      if (!isWallet)
-        throw new RpcException(&#x27;Wallet should be valid Ethereum address&#x27;);
-    }
+    let { walletAddress } &#x3D; data;
+    walletAddress &#x3D; await this.beneficiaryUtilsService.ensureValidWalletAddress(
+      walletAddress
+    );
+
     if (!piiData.phone) throw new RpcException(&#x27;Phone number is required&#x27;);
-    const benData &#x3D; await this.rsprisma.beneficiaryPii.findUnique({
-      where: {
-        phone: piiData.phone,
-      },
-    });
-    if (benData) throw new RpcException(&#x27;Phone number should be unique&#x27;);
+    await this.beneficiaryUtilsService.ensureUniquePhone(
+      piiData.phone.toString()
+    );
+
     if (data.birthDate) data.birthDate &#x3D; new Date(data.birthDate);
-    const rdata &#x3D; await this.rsprisma.beneficiary.create({
-      data,
+    const createdBeneficiary &#x3D; await this.rsprisma.beneficiary.create({
+      data: { ...data, walletAddress },
     });
-    if (piiData) {
-      await this.prisma.beneficiaryPii.create({
-        data: {
-          beneficiaryId: rdata.id,
-          phone: piiData.phone ? piiData.phone.toString() : null,
-          ...piiData,
-        },
-      });
-    }
+
+    await this.beneficiaryUtilsService.addPIIData(
+      createdBeneficiary.id,
+      piiData
+    );
 
     // Assign beneficiary to project while creating. Useful when a beneficiary is created from inside a project
-    if (projectUUIDs?.length &amp;&amp; rdata?.uuid) {
-      const assignPromises &#x3D; projectUUIDs.map((projectUuid) &#x3D;&gt; {
-        return this.assignBeneficiaryToProject({
-          beneficiaryId: rdata?.uuid,
-          projectId: projectUuid,
-        });
-      });
-      await Promise.all(assignPromises);
+    if (projectUUIDs &amp;&amp; projectUUIDs.length) {
+      await this.beneficiaryUtilsService.assignToProjects(
+        createdBeneficiary.uuid,
+        projectUUIDs
+      );
     }
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
       projectUuid,
     });
-    return rdata;
+
+    return createdBeneficiary;
   }
 
   async findOne(uuid: UUID) {
-    const row &#x3D; await this.rsprisma.beneficiary.findUnique({
-      where: { uuid },
-      include: {
-        BeneficiaryProject: {
-          include: {
-            Project: true,
+    const [data, piiData] &#x3D; await Promise.all([
+      this.rsprisma.beneficiary.findUnique({
+        where: { uuid },
+        include: {
+          BeneficiaryProject: {
+            include: {
+              Project: true,
+            },
           },
         },
-      },
-    });
-    if (!row) return null;
-    const piiData &#x3D; await this.rsprisma.beneficiaryPii.findUnique({
-      where: { beneficiaryId: row.id },
-    });
-    if (piiData) row.piiData &#x3D; piiData;
-    return row;
+      }),
+
+      this.prisma.beneficiaryPii.findUnique({
+        where: {
+          beneficiaryId:
+            (
+              await this.rsprisma.beneficiary.findUnique({
+                where: { uuid },
+                select: { id: true },
+              })
+            )?.id || &#x27;&#x27;,
+        },
+      }),
+    ]);
+
+    if (!data) return null;
+    if (piiData) data.piiData &#x3D; piiData;
+    return data;
   }
 
   async findOneByWallet(walletAddress: string) {
-    const row &#x3D; await this.rsprisma.beneficiary.findFirst({
-      where: { walletAddress },
-      include: {
-        BeneficiaryProject: {
-          include: {
-            Project: true,
+    const [data, piiData] &#x3D; await Promise.all([
+      this.rsprisma.beneficiary.findUnique({
+        where: { walletAddress },
+        include: {
+          BeneficiaryProject: {
+            include: {
+              Project: true,
+            },
           },
         },
-      },
-    });
-    if (!row) return null;
-    const piiData &#x3D; await this.rsprisma.beneficiaryPii.findUnique({
-      where: { beneficiaryId: row.id },
-    });
-    if (piiData) row.piiData &#x3D; piiData;
-    return row;
+      }),
+      this.rsprisma.beneficiary
+        .findUnique({
+          where: { walletAddress },
+          select: { id: true },
+        })
+        .then((beneficiary) &#x3D;&gt;
+          beneficiary
+            ? this.rsprisma.beneficiaryPii.findUnique({
+              where: { beneficiaryId: beneficiary.id },
+            })
+            : null
+        ),
+    ]);
+
+    if (!data) return null;
+
+    data.piiData &#x3D; piiData || null;
+
+    return data;
   }
 
-  async findOneByPhone(phone: string) {
-    const piiData &#x3D; await this.rsprisma.beneficiaryPii.findFirst({
+  async findOneByPhone(payload: { phone: string, projectUUID: string }) {
+    const beneficiary &#x3D; await this.prisma.beneficiary.findFirst({
       where: {
-        phone: {
-          contains: phone,
-        },
-      },
-    });
-    if (!piiData) return null;
-    const beneficiary &#x3D; await this.rsprisma.beneficiary.findUnique({
-      where: { id: piiData.beneficiaryId },
-      include: {
-        BeneficiaryProject: {
-          include: {
-            Project: true,
+        AND: [
+          {
+            BeneficiaryProject: {
+              some: {
+                projectId: payload.projectUUID
+              }
+            }
           },
-        },
+          {
+            pii: {
+              phone: payload.phone,
+            },
+          }
+        ],
       },
-    });
+      include: {
+        pii: true,
+      },
+    })
+
     if (!beneficiary) return null;
-    beneficiary.piiData &#x3D; piiData;
-    return beneficiary;
+    let piiData &#x3D; null;
+    if (beneficiary.pii) {
+      piiData &#x3D; beneficiary.pii;
+      delete beneficiary.pii;
+    }
+
+    return { ...beneficiary, piiData };
   }
 
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
@@ -4378,7 +4442,7 @@ export class BeneficiaryService {
     }
 
     // 2. Save Beneficiary to Project
-    await this.saveBeneficiaryToProject({
+    await this.beneficiaryUtilsService.saveBeneficiaryToProject({
       beneficiaryId: benef.uuid,
       projectId: projectUid,
     });
@@ -4388,10 +4452,6 @@ export class BeneficiaryService {
       { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUid },
       projectPayload
     );
-  }
-
-  async saveBeneficiaryToProject(dto: AddToProjectDto) {
-    return this.prisma.beneficiaryProject.create({ data: dto });
   }
 
   async addBulkBeneficiaryToProject(dto: addBulkBeneficiaryToProject) {
@@ -4407,9 +4467,7 @@ export class BeneficiaryService {
     const projectPayloads &#x3D; [];
     const benProjectData &#x3D; [];
 
-    const { beneficiaries: beneficiariesData } &#x3D; await this.createBulk(
-      beneficiaries
-    );
+    const { beneficiariesData } &#x3D; await this.createBulk(beneficiaries);
 
     await Promise.all(
       beneficiariesData.map(async (ben: any) &#x3D;&gt; {
@@ -4488,79 +4546,6 @@ export class BeneficiaryService {
       },
       projectPayloads
     );
-  }
-
-  async assignBeneficiaryToProject(dto: AddToProjectDto) {
-    const { beneficiaryId, projectId } &#x3D; dto;
-
-    // get project info
-    const project &#x3D; await this.prisma.project.findUnique({
-      where: {
-        uuid: projectId,
-      },
-    });
-
-    //1. Get beneficiary data
-    const beneficiaryData &#x3D; await this.rsprisma.beneficiary.findUnique({
-      where: { uuid: beneficiaryId },
-      include: { pii: true },
-    });
-    const projectPayload &#x3D; {
-      uuid: beneficiaryData.uuid,
-      walletAddress: beneficiaryData.walletAddress,
-      extras: beneficiaryData?.extras || null,
-      type: BeneficiaryConstants.Types.ENROLLED,
-      isVerfied: beneficiaryData?.isVerfied,
-    };
-
-    // if project type if aa, remove type
-    if (project.type.toLowerCase() &#x3D;&#x3D;&#x3D; &#x27;aa&#x27;) {
-      delete projectPayload.type;
-      projectPayload[&#x27;gender&#x27;] &#x3D; beneficiaryData?.gender;
-      projectPayload.extras &#x3D; {
-        ...projectPayload.extras,
-        phone: beneficiaryData?.pii?.phone,
-      };
-    }
-
-    if (project.type.toLowerCase() &#x3D;&#x3D;&#x3D; &#x27;rp&#x27;) {
-      delete projectPayload.type;
-    }
-
-    // if project type is c2c, send verficition mail
-    // if (project.type.toLowerCase() &#x3D;&#x3D;&#x3D; &#x27;c2c&#x27; &amp;&amp; !beneficiaryData.isVerfied) {
-    //   await this.verificationService.generateLink(beneficiaryId)
-    // }
-
-    //2.Save beneficiary to project
-
-    await this.saveBeneficiaryToProject({
-      beneficiaryId: beneficiaryId,
-      projectId: projectId,
-    });
-
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
-      projectUuid: projectId,
-    });
-
-    //3. Sync beneficiary to project
-    return handleMicroserviceCall({
-      client: this.client.send(
-        { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
-        projectPayload
-      ),
-      onSuccess(response) {
-        console.log(&#x27;response&#x27;, response);
-      },
-      onError(error) {
-        console.log(&#x27;error&#x27;, error);
-        throw new RpcException(error.message);
-      },
-    });
-    // return this.client.send(
-    //   { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
-    //   projectPayload
-    // );
   }
 
   async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
@@ -4675,147 +4660,106 @@ export class BeneficiaryService {
     projectUuid?: string,
     conditional?: boolean
   ) {
-    const result &#x3D; await this.prisma.$transaction(async (prm) &#x3D;&gt; {
-      // Validate phone numbers are present and unique
-      if (!dtos.every((dto) &#x3D;&gt; dto.piiData.phone)) {
-        throw new RpcException(&#x27;Phone number is required&#x27;);
-      }
-
-      const duplicatePhones &#x3D; await this.checkPhoneNumber(dtos);
-      if (duplicatePhones.length &gt; 0) {
-        throw new RpcException(
-          &#x60;${duplicatePhones.join(&#x27;, &#x27;)} - Phone numbers must be unique&#x60;
-        );
-      }
-
-      // Validate wallet addresses are unique if provided
-      const walletAddresses &#x3D; dtos
-        .map((dto) &#x3D;&gt; dto.walletAddress)
-        .filter(Boolean);
-      if (walletAddresses.length &gt; 0) {
-        const duplicateWallets &#x3D; await this.checkWalletAddress(dtos);
-        if (duplicateWallets.length &gt; 0) {
-          throw new RpcException(&#x27;Wallet addresses must be unique&#x27;);
+    try {
+      this.beneficiaryUtilsService.ensurePhoneNumbers(dtos);
+      const validDtos: CreateBeneficiaryDto[] &#x3D; [];
+      for (const dto of dtos) {
+        try {
+          await this.beneficiaryUtilsService.ensureUniquePhone(dto.piiData.phone.toString());
+        } catch (error) {
+          console.log(&#x60;Skipping entry due to duplicate phone: ${dto.piiData.phone}&#x60;);
+          continue;
         }
+
+        try {
+          dto.walletAddress &#x3D; await this.beneficiaryUtilsService.ensureValidWalletAddress(dto.walletAddress);
+        } catch (error) {
+          console.log(&#x60;Skipping entry due to duplicate/invalid wallet address: ${dto.walletAddress}&#x60;);
+          continue;
+        }
+
+        dto.uuid &#x3D; dto.uuid || uuidv4();
+        validDtos.push(dto);
       }
 
-      // Pre-generate UUIDs and wallet addresses if necessary
-      dtos.forEach((dto) &#x3D;&gt; {
-        dto.uuid &#x3D; dto.uuid || uuidv4();
-        dto.walletAddress &#x3D; dto.walletAddress || generateRandomWallet().address;
-      });
-
-      // Separate PII data and beneficiary data for insertion
-      const beneficiariesData &#x3D; dtos.map(({ piiData, ...data }) &#x3D;&gt; data);
-      const piiDataList &#x3D; dtos.map(({ uuid, piiData }) &#x3D;&gt; ({
-        ...piiData,
-        uuid,
-      }));
+      const { beneficiariesData, piiDataList } &#x3D;
+        this.beneficiaryUtilsService.prepareBulkInsertData(validDtos);
 
       // Insert beneficiaries in bulk
-      await prm.beneficiary
-        .createMany({ data: beneficiariesData })
-        .catch((e) &#x3D;&gt; {
-          throw new RpcException(e.message);
-        });
-
-      // Retrieve inserted beneficiaries for linking PII data
-      const insertedBeneficiaries &#x3D; await prm.beneficiary.findMany({
-        where: { uuid: { in: dtos.map((dto) &#x3D;&gt; dto.uuid) } },
-      });
-
-      // Map PII data with correct beneficiary IDs
-      const piiBulkInsertData &#x3D; piiDataList.map((piiData) &#x3D;&gt; {
-        const beneficiary &#x3D; insertedBeneficiaries.find(
-          (b) &#x3D;&gt; b.uuid &#x3D;&#x3D;&#x3D; piiData.uuid
+      const insertedBeneficiariesWithPii &#x3D;
+        await this.beneficiaryUtilsService.insertBeneficiariesAndPIIData(
+          beneficiariesData,
+          piiDataList,
+          validDtos
         );
-        return {
-          beneficiaryId: beneficiary.id,
-          ...piiData,
-          uuid: undefined, // Remove the temporary UUID field
-        };
-      });
-
-      // Insert PII data in bulk
-      if (piiBulkInsertData.length &gt; 0) {
-        const sanitizedPiiData &#x3D; piiBulkInsertData.map((pii) &#x3D;&gt; ({
-          ...pii,
-          phone: pii.phone ? pii.phone.toString() : null,
-        }));
-        await prm.beneficiaryPii.createMany({ data: sanitizedPiiData });
-      }
-
-      // Retrieve inserted beneficiaries with their PII data
-      const insertedBeneficiariesWithPii &#x3D; await prm.beneficiary.findMany({
-        where: { uuid: { in: dtos.map((dto) &#x3D;&gt; dto.uuid) } },
-        include: { pii: true },
-      });
 
       // Assign beneficiaries to the project if a projectUuid is provided
       // &amp;&amp; conditional
       if (projectUuid) {
-        await prm.beneficiaryProject.createMany({
+        await this.prisma.beneficiaryProject.createMany({
           data: insertedBeneficiariesWithPii.map(({ uuid }) &#x3D;&gt; ({
             beneficiaryId: uuid,
             projectId: projectUuid,
           })),
         });
-        //CANNOT CALCULATE DUE TO TRANSACTION
-        // this.eventEmitter.emit(
-        //   BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-        //   {
-        //     projectUuid: projectUuid,
-        //   }
-        // );
-        const assignPromises &#x3D; insertedBeneficiariesWithPii.map(
-          (b) &#x3D;&gt; {
-            const projectPayload &#x3D; {
-              uuid: b.uuid,
-              walletAddress: b.walletAddress,
-              extras: b?.extras || null,
-              type: BeneficiaryConstants.Types.ENROLLED,
-              isVerified: b?.isVerified,
-            };
-            return handleMicroserviceCall({
-              client: this.client.send(
-                { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUuid },
-                projectPayload
-              ),
-              onSuccess(response) {
-                console.log(&#x27;response&#x27;, response);
-              },
-              onError(error) {
-                console.log(&#x27;error&#x27;, error);
-                throw new RpcException(error.message);
-              },
-            });
+
+        this.eventEmitter.emit(
+          BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
+          {
+            projectUuid: projectUuid,
           }
-          //   this.assignBeneficiaryToProject({ beneficiaryId: b.uuid, projectId: projectUuid })
         );
-        await Promise.all(assignPromises);
+        //COMMENTING THIS BECAUSE ALREADY ADDED TO PROJECT
+
+        // const assignPromises &#x3D; insertedBeneficiariesWithPii.map(
+        //   (b) &#x3D;&gt; {
+        //     const projectPayload &#x3D; {
+        //       uuid: b.uuid,
+        //       walletAddress: b.walletAddress,
+        //       extras: b?.extras || null,
+        //       type: BeneficiaryConstants.Types.ENROLLED,
+        //       isVerified: b?.isVerified,
+        //     };
+        // return handleMicroserviceCall({
+        //   client: this.client.send(
+        //     { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUuid },
+        //     projectPayload
+        //  ),
+        //   onSuccess(response) {
+        //         console.log(&#x27;response&#x27;, response);
+        //       },
+        //       onError(error) {
+        //         console.log(&#x27;error&#x27;, error);
+        //         throw new RpcException(error.message);
+        //       },
+        //     });
+        // }
+        //   this.assignBeneficiaryGroupToProject({ beneficiaryId: b.uuid, projectId: projectUuid })
+        // );
+        // await Promise.all(assignPromises);
       }
 
-      // Return success response
+      this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
+        projectUuid,
+      });
+
+      // Return some form of success indicator, as createMany does not return the records themselves
       return {
         success: true,
-        count: dtos.length,
-        beneficiaries: insertedBeneficiariesWithPii,
+        count: validDtos.length,
+        beneficiariesData: insertedBeneficiariesWithPii,
       };
-    });
-    if (projectUuid) {
-      this.eventEmitter.emit(
-        BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-        {
-          projectUuid: projectUuid,
-        }
-      );
+    } catch (e) {
+      console.log(e);
+      return {
+        success: false
+      }
+      // throw new RpcException(e)
+
     }
-    // Emit an event after beneficiaries are created
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
-      projectUuid,
-    });
-    return result
   }
+
+
   async syncProjectStats(projectUuid) {
     return await this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
       projectUuid,
@@ -4823,6 +4767,20 @@ export class BeneficiaryService {
   }
 
 
+  async sendDisbursementCreatedEmail(payload) {
+    const ben &#x3D; await this.prisma.beneficiary.findUnique({
+      where: {
+        walletAddress: payload.walletAddress
+      },
+      include: {
+        pii: true
+      }
+    })
+    return await this.eventEmitter.emit(BeneficiaryEvents.DISBURSEMENT_CREATED, {
+      amount: payload.amount,
+      email: ben.pii.email
+    });
+  }
   async createBulkWithQueue(
     beneficiaries: CreateBeneficiaryDto[],
     allData?: any
@@ -4880,7 +4838,7 @@ export class BeneficiaryService {
       this.prisma
     );
 
-    if (allData?.automatedGroupOption?.createAutomatedGroup &#x3D;&#x3D;&#x3D; &#x27;true&#x27;) {
+    if (allData?.automatedGroupOption?.createAutomatedGroup &#x3D;&#x3D;&#x3D; true) {
       uniqueGroupKeys &#x3D; [
         ...new Set(
           filteredBeneficiaries.map(
@@ -5244,7 +5202,7 @@ export class BeneficiaryService {
         // bulk assign unassigned beneficiaries from group
         if (unassignedBenfs?.length) {
           for (const unassignedBenf of unassignedBenfs) {
-            await this.assignBeneficiaryToProject({
+            await this.beneficiaryUtilsService.assignBeneficiaryToProject({
               beneficiaryId: unassignedBenf.uuid,
               projectId: project.projectId,
             });
@@ -5315,7 +5273,7 @@ export class BeneficiaryService {
       // bulk assign unassigned beneficiaries from group
       if (unassignedBenfs?.length) {
         for (const unassignedBenf of unassignedBenfs) {
-          await this.assignBeneficiaryToProject({
+          await this.beneficiaryUtilsService.assignBeneficiaryToProject({
             beneficiaryId: unassignedBenf.uuid,
             projectId: project.uuid,
           });
@@ -5342,7 +5300,7 @@ export class BeneficiaryService {
 
 
   async listTempBeneficiaries(uuid: string, query: ListTempBeneficiariesDto) {
-    const res &#x3D; await this.prisma.tempGroup.findUnique({
+    const tempGroupWithBeneficiaries &#x3D; await this.prisma.tempGroup.findUnique({
       where: {
         uuid: uuid,
       },
@@ -5354,47 +5312,45 @@ export class BeneficiaryService {
         },
       },
     });
-    if (query &amp;&amp; query.page &amp;&amp; query.perPage) {
-      const filteredData &#x3D; res.TempGroupedBeneficiaries.filter((d) &#x3D;&gt; {
-        return Object.keys(query).every((key) &#x3D;&gt; {
-          if (key &#x3D;&#x3D;&#x3D; &#x27;firstName&#x27;) {
-            return d.tempBeneficiary.firstName
-              .toLowerCase()
-              .includes(query[key].toLowerCase());
-          }
-          return true;
-        });
-      });
-      const startIndex &#x3D; (query.page - 1) * query.perPage;
-      const endIndex &#x3D; query.page * query.perPage;
-      const paginatedBeneficiaries &#x3D; filteredData
-        .map(({ tempBeneficiary, ...rest }) &#x3D;&gt; ({
-          ...tempBeneficiary,
-          ...rest,
-        }))
-        .slice(startIndex, endIndex);
-      const total &#x3D; filteredData.length;
-      const lastPage &#x3D; Math.ceil(total / query.perPage);
-      const hasNextPage &#x3D; endIndex &lt; total;
-      const hasPreviousPage &#x3D; startIndex &gt; 0;
-      const next &#x3D; hasNextPage ? query.page + 1 : null;
-      const prev &#x3D; hasPreviousPage ? query.page - 1 : null;
 
-      const meta &#x3D; {
-        total,
-        lastPage,
-        currentPage: query.page,
-        perPage: query.perPage,
-        prev,
-        next,
-      };
+    if (!tempGroupWithBeneficiaries) throw new Error(&#x27;Temp Group not Found.&#x27;);
 
-      return {
-        tempeBeneficiary: paginatedBeneficiaries,
-        meta,
-      };
+    const { page &#x3D; 1, perPage &#x3D; 10, firstName } &#x3D; query;
+
+    let filteredData &#x3D; tempGroupWithBeneficiaries.TempGroupedBeneficiaries;
+    if (firstName) {
+      const lowerFirstName &#x3D; firstName.toLowerCase();
+      filteredData &#x3D; filteredData.filter(({ tempBeneficiary }) &#x3D;&gt;
+        tempBeneficiary.firstName.toLowerCase().includes(lowerFirstName)
+      );
     }
-    return res;
+
+    //Pagination Logic
+    const total &#x3D; filteredData.length;
+    const lastPage &#x3D; Math.ceil(total / perPage);
+    const startIndex &#x3D; (page - 1) * perPage;
+    const endIndex &#x3D; Math.min(startIndex + perPage, total);
+
+    const paginatedBeneficiaries &#x3D; filteredData
+      .slice(startIndex, endIndex)
+      .map(({ tempBeneficiary }) &#x3D;&gt; tempBeneficiary);
+
+    const hasNextPage &#x3D; page &lt; lastPage;
+    const hasPreviousPage &#x3D; page &gt; 1;
+
+    const meta &#x3D; {
+      total,
+      lastPage,
+      currentPage: page,
+      perPage,
+      prev: hasNextPage ? page - 1 : null,
+      next: hasPreviousPage ? page + 1 : null,
+    };
+
+    return {
+      tempBeneficiaries: paginatedBeneficiaries,
+      meta,
+    };
   }
 
   // async listTempBeneficiaries(uuid: string, query: ListTempBeneficiariesDto) {
@@ -5473,7 +5429,7 @@ export class BeneficiaryService {
 
   async importBeneficiariesFromTool(data: any) {
     const dataFromBuffer &#x3D; Buffer.from(data);
-    const bufferString &#x3D; dataFromBuffer.toString(&#x27;utf-8&#x27;);
+    const bufferString &#x3D; dataFromBuffer.toString(&#x27;utf-8&#x27;); 1570
     const jsonData &#x3D; JSON.parse(bufferString) || null;
     if (!jsonData) return null;
     const { groupName, beneficiaries } &#x3D; jsonData;
@@ -5556,16 +5512,16 @@ export class BeneficiaryService {
   }
 
   async importTempBeneficiaries(dto: ImportTempBenefDto) {
-    const groups &#x3D; await findTempBenefGroups(this.prisma, dto.groupUUID);
+    const groups &#x3D; await findTempBenefGroups(this.prisma as any, dto.groupUUID);
     if (!groups.length) throw new Error(&#x27;No groups found!&#x27;);
     const beneficiaries &#x3D; groups.map((f) &#x3D;&gt; f.tempBeneficiary);
     if (!beneficiaries.length) throw new Error(&#x27;No benficiaries found!&#x27;);
 
-    const dupliPhones &#x3D; await validateDupicatePhone(this.prisma, beneficiaries);
+    const dupliPhones &#x3D; await validateDupicatePhone(this.prisma as any, beneficiaries);
     if (dupliPhones.length)
       throw new Error(&#x60;Duplicate phones found: ${dupliPhones.toString()}&#x60;);
     const dupliWallets &#x3D; await validateDupicateWallet(
-      this.prisma,
+      this.prisma as any,
       beneficiaries
     );
     if (dupliWallets.length)
@@ -5591,6 +5547,13 @@ export class BeneficiaryService {
         group: &#x60;source&#x60;,
       },
     });
+  }
+
+
+  async deleteBenefAndPii(payload: any) {
+
+    return this.delete(payload.benefId);
+
   }
 }
 

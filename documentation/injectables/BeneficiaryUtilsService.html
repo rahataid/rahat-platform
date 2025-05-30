@@ -1,0 +1,1634 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>@rahat-os/source documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">@rahat-os/source documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content injectable">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Injectables</li>
+  <li class="breadcrumb-item" >BeneficiaryUtilsService</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts</code>
+        </p>
+
+
+
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#addPIIData" >addPIIData</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#assignBeneficiaryToProject" >assignBeneficiaryToProject</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#assignToProjects" >assignToProjects</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#attachPiiData" >attachPiiData</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Private</span>
+                                <a href="#buildProjectPayload" >buildProjectPayload</a>
+                            </li>
+                            <li>
+                                <a href="#buildWhereClause" >buildWhereClause</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#ensurePhoneNumbers" >ensurePhoneNumbers</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#ensureUniquePhone" >ensureUniquePhone</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#ensureValidWalletAddress" >ensureValidWalletAddress</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#handleMicroserviceCall" >handleMicroserviceCall</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#insertBeneficiariesAndPIIData" >insertBeneficiariesAndPIIData</a>
+                            </li>
+                            <li>
+                                <a href="#prepareBulkInsertData" >prepareBulkInsertData</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#saveBeneficiaryToProject" >saveBeneficiaryToProject</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+            <section data-compodoc="block-constructor">
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor(prismaService: PrismaService, eventEmitter: EventEmitter2, client: <a href="../strings/Client.html" target="_self">ClientProxy</a>)</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="27" class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:27</a></div>
+                            </td>
+                        </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                            <div>
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>prismaService</td>
+                                                  
+                                                        <td>
+                                                                    <code>PrismaService</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>eventEmitter</td>
+                                                  
+                                                        <td>
+                                                                    <code>EventEmitter2</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>client</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../miscellaneous/variables.html#Client" target="_self" >ClientProxy</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</section>
+
+            <section data-compodoc="block-methods">
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="addPIIData"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>addPIIData</b></span>
+                        <a href="#addPIIData"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>addPIIData(beneficiaryId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, piiData: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="117"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:117</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>beneficiaryId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>piiData</td>
+                                            <td>
+                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="assignBeneficiaryToProject"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>assignBeneficiaryToProject</b></span>
+                        <a href="#assignBeneficiaryToProject"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>assignBeneficiaryToProject(assignBeneficiaryDto: <a href="../classes/AddToProjectDto.html" target="_self">AddToProjectDto</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="141"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:141</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>assignBeneficiaryDto</td>
+                                            <td>
+                                                            <code><a href="../classes/AddToProjectDto.html" target="_self" >AddToProjectDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="assignToProjects"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>assignToProjects</b></span>
+                        <a href="#assignToProjects"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>assignToProjects(beneficiaryUuid: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, projectUuids: string[])</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="127"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:127</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>beneficiaryUuid</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>projectUuids</td>
+                                            <td>
+                                                        <code>string[]</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="attachPiiData"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>attachPiiData</b></span>
+                        <a href="#attachPiiData"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>attachPiiData(result: <a href="../objects/Types.html" target="_self">PaginatorTypes.PaginatedResult&lt;Beneficiary&gt;</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="55"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:55</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>result</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/variables.html#Types" target="_self" >PaginatorTypes.PaginatedResult&lt;Beneficiary&gt;</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/variables.html#Types" target="_self" >Promise&lt;PaginatorTypes.PaginatedResult&lt;Beneficiary&gt;&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="buildProjectPayload"></a>
+                    <span class="name">
+                            <span class="modifier">Private</span>
+                        <span ><b>buildProjectPayload</b></span>
+                        <a href="#buildProjectPayload"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>buildProjectPayload(projectData: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>, beneficiaryData: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="193"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:193</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>projectData</td>
+                                            <td>
+                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>beneficiaryData</td>
+                                            <td>
+                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/typealiases.html#BeneficiaryPayload" target="_self" >BeneficiaryPayload</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="buildWhereClause"></a>
+                    <span class="name">
+                        <span ><b>buildWhereClause</b></span>
+                        <a href="#buildWhereClause"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>buildWhereClause(dto: <a href="../classes/ListBeneficiaryDto.html" target="_self">ListBeneficiaryDto</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="34"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:34</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/ListBeneficiaryDto.html" target="_self" >ListBeneficiaryDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Record&lt;string, any&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="ensurePhoneNumbers"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>ensurePhoneNumbers</b></span>
+                        <a href="#ensurePhoneNumbers"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>ensurePhoneNumbers(dtos: <a href="../undefineds/Beneficiary.html" target="_self">CreateBeneficiaryDto[]</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="101"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:101</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dtos</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/typealiases.html#Beneficiary" target="_self" >CreateBeneficiaryDto[]</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="ensureUniquePhone"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>ensureUniquePhone</b></span>
+                        <a href="#ensureUniquePhone"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>ensureUniquePhone(phone: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="106"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:106</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>phone</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="ensureValidWalletAddress"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>ensureValidWalletAddress</b></span>
+                        <a href="#ensureValidWalletAddress"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>ensureValidWalletAddress(walletAddress?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="79"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:79</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>walletAddress</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;string&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="handleMicroserviceCall"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>handleMicroserviceCall</b></span>
+                        <a href="#handleMicroserviceCall"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>handleMicroserviceCall(options: <a href="../undefineds/Response.html" target="_self">MicroserviceOptions&lt;TRequest | TResponse&gt;</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="282"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:282</a></div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <b>Type parameters :</b>
+                            <ul class="type-parameters">
+                                    <li>TRequest</li>
+                                    <li>TResponse</li>
+                            </ul>
+                        </td>
+                    </tr>
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>options</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/typealiases.html#Response" target="_self" >MicroserviceOptions&lt;TRequest | TResponse&gt;</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/typealiases.html#Response" target="_self" >Promise&lt;TResponse&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="insertBeneficiariesAndPIIData"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>insertBeneficiariesAndPIIData</b></span>
+                        <a href="#insertBeneficiariesAndPIIData"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>insertBeneficiariesAndPIIData(beneficiariesData: any[], piiDataList: any[], dtos: <a href="../undefineds/Beneficiary.html" target="_self">CreateBeneficiaryDto[]</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="226"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:226</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>beneficiariesData</td>
+                                            <td>
+                                                        <code>any[]</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>piiDataList</td>
+                                            <td>
+                                                        <code>any[]</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>dtos</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/typealiases.html#Beneficiary" target="_self" >CreateBeneficiaryDto[]</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="prepareBulkInsertData"></a>
+                    <span class="name">
+                        <span ><b>prepareBulkInsertData</b></span>
+                        <a href="#prepareBulkInsertData"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>prepareBulkInsertData(dtos: <a href="../undefineds/Beneficiary.html" target="_self">CreateBeneficiaryDto[]</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="220"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:220</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dtos</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/typealiases.html#Beneficiary" target="_self" >CreateBeneficiaryDto[]</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>{ beneficiariesData: any; piiDataList: any; }</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="saveBeneficiaryToProject"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>saveBeneficiaryToProject</b></span>
+                        <a href="#saveBeneficiaryToProject"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>saveBeneficiaryToProject(dto: <a href="../classes/AddToProjectDto.html" target="_self">AddToProjectDto</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="216"
+                                    class="link-to-prism">apps/beneficiary/src/beneficiary/beneficiary.utils.service.ts:216</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/AddToProjectDto.html" target="_self" >AddToProjectDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Inject, Injectable } from &#x27;@nestjs/common&#x27;;
+import { EventEmitter2 } from &#x27;@nestjs/event-emitter&#x27;;
+import { ClientProxy, RpcException } from &#x27;@nestjs/microservices&#x27;;
+import { Beneficiary } from &#x27;@prisma/client&#x27;;
+import {
+  AddToProjectDto,
+  CreateBeneficiaryDto,
+  ListBeneficiaryDto,
+} from &#x27;@rahataid/extensions&#x27;;
+import {
+  AAPayload,
+  BeneficiaryConstants,
+  BeneficiaryEvents,
+  BeneficiaryJobs,
+  BeneficiaryPayload,
+  generateRandomWallet,
+  MicroserviceOptions,
+  ProjectContants,
+} from &#x27;@rahataid/sdk&#x27;;
+import { PaginatorTypes, PrismaService } from &#x27;@rumsan/prisma&#x27;;
+import { lastValueFrom } from &#x27;rxjs&#x27;;
+import { isAddress } from &#x27;viem&#x27;;
+
+@Injectable()
+export class BeneficiaryUtilsService {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private eventEmitter: EventEmitter2,
+    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
+  ) { }
+
+  buildWhereClause(dto: ListBeneficiaryDto): Record&lt;string, any&gt; {
+    const { projectId, startDate, endDate } &#x3D; dto;
+    const where: any &#x3D; { deletedAt: null };
+
+    if (projectId) {
+      where.BeneficiaryProject &#x3D;
+        projectId &#x3D;&#x3D;&#x3D; &#x27;NOT_ASSGNED&#x27; ? { none: {} } : { some: { projectId } };
+    }
+
+    if (startDate &amp;&amp; endDate) {
+      where.createdAt &#x3D; { gte: new Date(startDate), lte: new Date(endDate) };
+    } else if (startDate) {
+      where.createdAt &#x3D; { gte: new Date(startDate) };
+    } else if (endDate) {
+      where.createdAt &#x3D; { lte: new Date(endDate) };
+    }
+
+    return where;
+  }
+
+  // Method to attach PII data to the result
+  async attachPiiData(
+    result: PaginatorTypes.PaginatedResult&lt;Beneficiary&gt;
+  ): Promise&lt;PaginatorTypes.PaginatedResult&lt;Beneficiary&gt;&gt; {
+    const resultData &#x3D; result.data;
+
+    if (resultData.length &gt; 0) {
+      const beneficiaryIds &#x3D; resultData.map((d) &#x3D;&gt; d.id);
+      const benfPiiData &#x3D; await this.prismaService.beneficiaryPii.findMany({
+        where: { beneficiaryId: { in: beneficiaryIds } },
+      });
+
+      const piiDataMap &#x3D; new Map(
+        benfPiiData.map((pii) &#x3D;&gt; [pii.beneficiaryId, pii])
+      );
+
+      result.data &#x3D; resultData.map((d) &#x3D;&gt; ({
+        ...d,
+        piiData: piiDataMap.get(d.id) || null,
+      }));
+    }
+
+    return result;
+  }
+
+  async ensureValidWalletAddress(walletAddress?: string): Promise&lt;string&gt; {
+    if (!walletAddress) {
+      return generateRandomWallet().address;
+    }
+
+    const existingBeneficiary &#x3D; await this.prismaService.beneficiary.findUnique(
+      {
+        where: { walletAddress },
+      }
+    );
+
+    if (existingBeneficiary) {
+      console.log(&#x27;Wallet address already exists&#x27;);
+      throw new RpcException(&#x27;Wallet address already exists&#x27;);
+    }
+    if (!isAddress(walletAddress)) {
+      console.log(&#x27;Wallet should be valid Ethereum Address&#x27;);
+      throw new RpcException(&#x27;Wallet should be valid Ethereum Address&#x27;);
+    }
+    return walletAddress;
+  }
+
+  async ensurePhoneNumbers(dtos: CreateBeneficiaryDto[]) {
+    const hasPhone &#x3D; dtos.every((dto) &#x3D;&gt; dto.piiData.phone);
+    if (!hasPhone) throw new RpcException(&#x27;Phone number is required&#x27;);
+  }
+
+  async ensureUniquePhone(phone: string): Promise&lt;void&gt; {
+    const existingPiiData &#x3D; await this.prismaService.beneficiaryPii.findUnique({
+      where: { phone },
+    });
+    if (existingPiiData) {
+      console.log(&#x27;Phone number should be unique&#x27;);
+
+      throw new RpcException(&#x27;Phone number should be unique&#x27;);
+    }
+  }
+
+  async addPIIData(beneficiaryId: string, piiData: any): Promise&lt;void&gt; {
+    await this.prismaService.beneficiaryPii.create({
+      data: {
+        beneficiaryId,
+        phone: piiData.phone.toString(),
+        ...piiData,
+      },
+    });
+  }
+
+  async assignToProjects(
+    beneficiaryUuid: string,
+    projectUuids: string[]
+  ): Promise&lt;void&gt; {
+    const assignPromises &#x3D; projectUuids.map((projectUuid) &#x3D;&gt; {
+      return this.assignBeneficiaryToProject({
+        beneficiaryId: beneficiaryUuid,
+        projectId: projectUuid,
+      });
+    });
+
+    await Promise.all(assignPromises);
+  }
+
+  async assignBeneficiaryToProject(assignBeneficiaryDto: AddToProjectDto) {
+    const { beneficiaryId, projectId } &#x3D; assignBeneficiaryDto;
+
+    try {
+
+      //fetch project and beneficiary detail in parallel
+      const [projectData, beneficiaryData] &#x3D; await Promise.all([
+        this.prismaService.project.findUnique({ where: { uuid: projectId } }),
+        this.prismaService.beneficiary.findUnique({
+          where: { uuid: beneficiaryId },
+          include: { pii: true },
+        }),
+      ]);
+
+      if (!projectData) return;
+      if (!beneficiaryData) throw new RpcException(&#x27;Beneficiary not Found.&#x27;);
+
+      //Build Project Payload
+      const projectPayload &#x3D; this.buildProjectPayload(
+        projectData,
+        beneficiaryData
+      );
+
+      //Save beneficiary to Project
+      await this.saveBeneficiaryToProject({
+        beneficiaryId,
+        projectId,
+      });
+
+      this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
+        projectUuid: projectId,
+      });
+
+      //3. Sync beneficiary to project
+      return this.handleMicroserviceCall({
+        client: this.client.send(
+          { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
+          projectPayload
+        ),
+        onSuccess(response) {
+          console.log(&#x27;response&#x27;, response);
+        },
+        onError(error) {
+          console.log(&#x27;error&#x27;, error);
+          throw new RpcException(error.message);
+        },
+      });
+    } catch (e) {
+      console.log(&#x27;Error in assigning beneficiary to project:&#x27;, e);
+    }
+  }
+
+  private buildProjectPayload(projectData: any, beneficiaryData: any) {
+    const payload: BeneficiaryPayload &#x3D; {
+      uuid: beneficiaryData.uuid,
+      walletAddress: beneficiaryData.walletAddress,
+      extras: beneficiaryData.extras || null,
+      type: BeneficiaryConstants.Types.ENROLLED,
+      isVerified: beneficiaryData.isVerified,
+    };
+
+    //Handle aa project type
+    if (projectData.type.toLowerCase() &#x3D;&#x3D;&#x3D; &#x27;aa&#x27;) {
+      delete payload.type;
+      (payload as AAPayload).gender &#x3D; beneficiaryData.gender;
+      payload.extras &#x3D; { ...payload.extras, phone: beneficiaryData.pii.phone };
+    }
+
+    if (projectData.type.toLowerCase() &#x3D;&#x3D;&#x3D; &#x27;rp&#x27;) {
+      delete payload.type;
+    }
+
+    return payload;
+  }
+
+  async saveBeneficiaryToProject(dto: AddToProjectDto) {
+    return this.prismaService.beneficiaryProject.create({ data: dto });
+  }
+
+  prepareBulkInsertData(dtos: CreateBeneficiaryDto[]) {
+    const beneficiariesData &#x3D; dtos.map(({ piiData, ...data }) &#x3D;&gt; data);
+    const piiDataList &#x3D; dtos.map(({ uuid, piiData }) &#x3D;&gt; ({ ...piiData, uuid }));
+    return { beneficiariesData, piiDataList };
+  }
+
+  async insertBeneficiariesAndPIIData(
+    beneficiariesData: any[],
+    piiDataList: any[],
+    dtos: CreateBeneficiaryDto[]
+  ) {
+    const insertedBeneficiaries &#x3D; await this.prismaService.$transaction(
+      async (prisma) &#x3D;&gt; {
+        await prisma.beneficiary.createMany({ data: beneficiariesData });
+        // Retrieve inserted beneficiaries for linking PII data
+
+        const insertedBeneficiaries &#x3D; await prisma.beneficiary.findMany({
+          where: {
+            uuid: {
+              in: dtos.map((dto) &#x3D;&gt; dto.uuid),
+            },
+          },
+        });
+
+        // Map PII data with correct beneficiary IDs
+        const piiBulkInsertData &#x3D; piiDataList.map((piiData) &#x3D;&gt; {
+          const beneficiary &#x3D; insertedBeneficiaries.find(
+            (b) &#x3D;&gt; b.uuid &#x3D;&#x3D;&#x3D; piiData.uuid
+          );
+          return {
+            beneficiaryId: beneficiary.id,
+            ...piiData,
+            uuid: undefined, // Remove the temporary UUID field
+          };
+        });
+
+        // Insert PII data in bulk
+        if (piiBulkInsertData.length &gt; 0) {
+          const sanitizedPiiBenef &#x3D; piiBulkInsertData.map((bulkData) &#x3D;&gt; ({
+            ...bulkData,
+            phone: bulkData.phone ? bulkData.phone.toString() : null,
+          }));
+          await prisma.beneficiaryPii.createMany({
+            data: sanitizedPiiBenef,
+          });
+        }
+
+        return prisma.beneficiary.findMany({
+          where: {
+            uuid: {
+              in: dtos.map((dto) &#x3D;&gt; dto.uuid),
+            },
+          },
+          include: {
+            pii: true, // Include the related PII data
+          },
+        });
+      }
+    );
+    return insertedBeneficiaries;
+  }
+
+  async handleMicroserviceCall&lt;TRequest, TResponse&gt;(
+    options: MicroserviceOptions&lt;TRequest, TResponse&gt;
+  ): Promise&lt;TResponse&gt; {
+    const { client, onSuccess, onError } &#x3D; options;
+
+    try {
+      // Convert Observable to Promise and wait for the response
+      const response &#x3D; await lastValueFrom(client);
+      // If onSuccess callback is provided, call it with the response
+      if (onSuccess) await onSuccess(response);
+      return response;
+    } catch (error) {
+      // If onError callback is provided, call it with the error
+      if (onError) {
+        await onError(error);
+      } else {
+        // Rethrow the error if no onError callback is provided
+        throw error;
+      }
+    }
+  }
+}
+</code></pre>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
+            var COMPODOC_CURRENT_PAGE_URL = 'BeneficiaryUtilsService.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

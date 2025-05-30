@@ -142,6 +142,9 @@
                         <ul class="index-list">
                             <li>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#create" >create</a>
                             </li>
@@ -197,6 +200,7 @@
                                 <a href="#getBeneficiary" >getBeneficiary</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
@@ -387,6 +391,9 @@
                     <a name="create"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>create</b></span>
                         <a href="#create"><span class="icon ion-ios-link"></span></a>
@@ -404,14 +411,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post()<br /></code>
+                    <code>@ApiBearerAuth(APP.JWT_BEARER)<br />@UseGuards(JwtGuard, AbilitiesGuard)<br />@CheckAbilities({actions: undefined, subject: undefined})<br />@Post()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="150"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:150</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="152"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:152</a></div>
                         </td>
                     </tr>
 
@@ -490,8 +497,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="173"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:173</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="175"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:175</a></div>
                         </td>
                     </tr>
 
@@ -570,8 +577,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="425"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:425</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="455"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:455</a></div>
                         </td>
                     </tr>
 
@@ -651,8 +658,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="368"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:368</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="391"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:391</a></div>
                         </td>
                     </tr>
 
@@ -732,8 +739,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="401"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:401</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="431"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:431</a></div>
                         </td>
                     </tr>
 
@@ -812,8 +819,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="433"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:433</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="463"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:463</a></div>
                         </td>
                     </tr>
 
@@ -893,8 +900,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="377"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:377</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="400"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:400</a></div>
                         </td>
                     </tr>
 
@@ -951,6 +958,7 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getBeneficiaryByPhone</b></span>
                         <a href="#getBeneficiaryByPhone"><span class="icon ion-ios-link"></span></a>
@@ -960,7 +968,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getBeneficiaryByPhone(phone: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getBeneficiaryByPhone(phone: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, projectUUID: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -968,14 +976,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@ApiBearerAuth(APP.JWT_BEARER)<br />@UseGuards(JwtGuard, AbilitiesGuard)<br />@CheckAbilities({actions: undefined, subject: undefined})<br />@Get(&#x27;phone/:phone&#x27;)<br />@ApiParam({name: &#x27;phone&#x27;, required: true})<br /></code>
+                    <code>@ApiBearerAuth(APP.JWT_BEARER)<br />@UseGuards(JwtGuard, AbilitiesGuard)<br />@CheckAbilities({actions: undefined, subject: undefined})<br />@Get(&#x27;phone/:phone/:projectUUID&#x27;)<br />@ApiParam({name: &#x27;phone&#x27;, required: true})<br />@ApiParam({name: &#x27;projectUUID&#x27;, required: true})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="392"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:392</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="416"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:416</a></div>
                         </td>
                     </tr>
 
@@ -997,6 +1005,18 @@
                                     <tbody>
                                         <tr>
                                                 <td>phone</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>projectUUID</td>
                                             <td>
                                                             <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
                                             </td>
@@ -1052,8 +1072,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="383"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:383</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="406"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:406</a></div>
                         </td>
                     </tr>
 
@@ -1133,8 +1153,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="442"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:442</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="472"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:472</a></div>
                         </td>
                     </tr>
 
@@ -1210,8 +1230,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="127"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:127</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="129"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:129</a></div>
                         </td>
                     </tr>
 
@@ -1257,8 +1277,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="134"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:134</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="136"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:136</a></div>
                         </td>
                     </tr>
 
@@ -1305,8 +1325,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="142"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:142</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="144"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:144</a></div>
                         </td>
                     </tr>
 
@@ -1354,8 +1374,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="473"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:473</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="503"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:503</a></div>
                         </td>
                     </tr>
 
@@ -1434,8 +1454,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="486"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:486</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="516"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:516</a></div>
                         </td>
                     </tr>
 
@@ -1514,8 +1534,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="88"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:88</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="90"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:90</a></div>
                         </td>
                     </tr>
 
@@ -1594,8 +1614,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="119"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:119</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="121"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:121</a></div>
                         </td>
                     </tr>
 
@@ -1675,8 +1695,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="97"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:97</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="99"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:99</a></div>
                         </td>
                     </tr>
 
@@ -1767,8 +1787,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="111"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:111</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="113"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:113</a></div>
                         </td>
                     </tr>
 
@@ -1848,8 +1868,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="159"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:159</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="161"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:161</a></div>
                         </td>
                     </tr>
 
@@ -1941,8 +1961,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="359"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:359</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="382"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:382</a></div>
                         </td>
                     </tr>
 
@@ -2022,8 +2042,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="451"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:451</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="481"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:481</a></div>
                         </td>
                     </tr>
 
@@ -2103,8 +2123,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="350"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:350</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="373"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:373</a></div>
                         </td>
                     </tr>
 
@@ -2196,8 +2216,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="460"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:460</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="490"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:490</a></div>
                         </td>
                     </tr>
 
@@ -2289,8 +2309,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="193"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:193</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="191"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:191</a></div>
                         </td>
                     </tr>
 
@@ -2382,8 +2402,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="242"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:242</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="240"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:240</a></div>
                         </td>
                     </tr>
 
@@ -2474,8 +2494,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="409"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:409</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="439"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:439</a></div>
                         </td>
                     </tr>
 
@@ -2554,8 +2574,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="417"
-                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:417</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="447"
+                                    class="link-to-prism">apps/rahat/src/beneficiary/beneficiary.controller.ts:447</a></div>
                         </td>
                     </tr>
 
@@ -2605,7 +2625,9 @@
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { InjectQueue } from &#x27;@nestjs/bull&#x27;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import { InjectQueue } from &#x27;@nestjs/bull&#x27;;
 import {
   BadRequestException,
   Body,
@@ -2622,7 +2644,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from &#x27;@nestjs/common&#x27;;
-import { ClientProxy, RpcException } from &#x27;@nestjs/microservices&#x27;;
+import { ClientProxy } from &#x27;@nestjs/microservices&#x27;;
 import { FileInterceptor } from &#x27;@nestjs/platform-express&#x27;;
 import { ApiBearerAuth, ApiParam, ApiTags } from &#x27;@nestjs/swagger&#x27;;
 import {
@@ -2750,9 +2772,9 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET_TABLE_STATS }, {});
   }
 
-  // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
-  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post()
   async create(@Body() dto: CreateBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
@@ -2782,13 +2804,9 @@ export class BeneficiaryController {
       ...b,
       birthDate: b.birthDate ? new Date(b.birthDate).toISOString() : null,
     }));
+
     return this.client
       .send({ cmd: BeneficiaryJobs.CREATE_BULK }, data)
-      .pipe(
-        catchError((error) &#x3D;&gt;
-          throwError(() &#x3D;&gt; new RpcException(error.response))
-        )
-      )
       .pipe(timeout(MS_TIMEOUT));
   }
 
@@ -2851,7 +2869,13 @@ export class BeneficiaryController {
       req.body[&#x27;doctype&#x27;]?.toUpperCase() || Enums.UploadFileType.JSON;
     const projectId &#x3D; req.body[&#x27;projectId&#x27;];
     const automatedGroupOption &#x3D; req.body[&#x27;automatedGroupOption&#x27;];
+    automatedGroupOption.createAutomatedGroup &#x3D; JSON.parse(
+      automatedGroupOption.createAutomatedGroup
+    );
+    console.log(automatedGroupOption);
     const beneficiaries &#x3D; await DocParser(docType, file.buffer);
+
+
     // Utility function to sanitize input keys by trimming whitespace
     function sanitizeKey(key: string): string {
       return key.trim();
@@ -2879,24 +2903,38 @@ export class BeneficiaryController {
       location: trimNonAlphaNumericValue(b[sanitizeKey(&#x27;Location&#x27;)]),
       phoneStatus: b[sanitizeKey(&#x27;Phone Status*&#x27;)],
       notes: b[sanitizeKey(&#x27;Notes&#x27;)],
-      gender: b[sanitizeKey(&#x27;Gender*&#x27;)],
+      gender: b[sanitizeKey(&#x27;Gender*&#x27;)] || b[sanitizeKey(&#x27;Gender&#x27;)],
       latitude: b[sanitizeKey(&#x27;Latitude&#x27;)],
       longitude: b[sanitizeKey(&#x27;Longitude&#x27;)],
       age: b[sanitizeKey(&#x27;Age&#x27;)] || null,
       walletAddress: b[sanitizeKey(&#x27;Wallet Address&#x27;)],
       piiData: {
-        name: b[sanitizeKey(&#x27;Name*&#x27;)] || &#x27;Unknown&#x27;,
+        name: b[sanitizeKey(&#x27;Name*&#x27;)] || b[sanitizeKey(&#x27;Beneficiary Name&#x27;)] || &#x27;Unknown&#x27;,
         phone: removeSpaces(
           b[sanitizeKey(&#x27;Whatsapp Number*&#x27;)] ||
           b[sanitizeKey(&#x27;Phone Number*&#x27;)] ||
           b[sanitizeKey(&#x27;Phone Number&#x27;)] ||
+          b[sanitizeKey(&#x27;Beneficiary Phone Number&#x27;)] ||
           b[sanitizeKey(&#x27;Phone number&#x27;)]
         ),
-        extras: {},
+      },
+      extras: {
+        healthWorker: b[sanitizeKey(&#x27;Health Worker Username&#x27;)] || &quot;Unknown&quot;,
+        type: b[sanitizeKey(&#x27;Type&#x27;)] || null,
+        phone: removeSpaces(
+          b[sanitizeKey(&#x27;Phone Number*&#x27;)] ||
+          b[sanitizeKey(&#x27;Beneficiary Phone Number&#x27;)] ||
+          b[sanitizeKey(&#x27;Phone number&#x27;)] || null
+        ),
+        visionCenter: b[sanitizeKey(&#x27;Vision Center Name&#x27;)] || null,
+        reasonForLead: b[sanitizeKey(&#x27;Reason For Lead&#x27;)] || null,
+        village: b[sanitizeKey(&#x27;Village&#x27;)] || null,
+        commune: b[sanitizeKey(&#x27;Commune&#x27;)] || null,
+        district: b[sanitizeKey(&#x27;District&#x27;)] || null,
+        province: b[sanitizeKey(&#x27;Province&#x27;)] || null,
+        occupation: b[sanitizeKey(&#x27;Occupation&#x27;)] || null,
       },
     }));
-
-
 
 
     const uniquePhoneNumberedBeneficiaries &#x3D; beneficiariesMapped.filter(
@@ -2906,6 +2944,11 @@ export class BeneficiaryController {
           (t) &#x3D;&gt; t.piiData.phone &#x3D;&#x3D;&#x3D; b.piiData.phone
         )
     );
+
+    // uniquePhoneNumberedBeneficiaries.forEach((beneficiary) &#x3D;&gt; {
+    //   console.log(beneficiary, beneficiary.piiData.extras);
+    // });
+    // return &quot;sda&quot;
 
 
     console.log(&#x60;Trying to upload ${beneficiariesMapped.length} beneficiaries through queue. Unique phone numbers: ${uniquePhoneNumberedBeneficiaries.length}, Duplicate phone numbers: ${beneficiariesMapped.length - uniquePhoneNumberedBeneficiaries.length}&#x60;);
@@ -2994,10 +3037,17 @@ export class BeneficiaryController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
-  @Get(&#x27;phone/:phone&#x27;)
+  @Get(&#x27;phone/:phone/:projectUUID&#x27;)
   @ApiParam({ name: &#x27;phone&#x27;, required: true })
-  async getBeneficiaryByPhone(@Param(&#x27;phone&#x27;) phone: string) {
-    return this.client.send({ cmd: BeneficiaryJobs.GET_BY_PHONE }, phone);
+  @ApiParam({ name: &#x27;projectUUID&#x27;, required: true })
+  async getBeneficiaryByPhone(
+    @Param(&#x27;phone&#x27;) phone: string,
+    @Param(&#x27;projectUUID&#x27;) projectUUID: string
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.GET_BY_PHONE },
+      { phone, projectUUID }
+    );
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)

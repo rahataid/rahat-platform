@@ -249,8 +249,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="56"
-                                    class="link-to-prism">libs/extensions/src/utils/exception/exception.handler.ts:56</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="59"
+                                    class="link-to-prism">libs/extensions/src/utils/exception/exception.handler.ts:59</a></div>
                         </td>
                     </tr>
 
@@ -423,8 +423,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="46"
-                                    class="link-to-prism">libs/extensions/src/utils/exception/exception.handler.ts:46</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="49"
+                                    class="link-to-prism">libs/extensions/src/utils/exception/exception.handler.ts:49</a></div>
                         </td>
                     </tr>
 
@@ -504,8 +504,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="33"
-                                    class="link-to-prism">libs/extensions/src/utils/exception/exception.handler.ts:33</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="36"
+                                    class="link-to-prism">libs/extensions/src/utils/exception/exception.handler.ts:36</a></div>
                         </td>
                     </tr>
 
@@ -579,7 +579,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>isObjectWithErrors(value: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                    <code>isObjectWithErrors(value: string | object)</code>
                 </td>
             </tr>
 
@@ -610,7 +610,7 @@
                                         <tr>
                                                 <td>value</td>
                                             <td>
-                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                                        <code>string | object</code>
                                             </td>
 
                                             <td>
@@ -649,7 +649,7 @@ import { ExceptionResponse } from &#x27;@rumsan/sdk/types&#x27;;
 
 export class ExceptionHandler {
   static logger &#x3D; new Logger(ExceptionHandler?.name);
-  private static isObjectWithErrors(value: any): value is { errors: any[] } {
+  private static isObjectWithErrors(value: string | object): value is { errors: any[] } {
     return typeof value &#x3D;&#x3D;&#x3D; &#x27;object&#x27; &amp;&amp; value !&#x3D;&#x3D; null &amp;&amp; &#x27;errors&#x27; in value;
   }
 
@@ -658,18 +658,21 @@ export class ExceptionHandler {
     responseData: ExceptionResponse,
     response: any
   ): ExceptionResponse {
+    console.log(
+      exception.getResponse()
+    )
     const exceptionResponse &#x3D; exception?.getResponse();
-    if (ExceptionHandler.isObjectWithErrors(exceptionResponse)) {
-      responseData.meta &#x3D; exceptionResponse.errors ?? &#x27;&#x27;;
+    if (exceptionResponse !&#x3D;&#x3D; null) {
+      responseData.meta &#x3D; exceptionResponse;
     } else {
-      responseData.meta &#x3D; [response?.errors ?? &#x27;&#x27;];
+      responseData.meta &#x3D; response?.errors ?? &#x27;&#x27;;
     }
 
     responseData.name &#x3D; exception?.name;
     responseData.statusCode &#x3D; exception?.getStatus();
     responseData.message &#x3D; exception?.message;
     responseData.group &#x3D; &#x27;HTTP&#x27;;
-
+    console.log(responseData.message)
     this.logger.error(responseData?.message);
 
     return responseData;
@@ -702,9 +705,11 @@ export class ExceptionHandler {
     exception: Error,
     responseData: ExceptionResponse
   ): ExceptionResponse {
+    console.log({ stack: exception?.stack }, exception.message)
     responseData.name &#x3D; exception?.name;
     responseData.message &#x3D; exception?.message;
     responseData.group &#x3D; &#x27;General Error&#x27;;
+    responseData.meta &#x3D; exception?.stack;
 
     this.logger.error(responseData?.message);
 

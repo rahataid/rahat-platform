@@ -162,6 +162,11 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
+                                <a href="#sendDisbursementEmail" >sendDisbursementEmail</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
                                 <a href="#sendOTPEmail" >sendOTPEmail</a>
                             </li>
                         </ul>
@@ -187,7 +192,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="11" class="link-to-prism">apps/beneficiary/src/listeners/listener.service.ts:11</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="13" class="link-to-prism">apps/beneficiary/src/listeners/listener.service.ts:13</a></div>
                             </td>
                         </tr>
 
@@ -288,8 +293,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="24"
-                                    class="link-to-prism">apps/beneficiary/src/listeners/listener.service.ts:24</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="26"
+                                    class="link-to-prism">apps/beneficiary/src/listeners/listener.service.ts:26</a></div>
                         </td>
                     </tr>
 
@@ -310,6 +315,83 @@
                                     <tbody>
                                         <tr>
                                                 <td>eventObject</td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="sendDisbursementEmail"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>sendDisbursementEmail</b></span>
+                        <a href="#sendDisbursementEmail"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>sendDisbursementEmail(data: <a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank">any</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@OnEvent(BeneficiaryEvents.DISBURSEMENT_CREATED)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="69"
+                                    class="link-to-prism">apps/beneficiary/src/listeners/listener.service.ts:69</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>data</td>
+                                            <td>
+                                                            <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                                            </td>
 
                                             <td>
                                                     No
@@ -361,8 +443,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="29"
-                                    class="link-to-prism">apps/beneficiary/src/listeners/listener.service.ts:29</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="31"
+                                    class="link-to-prism">apps/beneficiary/src/listeners/listener.service.ts:31</a></div>
                         </td>
                     </tr>
 
@@ -434,7 +516,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="11" class="link-to-prism">apps/beneficiary/src/listeners/listener.service.ts:11</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="13" class="link-to-prism">apps/beneficiary/src/listeners/listener.service.ts:13</a></div>
                         </td>
                     </tr>
 
@@ -512,7 +594,32 @@ export class ListenersService {
     );
   }
 
+  @OnEvent(BeneficiaryEvents.DISBURSEMENT_CREATED)
+  async sendDisbursementEmail(data: any) {
+    this.emailService.sendEmail(
+      data.email,
+      &#x27;USDC Received&#x27;,
+      &#x27;USDC Received&#x27;,
+      &#x60;
+       &lt;div style&#x3D;&quot;max-width: 600px; margin: 40px auto; padding: 30px; background: #1E1E1E; border-radius: 12px; box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1); font-family: Arial, sans-serif; text-align: center;&quot;&gt;
+          &lt;div style&#x3D;&quot;margin-bottom: 20px;&quot;&gt;
+            &lt;img src&#x3D;&quot;https://assets.rumsan.net/rumsan-group/rahat-logo-white.png&quot; width&#x3D;&quot;200&quot; alt&#x3D;&quot;Rahat Logo&quot;&gt;
+          &lt;/div&gt;
+          &lt;h4 style&#x3D;&quot;color: #ffffff; font-size: 1.4em; font-weight: 600; margin-bottom: 15px;&quot;&gt;
+            You have successfully received &lt;span style&#x3D;&quot;color: #00FFAA;&quot;&gt;${data.amount} USDC&lt;/span&gt;
+          &lt;/h4&gt;
+          &lt;p style&#x3D;&quot;color: #bbbbbb; font-size: 1em; margin-bottom: 25px;&quot;&gt;
+            If you want to convert your funds to local currency, you can use our &lt;a href&#x3D;&quot;https://bit.ly/rahat-offramping&quot; style&#x3D;&quot;color: #00FFAA; text-decoration: none; font-weight: 600;&quot;&gt;off-ramping service&lt;/a&gt;.
+          &lt;/p&gt;
+          &lt;hr style&#x3D;&quot;border-top: 1px solid #444;&quot;&gt;
+          &lt;p style&#x3D;&quot;color: #bbbbbb; font-size: 0.9em; margin-top: 20px;&quot;&gt;
+            Regards,&lt;br&gt; Team Rahat
+          &lt;/p&gt;
+        &lt;/div&gt;
 
+      &#x60;
+    );
+  }
 
 }
 </code></pre>
