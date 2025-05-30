@@ -245,6 +245,7 @@ export const MS_ACTIONS = {
       SEND_GROUP_OTP: 'aa.stellar.sendGroupOTP',
       SEND_ASSET: 'aa.stellar.sendAsset',
       SEND_ASSET_WITH_ADDRESS: 'aa.stellar.sendAssetWithAddress',
+      TRANSFER_TO_OFFRAMP: 'aa.stellar.transferToOfframp',
       GET_WALLET_BY_PHONE: 'aaProject.stellar.getWalletByPhone',
       ADD_ONCHAIN_TRIGGER: 'aa.stellar.addTriggerOnChain',
       CHECK_TRUSTLINE: 'aa.stellar.checkTrustline',

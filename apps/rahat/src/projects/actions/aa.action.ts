@@ -336,6 +336,12 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.SEND_ASSET_WITH_ADDRESS, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.STELLAR.TRANSFER_TO_OFFRAMP]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.TRANSFER_TO_OFFRAMP, uuid }, payload),
+
   // [MS_ACTIONS.AAPROJECT.STELLAR.GET_WALLET_BY_PHONE]: (
   //   uuid,
   //   payload,
