@@ -45,7 +45,7 @@ export class VendorsService {
       });
       if (!role) throw new Error('Role not found');
       // Add to User table
-      const { service, wallet, ...rest } = dto;
+      const { service, wallet, authWallet, ...rest } = dto;
       if (dto?.email || dto?.phone) {
         const userData = await prisma.user.findFirst({
           where: {
@@ -71,7 +71,7 @@ export class VendorsService {
         data: {
           userId: +user.id,
           service: dto.service as any,
-          serviceId: dto[service.toLocaleLowerCase()],
+          serviceId: dto.authWallet ? authWallet : wallet,
           details: dto.extras,
         },
       });
