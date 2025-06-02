@@ -28,6 +28,12 @@ export class VendorRegisterDto implements VendorCreateInput {
   @IsOptional()
   phone?: string;
 
+  //PATCH FIX
+  @ApiProperty({ example: '0x000000000', required: false })
+  @IsString()
+  @IsOptional()
+  authWallet?: string;
+
   @ApiProperty({ example: '0x000000000000000000000', required: false })
   @IsString()
   // @IsEthereumAddress()

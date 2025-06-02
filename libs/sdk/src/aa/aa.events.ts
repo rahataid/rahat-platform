@@ -89,6 +89,7 @@ export const JOBS = {
     SEND_GROUP_OTP: 'aa.jobs.stellar.sendGroupOTP',
     SEND_ASSET_TO_VENDOR: 'aa.jobs.stellar.sendAssetToVendor',
     SEND_ASSET_WITH_ADDRESS: 'aa.jobs.stellar.sendAssetWithAddress',
+    TRANSFER_TO_OFFRAMP: 'aa.jobs.stellar.transferToOfframp',
     DISBURSE: 'aa.jobs.stellar.disburse',
     ADD_ONCHAIN_TRIGGER: 'aa.jobs.stellar.addTriggerOnChain',
     CHECK_TRUSTLINE: 'aa.jobs.stellar.checkTrustline',
