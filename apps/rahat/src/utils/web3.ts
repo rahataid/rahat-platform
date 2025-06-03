@@ -5,7 +5,8 @@ import {
   JsonRpcProvider,
   ethers
 } from 'ethers';
-
+import { StrKey } from 'stellar-sdk';
+import { Address, IsAddressOptions, isAddress as isEthAddress } from 'viem';
 
 export async function createContractSigner(abi: any, address: string) {
 
@@ -27,4 +28,16 @@ export async function getBlocktimeStamp(txHash: string) {
   }
   const block = await provider.getBlock(receipt.blockNumber);
   return block.timestamp;
+}
+
+const isStellarAddress = (address: string): boolean => {
+  return typeof address === 'string' && StrKey.isValidEd25519PublicKey(address)
+}
+
+export function isAddress(
+  address: string,
+  options?: IsAddressOptions,
+): address is Address {
+  if (isStellarAddress(address)) return true
+  return isEthAddress(address, options)
 }

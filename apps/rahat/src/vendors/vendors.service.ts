@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 // import * as jwt from '@nestjs/jwt';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
@@ -22,8 +23,9 @@ import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
 import { UUID } from 'crypto';
-import { Address, isAddress } from 'viem';
+import { Address } from 'viem';
 import { UsersService } from '../users/users.service';
+import { isAddress } from '../utils/web3';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -194,9 +196,15 @@ export class VendorsService {
   }
 
   async getVendor(id: UUID | Address) {
-    const data = isAddress(id)
+    const isIdAddress = isAddress(id);
+    const data = isIdAddress
       ? await this.prisma.user.findFirst({ where: { wallet: id } })
       : await this.prisma.user.findUnique({ where: { uuid: id } });
+
+    if (!data) {
+      throw new NotFoundException(`Vendor not found with id: ${id}`);
+    }
+
     const projectData = await this.prisma.projectVendors.findMany({
       where: { vendorId: data.uuid },
       include: {
