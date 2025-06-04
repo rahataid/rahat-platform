@@ -23,6 +23,7 @@ export const MS_TRIGGERS_JOBS = {
     REVERT_PHASE: 'ms.jobs.phases.revertPhase',
     GET_BY_LOCATION: 'ms.jobs.phases.getByLocation',
     ACTIVATE: 'ms.jobs.phases.activate',
+    CONFIGURE_THRESHOLD: 'ms.jobs.phase.configureThreshold',
   },
   REVERT_PHASE: {
     CREATE: 'ms.jobs.revertPhase.create',
@@ -192,6 +193,13 @@ export const msTriggerActions: ProjectActionFunc = {
   [MS_ACTIONS.MS_PHASES.ACTIVATE]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.ACTIVATE }, payload);
+  },
+
+
+
+  [MS_ACTIONS.MS_PHASES.CONFIGURE_THRESHOLD]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.CONFIGURE_THRESHOLD }, payload);
   },
   // // **** phases end ******//
 

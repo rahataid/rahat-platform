@@ -414,6 +414,7 @@ export const MS_ACTIONS = {
     REVERT_PHASE: 'ms.phases.revertPhase',
     GET_BY_LOCATION: 'ms.phases.getByLocation',
     ACTIVATE: 'ms.phases.activate',
+    CONFIGURE_THRESHOLD: "ms.phase.configureThreshold"
   },
 
   MS_RIVER_STATIONS: {
