@@ -265,6 +265,7 @@ export const MS_ACTIONS = {
       LIST: 'aa.payout.list',
       GET: 'aa.payout.get',
       UPDATE: 'aa.payout.update',
+      GET_PAYMENT_PROVIDERS: 'aa.payout.getPaymentProviders',
     },
   },
   C2CProject: {
@@ -413,6 +414,7 @@ export const MS_ACTIONS = {
     REVERT_PHASE: 'ms.phases.revertPhase',
     GET_BY_LOCATION: 'ms.phases.getByLocation',
     ACTIVATE: 'ms.phases.activate',
+    CONFIGURE_THRESHOLD: "ms.phase.configureThreshold"
   },
 
   MS_RIVER_STATIONS: {
