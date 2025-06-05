@@ -346,7 +346,7 @@ export class ProjectService {
     const row = await this.prisma.koboBeneficiary.create({
       data: koboPayload,
     });
-    const piiExist = await this.checkPiiPhone(benef.phone);
+    const piiExist = await this.checkPiiPhone(benef.phone, uuid);
     console.log({ piiExist });
     if (piiExist) {
       const discardedPayload = {
@@ -424,10 +424,19 @@ export class ProjectService {
     });
   }
 
-  async checkPiiPhone(phone: string) {
-    return this.prisma.beneficiaryPii.findUnique({
+  async checkPiiPhone(phone: string, projectId?: string) {
+    return this.prisma.beneficiaryPii.findFirst({
       where: {
         phone,
+        ...(projectId && {
+          beneficiary: {
+            BeneficiaryProject: {
+              some: {
+                projectId
+              }
+            }
+          }
+        })
       },
     });
   }
