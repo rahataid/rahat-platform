@@ -44,7 +44,6 @@ const smsVoucherConfig = JSON.parse(
 
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
-  datasourceUrl: "postgresql://postgres:Z1N%ve1zoGiEexN^3xNua$AxV@localhost:7655/rahat-cambodia-prod-replicate_core?schema=public&&ssl_mode=disable",
 });
 
 // A record to map "aa", "el-kenya", "sms-voucher" => their raw JSON
