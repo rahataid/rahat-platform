@@ -1,5 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import { HttpModule } from '@nestjs/axios';
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
@@ -23,6 +24,7 @@ import { BeneficiaryProcessor } from './beneficiary.processor';
         },
       },
     ]),
+    HttpModule,
     BullModule.registerQueue({
       name: BQUEUE.RAHAT_BENEFICIARY,
     }),
