@@ -62,8 +62,11 @@ export class VendorsService {
                 updatedAt: new Date(),
               },
             });
+            const userAuth = await prisma.auth.findFirst({
+              where: { userId: userData.id },
+            });
             await prisma.auth.update({
-              where: { userId: userData.id, },
+              where: { id: userAuth.id, },
               data: {
                 serviceId: dto.wallet,
               },
