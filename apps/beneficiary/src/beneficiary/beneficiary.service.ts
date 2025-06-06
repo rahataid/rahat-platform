@@ -1118,7 +1118,7 @@ export class BeneficiaryService {
   }
 
   async getOneGroup(uuid: string) {
-    return this.prisma.beneficiaryGroup.findUnique({
+    const group = await this.prisma.beneficiaryGroup.findUnique({
       where: {
         uuid: uuid,
       },
@@ -1137,10 +1137,54 @@ export class BeneficiaryService {
         },
       },
     });
+
+    const benfsInGroup = group.groupedBeneficiaries?.map(
+      (d) => d.Beneficiary
+    ).filter((benf) => !(benf.extras as any)?.validBankAccount);
+
+    return {
+      ...group,
+      isGroupValidForAA: benfsInGroup?.length === 0,
+    };
+  }
+
+  async isGroupValidForAA(uuid: string) {
+    const benfGroup = await this.prisma.beneficiaryGroup.findUnique({
+      where: {
+        uuid: uuid,
+      },
+      include: {
+        groupedBeneficiaries: {
+          where: {
+            deletedAt: null,
+          },
+          include: {
+            Beneficiary: {
+              include: {
+                pii: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
+      (d) => d.Beneficiary
+    ).filter((benf) => !(benf.extras as any)?.validBankAccount);
+
+    return benfsInGroup?.length === 0;
   }
 
   async groupAccountCheck(uuid: string) {
     const benfGroup = await this.getOneGroup(uuid);
+
+    if (benfGroup.isGroupValidForAA) {
+      return {
+        success: true,
+        message: 'Group has all beneficiaries with valid bank account.',
+      };
+    }
 
     const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
       (d) => d.Beneficiary
@@ -1258,7 +1302,14 @@ export class BeneficiaryService {
       }
     );
 
-    return data;
+    const d = await Promise.all(data.data.map(async (group: any) => {
+      return {
+        ...group,
+        isGroupValidForAA: await this.isGroupValidForAA(group.uuid),
+      }
+    }))
+
+    return { ...data, data: d };
   }
 
   async updateGroup(uuid: UUID, dto: UpdateBeneficiaryGroupDto) {
@@ -1371,6 +1422,15 @@ export class BeneficiaryService {
         },
       });
 
+      if (project && project.type.toLocaleLowerCase() === 'aa') {
+        // check if groups has any benf that doesn't have valid bank account
+        const isGroupValidForAA = await this.isGroupValidForAA(beneficiaryGroupId);
+
+        if (!isGroupValidForAA) {
+          throw new RpcException('Group is not valid for AA.');
+        }
+      }
+
       //1. Get beneficiary group data
       const beneficiaryGroupData =
         await this.prisma.beneficiaryGroup.findUnique({
@@ -1431,7 +1491,7 @@ export class BeneficiaryService {
       );
     } catch (err) {
       console.log(err);
-      return err;
+      throw new RpcException(err.message);
     }
   }
 
