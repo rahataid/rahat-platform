@@ -62,6 +62,12 @@ export class VendorsService {
                 updatedAt: new Date(),
               },
             });
+            await prisma.auth.update({
+              where: { userId: userData.id, },
+              data: {
+                serviceId: dto.wallet,
+              },
+            })
             return result;
           }
         }
