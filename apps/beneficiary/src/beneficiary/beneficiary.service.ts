@@ -1,7 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
@@ -51,6 +51,9 @@ const BATCH_SIZE = 20;
 @Injectable()
 export class BeneficiaryService {
   private rsprisma;
+
+  private readonly logger = new Logger(BeneficiaryService.name);
+
   constructor(
     protected prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
@@ -59,7 +62,7 @@ export class BeneficiaryService {
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
     private eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
-    private readonly beneficiaryUtilsService: BeneficiaryUtilsService
+    private readonly beneficiaryUtilsService: BeneficiaryUtilsService,
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -1136,6 +1139,40 @@ export class BeneficiaryService {
     });
   }
 
+  async groupAccountCheck(uuid: string) {
+    const benfGroup = await this.getOneGroup(uuid);
+
+    const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
+      (d) => d.Beneficiary
+    ).filter((benf) => !(benf.extras as any)?.validBankAccount);
+
+    this.logger.log(`Group account check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`);
+
+    const bulkQueueData = benfsInGroup.map((benf) => ({
+      name: BeneficiaryJobs.CHECK_BENEFICIARY_ACCOUNT,
+      data: {
+        uuid: benf.uuid,
+        walletAddress: benf.walletAddress,
+        extras: {
+          bank_name: (benf.extras as any)?.bank_name as string,
+          bank_ac_name: (benf.extras as any)?.bank_ac_name as string,
+          bank_ac_number: (benf.extras as any)?.bank_ac_number as string
+        },
+      },
+      opts: {
+        attempts: 3,
+        removeOnComplete: true,
+        removeOnFail: true,
+      },
+    }));
+
+    await this.beneficiaryQueue.addBulk(bulkQueueData);
+
+    return {
+      success: true,
+      message: 'Account check in progress. Data will be listed soon.',
+    };
+  }
   async removeOneGroup(uuid: string) {
     const benfGroup = await this.prisma.beneficiaryGroup.findUnique({
       where: {
