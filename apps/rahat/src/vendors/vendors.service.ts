@@ -55,6 +55,14 @@ export class VendorsService {
         if (userData) {
 
           if (userData?.email === dto.email || userData?.phone === dto.phone) {
+            const userAuth = await prisma.auth.findFirst({
+              where: { userId: userData.id },
+            });
+            if (userAuth.service !== Service.WALLET) {
+              throw new BadRequestException(
+                `User with ${dto.email === userData?.email ? 'email' : 'phone'} already exists`
+              );
+            }
             const result = await prisma.user.update({
               where: { id: userData.id },
               data: {
@@ -62,9 +70,7 @@ export class VendorsService {
                 updatedAt: new Date(),
               },
             });
-            const userAuth = await prisma.auth.findFirst({
-              where: { userId: userData.id },
-            });
+
             await prisma.auth.update({
               where: { id: userAuth.id, },
               data: {
