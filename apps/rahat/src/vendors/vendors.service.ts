@@ -93,7 +93,6 @@ export class VendorsService {
           }
         }
       }
-      return
 
       const user = await prisma.user.create({ data: rest });
       // Add to UserRole table
