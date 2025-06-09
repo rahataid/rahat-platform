@@ -55,14 +55,26 @@ export class VendorsService {
         if (userData) {
 
           if (userData?.email === dto.email || userData?.phone === dto.phone) {
-            const userAuth = await prisma.auth.findFirst({
+            const userRoles = await this.prisma.userRole.findMany({
               where: { userId: userData.id },
+              include: {
+                Role: {
+                  select: { name: true },
+                },
+              },
             });
-            if (userAuth.service !== Service.WALLET) {
+            const isVendor = userRoles.some(
+              (userRole) => userRole.Role.name === UserRoles.VENDOR
+            );
+
+            if (!isVendor) {
               throw new BadRequestException(
                 `User with ${dto.email === userData?.email ? 'email' : 'phone'} already exists`
               );
             }
+            const userAuth = await prisma.auth.findFirst({
+              where: { userId: userData.id },
+            });
             const result = await prisma.user.update({
               where: { id: userData.id },
               data: {
@@ -81,6 +93,7 @@ export class VendorsService {
           }
         }
       }
+      return
 
       const user = await prisma.user.create({ data: rest });
       // Add to UserRole table
