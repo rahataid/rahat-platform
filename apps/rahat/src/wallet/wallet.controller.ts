@@ -3,7 +3,7 @@ import { MessagePattern } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
 import { WalletJobs } from "@rahataid/sdk";
 import { BulkCreateWallet, BulkUpdateWallet, ChainType } from '@rahataid/wallet';
-import { PhoneAddressDto, PhoneNumberDto, WalletAddressDto } from './dto/getBy.dto';
+import { BulkWalletAddressDto, PhoneAddressDto, PhoneNumberDto, WalletAddressDto } from './dto/getBy.dto';
 import { WalletService } from './wallet.service';
 
 @ApiTags('wallet')
@@ -43,5 +43,10 @@ export class WalletController {
   @MessagePattern({ cmd: WalletJobs.GET_SECRET_BY_WALLET })
   getSecretByWallet(account: WalletAddressDto) {
     return this.walletService.getSecretByWallet(account.walletAddress, account.chain);
+  }
+
+  @MessagePattern({ cmd: WalletJobs.GET_BULK_SECRET_BY_WALLET })
+  getBulkSecretByWallet(accounts: BulkWalletAddressDto) {
+    return this.walletService.getBulkSecretByWallet(accounts);
   }
 }

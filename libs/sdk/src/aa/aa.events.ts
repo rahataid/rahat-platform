@@ -98,6 +98,8 @@ export const JOBS = {
     GET_STELLAR_STATS: 'aa.jobs.stellar.getStellarStats',
     GET_TRANSACTIONS: 'aa.jobs.stellar.getTransactions',
     GET_WALLET_BALANCE: 'aa.jobs.stellar.getWalletBalance',
+    // Remove after test
+    INTERNAL_FAUCET_TRUSTLINE: `aa.jobs.stellar.internalFaucetTrustline`,
     GET_VENDOR_STATS: 'aa.jobs.stellar.getVendorStats',
     FAUCET: 'aa.jobs.stellar.fundStellarAccount',
     GET_REDEMPTION_REQUEST: 'aa.jobs.stellar.getRedemptionRequest',

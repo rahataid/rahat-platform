@@ -255,6 +255,8 @@ export const MS_ACTIONS = {
       GET_STELLAR_STATS: 'aa.stellar.getStellarStats',
       GET_TRANSACTIONS: 'aa.stellar.getTransactions',
       GET_WALLET_BALANCE: 'aa.stellar.getWalletBalance',
+      // Remove after test
+      INTERNAL_FAUCET_TRUSTLINE: `aa.stellar.internalFaucetTrustline`,
       GET_VENDOR_STATS: 'aa.stellar.getVendorStats',
       TRUSTLINE: 'aa.stellar.trustline',
       GET_REDEMPTION_REQUEST: 'aa.stellar.getRedemptionRequest',

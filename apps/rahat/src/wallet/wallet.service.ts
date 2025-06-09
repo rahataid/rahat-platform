@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { BulkCreateWallet, BulkUpdateWallet, ChainType, EVMWallet, StellarWallet, WalletKeys } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
+import { BulkWalletAddressDto } from './dto/getBy.dto';
 import { FileWalletStorage } from './storages/fs.storage';
 
 @Injectable()
@@ -162,6 +163,12 @@ export class WalletService implements OnModuleInit {
     this.logger.log(`Wallet address: ${walletAddress}`);
 
     return this.getSecretByWallet(walletAddress, chain);
+  }
+
+  async getBulkSecretByWallet(accounts: BulkWalletAddressDto) {
+    return Promise.all(accounts.walletAddresses.map(async (walletAddress) => {
+      return this.getSecretByWallet(walletAddress, accounts.chain);
+    }))
   }
 
 

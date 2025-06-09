@@ -5,4 +5,5 @@ export const JOBS = {
     GET_SECRET_BY_WALLET: 'rahat.jobs.wallet.getSecretByWallet',
     GET_SECRET_BY_PHONE: 'rahat.jobs.wallet.getSecretByPhone',
     UPDATE_BULK: 'rahat.jobs.wallet.updateBulk',
+    GET_BULK_SECRET_BY_WALLET: 'rahat.jobs.wallet.getBulkSecretByWallet',
 }
