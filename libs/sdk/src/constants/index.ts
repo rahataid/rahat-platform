@@ -261,6 +261,7 @@ export const MS_ACTIONS = {
     },
     PAYOUT: {
       ASSIGN_TOKEN: 'aa.payout.assignToken',
+      TRIGGER_PAYOUT: 'aa.payout.triggerPayout',
       CREATE: 'aa.payout.create',
       LIST: 'aa.payout.list',
       GET: 'aa.payout.get',

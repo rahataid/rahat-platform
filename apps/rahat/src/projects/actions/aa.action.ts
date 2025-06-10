@@ -428,6 +428,9 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.PAYOUT.ASSIGN_TOKEN]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PAYOUT.ASSIGN_TOKEN, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.PAYOUT.TRIGGER_PAYOUT]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.TRIGGER_PAYOUT, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYMENT_PROVIDERS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYMENT_PROVIDERS, uuid }, payload),
 

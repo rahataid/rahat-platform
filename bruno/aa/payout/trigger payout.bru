@@ -1,0 +1,30 @@
+meta {
+  name: trigger payout
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.payout.triggerPayout",
+    "payload": {
+      "uuid": "7204ac67-92d4-4a27-ba6a-005a2f78c569"
+    }
+  }
+  
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
+}

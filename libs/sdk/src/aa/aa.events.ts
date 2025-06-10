@@ -104,6 +104,7 @@ export const JOBS = {
   },
   PAYOUT: {
     ASSIGN_TOKEN: 'aa.jobs.payout.assignToken',
+    TRIGGER_PAYOUT: 'aa.jobs.payout.triggerPayout',
     CREATE: 'aa.jobs.payout.create',
     LIST: 'aa.jobs.payout.list',
     GET: 'aa.jobs.payout.get',

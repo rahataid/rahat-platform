@@ -19,6 +19,7 @@ export const seedPaymentProvider = async () => {
         }
         const paymentProviderValue = {
             url,
+            appId: 'your_app_id',
             accessToken: 'sk_test_1234567890',
         };
 
