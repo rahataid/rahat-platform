@@ -1230,8 +1230,23 @@ export class BeneficiaryService {
           },
         },
       },
-      include: {
-        Beneficiary: true
+      select: {
+        beneficiaryGroup: {
+          select: {
+            name: true
+          }
+        },
+        Beneficiary: {
+          include: {
+            pii: {
+              select: {
+                name: true,
+                phone: true,
+
+              }
+            }
+          }
+        }
       }
     })
   }
