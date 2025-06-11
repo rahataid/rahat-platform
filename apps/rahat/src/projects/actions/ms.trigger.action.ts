@@ -28,6 +28,7 @@ export const MS_TRIGGERS_JOBS = {
   REVERT_PHASE: {
     CREATE: 'ms.jobs.revertPhase.create',
     GET_ALL: 'ms.jobs.revertPhase.getAll',
+    GET_ONE: 'ms.jobs.revertPhase.getOne',
   },
   RIVER_STATIONS: {
     GET_DHM: 'ms.jobs.riverStations.getDhm',
@@ -212,6 +213,11 @@ export const msTriggerActions: ProjectActionFunc = {
   [MS_ACTIONS.MS_REVERT_PHASE.GET_ALL]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.REVERT_PHASE.GET_ALL }, payload);
+  },
+
+  [MS_ACTIONS.MS_REVERT_PHASE.GET_ONE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.REVERT_PHASE.GET_ONE }, payload);
   },
   // **** revert phase end ******//
 

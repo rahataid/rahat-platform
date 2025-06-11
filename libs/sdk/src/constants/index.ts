@@ -404,6 +404,7 @@ export const MS_ACTIONS = {
   MS_REVERT_PHASE: {
     CREATE: 'ms.revertPhase.create',
     GET_ALL: 'ms.revertPhase.getAll',
+    GET_ONE: 'ms.revertPhase.getOne',
   },
   MS_PHASES: {
     CREATE: 'ms.phases.create',
