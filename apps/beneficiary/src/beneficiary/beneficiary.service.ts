@@ -1217,6 +1217,43 @@ export class BeneficiaryService {
       message: 'Account check in progress. Data will be listed soon.',
     };
   }
+
+
+  async getGroupBeneficiariesFailedAccount(uuid: string) {
+    return this.prisma.groupedBeneficiaries.findMany({
+      where: {
+        beneficiaryGroupId: uuid,
+        Beneficiary: {
+          extras: {
+            path: ['error'],
+            not: null,
+          },
+        },
+      },
+      select: {
+        beneficiaryGroup: {
+          select: {
+            name: true
+          }
+        },
+        Beneficiary: {
+          include: {
+            pii: {
+              select: {
+                name: true,
+                phone: true,
+
+              }
+            }
+          }
+        }
+      }
+    })
+  }
+
+
+
+
   async removeOneGroup(uuid: string) {
     const benfGroup = await this.prisma.beneficiaryGroup.findUnique({
       where: {
