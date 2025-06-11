@@ -23,6 +23,12 @@ export const MS_TRIGGERS_JOBS = {
     REVERT_PHASE: 'ms.jobs.phases.revertPhase',
     GET_BY_LOCATION: 'ms.jobs.phases.getByLocation',
     ACTIVATE: 'ms.jobs.phases.activate',
+    CONFIGURE_THRESHOLD: 'ms.jobs.phase.configureThreshold',
+  },
+  REVERT_PHASE: {
+    CREATE: 'ms.jobs.revertPhase.create',
+    GET_ALL: 'ms.jobs.revertPhase.getAll',
+    GET_ONE: 'ms.jobs.revertPhase.getOne',
   },
   RIVER_STATIONS: {
     GET_DHM: 'ms.jobs.riverStations.getDhm',
@@ -189,7 +195,31 @@ export const msTriggerActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.ACTIVATE }, payload);
   },
+
+
+
+  [MS_ACTIONS.MS_PHASES.CONFIGURE_THRESHOLD]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.CONFIGURE_THRESHOLD }, payload);
+  },
   // // **** phases end ******//
+
+  // **** revert phase start ******//
+  [MS_ACTIONS.MS_REVERT_PHASE.CREATE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.REVERT_PHASE.CREATE }, payload);
+  },
+
+  [MS_ACTIONS.MS_REVERT_PHASE.GET_ALL]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.REVERT_PHASE.GET_ALL }, payload);
+  },
+
+  [MS_ACTIONS.MS_REVERT_PHASE.GET_ONE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.REVERT_PHASE.GET_ONE }, payload);
+  },
+  // **** revert phase end ******//
 
   // **** river stations start ******//
 

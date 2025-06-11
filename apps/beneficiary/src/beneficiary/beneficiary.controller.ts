@@ -206,6 +206,11 @@ export class BeneficiaryController {
     return this.service.removeOneGroup(uuid);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK })
+  groupAccountCheck(uuid: string) {
+    return this.service.groupAccountCheck(uuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_GROUPS })
   getAllGroups(dto: ListBeneficiaryGroupDto) {
     return this.service.getAllGroups(dto);

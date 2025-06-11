@@ -204,6 +204,7 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.stakeholders.getAll',
       GET_ONE: 'aaProject.stakeholders.getOne',
       ADD: 'aaProject.stakeholders.add',
+      BULK_ADD: "aaProject.stakeholders.bulkAdd",
       REMOVE: 'aaProject.stakeholders.remove',
       UPDATE: 'aaProject.stakeholders.update',
       GET_GROUP: 'aaProject.stakeholders.getGroup',
@@ -268,6 +269,7 @@ export const MS_ACTIONS = {
       LIST: 'aa.payout.list',
       GET: 'aa.payout.get',
       UPDATE: 'aa.payout.update',
+      GET_PAYMENT_PROVIDERS: 'aa.payout.getPaymentProviders',
     },
   },
   C2CProject: {
@@ -403,6 +405,11 @@ export const MS_ACTIONS = {
     UPDATE: 'ms.triggers.update',
     GET_BY_LOCATION: 'ms.triggers.getByLocation',
   },
+  MS_REVERT_PHASE: {
+    CREATE: 'ms.revertPhase.create',
+    GET_ALL: 'ms.revertPhase.getAll',
+    GET_ONE: 'ms.revertPhase.getOne',
+  },
   MS_PHASES: {
     CREATE: 'ms.phases.create',
     GET_ONE: 'ms.phases.getOne',
@@ -412,6 +419,7 @@ export const MS_ACTIONS = {
     REVERT_PHASE: 'ms.phases.revertPhase',
     GET_BY_LOCATION: 'ms.phases.getByLocation',
     ACTIVATE: 'ms.phases.activate',
+    CONFIGURE_THRESHOLD: "ms.phase.configureThreshold"
   },
 
   MS_RIVER_STATIONS: {

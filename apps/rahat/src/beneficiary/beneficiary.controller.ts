@@ -472,6 +472,15 @@ export class BeneficiaryController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get('groups/:uuid/account-check')
+  @ApiParam({ name: 'uuid', required: true })
+  async groupAccountCheck(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK }, uuid);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Delete('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
   async removeGroup(@Param('uuid') uuid: UUID) {
