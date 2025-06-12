@@ -61,11 +61,12 @@ export class WalletInterceptor implements NestInterceptor {
   private async ensureValidWalletAddress(
     walletAddress?: string
   ): Promise<string> {
-    const chain = await this.getChainName();
+    // const chain = await this.getChainName();
 
     if (!walletAddress) {
-      const result = await this.walletService.create([chain]);
-      return result[0].address;
+      const result = await this.walletService.createWallet();
+      console.log('result', result);
+      return result.address;
     }
 
     const existingBeneficiary = await this.prismaService.beneficiary.findUnique(

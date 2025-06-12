@@ -18,17 +18,6 @@ export interface WalletCreateResult {
 // TODO: Multi-chain support - Future enhancement to support multiple chains per instance
 // Currently: One instance = One chain type
 // Future: One instance = Multiple chain types with dynamic selection
-interface ChainSettings {
-  defaultChain?: ChainType;
-  stellar?: {
-    rpcUrl: string;
-    networkPassphrase?: string;
-  };
-  evm?: {
-    rpcUrl: string;
-    chainId?: number;
-  };
-}
 
 @Injectable()
 export class WalletService implements OnModuleInit {
