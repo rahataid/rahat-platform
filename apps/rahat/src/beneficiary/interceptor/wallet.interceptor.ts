@@ -56,19 +56,35 @@ export class WalletInterceptor implements NestInterceptor {
         : new RpcException('Wallet processing failed');
     }
   }
-  // TODO: EVM Change
 
   private async ensureValidWalletAddress(
     walletAddress?: string
   ): Promise<string> {
-    // const chain = await this.getChainName();
+    const defaultChain = await this.getDefaultChain();
 
     if (!walletAddress) {
-      const result = await this.walletService.createWallet();
-      console.log('result', result);
+      const result = await this.walletService.createWallet(defaultChain);
+      console.log(
+        'Created new wallet for chain:',
+        defaultChain,
+        result.address
+      );
       return result.address;
     }
 
+    // Validate address format and detect chain type
+    try {
+      const isValid = await this.walletService.validateAddress(walletAddress);
+      if (!isValid) {
+        throw new RpcException(
+          `Invalid wallet address format: ${walletAddress}`
+        );
+      }
+    } catch (error) {
+      throw new RpcException(`Invalid wallet address: ${error.message}`);
+    }
+
+    // Check if wallet address already exists
     const existingBeneficiary = await this.prismaService.beneficiary.findUnique(
       {
         where: { walletAddress },
@@ -83,12 +99,30 @@ export class WalletInterceptor implements NestInterceptor {
     return walletAddress;
   }
 
-  private async getChainName(): Promise<ChainType> {
+  private async getDefaultChain(): Promise<ChainType> {
+    try {
+      return await this.walletService.getDefaultChain();
+    } catch (error) {
+      console.warn(
+        'Failed to get default chain from wallet service, falling back to settings detection'
+      );
+      return this.getChainFromSettings();
+    }
+  }
+
+  private async getChainFromSettings(): Promise<ChainType> {
     const settings = new SettingsService(this.prismaService);
     const contractSettings = await settings.getByName('CHAIN_SETTINGS');
     const contractValue = contractSettings?.value as {
       nativeCurrency?: { symbol?: string };
+      id?: string;
     };
-    return (contractValue?.nativeCurrency?.symbol as ChainType) || 'evm';
+
+    // Improved chain detection logic
+    if (contractValue?.nativeCurrency?.symbol === 'ETH' || contractValue?.id) {
+      return 'evm';
+    }
+
+    return 'stellar'; // default fallback
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
 import {
   BulkCreateWallet,
   ChainType,
@@ -7,10 +7,10 @@ import {
 } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
-import { BlockchainProviderRegistry } from './providers/blockchain-provider.registry';
-import { FileWalletStorage } from './storages/fs.storage';
-
-// Import the local providers
+import {
+  BlockchainProviderRegistry,
+  BLOCKCHAIN_REGISTRY_TOKEN,
+} from './providers/blockchain-provider.registry';
 
 export interface WalletCreateResult {
   chain: ChainType;
@@ -25,16 +25,14 @@ export interface WalletCreateResult {
 @Injectable()
 export class WalletService implements OnModuleInit {
   private readonly logger = new Logger(WalletService.name);
-  private providerRegistry: BlockchainProviderRegistry;
   private currentChainType: ChainType; // TODO: Remove when multi-chain support is implemented
 
   constructor(
     private readonly settings: SettingsService,
-    private readonly prisma: PrismaService
-  ) {
-    const storage = new FileWalletStorage();
-    this.providerRegistry = new BlockchainProviderRegistry(storage);
-  }
+    private readonly prisma: PrismaService,
+    @Inject(BLOCKCHAIN_REGISTRY_TOKEN)
+    private readonly providerRegistry: BlockchainProviderRegistry
+  ) {}
 
   async onModuleInit() {
     await this.initializeProviders();
@@ -49,6 +47,22 @@ export class WalletService implements OnModuleInit {
     this.currentChainType = chainSettings.detectedChain;
 
     this.logger.log(`Detected chain type: ${this.currentChainType}`);
+    this.logger.log(
+      `Registered wallet classes: ${this.providerRegistry
+        .getRegisteredChainTypes()
+        .join(', ')}`
+    );
+
+    // Validate that the detected chain is supported
+    if (
+      !this.providerRegistry
+        .getRegisteredChainTypes()
+        .includes(this.currentChainType)
+    ) {
+      throw new Error(
+        `Chain type ${this.currentChainType} is not registered in the module`
+      );
+    }
 
     // Initialize the detected chain using IWalletManager
     await this.providerRegistry.initializeChain(
@@ -57,11 +71,12 @@ export class WalletService implements OnModuleInit {
     );
 
     // TODO: Multi-chain support - Initialize all chains instead of just one
-    // await this.providerRegistry.initializeChain('stellar', chainSettings.stellar);
-    // await this.providerRegistry.initializeChain('evm', chainSettings.evm);
+    // for (const chainType of this.providerRegistry.getRegisteredChainTypes()) {
+    //   await this.providerRegistry.initializeChain(chainType, chainSettings[chainType]);
+    // }
 
     this.logger.log(
-      `Registered wallet managers: ${this.providerRegistry
+      `Initialized wallet managers: ${this.providerRegistry
         .getSupportedChains()
         .join(', ')}`
     );
