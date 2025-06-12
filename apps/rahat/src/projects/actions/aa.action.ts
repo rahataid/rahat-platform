@@ -26,8 +26,6 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.TRIGGERS.ACTIVATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.TRIGGERS.ACTIVATE, uuid }, payload),
-  [MS_ACTIONS.AAPROJECT.TRIGGERS.TEST]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.TRIGGERS.TEST, uuid }, payload),
   // **** triggers end ******//
 
   // **** river stations start ******//
