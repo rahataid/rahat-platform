@@ -1,4 +1,4 @@
-name: Stage AA CI/CD
+name: Demo AA V2 CI/CD
 on:
   push:
     branches:
