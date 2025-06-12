@@ -3,8 +3,16 @@ import { ChainType } from '@rahataid/wallet';
 export interface IWalletProvider {
   readonly chainType: ChainType;
   initialize(config: any): Promise<void>;
-  createWallet(): Promise<any>;
-  getWalletKeys(address: string): Promise<any>;
+  createWallet(): Promise<{
+    chain: ChainType;
+    address: string;
+    privateKey: string;
+  }>;
+  getWalletKeys(address: string): Promise<{
+    chain: ChainType;
+    address: string;
+    privateKey: string;
+  }>;
   validateAddress(address: string): boolean;
 }
 
