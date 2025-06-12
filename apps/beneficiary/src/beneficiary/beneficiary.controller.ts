@@ -201,9 +201,20 @@ export class BeneficiaryController {
     return this.service.getOneGroup(uuid);
   }
 
+  // Handles the event for exporting a group beneficiary bank account fails.
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_GROUP_BENEF_FAIL_ACCOUNT })
+  exportGroupBeneficiaryAccountFailed(uuid: string) {
+    return this.service.getGroupBeneficiariesFailedAccount(uuid)
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.REMOVE_ONE_GROUP })
   removeGroup(uuid: string) {
     return this.service.removeOneGroup(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK })
+  groupAccountCheck(uuid: string) {
+    return this.service.groupAccountCheck(uuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_GROUPS })
