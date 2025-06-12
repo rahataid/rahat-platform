@@ -46,3 +46,8 @@ export type BulkCreateWallet = {
     chain: ChainType;
     count: number;
 }
+
+export type BulkUpdateWallet = {
+    chain: ChainType;
+    benUuids: string[];
+}

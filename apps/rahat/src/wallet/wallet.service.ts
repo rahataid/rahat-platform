@@ -1,7 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { BulkCreateWallet, ChainType, EVMWallet, StellarWallet, WalletKeys } from '@rahataid/wallet';
+import { BulkCreateWallet, BulkUpdateWallet, ChainType, EVMWallet, StellarWallet, WalletKeys } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
+import { BulkWalletAddressDto } from './dto/getBy.dto';
 import { FileWalletStorage } from './storages/fs.storage';
 
 @Injectable()
@@ -116,6 +117,17 @@ export class WalletService implements OnModuleInit {
     return walletAddresses;
   }
 
+  async updateBulk(bulkUpdateWalletDto: BulkUpdateWallet) {
+    return Promise.all(bulkUpdateWalletDto.benUuids.map(async (uuid) => {
+      const walletAddress = await this.create([bulkUpdateWalletDto.chain]);
+      const beneficiary = await this.prisma.beneficiary.update({
+        where: { uuid },
+        data: { walletAddress: walletAddress[0].address },
+      });
+      return { uuid, walletAddress: beneficiary.walletAddress, secret: walletAddress[0].privateKey };
+    }))
+  }
+
   async getWalletByPhone(phoneNumber: string) {
     const result = await this.prisma.beneficiaryPii.findUnique({
       where: { phone: phoneNumber },
@@ -139,7 +151,7 @@ export class WalletService implements OnModuleInit {
       throw new Error("Wallet address not found");
     }
     const storage = new FileWalletStorage();
-    console.log(storage);
+
     this.logger.log(`Storage: ${JSON.stringify(storage)}`);
     return storage.getKey(walletAddress, chain);
   }
@@ -151,6 +163,12 @@ export class WalletService implements OnModuleInit {
     this.logger.log(`Wallet address: ${walletAddress}`);
 
     return this.getSecretByWallet(walletAddress, chain);
+  }
+
+  async getBulkSecretByWallet(accounts: BulkWalletAddressDto) {
+    return Promise.all(accounts.walletAddresses.map(async (walletAddress) => {
+      return this.getSecretByWallet(walletAddress, accounts.chain);
+    }))
   }
 
 

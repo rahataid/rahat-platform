@@ -93,14 +93,18 @@ export const JOBS = {
     DISBURSE: 'aa.jobs.stellar.disburse',
     ADD_ONCHAIN_TRIGGER: 'aa.jobs.stellar.addTriggerOnChain',
     CHECK_TRUSTLINE: 'aa.jobs.stellar.checkTrustline',
+    CHECK_BULK_TRUSTLINE: 'aa.jobs.stellar.checkBulkTrustline',
     UPDATE_ONCHAIN_TRIGGER: 'aa.jobs.stellar.updateTriggerOnChain',
     GET_ONCHAIN_TRIGGER: 'aa.jobs.stellar.getTriggerOnChain',
     GET_STELLAR_STATS: 'aa.jobs.stellar.getStellarStats',
     GET_TRANSACTIONS: 'aa.jobs.stellar.getTransactions',
     GET_WALLET_BALANCE: 'aa.jobs.stellar.getWalletBalance',
+    // Remove after test
+    INTERNAL_FAUCET_TRUSTLINE: `aa.jobs.stellar.internalFaucetTrustline`,
     GET_VENDOR_STATS: 'aa.jobs.stellar.getVendorStats',
     FAUCET: 'aa.jobs.stellar.fundStellarAccount',
     GET_REDEMPTION_REQUEST: 'aa.jobs.stellar.getRedemptionRequest',
+    RAHAT_FAUCET: 'aa.jobs.stellar.rahatFaucet',
   },
   PAYOUT: {
     ASSIGN_TOKEN: 'aa.jobs.payout.assignToken',

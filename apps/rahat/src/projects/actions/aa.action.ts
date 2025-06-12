@@ -363,6 +363,12 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.CHECK_TRUSTLINE, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.STELLAR.CHECK_BULK_TRUSTLINE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.CHECK_BULK_TRUSTLINE, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.STELLAR.TRUSTLINE]: (
     uuid,
     payload,
@@ -398,6 +404,12 @@ export const aaActions: ProjectActionFunc = {
     payload,
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.GET_WALLET_BALANCE, uuid }, payload),
+// remove after testing
+  [MS_ACTIONS.AAPROJECT.STELLAR.INTERNAL_FAUCET_TRUSTLINE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.INTERNAL_FAUCET_TRUSTLINE, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.STELLAR.GET_VENDOR_STATS]: (
     uuid,
@@ -410,6 +422,13 @@ export const aaActions: ProjectActionFunc = {
     payload,
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.GET_REDEMPTION_REQUEST, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.RAHAT_FAUCET]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.RAHAT_FAUCET, uuid }, payload),
+
   // **** Stellar end **** //
 
   // **** Payout start **** //
