@@ -68,16 +68,16 @@ export class ProjectController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS. })
   @Get()
   list() {
     return this.projectService.list();
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.PUBLIC })
   @Post('actions')
   msActions(
     @Body() data: ProjectCommunicationDto,
@@ -94,8 +94,8 @@ export class ProjectController {
   this endpoint  is used to upload file and parsed the file and send it to  project microservice
   */
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post(':uuid/upload')
   @UseInterceptors(FileInterceptor('file'))
   async upload(@Param('uuid') uuid: UUID, @UploadedFile() file: TFile, @Req() req: Request) {
@@ -127,8 +127,8 @@ export class ProjectController {
 
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
   @Get(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   findOne(@Param('uuid') uuid: UUID) {
@@ -168,8 +168,8 @@ export class ProjectController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @ApiParam({ name: 'uuid', required: true })
   @Get(':uuid/beneficiaries')
   listBeneficiaries(@Query() dto: ListProjectBeneficiaryDto) {
@@ -179,8 +179,8 @@ export class ProjectController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/settings')
   addSettings(@Param('uuid') uuid: UUID, @Body() dto: CreateSettingDto) {
@@ -190,8 +190,8 @@ export class ProjectController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
   projectActions(
