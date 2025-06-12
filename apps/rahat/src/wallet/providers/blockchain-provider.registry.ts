@@ -1,18 +1,10 @@
-import { ChainType } from '@rahataid/wallet';
+import { ChainType, WalletKeys } from '@rahataid/wallet';
 
 export interface IWalletProvider {
   readonly chainType: ChainType;
   initialize(config: any): Promise<void>;
-  createWallet(): Promise<{
-    chain: ChainType;
-    address: string;
-    privateKey: string;
-  }>;
-  getWalletKeys(address: string): Promise<{
-    chain: ChainType;
-    address: string;
-    privateKey: string;
-  }>;
+  createWallet(): Promise<WalletKeys>;
+  getWalletKeys(address: string): Promise<WalletKeys>;
   validateAddress(address: string): boolean;
 }
 
