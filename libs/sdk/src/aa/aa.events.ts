@@ -13,7 +13,6 @@ export const JOBS = {
     ADD: 'aa.jobs.triggers.add',
     REMOVE: 'aa.jobs.triggers.remove',
     ACTIVATE: 'aa.jobs.triggers.activate',
-    TEST: 'aa.jobs.test.disburse'
   },
   ACTIVITIES: {
     GET_ONE: 'aa.jobs.activities.getOne',
@@ -28,7 +27,7 @@ export const JOBS = {
       SESSION_LOGS: 'aa.jobs.activities.communication.sessionLogs',
       RETRY_FAILED: 'aa.jobs.activities.communication.retryFailed',
       GET_STATS: 'aa.jobs.activities.communication.getStats',
-    }
+    },
   },
   ACTIVITY_CATEGORIES: {
     GET_ALL: 'aa.jobs.activityCategories.getAll',
@@ -109,5 +108,11 @@ export const JOBS = {
     GET: 'aa.jobs.payout.get',
     UPDATE: 'aa.jobs.payout.update',
     GET_PAYMENT_PROVIDERS: 'aa.jobs.payout.getPaymentProviders',
-  }
+    TRIGGER_PAYOUT: 'aa.jobs.payout.triggerPayout',
+    TRIGGER_FAILED_PAYOUT_REQUEST: 'aa.jobs.payout.triggerFailedPayoutRequest',
+    TRIGGER_ONE_FAILED_PAYOUT_REQUEST:
+      'aa.jobs.payout.triggerOneFailedPayoutRequest',
+    GET_PAYOUT_LOGS: 'aa.jobs.payout.getPayoutLogs',
+    GET_PAYOUT_LOG: 'aa.jobs.payout.getPayoutLog',
+  },
 };

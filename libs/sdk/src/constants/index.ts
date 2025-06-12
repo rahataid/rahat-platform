@@ -128,8 +128,7 @@ export const MS_ACTIONS = {
     UPDATE_IS_VERIFIED: 'vendor.update_is_verified',
     LIST: 'vendor.list',
     GET_BY_UUID: 'vendor.get_by_uuid',
-    LIST_WITH_PROJECT_DATA: "vendor.list_with_project_data"
-
+    LIST_WITH_PROJECT_DATA: 'vendor.list_with_project_data',
   },
   USER: {},
   ELPROJECT: {
@@ -204,7 +203,7 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.stakeholders.getAll',
       GET_ONE: 'aaProject.stakeholders.getOne',
       ADD: 'aaProject.stakeholders.add',
-      BULK_ADD: "aaProject.stakeholders.bulkAdd",
+      BULK_ADD: 'aaProject.stakeholders.bulkAdd',
       REMOVE: 'aaProject.stakeholders.remove',
       UPDATE: 'aaProject.stakeholders.update',
       GET_GROUP: 'aaProject.stakeholders.getGroup',
@@ -266,6 +265,12 @@ export const MS_ACTIONS = {
       GET: 'aa.payout.get',
       UPDATE: 'aa.payout.update',
       GET_PAYMENT_PROVIDERS: 'aa.payout.getPaymentProviders',
+      TRIGGER_PAYOUT: 'aa.payout.triggerPayout',
+      TRIGGER_FAILED_PAYOUT_REQUEST: 'aa.payout.triggerFailedPayoutRequest',
+      TRIGGER_ONE_FAILED_PAYOUT_REQUEST:
+        'aa.payout.triggerOneFailedPayoutRequest',
+      GET_PAYOUT_LOGS: 'aa.payout.getPayoutLogs',
+      GET_PAYOUT_LOG: 'aa.payout.getPayoutLog',
     },
   },
   C2CProject: {
@@ -414,7 +419,7 @@ export const MS_ACTIONS = {
     REVERT_PHASE: 'ms.phases.revertPhase',
     GET_BY_LOCATION: 'ms.phases.getByLocation',
     ACTIVATE: 'ms.phases.activate',
-    CONFIGURE_THRESHOLD: "ms.phase.configureThreshold"
+    CONFIGURE_THRESHOLD: 'ms.phase.configureThreshold',
   },
 
   MS_RIVER_STATIONS: {
@@ -442,7 +447,7 @@ export const MS_ACTIONS = {
       SESSION_LOGS: 'ms.activities.communication.sessionLogs',
       RETRY_FAILED: 'ms.activities.communication.retryFailed',
       GET_STATS: 'ms.activities.communication.getStats',
-      GET_GROUP_STATS: "ms.triggers.getTransportSessionStatsByGroup"
+      GET_GROUP_STATS: 'ms.triggers.getTransportSessionStatsByGroup',
     },
   },
   MS_CATEGORIES: {
