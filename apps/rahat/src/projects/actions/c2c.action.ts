@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { BeneficiaryJobs, MS_ACTIONS, ProjectJobs } from '@rahataid/sdk'
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types'
 
@@ -129,6 +131,8 @@ export const c2cActions: ProjectActionFunc = {
   [MS_ACTIONS.C2CProject.GET_CAMPAIGN_LOG]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.CAMPAIGN.GET_CAMPAIGN_LOG, uuid }, payload),
   //campaign end
+
+
   // **** Beneficiary Groups **** //
   [MS_ACTIONS.C2CProject.ADD_GROUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.BENEFICIARY.ADD_GROUP, uuid }, payload),
@@ -138,4 +142,7 @@ export const c2cActions: ProjectActionFunc = {
 
   [MS_ACTIONS.C2CProject.GET_ONE_GROUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.BENEFICIARY.GET_ONE_GROUP, uuid }, payload),
+
+  [MS_ACTIONS.C2CProject.LIST_REPORTING]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.REPORTING.LIST, uuid }, payload),
 }

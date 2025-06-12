@@ -1,3 +1,4 @@
+
 ## Core Repository Overview
 
 ### Purpose and Structure
@@ -66,7 +67,7 @@ Before you begin, ensure your system has the following dependencies installed:
 
    Rahat currently supports the following projects:
 
-   - [rahat-project-el](https://github.com/rahataid/rahat-project-el)
+   - [rahat-project-c2c](https://github.com/rahataid/rahat-project-c2c)
 
    Clone the project you want to run and follow the instructions in its README.md file.
 
@@ -97,3 +98,6 @@ Explore the functionalities provided by the Rahat Platform locally. If you encou
 # Production deployment
 
 Refer to [deployment](docs/deployments.md) file for deployment steps.
+
+# License
+This project is licensed under the Mozilla Public License 2.0. See the [LICENSE](LICENSE) file for details.

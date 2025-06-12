@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
   BadRequestException,
   ForbiddenException,
@@ -51,10 +53,44 @@ export class VendorsService {
         });
 
         if (userData) {
-          if (userData?.email === dto.email)
-            throw new Error('Email must be unique');
-          if (userData?.phone === dto.phone)
-            throw new Error('Phone Number must be unique');
+
+          if (userData?.email === dto.email || userData?.phone === dto.phone) {
+            const userRoles = await this.prisma.userRole.findMany({
+              where: { userId: userData.id },
+              include: {
+                Role: {
+                  select: { name: true },
+                },
+              },
+            });
+            const isVendor = userRoles.some(
+              (userRole) => userRole.Role.name === UserRoles.VENDOR
+            );
+
+            if (!isVendor) {
+              throw new BadRequestException(
+                `User with ${dto.email === userData?.email ? 'email' : 'phone'} already exists`
+              );
+            }
+            const userAuth = await prisma.auth.findFirst({
+              where: { userId: userData.id },
+            });
+            const result = await prisma.user.update({
+              where: { id: userData.id },
+              data: {
+                ...rest,
+                updatedAt: new Date(),
+              },
+            });
+
+            await prisma.auth.update({
+              where: { id: userAuth.id, },
+              data: {
+                serviceId: dto.wallet,
+              },
+            })
+            return result;
+          }
         }
       }
 
@@ -189,7 +225,8 @@ export class VendorsService {
     });
   }
 
-  async getVendor(id: UUID | Address) {
+  async getVendor(id: UUID | Address,
+  ) {
     const data = isAddress(id)
       ? await this.prisma.user.findFirst({ where: { wallet: id } })
       : await this.prisma.user.findUnique({ where: { uuid: id } });
@@ -197,26 +234,64 @@ export class VendorsService {
       where: { vendorId: data.uuid },
       include: {
         Project: true,
+        User: true
       },
     });
-    const vendorIdentifier = projectData[0]?.extras;
-    const projects = projectData.map((project) => project.Project);
-    const userdata = { ...data, projects, vendorIdentifier };
-    return userdata;
+    //return vendor if no project data available
+    if (projectData.length === 0) {
+      return data
+    }
+    // const vendorIdentifier = projectData[0]?.extras;
+    // const projects = projectData.map((project) => project.Project);
+    // const userdata = { ...data, projects, vendorIdentifier };
+    return projectData;
   }
 
   async listVendor(dto) {
+    const { projectName, status, page, perPage } = dto;
+    const where: any = {
+      Role: {
+        name: UserRoles.VENDOR,
+      },
+      User: {
+        deletedAt: null,
+      },
+    };
+
+    if (projectName) {
+      where.User = {
+        ...where.User,
+        VendorProject: {
+          some: {
+            Project: {
+              name: projectName,
+            },
+          },
+        },
+      };
+    }
+
+    if (status) {
+      if (status === 'Assigned') {
+        where.User = {
+          ...where.User,
+          VendorProject: {
+            some: {},
+          },
+        };
+      } else if (status === 'Pending') {
+        where.User = {
+          ...where.User,
+          VendorProject: {
+            none: {},
+          },
+        };
+      }
+    }
     return paginate(
       this.prisma.userRole,
       {
-        where: {
-          Role: {
-            name: UserRoles.VENDOR,
-          },
-          User: {
-            deletedAt: null,
-          },
-        },
+        where,
         include: {
           User: {
             include: {
@@ -233,8 +308,8 @@ export class VendorsService {
         },
       },
       {
-        page: dto.page,
-        perPage: dto.perPage,
+        page,
+        perPage,
       }
     );
   }

@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -16,6 +18,7 @@ import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ExternalAppGuard } from '../decorators';
 import { GrievanceModule } from '../grievance/grievance.module';
 import { ListenersModule } from '../listeners/listeners.module';
+import { OfframpModule } from '../offramp/offramp.module';
 import { MetaTxnProcessorsModule } from '../processors/meta-transaction/metaTransaction.module';
 import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
@@ -59,6 +62,7 @@ import { AppService } from './app.service';
     GrievanceModule,
     TokenModule,
     SettingsModule,
+    OfframpModule,
     RequestContextModule,
     QueueModule,
   ],

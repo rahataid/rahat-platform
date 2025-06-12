@@ -6,6 +6,7 @@
 !.env.setup.example
 play
 .npmrc
+env.*
 
 # compiled output
 dist
@@ -65,3 +66,19 @@ typechain-types
 
 # bruno-testcase
 temp
+
+# Hardhat files
+/cache
+/libs/contracts/artifacts
+/build
+# TypeChain files
+/typechain
+/typechain-types
+
+# solidity-coverage files
+/coverage
+/coverage.json
+
+# Hardhat Ignition default folder for deployments against a local node
+ignition/deployments/chain-31337
+

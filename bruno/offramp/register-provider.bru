@@ -1,0 +1,29 @@
+meta {
+  name: register-provider
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/offramps/providers
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Kotani Pay",
+    "config": {
+      "baseUrl": "https://api.kotanipay.io/api/v3",
+      "apiKey": "eyJ1c2VyX2lkIjoiNjdkOGNmNWJiM2ViNmZmYmY5ZTY0NDFkIiwiY3JlYXRlZF9hdCI6IjIwMjUtMDMtMThUMTU6NDk6MDQuNjQ4WiJ9.2ce2574f940ad9cb0b4f1f5ae9925663e7f7b18d5b121455a6838a9c9defdf77"
+    },
+    "description": "Kotani Pay is a payment gateway",
+    "extras": {
+      "fee": 0.1,
+      "supportedCurrency": [
+        "KES",
+        "USD"
+      ]
+    }
+  }
+}

@@ -9,6 +9,16 @@ export const EVENTS = {
 };
 
 export const JOBS = {
+  GROUP: {
+    CREATE: 'rahat.jobs.group.create',
+    LIST: 'rahat.jobs.group.list',
+    GET: 'rahat.jobs.group.get',
+  },
+  BENEFICIARY_GROUP: {
+    BULK_ASSIGN: 'rahat.jobs.beneficiary_group.bulk_assign',
+    LIST: 'rahat.jobs.beneficiary_group.list',
+    LIST_BY_GROUP: 'rahat.jobs.beneficiary_group.lis_by_group',
+  },
   PROJECT_CREATE: 'project.create',
   PROJECT_UPDATE: 'project.update',
   PROJECT_DELETE: 'project.delete',
@@ -23,6 +33,7 @@ export const JOBS = {
   REQUEST_REDEMPTION: 'rahat.jobs.project.request_redemption',
   UPDATE_REDEMPTION: 'rahat.jobs.project.update_redemption',
   LIST_REDEMPTION: 'rahat.jobs.project.list_redemption',
+  GET_BENEFICIARY_REDEMPTION: 'rahat.jobs.project.get_beneficiary_redemption',
   GET_VENDOR_REDEMPTION: 'rahat.jobs.project.get_redemption_vendor',
   GET_REDEMPTION: 'rahat.jobs.project.get_redemption',
   GET_ALL_STATS: 'rahat.jobs.project.get_all_stats',
@@ -90,5 +101,7 @@ export const JOBS = {
   REPORTING: {
     LIST: 'rahat.jobs.reporting.list',
     GET: 'rahat.jobs.reporting.get',
+    LIST_EYE_CHECKEUP_LINE: 'rahat.jobs.reporting.list_eye_checkup_line',
+    LIST_PURCHASE_OF_GLASSESS_LINE: 'rahat.jobs.reporting.list_purchase_of_glassess',
   },
 };
