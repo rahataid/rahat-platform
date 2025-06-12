@@ -1,13 +1,16 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { BulkCreateWallet, ChainType, WalletKeys } from '@rahataid/wallet';
+import {
+  BulkCreateWallet,
+  ChainType,
+  IConnectedWallet,
+  WalletKeys,
+} from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
+import { BlockchainProviderRegistry } from './providers/blockchain-provider.registry';
 import { FileWalletStorage } from './storages/fs.storage';
 
 // Import the local providers
-import { BlockchainProviderRegistry } from './providers/blockchain-provider.registry';
-import { StellarWalletProvider } from './providers/stellar-wallet.provider';
-import { EVMWalletProvider } from './providers/evm-wallet.provider';
 
 export interface WalletCreateResult {
   chain: ChainType;
@@ -29,7 +32,8 @@ export class WalletService implements OnModuleInit {
     private readonly settings: SettingsService,
     private readonly prisma: PrismaService
   ) {
-    this.providerRegistry = new BlockchainProviderRegistry();
+    const storage = new FileWalletStorage();
+    this.providerRegistry = new BlockchainProviderRegistry(storage);
   }
 
   async onModuleInit() {
@@ -37,10 +41,7 @@ export class WalletService implements OnModuleInit {
   }
 
   private async initializeProviders() {
-    this.logger.log('Initializing blockchain providers...');
-
-    // Register and initialize providers
-    const storage = new FileWalletStorage();
+    this.logger.log('Initializing blockchain wallet managers...');
 
     // TODO: Multi-chain support - Currently detecting single chain from settings
     // Future: Support multiple chains simultaneously
@@ -49,26 +50,18 @@ export class WalletService implements OnModuleInit {
 
     this.logger.log(`Detected chain type: ${this.currentChainType}`);
 
-    if (this.currentChainType === 'stellar') {
-      // Register Stellar provider
-      const stellarProvider = new StellarWalletProvider(storage);
-      await stellarProvider.initialize(chainSettings.stellar);
-      this.providerRegistry.register('stellar', stellarProvider);
-    } else {
-      // Register EVM provider
-      const evmProvider = new EVMWalletProvider(storage);
-      await evmProvider.initialize(chainSettings.evm);
-      this.providerRegistry.register('evm', evmProvider);
-    }
+    // Initialize the detected chain using IWalletManager
+    await this.providerRegistry.initializeChain(
+      this.currentChainType,
+      chainSettings[this.currentChainType]
+    );
 
-    // TODO: Multi-chain support - Register all providers instead of just one
-    // await stellarProvider.initialize(chainSettings.stellar);
-    // this.providerRegistry.register('stellar', stellarProvider);
-    // await evmProvider.initialize(chainSettings.evm);
-    // this.providerRegistry.register('evm', evmProvider);
+    // TODO: Multi-chain support - Initialize all chains instead of just one
+    // await this.providerRegistry.initializeChain('stellar', chainSettings.stellar);
+    // await this.providerRegistry.initializeChain('evm', chainSettings.evm);
 
     this.logger.log(
-      `Registered providers: ${this.providerRegistry
+      `Registered wallet managers: ${this.providerRegistry
         .getSupportedChains()
         .join(', ')}`
     );
@@ -78,10 +71,9 @@ export class WalletService implements OnModuleInit {
   async createWallet(chainType?: ChainType): Promise<WalletKeys> {
     // TODO: Multi-chain support - Remove currentChainType fallback
     const chain = chainType || this.currentChainType;
-    const provider = this.providerRegistry.getProvider(chain);
 
     this.logger.log(`Creating ${chain} wallet`);
-    return provider.createWallet();
+    return this.providerRegistry.createWallet(chain);
   }
 
   // Multi-chain wallet creation
@@ -103,11 +95,11 @@ export class WalletService implements OnModuleInit {
 
     const chainWallets = await Promise.all(
       supportedChains.map(async (chain: ChainType) => {
-        const wallet = await this.createWallet(chain);
+        const walletKeys = await this.createWallet(chain);
         return {
           chain,
-          address: wallet.address,
-          privateKey: wallet.privateKey,
+          address: walletKeys.address,
+          privateKey: walletKeys.privateKey,
         };
       })
     );
@@ -153,8 +145,10 @@ export class WalletService implements OnModuleInit {
 
     for (const chainType of chains) {
       try {
-        const provider = this.providerRegistry.getProvider(chainType);
-        const walletKeys = await provider.getWalletKeys(walletAddress);
+        const walletKeys = await this.providerRegistry.getWalletKeys(
+          walletAddress,
+          chainType
+        );
         if (walletKeys) {
           return walletKeys;
         }
@@ -195,6 +189,34 @@ export class WalletService implements OnModuleInit {
     return result.beneficiary.walletAddress;
   }
 
+  // Connect to existing wallet
+  async connectWallet(
+    address: string,
+    chain?: ChainType
+  ): Promise<IConnectedWallet> {
+    const chainType = chain || (await this.detectChainFromAddress(address));
+
+    if (!this.providerRegistry.getSupportedChains().includes(chainType)) {
+      throw new Error(`Chain ${chainType} not supported in this instance`);
+    }
+
+    return this.providerRegistry.connectWallet(address, chainType);
+  }
+
+  // Import wallet from private key
+  async importWallet(
+    privateKey: string,
+    chain?: ChainType
+  ): Promise<WalletKeys> {
+    const chainType = chain || this.currentChainType;
+
+    if (!this.providerRegistry.getSupportedChains().includes(chainType)) {
+      throw new Error(`Chain ${chainType} not supported in this instance`);
+    }
+
+    return this.providerRegistry.importWallet(privateKey, chainType);
+  }
+
   // Validation methods
   async validateAddress(address: string, chain?: ChainType): Promise<boolean> {
     const chainType = chain || (await this.detectChainFromAddress(address));
@@ -205,8 +227,7 @@ export class WalletService implements OnModuleInit {
       return false;
     }
 
-    const provider = this.providerRegistry.getProvider(chainType);
-    return provider.validateAddress(address);
+    return this.providerRegistry.validateAddress(address, chainType);
   }
 
   // Utility methods
@@ -266,16 +287,7 @@ export class WalletService implements OnModuleInit {
   }
 
   private async detectChainFromAddress(address: string): Promise<ChainType> {
-    // Try to detect chain type from address format
-    if (address.startsWith('0x') && address.length === 42) {
-      return 'evm';
-    }
-    if (address.length === 56 && address.startsWith('G')) {
-      return 'stellar';
-    }
-
-    // Default to instance's chain type
-    return this.currentChainType;
+    return this.providerRegistry.detectChainFromAddress(address);
   }
 
   // Backward compatibility methods (deprecated)
