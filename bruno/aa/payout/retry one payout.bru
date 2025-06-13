@@ -1,7 +1,7 @@
 meta {
-  name: list payout payment providers
+  name: retry one payout
   type: http
-  seq: 5
+  seq: 9
 }
 
 post {
@@ -16,9 +16,9 @@ auth:bearer {
 
 body:json {
   {
-    "action": "aa.payout.getPaymentProviders",
+    "action": "aa.payout.triggerOneFailedPayoutRequest",
     "payload": {
-      "uuid": "9f6df560-490f-4e8f-9940-048afe94c861"
+      "beneficiaryRedeemUuid": "9f6df560-490f-4e8f-9940-048afe94c861"
     }
   }
 }
