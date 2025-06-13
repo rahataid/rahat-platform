@@ -114,15 +114,15 @@ export class WalletInterceptor implements NestInterceptor {
     const settings = new SettingsService(this.prismaService);
     const contractSettings = await settings.getByName('CHAIN_SETTINGS');
     const contractValue = contractSettings?.value as {
-      nativeCurrency?: { symbol?: string };
-      id?: string;
+      type: string;
     };
 
-    // Improved chain detection logic
-    if (contractValue?.nativeCurrency?.symbol === 'ETH' || contractValue?.id) {
-      return 'evm';
+    if (!contractValue?.type) {
+      throw new Error(
+        'Chain configuration must include a "type" field (evm or stellar)'
+      );
     }
 
-    return 'stellar'; // default fallback
+    return contractValue.type as ChainType;
   }
 }

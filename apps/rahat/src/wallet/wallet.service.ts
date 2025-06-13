@@ -11,6 +11,7 @@ import {
   BlockchainProviderRegistry,
   BLOCKCHAIN_REGISTRY_TOKEN,
 } from './providers/blockchain-provider.registry';
+import { ChainConfig } from './types/chain-config.interface';
 
 export interface WalletCreateResult {
   chain: ChainType;
@@ -251,41 +252,36 @@ export class WalletService implements OnModuleInit {
     return this.currentChainType;
   }
 
-  // TODO: Multi-chain support - Replace with proper multi-chain settings
+  // Chain configuration using new flat structure
   private async getCurrentChainSettings(): Promise<{
     detectedChain: ChainType;
     stellar: any;
     evm: any;
   }> {
     const settings = await this.settings.getByName('CHAIN_SETTINGS');
-    const rawValue = settings?.value as any;
+    const rawValue = settings?.value as unknown as ChainConfig;
 
-    // Detect chain type from current settings format
-    let detectedChain: ChainType = 'stellar'; // default
+    if (!rawValue?.type) {
+      throw new Error(
+        'Chain configuration must include a "type" field (evm or stellar)'
+      );
+    }
+
+    const detectedChain: ChainType = rawValue.type as ChainType;
     let evmConfig = null;
     let stellarConfig = null;
 
-    if (rawValue && rawValue.rpcUrls) {
-      // Current settings format detection
-      const isEVMChain =
-        rawValue.nativeCurrency?.symbol === 'ETH' || rawValue.id;
-      detectedChain = isEVMChain ? 'evm' : 'stellar';
-
-      if (isEVMChain) {
-        evmConfig = {
-          rpcUrl:
-            rawValue.rpcUrls?.default?.http?.[0] ||
-            'https://base-sepolia-rpc.publicnode.com',
-          chainId: parseInt(rawValue.id) || 84532,
-        };
-      } else {
-        stellarConfig = {
-          rpcUrl:
-            rawValue.rpcUrls?.default?.http?.[0] ||
-            'https://stellar-soroban-public.nodies.app',
-          networkPassphrase: 'Public Global Stellar Network ; September 2015',
-        };
-      }
+    if (detectedChain === 'evm') {
+      evmConfig = {
+        rpcUrl: rawValue.rpcUrl || 'https://base-sepolia-rpc.publicnode.com',
+        chainId: parseInt(rawValue.chainId || '84532'),
+      };
+    } else if (detectedChain === 'stellar') {
+      stellarConfig = {
+        rpcUrl: rawValue.rpcUrl || 'https://stellar-soroban-public.nodies.app',
+        networkPassphrase:
+          rawValue.chainId || 'Public Global Stellar Network ; September 2015',
+      };
     }
 
     return {
