@@ -1,7 +1,7 @@
 meta {
-  name: list payout payment providers
+  name: trigger payout
   type: http
-  seq: 5
+  seq: 6
 }
 
 post {
@@ -16,7 +16,7 @@ auth:bearer {
 
 body:json {
   {
-    "action": "aa.payout.getPaymentProviders",
+    "action": "aa.payout.triggerPayout",
     "payload": {
       "uuid": "9f6df560-490f-4e8f-9940-048afe94c861"
     }

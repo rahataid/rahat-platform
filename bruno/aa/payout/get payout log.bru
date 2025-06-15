@@ -1,7 +1,7 @@
 meta {
-  name: list payout payment providers
+  name: get payout log
   type: http
-  seq: 5
+  seq: 7
 }
 
 post {
@@ -16,9 +16,9 @@ auth:bearer {
 
 body:json {
   {
-    "action": "aa.payout.getPaymentProviders",
+    "action": "aa.payout.getPayoutLog",
     "payload": {
-      "uuid": "9f6df560-490f-4e8f-9940-048afe94c861"
+      "uuid": "9345e93e-e033-4b9c-83ab-a9ba874ad876"
     }
   }
 }
