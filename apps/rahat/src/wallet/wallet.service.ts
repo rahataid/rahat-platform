@@ -1,9 +1,5 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import {
-  ChainType,
-  IConnectedWallet,
-  WalletKeys
-} from '@rahataid/wallet';
+import { ChainType, IConnectedWallet, WalletKeys } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import {
@@ -31,7 +27,7 @@ export class WalletService implements OnModuleInit {
     private readonly prisma: PrismaService,
     @Inject(BLOCKCHAIN_REGISTRY_TOKEN)
     private readonly providerRegistry: BlockchainProviderRegistry
-  ) { }
+  ) {}
 
   async onModuleInit() {
     await this.initializeProviders();
@@ -81,7 +77,8 @@ export class WalletService implements OnModuleInit {
 
   // Dynamic wallet creation based on chain type
   async createWallet(chainType?: ChainType): Promise<WalletKeys> {
-    const chain = chainType || (await this.getCurrentChainSettings()).detectedChain;
+    const chain =
+      chainType || (await this.getCurrentChainSettings()).detectedChain;
 
     this.logger.log(`Creating ${chain} wallet`);
     return this.providerRegistry.createWallet(chain);
@@ -101,7 +98,9 @@ export class WalletService implements OnModuleInit {
       this.logger.warn(
         `No supported chains found in request: ${chains.join(', ')}`
       );
-      supportedChains.push((await this.getCurrentChainSettings()).detectedChain);
+      supportedChains.push(
+        (await this.getCurrentChainSettings()).detectedChain
+      );
     }
 
     const chainWallets = await Promise.all(
@@ -120,11 +119,15 @@ export class WalletService implements OnModuleInit {
 
   // Bulk wallet creation for a specific chain
   async createBulk(count: number): Promise<WalletCreateResult[]> {
-
     const chainSettings = await this.getCurrentChainSettings();
+    console.log('chainSettings', chainSettings);
 
     // TODO: Multi-chain support - Validate chain is supported
-    if (!this.providerRegistry.getSupportedChains().includes(chainSettings.detectedChain)) {
+    if (
+      !this.providerRegistry
+        .getSupportedChains()
+        .includes(chainSettings.detectedChain)
+    ) {
       throw new Error(
         `Chain ${chainSettings.detectedChain} is not supported in this instance`
       );
@@ -222,7 +225,8 @@ export class WalletService implements OnModuleInit {
     privateKey: string,
     chain?: ChainType
   ): Promise<WalletKeys> {
-    const chainType = chain || (await this.getCurrentChainSettings()).detectedChain;
+    const chainType =
+      chain || (await this.getCurrentChainSettings()).detectedChain;
 
     if (!this.providerRegistry.getSupportedChains().includes(chainType)) {
       throw new Error(`Chain ${chainType} not supported in this instance`);
@@ -257,6 +261,7 @@ export class WalletService implements OnModuleInit {
     evm: any;
   }> {
     const settings = await this.settings.getByName('CHAIN_SETTINGS');
+    console.log('CHAIN_SETTINGS', settings);
     const rawValue = settings?.value as unknown as ChainConfig;
 
     if (!rawValue?.type) {
