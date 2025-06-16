@@ -58,9 +58,16 @@ export class WalletService implements OnModuleInit {
     }
 
     // Initialize the detected chain using IWalletManager
+    const chainConfig = chainSettings[chainSettings.detectedChain];
+    if (!chainConfig) {
+      throw new Error(
+        `Configuration missing for chain type: ${chainSettings.detectedChain}`
+      );
+    }
+
     await this.providerRegistry.initializeChain(
       chainSettings.detectedChain,
-      chainSettings[chainSettings.detectedChain]
+      chainConfig
     );
 
     // TODO: Multi-chain support - Initialize all chains instead of just one
@@ -262,7 +269,14 @@ export class WalletService implements OnModuleInit {
   }> {
     const settings = await this.settings.getByName('CHAIN_SETTINGS');
     console.log('CHAIN_SETTINGS', settings);
-    const rawValue = settings?.value as unknown as ChainConfig;
+
+    if (!settings || !settings.value) {
+      throw new Error(
+        'CHAIN_SETTINGS configuration not found. Please configure chain settings in the application settings.'
+      );
+    }
+
+    const rawValue = settings.value as unknown as ChainConfig;
 
     if (!rawValue?.type) {
       throw new Error(
@@ -270,33 +284,50 @@ export class WalletService implements OnModuleInit {
       );
     }
 
-    const detectedChain: ChainType = rawValue.type as ChainType;
-    let evmConfig = null;
-    let stellarConfig = null;
-
-    if (detectedChain === 'evm') {
-      evmConfig = {
-        rpcUrl: rawValue.rpcUrl || 'https://base-sepolia-rpc.publicnode.com',
-        chainId: parseInt(rawValue.chainId || '84532'),
-      };
-    } else if (detectedChain === 'stellar') {
-      stellarConfig = {
-        rpcUrl: rawValue.rpcUrl || 'https://stellar-soroban-public.nodies.app',
-        networkPassphrase:
-          rawValue.chainId || 'Public Global Stellar Network ; September 2015',
-      };
+    // Validate that the type is a valid ChainType
+    const validChainTypes: ChainType[] = ['evm', 'stellar'];
+    if (!validChainTypes.includes(rawValue.type as ChainType)) {
+      throw new Error(
+        `Invalid chain type "${
+          rawValue.type
+        }". Must be one of: ${validChainTypes.join(', ')}`
+      );
     }
 
+    const detectedChain: ChainType = rawValue.type as ChainType;
+
+    // Build chain-specific configuration based on the detected chain type
+    const chainSpecificConfig = {
+      rpcUrl: rawValue.rpcUrl,
+      ...(detectedChain === 'evm' && {
+        chainId: parseInt(rawValue.chainId || '84532'),
+      }),
+      ...(detectedChain === 'stellar' && {
+        networkPassphrase:
+          rawValue.chainId || 'Public Global Stellar Network ; September 2015',
+      }),
+    };
+
+    // Return configuration with both the detected chain config and fallback defaults
     return {
       detectedChain,
-      stellar: stellarConfig || {
-        rpcUrl: 'https://stellar-soroban-public.nodies.app',
-        networkPassphrase: 'Public Global Stellar Network ; September 2015',
-      },
-      evm: evmConfig || {
-        rpcUrl: 'https://base-sepolia-rpc.publicnode.com',
-        chainId: 84532,
-      },
+      [detectedChain]: chainSpecificConfig,
+      // Keep defaults for backward compatibility
+      stellar:
+        detectedChain === 'stellar'
+          ? chainSpecificConfig
+          : {
+              rpcUrl: 'https://stellar-soroban-public.nodies.app',
+              networkPassphrase:
+                'Public Global Stellar Network ; September 2015',
+            },
+      evm:
+        detectedChain === 'evm'
+          ? chainSpecificConfig
+          : {
+              rpcUrl: 'https://base-sepolia-rpc.publicnode.com',
+              chainId: 84532,
+            },
     };
   }
 
