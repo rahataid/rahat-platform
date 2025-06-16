@@ -1,15 +1,14 @@
-import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import {
-  BulkCreateWallet,
   ChainType,
   IConnectedWallet,
-  WalletKeys,
+  WalletKeys
 } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import {
-  BlockchainProviderRegistry,
   BLOCKCHAIN_REGISTRY_TOKEN,
+  BlockchainProviderRegistry,
 } from './providers/blockchain-provider.registry';
 import { ChainConfig } from './types/chain-config.interface';
 
@@ -26,14 +25,13 @@ export interface WalletCreateResult {
 @Injectable()
 export class WalletService implements OnModuleInit {
   private readonly logger = new Logger(WalletService.name);
-  private currentChainType: ChainType; // TODO: Remove when multi-chain support is implemented
 
   constructor(
     private readonly settings: SettingsService,
     private readonly prisma: PrismaService,
     @Inject(BLOCKCHAIN_REGISTRY_TOKEN)
     private readonly providerRegistry: BlockchainProviderRegistry
-  ) {}
+  ) { }
 
   async onModuleInit() {
     await this.initializeProviders();
@@ -45,9 +43,7 @@ export class WalletService implements OnModuleInit {
     // TODO: Multi-chain support - Currently detecting single chain from settings
     // Future: Support multiple chains simultaneously
     const chainSettings = await this.getCurrentChainSettings();
-    this.currentChainType = chainSettings.detectedChain;
 
-    this.logger.log(`Detected chain type: ${this.currentChainType}`);
     this.logger.log(
       `Registered wallet classes: ${this.providerRegistry
         .getRegisteredChainTypes()
@@ -58,17 +54,17 @@ export class WalletService implements OnModuleInit {
     if (
       !this.providerRegistry
         .getRegisteredChainTypes()
-        .includes(this.currentChainType)
+        .includes(chainSettings.detectedChain)
     ) {
       throw new Error(
-        `Chain type ${this.currentChainType} is not registered in the module`
+        `Chain type ${chainSettings.detectedChain} is not registered in the module`
       );
     }
 
     // Initialize the detected chain using IWalletManager
     await this.providerRegistry.initializeChain(
-      this.currentChainType,
-      chainSettings[this.currentChainType]
+      chainSettings.detectedChain,
+      chainSettings[chainSettings.detectedChain]
     );
 
     // TODO: Multi-chain support - Initialize all chains instead of just one
@@ -85,8 +81,7 @@ export class WalletService implements OnModuleInit {
 
   // Dynamic wallet creation based on chain type
   async createWallet(chainType?: ChainType): Promise<WalletKeys> {
-    // TODO: Multi-chain support - Remove currentChainType fallback
-    const chain = chainType || this.currentChainType;
+    const chain = chainType || (await this.getCurrentChainSettings()).detectedChain;
 
     this.logger.log(`Creating ${chain} wallet`);
     return this.providerRegistry.createWallet(chain);
@@ -106,7 +101,7 @@ export class WalletService implements OnModuleInit {
       this.logger.warn(
         `No supported chains found in request: ${chains.join(', ')}`
       );
-      supportedChains.push(this.currentChainType);
+      supportedChains.push((await this.getCurrentChainSettings()).detectedChain);
     }
 
     const chainWallets = await Promise.all(
@@ -124,24 +119,27 @@ export class WalletService implements OnModuleInit {
   }
 
   // Bulk wallet creation for a specific chain
-  async createBulk(params: BulkCreateWallet): Promise<WalletCreateResult[]> {
-    this.logger.log(`Creating ${params.count} ${params.chain} wallets`);
+  async createBulk(count: number): Promise<WalletCreateResult[]> {
+
+    const chainSettings = await this.getCurrentChainSettings();
 
     // TODO: Multi-chain support - Validate chain is supported
-    if (!this.providerRegistry.getSupportedChains().includes(params.chain)) {
+    if (!this.providerRegistry.getSupportedChains().includes(chainSettings.detectedChain)) {
       throw new Error(
-        `Chain ${params.chain} is not supported in this instance`
+        `Chain ${chainSettings.detectedChain} is not supported in this instance`
       );
     }
 
-    const walletPromises = Array.from({ length: params.count }, () =>
-      this.createWallet(params.chain)
+    const walletPromises = Array.from({ length: count }, () =>
+      this.createWallet()
     );
 
     const wallets = await Promise.all(walletPromises);
 
+    console.log(wallets);
+
     return wallets.map((wallet) => ({
-      chain: params.chain,
+      chain: chainSettings.detectedChain,
       address: wallet.address,
       privateKey: wallet.privateKey,
     }));
@@ -224,7 +222,7 @@ export class WalletService implements OnModuleInit {
     privateKey: string,
     chain?: ChainType
   ): Promise<WalletKeys> {
-    const chainType = chain || this.currentChainType;
+    const chainType = chain || (await this.getCurrentChainSettings()).detectedChain;
 
     if (!this.providerRegistry.getSupportedChains().includes(chainType)) {
       throw new Error(`Chain ${chainType} not supported in this instance`);
@@ -249,7 +247,7 @@ export class WalletService implements OnModuleInit {
   // Utility methods
   async getDefaultChain(): Promise<ChainType> {
     // TODO: Multi-chain support - Return configured default instead of instance chain
-    return this.currentChainType;
+    return (await this.getCurrentChainSettings()).detectedChain;
   }
 
   // Chain configuration using new flat structure

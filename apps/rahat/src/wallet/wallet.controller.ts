@@ -18,7 +18,7 @@ export class WalletController {
 
   @MessagePattern({ cmd: WalletJobs.CREATE_BULK })
   createBulk(chains: BulkCreateWallet) {
-    return this.walletService.createBulk(chains);
+    return this.walletService.createBulk(chains.count);
   }
 
   @MessagePattern({ cmd: WalletJobs.GET_WALLET_BY_PHONE })

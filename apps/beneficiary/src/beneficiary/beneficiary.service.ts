@@ -1635,10 +1635,9 @@ export class BeneficiaryService {
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
 
-    const chain = await this.beneficiaryUtilsService.getChainName();
     const walletAddress = await handleMicroserviceCall({
       client: this.walletClient.send(
-        { cmd: WalletJobs.CREATE_BULK }, { chain: chain.toLowerCase(), count: beneficiaries.length }
+        { cmd: WalletJobs.CREATE_BULK }, { count: beneficiaries.length }
       ),
       onSuccess: (response) => {
         console.log(
@@ -1658,13 +1657,10 @@ export class BeneficiaryService {
 
     const beneficiaryData = await Promise.all(beneficiaries.map(async (d: any, index: number) => {
 
-      if (chain.toLowerCase() == 'stellar') {
-        d.walletAddress = walletAddress[index]?.address;
-      }
       return {
         firstName: d.firstName,
         lastName: d.lastName,
-        walletAddress: d.walletAddress,
+        walletAddress: walletAddress[index]?.address,
         govtIDNumber: d.govtIDNumber,
         gender: d.gender,
         bankedStatus: d.bankedStatus,

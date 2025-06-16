@@ -18,7 +18,7 @@ export class WalletInterceptor implements NestInterceptor {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly walletService: WalletService
-  ) {}
+  ) { }
 
   async intercept(
     context: ExecutionContext,
@@ -60,13 +60,11 @@ export class WalletInterceptor implements NestInterceptor {
   private async ensureValidWalletAddress(
     walletAddress?: string
   ): Promise<string> {
-    const defaultChain = await this.getDefaultChain();
 
     if (!walletAddress) {
-      const result = await this.walletService.createWallet(defaultChain);
+      const result = await this.walletService.createWallet();
       console.log(
         'Created new wallet for chain:',
-        defaultChain,
         result.address
       );
       return result.address;
