@@ -19,9 +19,11 @@ body:json {
     "action": "aa.payout.getPayoutLogs",
     "payload": {
       "payoutUUID": "9f6df560-490f-4e8f-9940-048afe94c861",
+      "sort": "updatedAt",
+      "order": "desc"  ,
+      "search": "Failed to initiate instant offramp",
       "transactionType": "FIAT_TRANSFER",
-      "sort": "createdAt",
-      "order": "asc"
+      "status": "FIAT_TRANSACTION_FAILED"
     }
   }
 }
