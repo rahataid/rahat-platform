@@ -109,5 +109,12 @@ export const JOBS = {
     GET: 'aa.jobs.payout.get',
     UPDATE: 'aa.jobs.payout.update',
     GET_PAYMENT_PROVIDERS: 'aa.jobs.payout.getPaymentProviders',
+  },
+  GRIEVANCES: {
+    CREATE: 'aa.jobs.grievances.create',
+    LIST: 'aa.jobs.grievances.list',
+    GET: 'aa.jobs.grievances.get',
+    UPDATE: 'aa.jobs.grievances.update',
+    REMOVE: 'aa.jobs.grievances.remove'
   }
 };

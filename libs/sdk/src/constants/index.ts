@@ -267,6 +267,13 @@ export const MS_ACTIONS = {
       UPDATE: 'aa.payout.update',
       GET_PAYMENT_PROVIDERS: 'aa.payout.getPaymentProviders',
     },
+    GRIEVANCES: {
+      CREATE: 'aa.grievances.create',
+      LIST: 'aa.grievances.list',
+      GET: 'aa.grievances.get',
+      UPDATE: 'aa.grievances.update',
+      REMOVE: 'aa.grievances.remove',
+    }
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',

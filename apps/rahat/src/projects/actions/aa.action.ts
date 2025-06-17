@@ -432,4 +432,18 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYMENT_PROVIDERS, uuid }, payload),
 
   // **** Payout end **** //
+
+  // **** grievance start **** //
+  [MS_ACTIONS.AAPROJECT.GRIEVANCES.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GRIEVANCES.CREATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GRIEVANCES.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GRIEVANCES.LIST, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GRIEVANCES.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GRIEVANCES.GET, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GRIEVANCES.UPDATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GRIEVANCES.UPDATE, uuid }, payload),
+  // **** grievance end **** //
 };
