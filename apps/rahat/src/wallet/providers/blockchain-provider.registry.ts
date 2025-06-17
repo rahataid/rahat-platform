@@ -65,9 +65,8 @@ export class BlockchainProviderRegistry {
   // Register wallet classes generically by reading their blockchainType
   private registerWalletClasses(walletClasses: WalletClass[]): void {
     walletClasses.forEach((WalletClass) => {
-      // Create temporary instance to read blockchainType property
-      const tempInstance = new WalletClass('dummy-url', this.storage);
-      const blockchainType = (tempInstance as any).blockchainType;
+      // Get blockchainType from the static property
+      const blockchainType = (WalletClass as any).blockchainType;
 
       if (!blockchainType) {
         throw new Error(
