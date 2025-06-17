@@ -44,6 +44,11 @@ export interface IWalletManager {
 export type ChainType = 'stellar' | 'evm';
 
 export type BulkCreateWallet = {
-  chain: ChainType;
+  chain?: ChainType;
   count: number;
 };
+
+export type BulkUpdateWallet = {
+  chain: ChainType;
+  benUuids: string[];
+}

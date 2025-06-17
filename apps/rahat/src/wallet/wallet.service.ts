@@ -1,7 +1,8 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ChainType, IConnectedWallet, WalletKeys } from '@rahataid/wallet';
+import { BulkUpdateWallet, ChainType, IConnectedWallet, WalletKeys } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
+import { BulkWalletAddressDto } from './dto/getBy.dto';
 import {
   BLOCKCHAIN_REGISTRY_TOKEN,
   BlockchainProviderRegistry,
@@ -27,7 +28,7 @@ export class WalletService implements OnModuleInit {
     private readonly prisma: PrismaService,
     @Inject(BLOCKCHAIN_REGISTRY_TOKEN)
     private readonly providerRegistry: BlockchainProviderRegistry
-  ) {}
+  ) { }
 
   async onModuleInit() {
     await this.initializeProviders();
@@ -186,6 +187,12 @@ export class WalletService implements OnModuleInit {
     return null;
   }
 
+  async getBulkSecretByWallet(accounts: BulkWalletAddressDto) {
+    return Promise.all(accounts.walletAddresses.map(async (walletAddress) => {
+      return this.getSecretByWallet(walletAddress, accounts.chain);
+    }))
+  }
+
   async getSecretByPhone(
     phoneNumber: string,
     chain?: ChainType
@@ -211,6 +218,17 @@ export class WalletService implements OnModuleInit {
     }
 
     return result.beneficiary.walletAddress;
+  }
+
+  async updateBulk(bulkUpdateWalletDto: BulkUpdateWallet) {
+    return Promise.all(bulkUpdateWalletDto.benUuids.map(async (uuid) => {
+      const walletAddress = await this.create([bulkUpdateWalletDto.chain]);
+      const beneficiary = await this.prisma.beneficiary.update({
+        where: { uuid },
+        data: { walletAddress: walletAddress[0].address },
+      });
+      return { uuid, walletAddress: beneficiary.walletAddress, secret: walletAddress[0].privateKey };
+    }))
   }
 
   // Connect to existing wallet
@@ -288,8 +306,7 @@ export class WalletService implements OnModuleInit {
     const validChainTypes: ChainType[] = ['evm', 'stellar'];
     if (!validChainTypes.includes(rawValue.type as ChainType)) {
       throw new Error(
-        `Invalid chain type "${
-          rawValue.type
+        `Invalid chain type "${rawValue.type
         }". Must be one of: ${validChainTypes.join(', ')}`
       );
     }
@@ -317,17 +334,17 @@ export class WalletService implements OnModuleInit {
         detectedChain === 'stellar'
           ? chainSpecificConfig
           : {
-              rpcUrl: 'https://stellar-soroban-public.nodies.app',
-              networkPassphrase:
-                'Public Global Stellar Network ; September 2015',
-            },
+            rpcUrl: 'https://stellar-soroban-public.nodies.app',
+            networkPassphrase:
+              'Public Global Stellar Network ; September 2015',
+          },
       evm:
         detectedChain === 'evm'
           ? chainSpecificConfig
           : {
-              rpcUrl: 'https://base-sepolia-rpc.publicnode.com',
-              chainId: 84532,
-            },
+            rpcUrl: 'https://base-sepolia-rpc.publicnode.com',
+            chainId: 84532,
+          },
     };
   }
 
