@@ -1274,6 +1274,11 @@ export class BeneficiaryService {
     });
   }
 
+  async deleteOneGroup(uuid: string) {
+    this.logger.log(`Deleting group with UUID: ${uuid}`);
+    return 'success';
+  }
+
   async getAllGroups(dto: ListBeneficiaryGroupDto) {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;

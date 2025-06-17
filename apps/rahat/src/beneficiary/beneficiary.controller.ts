@@ -496,6 +496,16 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.REMOVE_ONE_GROUP }, uuid);
   }
 
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Delete('groups/:uuid/delete')
+  @ApiParam({ name: 'uuid', required: true })
+  async deleteGroup(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.DELETE_ONE_GROUP }, uuid);
+  }
+
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
