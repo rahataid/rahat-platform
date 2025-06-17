@@ -320,8 +320,7 @@ export class WalletService implements OnModuleInit {
         chainId: parseInt(rawValue.chainId || '84532'),
       }),
       ...(detectedChain === 'stellar' && {
-        networkPassphrase:
-          rawValue.chainId || 'Public Global Stellar Network ; September 2015',
+        networkPassphrase: 'Test SDF Network ; September 2015', // Use testnet passphrase for Soroban
       }),
     };
 
@@ -335,8 +334,7 @@ export class WalletService implements OnModuleInit {
           ? chainSpecificConfig
           : {
             rpcUrl: 'https://stellar-soroban-public.nodies.app',
-            networkPassphrase:
-              'Public Global Stellar Network ; September 2015',
+            networkPassphrase: 'Test SDF Network ; September 2015',
           },
       evm:
         detectedChain === 'evm'
