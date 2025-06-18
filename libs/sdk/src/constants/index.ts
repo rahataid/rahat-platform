@@ -273,6 +273,7 @@ export const MS_ACTIONS = {
       GET: 'aa.grievances.get',
       UPDATE: 'aa.grievances.update',
       REMOVE: 'aa.grievances.remove',
+      UPDATE_STATUS: 'aa.grievances.updateStatus'
     }
   },
   C2CProject: {

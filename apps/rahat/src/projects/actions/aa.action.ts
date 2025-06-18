@@ -445,5 +445,8 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.GRIEVANCES.UPDATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GRIEVANCES.UPDATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GRIEVANCES.UPDATE_STATUS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GRIEVANCES.UPDATE_STATUS, uuid }, payload),
   // **** grievance end **** //
 };
