@@ -1,7 +1,7 @@
 meta {
-  name: getOne payout
+  name: retry failed payout
   type: http
-  seq: 3
+  seq: 10
 }
 
 post {
@@ -16,9 +16,9 @@ auth:bearer {
 
 body:json {
   {
-    "action": "aa.payout.get",
+    "action": "aa.payout.triggerFailedPayoutRequest",
     "payload": {
-      "uuid": "9f6df560-490f-4e8f-9940-048afe94c861"
+      "payoutUUID": "9f6df560-490f-4e8f-9940-048afe94c861"
     }
   }
 }

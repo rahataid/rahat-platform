@@ -33,7 +33,6 @@ migrate_seed() {
     pnpm seed:cambodiadevsettings $current_dir
     pnpm seed:chainsettings
     npx ts-node prisma/seed.communication-settings.ts
-    npx ts-node prisma/seed.sms.ts
     npx ts-node prisma/seed.offramp.ts
 }
 
