@@ -1,0 +1,34 @@
+meta {
+  name: get payout logs
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.payout.getPayoutLogs",
+    "payload": {
+      "payoutUUID": "9f6df560-490f-4e8f-9940-048afe94c861",
+      "sort": "updatedAt",
+      "order": "desc"  ,
+      "search": "Failed to initiate instant offramp",
+      "transactionType": "FIAT_TRANSFER",
+      "status": "FIAT_TRANSACTION_FAILED"
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
+}

@@ -26,8 +26,6 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.TRIGGERS.ACTIVATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.TRIGGERS.ACTIVATE, uuid }, payload),
-  [MS_ACTIONS.AAPROJECT.TRIGGERS.TEST]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.TRIGGERS.TEST, uuid }, payload),
   // **** triggers end ******//
 
   // **** river stations start ******//
@@ -309,35 +307,24 @@ export const aaActions: ProjectActionFunc = {
   // **** daily monitoring end ****//
 
   // **** Stellar start **** //
-  [MS_ACTIONS.AAPROJECT.STELLAR.DISBURSE]: (
-    uuid,
-    payload,
-    sendCommand
-  ) => sendCommand({ cmd: AAJobs.STELLAR.DISBURSE, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.STELLAR.DISBURSE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STELLAR.DISBURSE, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.STELLAR.SEND_OTP]: (
-    uuid,
-    payload,
-    sendCommand
-  ) => sendCommand({ cmd: AAJobs.STELLAR.SEND_OTP, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.STELLAR.SEND_OTP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STELLAR.SEND_OTP, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.STELLAR.SEND_GROUP_OTP]: (
-    uuid,
-    payload,
-    sendCommand
-  ) => sendCommand({ cmd: AAJobs.STELLAR.SEND_GROUP_OTP, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.STELLAR.SEND_GROUP_OTP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STELLAR.SEND_GROUP_OTP, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.STELLAR.SEND_ASSET]: (
-    uuid,
-    payload,
-    sendCommand
-  ) => sendCommand({ cmd: AAJobs.STELLAR.SEND_ASSET_TO_VENDOR, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.STELLAR.SEND_ASSET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STELLAR.SEND_ASSET_TO_VENDOR, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.STELLAR.SEND_ASSET_WITH_ADDRESS]: (
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.STELLAR.SEND_ASSET_WITH_ADDRESS, uuid }, payload),
+  ) =>
+    sendCommand({ cmd: AAJobs.STELLAR.SEND_ASSET_WITH_ADDRESS, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.STELLAR.TRANSFER_TO_OFFRAMP]: (
     uuid,
@@ -375,11 +362,13 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.FAUCET, uuid }, payload),
 
+
   [MS_ACTIONS.AAPROJECT.STELLAR.UPDATE_ONCHAIN_TRIGGER]: (
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.STELLAR.UPDATE_ONCHAIN_TRIGGER, uuid }, payload),
+  ) =>
+    sendCommand({ cmd: AAJobs.STELLAR.UPDATE_ONCHAIN_TRIGGER, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.STELLAR.GET_ONCHAIN_TRIGGER]: (
     uuid,
@@ -429,6 +418,7 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.RAHAT_FAUCET, uuid }, payload),
 
+
   // **** Stellar end **** //
 
   // **** Payout start **** //
@@ -447,8 +437,39 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.PAYOUT.ASSIGN_TOKEN]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PAYOUT.ASSIGN_TOKEN, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYMENT_PROVIDERS]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYMENT_PROVIDERS, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYMENT_PROVIDERS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYMENT_PROVIDERS, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.PAYOUT.TRIGGER_PAYOUT]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.TRIGGER_PAYOUT, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.TRIGGER_FAILED_PAYOUT_REQUEST]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.PAYOUT.TRIGGER_FAILED_PAYOUT_REQUEST, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.TRIGGER_ONE_FAILED_PAYOUT_REQUEST]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.PAYOUT.TRIGGER_ONE_FAILED_PAYOUT_REQUEST, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYOUT_LOGS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYOUT_LOGS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYOUT_LOG]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYOUT_LOG, uuid }, payload),
   // **** Payout end **** //
 };
