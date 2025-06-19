@@ -1275,8 +1275,101 @@ export class BeneficiaryService {
   }
 
   async deleteOneGroup(uuid: string) {
-    this.logger.log(`Deleting group with UUID: ${uuid}`);
-    return 'success';
+    this.logger.log(`Attempting to delete group with UUID: ${uuid}`);
+
+    const benefGroup = await this.prisma.beneficiaryGroup.findUnique({
+      where: { uuid, deletedAt: null },
+    });
+
+    if (!benefGroup) {
+      this.logger.warn(`Group not found or already deleted: ${uuid}`);
+      throw new RpcException('Beneficiary group not found or already deleted.');
+    }
+
+    const groupProjects = await this.prisma.beneficiaryGroupProject.findMany({
+      where: { beneficiaryGroupId: uuid, deletedAt: null },
+    });
+
+    if (groupProjects.length > 0) {
+      this.logger.warn(`Group ${uuid} is linked to projects.`);
+      throw new RpcException('Group is assigned to a project. Please remove the group from the project first.');
+    }
+
+    const groupedBeneficiaries = await this.prisma.groupedBeneficiaries.findMany({
+      where: { beneficiaryGroupId: uuid, deletedAt: null },
+      select: { beneficiaryId: true },
+    });
+
+    const beneficiaryIds = [...new Set(groupedBeneficiaries.map(b => b.beneficiaryId))];
+
+    if (beneficiaryIds.length === 0) {
+      await this.prisma.beneficiaryGroup.delete({ where: { uuid } });
+      return { message: 'Empty group deleted successfully.' };
+    }
+
+    const [assignedToOtherGroups, assignedToProjects] = await Promise.all([
+      this.prisma.groupedBeneficiaries.findMany({
+        where: {
+          beneficiaryGroupId: { not: uuid },
+          beneficiaryId: { in: beneficiaryIds },
+          deletedAt: null,
+        },
+        select: { beneficiaryId: true },
+      }),
+      this.prisma.beneficiaryProject.findMany({
+        where: { beneficiaryId: { in: beneficiaryIds } },
+        select: { beneficiaryId: true },
+      }),
+    ]);
+
+    const allAssignedBeneficiaryIds = [
+      ...new Set([
+        ...assignedToOtherGroups.map(b => b.beneficiaryId),
+        ...assignedToProjects.map(b => b.beneficiaryId),
+      ]),
+    ];
+
+    const unassignedBeneficiaryIds = beneficiaryIds.filter(id => !allAssignedBeneficiaryIds.includes(id));
+
+    if (unassignedBeneficiaryIds.length === beneficiaryIds.length) {
+      // All beneficiaries are unassigned elsewhere – delete all
+      await this.prisma.$transaction([
+        this.prisma.beneficiaryPii.deleteMany({
+          where: { beneficiary: { uuid: { in: unassignedBeneficiaryIds } } },
+        }),
+        this.prisma.groupedBeneficiaries.deleteMany({
+          where: { beneficiaryGroupId: uuid },
+        }),
+        this.prisma.beneficiary.deleteMany({
+          where: { uuid: { in: unassignedBeneficiaryIds } },
+        }),
+        this.prisma.beneficiaryGroup.delete({
+          where: { uuid },
+        }),
+      ]);
+
+      return { message: 'Group and related beneficiaries deleted successfully.' };
+    }
+
+    // Only remove assigned beneficiaries from this group
+    await this.prisma.groupedBeneficiaries.deleteMany({
+      where: {
+        beneficiaryGroupId: uuid,
+        beneficiaryId: { in: allAssignedBeneficiaryIds },
+      },
+    });
+
+    // Check if group is now empty
+    const remainingCount = await this.prisma.groupedBeneficiaries.count({
+      where: { beneficiaryGroupId: uuid, deletedAt: null },
+    });
+
+    if (remainingCount === 0) {
+      await this.prisma.beneficiaryGroup.delete({ where: { uuid } });
+      return { message: 'Group became empty and was deleted successfully.' };
+    }
+
+    return { message: 'Beneficiaries removed from group successfully.' };
   }
 
   async getAllGroups(dto: ListBeneficiaryGroupDto) {
