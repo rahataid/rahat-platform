@@ -19,7 +19,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   AddBenToProjectDto,
   CreateBeneficiaryDto,
@@ -492,18 +492,14 @@ export class BeneficiaryController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Delete('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
-  async removeGroup(@Param('uuid') uuid: UUID) {
-    return this.client.send({ cmd: BeneficiaryJobs.REMOVE_ONE_GROUP }, uuid);
-  }
-
-
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
-  @Delete('groups/:uuid/delete')
-  @ApiParam({ name: 'uuid', required: true })
-  async deleteGroup(@Param('uuid') uuid: UUID) {
-    return this.client.send({ cmd: BeneficiaryJobs.DELETE_ONE_GROUP }, uuid);
+  @ApiQuery({ name: 'hardDelete', required: false, type: Boolean, description: 'If true, permanently deletes the group and beneficiaries. If false or not provided, performs soft delete.' })
+  async removeGroup(
+    @Param('uuid') uuid: UUID,
+    @Query('hardDelete') hardDelete?: boolean
+  ) {
+    const deleteType = hardDelete === true;
+    const command = deleteType ? BeneficiaryJobs.DELETE_ONE_GROUP : BeneficiaryJobs.REMOVE_ONE_GROUP;
+    return this.client.send({ cmd: command }, uuid);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
