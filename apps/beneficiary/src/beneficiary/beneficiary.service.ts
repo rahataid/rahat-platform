@@ -1287,7 +1287,7 @@ export class BeneficiaryService {
     }
 
     const groupProjects = await this.prisma.beneficiaryGroupProject.findMany({
-      where: { beneficiaryGroupId: uuid, deletedAt: null },
+      where: { beneficiaryGroupId: uuid },
     });
 
     if (groupProjects.length > 0) {
@@ -1296,7 +1296,7 @@ export class BeneficiaryService {
     }
 
     const groupedBeneficiaries = await this.prisma.groupedBeneficiaries.findMany({
-      where: { beneficiaryGroupId: uuid, deletedAt: null },
+      where: { beneficiaryGroupId: uuid },
       select: { beneficiaryId: true },
     });
 
@@ -1312,7 +1312,6 @@ export class BeneficiaryService {
         where: {
           beneficiaryGroupId: { not: uuid },
           beneficiaryId: { in: beneficiaryIds },
-          deletedAt: null,
         },
         select: { beneficiaryId: true },
       }),
