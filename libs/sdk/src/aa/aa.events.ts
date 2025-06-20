@@ -113,5 +113,8 @@ export const JOBS = {
     GET: 'aa.jobs.payout.get',
     UPDATE: 'aa.jobs.payout.update',
     GET_PAYMENT_PROVIDERS: 'aa.jobs.payout.getPaymentProviders',
-  }
+  },
+  CHAIN: {
+    DISBURSE: 'jobs.chain.disburse',
+  },
 };

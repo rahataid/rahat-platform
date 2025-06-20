@@ -404,7 +404,14 @@ export const aaActions: ProjectActionFunc = {
     payload,
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.GET_WALLET_BALANCE, uuid }, payload),
-// remove after testing
+
+  [MS_ACTIONS.AAPROJECT.CHAIN.DISBURSE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.CHAIN.DISBURSE, uuid }, payload),
+
+  // remove after testing
   [MS_ACTIONS.AAPROJECT.STELLAR.INTERNAL_FAUCET_TRUSTLINE]: (
     uuid,
     payload,

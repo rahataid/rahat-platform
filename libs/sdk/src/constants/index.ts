@@ -240,6 +240,12 @@ export const MS_ACTIONS = {
       UPDATE: 'aaProject.dailyMonitoring.update',
       REMOVE: 'aaProject.dailyMonitoring.remove',
     },
+
+    // new chain 
+
+    CHAIN: {
+      DISBURSE: 'aa.chain.disburse',
+    },
     STELLAR: {
       DISBURSE: 'aa.stellar.disburse',
       SEND_OTP: 'aa.stellar.sendOtp',
