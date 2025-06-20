@@ -1330,45 +1330,22 @@ export class BeneficiaryService {
 
     const unassignedBeneficiaryIds = beneficiaryIds.filter(id => !allAssignedBeneficiaryIds.includes(id));
 
-    if (unassignedBeneficiaryIds.length === beneficiaryIds.length) {
-      // All beneficiaries are unassigned elsewhere – delete all
-      await this.prisma.$transaction([
-        this.prisma.beneficiaryPii.deleteMany({
-          where: { beneficiary: { uuid: { in: unassignedBeneficiaryIds } } },
-        }),
-        this.prisma.groupedBeneficiaries.deleteMany({
-          where: { beneficiaryGroupId: uuid },
-        }),
-        this.prisma.beneficiary.deleteMany({
-          where: { uuid: { in: unassignedBeneficiaryIds } },
-        }),
-        this.prisma.beneficiaryGroup.delete({
-          where: { uuid },
-        }),
-      ]);
+    await this.prisma.$transaction([
+      this.prisma.beneficiaryPii.deleteMany({
+        where: { beneficiary: { uuid: { in: unassignedBeneficiaryIds } } },
+      }),
+      this.prisma.groupedBeneficiaries.deleteMany({
+        where: { beneficiaryGroupId: uuid },
+      }),
+      this.prisma.beneficiary.deleteMany({
+        where: { uuid: { in: unassignedBeneficiaryIds } },
+      }),
+      this.prisma.beneficiaryGroup.delete({
+        where: { uuid },
+      }),
+    ]);
 
-      return { message: 'Group and all associated beneficiaries successfully deleted.' };
-    }
-
-    // Only remove assigned beneficiaries from this group
-    await this.prisma.groupedBeneficiaries.deleteMany({
-      where: {
-        beneficiaryGroupId: uuid,
-        beneficiaryId: { in: allAssignedBeneficiaryIds },
-      },
-    });
-
-    // Check if group is now empty
-    const remainingCount = await this.prisma.groupedBeneficiaries.count({
-      where: { beneficiaryGroupId: uuid, deletedAt: null },
-    });
-
-    if (remainingCount === 0) {
-      await this.prisma.beneficiaryGroup.delete({ where: { uuid } });
-      return { message: 'Group successfully deleted (became empty after removing assigned beneficiaries).' };
-    }
-
-    return { message: 'Assigned beneficiaries successfully removed from group.' };
+    return { message: 'Group and all associated beneficiaries successfully deleted.' };
   }
 
   async getAllGroups(dto: ListBeneficiaryGroupDto) {
