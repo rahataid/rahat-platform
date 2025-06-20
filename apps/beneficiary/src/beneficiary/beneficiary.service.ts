@@ -1510,7 +1510,7 @@ export class BeneficiaryService {
       // Get secret of beneficiaries
       await handleMicroserviceCall({
         client: this.walletClient.send(
-          { cmd: WalletJobs.GET_BULK_SECRET_BY_WALLET }, { walletAddresses: unassignedBenfs.map((d) => d.walletAddress), chain: chain.toLowerCase() }
+          { cmd: WalletJobs.GET_BULK_SECRET_BY_WALLET }, { walletAddresses: unassignedBenfs.map((d) => d.walletAddress) }
         ),
         onSuccess: async (response) => {
 
