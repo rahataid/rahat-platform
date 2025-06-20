@@ -72,6 +72,9 @@ export const MS_TRIGGERS_JOBS = {
     REMOVE: 'ms.jobs.dailyMonitoring.remove',
     DELETE: 'ms.jobs.dailyMonitoring.delete',
   },
+  SOURCE: {
+    GET_ALL: 'ms.jobs.sources.getAll'
+  }
 };
 
 export const msTriggerActions: ProjectActionFunc = {
@@ -203,6 +206,15 @@ export const msTriggerActions: ProjectActionFunc = {
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.CONFIGURE_THRESHOLD }, payload);
   },
   // // **** phases end ******//
+
+  // **** source start ******//
+
+  [MS_ACTIONS.MS_SOURCES.GET_ALL]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.SOURCE.GET_ALL }, payload);
+  },
+
+  // **** source start ******//
 
   // **** revert phase start ******//
   [MS_ACTIONS.MS_REVERT_PHASE.CREATE]: (uuid, payload, sendCommand) => {
