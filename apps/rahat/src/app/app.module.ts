@@ -43,7 +43,6 @@ import { AppService } from './app.service';
           host: configService.get('REDIS_HOST'),
           port: configService.get('REDIS_PORT'),
           password: configService.get('REDIS_PASSWORD'),
-
         },
         settings: {
           stalledInterval: 30000, // Time (ms) to check for stalled jobs, default is 30 seconds.
@@ -68,12 +67,16 @@ import { AppService } from './app.service';
     OfframpModule,
     RequestContextModule,
     QueueModule,
-    WalletModule
+    WalletModule,
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService, {
-    provide: APP_GUARD,
-    useClass: ExternalAppGuard,
-  }],
+  providers: [
+    AppService,
+    PrismaService,
+    {
+      provide: APP_GUARD,
+      useClass: ExternalAppGuard,
+    },
+  ],
 })
-export class AppModule { }
+export class AppModule {}
