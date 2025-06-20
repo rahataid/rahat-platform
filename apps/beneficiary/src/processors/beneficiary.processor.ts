@@ -24,8 +24,7 @@ import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
 import {
   findTempBenefGroups,
-  validateDupicatePhone,
-  validateDupicateWallet,
+  validateDupicateWallet
 } from './processor.utils';
 
 const BATCH_SIZE = 500;
@@ -60,12 +59,12 @@ export class BeneficiaryProcessor {
       if (!beneficiaries.length) return;
 
       // Validate duplicate phones and wallets
-      const dupliPhones = await validateDupicatePhone(
-        this.prisma,
-        beneficiaries
-      );
-      if (dupliPhones.length)
-        throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
+      // const dupliPhones = await validateDupicatePhone(
+      //   this.prisma,
+      //   beneficiaries
+      // );
+      // if (dupliPhones.length)
+      //   throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
       const dupliWallets = await validateDupicateWallet(
         this.prisma,
         beneficiaries
