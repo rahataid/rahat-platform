@@ -400,6 +400,18 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.CHAIN.DISBURSE, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.CHAIN.SEND_OTP]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.CHAIN.SEND_OTP, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CHAIN.SEND_ASSET]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.CHAIN.SEND_ASSET, uuid }, payload),
+
   // remove after testing
   [MS_ACTIONS.AAPROJECT.STELLAR.INTERNAL_FAUCET_TRUSTLINE]: (
     uuid,

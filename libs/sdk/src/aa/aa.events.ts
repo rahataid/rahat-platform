@@ -121,5 +121,7 @@ export const JOBS = {
   },
   CHAIN: {
     DISBURSE: 'jobs.chain.disburse',
+    SEND_OTP: 'jobs.chain.sendOtp',
+    SEND_ASSET: 'jobs.chain.sendAsset',
   },
 };

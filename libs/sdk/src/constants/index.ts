@@ -244,6 +244,8 @@ export const MS_ACTIONS = {
 
     CHAIN: {
       DISBURSE: 'aa.chain.disburse',
+      SEND_OTP: 'aa.chain.sendOtp',
+      SEND_ASSET: 'aa.chain.sendAsset',
     },
     STELLAR: {
       DISBURSE: 'aa.stellar.disburse',
