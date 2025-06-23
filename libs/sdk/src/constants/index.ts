@@ -239,6 +239,14 @@ export const MS_ACTIONS = {
       UPDATE: 'aaProject.dailyMonitoring.update',
       REMOVE: 'aaProject.dailyMonitoring.remove',
     },
+
+    // new chain 
+
+    CHAIN: {
+      DISBURSE: 'aa.chain.disburse',
+      SEND_OTP: 'aa.chain.sendOtp',
+      SEND_ASSET: 'aa.chain.sendAsset',
+    },
     STELLAR: {
       DISBURSE: 'aa.stellar.disburse',
       SEND_OTP: 'aa.stellar.sendOtp',
@@ -249,14 +257,18 @@ export const MS_ACTIONS = {
       GET_WALLET_BY_PHONE: 'aaProject.stellar.getWalletByPhone',
       ADD_ONCHAIN_TRIGGER: 'aa.stellar.addTriggerOnChain',
       CHECK_TRUSTLINE: 'aa.stellar.checkTrustline',
+      CHECK_BULK_TRUSTLINE: 'aa.stellar.checkBulkTrustline',
       UPDATE_ONCHAIN_TRIGGER: 'aa.stellar.updateTriggerOnChain',
       GET_ONCHAIN_TRIGGER: 'aa.stellar.getTriggerOnChain',
       GET_STELLAR_STATS: 'aa.stellar.getStellarStats',
       GET_TRANSACTIONS: 'aa.stellar.getTransactions',
       GET_WALLET_BALANCE: 'aa.stellar.getWalletBalance',
+      // Remove after test
+      INTERNAL_FAUCET_TRUSTLINE: `aa.stellar.internalFaucetTrustline`,
       GET_VENDOR_STATS: 'aa.stellar.getVendorStats',
       TRUSTLINE: 'aa.stellar.trustline',
       GET_REDEMPTION_REQUEST: 'aa.stellar.getRedemptionRequest',
+      RAHAT_FAUCET: 'aa.stellar.rahatFaucet',
     },
     PAYOUT: {
       ASSIGN_TOKEN: 'aa.payout.assignToken',

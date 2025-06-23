@@ -21,6 +21,7 @@ import {
   UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
+  AAJobs,
   BeneficiaryConstants,
   BeneficiaryEvents,
   BeneficiaryJobs,
@@ -63,6 +64,7 @@ export class BeneficiaryService {
     private eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
     private readonly beneficiaryUtilsService: BeneficiaryUtilsService,
+
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -1504,7 +1506,49 @@ export class BeneficiaryService {
         },
       });
 
-      // bulk assign unassigned beneficiaries from group
+      const chain = await this.beneficiaryUtilsService.getChainName();
+      // Get secret of beneficiaries
+      await handleMicroserviceCall({
+        client: this.walletClient.send(
+          { cmd: WalletJobs.GET_BULK_SECRET_BY_WALLET }, { walletAddresses: unassignedBenfs.map((d) => d.walletAddress) }
+        ),
+        onSuccess: async (response) => {
+
+          let benWallets = response.map((d) => ({
+            address: d.publicKey,
+            secret: d.privateKey
+          }));
+
+          // Create stellar account and add trustline for beneficiaries
+          await handleMicroserviceCall({
+            client: this.client.send(
+              { cmd: AAJobs.STELLAR.INTERNAL_FAUCET_TRUSTLINE, uuid: project.uuid }, { wallets: benWallets }
+            ),
+            onSuccess: async (response) => {
+              return response;
+            },
+            onError(error) {
+              console.log(
+                'Error adding trustline to beneficiaries',
+                error
+              );
+              throw new RpcException(error.message);
+            },
+          })
+
+          return response;
+        },
+        onError(error) {
+          console.log(
+            'Error getting secrets of beneficiaries',
+            error
+          );
+          throw new RpcException(error.message);
+        },
+      })
+
+
+      // todo: Remove loop while assigning beneficiary to project
       if (unassignedBenfs?.length) {
         for (const unassignedBenf of unassignedBenfs) {
           await this.beneficiaryUtilsService.assignBeneficiaryToProject({
@@ -1672,10 +1716,9 @@ export class BeneficiaryService {
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
 
-    const chain = await this.beneficiaryUtilsService.getChainName();
     const walletAddress = await handleMicroserviceCall({
       client: this.walletClient.send(
-        { cmd: WalletJobs.CREATE_BULK }, { chain: chain.toLowerCase(), count: beneficiaries.length }
+        { cmd: WalletJobs.CREATE_BULK }, { count: beneficiaries.length }
       ),
       onSuccess: (response) => {
         console.log(
@@ -1695,13 +1738,10 @@ export class BeneficiaryService {
 
     const beneficiaryData = await Promise.all(beneficiaries.map(async (d: any, index: number) => {
 
-      if (chain.toLowerCase() == 'stellar') {
-        d.walletAddress = walletAddress[index]?.address;
-      }
       return {
         firstName: d.firstName,
         lastName: d.lastName,
-        walletAddress: d.walletAddress,
+        walletAddress: walletAddress[index]?.address,
         govtIDNumber: d.govtIDNumber,
         gender: d.gender,
         bankedStatus: d.bankedStatus,
