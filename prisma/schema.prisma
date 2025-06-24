@@ -503,16 +503,17 @@ enum TransactionStatus {
 // ++++++++++++++++++ START: @rahat/grievances - Grievances ++++++++++++++++++++
 
 enum GrievanceStatus {
-  //  'New', 'Under Review', 'Resolved', 'Closed
   NEW
-  UNDER_REVIEW
+  IN_PROGRESS
   RESOLVED
   CLOSED
+  REJECTED
 }
 
 enum GrievanceType {
   TECHNICAL
-  NON_TECHNICAL
+  OPERATIONAL
+  FINANCIAL
   OTHER
 }
 
