@@ -22,6 +22,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   AddBenToProjectDto,
+  AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ImportTempBenefDto,
@@ -509,6 +510,15 @@ export class BeneficiaryController {
       { cmd: BeneficiaryJobs.UPDATE_GROUP },
       { uuid, ...dto }
     );
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Patch('groups/:uuid/addGroupPurpose')
+  @ApiParam({ name: 'uuid', required: true })
+  async addGroupPurpose(@Param('uuid') uuid: UUID, @Body() dto: AddGroupsPurposeDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.ADD_GROUP_PURPOSE }, { uuid, ...dto });
   }
 
   @Post('import-tools')
