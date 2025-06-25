@@ -4,7 +4,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { Beneficiary } from '@prisma/client';
+import { Beneficiary, GroupPurpose } from '@prisma/client';
 import {
   AddBenfGroupToProjectDto,
   AddBenToProjectDto,
@@ -1172,11 +1172,33 @@ export class BeneficiaryService {
       },
     });
 
-    const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
-      (d) => d.Beneficiary
-    ).filter((benf) => !(benf.extras as any)?.validBankAccount);
+    const purpose = benfGroup?.groupPurpose;
+    if (!purpose) {
+      this.logger.warn('Group purpose is required for AA project.');
+      return false;
+    }
 
-    return benfsInGroup?.length === 0;
+
+    const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
+      (d) => d.Beneficiary)
+
+    if (!benfsInGroup) return false;
+
+    switch (purpose) {
+      case GroupPurpose.BANK_TRANSFER:
+        return benfsInGroup.every(
+          (benf) => (benf.extras as any)?.validBankAccount
+        );
+      case GroupPurpose.MOBILE_MONEY:
+        return benfsInGroup.every(
+          (benf) => (benf.extras as any)?.validPhoneNumber
+        );
+      case GroupPurpose.COMMUNICATION:
+        return true; // groups with COMMUNICATION purpose can be valid without specific checks
+      default:
+        this.logger.error(`Invalid group purpose provided: ${purpose}`);
+        return false;
+    }
   }
 
   async groupAccountCheck(uuid: string) {
