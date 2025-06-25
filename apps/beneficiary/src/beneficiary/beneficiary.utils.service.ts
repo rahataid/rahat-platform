@@ -17,7 +17,7 @@ import {
   BeneficiaryPayload,
   MicroserviceOptions,
   ProjectContants,
-  WalletJobs
+  WalletJobs,
 } from '@rahataid/sdk';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService } from '@rumsan/prisma';
@@ -31,7 +31,7 @@ export class BeneficiaryUtilsService {
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly settings: SettingsService
-  ) { }
+  ) {}
 
   buildWhereClause(dto: ListBeneficiaryDto): Record<string, any> {
     const { projectId, startDate, endDate } = dto;
@@ -79,9 +79,11 @@ export class BeneficiaryUtilsService {
   }
 
   async ensureValidWalletAddress(walletAddress?: string): Promise<string> {
-    const chain = await this.getChainName()
+    const chain = await this.getChainName();
     if (!walletAddress) {
-      const observable = this.walletClient.send({ cmd: WalletJobs.CREATE }, [chain.toLowerCase()]);
+      const observable = this.walletClient.send({ cmd: WalletJobs.CREATE }, [
+        chain.toLowerCase(),
+      ]);
       const result = await firstValueFrom(observable);
       return result[0].address;
     }
@@ -302,9 +304,15 @@ export class BeneficiaryUtilsService {
 
   async getChainName(): Promise<string> {
     const contractSettings = await this.settings.getByName('CHAIN_SETTINGS');
-    const value = typeof contractSettings.value === 'string'
-      ? JSON.parse(contractSettings.value)
-      : contractSettings.value;
-    return value.nativeCurrency?.symbol;
+    const value =
+      typeof contractSettings.value === 'string'
+        ? JSON.parse(contractSettings.value)
+        : contractSettings.value;
+
+    if (!value.currency?.symbol) {
+      throw new Error('Chain configuration must include currency.symbol');
+    }
+
+    return value.currency.symbol;
   }
 }

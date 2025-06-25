@@ -1,122 +1,209 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { BulkCreateWallet, ChainType, EVMWallet, StellarWallet, WalletKeys } from '@rahataid/wallet';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { BulkUpdateWallet, ChainType, IConnectedWallet, WalletKeys } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
-import { FileWalletStorage } from './storages/fs.storage';
+import { BulkWalletAddressDto } from './dto/getBy.dto';
+import {
+  BLOCKCHAIN_REGISTRY_TOKEN,
+  BlockchainProviderRegistry,
+} from './providers/blockchain-provider.registry';
+import { ChainConfig } from './types/chain-config.interface';
+
+export interface WalletCreateResult {
+  chain: ChainType;
+  address: string;
+  privateKey: string;
+}
+
+// TODO: Multi-chain support - Future enhancement to support multiple chains per instance
+// Currently: One instance = One chain type
+// Future: One instance = Multiple chain types with dynamic selection
 
 @Injectable()
 export class WalletService implements OnModuleInit {
   private readonly logger = new Logger(WalletService.name);
-  private evmWallet: EVMWallet | null = null; // Singleton instance for EVMWallet
-  private stellarWallet: StellarWallet | null = null; // Singleton instance for StellarWallet
 
-  constructor(private readonly settings: SettingsService, private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly settings: SettingsService,
+    private readonly prisma: PrismaService,
+    @Inject(BLOCKCHAIN_REGISTRY_TOKEN)
+    private readonly providerRegistry: BlockchainProviderRegistry
+  ) { }
 
-  // Called when the module is initialized
   async onModuleInit() {
-    await this.initializeEvmWallet();
-    await this.initializeStellarWallet();
+    await this.initializeProviders();
   }
 
-  // Initialize EVMWallet
-  private async initializeEvmWallet() {
-    this.logger.log('Initializing EVMWallet...');
-    const evmChain = await this.settings.getByName('CHAIN_SETTINGS');
-    const evmChainValue = evmChain?.value as { rpcUrls: { default: { http: string[] } } } || {
-      rpcUrls: { default: { http: ['https://base-sepolia-rpc.publicnode.com'] } },
-    };
+  private async initializeProviders() {
+    this.logger.log('Initializing blockchain wallet managers...');
 
-    this.evmWallet = new EVMWallet(
-      evmChainValue.rpcUrls.default.http[0],
-      new FileWalletStorage()
+    // TODO: Multi-chain support - Currently detecting single chain from settings
+    // Future: Support multiple chains simultaneously
+    const chainSettings = await this.getCurrentChainSettings();
+
+    this.logger.log(
+      `Registered wallet classes: ${this.providerRegistry
+        .getRegisteredChainTypes()
+        .join(', ')}`
     );
-    await this.evmWallet.init(); // Initialize the wallet
-  }
 
-  // Initialize StellarWallet
-  private async initializeStellarWallet() {
-    this.logger.log('Initializing StellarWallet...');
-    const stellarChain = await this.settings.getByName('CHAIN_SETTINGS');
-    const stellarChainValue = stellarChain?.value as { rpcUrls: { default: { http: string } } } || {
-      rpcUrls: { default: { http: 'https://stellar-soroban-public.nodies.app' } },
-    };
+    // Validate that the detected chain is supported
+    if (
+      !this.providerRegistry
+        .getRegisteredChainTypes()
+        .includes(chainSettings.detectedChain)
+    ) {
+      throw new Error(
+        `Chain type ${chainSettings.detectedChain} is not registered in the module`
+      );
+    }
 
-    this.stellarWallet = new StellarWallet(
-      stellarChainValue.rpcUrls.default.http,
-      new FileWalletStorage()
+    // Initialize the detected chain using IWalletManager
+    const chainConfig = chainSettings[chainSettings.detectedChain];
+    if (!chainConfig) {
+      throw new Error(
+        `Configuration missing for chain type: ${chainSettings.detectedChain}`
+      );
+    }
+
+    await this.providerRegistry.initializeChain(
+      chainSettings.detectedChain,
+      chainConfig
     );
-    await this.stellarWallet.init(); // Initialize the wallet
+
+    // TODO: Multi-chain support - Initialize all chains instead of just one
+    // for (const chainType of this.providerRegistry.getRegisteredChainTypes()) {
+    //   await this.providerRegistry.initializeChain(chainType, chainSettings[chainType]);
+    // }
+
+    this.logger.log(
+      `Initialized wallet managers: ${this.providerRegistry
+        .getSupportedChains()
+        .join(', ')}`
+    );
   }
 
-  private getEvmWallet(): EVMWallet {
-    if (!this.evmWallet) {
-      throw new Error('EVMWallet is not initialized');
+  // Dynamic wallet creation based on chain type
+  async createWallet(chainType?: ChainType): Promise<WalletKeys> {
+    const chain =
+      chainType || (await this.getCurrentChainSettings()).detectedChain;
+
+    this.logger.log(`Creating ${chain} wallet`);
+    return this.providerRegistry.createWallet(chain);
+  }
+
+  // Multi-chain wallet creation
+  async create(chains: ChainType[]): Promise<WalletCreateResult[]> {
+    this.logger.log(`Creating wallets for chains: ${chains.join(', ')}`);
+
+    // TODO: Multi-chain support - Currently limited to single chain per instance
+    // For now, filter to only supported chains
+    const supportedChains = chains.filter((chain) =>
+      this.providerRegistry.getSupportedChains().includes(chain)
+    );
+
+    if (supportedChains.length === 0) {
+      this.logger.warn(
+        `No supported chains found in request: ${chains.join(', ')}`
+      );
+      supportedChains.push(
+        (await this.getCurrentChainSettings()).detectedChain
+      );
     }
-    return this.evmWallet;
-  }
 
-  private getStellarWallet(): StellarWallet {
-    if (!this.stellarWallet) {
-      throw new Error('StellarWallet is not initialized');
-    }
-    return this.stellarWallet;
-  }
-
-  async createethWallets(): Promise<WalletKeys> {
-    const evmWallet = this.getEvmWallet();
-    const walletKeys = (await evmWallet.createWallet()).getWalletKeys();
-    return walletKeys;
-  }
-
-  async createstellarWallets() {
-    const stellarWallet = this.getStellarWallet();
-    const walletKeys = (await stellarWallet.createWallet()).getWalletKeys();
-    return walletKeys;
-  }
-
-  async create(chains: ChainType[]) {
     const chainWallets = await Promise.all(
-      chains.map(async (chain: ChainType) => {
-        const functionName = this.getFunctionByName(chain);
-        const walletFn = this[functionName].bind(this) as () => Promise<WalletKeys>;
-        const wallet = await walletFn();
-
+      supportedChains.map(async (chain: ChainType) => {
+        const walletKeys = await this.createWallet(chain);
         return {
           chain,
-          address: wallet.address,
-          privateKey: wallet.privateKey,
+          address: walletKeys.address,
+          privateKey: walletKeys.privateKey,
         };
       })
     );
+
     return chainWallets;
   }
 
-  async createBulk(chains: BulkCreateWallet) {
+  // Bulk wallet creation for a specific chain
+  async createBulk(count: number): Promise<WalletCreateResult[]> {
+    const chainSettings = await this.getCurrentChainSettings();
+    console.log('chainSettings', chainSettings);
 
-    // Initialize walletAddresses as an array
-    const walletPromises = [];
-
-    // Create array of promises for wallet creation
-    for (let i = 0; i < chains.count; i++) {
-      const functionName = this.getFunctionByName(chains.chain);
-      const walletFn = this[functionName].bind(this) as () => Promise<WalletKeys>;
-      walletPromises.push(walletFn());
+    // TODO: Multi-chain support - Validate chain is supported
+    if (
+      !this.providerRegistry
+        .getSupportedChains()
+        .includes(chainSettings.detectedChain)
+    ) {
+      throw new Error(
+        `Chain ${chainSettings.detectedChain} is not supported in this instance`
+      );
     }
 
-    // Wait for all wallets to be created
+    const walletPromises = Array.from({ length: count }, () =>
+      this.createWallet()
+    );
+
     const wallets = await Promise.all(walletPromises);
 
-    // Map wallets to desired output format
-    const walletAddresses = wallets.map(wallet => ({
-      chain: chains.chain,
+    console.log(wallets);
+
+    return wallets.map((wallet) => ({
+      chain: chainSettings.detectedChain,
       address: wallet.address,
       privateKey: wallet.privateKey,
     }));
-
-    return walletAddresses;
   }
 
-  async getWalletByPhone(phoneNumber: string) {
+  // Get wallet secret by address and chain
+  async getSecretByWallet(
+    walletAddress: string,
+    chain?: ChainType
+  ): Promise<WalletKeys | null> {
+    if (!walletAddress) {
+      throw new Error('Wallet address not found');
+    }
+
+    // TODO: Multi-chain support - Currently limited to instance's supported chains
+    const chains = chain ? [chain] : this.providerRegistry.getSupportedChains();
+
+    for (const chainType of chains) {
+      try {
+        const walletKeys = await this.providerRegistry.getWalletKeys(
+          walletAddress,
+          chainType
+        );
+        if (walletKeys) {
+          return walletKeys;
+        }
+      } catch (error) {
+        this.logger.warn(
+          `Failed to get wallet keys for ${chainType}: ${error.message}`
+        );
+      }
+    }
+
+    return null;
+  }
+
+  async getBulkSecretByWallet(accounts: BulkWalletAddressDto) {
+    return Promise.all(accounts.walletAddresses.map(async (walletAddress) => {
+      return this.getSecretByWallet(walletAddress, accounts.chain);
+    }))
+  }
+
+  async getSecretByPhone(
+    phoneNumber: string,
+    chain?: ChainType
+  ): Promise<WalletKeys | null> {
+    this.logger.log(`Getting secret by phone: ${phoneNumber}`);
+
+    const walletAddress = await this.getWalletByPhone(phoneNumber);
+    return this.getSecretByWallet(walletAddress, chain);
+  }
+
+  async getWalletByPhone(phoneNumber: string): Promise<string> {
     const result = await this.prisma.beneficiaryPii.findUnique({
       where: { phone: phoneNumber },
       select: {
@@ -127,40 +214,156 @@ export class WalletService implements OnModuleInit {
     });
 
     if (!result) {
-      throw new Error("Beneficiary not found");
+      throw new Error('Beneficiary not found');
     }
 
     return result.beneficiary.walletAddress;
   }
 
-  async getSecretByWallet(walletAddress: string, chain: ChainType) {
-
-    if (!walletAddress) {
-      throw new Error("Wallet address not found");
-    }
-    const storage = new FileWalletStorage();
-    console.log(storage);
-    this.logger.log(`Storage: ${JSON.stringify(storage)}`);
-    return storage.getKey(walletAddress, chain);
+  async updateBulk(bulkUpdateWalletDto: BulkUpdateWallet) {
+    return Promise.all(bulkUpdateWalletDto.benUuids.map(async (uuid) => {
+      const walletAddress = await this.create([bulkUpdateWalletDto.chain]);
+      const beneficiary = await this.prisma.beneficiary.update({
+        where: { uuid },
+        data: { walletAddress: walletAddress[0].address },
+      });
+      return { uuid, walletAddress: beneficiary.walletAddress, secret: walletAddress[0].privateKey };
+    }))
   }
 
-  async getSecretByPhone(phoneNumber: string, chain: ChainType) {
-    this.logger.log(`Getting secret by phone number: ${phoneNumber} and chain: ${chain}`);
+  // Connect to existing wallet
+  async connectWallet(
+    address: string,
+    chain?: ChainType
+  ): Promise<IConnectedWallet> {
+    const chainType = chain || (await this.detectChainFromAddress(address));
 
-    const walletAddress = await this.getWalletByPhone(phoneNumber);
-    this.logger.log(`Wallet address: ${walletAddress}`);
-
-    return this.getSecretByWallet(walletAddress, chain);
-  }
-
-
-  getFunctionByName(chain: string): string {
-    const functionName = `create${chain}Wallets` as keyof this;
-
-    if (typeof this[functionName] !== 'function') {
-      throw new Error(`Wallet creation method not found`);
+    if (!this.providerRegistry.getSupportedChains().includes(chainType)) {
+      throw new Error(`Chain ${chainType} not supported in this instance`);
     }
 
-    return functionName as string;
+    return this.providerRegistry.connectWallet(address, chainType);
+  }
+
+  // Import wallet from private key
+  async importWallet(
+    privateKey: string,
+    chain?: ChainType
+  ): Promise<WalletKeys> {
+    const chainType =
+      chain || (await this.getCurrentChainSettings()).detectedChain;
+
+    if (!this.providerRegistry.getSupportedChains().includes(chainType)) {
+      throw new Error(`Chain ${chainType} not supported in this instance`);
+    }
+
+    return this.providerRegistry.importWallet(privateKey, chainType);
+  }
+
+  // Validation methods
+  async validateAddress(address: string, chain?: ChainType): Promise<boolean> {
+    const chainType = chain || (await this.detectChainFromAddress(address));
+
+    // TODO: Multi-chain support - Remove this check when all chains are supported
+    if (!this.providerRegistry.getSupportedChains().includes(chainType)) {
+      this.logger.warn(`Chain ${chainType} not supported in this instance`);
+      return false;
+    }
+
+    return this.providerRegistry.validateAddress(address, chainType);
+  }
+
+  // Utility methods
+  async getDefaultChain(): Promise<ChainType> {
+    // TODO: Multi-chain support - Return configured default instead of instance chain
+    return (await this.getCurrentChainSettings()).detectedChain;
+  }
+
+  // Chain configuration using new flat structure
+  private async getCurrentChainSettings(): Promise<{
+    detectedChain: ChainType;
+    stellar: any;
+    evm: any;
+  }> {
+    const settings = await this.settings.getByName('CHAIN_SETTINGS');
+    console.log('CHAIN_SETTINGS', settings);
+
+    if (!settings || !settings.value) {
+      throw new Error(
+        'CHAIN_SETTINGS configuration not found. Please configure chain settings in the application settings.'
+      );
+    }
+
+    const rawValue = settings.value as unknown as ChainConfig;
+
+    if (!rawValue?.type) {
+      throw new Error(
+        'Chain configuration must include a "type" field (evm or stellar)'
+      );
+    }
+
+    // Validate that the type is a valid ChainType
+    const validChainTypes: ChainType[] = ['evm', 'stellar'];
+    if (!validChainTypes.includes(rawValue.type as ChainType)) {
+      throw new Error(
+        `Invalid chain type "${rawValue.type
+        }". Must be one of: ${validChainTypes.join(', ')}`
+      );
+    }
+
+    const detectedChain: ChainType = rawValue.type as ChainType;
+
+    // Build chain-specific configuration based on the detected chain type
+    const chainSpecificConfig = {
+      rpcUrl: rawValue.rpcUrl,
+      ...(detectedChain === 'evm' && {
+        chainId: parseInt(rawValue.chainId || '84532'),
+      }),
+      ...(detectedChain === 'stellar' && {
+        networkPassphrase: 'Test SDF Network ; September 2015', // Use testnet passphrase for Soroban
+      }),
+    };
+
+    // Return configuration with both the detected chain config and fallback defaults
+    return {
+      detectedChain,
+      [detectedChain]: chainSpecificConfig,
+      // Keep defaults for backward compatibility
+      stellar:
+        detectedChain === 'stellar'
+          ? chainSpecificConfig
+          : {
+            rpcUrl: 'https://stellar-soroban-public.nodies.app',
+            networkPassphrase: 'Test SDF Network ; September 2015',
+          },
+      evm:
+        detectedChain === 'evm'
+          ? chainSpecificConfig
+          : {
+            rpcUrl: 'https://base-sepolia-rpc.publicnode.com',
+            chainId: 84532,
+          },
+    };
+  }
+
+  private async detectChainFromAddress(address: string): Promise<ChainType> {
+    return this.providerRegistry.detectChainFromAddress(address);
+  }
+
+  // Backward compatibility methods (deprecated)
+  /** @deprecated Use createWallet('stellar') instead */
+  async createstellarWallets(): Promise<WalletKeys> {
+    this.logger.warn(
+      'createstellarWallets is deprecated. Use createWallet("stellar") instead.'
+    );
+    return this.createWallet('stellar');
+  }
+
+  /** @deprecated Use createWallet('evm') instead */
+  async createethWallets(): Promise<WalletKeys> {
+    this.logger.warn(
+      'createethWallets is deprecated. Use createWallet("evm") instead.'
+    );
+    return this.createWallet('evm');
   }
 }
