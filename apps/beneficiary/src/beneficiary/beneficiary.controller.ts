@@ -213,6 +213,11 @@ export class BeneficiaryController {
     return this.service.removeOneGroup(uuid);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.DELETE_ONE_GROUP })
+  deleteGroup(uuid: string) {
+    return this.service.deleteOneGroup(uuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK })
   groupAccountCheck(uuid: string) {
     return this.service.groupAccountCheck(uuid);
