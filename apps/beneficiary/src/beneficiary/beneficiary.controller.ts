@@ -4,6 +4,7 @@ import { Controller, Param } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   addBulkBeneficiaryToProject,
+  AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ImportTempBenefDto,
@@ -229,6 +230,13 @@ export class BeneficiaryController {
   ) {
     const groupUUID = uuid ? uuid : dto?.uuid;
     return this.service.updateGroup(groupUUID, dto);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.ADD_GROUP_PURPOSE })
+  addGroupPurpose(
+    @Payload() dto: AddGroupsPurposeDto
+  ) {
+    return this.service.addGroupPurpose(dto);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT })

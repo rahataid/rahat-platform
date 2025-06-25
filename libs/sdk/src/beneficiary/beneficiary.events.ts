@@ -54,6 +54,7 @@ export const JOBS = {
   GET_GROUP_BENEF_FAIL_ACCOUNT: 'rahat.jobs.beneficiary.get_group_benef_fail_account',
   GET_ALL_GROUPS: 'rahat.jobs.beneficiary.get_all_groups',
   UPDATE_GROUP: 'rahat.jobs.beneficiary.update_group',
+  ADD_GROUP_PURPOSE: 'rahat.job.beneficiary.add_group_purpose',
   GROUP_ACCOUNT_CHECK: 'rahat.jobs.beneficiary.group_account_check',
   ADD_GROUP_TO_PROJECT: 'rahat.jobs.beneficiary.add_group_to_project',
   GET_BENEFICIARIES_DISBURSEMENTS: 'rahat.jobs.beneficiaries.getDisBURSEMENTS',

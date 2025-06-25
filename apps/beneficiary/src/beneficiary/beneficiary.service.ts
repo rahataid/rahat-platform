@@ -9,6 +9,7 @@ import {
   AddBenfGroupToProjectDto,
   AddBenToProjectDto,
   addBulkBeneficiaryToProject,
+  AddGroupsPurposeDto,
   AddToProjectDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
@@ -1438,6 +1439,26 @@ export class BeneficiaryService {
       }
       return 'Success';
     } else return updatedGroupedBeneficiaries;
+  }
+
+  async addGroupPurpose(dto: AddGroupsPurposeDto) {
+    const group = await this.prisma.beneficiaryGroup.findUnique({
+      where: {
+        uuid: dto.uuid
+      }
+    })
+
+    if (!group) throw new RpcException('Group not found')
+    await this.prisma.beneficiaryGroup.update({
+      where: {
+        uuid: dto.uuid
+      },
+      data: {
+        groupPurpose: dto.groupPurpose
+      }
+    })
+
+    return { success: `Group purpose suppessfully updated to ${dto.groupPurpose}` }
   }
 
   async saveBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
