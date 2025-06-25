@@ -27,10 +27,12 @@ import {
   BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
+  GroupWithValidationAA,
   ProjectContants,
   TPIIData,
   WalletJobs
 } from '@rahataid/sdk';
+import { BeneficiaryGroupAttribute } from '@rahataid/sdk/enums';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -1120,7 +1122,7 @@ export class BeneficiaryService {
     return groupedBeneficiaries;
   }
 
-  async getOneGroup(uuid: string) {
+  async getOneGroup(uuid: string): Promise<GroupWithValidationAA> {
     const group = await this.prisma.beneficiaryGroup.findUnique({
       where: {
         uuid: uuid,
@@ -1201,16 +1203,47 @@ export class BeneficiaryService {
     }
   }
 
-  async groupAccountCheck(uuid: string) {
+  async groupAttributesCheck(uuid: string, attribute: BeneficiaryGroupAttribute) {
     const benfGroup = await this.getOneGroup(uuid);
 
     if (benfGroup.isGroupValidForAA) {
       return {
         success: true,
-        message: 'Group has all beneficiaries with valid bank account.',
+        message: `Group has all beneficiaries with valid ${attribute.toLowerCase()}.`,
       };
     }
 
+    switch (attribute) {
+      case BeneficiaryGroupAttribute.PHONE: {
+        return this.groupPhoneCheck(uuid, benfGroup);
+      }
+      case BeneficiaryGroupAttribute.ACCOUNT: {
+        return this.groupAccountCheck(uuid, benfGroup);
+      }
+      default: {
+        this.logger.error(`Invalid attribute provided: ${attribute}`);
+        return {
+          success: false,
+          message: `Invalid attribute provided for group check: ${attribute}.`,
+        }
+      }
+    }
+  }
+
+  async groupPhoneCheck(uuid: string, benfGroup: GroupWithValidationAA) {
+    const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
+      (d) => d.Beneficiary
+    ).filter((benf) => !(benf.extras as any)?.validPhoneNumber);
+
+    this.logger.log(`Group phone check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`);
+
+    return {
+      success: true,
+      message: 'Phone number check in progress. Data will be listed soon.',
+    };
+  }
+
+  async groupAccountCheck(uuid: string, benfGroup: GroupWithValidationAA) {
     const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
       (d) => d.Beneficiary
     ).filter((benf) => !(benf.extras as any)?.validBankAccount);

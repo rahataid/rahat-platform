@@ -23,6 +23,7 @@ import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   AddBenToProjectDto,
   AddGroupsPurposeDto,
+  CheckBeneficiaryGroupAttributeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ImportTempBenefDto,
@@ -475,8 +476,8 @@ export class BeneficiaryController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('groups/:uuid/account-check')
   @ApiParam({ name: 'uuid', required: true })
-  async groupAccountCheck(@Param('uuid') uuid: UUID) {
-    return this.client.send({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK }, uuid);
+  async groupAccountCheck(@Param('uuid') uuid: UUID, @Body() dto: CheckBeneficiaryGroupAttributeDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK }, { uuid, ...dto });
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
