@@ -1,0 +1,35 @@
+meta {
+  name: getWalletBalance
+  type: http
+  seq: 41
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.stellar.getWalletBalance",
+    "payload": {
+      "address": "+9779801109700"
+    }
+  }
+  
+  // {
+  //   "action": "aa.stellar.sendAssetWithAddress",
+  //   "payload": {
+  // //     "address": "+9779865430408"
+  //     "amount": 10,
+  //     "beneficiaryWalletAddress": "GA4WPRTRZVYMMOTYTZ4F5J6LDS7XHU5STMVGQESFUX7XNQ5EDZHQPQ37",
+  //     "offRampWalletAddress": "GBBLK4Y75BMKCBJ4AW2PBTLEVFSVJJ2O2PI3TAQVSL7RRNJQL2JISAJL"
+  //   }
+  // }
+  
+}
