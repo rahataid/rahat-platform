@@ -350,8 +350,18 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.CHECK_TRUSTLINE, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.STELLAR.TRUSTLINE]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.STELLAR.FAUCET, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.STELLAR.CHECK_BULK_TRUSTLINE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.CHECK_BULK_TRUSTLINE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.TRUSTLINE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.FAUCET, uuid }, payload),
+
 
   [MS_ACTIONS.AAPROJECT.STELLAR.UPDATE_ONCHAIN_TRIGGER]: (
     uuid,
@@ -384,6 +394,31 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.GET_WALLET_BALANCE, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.CHAIN.DISBURSE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.CHAIN.DISBURSE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CHAIN.SEND_OTP]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.CHAIN.SEND_OTP, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CHAIN.SEND_ASSET]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.CHAIN.SEND_ASSET, uuid }, payload),
+
+  // remove after testing
+  [MS_ACTIONS.AAPROJECT.STELLAR.INTERNAL_FAUCET_TRUSTLINE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.INTERNAL_FAUCET_TRUSTLINE, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.STELLAR.GET_VENDOR_STATS]: (
     uuid,
     payload,
@@ -394,8 +429,15 @@ export const aaActions: ProjectActionFunc = {
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand({ cmd: AAJobs.STELLAR.GET_REDEMPTION_REQUEST, uuid }, payload),
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_REDEMPTION_REQUEST, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.RAHAT_FAUCET]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.RAHAT_FAUCET, uuid }, payload),
+
+
   // **** Stellar end **** //
 
   // **** Payout start **** //

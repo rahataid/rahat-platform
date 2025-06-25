@@ -21,10 +21,11 @@ class SettingsSeed extends commonLib {
       name: 'Blockchain',
       value: {
         chainId: process.env.CHAIN_ID,
+        name: process.env.CHAIN_NAME,
+        type: process.env.CHAIN_TYPE || 'evm', // Default to EVM if not specified
         rpcUrl: process.env.NETWORK_PROVIDER,
-        chainName: process.env.CHAIN_NAME,
-        networkId: process.env.NETWORK_ID,
-        nativeCurrency: {
+        explorerUrl: process.env.BLOCK_EXPLORER_URL || 'https://etherscan.io',
+        currency: {
           name: process.env.CURRENCY_NAME,
           symbol: process.env.CURRENCY_SYMBOL,
         },
@@ -32,7 +33,6 @@ class SettingsSeed extends commonLib {
       isPrivate: false,
     });
   }
-
 
   public async addGraphSettings() {
     const formatted = subGraphURL.substring(
