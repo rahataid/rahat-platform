@@ -1458,7 +1458,7 @@ export class BeneficiaryService {
       }
     })
 
-    return { success: `grpup purpose suppessfully updated to ${dto.groupPurpose}` }
+    return { success: `Group purpose suppessfully updated to ${dto.groupPurpose}` }
   }
 
   async saveBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
