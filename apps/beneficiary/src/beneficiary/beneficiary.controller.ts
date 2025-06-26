@@ -5,7 +5,6 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   addBulkBeneficiaryToProject,
   AddGroupsPurposeDto,
-  CheckBeneficiaryGroupAttributeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ImportTempBenefDto,
@@ -13,7 +12,7 @@ import {
   ListBeneficiaryGroupDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto,
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
@@ -220,9 +219,8 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK })
-  groupAttributesCheck(dto: CheckBeneficiaryGroupAttributeDto) {
-    const { uuid, attribute } = dto;
-    return this.service.groupAttributesCheck(uuid, attribute);
+  groupAttributesCheck(uuid: string) {
+    return this.service.groupAttributesCheck(uuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_GROUPS })

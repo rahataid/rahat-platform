@@ -32,7 +32,6 @@ import {
   TPIIData,
   WalletJobs
 } from '@rahataid/sdk';
-import { BeneficiaryGroupAttribute } from '@rahataid/sdk/enums';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -1203,28 +1202,29 @@ export class BeneficiaryService {
     }
   }
 
-  async groupAttributesCheck(uuid: string, attribute: BeneficiaryGroupAttribute) {
+  async groupAttributesCheck(uuid: string) {
     const benfGroup = await this.getOneGroup(uuid);
 
     if (benfGroup.isGroupValidForAA) {
       return {
         success: true,
-        message: `Group has all beneficiaries with valid ${attribute.toLowerCase()}.`,
+        message: 'Group has valid beneficiaries',
       };
     }
 
-    switch (attribute) {
-      case BeneficiaryGroupAttribute.PHONE: {
+    const groupPurpose = benfGroup?.groupPurpose;
+    switch (groupPurpose) {
+      case GroupPurpose.MOBILE_MONEY: {
         return this.groupPhoneCheck(uuid, benfGroup);
       }
-      case BeneficiaryGroupAttribute.ACCOUNT: {
+      case GroupPurpose.BANK_TRANSFER: {
         return this.groupAccountCheck(uuid, benfGroup);
       }
       default: {
-        this.logger.error(`Invalid attribute provided: ${attribute}`);
+        this.logger.error(`Invalid group purpose: ${groupPurpose}`);
         return {
           success: false,
-          message: `Invalid attribute provided for group check: ${attribute}.`,
+          message: `Invalid group purpose: ${groupPurpose}.`,
         }
       }
     }
