@@ -521,6 +521,7 @@ enum GrievancePriority {
   LOW
   MEDIUM
   HIGH
+  CRITICAL
 }
 
 model Grievance {
