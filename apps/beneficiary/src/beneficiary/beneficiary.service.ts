@@ -1437,6 +1437,7 @@ export class BeneficiaryService {
           id: true,
           uuid: true,
           name: true,
+          groupPurpose: true,
           createdAt: true,
           updatedAt: true,
           _count: {
