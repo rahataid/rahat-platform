@@ -1142,13 +1142,9 @@ export class BeneficiaryService {
       },
     });
 
-    const benfsInGroup = group.groupedBeneficiaries?.map(
-      (d) => d.Beneficiary
-    ).filter((benf) => !(benf.extras as any)?.validBankAccount);
-
     return {
       ...group,
-      isGroupValidForAA: benfsInGroup?.length === 0,
+      isGroupValidForAA: await this.isGroupValidForAA(group.uuid),
     };
   }
 
