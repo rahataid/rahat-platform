@@ -32,7 +32,7 @@ import {
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto,
-  ValidateWalletDto,
+  ValidateWalletDto
 } from '@rahataid/extensions';
 import {
   APP,
