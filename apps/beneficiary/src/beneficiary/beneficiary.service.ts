@@ -37,7 +37,6 @@ import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import {
   findTempBenefGroups,
-  validateDupicatePhone,
   validateDupicateWallet
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
@@ -1919,9 +1918,9 @@ export class BeneficiaryService {
     const beneficiaries = groups.map((f) => f.tempBeneficiary);
     if (!beneficiaries.length) throw new Error('No benficiaries found!');
 
-    const dupliPhones = await validateDupicatePhone(this.prisma, beneficiaries);
-    if (dupliPhones.length)
-      throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
+    // const dupliPhones = await validateDupicatePhone(this.prisma, beneficiaries);
+    // if (dupliPhones.length)
+    //   throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
     const dupliWallets = await validateDupicateWallet(
       this.prisma,
       beneficiaries
