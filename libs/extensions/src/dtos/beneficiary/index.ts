@@ -1,7 +1,6 @@
 export * from './add-group-purpose.dto';
 export * from './add-to-project.dto';
 export * from './add.beneficiary.project.dto';
-export * from './check-beneficiary-group-attribute.dto';
 export * from './create-beneficiary-group.dto';
 export * from './create-beneficiary.dto';
 export * from './import-from-tools';
