@@ -120,8 +120,9 @@ export const JOBS = {
     GET_PAYOUT_LOG: 'aa.jobs.payout.getPayoutLog',
   },
   CHAIN: {
-    DISBURSE: 'jobs.chain.disburse',
-    SEND_OTP: 'jobs.chain.sendOtp',
-    SEND_ASSET: 'jobs.chain.sendAsset',
+    DISBURSE: 'aa.jobs.chain.disburse',
+    SEND_OTP: 'aa.jobs.chain.sendOtp',
+    SEND_ASSET: 'aa.jobs.chain.sendAsset',
+    GET_DISBURSEMENT_STATS: 'aa.jobs.chain.getDisbursementStats'
   },
 };
