@@ -123,6 +123,14 @@ export const JOBS = {
     DISBURSE: 'aa.jobs.chain.disburse',
     SEND_OTP: 'aa.jobs.chain.sendOtp',
     SEND_ASSET: 'aa.jobs.chain.sendAsset',
-    GET_DISBURSEMENT_STATS: 'aa.jobs.chain.getDisbursementStats'
+    GET_DISBURSEMENT_STATS: 'aa.jobs.chain.getDisbursementStats',
+  },
+  GRIEVANCES: {
+    CREATE: 'aa.jobs.grievances.create',
+    LIST: 'aa.jobs.grievances.list',
+    GET: 'aa.jobs.grievances.get',
+    UPDATE: 'aa.jobs.grievances.update',
+    REMOVE: 'aa.jobs.grievances.remove',
+    UPDATE_STATUS: 'aa.jobs.grievances.updateStatus'
   },
 };
