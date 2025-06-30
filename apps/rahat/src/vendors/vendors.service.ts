@@ -203,6 +203,11 @@ export class VendorsService {
         User: true
       },
     });
+
+    //return vendor if no project data available
+    if (projectData.length === 0) {
+      return data
+    }
     // const vendorIdentifier = projectData[0]?.extras;
     // const projects = projectData.map((project) => project.Project);
     // const userdata = { ...data, projects, vendorIdentifier };
