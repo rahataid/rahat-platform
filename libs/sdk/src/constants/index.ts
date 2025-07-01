@@ -284,6 +284,14 @@ export const MS_ACTIONS = {
       GET_PAYOUT_LOGS: 'aa.payout.getPayoutLogs',
       GET_PAYOUT_LOG: 'aa.payout.getPayoutLog',
     },
+    GRIEVANCES: {
+      CREATE: 'aa.grievances.create',
+      LIST: 'aa.grievances.list',
+      GET: 'aa.grievances.get',
+      UPDATE: 'aa.grievances.update',
+      REMOVE: 'aa.grievances.remove',
+      UPDATE_STATUS: 'aa.grievances.updateStatus'
+    }
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',
