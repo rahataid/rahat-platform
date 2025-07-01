@@ -1,9 +1,12 @@
-import { faker } from '@faker-js/faker';
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { BeneficiaryJobs } from '@rahataid/sdk';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@rumsan/prisma';
-import { lastValueFrom } from 'rxjs';
+import { StressTestStrategyFactory } from './factories/stress-test-strategy.factory';
+import {
+    BeneficiaryImportConfig,
+    StressTestExecutionConfig,
+    StressTestExecutionResult,
+    StressTestType
+} from './types/stress-test.interface';
 
 @Injectable()
 export class StressTestingService {
@@ -11,132 +14,92 @@ export class StressTestingService {
 
     constructor(
         protected prisma: PrismaService,
-        @Inject('BEN_CLIENT') private readonly client: ClientProxy,
+        private readonly strategyFactory: StressTestStrategyFactory,
     ) { }
 
-    private generateBeneficiaryData(numberOfBeneficiaries: number) {
-        const beneficiaries: any[] = [];
-        for (let i = 0; i < numberOfBeneficiaries; i++) {
-            const gender = faker.helpers.arrayElement(['MALE', 'FEMALE', 'OTHER']);
-            const bankedStatus = faker.helpers.arrayElement(['BANKED', 'UNBANKED', 'UNDER_BANKED']);
-            const phoneStatus = faker.helpers.arrayElement(['NO_PHONE', 'FEATURE_PHONE', 'SMART_PHONE']);
-            const internetStatus = faker.helpers.arrayElement(['NO_INTERNET', 'MOBILE_INTERNET', 'HOME_INTERNET']);
+    /**
+     * Executes a stress test using the appropriate strategy based on test type
+     */
+    async executeStressTest(config: StressTestExecutionConfig): Promise<StressTestExecutionResult> {
+        this.logger.log(`Executing stress test: ${config.testType}`);
 
-            beneficiaries.push({
-                firstName: faker.person.firstName(),
-                lastName: faker.person.lastName(),
-                govtIDNumber: faker.string.numeric(10),
-                walletAddress: `0x${faker.string.hexadecimal({ length: 40 })}`,
-                gender,
-                bankedStatus,
-                phoneStatus,
-                internetStatus,
-                email: faker.internet.email(),
-                phone: faker.phone.number(),
-                birthDate: faker.date.birthdate({ min: 18, max: 65, mode: 'age' }).toISOString(),
-                location: faker.location.city(),
-                latitude: faker.location.latitude(),
-                longitude: faker.location.longitude(),
-                notes: faker.lorem.sentence(),
-                extras: {
-                    occupation: faker.person.jobTitle(),
-                    education: faker.helpers.arrayElement(['NONE', 'PRIMARY', 'SECONDARY', 'HIGHER']),
-                    householdSize: faker.number.int({ min: 1, max: 10 }),
-                    income: faker.number.int({ min: 1000, max: 10000 }),
-                    bank_name: "Kamana Sewa Bikas Bank Ltd.",
-                    bank_ac_name: "Ankit Neupane",
-                    bank_ac_number: "0010055573200018",
-                }
-            });
-        }
-        return beneficiaries;
-    }
-
-    async executeBenfImport(config: {
-        numberOfBeneficiaries: number;
-    }) {
         try {
-            console.log(`Executing beneficiary import with config: ${JSON.stringify(config)}`);
+            // Get the appropriate strategy for the test type
+            const strategy = await this.strategyFactory.createStrategy(config.testType);
 
-            if (!config.numberOfBeneficiaries) {
-                config.numberOfBeneficiaries = 5;
-            }
-
-            console.log(`Generating ${config.numberOfBeneficiaries} beneficiaries`);
-
-            const benfs = await Promise.all(this.generateBeneficiaryData(config.numberOfBeneficiaries));
-
-            this.logger.log(`Generated dummy beneficiaries: ${benfs.length}`);
-
-            const info: {
-                groupName: string;
-                beneficiaries: any;
-            } = {
-                groupName: faker.string.uuid(),
-                beneficiaries: benfs,
-            };
-
-            console.log(`Group name: ${info.groupName}`);
-            console.log('--------------------------------');
-            console.log(`Stress testing started`);
-            console.log('--------------------------------');
-
-            const data = Buffer.from(
-                JSON.stringify({
-                    ...info,
-                    batchSize: 1,
-                    batchIndex: 1,
-                })
-            );
-
-            lastValueFrom(this.client.send(
-                {
-                    cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL,
-                },
-                data
-            ));
-
-            console.log('--------------------------------');
-            console.log(`Stress testing completed, waiting for 2 seconds`);
-            console.log('--------------------------------');
-
-
-            console.log(`Successfully imported ${config.numberOfBeneficiaries} beneficiaries`);
-
-            // await new Promise(resolve => setTimeout(resolve, 2000)); // sleep for 2 seconds
-
-            console.log('--------------------------------');
-            console.log(`Finding temp group`);
-            console.log('--------------------------------');
-
-            console.log(`Temp group name: ${info.groupName}`);
-
-            const tempGroup = await this.prisma.tempGroup.findFirst({
-                where: {
-                    name: info.groupName
-                }
-            });
-
-            if (!tempGroup) {
+            // Validate configuration
+            if (!strategy.validateConfig(config)) {
                 return {
                     success: false,
-                    message: `Group not found with name ${info.groupName}`
+                    message: 'Invalid configuration provided',
+                    errors: ['Configuration validation failed']
                 };
             }
 
-            return this.client.send(
-                { cmd: BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES },
-                {
-                    groupUUID: tempGroup.uuid,
-                }
-            );
+            // Execute the strategy
+            const result = await strategy.execute(config);
+
+            this.logger.log(`Stress test completed: ${config.testType}, Success: ${result.success}`);
+            return result;
 
         } catch (error) {
-            console.log(`Error: ${error}`);
+            this.logger.error(`Stress test execution failed: ${error.message}`);
             return {
                 success: false,
-                message: `Error: ${error}`
+                message: `Stress test execution failed: ${error.message}`,
+                errors: [error.message]
             };
+        }
+    }
+
+    /**
+     * Legacy method for backward compatibility - executes beneficiary import
+     * @deprecated Use executeStressTest with StressTestType.BENEFICIARY_IMPORT instead
+     */
+    async executeBenfImport(legacyConfig: {
+        numberOfBeneficiaries: number;
+        groupName?: string;
+    }): Promise<StressTestExecutionResult> {
+        this.logger.warn('executeBenfImport is deprecated. Use executeStressTest instead.');
+
+        const config: StressTestExecutionConfig = {
+            testType: StressTestType.BENEFICIARY_IMPORT,
+            parameters: {
+                numberOfBeneficiaries: legacyConfig.numberOfBeneficiaries,
+                groupName: legacyConfig.groupName,
+                batchSize: 1,
+                enableValidation: true,
+                generateBankDetails: true
+            } as BeneficiaryImportConfig
+        };
+
+        return this.executeStressTest(config);
+    }
+
+    /**
+     * Gets all supported stress test types
+     */
+    getSupportedTestTypes(): StressTestType[] {
+        return this.strategyFactory.getSupportedTestTypes();
+    }
+
+    /**
+     * Gets information about all available strategies
+     */
+    getStrategyInfo() {
+        return this.strategyFactory.getStrategyInfo();
+    }
+
+    /**
+     * Validates a stress test configuration
+     */
+    async validateConfig(config: StressTestExecutionConfig): Promise<boolean> {
+        try {
+            const strategy = await this.strategyFactory.createStrategy(config.testType);
+            return strategy.validateConfig(config);
+        } catch (error) {
+            this.logger.error(`Configuration validation failed: ${error.message}`);
+            return false;
         }
     }
 }

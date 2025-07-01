@@ -1,12 +1,10 @@
-import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BeneficiaryConstants } from '@rahataid/sdk';
-import { LoadGeneratorService } from './load-generator.service';
-import { MetricsService } from './metrics.service';
+import { StressTestStrategyFactory } from './factories/stress-test-strategy.factory';
+import { BeneficiaryImportStrategy } from './strategies/beneficiary-import.strategy';
 import { StressTestingController } from './stress-testing.controller';
 import { StressTestingService } from './stress-testing.service';
-import { TestJobProcessor } from './test-job.processor';
 
 @Module({
     imports: [
@@ -23,19 +21,22 @@ import { TestJobProcessor } from './test-job.processor';
                 },
             },
         ]),
-        BullModule.registerQueue(
-            { name: 'stress-test-queue' },
-            { name: 'high-priority-queue' },
-            { name: 'low-priority-queue' },
-        ),
     ],
     providers: [
         StressTestingService,
-        MetricsService,
-        LoadGeneratorService,
-        TestJobProcessor,
+        StressTestStrategyFactory,
+        // Register all strategy implementations
+        BeneficiaryImportStrategy,
+        // Future strategies can be added here:
+        // VendorManagementStrategy,
+        // TransactionProcessingStrategy,
+        // ApiLoadTestStrategy,
+        // DatabaseStressStrategy,
     ],
     controllers: [StressTestingController],
-    exports: [StressTestingService, MetricsService],
+    exports: [
+        StressTestingService,
+        StressTestStrategyFactory,
+    ],
 })
 export class StressTestingModule { }
