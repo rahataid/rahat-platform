@@ -240,7 +240,7 @@ export const MS_ACTIONS = {
       REMOVE: 'aaProject.dailyMonitoring.remove',
     },
 
-    // new chain 
+    // new chain
 
     CHAIN: {
       DISBURSE: 'aa.chain.disburse',
@@ -283,6 +283,7 @@ export const MS_ACTIONS = {
         'aa.payout.triggerOneFailedPayoutRequest',
       GET_PAYOUT_LOGS: 'aa.payout.getPayoutLogs',
       GET_PAYOUT_LOG: 'aa.payout.getPayoutLog',
+      GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
     },
   },
   C2CProject: {
