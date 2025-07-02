@@ -4,11 +4,12 @@ import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { Beneficiary } from '@prisma/client';
+import { Beneficiary, GroupPurpose } from '@prisma/client';
 import {
   AddBenfGroupToProjectDto,
   AddBenToProjectDto,
   addBulkBeneficiaryToProject,
+  AddGroupsPurposeDto,
   AddToProjectDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
@@ -26,6 +27,7 @@ import {
   BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
+  GroupWithValidationAA,
   ProjectContants,
   TPIIData,
   WalletJobs
@@ -1119,7 +1121,7 @@ export class BeneficiaryService {
     return groupedBeneficiaries;
   }
 
-  async getOneGroup(uuid: string) {
+  async getOneGroup(uuid: string): Promise<GroupWithValidationAA> {
     const group = await this.prisma.beneficiaryGroup.findUnique({
       where: {
         uuid: uuid,
@@ -1140,13 +1142,9 @@ export class BeneficiaryService {
       },
     });
 
-    const benfsInGroup = group.groupedBeneficiaries?.map(
-      (d) => d.Beneficiary
-    ).filter((benf) => !(benf.extras as any)?.validBankAccount);
-
     return {
       ...group,
-      isGroupValidForAA: benfsInGroup?.length === 0,
+      isGroupValidForAA: await this.isGroupValidForAA(group.uuid),
     };
   }
 
@@ -1171,23 +1169,77 @@ export class BeneficiaryService {
       },
     });
 
-    const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
-      (d) => d.Beneficiary
-    ).filter((benf) => !(benf.extras as any)?.validBankAccount);
+    const purpose = benfGroup?.groupPurpose;
+    if (!purpose) {
+      this.logger.warn('Group purpose is required for AA project.');
+      return false;
+    }
 
-    return benfsInGroup?.length === 0;
+
+    const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
+      (d) => d.Beneficiary)
+
+    if (!benfsInGroup) return false;
+
+    switch (purpose) {
+      case GroupPurpose.BANK_TRANSFER:
+        return benfsInGroup.every(
+          (benf) => (benf.extras as any)?.validBankAccount
+        );
+      case GroupPurpose.MOBILE_MONEY:
+        return benfsInGroup.every(
+          (benf) => (benf.extras as any)?.validPhoneNumber
+        );
+      case GroupPurpose.COMMUNICATION:
+        return true; // groups with COMMUNICATION purpose can be valid without specific checks
+      default:
+        this.logger.error(`Invalid group purpose provided: ${purpose}`);
+        return false;
+    }
   }
 
-  async groupAccountCheck(uuid: string) {
+  async groupAttributesCheck(uuid: string) {
     const benfGroup = await this.getOneGroup(uuid);
 
     if (benfGroup.isGroupValidForAA) {
       return {
         success: true,
-        message: 'Group has all beneficiaries with valid bank account.',
+        message: 'Group has valid beneficiaries',
       };
     }
 
+    const groupPurpose = benfGroup?.groupPurpose;
+    switch (groupPurpose) {
+      case GroupPurpose.MOBILE_MONEY: {
+        return this.groupPhoneCheck(uuid, benfGroup);
+      }
+      case GroupPurpose.BANK_TRANSFER: {
+        return this.groupAccountCheck(uuid, benfGroup);
+      }
+      default: {
+        this.logger.error(`Invalid group purpose: ${groupPurpose}`);
+        return {
+          success: false,
+          message: `Invalid group purpose: ${groupPurpose}.`,
+        }
+      }
+    }
+  }
+
+  async groupPhoneCheck(uuid: string, benfGroup: GroupWithValidationAA) {
+    const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
+      (d) => d.Beneficiary
+    ).filter((benf) => !(benf.extras as any)?.validPhoneNumber);
+
+    this.logger.log(`Group phone check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`);
+
+    return {
+      success: true,
+      message: 'Phone number check in progress. Data will be listed soon.',
+    };
+  }
+
+  async groupAccountCheck(uuid: string, benfGroup: GroupWithValidationAA) {
     const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
       (d) => d.Beneficiary
     ).filter((benf) => !(benf.extras as any)?.validBankAccount);
@@ -1276,6 +1328,80 @@ export class BeneficiaryService {
     });
   }
 
+  async deleteOneGroup(uuid: string) {
+    this.logger.log(`Attempting to delete group with UUID: ${uuid}`);
+
+    const benefGroup = await this.prisma.beneficiaryGroup.findUnique({
+      where: { uuid, deletedAt: null },
+    });
+
+    if (!benefGroup) {
+      this.logger.warn(`Group not found or already deleted: ${uuid}`);
+      throw new RpcException('Beneficiary group not found or has already been deleted.');
+    }
+
+    const groupProjects = await this.prisma.beneficiaryGroupProject.findMany({
+      where: { beneficiaryGroupId: uuid },
+    });
+
+    if (groupProjects.length > 0) {
+      this.logger.warn(`Group ${uuid} is linked to projects.`);
+      throw new RpcException('Cannot delete group: it is currently assigned to one or more projects. Please remove the group from all projects first.');
+    }
+
+    const groupedBeneficiaries = await this.prisma.groupedBeneficiaries.findMany({
+      where: { beneficiaryGroupId: uuid },
+      select: { beneficiaryId: true },
+    });
+
+    const beneficiaryIds = [...new Set(groupedBeneficiaries.map(b => b.beneficiaryId))];
+
+    if (beneficiaryIds.length === 0) {
+      await this.prisma.beneficiaryGroup.delete({ where: { uuid } });
+      return { message: 'Group successfully deleted (group was empty).' };
+    }
+
+    const [assignedToOtherGroups, assignedToProjects] = await Promise.all([
+      this.prisma.groupedBeneficiaries.findMany({
+        where: {
+          beneficiaryGroupId: { not: uuid },
+          beneficiaryId: { in: beneficiaryIds },
+        },
+        select: { beneficiaryId: true },
+      }),
+      this.prisma.beneficiaryProject.findMany({
+        where: { beneficiaryId: { in: beneficiaryIds } },
+        select: { beneficiaryId: true },
+      }),
+    ]);
+
+    const allAssignedBeneficiaryIds = [
+      ...new Set([
+        ...assignedToOtherGroups.map(b => b.beneficiaryId),
+        ...assignedToProjects.map(b => b.beneficiaryId),
+      ]),
+    ];
+
+    const unassignedBeneficiaryIds = beneficiaryIds.filter(id => !allAssignedBeneficiaryIds.includes(id));
+
+    await this.prisma.$transaction([
+      this.prisma.beneficiaryPii.deleteMany({
+        where: { beneficiary: { uuid: { in: unassignedBeneficiaryIds } } },
+      }),
+      this.prisma.groupedBeneficiaries.deleteMany({
+        where: { beneficiaryGroupId: uuid },
+      }),
+      this.prisma.beneficiary.deleteMany({
+        where: { uuid: { in: unassignedBeneficiaryIds } },
+      }),
+      this.prisma.beneficiaryGroup.delete({
+        where: { uuid },
+      }),
+    ]);
+
+    return { message: 'Group and all associated beneficiaries successfully deleted.' };
+  }
+
   async getAllGroups(dto: ListBeneficiaryGroupDto) {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;
@@ -1307,6 +1433,7 @@ export class BeneficiaryService {
           id: true,
           uuid: true,
           name: true,
+          groupPurpose: true,
           createdAt: true,
           updatedAt: true,
           _count: {
@@ -1438,6 +1565,26 @@ export class BeneficiaryService {
       }
       return 'Success';
     } else return updatedGroupedBeneficiaries;
+  }
+
+  async addGroupPurpose(dto: AddGroupsPurposeDto) {
+    const group = await this.prisma.beneficiaryGroup.findUnique({
+      where: {
+        uuid: dto.uuid
+      }
+    })
+
+    if (!group) throw new RpcException('Group not found')
+    await this.prisma.beneficiaryGroup.update({
+      where: {
+        uuid: dto.uuid
+      },
+      data: {
+        groupPurpose: dto.groupPurpose
+      }
+    })
+
+    return { success: `Group purpose successfully updated to ${dto.groupPurpose}` }
   }
 
   async saveBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {

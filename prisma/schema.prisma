@@ -297,6 +297,7 @@ model BeneficiaryGroup {
   uuid String @unique @default(uuid()) @db.Uuid()
 
   name String @unique
+  groupPurpose GroupPurpose?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -349,6 +350,13 @@ model BeneficiaryProject {
   @@index([beneficiaryId])
   @@index([deletedAt])
   @@map("tbl_beneficiaries_projects")
+}
+
+
+enum GroupPurpose {
+BANK_TRANSFER
+MOBILE_MONEY
+COMMUNICATION
 }
 
 // ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++

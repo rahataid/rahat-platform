@@ -412,8 +412,8 @@ export const MS_ACTIONS = {
     GET_ONE_GROUP: 'comms.beneficiary.getOneGroup',
   },
   MS_SOURCES: {
-    GETALL: 'ms.sources.getAll',
-    GETONE: 'ms.sources.getOne',
+    GET_ALL: 'ms.sources.getAll',
+    GET_ONE: 'ms.sources.getOne',
   },
   MS_TRIGGERS: {
     DEV_ONLY: 'ms.triggers.devOnly',

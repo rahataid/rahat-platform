@@ -4,6 +4,7 @@ import { Controller, Param } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   addBulkBeneficiaryToProject,
+  AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ImportTempBenefDto,
@@ -11,7 +12,7 @@ import {
   ListBeneficiaryGroupDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto,
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
@@ -212,9 +213,14 @@ export class BeneficiaryController {
     return this.service.removeOneGroup(uuid);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.DELETE_ONE_GROUP })
+  deleteGroup(uuid: string) {
+    return this.service.deleteOneGroup(uuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK })
-  groupAccountCheck(uuid: string) {
-    return this.service.groupAccountCheck(uuid);
+  groupAttributesCheck(uuid: string) {
+    return this.service.groupAttributesCheck(uuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_GROUPS })
@@ -229,6 +235,13 @@ export class BeneficiaryController {
   ) {
     const groupUUID = uuid ? uuid : dto?.uuid;
     return this.service.updateGroup(groupUUID, dto);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.ADD_GROUP_PURPOSE })
+  addGroupPurpose(
+    @Payload() dto: AddGroupsPurposeDto
+  ) {
+    return this.service.addGroupPurpose(dto);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT })

@@ -19,9 +19,10 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   AddBenToProjectDto,
+  AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ImportTempBenefDto,
@@ -31,7 +32,7 @@ import {
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto,
-  ValidateWalletDto,
+  ValidateWalletDto
 } from '@rahataid/extensions';
 import {
   APP,
@@ -492,8 +493,14 @@ export class BeneficiaryController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Delete('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
-  async removeGroup(@Param('uuid') uuid: UUID) {
-    return this.client.send({ cmd: BeneficiaryJobs.REMOVE_ONE_GROUP }, uuid);
+  @ApiQuery({ name: 'hardDelete', required: false, type: Boolean, description: 'If true, permanently deletes the group and beneficiaries. If false or not provided, performs soft delete.' })
+  async removeGroup(
+    @Param('uuid') uuid: UUID,
+    @Query('hardDelete') hardDelete?: boolean
+  ) {
+    const deleteType = hardDelete === true;
+    const command = deleteType ? BeneficiaryJobs.DELETE_ONE_GROUP : BeneficiaryJobs.REMOVE_ONE_GROUP;
+    return this.client.send({ cmd: command }, uuid);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -509,6 +516,15 @@ export class BeneficiaryController {
       { cmd: BeneficiaryJobs.UPDATE_GROUP },
       { uuid, ...dto }
     );
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Patch('groups/:uuid/addGroupPurpose')
+  @ApiParam({ name: 'uuid', required: true })
+  async addGroupPurpose(@Param('uuid') uuid: UUID, @Body() dto: AddGroupsPurposeDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.ADD_GROUP_PURPOSE }, { uuid, ...dto });
   }
 
   @Post('import-tools')
