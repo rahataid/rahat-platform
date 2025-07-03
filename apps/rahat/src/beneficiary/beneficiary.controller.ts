@@ -224,7 +224,7 @@ export class BeneficiaryController {
     return this.client
       .send(
         { cmd: BeneficiaryJobs.CREATE_BULK },
-        { data: beneficiariesMapped, projectUUID: projectId }
+        { payload: beneficiariesMapped, projectUUID: projectId }
       )
       .pipe(
         catchError((error) => {
