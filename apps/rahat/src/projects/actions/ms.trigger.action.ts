@@ -67,6 +67,8 @@ export const MS_TRIGGERS_JOBS = {
   DAILY_MONITORING: {
     ADD: 'ms.jobs.dailyMonitoring.add',
     GET_ALL: 'ms.jobs.dailyMonitoring.getAll',
+    GET_Gauge_Reading: 'ms.jobs.dailyMonitoring.getGaugeReading',
+    GET_Gauge_Forecast: 'ms.jobs.dailyMonitoring.getGaugeForecast',
     GET_ONE: 'ms.jobs.dailyMonitoring.getOne',
     UPDATE: 'ms.jobs.dailyMonitoring.update',
     REMOVE: 'ms.jobs.dailyMonitoring.remove',
@@ -444,6 +446,24 @@ export const msTriggerActions: ProjectActionFunc = {
 
     return sendCommand(
       { cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.GET_ONE },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_DAILY_MONITORING.GET_Gauge_Reading]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.GET_Gauge_Reading },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_DAILY_MONITORING.GET_Gauge_Forecast]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.GET_Gauge_Forecast },
       payload
     );
   },

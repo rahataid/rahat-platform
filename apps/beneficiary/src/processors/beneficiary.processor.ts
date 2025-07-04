@@ -6,6 +6,7 @@ import { Process, Processor } from '@nestjs/bull';
 import { BadRequestException, Inject, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { PhoneStatus } from '@prisma/client';
 import { CreateBeneficiaryDto } from '@rahataid/extensions';
 import {
   BeneficiaryEvents,
@@ -18,6 +19,7 @@ import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { Job } from 'bull';
 import { randomUUID, UUID } from 'crypto';
+import { PhoneNumberUtil } from 'google-libphonenumber';
 import { splitBeneficiaryPII } from '../beneficiary/helpers';
 import { getBankId } from '../utils/banks';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
@@ -425,10 +427,107 @@ export class BeneficiaryProcessor {
     };
   }
 
+  @Process({
+    name: BeneficiaryJobs.CHECK_BENEFICIARY_PHONE_NUMBER,
+    concurrency: 1,
+  })
+  async checkBeneficiaryPhone(job: Job<{ uuid: string; phone: string; }>) {
+    const { uuid, phone } = job.data;
+    this.logger.log(`Checking beneficiary phone number for benf: ${uuid}`);
 
+    try {
+      const benf = await this.prisma.beneficiary.findUnique({ where: { uuid } });
+
+      if (!benf) {
+        this.logger.error(`Beneficiary not found: ${uuid}`);
+        return;
+      }
+
+      const benfExtras = JSON.parse(JSON.stringify(benf.extras));
+
+      if (!phone) {
+        this.logger.error(`No phone number for beneficiary: ${uuid}`);
+        await this.updateExtras(uuid, {
+          phoneStatus: PhoneStatus.NO_PHONE,
+          extras: {
+            ...benfExtras,
+            error: 'Beneficiary does not have phone number',
+          },
+        });
+        return;
+      }
+
+      const { success, isValid } = await this.isValidNepaliNumber(phone);
+      if (!isValid) {
+        this.logger.warn(`Invalid phone number for beneficiary ${uuid}: ${phone}`);
+        await this.updateExtras(uuid, {
+          extras: {
+            ...benfExtras,
+            error: 'Invalid phone number',
+            validPhoneNumber: false,
+          },
+        });
+        return;
+      }
+
+      if (!success) {
+        this.logger.warn(`Error checking phone number for beneficiary ${uuid}: ${phone}`);
+        await this.updateExtras(uuid, {
+          extras: {
+            ...benfExtras,
+            error: 'Error checking phone number',
+            validPhoneNumber: false,
+          },
+        });
+        return;
+      }
+
+      this.logger.log(`Phone number is valid for beneficiary: ${uuid}`);
+
+      delete benfExtras.error;
+
+      await this.updateExtras(uuid, {
+        extras: {
+          ...benfExtras,
+          validPhoneNumber: true,
+        },
+      });
+
+      return;
+
+    } catch (error) {
+      this.logger.error('Error checking phone number', error);
+      return;
+    }
+  }
+
+  async updateExtras(uuid: string, data: Partial<{ phoneStatus: PhoneStatus; extras: Record<string, any> }>) {
+    await this.prisma.beneficiary.update({
+      where: { uuid },
+      data,
+    });
+  }
+
+  async isValidNepaliNumber(phone: string): Promise<{ success: boolean; isValid: boolean }> {
+    const phoneUtil = PhoneNumberUtil.getInstance();
+    try {
+      const number = phoneUtil.parse(phone, 'NP');
+      const isValid = phoneUtil.isValidNumber(number) && phoneUtil.getRegionCodeForNumber(number) === 'NP';
+      return {
+        success: true,
+        isValid,
+      };
+    } catch (e) {
+      this.logger.error('Error validating nepali number', e);
+      return {
+        success: false,
+        isValid: false,
+      };
+    }
+  }
 
   @Process({
-    name: BeneficiaryJobs.CHECK_BENEFICIARY_ACCOUNT,
+    name: BeneficiaryJobs.CHECK_BENEFICIARY_BANK_ACCOUNT,
     concurrency: 1,
   })
   async checkBeneficiaryAccount(job: Job<{
