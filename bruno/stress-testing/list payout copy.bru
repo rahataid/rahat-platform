@@ -1,0 +1,28 @@
+meta {
+  name: list payout copy
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.payout.list",
+    "payload": {
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
+}

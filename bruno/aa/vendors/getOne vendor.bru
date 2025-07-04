@@ -1,0 +1,29 @@
+meta {
+  name: getOne vendor
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.stellar.getVendorStats",
+    "payload": {
+      "uuid": "e0207376-df9e-41cc-8614-00075e87888e"
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
+}
