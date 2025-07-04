@@ -4,7 +4,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { Beneficiary, GroupPurpose } from '@prisma/client';
+import { Beneficiary, BeneficiaryPii, GroupPurpose } from '@prisma/client';
 import {
   AddBenfGroupToProjectDto,
   AddBenToProjectDto,
@@ -1233,6 +1233,20 @@ export class BeneficiaryService {
 
     this.logger.log(`Group phone check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`);
 
+    const bulkQueueData = benfsInGroup.map((benf) => ({
+      name: BeneficiaryJobs.CHECK_BENEFICIARY_PHONE_NUMBER,
+      data: {
+        uuid: benf.uuid,
+        phone: (benf.pii as BeneficiaryPii)?.phone
+      },
+      opts: {
+        attempts: 3,
+        removeOnComplete: true,
+      },
+    }));
+
+    await this.beneficiaryQueue.addBulk(bulkQueueData);
+
     return {
       success: true,
       message: 'Phone number check in progress. Data will be listed soon.',
@@ -1247,7 +1261,7 @@ export class BeneficiaryService {
     this.logger.log(`Group account check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`);
 
     const bulkQueueData = benfsInGroup.map((benf) => ({
-      name: BeneficiaryJobs.CHECK_BENEFICIARY_ACCOUNT,
+      name: BeneficiaryJobs.CHECK_BENEFICIARY_BANK_ACCOUNT,
       data: {
         uuid: benf.uuid,
         walletAddress: benf.walletAddress,
@@ -1260,7 +1274,6 @@ export class BeneficiaryService {
       opts: {
         attempts: 3,
         removeOnComplete: true,
-        removeOnFail: true,
       },
     }));
 
