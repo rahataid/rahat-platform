@@ -240,7 +240,7 @@ export const MS_ACTIONS = {
       REMOVE: 'aaProject.dailyMonitoring.remove',
     },
 
-    // new chain 
+    // new chain
 
     CHAIN: {
       DISBURSE: 'aa.chain.disburse',
@@ -283,6 +283,7 @@ export const MS_ACTIONS = {
         'aa.payout.triggerOneFailedPayoutRequest',
       GET_PAYOUT_LOGS: 'aa.payout.getPayoutLogs',
       GET_PAYOUT_LOG: 'aa.payout.getPayoutLog',
+      GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
     },
   },
   C2CProject: {
@@ -473,6 +474,8 @@ export const MS_ACTIONS = {
     ADD: 'ms.dailyMonitoring.add',
     GET_ALL: 'ms.dailyMonitoring.getAll',
     GET_ONE: 'ms.dailyMonitoring.getOne',
+    GET_Gauge_Reading: 'ms.dailyMonitoring.getGaugeReading',
+    GET_Gauge_Forecast: 'ms.dailyMonitoring.getGaugeForecast',
     UPDATE: 'ms.dailyMonitoring.update',
     REMOVE: 'ms.dailyMonitoring.remove',
     DELETE: 'ms.dailyMonitoring.delete',
