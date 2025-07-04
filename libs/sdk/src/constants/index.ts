@@ -474,6 +474,8 @@ export const MS_ACTIONS = {
     ADD: 'ms.dailyMonitoring.add',
     GET_ALL: 'ms.dailyMonitoring.getAll',
     GET_ONE: 'ms.dailyMonitoring.getOne',
+    GET_Gauge_Reading: 'ms.dailyMonitoring.getGaugeReading',
+    GET_Gauge_Forecast: 'ms.dailyMonitoring.getGaugeForecast',
     UPDATE: 'ms.dailyMonitoring.update',
     REMOVE: 'ms.dailyMonitoring.remove',
     DELETE: 'ms.dailyMonitoring.delete',
