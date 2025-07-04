@@ -37,19 +37,6 @@ The Stress Testing Module is designed using the **Open-Close Principle** to prov
   }
   ```
 
-### 2. Vendor Management Strategy (Example)
-- **Type**: `VENDOR_MANAGEMENT`
-- **Purpose**: Example strategy showing how to add new stress tests
-- **Parameters**:
-  ```typescript
-  {
-    numberOfVendors: number;
-    vendorType?: 'INDIVIDUAL' | 'ORGANIZATION' | 'MIXED';
-    includeKYC?: boolean;
-    simulateApprovalProcess?: boolean;
-  }
-  ```
-
 ## API Endpoints
 
 ### Execute Stress Test
@@ -131,12 +118,11 @@ export class YourTestStrategy extends BaseStressTestStrategy {
   }
 
   getSupportedTestType(): StressTestType {
-    return StressTestType.YOUR_TEST_TYPE; // Add this to the enum
+    return StressTestType.YOUR_TEST_TYPE; 
   }
 
   protected validateSpecificConfig(config: StressTestExecutionConfig): boolean {
     const params = config.parameters as YourTestConfig;
-    // Implement your validation logic
     return true;
   }
 
@@ -145,8 +131,6 @@ export class YourTestStrategy extends BaseStressTestStrategy {
     
     try {
       const params = config.parameters as YourTestConfig;
-      
-      // Implement your stress test logic here
       
       return this.createSuccessResult('Success message', data, metrics);
     } catch (error) {
@@ -284,12 +268,3 @@ await stressTestingService.executeStressTest({
   }
 });
 ```
-
-## Contributing
-
-When adding new strategies:
-1. Follow the established patterns
-2. Add comprehensive tests
-3. Update this documentation
-4. Consider backward compatibility
-5. Add proper TypeScript types 

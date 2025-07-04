@@ -73,7 +73,6 @@ export enum StressTestType {
     DATABASE_STRESS = 'database_stress'
 }
 
-// Beneficiary Import specific interfaces
 export interface BeneficiaryImportConfig {
     numberOfBeneficiaries: number;
     groupName?: string;

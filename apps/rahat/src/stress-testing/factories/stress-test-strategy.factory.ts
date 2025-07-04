@@ -13,7 +13,6 @@ export class StressTestStrategyFactory {
     }
 
     private registerStrategies(): void {
-        // Register all available strategies
         this.strategies.set(StressTestType.BENEFICIARY_IMPORT, BeneficiaryImportStrategy);
 
         // Future strategies can be registered here:
@@ -34,7 +33,6 @@ export class StressTestStrategyFactory {
         }
 
         try {
-            // Use ModuleRef to get the strategy instance with proper dependency injection
             const strategy = await this.moduleRef.get(StrategyClass, { strict: false });
             this.logger.log(`Created strategy for test type: ${testType}`);
             return strategy;
@@ -49,15 +47,11 @@ export class StressTestStrategyFactory {
     }
 
     getStrategyInfo(): { type: StressTestType; name: string; description: string }[] {
-        // Note: This method creates temporary instances just to get info
-        // In a production environment, you might want to store this info statically
         return Array.from(this.strategies.entries()).map(([type, StrategyClass]) => {
-            // Create a temporary instance to get name and description
-            // This is not ideal but works for getting basic info
             return {
                 type,
-                name: type.toString(), // Fallback, should be improved
-                description: `Strategy for ${type}` // Fallback, should be improved
+                name: type.toString(),
+                description: `Strategy for ${type}`
             };
         });
     }
