@@ -4,7 +4,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { Beneficiary } from '@prisma/client';
+import { Beneficiary, BeneficiaryPii, GroupPurpose } from '@prisma/client';
 import {
   AddBenfGroupToProjectDto,
   AddBenToProjectDto,
@@ -27,6 +27,7 @@ import {
   BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
+  GroupWithValidationAA,
   ProjectContants,
   TPIIData,
   WalletJobs
@@ -1120,7 +1121,7 @@ export class BeneficiaryService {
     return groupedBeneficiaries;
   }
 
-  async getOneGroup(uuid: string) {
+  async getOneGroup(uuid: string): Promise<GroupWithValidationAA> {
     const group = await this.prisma.beneficiaryGroup.findUnique({
       where: {
         uuid: uuid,
@@ -1141,13 +1142,9 @@ export class BeneficiaryService {
       },
     });
 
-    const benfsInGroup = group.groupedBeneficiaries?.map(
-      (d) => d.Beneficiary
-    ).filter((benf) => !(benf.extras as any)?.validBankAccount);
-
     return {
       ...group,
-      isGroupValidForAA: benfsInGroup?.length === 0,
+      isGroupValidForAA: await this.isGroupValidForAA(group.uuid),
     };
   }
 
@@ -1172,23 +1169,91 @@ export class BeneficiaryService {
       },
     });
 
-    const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
-      (d) => d.Beneficiary
-    ).filter((benf) => !(benf.extras as any)?.validBankAccount);
+    const purpose = benfGroup?.groupPurpose;
+    if (!purpose) {
+      this.logger.warn('Group purpose is required for AA project.');
+      return false;
+    }
 
-    return benfsInGroup?.length === 0;
+
+    const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
+      (d) => d.Beneficiary)
+
+    if (!benfsInGroup) return false;
+
+    switch (purpose) {
+      case GroupPurpose.BANK_TRANSFER:
+        return benfsInGroup.every(
+          (benf) => (benf.extras as any)?.validBankAccount
+        );
+      case GroupPurpose.MOBILE_MONEY:
+        return benfsInGroup.every(
+          (benf) => (benf.extras as any)?.validPhoneNumber
+        );
+      case GroupPurpose.COMMUNICATION:
+        return true; // groups with COMMUNICATION purpose can be valid without specific checks
+      default:
+        this.logger.error(`Invalid group purpose provided: ${purpose}`);
+        return false;
+    }
   }
 
-  async groupAccountCheck(uuid: string) {
+  async groupAttributesCheck(uuid: string) {
     const benfGroup = await this.getOneGroup(uuid);
 
     if (benfGroup.isGroupValidForAA) {
       return {
         success: true,
-        message: 'Group has all beneficiaries with valid bank account.',
+        message: 'Group has valid beneficiaries',
       };
     }
 
+    const groupPurpose = benfGroup?.groupPurpose;
+    switch (groupPurpose) {
+      case GroupPurpose.MOBILE_MONEY: {
+        return this.groupPhoneCheck(uuid, benfGroup);
+      }
+      case GroupPurpose.BANK_TRANSFER: {
+        return this.groupAccountCheck(uuid, benfGroup);
+      }
+      default: {
+        this.logger.error(`Invalid group purpose: ${groupPurpose}`);
+        return {
+          success: false,
+          message: `Invalid group purpose: ${groupPurpose}.`,
+        }
+      }
+    }
+  }
+
+  async groupPhoneCheck(uuid: string, benfGroup: GroupWithValidationAA) {
+    const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
+      (d) => d.Beneficiary
+    ).filter((benf) => !(benf.extras as any)?.validPhoneNumber);
+
+    this.logger.log(`Group phone check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`);
+
+    const bulkQueueData = benfsInGroup.map((benf) => ({
+      name: BeneficiaryJobs.CHECK_BENEFICIARY_PHONE_NUMBER,
+      data: {
+        uuid: benf.uuid,
+        phone: (benf.pii as BeneficiaryPii)?.phone
+      },
+      opts: {
+        attempts: 3,
+        removeOnComplete: true,
+      },
+    }));
+
+    await this.beneficiaryQueue.addBulk(bulkQueueData);
+
+    return {
+      success: true,
+      message: 'Phone number check in progress. Data will be listed soon.',
+    };
+  }
+
+  async groupAccountCheck(uuid: string, benfGroup: GroupWithValidationAA) {
     const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
       (d) => d.Beneficiary
     ).filter((benf) => !(benf.extras as any)?.validBankAccount);
@@ -1196,7 +1261,7 @@ export class BeneficiaryService {
     this.logger.log(`Group account check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`);
 
     const bulkQueueData = benfsInGroup.map((benf) => ({
-      name: BeneficiaryJobs.CHECK_BENEFICIARY_ACCOUNT,
+      name: BeneficiaryJobs.CHECK_BENEFICIARY_BANK_ACCOUNT,
       data: {
         uuid: benf.uuid,
         walletAddress: benf.walletAddress,
@@ -1209,7 +1274,6 @@ export class BeneficiaryService {
       opts: {
         attempts: 3,
         removeOnComplete: true,
-        removeOnFail: true,
       },
     }));
 
@@ -1533,7 +1597,7 @@ export class BeneficiaryService {
       }
     })
 
-    return { success: `Group purpose suppessfully updated to ${dto.groupPurpose}` }
+    return { success: `Group purpose successfully updated to ${dto.groupPurpose}` }
   }
 
   async saveBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
