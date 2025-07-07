@@ -1,4 +1,4 @@
-name: C2C Release CI/CD
+name: C2C Polygon XCapit CI/CD
 on:
   workflow_dispatch:
 
