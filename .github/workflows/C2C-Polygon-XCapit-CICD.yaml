@@ -9,7 +9,7 @@ jobs:
  rahat-platform:
     name: rahat-platform
     runs-on: ubuntu-latest
-    if: startsWith(github.ref_name, 'xcapita/') && github.event_name == 'workflow_dispatch'
+    if: startsWith(github.ref_name, 'release/') && github.event_name == 'workflow_dispatch'
 
     steps:
       - uses: actions/checkout@v4
