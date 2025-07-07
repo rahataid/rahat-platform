@@ -9,7 +9,7 @@ jobs:
  rahat-platform:
     name: rahat-platform
     runs-on: ubuntu-latest
-    if: startsWith(github.ref_name, 'release/') && github.event_name == 'workflow_dispatch'
+    if: startsWith(github.ref_name, 'xcapita/') && github.event_name == 'workflow_dispatch'
 
     steps:
       - uses: actions/checkout@v4
@@ -54,9 +54,9 @@ jobs:
           file: Dockerfile.beneficiary
           push: ${{ github.event_name == 'workflow_dispatch' }}
           tags: |
-            esatya/rahat-platform-beneficiary:c2c-release
-            esatya/rahat-platform-beneficiary:c2c-release-${{ env.VERSION }}
-            esatya/rahat-platform-beneficiary:c2c-release-${{ env.VERSION }}-${{ env.timestamp }}
+            esatya/rahat-platform-beneficiary:c2c-xcapita
+            esatya/rahat-platform-beneficiary:c2c-xcapita-${{ env.VERSION }}
+            esatya/rahat-platform-beneficiary:c2c-xcapita-${{ env.VERSION }}-${{ env.timestamp }}
 
       # Rahat Image
       - name: build && push rahat
@@ -67,6 +67,6 @@ jobs:
           file: Dockerfile.rahat
           push: ${{ github.event_name == 'workflow_dispatch' }}
           tags: |
-            esatya/rahat-platform-rahat:c2c-release
-            esatya/rahat-platform-rahat:c2c-release-${{ env.VERSION }}
-            esatya/rahat-platform-rahat:c2c-release-${{ env.VERSION }}-${{ env.timestamp }}
+            esatya/rahat-platform-rahat:c2c-xcapita
+            esatya/rahat-platform-rahat:c2c-xcapita-${{ env.VERSION }}
+            esatya/rahat-platform-rahat:c2c-xcapita-${{ env.VERSION }}-${{ env.timestamp }}
