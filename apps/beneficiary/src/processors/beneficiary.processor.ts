@@ -598,7 +598,7 @@ export class BeneficiaryProcessor {
         await this.updateBenfExtras(uuid, {
           ...benfExtras,
           bankedStatus: 'ERROR',
-          error: 'Invalid bank account',
+          error: bankAccount?.message || 'Invalid bank account',
           validBankAccount: false,
         });
         return;
@@ -641,9 +641,14 @@ export class BeneficiaryProcessor {
       }
 
       const baseUrl = (res?.value as any)?.URL as string;
+      const appId = (res?.value as any)?.APPID as string;
 
       if (!baseUrl) {
         throw new Error(`Offramp URL not found in settings.`);
+      }
+
+      if (!appId) {
+        throw new Error(`Offramp APP_ID not found in settings.`);
       }
 
       const payload = {
@@ -661,19 +666,24 @@ export class BeneficiaryProcessor {
         }
       }>(
         `${baseUrl}/payment-provider/json-rpc`
-        , payload);
+        , payload, {
+        headers: {
+          'APP_ID': appId,
+        }
+      });
 
       return {
         success: true,
         isValid: data.isValid
       };
     } catch (error) {
-
-      this.logger.error('Error checking bank account', error);
+      const errorMessage = error?.response?.data?.message || error?.message;
+      this.logger.error(`Error checking bank account: '${errorMessage}'`);
 
       return {
         success: false,
-        isValid: false
+        isValid: false,
+        message: `Invalid bank account: '${errorMessage}'`,
       };
     }
   }
