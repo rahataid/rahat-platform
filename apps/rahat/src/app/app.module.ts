@@ -25,6 +25,7 @@ import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
 import { QueueModule } from '../queue/queue.module';
 import { RequestContextModule } from '../request-context/request-context.module';
+import { StressTestingModule } from '../stress-testing/stress-testing.module';
 import { TokenModule } from '../token/token.module';
 import { UploadModule } from '../upload/upload.module';
 import { AppUsersModule } from '../vendors/vendors.module';
@@ -68,6 +69,7 @@ import { AppService } from './app.service';
     RequestContextModule,
     QueueModule,
     WalletModule,
+    StressTestingModule,
   ],
   controllers: [AppController],
   providers: [
@@ -79,4 +81,4 @@ import { AppService } from './app.service';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

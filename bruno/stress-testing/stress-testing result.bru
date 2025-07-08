@@ -1,0 +1,20 @@
+meta {
+  name: stress-testing result
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{url}}/stress-test/results/23fe9b98-c1fd-41db-9d3c-d16d1f3dadc2
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
+}

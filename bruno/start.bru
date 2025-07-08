@@ -1,0 +1,18 @@
+meta {
+  name: start
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{url}}/stress-test/start
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "numberOfBeneficiaries": 10,
+    "groupName": "Phone test"
+  }
+}
