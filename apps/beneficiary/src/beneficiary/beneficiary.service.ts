@@ -1143,7 +1143,8 @@ export class BeneficiaryService {
           select: {
             Project: {
               select: {
-                id: true
+                id: true,
+                name: true,
               }
             }
           }
