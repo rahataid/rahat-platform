@@ -8,6 +8,7 @@ const settings = new SettingsService(prismaService);
 
 export const seedPaymentProvider = async () => {
     const url = process.env.PAYMENT_PROVIDER_URL || 'https://api-offramp-dev.rahat.io/v1';
+    const appId = process.env.PAYMENT_PROVIDER_APP_ID || '1234567890';
 
     try {
         const dataSource = await settings.getPublic('OFFRAMP_SETTINGS');
@@ -19,6 +20,7 @@ export const seedPaymentProvider = async () => {
         }
         const paymentProviderValue = {
             url,
+            appId,
             accessToken: 'sk_test_1234567890',
         };
 
