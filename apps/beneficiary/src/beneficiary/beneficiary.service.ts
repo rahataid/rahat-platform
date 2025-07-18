@@ -1137,8 +1137,18 @@ export class BeneficiaryService {
                 pii: true,
               },
             },
-          },
+          }
         },
+        beneficiaryGroupProject: {
+          select: {
+            Project: {
+              select: {
+                id: true,
+                name: true,
+              }
+            }
+          }
+        }
       },
     });
 
