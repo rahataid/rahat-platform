@@ -22,7 +22,7 @@ export default async (phone: string, message: string, extras: any) => {
         }
     };
 
-    const response = await axios.post(extras.url, data, {
+    const response = await axios.post(`${extras.url}/broadcasts`, data, {
         headers: {
             "app-id": extras.appId,
             'Content-Type': 'application/json',
