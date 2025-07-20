@@ -4,15 +4,17 @@ const fs = require('fs');
 const path = require('path');
 
 const projectId = process.env.RAHAT_PROJECT_ID;
+const groupId = process.env.RAHAT_GROUP_ID;
+const baseUrl = process.env.RAHAT_API_URL || 'https://api-aa-dev.rahat.io/v1';
 
-const API_URL = `https://api-aa-dev.rahat.io/v1/projects/${projectId}/actions`;
+const API_URL = `${baseUrl}/v1/projects/${projectId}/actions`;
 const RAHAT_ACCESS_TOKEN = process.env.RAHAT_ACCESS_TOKEN;
 const STELLAR_HORIZON_URL = 'https://horizon.stellar.org';
 
 console.log('RAHAT_API_URL:', API_URL);
 console.log('RAHAT_ACCESS_TOKEN:', RAHAT_ACCESS_TOKEN);
 
-const getBeneficiaresFromApi = async () => {
+const getProjectBeneficiariesFromApi = async () => {
     const payload = {
         action: "beneficiary.list_by_project",
         payload: {
@@ -38,8 +40,38 @@ const getBeneficiaresFromApi = async () => {
     }
 }
 
+const getBeneficiariesOfGroup = async () => {
+    console.log(`Fetching beneficiaries of group ${groupId}...`);
+    const payload = {
+        action: "aaProject.beneficiary.getOneGroup",
+        payload: {
+            uuid: groupId
+        }
+    };
+    console.log('Payload:', JSON.stringify(payload, null, 2));
+
+    try {
+        const response = await axios.post(API_URL, payload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${RAHAT_ACCESS_TOKEN}`
+            }
+        });
+
+        const group = response.data.data;
+        const beneficiaries = group.groupedBeneficiaries.map(b => b.Beneficiary);
+        return { data: beneficiaries };
+    } catch (error) {
+        console.error('Error fetching beneficiaries of group:', error.message);
+        throw error;
+    }
+}
+
 const getBeneficiaryWallets = async () => {
-    const beneficiaries = await getBeneficiaresFromApi();
+    //const beneficiaries = await getProjectBeneficiariesFromApi();
+    const beneficiaries = await getBeneficiariesOfGroup();
+    console.log(`Beneficiaries of group ${groupId}:`, beneficiaries);
+    console.log(`Found ${beneficiaries.length} beneficiaries in group ${groupId}`);
     return beneficiaries.data.map(b => b.walletAddress);
 }
 
@@ -89,7 +121,8 @@ module.exports = {
     saveJsonFile,
     getBeneficiaryWallets,
     checkStellarAccount,
-    getBeneficiaresFromApi,
+    getProjectBeneficiariesFromApi,
+    getBeneficiariesOfGroup
 }
 
 
