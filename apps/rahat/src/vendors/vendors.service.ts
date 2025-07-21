@@ -209,26 +209,60 @@ export class VendorsService {
       where: { vendorId: data.uuid },
       include: {
         Project: true,
+        User: true
       },
     });
-    const vendorIdentifier = projectData[0]?.extras;
-    const projects = projectData.map((project) => project.Project);
-    const userdata = { ...data, projects, vendorIdentifier };
-    return userdata;
+    // const vendorIdentifier = projectData[0]?.extras;
+    // const projects = projectData.map((project) => project.Project);
+    // const userdata = { ...data, projects, vendorIdentifier };
+    return projectData;
   }
 
   async listVendor(dto) {
+    const { projectName, status, page, perPage } = dto;
+    const where: any = {
+      Role: {
+        name: UserRoles.VENDOR,
+      },
+      User: {
+        deletedAt: null,
+      },
+    };
+
+    if (projectName) {
+      where.User = {
+        ...where.User,
+        VendorProject: {
+          some: {
+            Project: {
+              name: projectName,
+            },
+          },
+        },
+      };
+    }
+
+    if (status) {
+      if (status === 'Assigned') {
+        where.User = {
+          ...where.User,
+          VendorProject: {
+            some: {},
+          },
+        };
+      } else if (status === 'Pending') {
+        where.User = {
+          ...where.User,
+          VendorProject: {
+            none: {},
+          },
+        };
+      }
+    }
     return paginate(
       this.prisma.userRole,
       {
-        where: {
-          Role: {
-            name: UserRoles.VENDOR,
-          },
-          User: {
-            deletedAt: null,
-          },
-        },
+        where,
         include: {
           User: {
             include: {
@@ -245,8 +279,8 @@ export class VendorsService {
         },
       },
       {
-        page: dto.page,
-        perPage: dto.perPage,
+        page,
+        perPage,
       }
     );
   }

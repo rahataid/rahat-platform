@@ -330,9 +330,10 @@ export class ProjectService {
     if (benef.type) benef.type = benef.type.toUpperCase();
     if (benef.type !== 'LEAD') benef.phone = genRandomPhone('88');
     if (!benef.phone) throw new Error('Phone number is required!');
+    if (!benef.name) benef.name = "UNKNOWN";
 
     if (benef.gender) {
-      if (benef.gender === 'Others') benef.gender = 'OTHER';
+      if (benef.gender.toUpperCase() === 'OTHERS') benef.gender = 'OTHER';
       benef.gender = benef.gender.toUpperCase();
     }
     if (benef.age) benef.age = parseInt(benef.age);
