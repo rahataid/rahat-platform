@@ -5,7 +5,6 @@ import { CreateOfframpProviderDto, CreateOfframpRequestDto, ListOfframpProviderD
 import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
 import { KotaniPayService } from './offrampProviders/kotaniPay.service';
 
-
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
 @Injectable()
@@ -18,36 +17,40 @@ export class OfframpService {
   registerProvider(createOfframpDto: CreateOfframpProviderDto) {
     console.log({ createOfframpDto });
     return this.prisma.offrampProvider.create({
-      data: createOfframpDto
-    })
+      data: createOfframpDto,
+    });
   }
 
   listProviders(query?: ListOfframpProviderDto) {
     const where = {
-      deletedAt: null
-    }
-    return paginate(this.prisma.offrampProvider, {
-      where,
-      select: {
-        id: true,
-        uuid: true,
-        name: true,
-        description: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-        extras: true
+      deletedAt: null,
+    };
+    return paginate(
+      this.prisma.offrampProvider,
+      {
+        where,
+        select: {
+          id: true,
+          uuid: true,
+          name: true,
+          description: true,
+          createdAt: true,
+          updatedAt: true,
+          deletedAt: true,
+          extras: true,
+        },
+      },
+      {
+        page: query.page || 1,
+        perPage: query.perPage || 10,
       }
-    }, {
-      page: query.page || 1,
-      perPage: query.perPage || 10,
-    });
+    );
   }
   getProviderById(uuid: string) {
     return this.prisma.offrampProvider.findUnique({
       where: {
-        uuid
-      }
+        uuid,
+      },
     });
   }
 
@@ -70,8 +73,8 @@ export class OfframpService {
 
     return {
       success: false,
-      message: "Action not found",
-      error_code: 404
+      message: 'Action not found',
+      error_code: 404,
     };
   }
 
@@ -151,9 +154,7 @@ export class OfframpService {
     } catch (error) {
       console.log(error.response);
       throw new BadRequestException(error.response.message);
-
     }
-
 
     // const { data: kotaniPayResponse } = await this.kotaniPayService.executeOfframpRequest(providerUuid, offrampRequestData);
     // return this.prisma.offrampRequest.update({
@@ -164,35 +165,35 @@ export class OfframpService {
 
   findAllOfframpRequests(query?: ListOfframpRequestDto) {
     const where = {
-      deletedAt: null
+      deletedAt: null,
     };
 
-    return paginate(this.prisma.offrampRequest, {
-      where
-    }, {
-      page: query?.page || 1,
-      perPage: query?.perPage || 10,
-    });
+    return paginate(
+      this.prisma.offrampRequest,
+      {
+        where,
+      },
+      {
+        page: query?.page || 1,
+        perPage: query?.perPage || 10,
+      }
+    );
   }
 
-  findOne(payload: {
-    uuid?: string;
-    id?: number;
-    requestId?: string;
-  }) {
+  findOne(payload: { uuid?: string; id?: number; requestId?: string }) {
     if (payload.uuid) {
       return this.prisma.offrampRequest.findUniqueOrThrow({
-        where: { uuid: payload.uuid }
+        where: { uuid: payload.uuid },
       });
     }
     if (payload.id) {
       return this.prisma.offrampRequest.findUniqueOrThrow({
-        where: { id: payload.id }
+        where: { id: payload.id },
       });
     }
     if (payload.requestId) {
       return this.prisma.offrampRequest.findUniqueOrThrow({
-        where: { requestId: payload.requestId }
+        where: { requestId: payload.requestId },
       });
     }
     throw new BadRequestException('Must provide either uuid, id or requestId');

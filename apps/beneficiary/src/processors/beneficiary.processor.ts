@@ -56,20 +56,20 @@ export class BeneficiaryProcessor {
       const tempGroup = await this.prisma.tempGroup.findUnique({
         where: { uuid: groupUUID },
       });
-      const groups = await findTempBenefGroups(this.prisma, groupUUID);
+      const groups = await findTempBenefGroups(this.prisma as any, groupUUID);
       if (!groups.length) return;
       const beneficiaries = groups.map((f) => f.tempBeneficiary);
       if (!beneficiaries.length) return;
 
       // Validate duplicate phones and wallets
       const dupliPhones = await validateDupicatePhone(
-        this.prisma,
+        this.prisma as any,
         beneficiaries
       );
       if (dupliPhones.length)
         throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
       const dupliWallets = await validateDupicateWallet(
-        this.prisma,
+        this.prisma as any,
         beneficiaries
       );
       if (dupliWallets.length)

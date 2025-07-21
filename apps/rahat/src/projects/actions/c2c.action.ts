@@ -130,6 +130,8 @@ export const c2cActions: ProjectActionFunc = {
     ),
   [MS_ACTIONS.C2CProject.GET_CAMPAIGN_LOG]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.CAMPAIGN.GET_CAMPAIGN_LOG, uuid }, payload),
+  [MS_ACTIONS.C2CProject.UPDATE_CAMPAIGN]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.CAMPAIGN.UPDATE_CAMPAIGN, uuid }, payload),
   //campaign end
 
 
