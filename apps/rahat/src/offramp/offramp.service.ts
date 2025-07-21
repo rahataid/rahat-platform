@@ -191,7 +191,7 @@ export class OfframpService {
 
       return { transaction, kotaniPayResponse };
     } catch (error) {
-      console.log(error);
+      console.log(error.response);
       throw new BadRequestException(error.response.message);
     }
 

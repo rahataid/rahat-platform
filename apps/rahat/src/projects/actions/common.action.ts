@@ -44,6 +44,11 @@ export const beneficiaryActions: ProjectActionFunc = {
       { cmd: BeneficiaryJobs.LIST, uuid },
       { projectId: uuid, ...payload }
     ),
+  [MS_ACTIONS.BENEFICIARY.GET_ONE_BENEFICARY]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.GET_ONE_BENEFICIARY, uuid },
+      { projectId: uuid, ...payload }
+    ),
   [MS_ACTIONS.BENEFICIARY.LIST_FULL_DATA_BY_PROJECT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.LIST_FULL_DATA, uuid },
@@ -79,6 +84,13 @@ export const vendorActions: ProjectActionFunc = {
       { cmd: VendorJobs.GET_BY_UUID },
       { projectId: uuid, ...payload }
     ),
+
+  [MS_ACTIONS.VENDOR.LIST_WITH_PROJECT_DATA]: (uuid, payload, sendCommand) => sendCommand(
+    { cmd: VendorJobs.LIST_WITH_PROJECT_DATA, uuid },
+    payload
+  )
+
+
 };
 
 export const settingActions: ProjectActionFunc = {
@@ -88,7 +100,7 @@ export const settingActions: ProjectActionFunc = {
   [MS_ACTIONS.SETTINGS.GET]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.PROJECT_SETTINGS_GET, uuid },
-      payload
+      { projectId: uuid, ...payload }
     ),
 
 }

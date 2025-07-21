@@ -1,6 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -11,9 +12,12 @@ import {
   Post,
   Query,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   CreateProjectDto,
@@ -27,8 +31,10 @@ import {
   ACTIONS,
   APP,
   BeneficiaryJobs,
+  Enums,
   MS_TIMEOUT,
   ProjectJobs,
+  TFile,
 } from '@rahataid/sdk';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
 import {
@@ -39,7 +45,9 @@ import {
 } from '@rumsan/user';
 import { UUID } from 'crypto';
 import { Request } from 'express';
-import { timeout } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { catchError, timeout } from 'rxjs/operators';
+import { DocParser } from '../utils/doc-parser';
 import { ProjectService } from './project.service';
 
 @Controller('projects')
@@ -53,7 +61,7 @@ export class ProjectController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @Post()
   create(@Body() createProjectDto: CreateProjectDto) {
     return this.projectService.create(createProjectDto);
@@ -61,7 +69,7 @@ export class ProjectController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @Get()
   list() {
     return this.projectService.list();
@@ -69,7 +77,58 @@ export class ProjectController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
+  @Post('actions')
+  msActions(
+    @Body() data: ProjectCommunicationDto,
+    @Req() request: Request
+  ) {
+    const response = this.projectService.handleMsActions({
+      ...data,
+      user: request.user,
+    });
+    return response;
+  }
+
+  /*
+  this endpoint  is used to upload file and parsed the file and send it to  project microservice
+  */
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
+  @Post(':uuid/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async upload(@Param('uuid') uuid: UUID, @UploadedFile() file: TFile, @Req() req: Request) {
+    const projectId = uuid
+    const action = req.body['action']
+    if (!action || !projectId) {
+      throw new BadRequestException('Missing action or project id');
+    }
+    const docType: Enums.UploadFileType =
+      req.body['doctype']?.toUpperCase() || Enums.UploadFileType.EXCEL;
+
+    const rawData = await DocParser(docType, file.buffer);
+    const response = await this.projectService.handleProjectActions({
+      action,
+      uuid: projectId,
+      payload: rawData,
+      user: null,
+      trigger: null,
+    });
+    return response
+      .pipe(
+        catchError((error) => {
+          console.log('error', error);
+          return throwError(() => new BadRequestException(error?.meta?.details || error));
+        })
+      )
+      .pipe(timeout(MS_TIMEOUT));
+  }
+
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @Get(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   findOne(@Param('uuid') uuid: UUID) {
@@ -78,7 +137,7 @@ export class ProjectController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @ApiParam({ name: 'uuid', required: true })
   @Patch(':uuid')
   update(
@@ -90,7 +149,7 @@ export class ProjectController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @ApiParam({ name: 'uuid', required: true })
   @Patch(':uuid/status')
   updateStatus(
@@ -102,7 +161,7 @@ export class ProjectController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.ALL })
   @Delete(':uuid')
   remove(@Param('uuid') uuid: UUID) {
     return this.projectService.remove(uuid);
@@ -110,7 +169,7 @@ export class ProjectController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @ApiParam({ name: 'uuid', required: true })
   @Get(':uuid/beneficiaries')
   listBeneficiaries(@Query() dto: ListProjectBeneficiaryDto) {
@@ -121,7 +180,7 @@ export class ProjectController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.ALL })
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/settings')
   addSettings(@Param('uuid') uuid: UUID, @Body() dto: CreateSettingDto) {
@@ -132,7 +191,7 @@ export class ProjectController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
   projectActions(
@@ -149,8 +208,8 @@ export class ProjectController {
   }
 
   //list project specific stats
-  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
-  // @ApiParam({ name: 'uuid', required: true })
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
+  @ApiParam({ name: 'uuid', required: true })
   @Get(':uuid/stats')
   projectStats(@Param('uuid') uuid: UUID) {
     return this.benClient
@@ -173,7 +232,7 @@ export class ProjectController {
   //list project specific stats sources
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @ApiParam({ name: 'uuid', required: false })
   @Get(':uuid/statsSources')
   projectStatsSources(@Param('uuid') uuid: UUID) {

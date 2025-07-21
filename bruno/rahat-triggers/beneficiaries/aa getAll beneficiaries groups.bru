@@ -1,0 +1,26 @@
+meta {
+  name: aa getAll beneficiaries groups
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "action": "aaProject.beneficiary.getAllGroups",
+      "payload": {
+          "perPage": "100"
+  //         "tokenAssigned": true,
+  //       "hasPayout": false
+      }
+  }
+}

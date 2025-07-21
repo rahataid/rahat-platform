@@ -104,6 +104,7 @@ export class BeneficiaryStatService {
       count: stat._count.age,
     }));
   }
+
   async calculateBankedStatusStats(projectUuid?: string) {
     const filter: any = {};
 

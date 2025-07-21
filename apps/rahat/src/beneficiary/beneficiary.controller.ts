@@ -19,9 +19,10 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   AddBenToProjectDto,
+  AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ImportTempBenefDto,
@@ -31,7 +32,7 @@ import {
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto,
-  ValidateWalletDto,
+  ValidateWalletDto
 } from '@rahataid/extensions';
 import {
   APP,
@@ -55,6 +56,7 @@ import { CheckHeaders, ExternalAppGuard } from '../decorators';
 import { removeSpaces } from '../utils';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
+import { WalletInterceptor } from './interceptor/wallet.interceptor';
 import { DocParser } from './parser';
 
 function getDateInfo(dateString) {
@@ -149,6 +151,7 @@ export class BeneficiaryController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post()
+  @UseInterceptors(WalletInterceptor)
   async create(@Body() dto: CreateBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
@@ -171,6 +174,7 @@ export class BeneficiaryController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseInterceptors(WalletInterceptor)
   @Post('bulk')
   async createBulk(@Body() dto: CreateBeneficiaryDto[]) {
     const data = dto.map((b) => ({
@@ -476,10 +480,34 @@ export class BeneficiaryController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get('groups/:uuid/account-check')
+  @ApiParam({ name: 'uuid', required: true })
+  async groupAccountCheck(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK }, uuid);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get('groups/:uuid/fail-account/export')
+  @ApiParam({ name: 'uuid', required: true })
+  async getGroupBeneficiariesFailedAccount(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GET_GROUP_BENEF_FAIL_ACCOUNT }, uuid);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Delete('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
-  async removeGroup(@Param('uuid') uuid: UUID) {
-    return this.client.send({ cmd: BeneficiaryJobs.REMOVE_ONE_GROUP }, uuid);
+  @ApiQuery({ name: 'hardDelete', required: false, type: Boolean, description: 'If true, permanently deletes the group and beneficiaries. If false or not provided, performs soft delete.' })
+  async removeGroup(
+    @Param('uuid') uuid: UUID,
+    @Query('hardDelete') hardDelete?: boolean
+  ) {
+    const deleteType = hardDelete === true;
+    const command = deleteType ? BeneficiaryJobs.DELETE_ONE_GROUP : BeneficiaryJobs.REMOVE_ONE_GROUP;
+    return this.client.send({ cmd: command }, uuid);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -495,6 +523,15 @@ export class BeneficiaryController {
       { cmd: BeneficiaryJobs.UPDATE_GROUP },
       { uuid, ...dto }
     );
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Patch('groups/:uuid/addGroupPurpose')
+  @ApiParam({ name: 'uuid', required: true })
+  async addGroupPurpose(@Param('uuid') uuid: UUID, @Body() dto: AddGroupsPurposeDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.ADD_GROUP_PURPOSE }, { uuid, ...dto });
   }
 
   @Post('import-tools')

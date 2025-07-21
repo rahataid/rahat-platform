@@ -7,12 +7,10 @@ dotenv.config({ path: `${__dirname}/.env.setup` });
 
 export class commonLib {
     provider: ethers.JsonRpcProvider;
-    projectUUID: string;
 
     constructor() {
         console.log('Network:', process.env.NETWORK_PROVIDER)
         this.provider = new ethers.JsonRpcProvider(process.env.NETWORK_PROVIDER);
-        this.projectUUID = process.env.PROJECT_UUID as string;
     }
     static getUUID() {
         return uuidV4(randomBytes(16));

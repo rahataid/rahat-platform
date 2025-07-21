@@ -1,0 +1,24 @@
+meta {
+  name: list sources
+  type: http
+  seq: 24
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.sources.getAll",
+    "payload": {
+     
+    }
+  }
+}

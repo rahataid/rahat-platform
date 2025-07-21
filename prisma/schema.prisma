@@ -23,6 +23,8 @@ model User {
   phone     String?
   wallet    String?
   extras    Json?   @db.JsonB()
+  notes     String? @db.Text()
+  sessionId String?
 
   Auth          Auth[]
   UserRole      UserRole[]
@@ -36,9 +38,26 @@ model User {
   updatedBy String?
 
   grievances Grievance[] @relation("UserGrievances")
+  // wallets    UserWallets[]
 
   @@map("tbl_users")
 }
+
+// model UserWallets {
+//   id         Int       @id @default(autoincrement())
+//   userId     Int
+//   chain      String
+//   address    String
+//   privateKey String
+//   createdAt  DateTime  @default(now())
+//   updatedAt  DateTime? @updatedAt()
+//   deletedAt  DateTime?
+
+//   user User @relation(fields: [userId], references: [id])
+
+//   @@unique([userId, chain])
+//   @@map("tbl_users_wallets")
+// }
 
 enum Gender {
   MALE
@@ -243,6 +262,7 @@ model Beneficiary {
   deletedAt      DateTime?
   isVerified     Boolean        @default(false)
 
+
   pii                  BeneficiaryPii?        @relation("BeneficiaryToPii")
   BeneficiaryProject   BeneficiaryProject[]
   groupedBeneficiaries GroupedBeneficiaries[]
@@ -277,6 +297,7 @@ model BeneficiaryGroup {
   uuid String @unique @default(uuid()) @db.Uuid()
 
   name String @unique
+  groupPurpose GroupPurpose?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -329,6 +350,13 @@ model BeneficiaryProject {
   @@index([beneficiaryId])
   @@index([deletedAt])
   @@map("tbl_beneficiaries_projects")
+}
+
+
+enum GroupPurpose {
+BANK_TRANSFER
+MOBILE_MONEY
+COMMUNICATION
 }
 
 // ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
@@ -425,7 +453,7 @@ model Vendors {
   email     String?
   phone     String?
   location  String?
-  wallet    String?
+  wallet    String? // Todo: Remove this after wallet integration
   extras    Json?     @db.JsonB()
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -560,18 +588,18 @@ enum KoboBeneficiaryStatus {
 }
 
 model KoboBeneficiary {
-  id                       Int                    @id @default(autoincrement())
-  uuid                     String                 @unique @default(uuid()) @db.Uuid()
-  name                     String
-  gender                   Gender                 @default(UNKNOWN)
-  type                     KoboBeneficiaryType    @default(SALE)
-  status                   KoboBeneficiaryStatus  @default(PENDING)
-  phone                    String
-  age                      Int?
-  email                    String?
-  wallet                   String?
-  leadInterests            String[]
-  extras                    Json?                  @db.JsonB()
+  id            Int                   @id @default(autoincrement())
+  uuid          String                @unique @default(uuid()) @db.Uuid()
+  name          String
+  gender        Gender                @default(UNKNOWN)
+  type          KoboBeneficiaryType   @default(SALE)
+  status        KoboBeneficiaryStatus @default(PENDING)
+  phone         String
+  age           Int?
+  email         String?
+  wallet        String?
+  leadInterests String[]
+  extras        Json?                 @db.JsonB()
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()

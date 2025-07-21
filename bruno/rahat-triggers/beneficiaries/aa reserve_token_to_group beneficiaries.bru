@@ -1,0 +1,29 @@
+meta {
+  name: aa reserve_token_to_group beneficiaries
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aaProject.beneficiary.reserve_token_to_group",
+    "payload": {
+      "dName": "SXYDD",
+      "beneficiaryGroupId": "24a712e1-7a0f-4326-abc4-2e93b51afd1b",
+      "numberOfTokens": 10,
+      "totalTokensReserved": 10,
+      "title": "Payout test"
+    }
+  }
+  
+}

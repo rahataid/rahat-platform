@@ -1,0 +1,24 @@
+meta {
+  name: getOne sources
+  type: http
+  seq: 25
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.sources.getOne",
+    "payload": {
+     "uuid": "5facb0a6-bbc0-4a4e-9b8f-6f75d13c8b07"
+    }
+  }
+}

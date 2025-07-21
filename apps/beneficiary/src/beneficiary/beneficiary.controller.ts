@@ -4,6 +4,7 @@ import { Controller, Param } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   addBulkBeneficiaryToProject,
+  AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ImportTempBenefDto,
@@ -11,7 +12,7 @@ import {
   ListBeneficiaryGroupDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto,
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
   BeneficiaryJobs,
@@ -42,9 +43,19 @@ export class BeneficiaryController {
     return this.service.findOne(uuid);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.FIND_PHONE_BY_UUID })
+  async findPhoneByUUID(uuid: UUID[]) {
+    return this.service.findPhoneByUUID(uuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_WALLET })
   async getBeneficiaryByWallet(wallet: string) {
     return this.service.findOneByWallet(wallet);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BULK_BY_WALLET })
+  async getBulkBeneficiaryByWallet(wallet: string[]) {
+    return this.service.findBulkByWallet(wallet);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_PHONE })
@@ -86,6 +97,12 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_BY_PROJECT })
   async listByProject(data: any) {
     return this.service.listBenefByProject(data);
+  }
+
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_BENEFICIARY })
+  async findOneBeneficiary(data: any) {
+    return this.service.findOneBeneficiary(data);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_PII })
@@ -185,9 +202,25 @@ export class BeneficiaryController {
     return this.service.getOneGroup(uuid);
   }
 
+  // Handles the event for exporting a group beneficiary bank account fails.
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_GROUP_BENEF_FAIL_ACCOUNT })
+  exportGroupBeneficiaryAccountFailed(uuid: string) {
+    return this.service.getGroupBeneficiariesFailedAccount(uuid)
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.REMOVE_ONE_GROUP })
   removeGroup(uuid: string) {
     return this.service.removeOneGroup(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.DELETE_ONE_GROUP })
+  deleteGroup(uuid: string) {
+    return this.service.deleteOneGroup(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK })
+  groupAttributesCheck(uuid: string) {
+    return this.service.groupAttributesCheck(uuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_GROUPS })
@@ -202,6 +235,13 @@ export class BeneficiaryController {
   ) {
     const groupUUID = uuid ? uuid : dto?.uuid;
     return this.service.updateGroup(groupUUID, dto);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.ADD_GROUP_PURPOSE })
+  addGroupPurpose(
+    @Payload() dto: AddGroupsPurposeDto
+  ) {
+    return this.service.addGroupPurpose(dto);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT })
@@ -258,11 +298,6 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.CALCULATE_STATS })
   async syncProjectStats(payload) {
     return this.service.syncProjectStats(payload.projectUUID)
-  }
-
-  @MessagePattern({ cmd: BeneficiaryJobs.SEND_DISBURSEMENT_CREATED_EMAIL })
-  async sendDisbursementCreatedEmail(payload) {
-    return this.service.sendDisbursementCreatedEmail(payload)
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.DELETE_BENEFICIARY_AND_PII })

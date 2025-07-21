@@ -13,7 +13,7 @@ export const BQUEUE = {
   RAHAT_PROJECT: 'RAHAT.PROJECT',
   RAHAT_BENEFICIARY: 'RAHAT.BENEFICIARY',
   HOST: 'RAHAT.HOST',
-  META_TXN: 'RAHAT.META_TXN'
+  META_TXN: 'RAHAT.META_TXN',
 };
 
 export const UserRoles = {
@@ -46,16 +46,21 @@ export const MS_ACTIONS = {
   GROUP: {
     CREATE: 'group.create',
     LIST: 'group.list',
-    GET: 'group.get'
+    GET: 'group.get',
   },
   BENEFICIARY_GROUP: {
     BULK_ASSIGN: 'beneficiary_group.bulk_assign',
     LIST: 'beneficiary_group.list',
     LIST_BY_GROUP: 'beneficiary_group.list_by_group',
-  }
-  ,
+  },
   CAMBODIA: {
-    APP: { STATS: 'cambodia.app.stats', LINE_STATS: 'cambodia.app.line_stats', BROAD_CAST_STATUS_COUNT: 'cambodia.app.broadcast_status_count', PROJECT_SETTINGS: 'cambodia.app.project_settings', TRIGGER_COMMUNICATION: 'cambodia.app.trigger_communication', },
+    APP: {
+      STATS: 'cambodia.app.stats',
+      LINE_STATS: 'cambodia.app.line_stats',
+      BROAD_CAST_STATUS_COUNT: 'cambodia.app.broadcast_status_count',
+      PROJECT_SETTINGS: 'cambodia.app.project_settings',
+      TRIGGER_COMMUNICATION: 'cambodia.app.trigger_communication',
+    },
     BENEFICIARY: {
       VALIDATE_CONVERSION: 'cambodia.beneficiary.validate_conversion',
       STATS: 'cambodia.beneficiary.stats',
@@ -94,7 +99,7 @@ export const MS_ACTIONS = {
 
     COMMUNICATION: {
       LIST: 'cambodia.communication.list',
-    }
+    },
   },
 
   PROJECT: {
@@ -114,6 +119,7 @@ export const MS_ACTIONS = {
     LIST_BY_PROJECT: 'beneficiary.list_by_project',
     LIST_FULL_DATA_BY_PROJECT: 'beneficiary.list_full_data_by_project',
     GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',
+    GET_ONE_BENEFICARY: 'beneficiary.get_one_beneficiary',
   },
   VENDOR: {
     REGISTER: 'vendor.register',
@@ -122,6 +128,7 @@ export const MS_ACTIONS = {
     UPDATE_IS_VERIFIED: 'vendor.update_is_verified',
     LIST: 'vendor.list',
     GET_BY_UUID: 'vendor.get_by_uuid',
+    LIST_WITH_PROJECT_DATA: 'vendor.list_with_project_data',
   },
   USER: {},
   ELPROJECT: {
@@ -160,6 +167,7 @@ export const MS_ACTIONS = {
       ADD: 'aaProject.triggers.add',
       REMOVE: 'aaProject.triggers.remove',
       ACTIVATE: 'aaProject.triggers.activate',
+      TEST: 'aaProject.disbursement.test',
     },
     ACTIVITIES: {
       GET_ONE: 'aaProject.activities.getOne',
@@ -193,7 +201,9 @@ export const MS_ACTIONS = {
     },
     STAKEHOLDERS: {
       GET_ALL: 'aaProject.stakeholders.getAll',
+      GET_ONE: 'aaProject.stakeholders.getOne',
       ADD: 'aaProject.stakeholders.add',
+      BULK_ADD: 'aaProject.stakeholders.bulkAdd',
       REMOVE: 'aaProject.stakeholders.remove',
       UPDATE: 'aaProject.stakeholders.update',
       GET_GROUP: 'aaProject.stakeholders.getGroup',
@@ -228,6 +238,52 @@ export const MS_ACTIONS = {
       GET_ONE: 'aaProject.dailyMonitoring.getOne',
       UPDATE: 'aaProject.dailyMonitoring.update',
       REMOVE: 'aaProject.dailyMonitoring.remove',
+    },
+
+    // new chain
+
+    CHAIN: {
+      DISBURSE: 'aa.chain.disburse',
+      SEND_OTP: 'aa.chain.sendOtp',
+      SEND_ASSET: 'aa.chain.sendAsset',
+    },
+    STELLAR: {
+      DISBURSE: 'aa.stellar.disburse',
+      SEND_OTP: 'aa.stellar.sendOtp',
+      SEND_GROUP_OTP: 'aa.stellar.sendGroupOTP',
+      SEND_ASSET: 'aa.stellar.sendAsset',
+      SEND_ASSET_WITH_ADDRESS: 'aa.stellar.sendAssetWithAddress',
+      TRANSFER_TO_OFFRAMP: 'aa.stellar.transferToOfframp',
+      GET_WALLET_BY_PHONE: 'aaProject.stellar.getWalletByPhone',
+      ADD_ONCHAIN_TRIGGER: 'aa.stellar.addTriggerOnChain',
+      CHECK_TRUSTLINE: 'aa.stellar.checkTrustline',
+      CHECK_BULK_TRUSTLINE: 'aa.stellar.checkBulkTrustline',
+      UPDATE_ONCHAIN_TRIGGER: 'aa.stellar.updateTriggerOnChain',
+      GET_ONCHAIN_TRIGGER: 'aa.stellar.getTriggerOnChain',
+      GET_STELLAR_STATS: 'aa.stellar.getStellarStats',
+      GET_TRANSACTIONS: 'aa.stellar.getTransactions',
+      GET_WALLET_BALANCE: 'aa.stellar.getWalletBalance',
+      // Remove after test
+      INTERNAL_FAUCET_TRUSTLINE: `aa.stellar.internalFaucetTrustline`,
+      GET_VENDOR_STATS: 'aa.stellar.getVendorStats',
+      TRUSTLINE: 'aa.stellar.trustline',
+      GET_REDEMPTION_REQUEST: 'aa.stellar.getRedemptionRequest',
+      RAHAT_FAUCET: 'aa.stellar.rahatFaucet',
+    },
+    PAYOUT: {
+      ASSIGN_TOKEN: 'aa.payout.assignToken',
+      CREATE: 'aa.payout.create',
+      LIST: 'aa.payout.list',
+      GET: 'aa.payout.get',
+      UPDATE: 'aa.payout.update',
+      GET_PAYMENT_PROVIDERS: 'aa.payout.getPaymentProviders',
+      TRIGGER_PAYOUT: 'aa.payout.triggerPayout',
+      TRIGGER_FAILED_PAYOUT_REQUEST: 'aa.payout.triggerFailedPayoutRequest',
+      TRIGGER_ONE_FAILED_PAYOUT_REQUEST:
+        'aa.payout.triggerOneFailedPayoutRequest',
+      GET_PAYOUT_LOGS: 'aa.payout.getPayoutLogs',
+      GET_PAYOUT_LOG: 'aa.payout.getPayoutLog',
+      GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
     },
   },
   C2CProject: {
@@ -329,7 +385,8 @@ export const MS_ACTIONS = {
     LIST_BENEFICIARY_REIMBURSEMENTS: 'rpProject.beneficiary.listReimbursements',
     SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions',
     LIST_EYE_CHECKEUP_LINE: 'rpProject.reporting.list_eye_checkup_line',
-    LIST_PURCHASE_OF_GLASSESS_LINE: 'rpProject.reporting.list_purchase_of_glassess',
+    LIST_PURCHASE_OF_GLASSESS_LINE:
+      'rpProject.reporting.list_purchase_of_glassess',
   },
   COMMS: {
     CREATE_CAMPAIGN: 'comms.campaign.create',
@@ -348,8 +405,83 @@ export const MS_ACTIONS = {
     GET_ALL_GROUPS: 'comms.beneficiary.getAllGroups',
     GET_ONE_GROUP: 'comms.beneficiary.getOneGroup',
   },
-}
+  MS_SOURCES: {
+    GET_ALL: 'ms.sources.getAll',
+    GET_ONE: 'ms.sources.getOne',
+  },
+  MS_TRIGGERS: {
+    DEV_ONLY: 'ms.triggers.devOnly',
+    GET_ALL: 'ms.triggers.getAll',
+    GET_ONE: 'ms.triggers.getOne',
+    ADD: 'ms.triggers.add',
+    REMOVE: 'ms.triggers.remove',
+    ACTIVATE: 'ms.triggers.activate',
+    UPDATE_TRANSACTION: 'ms.triggers.updateTransaction',
+    UPDATE: 'ms.triggers.update',
+    GET_BY_LOCATION: 'ms.triggers.getByLocation',
+  },
+  MS_REVERT_PHASE: {
+    CREATE: 'ms.revertPhase.create',
+    GET_ALL: 'ms.revertPhase.getAll',
+    GET_ONE: 'ms.revertPhase.getOne',
+  },
+  MS_PHASES: {
+    CREATE: 'ms.phases.create',
+    GET_ONE: 'ms.phases.getOne',
+    GET_ALL: 'ms.phases.getAll',
+    GET_STATS: 'ms.phases.getStats',
+    ADD_TRIGGERS: 'ms.phases.addTriggers',
+    REVERT_PHASE: 'ms.phases.revertPhase',
+    GET_BY_LOCATION: 'ms.phases.getByLocation',
+    ACTIVATE: 'ms.phases.activate',
+    CONFIGURE_THRESHOLD: 'ms.phase.configureThreshold',
+  },
 
+  MS_RIVER_STATIONS: {
+    GET_DHM: 'ms.riverStations.getDhm',
+  },
+  MS_WATER_LEVELS: {
+    GET_DHM: 'ms.waterLevels.getDhm',
+    GET_GLOFAS: 'ms.waterLevels.getGlofas',
+  },
+  MS_RAINFALL_LEVELS: {
+    GET_DHM: 'ms.rainfallLevels.getDhm',
+    GET_GLOFAS: 'ms.rainfallLevels.getGlofas',
+  },
+  MS_ACTIVITIES: {
+    GET_ONE: 'ms.activities.getOne',
+    GET_ALL: 'ms.activities.getAll',
+    GET_HAVING_COMMS: 'ms.activities.getHavingComms',
+    ADD: 'ms.activities.add',
+    REMOVE: 'ms.activities.remove',
+    UPDATE: 'ms.activities.update',
+    UPDATE_STATUS: 'ms.activities.updateStatus',
+    LIST_PROJECT_SPECIFIC: 'ms.activities.listProjectSpecific',
+    COMMUNICATION: {
+      TRIGGER: 'ms.activities.communication.trigger',
+      SESSION_LOGS: 'ms.activities.communication.sessionLogs',
+      RETRY_FAILED: 'ms.activities.communication.retryFailed',
+      GET_STATS: 'ms.activities.communication.getStats',
+      GET_GROUP_STATS: 'ms.triggers.getTransportSessionStatsByGroup',
+    },
+  },
+  MS_CATEGORIES: {
+    GET_ALL: 'ms.activityCategories.getAll',
+    ADD: 'ms.activityCategories.add',
+    REMOVE: 'ms.activityCategories.remove',
+  },
+
+  MS_DAILY_MONITORING: {
+    ADD: 'ms.dailyMonitoring.add',
+    GET_ALL: 'ms.dailyMonitoring.getAll',
+    GET_ONE: 'ms.dailyMonitoring.getOne',
+    GET_Gauge_Reading: 'ms.dailyMonitoring.getGaugeReading',
+    GET_Gauge_Forecast: 'ms.dailyMonitoring.getGaugeForecast',
+    UPDATE: 'ms.dailyMonitoring.update',
+    REMOVE: 'ms.dailyMonitoring.remove',
+    DELETE: 'ms.dailyMonitoring.delete',
+  },
+};
 
 export const RABBIT_MQ = {
   AMQP_CONNECTION: 'AMQP_CONNECTION',

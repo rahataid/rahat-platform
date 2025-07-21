@@ -1,0 +1,30 @@
+meta {
+  name: list activities
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.activities.getAll",
+    "payload": {
+      "page" : 1,
+      "perPage": 999,
+      "activeYear": "2024",
+       "isAutomated": "",
+      "phaseId": "c6169c0e-12b0-4e8e-927c-3992a959df1d",
+      "riverBasin": "Mahakali"
+  //     "manager": "4d918fd3-8602-480e-bdbb-66a2102019f"
+    }
+  }
+}

@@ -15,21 +15,23 @@ import {
   BeneficiaryEvents,
   BeneficiaryJobs,
   BeneficiaryPayload,
-  generateRandomWallet,
   MicroserviceOptions,
   ProjectContants,
+  WalletJobs,
 } from '@rahataid/sdk';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService } from '@rumsan/prisma';
-import { lastValueFrom } from 'rxjs';
-import { isAddress } from 'viem';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class BeneficiaryUtilsService {
   constructor(
     private readonly prismaService: PrismaService,
     private eventEmitter: EventEmitter2,
-    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
-  ) { }
+    @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
+    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
+    private readonly settings: SettingsService
+  ) {}
 
   buildWhereClause(dto: ListBeneficiaryDto): Record<string, any> {
     const { projectId, startDate, endDate } = dto;
@@ -77,8 +79,13 @@ export class BeneficiaryUtilsService {
   }
 
   async ensureValidWalletAddress(walletAddress?: string): Promise<string> {
+    const chain = await this.getChainName();
     if (!walletAddress) {
-      return generateRandomWallet().address;
+      const observable = this.walletClient.send({ cmd: WalletJobs.CREATE }, [
+        chain.toLowerCase(),
+      ]);
+      const result = await firstValueFrom(observable);
+      return result[0].address;
     }
 
     const existingBeneficiary = await this.prismaService.beneficiary.findUnique(
@@ -91,10 +98,9 @@ export class BeneficiaryUtilsService {
       console.log('Wallet address already exists');
       throw new RpcException('Wallet address already exists');
     }
-    if (!isAddress(walletAddress)) {
-      console.log('Wallet should be valid Ethereum Address');
-      throw new RpcException('Wallet should be valid Ethereum Address');
-    }
+    // if (!isAddress(walletAddress)) {
+    //   throw new RpcException('Wallet should be valid Ethereum Address');
+    // }
     return walletAddress;
   }
 
@@ -299,5 +305,19 @@ export class BeneficiaryUtilsService {
         throw error;
       }
     }
+  }
+
+  async getChainName(): Promise<string> {
+    const contractSettings = await this.settings.getByName('CHAIN_SETTINGS');
+    const value =
+      typeof contractSettings.value === 'string'
+        ? JSON.parse(contractSettings.value)
+        : contractSettings.value;
+
+    if (!value.currency?.symbol) {
+      throw new Error('Chain configuration must include currency.symbol');
+    }
+
+    return value.currency.symbol;
   }
 }
