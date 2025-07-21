@@ -11,7 +11,7 @@ on:
 env:
   CI: false
   PLATFORM_MANIFEST_FILE: 'K8s-Manifest/Rahat/AA-Stage/Argo-Rollout/platform.yaml'
-  BENEFICIARY_MANIFEST_FILE: 'K8s-Manifest/Rahat/AA-Stage/Argo-Rolloutbeneficiary.yaml'
+  BENEFICIARY_MANIFEST_FILE: 'K8s-Manifest/Rahat/AA-Stage/Argo-Rollout/beneficiary.yaml'
 
 jobs:
   deploy:
@@ -117,5 +117,5 @@ jobs:
           git config user.email "sandab@rumsan.net"
           git add ${{ env.BENEFICIARY_MANIFEST_FILE }}
           git add ${{ env.PLATFORM_MANIFEST_FILE }}
-          git commit -m "runner: Update Rahat AA Stage UI image tag to aa-stage-${{ needs.deploy.outputs.sha_short }}"
+          git commit -m "runner: Update Rahat Stage image tag to stage-${{ needs.deploy.outputs.sha_short }}"
           git push origin main

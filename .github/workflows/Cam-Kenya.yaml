@@ -12,6 +12,7 @@ env:
   CI: false
   PLATFORM_MANIFEST_FILE: 'K8s-Manifest/Rahat/AA-Stage/Argo-Rollout/platform.yaml'
   BENEFICIARY_MANIFEST_FILE: 'K8s-Manifest/Rahat/AA-Stage/Argo-Rollout/beneficiary.yaml'
+  env_npmrc: ${{ secrets.ENV_NPMRC }}
 
 jobs:
   deploy:
@@ -64,13 +65,7 @@ jobs:
           context: .
           file: Dockerfile.beneficiary
           push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-<<<<<<<< HEAD:.github/workflows/Cam-Kenya.yaml
           tags: esatya/rahat-platform-beneficiary:cam-ken
-========
-          tags: |
-            esatya/rahat-platform-beneficiary:stage-aa
-            esatya/rahat-platform-beneficiary:stage-aa-${{ steps.vars.outputs.sha_short }}
->>>>>>>> b14e35bba8b2553cec8bcdef2c292fa48c579a60:.github/workflows/Stage-AA-CICD.yaml
 
       # Rahat Image
       - name: build && push rahat
@@ -80,50 +75,4 @@ jobs:
           context: .
           file: Dockerfile.rahat
           push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-<<<<<<<< HEAD:.github/workflows/Cam-Kenya.yaml
           tags: esatya/rahat-platform-rahat:cam-ken
-========
-          tags: |
-            esatya/rahat-platform-rahat:stage-aa
-            esatya/rahat-platform-rahat:stage-aa-${{ steps.vars.outputs.sha_short }}
-    outputs:
-      sha_short: ${{ steps.vars.outputs.sha_short }}
-
-  update-manifest:
-    name: Update Kubernetes Manifest
-    needs: deploy
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    steps:
-      - name: Import Secrets
-        uses: hashicorp/vault-action@v2.4.0
-        with:
-          url: ${{ secrets.VAULT_URL }}
-          token: ${{ secrets.VAULT_TOKEN }}
-          secrets: |
-            github/data/general/Stage-Manifest repo | MANIFEST_REPO ;
-            github/data/general/Stage-Manifest ssh-key | SSH_KEY ;
-
-      # Checkout the manifest repository using SSH
-      - name: Checkout Stage Manifest Repo
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.MANIFEST_REPO }}
-          ssh-key: ${{ env.SSH_KEY }}
-
-      # Update the image tag in the manifest
-      - name: Update Image Tag in Manifest
-        run: |
-          sed -i "s|image: esatya/rahat-platform-rahat:.*|image: esatya/rahat-platform-rahat:stage-aa-${{ needs.deploy.outputs.sha_short }}|" ${{ env.PLATFORM_MANIFEST_FILE }}
-          sed -i "s|image: esatya/rahat-platform-beneficiary:.*|image: esatya/rahat-platform-beneficiary:stage-aa-${{ needs.deploy.outputs.sha_short }}|" ${{ env.BENEFICIARY_MANIFEST_FILE }}
-
-      # Commit and push changes using SSH
-      - name: Commit and Push Changes
-        run: |
-          git config user.name "sandab-rumsan"
-          git config user.email "sandab@rumsan.net"
-          git add ${{ env.BENEFICIARY_MANIFEST_FILE }}
-          git add ${{ env.PLATFORM_MANIFEST_FILE }}
-          git commit -m "runner: Update Rahat AA Stage UI image tag to aa-stage-${{ needs.deploy.outputs.sha_short }}"
-          git push origin main
->>>>>>>> b14e35bba8b2553cec8bcdef2c292fa48c579a60:.github/workflows/Stage-AA-CICD.yaml

@@ -1,8 +1,16 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateOfframpProviderDto, CreateOfframpRequestDto, ListOfframpProviderDto, ListOfframpRequestDto, ProviderActionDto } from '@rahataid/extensions';
-import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
+import { Prisma } from '@prisma/client';
+import {
+  CreateOfframpProviderDto,
+  CreateOfframpRequestDto,
+  ListOfframpProviderDto,
+  ListOfframpRequestDto,
+  ProviderActionDto,
+} from '@rahataid/extensions';
+import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
+import { randomUUID } from 'crypto';
 import { KotaniPayService } from './offrampProviders/kotaniPay.service';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -55,8 +63,6 @@ export class OfframpService {
   }
 
   async providerActions(data: ProviderActionDto) {
-    console.log({ data });
-
     const offrampProvider = await this.getProviderById(data.uuid);
     if (!offrampProvider) {
       throw new BadRequestException('Offramp provider not found');
@@ -81,47 +87,44 @@ export class OfframpService {
   async createOfframpRequest(createOfframpData: CreateOfframpRequestDto) {
     console.log({ createOfframpData });
     const { providerUuid, ...offrampRequestData } = createOfframpData;
-    const { data: kotaniPayResponse } = await this.kotaniPayService.createOfframpRequest(providerUuid, offrampRequestData);
+    // const isBeneficiary = await this.prisma.beneficiary.findUnique({
+    //   where: {
+    //     walletAddress: offrampRequestData?.senderAddress?.toLowerCase(),
+    //   },
+    // });
+    // if (!isBeneficiary) {
+    //   throw new BadRequestException(
+    //     'Should be a valid beneficiary in order to proceed.'
+    //   );
+    // }
+    const { data: kotaniPayResponse } =
+      await this.kotaniPayService.createOfframpRequest(
+        providerUuid,
+        offrampRequestData
+      );
+    const offrampExists = await this.prisma.offrampRequest.findUnique({
+      where: {
+        requestId: kotaniPayResponse?.data.request_id,
+      },
+    });
+    if (offrampExists) {
+      throw new BadRequestException('Offramp request already exists');
+    }
     return this.prisma.offrampRequest.create({
-      data: { ...offrampRequestData, requestId: kotaniPayResponse?.data.request_id, escrowAddress: kotaniPayResponse?.data.escrow_address }
-    })
+      data: {
+        ...offrampRequestData,
+        requestId: kotaniPayResponse?.data.request_id,
+        escrowAddress: kotaniPayResponse?.data.escrow_address,
+      },
+    });
   }
 
   //TODO: Geenralize the offramp request execution
   async executeOfframpRequest(executeOfframpData: any) {
     console.log({ executeOfframpData });
-    const { providerUuid, requestUuid, ...data } = executeOfframpData;
-    const request = await this.prisma.offrampRequest.findUniqueOrThrow({
-      where: {
-        uuid: requestUuid
-      }
-    });
-    console.log('reference', request)
-    if (!request) {
-      throw new BadRequestException('Offramp request not found');
-    }
-    // const executionData = {
-    //   chain: data.data.chain,
-    //   token: data.data.token,
-    //   transaction_hash: data.data.transaction_hash,
-    //   wallet_id: data.data.wallet_id,
-    //   request_id: data.data.request_id,
-    //   customer_key: data.data.customer_key,
-    //   preview: true
-    // }
-    // const v = {
-    //   "mobileMoneyReceiver": {
-    //     "networkProvider": "MTN",
-    //     "phoneNumber": "+233542851111",
-    //     "accountName": "Patrick Oduro"
-    //   },
-    //   "currency": "KES",
-    //   "chain": "BASE",
-    //   "token": "USDC",
-    //   "cryptoAmount": 1,
-    //   "referenceId": "123456",
-    //   "senderAddress": "0TQdKsMayR5xcEKrE6jDixUQ74xtTEA9euo"
-    // }
+    const { providerUuid, ...data } = executeOfframpData;
+
+
 
     const executionData = {
       mobileMoneyReceiver: data.data.mobileMoneyReceiver,
@@ -130,11 +133,29 @@ export class OfframpService {
       token: data.data.token,
       cryptoAmount: +data.data.cryptoAmount,
       currency: data.data.currency,
-      referenceId: request.requestId
-    }
+      referenceId: randomUUID(),
+    };
+    // const isBeneficiary = await this.prisma.beneficiary.findFirst({
+    //   where: {
+    //     walletAddress: {
+    //       equals: executionData.senderAddress,
+    //       mode: 'insensitive',
+    //     },
+    //   },
+    // });
+    // if (!isBeneficiary) {
+    //   throw new BadRequestException(
+    //     'Should be a valid beneficiary in order to proceed.'
+    //   );
+    // }
     console.log(JSON.stringify(executionData, null, 2));
     try {
-      const { data: kotaniPayResponse } = await this.kotaniPayService.executeOfframpRequest(providerUuid, executionData)
+      const { data: kotaniPayResponse } =
+        await this.kotaniPayService.executeOfframpRequest(
+          providerUuid,
+          executionData
+        );
+      console.log('kota', kotaniPayResponse);
 
       const transaction = await this.prisma.offrampTransaction.create({
         data: {
@@ -145,9 +166,27 @@ export class OfframpService {
           customerKey: data.data.customer_key,
           referenceId: executionData.referenceId,
           offrampRequest: {
-            connect: { id: request.id }
-          }
-        }
+            connectOrCreate: {
+              where: {
+                requestId: executionData.referenceId,
+              },
+              create: {
+                chain: data.data.chain,
+                token: data.data.token,
+                senderAddress: data.data.senderAddress,
+                amount: +data.data.cryptoAmount,
+                requestId: executionData.referenceId,
+                escrowAddress: kotaniPayResponse?.escrow_address,
+                status: 'PENDING',
+                extras: {
+                  mobileMoneyReceiver: executionData.mobileMoneyReceiver,
+                  currency: executionData.currency,
+                  cryptoAmount: executionData.cryptoAmount,
+                },
+              },
+            },
+          },
+        },
       });
 
       return { transaction, kotaniPayResponse };
@@ -205,5 +244,73 @@ export class OfframpService {
 
   remove(id: number) {
     return `This action removes a #${id} offramp`;
+  }
+
+  async getOfframpTransactions(payload: {
+    uuid?: string;
+    id?: number;
+    requestId?: string;
+    status?: string;
+    page?: number;
+    perPage?: number;
+    senderAddress?: string;
+  }) {
+    const where: Prisma.OfframpTransactionWhereInput = {
+      deletedAt: null,
+    };
+
+    // Filter by ID
+    if (payload.id) {
+      where.id = payload.id;
+    }
+
+    // Filter by UUID
+    if (payload.uuid) {
+      where.uuid = payload.uuid;
+    }
+
+    // Filter by requestId
+    if (payload.requestId) {
+      where.requestId = payload.requestId;
+    }
+
+    // Filter by status
+    if (payload.status) {
+      where.status = payload.status;
+    }
+
+    // Filter by a JSON key "senderAddress" inside `extras`
+    if (payload.senderAddress) {
+      where.extras = {
+        path: ['senderAddress'],
+        // todo : check if this is correct
+        string_contains: payload.senderAddress.toLowerCase(),
+      };
+    }
+
+    console.log('where', where);
+
+    // Compute pagination
+    const page = payload.page ?? 1;
+    const perPage = payload.perPage ?? 10;
+
+    return paginate<any, Prisma.OfframpTransactionFindManyArgs>(
+      this.prisma.offrampTransaction,
+      {
+        where,
+        orderBy: { createdAt: 'desc' },
+      },
+      {
+        page,
+        perPage,
+      }
+    );
+
+    // return this.prisma.offrampTransaction.findMany({
+    //   where,
+    //   orderBy: { createdAt: 'desc' },
+    //   take: perPage,
+    //   skip: (page - 1) * perPage,
+    // });
   }
 }
