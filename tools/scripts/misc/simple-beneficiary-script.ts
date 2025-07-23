@@ -4,19 +4,19 @@ import axios from 'axios';
 // Configuration
 const BASE_URL = 'http://localhost:5500/v1';
 const PROJECT_ID = 'ade76eab-ab56-4adc-8d31-0552f44f1302';
-const ACCESS_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcklkIjoxLCJ1dWlkIjoiYmQyOTkxMjEtN2E4ZC00MDE1LThhYTItZTA4YzQzZDQ1YmMyIiwibmFtZSI6IlJ1bXNhbiBBZG1pbiIsImVtYWlsIjoicnVtc2FuQG1haWxpbmF0b3IuY29tIiwicGhvbmUiOm51bGwsIndhbGxldCI6IjB4QUM2YkZhZjEwZTg5MjAyYzI5M2RENzk1ZUNlMTgwQkJmMTQzMGQ3QiIsInJvbGVzIjpbIkFkbWluIl0sInBlcm1pc3Npb25zIjpbeyJhY3Rpb24iOiJtYW5hZ2UiLCJzdWJqZWN0IjoiYWxsIiwiaW52ZXJ0ZWQiOmZhbHNlLCJjb25kaXRpb25zIjpudWxsfV0sInNlc3Npb25JZCI6IjUxNmM2NWIzLWMyNzQtNDI2Ny05ZmYyLTMzNGU5ZTg2ZjllOCIsImlhdCI6MTc1MjQ2OTUyNCwiZXhwIjoxNzUyNTU1OTI0fQ.6WxCMuheyjb7hJdf_caGbEBjz2dPxYH8SNYAX8NsdTI';
+const ACCESS_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcklkIjoxLCJ1dWlkIjoiYmQyOTkxMjEtN2E4ZC00MDE1LThhYTItZTA4YzQzZDQ1YmMyIiwibmFtZSI6IlJ1bXNhbiBBZG1pbiIsImVtYWlsIjoicnVtc2FuQG1haWxpbmF0b3IuY29tIiwicGhvbmUiOm51bGwsIndhbGxldCI6IjB4QUM2YkZhZjEwZTg5MjAyYzI5M2RENzk1ZUNlMTgwQkJmMTQzMGQ3QiIsInJvbGVzIjpbIkFkbWluIl0sInBlcm1pc3Npb25zIjpbeyJhY3Rpb24iOiJtYW5hZ2UiLCJzdWJqZWN0IjoiYWxsIiwiaW52ZXJ0ZWQiOmZhbHNlLCJjb25kaXRpb25zIjpudWxsfV0sInNlc3Npb25JZCI6IjFlOWYzNzA3LWIzZTMtNDA0Zi05NjVjLTZlNWNmZTY3YWQyYyIsImlhdCI6MTc1MzE2Njc0NywiZXhwIjoxNzUzMjUzMTQ3fQ.nIs8MdyoriJDT2R9v-PrUjwYoRjDAxeMRqUQ8lMXV1E';
 
 const headers = {
     'Authorization': `Bearer ${ACCESS_TOKEN}`,
     'Content-Type': 'application/json'
 };
 
-const numberOfBeneficiaries = 500;
+const numberOfBeneficiaries = 1;
 
 // Generate random beneficiary data
 const generateBeneficiaryData = () => {
     const randomName = faker.person.fullName();
-    const areaCodes = ['980', '981', '982', '984', '985', '986', '988', '989'];
+    const areaCodes = ['980', '981', '982', '984', '985', '986'];
     const areaCode = areaCodes[Math.floor(Math.random() * areaCodes.length)];
     const phoneNumber = Math.floor(Math.random() * 9000000) + 1000000;
     const randomPhone = `+977${areaCode}${phoneNumber}`;
@@ -83,28 +83,45 @@ const main = async () => {
 
         // Step 2: Create group
         console.log('\n📝 Step 2: Creating group...');
+        const groupName = `random group ${Date.now()}-${Math.floor(Math.random() * 100000)}`;
         const groupData = {
-            "name": `random group ${Date.now()}`,
+            "name": groupName,
             "beneficiaries": beneficiaries.map(uuid => ({ uuid }))
         };
 
         console.log('📋 Group data:', JSON.stringify(groupData, null, 2));
 
         const groupResponse = await axios.post(`${BASE_URL}/beneficiaries/groups`, groupData, { headers });
+
         console.log('📋 Group response:', JSON.stringify(groupResponse.data, null, 2));
 
-        // Get group ID from response or fetch it
-        let groupId: string;
+        let groupId;
         if (groupResponse.data?.data?.uuid) {
             groupId = groupResponse.data.data.uuid;
         } else {
-            // Fetch groups to find the new one
-            const groupsResponse = await axios.get(`${BASE_URL}/beneficiaries/groups/all`, {
-                headers,
-                params: { page: 1, perPage: 100 }
-            });
-            const newGroup = groupsResponse.data.data.find((g: any) => g.name === groupData.name);
-            groupId = newGroup?.uuid || 'fallback-id';
+            // Add a short delay to allow the group to appear in the list (eventual consistency)
+            await new Promise(r => setTimeout(r, 3000)); // longer delay
+
+            // Fetch all groups (increase perPage)
+            const groupsResponse = await axios.get(
+                `${BASE_URL}/beneficiaries/groups/all`,
+                { headers, params: { page: 1, perPage: 500 } }
+            );
+
+            console.log('Group names in list:', groupsResponse.data.data.map(g => g.name));
+
+            const newGroup = groupsResponse.data.data.find(
+                (g) => g.name.trim() === groupName.trim()
+            );
+
+            if (newGroup && newGroup.uuid) {
+                groupId = newGroup.uuid;
+                console.log(`✅ Found new group with ID: ${groupId}`);
+            } else {
+                throw new Error(
+                    `❌ Could not find the created group "${groupName}" in the group list. Aborting.`
+                );
+            }
         }
 
         console.log(`✅ Group created with ID: ${groupId}`);
