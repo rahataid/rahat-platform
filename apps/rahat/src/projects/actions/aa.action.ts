@@ -446,6 +446,8 @@ export const aaActions: ProjectActionFunc = {
 
   // **** Stellar end **** //
 
+
+
   // **** Payout start **** //
   [MS_ACTIONS.AAPROJECT.PAYOUT.CREATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PAYOUT.CREATE, uuid }, payload),
@@ -496,6 +498,10 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYOUT_LOG]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYOUT_LOG, uuid }, payload),
+
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYOUT_STATS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.GET_STATS, uuid }, payload),
   // **** Payout end **** //
 
   // **** grievance start **** //
