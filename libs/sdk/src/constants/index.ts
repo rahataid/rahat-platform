@@ -442,6 +442,7 @@ export const MS_ACTIONS = {
   MS_WATER_LEVELS: {
     GET_DHM: 'ms.waterLevels.getDhm',
     GET_GLOFAS: 'ms.waterLevels.getGlofas',
+    GET_GFH: 'ms.waterLevels.getGfh',
   },
   MS_RAINFALL_LEVELS: {
     GET_DHM: 'ms.rainfallLevels.getDhm',
