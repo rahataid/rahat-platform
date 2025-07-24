@@ -433,28 +433,43 @@ export class BeneficiaryService {
     return data;
   }
 
-  async findPhoneByUUID(uuid: UUID[]) {
-    const beneficiaryIds = await this.rsprisma.beneficiary.findMany({
+  async findPhoneByUUID(uuids: UUID[]) {
+    // Fetch both id and uuid for mapping
+    const beneficiaries = await this.rsprisma.beneficiary.findMany({
       where: {
         uuid: {
-          in: uuid,
+          in: uuids,
         },
       },
       select: {
         id: true,
+        uuid: true,
       },
     });
 
-    return this.prisma.beneficiaryPii.findMany({
+    // Map id to uuid for quick lookup
+    const idToUuid = new Map(beneficiaries.map(b => [b.id, b.uuid]));
+
+    // Fetch PII data for these beneficiaries
+    const piiList = await this.prisma.beneficiaryPii.findMany({
       where: {
         beneficiaryId: {
-          in: beneficiaryIds.map((b) => b.id),
+          in: beneficiaries.map((b) => b.id),
         },
       },
       select: {
-        phone: true
+        beneficiaryId: true,
+        phone: true,
+        name: true,
       }
     });
+
+    // Attach uuid to each PII record
+    return piiList.map(pii => ({
+      uuid: idToUuid.get(pii.beneficiaryId),
+      phone: pii.phone,
+      name: pii.name,
+    }));
   }
 
   async findOneByWallet(walletAddress: string) {
