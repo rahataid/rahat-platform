@@ -58,11 +58,6 @@
     "bruno:test": "cd bruno && bru run --env local",
     "bruno:coverage": "cd bruno && bru run --env local --output results.json"
   },
-  "pnpm": {
-    "overrides": {
-      "stylus": "0.0.1-security"
-    }
-  },
   "private": true,
   "dependencies": {
     "@casl/ability": "^6.7.1",
