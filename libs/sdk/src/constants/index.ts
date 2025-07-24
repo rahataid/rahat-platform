@@ -129,6 +129,7 @@ export const MS_ACTIONS = {
     LIST: 'vendor.list',
     GET_BY_UUID: 'vendor.get_by_uuid',
     LIST_WITH_PROJECT_DATA: 'vendor.list_with_project_data',
+    GET_BENEFICIARIES: 'vendor.get_beneficiaries',
   },
   USER: {},
   ELPROJECT: {
