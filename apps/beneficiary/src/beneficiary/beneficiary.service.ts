@@ -1167,9 +1167,42 @@ export class BeneficiaryService {
       },
     });
 
-    return {
+    if (!group) {
+      throw new RpcException('Group not found');
+    }
+
+    // If groupPurpose is not found and groupedBeneficiaries is empty, return group with isGroupValidForAA as false
+    if (!group.groupPurpose || !group.groupedBeneficiaries?.length) {
+      return {
+        ...group,
+        isGroupValidForAA: false,
+        isAnyBeneficiaryInvalid: false,
+      }
+    }
+
+    // If group is found, check if it is valid for AA
+    const finalData = {
       ...group,
       isGroupValidForAA: await this.isGroupValidForAA(group.uuid),
+    };
+
+    // Check if any beneficiary has invalid account or phone number
+    let isAnyBeneficiaryInvalid = false;
+
+    // Only check for errors if groupPurpose is not COMMUNICATION and group is not valid for AA
+    if (finalData.groupPurpose !== GroupPurpose.COMMUNICATION && !finalData.isGroupValidForAA) {
+      for (const bef of finalData.groupedBeneficiaries) {
+        const extras = bef.Beneficiary.extras as Record<string, any>;
+        if (extras?.error) {
+          isAnyBeneficiaryInvalid = true;
+          break;
+        }
+      }
+    }
+
+    return {
+      ...finalData,
+      isAnyBeneficiaryInvalid
     };
   }
 
