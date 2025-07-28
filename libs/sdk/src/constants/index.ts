@@ -285,6 +285,7 @@ export const MS_ACTIONS = {
       GET_PAYOUT_LOGS: 'aa.payout.getPayoutLogs',
       GET_PAYOUT_LOG: 'aa.payout.getPayoutLog',
       GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
+      GET_PAYOUT_DETAILS: 'aa.payout.getPayoutDetails',
     },
   },
   C2CProject: {
