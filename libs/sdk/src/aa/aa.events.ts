@@ -119,6 +119,7 @@ export const JOBS = {
       'aa.jobs.payout.triggerOneFailedPayoutRequest',
     GET_PAYOUT_LOGS: 'aa.jobs.payout.getPayoutLogs',
     GET_PAYOUT_LOG: 'aa.jobs.payout.getPayoutLog',
+    EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
   },
   CHAIN: {
     DISBURSE: 'jobs.chain.disburse',
