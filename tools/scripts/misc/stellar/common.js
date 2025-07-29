@@ -68,8 +68,8 @@ const getBeneficiariesOfGroup = async () => {
 }
 
 const getBeneficiaryWallets = async () => {
-    //const beneficiaries = await getProjectBeneficiariesFromApi();
-    const beneficiaries = await getBeneficiariesOfGroup();
+    const beneficiaries = await getProjectBeneficiariesFromApi();
+    // const beneficiaries = await getBeneficiariesOfGroup();
     console.log(`Beneficiaries of group ${groupId}:`, beneficiaries);
     console.log(`Found ${beneficiaries.length} beneficiaries in group ${groupId}`);
     return beneficiaries.data.map(b => b.walletAddress);

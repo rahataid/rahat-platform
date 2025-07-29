@@ -1,0 +1,610 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table tbl_users {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  name String
+  gender Gender [not null, default: 'UNKNOWN']
+  email String
+  phone String
+  wallet String
+  extras Json
+  notes String
+  sessionId String
+  Auth tbl_auth [not null]
+  UserRole tbl_users_roles [not null]
+  Signup tbl_users_signups [not null]
+  VendorProject tbl_projects_vendors [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  deletedAt DateTime
+  createdBy String
+  updatedBy String
+  grievances tbl_grievances [not null]
+}
+
+Table tbl_auth_roles {
+  id Int [increment, unique, not null]
+  name String [unique, not null]
+  isSystem Boolean [not null, default: false]
+  expiry DateTime
+  Permission tbl_auth_permissions [not null]
+  UserRole tbl_users_roles [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  createdBy Int
+  updatedBy Int
+}
+
+Table tbl_auth_permissions {
+  id Int [increment, unique, not null]
+  roleId Int [not null]
+  action String [not null]
+  subject String [not null]
+  inverted Boolean [not null, default: false]
+  conditions Json
+  reason String
+  Role tbl_auth_roles [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+}
+
+Table tbl_users_roles {
+  id Int [pk, increment]
+  userId Int [not null]
+  roleId Int [not null]
+  expiry DateTime
+  User tbl_users [not null]
+  Role tbl_auth_roles [not null]
+  createdAt DateTime [default: `now()`, not null]
+  createdBy Int
+
+  indexes {
+    (userId, roleId) [unique]
+  }
+}
+
+Table tbl_auth {
+  id Int [pk, increment]
+  userId Int [not null]
+  service Service [not null]
+  serviceId String [not null]
+  details Json
+  challenge String
+  falseAttempts Int [not null, default: 0]
+  isLocked Boolean [not null, default: false]
+  lockedOnAt DateTime
+  lastLoginAt DateTime
+  User tbl_users [not null]
+  AuthLog tbl_auth_sessions [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+
+  indexes {
+    (service, serviceId) [unique]
+  }
+}
+
+Table tbl_auth_sessions {
+  id Int [pk, increment]
+  clientId String [not null]
+  sessionId String [unique, not null]
+  authId Int [not null]
+  ip String
+  details Json
+  userAgent String
+  Auth tbl_auth [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table tbl_users_signups {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  userIdentifier String
+  data Json
+  status SignupStatus [not null, default: 'PENDING']
+  rejectedReason String
+  approvedBy Int
+  approvedAt DateTime
+  User tbl_users
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+}
+
+Table tbl_settings {
+  name String [pk]
+  value Json [not null]
+  dataType SettingDataType [not null]
+  requiredFields String[] [not null]
+  isReadOnly Boolean [not null, default: false]
+  isPrivate Boolean [not null, default: true]
+}
+
+Table tbl_auth_apps {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  address String [unique, not null]
+  name String [not null]
+  description String
+  nonceMessage String
+  createdBy String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  deletedAt DateTime
+}
+
+Table tbl_beneficiaries {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  gender Gender [not null, default: 'UNKNOWN']
+  walletAddress String [unique, not null]
+  birthDate DateTime
+  age Int
+  location String
+  latitude Float
+  longitude Float
+  extras Json
+  notes String
+  bankedStatus BankedStatus [not null, default: 'UNKNOWN']
+  internetStatus InternetStatus [not null, default: 'UNKNOWN']
+  phoneStatus PhoneStatus [not null, default: 'UNKNOWN']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  deletedAt DateTime
+  isVerified Boolean [not null, default: false]
+  pii tbl_beneficiaries_pii
+  BeneficiaryProject tbl_beneficiaries_projects [not null]
+  groupedBeneficiaries tbl_grouped_beneficiaries [not null]
+}
+
+Table tbl_grouped_beneficiaries {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  beneficiaryGroupId String [not null]
+  beneficiaryGroup tbl_beneficiaries_group [not null]
+  beneficiaryId String [not null]
+  Beneficiary tbl_beneficiaries [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+
+  indexes {
+    (beneficiaryGroupId, beneficiaryId) [unique]
+  }
+}
+
+Table tbl_beneficiaries_group {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  name String [unique, not null]
+  groupPurpose GroupPurpose
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  deletedAt DateTime
+  groupedBeneficiaries tbl_grouped_beneficiaries [not null]
+  beneficiaryGroupProject tbl_beneficiaries_gorup_projects [not null]
+}
+
+Table tbl_beneficiaries_gorup_projects {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  projectId String [not null]
+  Project tbl_projects [not null]
+  beneficiaryGroupId String [not null]
+  beneficiaryGroup tbl_beneficiaries_group [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+
+  indexes {
+    (projectId, beneficiaryGroupId) [unique]
+  }
+}
+
+Table tbl_beneficiaries_projects {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  projectId String [not null]
+  Project tbl_projects [not null]
+  beneficiaryId String [not null]
+  Beneficiary tbl_beneficiaries [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+
+  indexes {
+    (projectId, beneficiaryId) [unique]
+  }
+}
+
+Table tbl_beneficiaries_pii {
+  beneficiaryId Int [unique, not null]
+  name String
+  phone String [unique, not null]
+  email String
+  extras Json
+  beneficiary tbl_beneficiaries [not null]
+}
+
+Table tbl_projects {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  name String [not null]
+  description String
+  status ProjectStatus [not null, default: 'NOT_READY']
+  type String [not null]
+  contractAddress String
+  extras Json
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  deletedAt DateTime
+  BeneficiaryProject tbl_beneficiaries_projects [not null]
+  ProjectVendors tbl_projects_vendors [not null]
+  beneficiaryGroupProject tbl_beneficiaries_gorup_projects [not null]
+  Grievance tbl_grievances [not null]
+}
+
+Table tbl_stats {
+  name String [pk]
+  data Json [not null]
+  group String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+}
+
+Table tbl_vendors {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  name String [not null]
+  email String
+  phone String
+  location String
+  wallet String
+  extras Json
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  deletedAt DateTime
+}
+
+Table tbl_projects_vendors {
+  id Int [pk, increment]
+  projectId String [not null]
+  Project tbl_projects [not null]
+  vendorId String [not null]
+  User tbl_users [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  deletedAt DateTime
+  extras Json
+
+  indexes {
+    (projectId, vendorId) [unique]
+  }
+}
+
+Table tbl_transactions {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  projectId String [not null]
+  beneficiaryId String [not null]
+  vendorId String [not null]
+  amount Float [not null]
+  currency String [not null]
+  status TransactionStatus [not null, default: 'PENDING']
+  extras Json
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  deletedAt DateTime
+}
+
+Table tbl_grievances {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  reportedBy String [not null]
+  reporterUserId Int [not null]
+  reporterUser tbl_users [not null]
+  reporterContact String [not null]
+  title String [not null]
+  type GrievanceType [not null]
+  projectId String [not null]
+  project tbl_projects [not null]
+  description String [not null]
+  status GrievanceStatus [not null, default: 'NEW']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  deletedAt DateTime
+}
+
+Table tbl_temp_beneficiaries {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  firstName String [not null]
+  lastName String [not null]
+  govtIDNumber String
+  gender Gender [not null, default: 'UNKNOWN']
+  birthDate DateTime
+  walletAddress String [not null]
+  phone String
+  email String
+  archived Boolean [not null, default: false]
+  location String
+  latitude Float
+  longitude Float
+  notes String
+  bankedStatus BankedStatus [not null, default: 'UNKNOWN']
+  internetStatus InternetStatus [not null, default: 'UNKNOWN']
+  phoneStatus PhoneStatus [not null, default: 'UNKNOWN']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  extras Json
+  deletedAt DateTime
+  TempGroupedBeneficiaries tbl_temp_beneficiary_group [not null]
+}
+
+Table tbl_kobo_beneficiaries {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  name String [not null]
+  gender Gender [not null, default: 'UNKNOWN']
+  type KoboBeneficiaryType [not null, default: 'SALE']
+  status KoboBeneficiaryStatus [not null, default: 'PENDING']
+  phone String [not null]
+  age Int
+  email String
+  wallet String
+  leadInterests String[] [not null]
+  extras Json
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  deletedAt DateTime
+}
+
+Table tbl_temp_group {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  name String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  TempGroupedBeneficiaries tbl_temp_beneficiary_group [not null]
+}
+
+Table tbl_temp_beneficiary_group {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  tempGroupUID String [not null]
+  tempGroup tbl_temp_group [not null]
+  tempBenefUID String [not null]
+  tempBeneficiary tbl_temp_beneficiaries [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (tempGroupUID, tempBenefUID) [unique]
+  }
+}
+
+Table tbl_tokens {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  name String [not null]
+  symbol String [unique, not null]
+  description String
+  decimals Int [not null]
+  initialSupply Int [not null]
+  fromBlock Int [unique, not null]
+  contractAddress String [unique, not null]
+  transactionHash String [unique]
+  type TokenDataType [not null, default: 'CREATED']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  createdBy Int
+  updatedBy Int
+}
+
+Table tbl_offramp_providers {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  name String [unique, not null]
+  description String
+  config Json [not null]
+  extras Json
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  deletedAt DateTime
+  createdBy Int
+  updatedBy Int
+}
+
+Table tbl_offramps {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  chain String [not null]
+  token String [not null]
+  senderAddress String [not null]
+  amount Float [not null]
+  requestId String [unique]
+  escrowAddress String
+  status OfframpStatus [not null, default: 'PENDING']
+  transaction tbl_offramp_transactions
+  extras Json
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  deletedAt DateTime
+  createdBy Int
+  updatedBy Int
+}
+
+Table tbl_offramp_transactions {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  requestId String [unique, not null]
+  txHash String [not null]
+  walletId String
+  customerKey String
+  chain String
+  token String
+  referenceId String
+  status OfframpStatus [not null, default: 'PENDING']
+  extras Json
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime
+  deletedAt DateTime
+  createdBy Int
+  updatedBy Int
+  offrampRequest tbl_offramps [not null]
+}
+
+Enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  UNKNOWN
+}
+
+Enum Service {
+  EMAIL
+  PHONE
+  WALLET
+  GOOGLE
+  APPLE
+  FACEBOOK
+  TWITTER
+  GITHUB
+  LINKEDIN
+}
+
+Enum SignupStatus {
+  PENDING
+  APPROVED
+  FAILED
+  REJECTED
+}
+
+Enum SettingDataType {
+  STRING
+  NUMBER
+  BOOLEAN
+  OBJECT
+}
+
+Enum TokenDataType {
+  IMPORTED
+  CREATED
+}
+
+Enum GroupPurpose {
+  BANK_TRANSFER
+  MOBILE_MONEY
+  COMMUNICATION
+}
+
+Enum ProjectStatus {
+  NOT_READY
+  ACTIVE
+  CLOSED
+}
+
+Enum BeneficiaryTypes {
+  ENROLLED
+  REFERRED
+}
+
+Enum BankedStatus {
+  UNKNOWN
+  UNBANKED
+  BANKED
+  UNDER_BANKED
+}
+
+Enum InternetStatus {
+  UNKNOWN
+  NO_INTERNET
+  HOME_INTERNET
+  MOBILE_INTERNET
+}
+
+Enum PhoneStatus {
+  UNKNOWN
+  NO_PHONE
+  FEATURE_PHONE
+  SMART_PHONE
+}
+
+Enum TransactionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FAILED
+}
+
+Enum GrievanceStatus {
+  NEW
+  UNDER_REVIEW
+  RESOLVED
+  CLOSED
+}
+
+Enum GrievanceType {
+  TECHNICAL
+  NON_TECHNICAL
+  OTHER
+}
+
+Enum KoboBeneficiaryType {
+  SALE
+  LEAD
+  HOME_VISIT
+}
+
+Enum KoboBeneficiaryStatus {
+  PENDING
+  FAILED
+  SUCCESS
+}
+
+Enum OfframpStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+Ref: tbl_auth_permissions.roleId > tbl_auth_roles.id
+
+Ref: tbl_users_roles.userId > tbl_users.id
+
+Ref: tbl_users_roles.roleId > tbl_auth_roles.id
+
+Ref: tbl_auth.userId > tbl_users.id
+
+Ref: tbl_auth_sessions.authId > tbl_auth.id
+
+Ref: tbl_users_signups.approvedBy > tbl_users.id
+
+Ref: tbl_grouped_beneficiaries.beneficiaryGroupId > tbl_beneficiaries_group.uuid
+
+Ref: tbl_grouped_beneficiaries.beneficiaryId > tbl_beneficiaries.uuid
+
+Ref: tbl_beneficiaries_gorup_projects.projectId > tbl_projects.uuid
+
+Ref: tbl_beneficiaries_gorup_projects.beneficiaryGroupId > tbl_beneficiaries_group.uuid
+
+Ref: tbl_beneficiaries_projects.projectId > tbl_projects.uuid
+
+Ref: tbl_beneficiaries_projects.beneficiaryId > tbl_beneficiaries.uuid
+
+Ref: tbl_beneficiaries_pii.beneficiaryId - tbl_beneficiaries.id
+
+Ref: tbl_projects_vendors.projectId > tbl_projects.uuid
+
+Ref: tbl_projects_vendors.vendorId > tbl_users.uuid
+
+Ref: tbl_grievances.reporterUserId > tbl_users.id
+
+Ref: tbl_grievances.projectId > tbl_projects.uuid
+
+Ref: tbl_temp_beneficiary_group.tempGroupUID > tbl_temp_group.uuid
+
+Ref: tbl_temp_beneficiary_group.tempBenefUID > tbl_temp_beneficiaries.uuid
+
+Ref: tbl_offramp_transactions.requestId - tbl_offramps.requestId

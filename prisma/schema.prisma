@@ -6,6 +6,10 @@ generator client {
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -262,7 +266,6 @@ model Beneficiary {
   deletedAt      DateTime?
   isVerified     Boolean        @default(false)
 
-
   pii                  BeneficiaryPii?        @relation("BeneficiaryToPii")
   BeneficiaryProject   BeneficiaryProject[]
   groupedBeneficiaries GroupedBeneficiaries[]
@@ -296,7 +299,7 @@ model BeneficiaryGroup {
   id   Int    @id @default(autoincrement())
   uuid String @unique @default(uuid()) @db.Uuid()
 
-  name String @unique
+  name         String        @unique
   groupPurpose GroupPurpose?
 
   createdAt DateTime  @default(now())
@@ -352,11 +355,10 @@ model BeneficiaryProject {
   @@map("tbl_beneficiaries_projects")
 }
 
-
 enum GroupPurpose {
-BANK_TRANSFER
-MOBILE_MONEY
-COMMUNICATION
+  BANK_TRANSFER
+  MOBILE_MONEY
+  COMMUNICATION
 }
 
 // ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
