@@ -121,6 +121,7 @@ export const JOBS = {
     GET_PAYOUT_LOGS: 'aa.jobs.payout.getPayoutLogs',
     GET_PAYOUT_LOG: 'aa.jobs.payout.getPayoutLog',
     GET_PAYOUT_DETAILS: 'aa.jobs.payout.getPayoutDetails',
+    EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
   },
   CHAIN: {
     DISBURSE: 'jobs.chain.disburse',
