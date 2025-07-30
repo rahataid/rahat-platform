@@ -129,6 +129,7 @@ export const MS_ACTIONS = {
     LIST: 'vendor.list',
     GET_BY_UUID: 'vendor.get_by_uuid',
     LIST_WITH_PROJECT_DATA: 'vendor.list_with_project_data',
+    GET_BENEFICIARIES: 'vendor.get_beneficiaries',
   },
   USER: {},
   ELPROJECT: {
@@ -284,6 +285,8 @@ export const MS_ACTIONS = {
       GET_PAYOUT_LOGS: 'aa.payout.getPayoutLogs',
       GET_PAYOUT_LOG: 'aa.payout.getPayoutLog',
       GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
+      EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+
     },
   },
   C2CProject: {
@@ -442,6 +445,7 @@ export const MS_ACTIONS = {
   MS_WATER_LEVELS: {
     GET_DHM: 'ms.waterLevels.getDhm',
     GET_GLOFAS: 'ms.waterLevels.getGlofas',
+    GET_GFH: 'ms.waterLevels.getGfh',
   },
   MS_RAINFALL_LEVELS: {
     GET_DHM: 'ms.rainfallLevels.getDhm',

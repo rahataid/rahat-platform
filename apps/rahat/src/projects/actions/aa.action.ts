@@ -496,6 +496,10 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYOUT_STATS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PAYOUT.GET_STATS, uuid }, payload),
+
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.EXPORT_PAYOUT_LOGS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.EXPORT_PAYOUT_LOGS, uuid }, payload),
   // **** Payout end **** //
 
 };
