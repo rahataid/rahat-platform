@@ -523,4 +523,18 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.GRIEVANCES.REMOVE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GRIEVANCES.REMOVE, uuid }, payload),
   // **** grievance end **** //
+
+  // **** bank scrape start **** //
+  [MS_ACTIONS.AAPROJECT.BANK_SCRAPE.HBL_ACCOUNTS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.BANK_SCRAPE.HBL_ACCOUNTS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.BANK_SCRAPE.HBL_TRANSACTIONS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.BANK_SCRAPE.HBL_TRANSACTIONS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.BANK_SCRAPE.CZBIL_ACCOUNTS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.BANK_SCRAPE.CZBIL_ACCOUNTS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.BANK_SCRAPE.CZBIL_TRANSACTIONS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.BANK_SCRAPE.CZBIL_TRANSACTIONS, uuid }, payload),
+  // **** bank scrape end **** //
 };

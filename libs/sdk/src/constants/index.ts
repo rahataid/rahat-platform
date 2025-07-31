@@ -291,8 +291,14 @@ export const MS_ACTIONS = {
       GET: 'aa.grievances.get',
       UPDATE: 'aa.grievances.update',
       REMOVE: 'aa.grievances.remove',
-      UPDATE_STATUS: 'aa.grievances.updateStatus'
-    }
+      UPDATE_STATUS: 'aa.grievances.updateStatus',
+    },
+    BANK_SCRAPE: {
+      HBL_ACCOUNTS: 'aa.bank-scrape.hbl.accounts',
+      HBL_TRANSACTIONS: 'aa.bank-scrape.hbl.transactions',
+      CZBIL_ACCOUNTS: 'aa.bank-scrape.czbil.accounts',
+      CZBIL_TRANSACTIONS: 'aa.bank-scrape.czbil.transactions',
+    },
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',
