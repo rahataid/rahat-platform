@@ -18,6 +18,7 @@ import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ExternalAppGuard } from '../decorators';
 import { GrievanceModule } from '../grievance/grievance.module';
 import { ListenersModule } from '../listeners/listeners.module';
+import { NotificationModule } from '../notification/notification.module';
 import { OfframpModule } from '../offramp/offramp.module';
 import { OtpModule } from '../otp/otp.module';
 import { MetaTxnProcessorsModule } from '../processors/meta-transaction/metaTransaction.module';
@@ -68,6 +69,7 @@ import { AppService } from './app.service';
     RequestContextModule,
     QueueModule,
     WalletModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [
@@ -79,4 +81,4 @@ import { AppService } from './app.service';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
