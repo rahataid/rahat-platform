@@ -43,6 +43,7 @@ import {
   vendorActions,
 } from './actions';
 import { CAMBODIA_JOBS } from './actions/cambodia.action';
+import { notificationActions } from './actions/common.action';
 import { commsActions } from './actions/comms.action';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
@@ -212,6 +213,7 @@ export class ProjectService {
   async handleMsActions({ action, payload, user }) {
     const actions = {
       ...msTriggerActions,
+      ...notificationActions,
     };
 
     const actionFunc = actions[action];

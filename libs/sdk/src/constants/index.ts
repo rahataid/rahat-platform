@@ -484,6 +484,11 @@ export const MS_ACTIONS = {
     REMOVE: 'ms.dailyMonitoring.remove',
     DELETE: 'ms.dailyMonitoring.delete',
   },
+
+  NOTIFICATION: {
+    CREATE: 'notification.create',
+    LIST: 'notification.list',
+  }
 };
 
 export const RABBIT_MQ = {
