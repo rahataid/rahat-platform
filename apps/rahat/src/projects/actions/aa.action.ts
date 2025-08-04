@@ -280,6 +280,9 @@ export const aaActions: ProjectActionFunc = {
   // **** fund mgmt end ****//
 
   // **** stats ****//
+  [MS_ACTIONS.AAPROJECT.STATS.GET_MAP_LOCATION]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STATS.GET_MAP_LOCATION, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.STATS.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STATS.GET_ALL, uuid }, payload),
 
