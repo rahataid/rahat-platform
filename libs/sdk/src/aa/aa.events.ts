@@ -123,6 +123,10 @@ export const JOBS = {
     GET_PAYOUT_DETAILS: 'aa.jobs.payout.getPayoutDetails',
     EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
   },
+  VENDOR: {
+    // Remove after test
+    TEST_OFFLINE_PAYOUT: 'aa.jobs.vendor.test_offline_payout',
+  },
   CHAIN: {
     DISBURSE: 'jobs.chain.disburse',
     SEND_OTP: 'jobs.chain.sendOtp',

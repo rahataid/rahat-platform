@@ -288,7 +288,10 @@ export const MS_ACTIONS = {
       GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
       GET_PAYOUT_DETAILS: 'aa.payout.getPayoutDetails',
       EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
-
+    },
+    VENDOR: {
+      // Remove after test
+      TEST_OFFLINE_PAYOUT: 'aaProject.vendor.testOfflinePayout',
     },
   },
   C2CProject: {
@@ -485,6 +488,10 @@ export const MS_ACTIONS = {
     UPDATE: 'ms.dailyMonitoring.update',
     REMOVE: 'ms.dailyMonitoring.remove',
     DELETE: 'ms.dailyMonitoring.delete',
+  },
+  OTP: {
+    SEND_OTP: 'otp.sendOtp',
+    SEND_BULK_OTP: 'otp.sendBulkOtp',
   },
 };
 
