@@ -129,6 +129,7 @@ export const MS_ACTIONS = {
     LIST: 'vendor.list',
     GET_BY_UUID: 'vendor.get_by_uuid',
     LIST_WITH_PROJECT_DATA: 'vendor.list_with_project_data',
+    GET_BENEFICIARIES: 'vendor.get_beneficiaries',
   },
   USER: {},
   ELPROJECT: {
@@ -227,9 +228,11 @@ export const MS_ACTIONS = {
       GET_ONE_TOKEN_RESERVATION:
         'aaProject.beneficiary.get_one_token_reservation',
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats',
+      GET_REDEEM_INFO: 'aaProject.beneficiary.getRedeemInfo',
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
+      GET_MAP_LOCATION: 'aaProject.stats.getMapLocation',
       GET_ONE: 'aaProject.stats.getOne',
     },
     DAILY_MONITORING: {
@@ -284,6 +287,9 @@ export const MS_ACTIONS = {
       GET_PAYOUT_LOGS: 'aa.payout.getPayoutLogs',
       GET_PAYOUT_LOG: 'aa.payout.getPayoutLog',
       GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
+      GET_PAYOUT_DETAILS: 'aa.payout.getPayoutDetails',
+      EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+
     },
     GRIEVANCES: {
       CREATE: 'aa.grievances.create',
@@ -456,6 +462,7 @@ export const MS_ACTIONS = {
   MS_WATER_LEVELS: {
     GET_DHM: 'ms.waterLevels.getDhm',
     GET_GLOFAS: 'ms.waterLevels.getGlofas',
+    GET_GFH: 'ms.waterLevels.getGfh',
   },
   MS_RAINFALL_LEVELS: {
     GET_DHM: 'ms.rainfallLevels.getDhm',

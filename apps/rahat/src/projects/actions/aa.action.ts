@@ -267,9 +267,22 @@ export const aaActions: ProjectActionFunc = {
       payload
     ),
 
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_REDEEM_INFO]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.BENEFICIARY.GET_REDEEM_INFO, uuid },
+      payload
+    ),
+
   // **** fund mgmt end ****//
 
   // **** stats ****//
+  [MS_ACTIONS.AAPROJECT.STATS.GET_MAP_LOCATION]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STATS.GET_MAP_LOCATION, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.STATS.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STATS.GET_ALL, uuid }, payload),
 
@@ -499,9 +512,15 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYOUT_LOG]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYOUT_LOG, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYOUT_DETAILS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYOUT_DETAILS, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYOUT_STATS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PAYOUT.GET_STATS, uuid }, payload),
+
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.EXPORT_PAYOUT_LOGS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.EXPORT_PAYOUT_LOGS, uuid }, payload),
   // **** Payout end **** //
 
   // **** grievance start **** //

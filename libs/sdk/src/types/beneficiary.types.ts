@@ -16,4 +16,5 @@ export type GroupWithBeneficiaries = Prisma.BeneficiaryGroupGetPayload<{
 
 export interface GroupWithValidationAA extends GroupWithBeneficiaries {
     isGroupValidForAA: boolean;
+    isAnyBeneficiaryInvalid?: boolean;
 }
