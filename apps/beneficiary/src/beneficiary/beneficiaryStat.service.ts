@@ -11,6 +11,7 @@ import { hasKey } from '../utils/objectUtil';
 import { RahatTokenAbi } from '../utils/rahatToken';
 import { mapVulnerabilityStatusCount } from '../utils/vulnerabilityCountHelpers';
 import { createContractReader } from '../utils/web3';
+import { countBySSAType, countResult, FIELD_COMMUNICATION_CHANNEL, mapAgeGroupCounts, toPascalCase } from './helpers';
 
 const REPORTING_FIELD = {
   FAMILY_MEMBER_BANK_ACCOUNT:
@@ -396,6 +397,37 @@ export class BeneficiaryStatService {
     return result.filter((f) => f.id.toLocaleUpperCase() !== 'NO');
   }
 
+  async countExtrasFieldValuesNormalized(field: string, expected: string[]) {
+    const results = await this.prisma.beneficiary.findMany({
+      select: {
+        extras: true,
+      },
+    });
+
+    // Initialize counts with 0 for each expected value
+    const counts: Record<string, number> = {};
+    for (const key of expected) {
+      counts[key] = 0;
+    }
+
+    for (const item of results) {
+      const rawVal = item.extras?.[field];
+
+      if (typeof rawVal === 'string') {
+        const normalized = rawVal.trim().toLowerCase(); // Normalize
+        if (expected.includes(normalized)) {
+          counts[normalized] += 1;
+        }
+      }
+    }
+
+    console.log(results)
+    return Object.entries(counts).map(([key, count]) => ({
+      id: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize
+      count,
+    }));
+  }
+
   async calculatePhoneAvailabilityStats() {
     const results = await this.prisma.beneficiaryPii.findMany({});
     const finalResult = this.filterAndCountPhoneStatus(results);
@@ -443,7 +475,135 @@ export class BeneficiaryStatService {
       count,
     }));
   }
+  async calculateChannelUsageStats() {
+    // const fields = [
+    //   'channelcommunity',
+    //   'channelfm_radio',
+    //   'channelmobile_phone___sms',
+    //   'channelnewspaper',
+    //   'channelothers',
+    //   'channelpeople_representatives',
+    //   'channelrelatives',
+    //   'channelsocial_media',
+    // ];
 
+    const results = await this.prisma.beneficiary.findMany({
+      select: {
+        uuid: true,
+        extras: true,
+      },
+    });
+
+    const counts: Record<string, number> = {};
+
+    for (const field of FIELD_COMMUNICATION_CHANNEL) {
+      counts[field] = 0;
+    }
+
+    for (const item of results) {
+      for (const field of FIELD_COMMUNICATION_CHANNEL) {
+        if (item.extras?.[field] === 1) {
+          counts[field] += 1;
+        }
+      }
+    }
+
+    return Object.entries(counts).map(([key, count]) => ({
+      id: toPascalCase(key),
+      count,
+    }));
+  }
+
+  async vulnerableCountStats() {
+    const benefs = await this.prisma.beneficiary.findMany();
+    return countResult(benefs);
+  }
+  async accesstoEarlyWarningInformation() {
+    return this.countExtrasFieldValuesNormalized('receive_disaster_info', [
+      'yes',
+      'no',
+    ]);
+  }
+
+  async calculateBankStatusStats() {
+    return this.countExtrasFieldValuesNormalized('have_active_bank_ac', [
+      'yes',
+      'no',
+    ]);
+  }
+
+  async calculateSSARecipientInHH() {
+    return this.countExtrasFieldValuesNormalized('ssa_recipient_in_hh', [
+      'yes',
+      'no',
+    ]);
+  }
+
+  async accessToMobilePhones() {
+    return this.countExtrasFieldValuesNormalized(
+      'do_you_have_access_to_mobile_phones',
+      ['yes', 'no']
+    );
+  }
+
+  async accessInternet() {
+    return this.countExtrasFieldValuesNormalized(
+      'do_you_have_access_to_internet',
+      ['yes', 'no']
+    );
+  }
+
+  async digitalWalletUse() {
+    return this.countExtrasFieldValuesNormalized('use_digital_wallets', [
+      'yes',
+      'no',
+    ]);
+  }
+
+  async floadImpactIn5Years() {
+    return this.countExtrasFieldValuesNormalized('flood_affected_in_5_years', [
+      'yes',
+      'no',
+    ]);
+  }
+  async phoneTypeDistribution() {
+    const rData = await this.countExtrasFieldValuesNormalized(
+      'type_of_phone_set',
+      ['smartphone', 'keypad', 'both', 'brick']
+    );
+    const result = [];
+
+    let keypadBrickCount = 0;
+
+    for (const item of rData) {
+      if (item.id === 'Keypad' || item.id === 'Brick') {
+        keypadBrickCount += item.count;
+      } else {
+        result.push(item);
+      }
+    }
+
+    result.push({ id: 'Keypad/Brick', count: keypadBrickCount });
+
+    return result;
+  }
+
+  async calculateAgeGroups() {
+    const benef = await this.prisma.beneficiary.findMany({});
+    const ageGroupCounts = mapAgeGroupCounts(benef);
+    return Object.keys(ageGroupCounts).map((d) => ({
+      id: d,
+      count: ageGroupCounts[d],
+    }));
+  }
+  async calculateTypeOfSSA() {
+    const benef = await this.prisma.beneficiary.findMany({});
+    const myData = countBySSAType(benef);
+    return Object.keys(myData).map((d) => ({
+      id: d,
+      count: myData[d],
+    }));
+  }
   async calculateAllStats() {
     const [
       gender,
@@ -458,7 +618,19 @@ export class BeneficiaryStatService {
       vulnerabilityCountStats,
       casteCountStats,
       phoneTypeStats,
-      totalVendors
+      totalVendors,
+      calculateChannelUsageStats,
+      accessToMobilePhones,
+      accessInternet,
+      digitalWalletUse,
+      phoneTypeDistribution,
+      calculateSSARecipientInHH,
+      floadImpactIn5Years,
+      accesstoEarlyWarningInformation,
+      vulnerableCountStats,
+      calculateAgeGroups,
+      calculateTypeOfSSA
+
     ] = await Promise.all([
       this.calculateGenderStats(),
       this.calculateBankedStatusStats(),
@@ -472,7 +644,19 @@ export class BeneficiaryStatService {
       this.calculateVulnerabilityCountStats(),
       this.calculateCountByCasteStats(),
       this.calculatePhoneTypeStats(),
-      this.totalVendors()
+      this.totalVendors(),
+      this.calculateChannelUsageStats(),
+      this.accessToMobilePhones(),
+      this.accessInternet(),
+      this.digitalWalletUse(),
+      this.phoneTypeDistribution(),
+      this.calculateSSARecipientInHH(),
+      this.floadImpactIn5Years(),
+      this.accesstoEarlyWarningInformation(),
+      this.vulnerableCountStats(),
+      this.calculateAgeGroups(),
+      this.calculateTypeOfSSA()
+
     ]);
 
 
@@ -489,7 +673,19 @@ export class BeneficiaryStatService {
       vulnerabilityCountStats,
       casteCountStats,
       phoneTypeStats,
-      totalVendors
+      totalVendors,
+      calculateChannelUsageStats,
+      accessToMobilePhones,
+      accessInternet,
+      digitalWalletUse,
+      phoneTypeDistribution,
+      calculateSSARecipientInHH,
+      floadImpactIn5Years,
+      accesstoEarlyWarningInformation,
+      vulnerableCountStats,
+      calculateAgeGroups,
+      calculateTypeOfSSA
+
     };
   }
   async calculateProjectStats(projectUuid: string) {
@@ -569,7 +765,19 @@ export class BeneficiaryStatService {
       vulnerabilityCountStats,
       casteCountStats,
       phoneTypeStats,
-      totalVendors
+      totalVendors,
+      calculateChannelUsageStats,
+      accessToMobilePhones,
+      accessInternet,
+      digitalWalletUse,
+      phoneTypeDistribution,
+      calculateSSARecipientInHH,
+      floadImpactIn5Years,
+      accesstoEarlyWarningInformation,
+      vulnerableCountStats,
+      calculateAgeGroups,
+      calculateTypeOfSSA
+
     } = await this.calculateAllStats();
 
     const rangedAge = await this.calculateRangedAge(age);
@@ -639,8 +847,65 @@ export class BeneficiaryStatService {
         name: 'vendor_total',
         data: totalVendors,
         group: 'vendor'
-      })
+      }),
+      this.statsService.save({
+        name: 'channel_usage_stats',
+        data: calculateChannelUsageStats,
+        group: 'beneficiary_channel',
+      }),
+      this.statsService.save({
+        name: 'mobile_access',
+        data: accessToMobilePhones,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'internet_access',
+        data: accessInternet,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'digital_wallet_use',
+        data: digitalWalletUse,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'type_of_phone',
+        data: phoneTypeDistribution,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'social_security_linked_to_bank_account',
+        data: calculateSSARecipientInHH,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'flood_impact_in_last_5years',
+        data: floadImpactIn5Years,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'acces_to_early_warning_information',
+        data: accesstoEarlyWarningInformation,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'vulnerable_count_stats',
+        data: vulnerableCountStats,
+        group: 'beneficiary',
+      }),
+      {
+        name: 'beneficiary_ageGroups',
+        data: calculateAgeGroups,
+        group: 'beneficiary',
+      },
+      {
+        name: 'beneficiary_SSA_Types',
+        data: calculateTypeOfSSA,
+        group: 'beneficiary',
+      },
     ]);
+
+
     if (projectUuid) {
       const { gender, bankedStatus, internetStatus, phoneStatus, total, age, totalVendors } =
         await this.calculateProjectStats(projectUuid);

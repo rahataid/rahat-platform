@@ -31,7 +31,7 @@ export class BeneficiaryUtilsService {
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly settings: SettingsService
-  ) {}
+  ) { }
 
   buildWhereClause(dto: ListBeneficiaryDto): Record<string, any> {
     const { projectId, startDate, endDate } = dto;
@@ -145,6 +145,7 @@ export class BeneficiaryUtilsService {
   }
 
   async assignBeneficiaryToProject(assignBeneficiaryDto: AddToProjectDto) {
+
     const { beneficiaryId, projectId } = assignBeneficiaryDto;
 
     //fetch project and beneficiary detail in parallel
