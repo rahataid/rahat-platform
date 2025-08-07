@@ -1,10 +1,11 @@
 meta {
   name: "Get Cash Tracker Transactions"
-  type: "http"
+  type: http
+  seq: 1
 }
 
 post {
-  url: "{{baseUrl}}/projects/{{uuid}}/actions"
+  url: {{baseUrl}}/projects/{{uuid}}/actions
   body: json
   auth: bearer
 }
@@ -14,6 +15,8 @@ auth:bearer {
 }
 
 body:json {
-  "action": "aa.cash-tracker.getTransactions",
-  "payload": {}
-} 
+  {
+    "action": "aa.cash-tracker.getTransactions",
+    "payload": {}
+  }
+}

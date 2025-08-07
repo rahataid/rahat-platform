@@ -15,13 +15,15 @@ auth:bearer {
 }
 
 body:json {
-  "action": "aa.cash-tracker.executeAction",
-  "payload": {
-    "from": "0xe5159f997F32D04F9276567bb2ED4CC0CdC9D8E4",
-    "to": "0xB4b85A39C44667eDEc9F0eB5c328954e328E980B",
-    "alias": "Municipality",
-    "action": "confirm_transfer",
-    "amount": "500000000000000000",
-    "description": "Confirming transfer from field office"
+  {
+    "action": "aa.cash-tracker.executeAction",
+    "payload": {
+      "from": "0xe5159f997F32D04F9276567bb2ED4CC0CdC9D8E4",
+      "to": "0xB4b85A39C44667eDEc9F0eB5c328954e328E980B",
+      "alias": "Municipality",
+      "action": "confirm_transfer",
+      "amount": "500000000000000000",
+      "description": "Confirming transfer from field office"
+    }
   }
 }
