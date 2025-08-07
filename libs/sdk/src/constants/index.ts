@@ -232,6 +232,7 @@ export const MS_ACTIONS = {
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
+      GET_MAP_LOCATION: 'aaProject.stats.getMapLocation',
       GET_ONE: 'aaProject.stats.getOne',
     },
     DAILY_MONITORING: {
@@ -292,6 +293,14 @@ export const MS_ACTIONS = {
     VENDOR: {
       // Remove after test
       TEST_OFFLINE_PAYOUT: 'aaProject.vendor.testOfflinePayout',
+      TOKEN_REDEMPTION: {
+        CREATE: 'aa.vendor.token_redemption.create',
+        GET: 'aa.vendor.token_redemption.get',
+        UPDATE_STATUS: 'aa.vendor.token_redemption.update_status',
+        LIST: 'aa.vendor.token_redemption.list',
+        GET_VENDOR_REDEMPTIONS: 'aa.vendor.token_redemption.get_vendor_redemptions',
+        GET_STATS: 'aa.vendor.token_redemption.get_stats',
+      },
     },
   },
   C2CProject: {

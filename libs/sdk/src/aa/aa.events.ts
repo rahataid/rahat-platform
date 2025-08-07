@@ -74,6 +74,7 @@ export const JOBS = {
   },
   STATS: {
     GET_ALL: 'aa.jobs.stats.getAll',
+    GET_MAP_LOCATION: 'aa.jobs.stats.getMapLocation',
     GET_ONE: 'aa.jobs.stats.getOne',
   },
   DAILY_MONITORING: {
@@ -126,6 +127,14 @@ export const JOBS = {
   VENDOR: {
     // Remove after test
     TEST_OFFLINE_PAYOUT: 'aa.jobs.vendor.test_offline_payout',
+    TOKEN_REDEMPTION: {
+      CREATE: 'aa.jobs.vendor.token_redemption.create',
+      GET: 'aa.jobs.vendor.token_redemption.get',
+      UPDATE_STATUS: 'aa.jobs.vendor.token_redemption.update_status',
+      LIST: 'aa.jobs.vendor.token_redemption.list',
+      GET_VENDOR_REDEMPTIONS: 'aa.jobs.vendor.token_redemption.get_vendor_redemptions',
+      GET_STATS: 'aa.jobs.vendor.token_redemption.get_stats',
+    },
   },
   CHAIN: {
     DISBURSE: 'jobs.chain.disburse',
