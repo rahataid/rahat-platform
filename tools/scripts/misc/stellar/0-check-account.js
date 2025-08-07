@@ -27,7 +27,9 @@ const main = async () => {
     //     'GCX2W7XGCVVKZ5E6CU4M2WTRKFCCSXRZNL5TAH4KK6D5BS3VRHXBINJM'
     // ]
     const walletAddresses = await getBeneficiaryWallets();
+
     console.log('Wallet Addresses:', walletAddresses);
+    console.log('found wallet addresses:', walletAddresses.length);
 
     const accountDetails = [];
 

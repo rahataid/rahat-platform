@@ -88,4 +88,5 @@ ignition/deployments/chain-31337
 .qodo
 /wallet_storage
 .ssh_config
+.data/
 
