@@ -136,12 +136,16 @@ export const JOBS = {
     GET: 'aa.jobs.grievances.get',
     UPDATE: 'aa.jobs.grievances.update',
     REMOVE: 'aa.jobs.grievances.remove',
-    UPDATE_STATUS: 'aa.jobs.grievances.updateStatus'
+    UPDATE_STATUS: 'aa.jobs.grievances.updateStatus',
   },
   BANK_SCRAPE: {
     HBL_ACCOUNTS: 'aa.jobs.bank-scrape.hbl.accounts',
     HBL_TRANSACTIONS: 'aa.jobs.bank-scrape.hbl.transactions',
     CZBIL_ACCOUNTS: 'aa.jobs.bank-scrape.czbil.accounts',
-    CZBIL_TRANSACTIONS: 'aa.jobs.bank-scrape.czbil.transactions'
+    CZBIL_TRANSACTIONS: 'aa.jobs.bank-scrape.czbil.transactions',
+  },
+  CASH_TRACKER: {
+    EXECUTE_ACTION: 'aa.jobs.cash-tracker.executeAction',
+    GET_TRANSACTIONS: 'aa.jobs.cash-tracker.getTransactions',
   },
 };

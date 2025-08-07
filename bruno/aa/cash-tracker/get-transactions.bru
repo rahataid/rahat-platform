@@ -1,0 +1,19 @@
+meta {
+  name: "Get Cash Tracker Transactions"
+  type: "http"
+}
+
+post {
+  url: "{{baseUrl}}/projects/{{uuid}}/actions"
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: "{{authToken}}"
+}
+
+body:json {
+  "action": "aa.cash-tracker.getTransactions",
+  "payload": {}
+} 
