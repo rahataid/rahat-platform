@@ -41,7 +41,7 @@ const projectStats = (uuid: string, url: string) => {
             props: {},
             title: 'Total Wearers',
             colSpan: 1,
-            dataMap: 'TOTAL_CONSUMERS',
+            dataMap: 'TOTAL_WEARERS',
             dataSrc: 'source3',
             rowSpan: 1,
           },
