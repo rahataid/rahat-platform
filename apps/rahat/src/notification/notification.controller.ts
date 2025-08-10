@@ -1,6 +1,6 @@
 import { Controller } from "@nestjs/common";
 import { MessagePattern } from "@nestjs/microservices";
-import { CreateNotificationDto, GetNotificationsDto } from "@rahataid/extensions";
+import { CreateNotificationDto, ListNotificationsDto, } from "@rahataid/extensions";
 import { ProjectJobs } from "@rahataid/sdk";
 import { NotificationService } from "./notification.service";
 
@@ -14,7 +14,12 @@ export class NotificationController {
     }
 
     @MessagePattern({ cmd: ProjectJobs.NOTIFICATION.LIST })
-    async getNotifications(dto: GetNotificationsDto) {
-        return this.notificationService.getNotifications(dto);
+    async listNotifications(dto: ListNotificationsDto) {
+        return this.notificationService.listNotifications(dto);
+    }
+
+    @MessagePattern({ cmd: ProjectJobs.NOTIFICATION.GET })
+    async getNotification(dto: { id: number }) {
+        return this.notificationService.getNotification(dto);
     }
 }

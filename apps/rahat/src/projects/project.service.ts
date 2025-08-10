@@ -256,6 +256,7 @@ export class ProjectService {
       ...rpActions,
       ...commsActions,
       ...msTriggerActions,
+      ...notificationActions,
     };
 
     const actionFunc = actions[action];

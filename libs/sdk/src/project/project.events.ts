@@ -108,5 +108,6 @@ export const JOBS = {
   NOTIFICATION: {
     CREATE: 'rahat.jobs.notification.create',
     LIST: 'rahat.jobs.notification.list',
+    GET: 'rahat.jobs.notification.get',
   },
 };

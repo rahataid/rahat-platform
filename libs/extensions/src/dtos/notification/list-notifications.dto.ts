@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsOptional, IsString } from "class-validator";
+import { IsInt, IsOptional, IsString } from "class-validator";
 
-export class GetNotificationsDto {
+export class ListNotificationsDto {
     @ApiPropertyOptional({ example: "project-uuid", description: "Filter by project ID" })
     @IsString()
     @IsOptional()
@@ -17,8 +17,13 @@ export class GetNotificationsDto {
     @IsOptional()
     title?: string;
 
-    @ApiPropertyOptional({ example: "Some description", description: "Filter by description" })
-    @IsString()
+    @ApiPropertyOptional({ example: 1, description: "Page number" })
     @IsOptional()
-    description?: string;
+    @IsInt()
+    page?: number;
+
+    @ApiPropertyOptional({ example: 20, description: "Items per page" })
+    @IsOptional()
+    @IsInt()
+    perPage?: number;
 }
