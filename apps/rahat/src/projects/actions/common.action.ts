@@ -135,6 +135,10 @@ export const beneficiaryGroupActions: ProjectActionFunc = {
 };
 
 export const notificationActions: ProjectActionFunc = {
+  [MS_ACTIONS.NOTIFICATION.CREATE]: (uuid, payload, sendCommand) => {
+    payload.projectId = uuid || payload.projectId;
+    return sendCommand({ cmd: ProjectJobs.NOTIFICATION.CREATE }, payload);
+  },
   [MS_ACTIONS.NOTIFICATION.LIST]: (uuid, payload, sendCommand) => {
     payload.projectId = uuid || payload.projectId;
     return sendCommand({ cmd: ProjectJobs.NOTIFICATION.LIST }, payload);

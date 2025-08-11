@@ -486,6 +486,7 @@ export const MS_ACTIONS = {
   },
 
   NOTIFICATION: {
+    CREATE: 'notification.create',
     LIST: 'notification.list',
     GET: 'notification.get',
   }
