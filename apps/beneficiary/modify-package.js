@@ -22,6 +22,7 @@ try {
     prisma: '5.20.0',
     'ts-node': '^10.9.1',
     '@prisma/client': '5.20.0',
+    '@faker-js/faker': '^8.4.1',
   };
 
   packageData.prisma = {

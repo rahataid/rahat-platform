@@ -1,0 +1,26 @@
+meta {
+  name: stress-testing start
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{url}}/stress-test/start
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "numberOfBeneficiaries": 2
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
+}

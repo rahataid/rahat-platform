@@ -1740,7 +1740,7 @@ export class BeneficiaryService {
           // Create stellar account and add trustline for beneficiaries
           await handleMicroserviceCall({
             client: this.client.send(
-              { cmd: AAJobs.STELLAR.INTERNAL_FAUCET_TRUSTLINE, uuid: project.uuid }, { wallets: benWallets }
+              { cmd: AAJobs.STELLAR.INTERNAL_FAUCET_TRUSTLINE, uuid: project.uuid }, { wallets: benWallets, beneficiaryGroupId }
             ),
             onSuccess: async (response) => {
               return response;
