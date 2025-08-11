@@ -10,10 +10,14 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestApplication, NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { NestFastifyApplication } from '@nestjs/platform-fastify';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { GlobalCustomExceptionFilter, ResponseTransformInterceptor } from '@rahataid/extensions';
+import {
+  GlobalCustomExceptionFilter,
+  ResponseTransformInterceptor,
+} from '@rahataid/extensions';
 import { APP } from '@rahataid/sdk';
+import helmet from 'helmet';
 import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app/app.module';
 import { loggerInstance } from './logger/winston.logger';
@@ -21,11 +25,10 @@ import { loggerInstance } from './logger/winston.logger';
 // import { GlobalExceptionFilter } from './utils/exceptions/rpcException.filter';
 
 async function bootstrap() {
-  const _logger = new Logger(NestApplication.name)
+  const _logger = new Logger(NestApplication.name);
   const configService = new ConfigService();
 
-
-  const app = await NestFactory.create<NestFastifyApplication>(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: WinstonModule.createLogger({
       instance: loggerInstance,
     }),
@@ -33,15 +36,25 @@ async function bootstrap() {
   const globalPrefix = 'v1';
   app.enableCors();
 
-  const microservice = app.connectMicroservice<MicroserviceOptions>(
-    {
-      transport: Transport.REDIS,
-      options: {
-        host: configService.get('REDIS_HOST'),
-        port: configService.get('REDIS_PORT'),
-        password: configService.get('REDIS_PASSWORD'),
+  const microservice = app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.REDIS,
+    options: {
+      host: configService.get('REDIS_HOST'),
+      port: configService.get('REDIS_PORT'),
+      password: configService.get('REDIS_PASSWORD'),
+    },
+  });
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // disable if CSP not yet configured
+      hsts: {
+        maxAge: 31536000, // 1 year in seconds
+        includeSubDomains: true,
+        preload: true,
       },
     })
+  );
 
   // app.use(bodyParser.raw({ type: 'application/octet-stream' }));
   app.use(bodyParser.raw({ type: 'application/octet-stream', limit: '50mb' }));
@@ -50,6 +63,7 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '500mb' }));
   app.use(bodyParser.urlencoded({ limit: '500mb', extended: true }));
 
+  // app.disable('x-powered-by');
   //must have this if you want to implicit conversion of string to number in dto
   app.useGlobalPipes(
     new ValidationPipe({
@@ -61,6 +75,8 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalCustomExceptionFilter());
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
+  app.disable('etag');
+
 
   const port = process.env.PORT || 3333;
 
