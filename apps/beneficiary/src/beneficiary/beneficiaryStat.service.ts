@@ -397,6 +397,18 @@ export class BeneficiaryStatService {
     return result.filter((f) => f.id.toLocaleUpperCase() !== 'NO');
   }
 
+  countByBank(array) {
+    return array.reduce((result, currentValue) => {
+      const bankValue = currentValue.extras.bank_name;
+      if (bankValue) {
+        if (!result[bankValue]) {
+          result[bankValue] = 0;
+        }
+        result[bankValue]++;
+      }
+      return result;
+    }, {});
+  }
   async countExtrasFieldValuesNormalized(field: string, expected: string[]) {
     const results = await this.prisma.beneficiary.findMany({
       select: {
@@ -421,7 +433,6 @@ export class BeneficiaryStatService {
       }
     }
 
-    console.log(results)
     return Object.entries(counts).map(([key, count]) => ({
       id: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize
       count,
@@ -604,6 +615,44 @@ export class BeneficiaryStatService {
       count: myData[d],
     }));
   }
+  async calculateCountByBank() {
+    const results = await this.prisma.beneficiary.findMany({
+      where: {
+        extras: {
+          path: ['bank_name'],
+          not: null || '',
+        },
+      },
+      select: {
+        uuid: true,
+        extras: true,
+      },
+    });
+
+    const bankCounts = this.countByBank(results);
+    const resultArray = Object.keys(bankCounts).map((key) => {
+      return {
+        id: key,
+        count: bankCounts[key],
+      };
+    });
+    console.log(resultArray)
+    return resultArray;
+  }
+
+  async calculateTotalFamilyMembers() {
+    const benefs = await this.prisma.beneficiary.findMany();
+
+    const total = benefs.reduce((sum, ben) => {
+      const extras = ben.extras as {
+        total_number_of_family_members?: number;
+      };
+      const members = Number(extras?.total_number_of_family_members || 0);
+      return sum + members;
+    }, 0);
+
+    return { count: total };
+  }
   async calculateAllStats() {
     const [
       gender,
@@ -612,6 +661,7 @@ export class BeneficiaryStatService {
       internetStatus,
       phoneStatus,
       total,
+      calculateTotalFamilyMembers,
       age,
       mapStats,
       phoneAvailabilityStats,
@@ -629,7 +679,9 @@ export class BeneficiaryStatService {
       accesstoEarlyWarningInformation,
       vulnerableCountStats,
       calculateAgeGroups,
-      calculateTypeOfSSA
+      calculateTypeOfSSA,
+      calculateBankStatusStats,
+      calculateCountByBank
 
     ] = await Promise.all([
       this.calculateGenderStats(),
@@ -638,6 +690,7 @@ export class BeneficiaryStatService {
       this.calculateInternetStatusStats(),
       this.calculatePhoneStatusStats(),
       this.totalBeneficiaries(),
+      this.calculateTotalFamilyMembers(),
       this.calculateAgeStats(),
       this.calculateMapStats(),
       this.calculatePhoneAvailabilityStats(),
@@ -655,7 +708,9 @@ export class BeneficiaryStatService {
       this.accesstoEarlyWarningInformation(),
       this.vulnerableCountStats(),
       this.calculateAgeGroups(),
-      this.calculateTypeOfSSA()
+      this.calculateTypeOfSSA(),
+      this.calculateBankStatusStats(),
+      this.calculateCountByBank()
 
     ]);
 
@@ -667,6 +722,7 @@ export class BeneficiaryStatService {
       internetStatus,
       phoneStatus,
       total,
+      calculateTotalFamilyMembers,
       age,
       mapStats,
       phoneAvailabilityStats,
@@ -684,7 +740,9 @@ export class BeneficiaryStatService {
       accesstoEarlyWarningInformation,
       vulnerableCountStats,
       calculateAgeGroups,
-      calculateTypeOfSSA
+      calculateTypeOfSSA,
+      calculateBankStatusStats,
+      calculateCountByBank
 
     };
   }
@@ -759,6 +817,7 @@ export class BeneficiaryStatService {
       internetStatus,
       phoneStatus,
       total,
+      calculateTotalFamilyMembers,
       age,
       mapStats,
       phoneAvailabilityStats,
@@ -776,7 +835,9 @@ export class BeneficiaryStatService {
       accesstoEarlyWarningInformation,
       vulnerableCountStats,
       calculateAgeGroups,
-      calculateTypeOfSSA
+      calculateTypeOfSSA,
+      calculateBankStatusStats,
+      calculateCountByBank
 
     } = await this.calculateAllStats();
 
@@ -786,6 +847,11 @@ export class BeneficiaryStatService {
       this.statsService.save({
         name: 'beneficiary_total',
         data: total,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'total_number_family_members',
+        data: calculateTotalFamilyMembers,
         group: 'beneficiary',
       }),
       this.statsService.save({
@@ -851,7 +917,7 @@ export class BeneficiaryStatService {
       this.statsService.save({
         name: 'channel_usage_stats',
         data: calculateChannelUsageStats,
-        group: 'beneficiary_channel',
+        group: 'beneficiary',
       }),
       this.statsService.save({
         name: 'mobile_access',
@@ -893,18 +959,27 @@ export class BeneficiaryStatService {
         data: vulnerableCountStats,
         group: 'beneficiary',
       }),
-      {
-        name: 'beneficiary_ageGroups',
+      this.statsService.save({
+        name: 'age_groups',
         data: calculateAgeGroups,
         group: 'beneficiary',
-      },
-      {
-        name: 'beneficiary_SSA_Types',
+      }),
+      this.statsService.save({
+        name: 'household_receiving_social_protection_benefits',
         data: calculateTypeOfSSA,
         group: 'beneficiary',
-      },
+      }),
+      this.statsService.save({
+        name: 'bank_account_access',
+        data: calculateBankStatusStats,
+        group: 'beneficiary',
+      }),
+      this.statsService.save({
+        name: 'bank_count_stats',
+        data: calculateCountByBank,
+        group: 'beneficiary',
+      }),
     ]);
-
 
     if (projectUuid) {
       const { gender, bankedStatus, internetStatus, phoneStatus, total, age, totalVendors } =
