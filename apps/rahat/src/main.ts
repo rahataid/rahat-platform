@@ -47,7 +47,7 @@ async function bootstrap() {
 
   app.use(
     helmet({
-      contentSecurityPolicy: false, // disable if CSP not yet configured
+      contentSecurityPolicy: false,
       hsts: {
         maxAge: 31536000, // 1 year in seconds
         includeSubDomains: true,
@@ -63,7 +63,6 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '500mb' }));
   app.use(bodyParser.urlencoded({ limit: '500mb', extended: true }));
 
-  // app.disable('x-powered-by');
   //must have this if you want to implicit conversion of string to number in dto
   app.useGlobalPipes(
     new ValidationPipe({
