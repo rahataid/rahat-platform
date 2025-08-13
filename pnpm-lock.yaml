@@ -77,6 +77,9 @@ dependencies:
   '@rumsan/user':
     specifier: 3.0.169
     version: 3.0.169(@nestjs/platform-express@10.4.18)(amqplib@0.10.8)(ioredis@5.6.1)(passport@0.7.0)(prisma@5.20.0)(reflect-metadata@0.1.14)(typescript@5.3.3)
+  '@stellar/stellar-sdk':
+    specifier: ^13.3.0
+    version: 13.3.0
   '@types/amqplib':
     specifier: ^0.10.6
     version: 0.10.7
@@ -125,12 +128,18 @@ dependencies:
   google-auth-library:
     specifier: ^9.15.1
     version: 9.15.1
+  google-libphonenumber:
+    specifier: ^3.2.42
+    version: 3.2.42
   google-spreadsheet:
     specifier: ^4.1.4
     version: 4.1.4(google-auth-library@9.15.1)
   hardhat:
     specifier: ^2.22.6
     version: 2.24.1(ts-node@10.9.1)(typescript@5.3.3)
+  helmet:
+    specifier: ^8.1.0
+    version: 8.1.0
   http-status-codes:
     specifier: ^2.3.0
     version: 2.3.0
@@ -140,6 +149,9 @@ dependencies:
   ioredis:
     specifier: ^5.3.2
     version: 5.6.1
+  nepali-number:
+    specifier: ^1.0.3
+    version: 1.0.3
   nest-winston:
     specifier: ^1.9.4
     version: 1.10.2(@nestjs/common@10.3.3)(winston@3.17.0)
@@ -253,6 +265,9 @@ devDependencies:
   '@swc/helpers':
     specifier: ~0.5.6
     version: 0.5.17
+  '@types/google-libphonenumber':
+    specifier: ^7.4.30
+    version: 7.4.30
   '@types/jest':
     specifier: ^29.5.12
     version: 29.5.14
@@ -7518,6 +7533,22 @@ packages:
       sodium-native: 4.3.3
     dev: false
 
+  /@stellar/stellar-sdk@13.3.0:
+    resolution: {integrity: sha512-8+GHcZLp+mdin8gSjcgfb/Lb6sSMYRX6Nf/0LcSJxvjLQR0XHpjGzOiRbYb2jSXo51EnA6kAV5j+4Pzh5OUKUg==}
+    engines: {node: '>=18.0.0'}
+    dependencies:
+      '@stellar/stellar-base': 13.1.0
+      axios: 1.9.0(debug@4.4.1)
+      bignumber.js: 9.3.0
+      eventsource: 2.0.2
+      feaxios: 0.0.23
+      randombytes: 2.1.0
+      toml: 3.0.0
+      urijs: 1.19.11
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
   /@swc-node/core@1.13.3(@swc/core@1.3.107)(@swc/types@0.1.21):
     resolution: {integrity: sha512-OGsvXIid2Go21kiNqeTIn79jcaX4l0G93X2rAnas4LFoDyA9wAwVK7xZdm+QsKoMn5Mus2yFLCc4OtX2dD/PWA==}
     engines: {node: '>= 10'}
@@ -7909,6 +7940,10 @@ packages:
       '@types/minimatch': 5.1.2
       '@types/node': 18.16.20
     dev: false
+
+  /@types/google-libphonenumber@7.4.30:
+    resolution: {integrity: sha512-Td1X1ayRxePEm6/jPHUBs2tT6TzW1lrVB6ZX7ViPGellyzO/0xMNi+wx5nH6jEitjznq276VGIqjK5qAju0XVw==}
+    dev: true
 
   /@types/graceful-fs@4.1.9:
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
@@ -11347,7 +11382,7 @@ packages:
   /dns-over-http-resolver@1.2.3(node-fetch@3.3.2):
     resolution: {integrity: sha512-miDiVSI6KSNbi4SVifzO/reD8rMnxgrlnkrlkugOLQpWQTe2qMdHsZp5DmfKjxNE+/T3VAAYLQUZMv9SMr6+AA==}
     dependencies:
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.4.1(supports-color@8.1.1)
       native-fetch: 3.0.0(node-fetch@3.3.2)
       receptacle: 1.3.2
     transitivePeerDependencies:
@@ -13157,6 +13192,11 @@ packages:
       - supports-color
     dev: false
 
+  /google-libphonenumber@3.2.42:
+    resolution: {integrity: sha512-60jm6Lu72WmlUJXUBJmmuZlHG2vDJ2gQ9pL5gcFsSe1Q4eigsm0Z1ayNHjMgqGUl0zey8JqKtO4QCHPV+5LCNQ==}
+    engines: {node: '>=0.10'}
+    dev: false
+
   /google-logging-utils@0.0.2:
     resolution: {integrity: sha512-NEgUnEcBiP5HrPzufUkBzJOD/Sxsco3rLNo1F1TNf7ieU8ryUzBhqba8r756CjLX7rn3fHl6iLEwPYuqpoKgQQ==}
     engines: {node: '>=14'}
@@ -13414,6 +13454,11 @@ packages:
 
   /heap@0.2.7:
     resolution: {integrity: sha512-2bsegYkkHO+h/9MGbn6KWcE45cHZgPANo5LXF7EvWdT0yT2EguSVO1nDgU5c8+ZOPwp2vMNa7YFsJhVcDR9Sdg==}
+    dev: false
+
+  /helmet@8.1.0:
+    resolution: {integrity: sha512-jOiHyAZsmnr8LqoPGmCjYAaiuWwjAPLgY8ZX2XrmHawt99/u1y6RgrZMTeoPfpUbV96HOalYgz1qzkRbw54Pmg==}
+    engines: {node: '>=18.0.0'}
     dev: false
 
   /hmac-drbg@1.0.1:
@@ -16573,6 +16618,10 @@ packages:
     resolution: {integrity: sha512-Z4SmBUweYa09+o6pG+eASabEpP6QkQ70yHj351pQoEXIs8uHbaU2DWVmzBANKgflPa47A50PtB2+NgRpQvr7vA==}
     engines: {node: '>= 10'}
     dev: true
+
+  /nepali-number@1.0.3:
+    resolution: {integrity: sha512-Vb6aMQM/xtE7KiiEhemgDcACxIMaDn18Ub/imWXB6JlhDwc2qVDnGW+sR0gDLPQmyiyk06bkKze1oK88FxWIjw==}
+    dev: false
 
   /nest-winston@1.10.2(@nestjs/common@10.3.3)(winston@3.17.0):
     resolution: {integrity: sha512-Z9IzL/nekBOF/TEwBHUJDiDPMaXUcFquUQOFavIRet6xF0EbuWnOzslyN/ksgzG+fITNgXhMdrL/POp9SdaFxA==}

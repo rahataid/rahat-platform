@@ -3,6 +3,7 @@ import { RpcException } from '@nestjs/microservices';
 import { CreateClaimDto } from '@rahataid/extensions';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
+import { englishToNepaliNumber } from 'nepali-number';
 import prabhu from './sms/prabhu';
 
 @Injectable()
@@ -61,13 +62,13 @@ export class OtpService {
     };
 
     private async createMessage(otp: string | number, amount: string | number) {
-        let message: string = await this.getFromSettings('message') || 'Hi, your OTP is ${otp} and the amount is ${amount}';
+        let message: string = await this.getFromSettings('message') || 'नमस्ते, तपाईंको ओ.टी.पी ${otp} हो र तपाईंलाई प्राप्त हुने रकम रू. ${amount} हो। धन्यवाद - राहत';
 
         if (message.includes('${amount}')) {
-            message = message.replace('${amount}', amount.toString());
+            message = message.replace('${amount}', englishToNepaliNumber(amount.toString()));
         }
         if (message.includes('${otp}')) {
-            message = message.replace('${otp}', otp.toString());
+            message = message.replace('${otp}', englishToNepaliNumber(otp.toString()));
         }
 
         return message;
