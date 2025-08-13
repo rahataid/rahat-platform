@@ -66,3 +66,8 @@ export enum DisbursementConditionType {
   APPROVER_SIGNATURE = 'APPROVER_SIGNATURE',
   SCHEDULED_TIME = 'SCHEDULED_TIME',
 }
+
+export enum WalletService {
+  INTERNAL = 'INTERNAL',
+  XCAPIT = 'XCAPIT'
+}

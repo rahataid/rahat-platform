@@ -3,7 +3,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { Beneficiary, WalletService } from '@prisma/client';
+import { Beneficiary } from '@prisma/client';
 import {
   AddToProjectDto,
   CreateBeneficiaryDto,
@@ -19,6 +19,7 @@ import {
   MicroserviceOptions,
   ProjectContants
 } from '@rahataid/sdk';
+import { WalletService } from '@rahataid/sdk/enums';
 import { PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import axios from 'axios';
 import { lastValueFrom } from 'rxjs';

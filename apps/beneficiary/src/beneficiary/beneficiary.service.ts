@@ -4,7 +4,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { Beneficiary, WalletService } from '@prisma/client';
+import { Beneficiary } from '@prisma/client';
 import {
   AddBenfGroupToProjectDto,
   AddBenToProjectDto,
@@ -28,6 +28,7 @@ import {
   ProjectContants,
   TPIIData
 } from '@rahataid/sdk';
+import { WalletService } from '@rahataid/sdk/enums';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
