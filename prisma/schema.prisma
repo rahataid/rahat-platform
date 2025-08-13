@@ -242,7 +242,7 @@ model Beneficiary {
   updatedAt      DateTime?      @updatedAt()
   deletedAt      DateTime?
   isVerified     Boolean        @default(false)
-  walletService  WalletService  @default(INTERNAL)
+  walletService  String         @default("INTERNAL")
 
   pii                  BeneficiaryPii?        @relation("BeneficiaryToPii")
   BeneficiaryProject   BeneficiaryProject[]
@@ -375,11 +375,6 @@ enum PhoneStatus {
   NO_PHONE
   FEATURE_PHONE
   SMART_PHONE
-}
-
-enum WalletService{
-  INTERNAL
-  XCAPIT
 }
 
 // ++++++++++++++++++ END: Rahat - Projects +++++++++++++++++++++++
