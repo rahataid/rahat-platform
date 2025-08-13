@@ -15,14 +15,14 @@ datasource db {
 
 // =================== User Module ==================
 model User {
-  id        Int     @id @default(autoincrement())
-  uuid      String  @unique @default(uuid())
-  name      String?
-  gender    Gender  @default(UNKNOWN)
-  email     String?
-  phone     String?
-  wallet    String?
-  extras    Json?   @db.JsonB()
+  id     Int     @id @default(autoincrement())
+  uuid   String  @unique @default(uuid())
+  name   String?
+  gender Gender  @default(UNKNOWN)
+  email  String?
+  phone  String?
+  wallet String?
+  extras Json?   @db.JsonB()
 
   Auth          Auth[]
   UserRole      UserRole[]
@@ -561,18 +561,18 @@ enum KoboBeneficiaryStatus {
 }
 
 model KoboBeneficiary {
-  id                       Int                    @id @default(autoincrement())
-  uuid                     String                 @unique @default(uuid()) @db.Uuid()
-  name                     String
-  gender                   Gender                 @default(UNKNOWN)
-  type                     KoboBeneficiaryType    @default(SALE)
-  status                   KoboBeneficiaryStatus  @default(PENDING)
-  phone                    String
-  age                      Int?
-  email                    String?
-  wallet                   String?
-  leadInterests            String[]
-  extras                    Json?                  @db.JsonB()
+  id            Int                   @id @default(autoincrement())
+  uuid          String                @unique @default(uuid()) @db.Uuid()
+  name          String
+  gender        Gender                @default(UNKNOWN)
+  type          KoboBeneficiaryType   @default(SALE)
+  status        KoboBeneficiaryStatus @default(PENDING)
+  phone         String
+  age           Int?
+  email         String?
+  wallet        String?
+  leadInterests String[]
+  extras        Json?                 @db.JsonB()
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -666,7 +666,7 @@ model OfframpRequest {
   amount        Float
   requestId     String?             @unique
   escrowAddress String?
-  status        String       @default("PENDING")
+  status        String              @default("PENDING")
   transaction   OfframpTransaction? @relation("RequestTransaction")
   extras        Json?               @db.JsonB()
   createdAt     DateTime            @default(now())
@@ -688,7 +688,7 @@ model OfframpTransaction {
   chain          String?
   token          String?
   referenceId    String?
-  status         String  @default("PENDING")
+  status         String         @default("PENDING")
   extras         Json?          @db.JsonB()
   createdAt      DateTime       @default(now())
   updatedAt      DateTime?      @updatedAt()
