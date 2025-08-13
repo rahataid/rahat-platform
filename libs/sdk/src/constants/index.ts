@@ -232,6 +232,7 @@ export const MS_ACTIONS = {
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
+      GET_MAP_LOCATION: 'aaProject.stats.getMapLocation',
       GET_ONE: 'aaProject.stats.getOne',
     },
     DAILY_MONITORING: {
