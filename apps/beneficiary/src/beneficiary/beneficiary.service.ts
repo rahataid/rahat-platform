@@ -4,7 +4,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { Beneficiary } from '@prisma/client';
+import { Beneficiary, WalletService } from '@prisma/client';
 import {
   AddBenfGroupToProjectDto,
   AddBenToProjectDto,
@@ -44,7 +44,8 @@ import { VerificationService } from './verification.service';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 const BATCH_SIZE = 20;
-
+const useExternalWallet = process.env.USE_EXTERNAL_WALLET;
+const externalWalletService = process.env.EXTERNAL_WALLET_SERVICE;
 
 @Injectable()
 export class BeneficiaryService {
@@ -350,10 +351,16 @@ export class BeneficiaryService {
 
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
     const { piiData, projectUUIDs, ...data } = dto;
-    let { walletAddress } = data;
-    walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(
-      walletAddress
-    );
+    let { walletAddress, walletService } = data;
+
+    if (useExternalWallet === 'true' && externalWalletService === WalletService.XCAPIT) {
+      walletAddress = `xcapit-${piiData?.name?.toLowerCase().split(' ').join('-')}`;
+      walletService = WalletService.XCAPIT;
+    } else {
+      walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(
+        walletAddress
+      );
+    }
 
     if (!piiData.phone) throw new RpcException('Phone number is required');
     await this.beneficiaryUtilsService.ensureUniquePhone(
@@ -362,7 +369,7 @@ export class BeneficiaryService {
 
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const createdBeneficiary = await this.rsprisma.beneficiary.create({
-      data: { ...data, walletAddress },
+      data: { ...data, walletAddress, walletService },
     });
 
     await this.beneficiaryUtilsService.addPIIData(
