@@ -3,7 +3,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { Beneficiary } from '@prisma/client';
+import { Beneficiary, WalletService } from '@prisma/client';
 import {
   AddToProjectDto,
   CreateBeneficiaryDto,
@@ -17,9 +17,10 @@ import {
   BeneficiaryPayload,
   generateRandomWallet,
   MicroserviceOptions,
-  ProjectContants,
+  ProjectContants
 } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService } from '@rumsan/prisma';
+import axios from 'axios';
 import { lastValueFrom } from 'rxjs';
 import { isAddress } from 'viem';
 
@@ -28,7 +29,7 @@ export class BeneficiaryUtilsService {
   constructor(
     private readonly prismaService: PrismaService,
     private eventEmitter: EventEmitter2,
-    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
+    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
   ) { }
 
   buildWhereClause(dto: ListBeneficiaryDto): Record<string, any> {
@@ -155,6 +156,18 @@ export class BeneficiaryUtilsService {
       if (!projectData) return;
       if (!beneficiaryData) throw new RpcException('Beneficiary not Found.');
 
+      let beneficiary: Beneficiary;
+
+      if (beneficiaryData?.walletService === WalletService.XCAPIT) {
+        const res = await this.generateXcapitSmartWallet(beneficiaryData?.pii?.phone);
+        beneficiary = await this.prismaService.beneficiary.update({
+          where: { uuid: beneficiaryId },
+          data: { walletAddress: res.address }
+        })
+      } else {
+        beneficiary = beneficiaryData;
+      }
+
       //Build Project Payload
       const projectPayload = this.buildProjectPayload(
         projectData,
@@ -187,6 +200,39 @@ export class BeneficiaryUtilsService {
       });
     } catch (e) {
       console.log('Error in assigning beneficiary to project:', e);
+    }
+  }
+
+  private async generateXcapitSmartWallet(phoneNumber: string) {
+    const xcapit = await this.prismaService.setting.findUnique({
+      where: { name: WalletService.XCAPIT },
+    });
+
+    if (!xcapit) {
+      throw new RpcException("XCAPIT setting not found");
+    }
+
+    const { URL, TOKEN } = xcapit.value as { URL: string; TOKEN: string };
+
+    if (!URL || !TOKEN || !phoneNumber) {
+      throw new RpcException('Missing XCAPIT_URL or XCAPIT_TOKEN or phoneNumber');
+    }
+
+    try {
+      const { data } = await axios.post(
+        `${URL}/api/beneficiaries`,
+        { phoneNumber },
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      return data;
+    } catch (error) {
+      throw new RpcException(`Unexpected Error: ${error.message}`);
     }
   }
 
