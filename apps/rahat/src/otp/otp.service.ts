@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { CreateClaimDto } from '@rahataid/extensions';
+import { BulkOtpDto, CreateClaimDto } from '@rahataid/extensions';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
+import { englishToNepaliNumber } from 'nepali-number';
 import prabhu from './sms/prabhu';
 
 @Injectable()
@@ -45,6 +46,39 @@ export class OtpService {
         return { otp };
     }
 
+    async sendBulkOtp(data: BulkOtpDto) {
+        const results = [];
+
+        this.logger.log(`Starting bulk OTP send for ${data.requests.length} requests`);
+
+        for (const request of data.requests) {
+            try {
+                const result = await this.addOtpToClaim(request);
+                this.logger.log(`OTP Sent to phone number: ${request.phoneNumber}`);
+                results.push({
+                    phoneNumber: request.phoneNumber,
+                    success: true,
+                    otp: result.otp
+                });
+            } catch (error) {
+                this.logger.error(`Failed to send OTP to ${request.phoneNumber}: ${error.message}`);
+                results.push({
+                    phoneNumber: request.phoneNumber,
+                    success: false,
+                    error: error.message
+                });
+            }
+        }
+
+        this.logger.log(`Bulk OTP send completed. Success: ${results.filter(r => r.success).length}, Failed: ${results.filter(r => !r.success).length}`);
+        return {
+            total: data.requests.length,
+            success: results.filter(r => r.success).length,
+            failed: results.filter(r => !r.success).length,
+            results: results
+        };
+    }
+
     private async getOtp() {
         return Math.floor(1000 + Math.random() * 9000).toString()
     }
@@ -61,13 +95,13 @@ export class OtpService {
     };
 
     private async createMessage(otp: string | number, amount: string | number) {
-        let message: string = await this.getFromSettings('message') || 'Hi, your OTP is ${otp} and the amount is ${amount}';
+        let message: string = await this.getFromSettings('message') || 'नमस्ते, तपाईंको ओ.टी.पी ${otp} हो र तपाईंलाई प्राप्त हुने रकम रू. ${amount} हो। धन्यवाद - राहत';
 
         if (message.includes('${amount}')) {
-            message = message.replace('${amount}', amount.toString());
+            message = message.replace('${amount}', englishToNepaliNumber(amount.toString()));
         }
         if (message.includes('${otp}')) {
-            message = message.replace('${otp}', otp.toString());
+            message = message.replace('${otp}', englishToNepaliNumber(otp.toString()));
         }
 
         return message;

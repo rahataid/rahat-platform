@@ -52,6 +52,7 @@ export const MS_TRIGGERS_JOBS = {
     UPDATE: 'ms.jobs.activities.update',
     UPDATE_STATUS: 'ms.jobs.activities.updateStatus',
     COMMUNICATION: {
+      GET_COMMS: 'ms.jobs.activities.getComms',
       TRIGGER: 'ms.jobs.activity.communication.trigger',
       SESSION_LOGS: 'ms.jobs.activities.communication.sessionLogs',
       // RETRY_FAILED: 'ms.jobs.activities.communication.retryFailed',
@@ -411,6 +412,19 @@ export const msTriggerActions: ProjectActionFunc = {
 
     return sendCommand(
       { cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.TRIGGER },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.GET_COMMS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.GET_COMMS },
       payload
     );
   },

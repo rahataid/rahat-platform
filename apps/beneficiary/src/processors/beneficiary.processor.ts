@@ -443,7 +443,7 @@ export class BeneficiaryProcessor {
         return;
       }
 
-      const benfExtras = JSON.parse(JSON.stringify(benf.extras));
+      const benfExtras = benf.extras ? JSON.parse(JSON.stringify(benf.extras)) : {};
 
       if (!phone) {
         this.logger.error(`No phone number for beneficiary: ${uuid}`);

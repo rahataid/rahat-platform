@@ -67,12 +67,14 @@ export const JOBS = {
     GET_ALL_TOKEN_RESERVATION: 'aa.jobs.beneficiary.getAllTokenReservation',
     GET_ONE_TOKEN_RESERVATION: 'aa.jobs.beneficiary.getOneTokenReservation',
     GET_RESERVATION_STATS: 'aa.jobs.beneficiary.getReservationStats',
+    GET_REDEEM_INFO: 'aa.jobs.beneficiary.getRedeemInfo',
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget',
   },
   STATS: {
     GET_ALL: 'aa.jobs.stats.getAll',
+    GET_MAP_LOCATION: 'aa.jobs.stats.getMapLocation',
     GET_ONE: 'aa.jobs.stats.getOne',
   },
   DAILY_MONITORING: {
@@ -119,7 +121,20 @@ export const JOBS = {
       'aa.jobs.payout.triggerOneFailedPayoutRequest',
     GET_PAYOUT_LOGS: 'aa.jobs.payout.getPayoutLogs',
     GET_PAYOUT_LOG: 'aa.jobs.payout.getPayoutLog',
+    GET_PAYOUT_DETAILS: 'aa.jobs.payout.getPayoutDetails',
     EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+  },
+  VENDOR: {
+    // Remove after test
+    TEST_OFFLINE_PAYOUT: 'aa.jobs.vendor.test_offline_payout',
+    TOKEN_REDEMPTION: {
+      CREATE: 'aa.jobs.vendor.token_redemption.create',
+      GET: 'aa.jobs.vendor.token_redemption.get',
+      UPDATE_STATUS: 'aa.jobs.vendor.token_redemption.update_status',
+      LIST: 'aa.jobs.vendor.token_redemption.list',
+      GET_VENDOR_REDEMPTIONS: 'aa.jobs.vendor.token_redemption.get_vendor_redemptions',
+      GET_STATS: 'aa.jobs.vendor.token_redemption.get_stats',
+    },
   },
   CHAIN: {
     DISBURSE: 'jobs.chain.disburse',

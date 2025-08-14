@@ -230,9 +230,11 @@ export const MS_ACTIONS = {
       GET_ONE_TOKEN_RESERVATION:
         'aaProject.beneficiary.get_one_token_reservation',
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats',
+      GET_REDEEM_INFO: 'aaProject.beneficiary.getRedeemInfo',
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
+      GET_MAP_LOCATION: 'aaProject.stats.getMapLocation',
       GET_ONE: 'aaProject.stats.getOne',
     },
     DAILY_MONITORING: {
@@ -287,8 +289,20 @@ export const MS_ACTIONS = {
       GET_PAYOUT_LOGS: 'aa.payout.getPayoutLogs',
       GET_PAYOUT_LOG: 'aa.payout.getPayoutLog',
       GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
+      GET_PAYOUT_DETAILS: 'aa.payout.getPayoutDetails',
       EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
-
+    },
+    VENDOR: {
+      // Remove after test
+      TEST_OFFLINE_PAYOUT: 'aaProject.vendor.testOfflinePayout',
+      TOKEN_REDEMPTION: {
+        CREATE: 'aa.vendor.token_redemption.create',
+        GET: 'aa.vendor.token_redemption.get',
+        UPDATE_STATUS: 'aa.vendor.token_redemption.update_status',
+        LIST: 'aa.vendor.token_redemption.list',
+        GET_VENDOR_REDEMPTIONS: 'aa.vendor.token_redemption.get_vendor_redemptions',
+        GET_STATS: 'aa.vendor.token_redemption.get_stats',
+      },
     },
   },
   C2CProject: {
@@ -463,6 +477,7 @@ export const MS_ACTIONS = {
     UPDATE_STATUS: 'ms.activities.updateStatus',
     LIST_PROJECT_SPECIFIC: 'ms.activities.listProjectSpecific',
     COMMUNICATION: {
+      GET_COMMS: 'ms.activities.getComms',
       TRIGGER: 'ms.activities.communication.trigger',
       SESSION_LOGS: 'ms.activities.communication.sessionLogs',
       RETRY_FAILED: 'ms.activities.communication.retryFailed',
@@ -491,7 +506,12 @@ export const MS_ACTIONS = {
     CREATE: 'notification.create',
     LIST: 'notification.list',
     GET: 'notification.get',
-  }
+  },
+
+  OTP: {
+    SEND_OTP: 'otp.sendOtp',
+    SEND_BULK_OTP: 'otp.sendBulkOtp',
+  },
 };
 
 export const RABBIT_MQ = {
