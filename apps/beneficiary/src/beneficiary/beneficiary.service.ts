@@ -42,6 +42,7 @@ import { createBatches } from '../utils/array';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
+import { XcapitUtilsService } from './xcapit.utils.service';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 const BATCH_SIZE = 20;
@@ -58,7 +59,8 @@ export class BeneficiaryService {
     private readonly beneficiaryQueue: Queue,
     private eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
-    private readonly beneficiaryUtilsService: BeneficiaryUtilsService
+    private readonly beneficiaryUtilsService: BeneficiaryUtilsService,
+    private readonly xcapitService: XcapitUtilsService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -570,29 +572,43 @@ export class BeneficiaryService {
     );
   }
 
-  async bulkAssignToProject(dto) {
+  async bulkAssignToProject(dto: { beneficiaryIds: string[], projectId: string }) {
     const { beneficiaryIds, projectId } = dto;
-    const projectPayloads = [];
-    const benProjectData = [];
 
-    await Promise.all(
-      beneficiaryIds.map(async (beneficiaryId) => {
-        const beneficiaryData = await this.rsprisma.beneficiary.findUnique({
-          where: { uuid: beneficiaryId },
-        });
-        const projectPayload = {
-          uuid: beneficiaryData.uuid,
-          walletAddress: beneficiaryData.walletAddress,
-          extras: beneficiaryData?.extras || null,
-          type: BeneficiaryConstants.Types.ENROLLED,
-        };
-        benProjectData.push({
-          projectId,
-          beneficiaryId,
-        });
-        projectPayloads.push(projectPayload);
-      })
-    );
+    let benfs: Beneficiary[] = [];
+
+    const beneficiaries = await this.prisma.beneficiary.findMany({
+      where: { uuid: { in: beneficiaryIds } },
+      include: { pii: true }
+    })
+
+    if (beneficiaries.length > 0 && externalWalletService === WalletService.XCAPIT) {
+      const benfsPhoneNumber = beneficiaries.map((ben) => ({
+        phoneNumber: ben.pii?.phone,
+      }));
+
+      const res = await this.xcapitService.bulkGenerateXcapitWallet(benfsPhoneNumber);
+      benfs = await Promise.all(
+        res.map((xBen) => {
+          const match = beneficiaries.find((b) => b.pii.phone === xBen.phoneNumber)
+          return this.prisma.beneficiary.update({
+            where: { uuid: match.uuid },
+            data: { walletAddress: xBen.walletAddress }
+          })
+        })
+      )
+    } else {
+      benfs = beneficiaries
+    }
+
+    const projectPayloads = beneficiaries?.map((ben) => ({
+      uuid: ben.uuid,
+      walletAddress: ben.walletAddress,
+      extras: ben?.extras || null,
+      type: BeneficiaryConstants.Types.ENROLLED,
+    }))
+
+    const benProjectData = beneficiaries?.map((ben) => ({ projectId, beneficiaryId: ben.uuid }))
 
     //2.Save beneficiary to project
     await this.prisma.beneficiaryProject.createMany({
