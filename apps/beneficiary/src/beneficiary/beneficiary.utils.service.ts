@@ -21,9 +21,9 @@ import {
 } from '@rahataid/sdk';
 import { WalletService } from '@rahataid/sdk/enums';
 import { PaginatorTypes, PrismaService } from '@rumsan/prisma';
-import axios from 'axios';
 import { lastValueFrom } from 'rxjs';
 import { isAddress } from 'viem';
+import { XcapitUtilsService } from './xcapit.utils.service';
 
 @Injectable()
 export class BeneficiaryUtilsService {
@@ -31,6 +31,7 @@ export class BeneficiaryUtilsService {
     private readonly prismaService: PrismaService,
     private eventEmitter: EventEmitter2,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
+    private readonly xcapitService: XcapitUtilsService
   ) { }
 
   buildWhereClause(dto: ListBeneficiaryDto): Record<string, any> {
@@ -160,7 +161,7 @@ export class BeneficiaryUtilsService {
       let beneficiary: Beneficiary;
 
       if (beneficiaryData?.walletService === WalletService.XCAPIT) {
-        const res = await this.generateXcapitSmartWallet(beneficiaryData?.pii?.phone);
+        const res = await this.xcapitService.generateXCapitWallet(beneficiaryData?.pii?.phone);
         beneficiary = await this.prismaService.beneficiary.update({
           where: { uuid: beneficiaryId },
           data: { walletAddress: res.address }
@@ -204,38 +205,6 @@ export class BeneficiaryUtilsService {
     }
   }
 
-  private async generateXcapitSmartWallet(phoneNumber: string) {
-    const xcapit = await this.prismaService.setting.findUnique({
-      where: { name: WalletService.XCAPIT },
-    });
-
-    if (!xcapit) {
-      throw new RpcException("XCAPIT setting not found");
-    }
-
-    const { URL, TOKEN } = xcapit.value as { URL: string; TOKEN: string };
-
-    if (!URL || !TOKEN || !phoneNumber) {
-      throw new RpcException('Missing XCAPIT_URL or XCAPIT_TOKEN or phoneNumber');
-    }
-
-    try {
-      const { data } = await axios.post(
-        `${URL}/api/beneficiaries`,
-        { phoneNumber },
-        {
-          headers: {
-            Authorization: `Bearer ${TOKEN}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-
-      return data;
-    } catch (error) {
-      throw new RpcException(`Unexpected Error: ${error.message}`);
-    }
-  }
 
   private buildProjectPayload(projectData: any, beneficiaryData: any) {
     const payload: BeneficiaryPayload = {
