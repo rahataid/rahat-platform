@@ -740,6 +740,7 @@ model Notification {
   description    String
   group          String 
   createdAt      DateTime       @default(now())   
+  notify         Boolean        @default(false)
 
   @@map("tbl_notifications")
 }

@@ -4,6 +4,7 @@ export const APP_JOBS = {
   EMAIL: 'email',
   SLACK: 'slack',
   OTP: 'otp',
+  NOTIFY: 'notify'
 };
 
 export const MS_TIMEOUT = 500000;
@@ -18,6 +19,7 @@ export const BQUEUE = {
 
 export const UserRoles = {
   ADMIN: 'Admin',
+  MANAGER: 'Manager',
   USER: 'User',
   VENDOR: 'Vendor',
 };

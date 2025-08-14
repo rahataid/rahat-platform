@@ -33,4 +33,11 @@ export class CreateNotificationDto {
     @IsString()
     @IsNotEmpty()
     group: string;
+
+    @ApiPropertyOptional({
+        example: true,
+        description: 'Flag to send notification via any channel (email, etc). Optional. Default is false.'
+    })
+    @IsOptional()
+    notify?: boolean;
 }
