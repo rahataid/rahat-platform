@@ -59,8 +59,8 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_PHONE })
-  async getBeneficiaryByPhone(phone: string) {
-    return this.service.findOneByPhone(phone);
+  async getBeneficiaryByPhone(payload: { phone: string, projectUUID: string }) {
+    return this.service.findOneByPhone(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
@@ -257,6 +257,10 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP_BY_PROJECT })
   async getOneGroupByProject(uuid: UUID) {
     return this.service.getOneGroupByProject(uuid);
+  }
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_GROUP_BY_UUID })
+  async listGroupByUuid(uuid: UUID[]) {
+    return this.service.listGroupByUUid(uuid);
   }
 
   @MessagePattern({

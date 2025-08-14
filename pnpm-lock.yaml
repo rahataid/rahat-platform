@@ -117,7 +117,7 @@ importers:
         version: 0.14.1
       dotenv:
         specifier: ^16.4.5
-        version: 16.4.7
+        version: 16.5.0
       dotenv-cli:
         specifier: ^7.3.0
         version: 7.4.4
@@ -259,7 +259,7 @@ importers:
         version: 1.6.8(@swc/core@1.3.107(@swc/helpers@0.5.15))(@swc/types@0.1.21)(typescript@5.3.3)
       '@swc/core':
         specifier: ~1.3.107
-        version: 1.3.107(@swc/helpers@0.5.15)
+        version: 1.3.107(@swc/helpers@0.5.17)
       '@swc/helpers':
         specifier: ~0.5.6
         version: 0.5.15
@@ -302,6 +302,9 @@ importers:
       prettier:
         specifier: ^2.8.8
         version: 2.8.8
+      prisma:
+        specifier: 5.22.0
+        version: 5.22.0
       supertest:
         specifier: ^7.0.0
         version: 7.1.0
@@ -2057,12 +2060,21 @@ packages:
     engines: { node: '>=14' }
     hasBin: true
 
+  '@ethereumjs/rlp@5.0.2':
+    resolution: {integrity: sha512-DziebCdg4JpGlEqEdGgXmjqcFoJi+JGulUXwEjsZGAscAQ7MyD/7LE/GVCP29vEQxKc7AAwjT3A2ywHp2xfoCA==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   '@ethereumjs/util@8.1.0':
     resolution:
       {
         integrity: sha512-zQ0IqbdX8FZ9aw11vP+dZkKDkS+kgIvQPHnSAXzP9pLu+Rfu3D3XEeLbicvoXJTYnhZiPmsZUxgdzXwNKxRPbA==,
       }
     engines: { node: '>=14' }
+
+  '@ethereumjs/util@9.1.0':
+    resolution: {integrity: sha512-XBEKsYqLGXLah9PNJbgdkigthkG7TAGvlD/sH12beMXEyHDyigfcbdvHhmLyDWgDyOJn4QwiQUaF7yeuhnjdog==}
+    engines: {node: '>=18'}
 
   '@ethersproject/abi@5.0.7':
     resolution:
@@ -2820,6 +2832,19 @@ packages:
       {
         integrity: sha512-vaLg1ZgwhG29BuLDxPA9OAcIlgqzp9/N8iG0wGapyUNTf4IY4O6zAHgN6QalwLhFxq7nOI021vdRojR1oF3bqg==,
       }
+    peerDependencies:
+      class-transformer: '*'
+      class-validator: '*'
+      reflect-metadata: ^0.1.12 || ^0.2.0
+      rxjs: ^7.1.0
+    peerDependenciesMeta:
+      class-transformer:
+        optional: true
+      class-validator:
+        optional: true
+
+  '@nestjs/common@10.4.17':
+    resolution: {integrity: sha512-NKzPA4Tb35XjlxizsT8KZb3CCX8tNKj5EnsXsTl/gZX//uAWccBsqB8BjU69x/u4/kQ0106/Kt6PP+yrHAez0w==}
     peerDependencies:
       class-transformer: '*'
       class-validator: '*'
@@ -4645,6 +4670,13 @@ packages:
         integrity: sha512-H+hs1lw3Yc1NfwG0b7F7YmVjxQZ31NO2+6zx+I+9XabHxdwPKjvYJnkKKXr7bSItgm2AFrfOn5+3veB6W4iauw==,
       }
     engines: { node: '>=16', pnpm: '>=8.6.0' }
+
+  '@tokenizer/inflate@0.2.7':
+    resolution: {integrity: sha512-MADQgmZT1eKjp06jpI2yozxaU9uVs4GzzgSL+uEq7bVcJ9V1ZXQkeGNql1fsSI0gMy1vhvNTNbUqrx+pZfJVmg==}
+    engines: {node: '>=18'}
+
+  '@tokenizer/token@0.3.0':
+    resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
 
   '@trysound/sax@0.2.0':
     resolution:
@@ -7380,6 +7412,10 @@ packages:
       }
     engines: { node: '>= 0.8.0' }
 
+  compression@1.8.0:
+    resolution: {integrity: sha512-k6WLKfunuqCYD3t6AsuPGvQWaKwuLLh2/xHNcX4qE+vIfDNXpSqnrhwA7O53R7WVQUnt8dVAIW+YHr7xTgOgGA==}
+    engines: {node: '>= 0.8.0'}
+
   concat-map@0.0.1:
     resolution:
       {
@@ -9127,6 +9163,10 @@ packages:
       }
     engines: { node: ^10.12.0 || >=12.0.0 }
 
+  file-type@20.4.1:
+    resolution: {integrity: sha512-hw9gNZXUfZ02Jo0uafWLaFVPter5/k2rfcrjFJJHX/77xtSDOfJuEFb6oKlFV86FLP1SuyHMW1PSk0U9M5tKkQ==}
+    engines: {node: '>=18'}
+
   filelist@1.0.4:
     resolution:
       {
@@ -9334,6 +9374,10 @@ packages:
         integrity: sha512-Rx/WycZ60HOaqLKAi6cHRKKI7zxWbJ31MhntmtwMoaTeF7XFH9hhBp8vITaMidfljRQ6eYWCKkaTK+ykVJHP2A==,
       }
     engines: { node: '>= 0.8' }
+
+  fresh@2.0.0:
+    resolution: {integrity: sha512-Rx/WycZ60HOaqLKAi6cHRKKI7zxWbJ31MhntmtwMoaTeF7XFH9hhBp8vITaMidfljRQ6eYWCKkaTK+ykVJHP2A==}
+    engines: {node: '>= 0.8'}
 
   from@0.1.7:
     resolution:
@@ -12065,11 +12109,17 @@ packages:
       }
     engines: { node: '>= 0.6' }
 
+  micro-eth-signer@0.14.0:
+    resolution: {integrity: sha512-5PLLzHiVYPWClEvZIXXFu5yutzpadb73rnQCpUqIHu3No3coFuWQNfE5tkBQJ7djuLYl6aRLaS0MgWJYGoqiBw==}
+
   micro-ftch@0.3.1:
     resolution:
       {
         integrity: sha512-/0LLxhzP0tfiR5hcQebtudP56gUurs2CLkGarnCiB/OqEyUFQ6U3paQi/tgLv0hBJYt2rnr9MNpxz4fiiugstg==,
       }
+
+  micro-packed@0.7.2:
+    resolution: {integrity: sha512-HJ/u8+tMzgrJVAl6P/4l8KGjJSA3SCZaRb1m4wpbovNScCSmVOGUYbkkcoPPcknCHWPpRAdjy+yqXqyQWf+k8g==}
 
   micromatch@4.0.8:
     resolution:
@@ -12105,6 +12155,10 @@ packages:
         integrity: sha512-xRc4oEhT6eaBpU1XF7AjpOFD+xQmXNB5OVKwp4tqCuBpHLS/ZbBDrc07mYTDqVMg6PfxUjjNp85O6Cd2Z/5HWA==,
       }
     engines: { node: '>= 0.6' }
+
+  mime-types@3.0.1:
+    resolution: {integrity: sha512-xRc4oEhT6eaBpU1XF7AjpOFD+xQmXNB5OVKwp4tqCuBpHLS/ZbBDrc07mYTDqVMg6PfxUjjNp85O6Cd2Z/5HWA==}
+    engines: {node: '>= 0.6'}
 
   mime@1.6.0:
     resolution:
@@ -12861,6 +12915,10 @@ packages:
       }
     engines: { node: '>=6.0.0' }
 
+  nodemailer@6.10.1:
+    resolution: {integrity: sha512-Z+iLaBGVaSjbIzQ4pX6XV41HrooLsQ10ZWPUehGmuantvzWoDVBnmsdUcOIDM1t+yPor5pDhVlDESgOMEGxhHA==}
+    engines: {node: '>=6.0.0'}
+
   nodemailer@6.9.16:
     resolution:
       {
@@ -13513,6 +13571,10 @@ packages:
         integrity: sha512-XIxfHpEuSJbITd1H3EeQwpcZbTLHc+VVr8ANI9t5sit565tsI4/xK3KWTUFE2e6QiangUkh3B0jihzmGnNrRsQ==,
       }
 
+  peek-readable@7.0.0:
+    resolution: {integrity: sha512-nri2TO5JE3/mRryik9LlHFT53cgHfRK0Lt0BAZQXku/AW3E6XLt2GaY8siWi7dvW/m1z0ecn+J+bpDa9ZN3IsQ==}
+    engines: {node: '>=18'}
+
   peek-stream@1.1.3:
     resolution:
       {
@@ -13597,6 +13659,49 @@ packages:
       {
         integrity: sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug==,
       }
+
+  pg-cloudflare@1.1.1:
+    resolution: {integrity: sha512-xWPagP/4B6BgFO+EKz3JONXv3YDgvkbVrGw2mTo3D6tVDQRh1e7cqVGvyR3BE+eQgAvx1XhW/iEASj4/jCWl3Q==}
+
+  pg-connection-string@2.7.0:
+    resolution: {integrity: sha512-PI2W9mv53rXJQEOb8xNR8lH7Hr+EKa6oJa38zsK0S/ky2er16ios1wLKhZyxzD7jUReiWokc9WK5nxSnC7W1TA==}
+
+  pg-format@1.0.4:
+    resolution: {integrity: sha512-YyKEF78pEA6wwTAqOUaHIN/rWpfzzIuMh9KdAhc3rSLQ/7zkRFcCgYBAEGatDstLyZw4g0s9SNICmaTGnBVeyw==}
+    engines: {node: '>=4.0'}
+
+  pg-int8@1.0.1:
+    resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
+    engines: {node: '>=4.0.0'}
+
+  pg-listen@1.7.0:
+    resolution: {integrity: sha512-MKDwKLm4ryhy7iq1yw1K1MvUzBdTkaT16HZToddX9QaT8XSdt3Kins5mYH6DLECGFzFWG09VdXvWOIYogjXrsg==}
+    peerDependencies:
+      pg: 7.x || 8.x
+
+  pg-pool@3.8.0:
+    resolution: {integrity: sha512-VBw3jiVm6ZOdLBTIcXLNdSotb6Iy3uOCwDGFAksZCXmi10nyRvnP2v3jl4d+IsLYRyXf6o9hIm/ZtUzlByNUdw==}
+    peerDependencies:
+      pg: '>=8.0'
+
+  pg-protocol@1.8.0:
+    resolution: {integrity: sha512-jvuYlEkL03NRvOoyoRktBK7+qU5kOvlAwvmrH8sr3wbLrOdVWsRxQfz8mMy9sZFsqJ1hEWNfdWKI4SAmoL+j7g==}
+
+  pg-types@2.2.0:
+    resolution: {integrity: sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==}
+    engines: {node: '>=4'}
+
+  pg@8.14.1:
+    resolution: {integrity: sha512-0TdbqfjwIun9Fm/r89oB7RFQ0bLgduAhiIqIXOsyKoiC/L54DbuAAzIEN/9Op0f1Po9X7iCPXGoa/Ah+2aI8Xw==}
+    engines: {node: '>= 8.0.0'}
+    peerDependencies:
+      pg-native: '>=3.0.1'
+    peerDependenciesMeta:
+      pg-native:
+        optional: true
+
+  pgpass@1.0.5:
+    resolution: {integrity: sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug==}
 
   picocolors@1.1.1:
     resolution:
@@ -14118,6 +14223,22 @@ packages:
         integrity: sha512-lepCE8QU0izagxxA31O/MHj8IUguwLlpqeVK7A8vHK401FPvN/PTIzWHm29c/L3j3kTUE7dhZbq8vvbyQ7S2Bw==,
       }
     engines: { node: '>= 16' }
+
+  postgres-array@2.0.0:
+    resolution: {integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==}
+    engines: {node: '>=4'}
+
+  postgres-bytea@1.0.0:
+    resolution: {integrity: sha512-xy3pmLuQqRBZBXDULy7KbaitYqLcmxigw14Q5sj8QBVLqEwXfeybIKVWiqAXTlcvdvb0+xkOtDbfQMOf4lST1w==}
+    engines: {node: '>=0.10.0'}
+
+  postgres-date@1.0.7:
+    resolution: {integrity: sha512-suDmjLVQg78nMK2UZ454hAG+OAW+HQPZ6n++TNDUX+L0+uUlLywnoxJKDou51Zm+zTCjrCl0Nq6J9C5hP9vK/Q==}
+    engines: {node: '>=0.10.0'}
+
+  postgres-interval@1.2.0:
+    resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
+    engines: {node: '>=0.10.0'}
 
   prelude-ls@1.1.2:
     resolution:
@@ -14963,6 +15084,9 @@ packages:
         integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==,
       }
 
+  rxjs@7.8.2:
+    resolution: {integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==}
+
   safe-buffer@5.1.2:
     resolution:
       {
@@ -15158,6 +15282,11 @@ packages:
         integrity: sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA==,
       }
     engines: { node: '>=10' }
+    hasBin: true
+
+  semver@7.7.1:
+    resolution: {integrity: sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA==}
+    engines: {node: '>=10'}
     hasBin: true
 
   send@0.19.0:
@@ -15846,6 +15975,10 @@ packages:
     engines: { node: '>=4' }
     hasBin: true
 
+  strtok3@10.2.2:
+    resolution: {integrity: sha512-Xt18+h4s7Z8xyZ0tmBoRmzxcop97R4BAh+dXouUDCYn+Em+1P3qpkUfI5ueWLT8ynC5hZ+q4iPEmGG1urvQGBg==}
+    engines: {node: '>=18'}
+
   style-loader@3.3.4:
     resolution:
       {
@@ -16506,6 +16639,10 @@ packages:
       }
     engines: { node: '>=16' }
 
+  type-fest@4.40.0:
+    resolution: {integrity: sha512-ABHZ2/tS2JkvH1PEjxFDTUWC8dB5OsIGZP4IFLhR293GqT5Y5qB1WwL2kMPYhQW9DVgVD8Hd7I8gjwPIf5GFkw==}
+    engines: {node: '>=16'}
+
   type-is@1.6.18:
     resolution:
       {
@@ -16533,6 +16670,9 @@ packages:
       {
         integrity: sha512-Tfay0l6gJMP5rkil8CzGbLthukn+9BN/VXWcABVFPjOoelJ+koW8BuPZYk+h/L+lEeIp1fSzVRiWRPIjKVjPdg==,
       }
+
+  typed-emitter@0.1.0:
+    resolution: {integrity: sha512-Tfay0l6gJMP5rkil8CzGbLthukn+9BN/VXWcABVFPjOoelJ+koW8BuPZYk+h/L+lEeIp1fSzVRiWRPIjKVjPdg==}
 
   typedarray@0.0.6:
     resolution:
@@ -16582,6 +16722,10 @@ packages:
         integrity: sha512-u3xV3X7uzvi5b1MncmZo3i2Aw222Zk1keqLA1YkHldREkAhAqi65wuPfe7lHx8H/Wzy+8CE7S7uS3jekIM5s8g==,
       }
     engines: { node: '>=8' }
+
+  uint8array-extras@1.4.0:
+    resolution: {integrity: sha512-ZPtzy0hu4cZjv3z5NW9gfKnNLjoz4y6uv4HlelAjDK7sY/xOkKZv9xK/WQpcsBB3jEybChz9DPC2U/+cusjJVQ==}
+    engines: {node: '>=18'}
 
   uint8arrays@2.1.10:
     resolution:
@@ -16834,6 +16978,10 @@ packages:
         integrity: sha512-c1Q0mCiPlgdTVVVIJIrBuxNicYE+t/7oKeI9MWLj3fh/uq2Pxh/3eeWbVZ4OcGW1TUf53At0njHw5SMdA3tmMg==,
       }
     engines: { node: '>= 0.10' }
+
+  validator@13.15.0:
+    resolution: {integrity: sha512-36B2ryl4+oL5QxZ3AzD0t5SsMNGvTtQHpjgFO5tbNxfXbMFkY822ktCDe1MnlqV3301QQI9SLHDNJokDI+Z9pA==}
+    engines: {node: '>= 0.10'}
 
   varint@5.0.2:
     resolution:
@@ -18016,6 +18164,8 @@ snapshots:
       '@smithy/shared-ini-file-loader': 4.0.2
       '@smithy/types': 4.2.0
       tslib: 2.6.2
+    transitivePeerDependencies:
+      - aws-crt
 
   '@aws-sdk/credential-provider-process@3.775.0':
     dependencies:
@@ -18330,6 +18480,8 @@ snapshots:
       '@smithy/signature-v4': 5.0.2
       '@smithy/types': 4.2.0
       tslib: 2.6.2
+    transitivePeerDependencies:
+      - aws-crt
 
   '@aws-sdk/token-providers@3.750.0':
     dependencies:
@@ -19895,11 +20047,18 @@ snapshots:
 
   '@ethereumjs/rlp@4.0.1': {}
 
+  '@ethereumjs/rlp@5.0.2': {}
+
   '@ethereumjs/util@8.1.0':
     dependencies:
       '@ethereumjs/rlp': 4.0.1
       ethereum-cryptography: 2.2.1
       micro-ftch: 0.3.1
+
+  '@ethereumjs/util@9.1.0':
+    dependencies:
+      '@ethereumjs/rlp': 5.0.2
+      ethereum-cryptography: 2.2.1
 
   '@ethersproject/abi@5.0.7':
     dependencies:
@@ -20097,9 +20256,9 @@ snapshots:
   '@graphprotocol/graph-cli@0.82.0(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(encoding@0.1.13)(node-fetch@2.7.0(encoding@0.1.13))(typescript@5.3.3)':
     dependencies:
       '@float-capital/float-subgraph-uncrashable': 0.0.0-internal-testing.5
-      '@oclif/core': 2.8.6(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)
-      '@oclif/plugin-autocomplete': 2.3.10(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)
-      '@oclif/plugin-not-found': 2.4.3(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)
+      '@oclif/core': 2.8.6(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3)
+      '@oclif/plugin-autocomplete': 2.3.10(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3)
+      '@oclif/plugin-not-found': 2.4.3(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3)
       '@whatwg-node/fetch': 0.8.8
       assemblyscript: 0.19.23
       binary-install-raw: 0.0.13(debug@4.3.4)
@@ -20325,7 +20484,7 @@ snapshots:
       exit: 0.1.2
       graceful-fs: 4.2.11
       jest-changed-files: 29.7.0
-      jest-config: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3))
+      jest-config: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3))
       jest-haste-map: 29.7.0
       jest-message-util: 29.7.0
       jest-regex-util: 29.6.3
@@ -20512,14 +20671,6 @@ snapshots:
   '@leichtgewicht/ip-codec@2.0.5': {}
 
   '@lukeed/csprng@1.1.0': {}
-
-  '@metamask/eth-sig-util@4.0.1':
-    dependencies:
-      ethereumjs-abi: 0.6.8
-      ethereumjs-util: 6.2.1
-      ethjs-util: 0.1.6
-      tweetnacl: 1.0.3
-      tweetnacl-util: 0.15.1
 
   '@microsoft/tsdoc@0.15.1': {}
 
@@ -20872,7 +21023,7 @@ snapshots:
       '@nomicfoundation/edr-linux-x64-musl': 0.8.0
       '@nomicfoundation/edr-win32-x64-msvc': 0.8.0
 
-  '@nomicfoundation/ethereumjs-common@4.0.4':
+  '@nomicfoundation/hardhat-chai-matchers@2.0.8(@nomicfoundation/hardhat-ethers@3.0.8(ethers@6.11.1)(hardhat@2.23.0(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3))(typescript@5.3.3)))(chai@4.5.0)(ethers@6.11.1)(hardhat@2.23.0(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3))(typescript@5.3.3))':
     dependencies:
       '@nomicfoundation/ethereumjs-util': 9.0.4
     transitivePeerDependencies:
@@ -21216,7 +21367,7 @@ snapshots:
       chalk: 4.1.2
       confusing-browser-globals: 1.0.11
       jsonc-eslint-parser: 2.4.0
-      semver: 7.6.3
+      semver: 7.7.1
       tslib: 2.6.2
     optionalDependencies:
       eslint-config-prettier: 9.1.0(eslint@8.48.0)
@@ -21264,7 +21415,7 @@ snapshots:
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.3.3)
       chalk: 4.1.2
       identity-obj-proxy: 3.0.0
-      jest-config: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3))
+      jest-config: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3))
       jest-resolve: 29.7.0
       jest-util: 29.7.0
       minimatch: 9.0.3
@@ -21312,9 +21463,9 @@ snapshots:
       npm-package-arg: 11.0.1
       npm-run-path: 4.0.1
       ora: 5.3.0
-      semver: 7.6.3
+      semver: 7.7.1
       source-map-support: 0.5.19
-      ts-node: 10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)
+      ts-node: 10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3)
       tsconfig-paths: 4.2.0
       tslib: 2.6.2
     optionalDependencies:
@@ -21552,7 +21703,7 @@ snapshots:
       strip-ansi: 6.0.1
       supports-color: 8.1.1
       supports-hyperlinks: 2.3.0
-      ts-node: 10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)
+      ts-node: 10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3)
       tslib: 2.6.2
       widest-line: 3.1.0
       wordwrap: 1.0.0
@@ -21589,7 +21740,7 @@ snapshots:
       strip-ansi: 6.0.1
       supports-color: 8.1.1
       supports-hyperlinks: 2.3.0
-      ts-node: 10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)
+      ts-node: 10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3)
       tslib: 2.6.2
       widest-line: 3.1.0
       wordwrap: 1.0.0
@@ -21602,7 +21753,7 @@ snapshots:
 
   '@oclif/plugin-autocomplete@2.3.10(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)':
     dependencies:
-      '@oclif/core': 2.16.0(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)
+      '@oclif/core': 2.16.0(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3)
       chalk: 4.1.2
       debug: 4.3.4(supports-color@8.1.1)
     transitivePeerDependencies:
@@ -21614,7 +21765,7 @@ snapshots:
 
   '@oclif/plugin-not-found@2.4.3(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)':
     dependencies:
-      '@oclif/core': 2.16.0(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)
+      '@oclif/core': 2.16.0(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3)
       chalk: 4.1.2
       fast-levenshtein: 3.0.0
     transitivePeerDependencies:
@@ -21926,12 +22077,6 @@ snapshots:
       '@noble/secp256k1': 1.7.1
       '@scure/base': 1.1.9
 
-  '@scure/bip32@1.3.2':
-    dependencies:
-      '@noble/curves': 1.2.0
-      '@noble/hashes': 1.3.2
-      '@scure/base': 1.1.9
-
   '@scure/bip32@1.4.0':
     dependencies:
       '@noble/curves': 1.4.2
@@ -21947,11 +22092,6 @@ snapshots:
   '@scure/bip39@1.1.1':
     dependencies:
       '@noble/hashes': 1.2.0
-      '@scure/base': 1.1.9
-
-  '@scure/bip39@1.2.1':
-    dependencies:
-      '@noble/hashes': 1.3.2
       '@scure/base': 1.1.9
 
   '@scure/bip39@1.3.0':
@@ -22396,7 +22536,7 @@ snapshots:
     dependencies:
       '@swc-node/core': 1.13.3(@swc/core@1.3.107(@swc/helpers@0.5.15))(@swc/types@0.1.21)
       '@swc-node/sourcemap-support': 0.3.0
-      '@swc/core': 1.3.107(@swc/helpers@0.5.15)
+      '@swc/core': 1.3.107(@swc/helpers@0.5.17)
       colorette: 2.0.20
       debug: 4.4.0(supports-color@8.1.1)
       pirates: 4.0.7
@@ -22441,7 +22581,7 @@ snapshots:
   '@swc/core-win32-x64-msvc@1.3.107':
     optional: true
 
-  '@swc/core@1.3.107(@swc/helpers@0.5.15)':
+  '@swc/core@1.3.107(@swc/helpers@0.5.17)':
     dependencies:
       '@swc/counter': 0.1.3
       '@swc/types': 0.1.21
@@ -22456,11 +22596,11 @@ snapshots:
       '@swc/core-win32-arm64-msvc': 1.3.107
       '@swc/core-win32-ia32-msvc': 1.3.107
       '@swc/core-win32-x64-msvc': 1.3.107
-      '@swc/helpers': 0.5.15
+      '@swc/helpers': 0.5.17
 
   '@swc/counter@0.1.3': {}
 
-  '@swc/helpers@0.5.15':
+  '@swc/helpers@0.5.17':
     dependencies:
       tslib: 2.8.1
 
@@ -22475,6 +22615,16 @@ snapshots:
       '@thednp/shorty': 2.0.10
 
   '@thednp/shorty@2.0.10': {}
+
+  '@tokenizer/inflate@0.2.7':
+    dependencies:
+      debug: 4.4.0(supports-color@8.1.1)
+      fflate: 0.8.2
+      token-types: 6.0.0
+    transitivePeerDependencies:
+      - supports-color
+
+  '@tokenizer/token@0.3.0': {}
 
   '@trysound/sax@0.2.0': {}
 
@@ -22758,7 +22908,7 @@ snapshots:
       graphemer: 1.4.0
       ignore: 5.3.2
       natural-compare: 1.4.0
-      semver: 7.6.3
+      semver: 7.7.1
       ts-api-utils: 1.4.3(typescript@5.3.3)
     optionalDependencies:
       typescript: 5.3.3
@@ -22805,7 +22955,7 @@ snapshots:
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.3
-      semver: 7.6.3
+      semver: 7.7.1
       ts-api-utils: 1.4.3(typescript@5.3.3)
     optionalDependencies:
       typescript: 5.3.3
@@ -22821,7 +22971,7 @@ snapshots:
       '@typescript-eslint/types': 6.21.0
       '@typescript-eslint/typescript-estree': 6.21.0(typescript@5.3.3)
       eslint: 8.48.0
-      semver: 7.6.3
+      semver: 7.7.1
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -23933,7 +24083,7 @@ snapshots:
       ioredis: 5.6.0
       lodash: 4.17.21
       msgpackr: 1.11.2
-      semver: 7.6.3
+      semver: 7.7.1
       uuid: 8.3.2
     transitivePeerDependencies:
       - supports-color
@@ -24332,6 +24482,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  compression@1.8.0:
+    dependencies:
+      bytes: 3.1.2
+      compressible: 2.0.18
+      debug: 2.6.9
+      negotiator: 0.6.4
+      on-headers: 1.0.2
+      safe-buffer: 5.2.1
+      vary: 1.1.2
+    transitivePeerDependencies:
+      - supports-color
+
   concat-map@0.0.1: {}
 
   concat-stream@1.6.2:
@@ -24477,7 +24639,7 @@ snapshots:
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
-      jest-config: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3))
+      jest-config: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3))
       jest-util: 29.7.0
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -24839,7 +25001,7 @@ snapshots:
   dotenv-cli@7.4.4:
     dependencies:
       cross-spawn: 7.0.6
-      dotenv: 16.4.7
+      dotenv: 16.5.0
       dotenv-expand: 10.0.0
       minimist: 1.2.8
 
@@ -25155,21 +25317,6 @@ snapshots:
       '@scure/bip32': 1.4.0
       '@scure/bip39': 1.3.0
 
-  ethereumjs-abi@0.6.8:
-    dependencies:
-      bn.js: 4.12.1
-      ethereumjs-util: 6.2.1
-
-  ethereumjs-util@6.2.1:
-    dependencies:
-      '@types/bn.js': 4.11.6
-      bn.js: 4.12.1
-      create-hash: 1.2.0
-      elliptic: 6.6.1
-      ethereum-cryptography: 0.1.3
-      ethjs-util: 0.1.6
-      rlp: 2.2.7
-
   ethereumjs-util@7.1.5:
     dependencies:
       '@types/bn.js': 5.1.6
@@ -25195,11 +25342,6 @@ snapshots:
     dependencies:
       bn.js: 4.11.6
       number-to-bn: 1.7.0
-
-  ethjs-util@0.1.6:
-    dependencies:
-      is-hex-prefixed: 1.0.0
-      strip-hex-prefix: 1.0.0
 
   event-stream@4.0.1:
     dependencies:
@@ -25484,7 +25626,7 @@ snapshots:
       proxy-addr: 2.0.7
       rfdc: 1.4.1
       secure-json-parse: 2.7.0
-      semver: 7.6.3
+      semver: 7.7.1
       toad-cache: 3.7.0
 
   fastq@1.19.1:
@@ -25516,6 +25658,15 @@ snapshots:
   file-entry-cache@6.0.1:
     dependencies:
       flat-cache: 3.2.0
+
+  file-type@20.4.1:
+    dependencies:
+      '@tokenizer/inflate': 0.2.7
+      strtok3: 10.2.2
+      token-types: 6.0.0
+      uint8array-extras: 1.4.0
+    transitivePeerDependencies:
+      - supports-color
 
   filelist@1.0.4:
     dependencies:
@@ -26049,7 +26200,7 @@ snapshots:
       lodash: 4.17.21
       markdown-table: 2.0.0
       sha1: 1.1.1
-      viem: 2.7.14(typescript@5.3.3)
+      viem: 2.27.0(typescript@5.3.3)
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -26079,7 +26230,6 @@ snapshots:
       enquirer: 2.4.1
       env-paths: 2.2.1
       ethereum-cryptography: 1.2.0
-      ethereumjs-abi: 0.6.8
       find-up: 5.0.0
       fp-ts: 1.19.3
       fs-extra: 7.0.1
@@ -26088,6 +26238,7 @@ snapshots:
       json-stream-stringify: 3.1.6
       keccak: 3.0.4
       lodash: 4.17.21
+      micro-eth-signer: 0.14.0
       mnemonist: 0.38.5
       mocha: 10.8.2
       p-map: 4.0.0
@@ -26104,11 +26255,10 @@ snapshots:
       uuid: 8.3.2
       ws: 7.5.10
     optionalDependencies:
-      ts-node: 10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)
+      ts-node: 10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3)
       typescript: 5.3.3
     transitivePeerDependencies:
       - bufferutil
-      - c-kzg
       - supports-color
       - utf-8-validate
 
@@ -26265,7 +26415,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  http-proxy-middleware@2.0.7(@types/express@4.17.21):
+  http-proxy-middleware@2.0.9(@types/express@4.17.21):
     dependencies:
       '@types/http-proxy': 1.17.16
       http-proxy: 1.18.1
@@ -26415,7 +26565,7 @@ snapshots:
   interface-datastore@6.1.1:
     dependencies:
       interface-store: 2.0.2
-      nanoid: 3.3.8
+      nanoid: 3.3.11
       uint8arrays: 3.1.1
 
   interface-ipld-format@1.0.1:
@@ -26704,7 +26854,7 @@ snapshots:
     dependencies:
       ws: 7.5.10
 
-  isows@1.0.3(ws@8.13.0):
+  isows@1.0.6(ws@8.18.1):
     dependencies:
       ws: 8.13.0
 
@@ -26732,7 +26882,7 @@ snapshots:
       '@babel/parser': 7.27.0
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.2
-      semver: 7.6.3
+      semver: 7.7.1
     transitivePeerDependencies:
       - supports-color
 
@@ -26862,14 +27012,14 @@ snapshots:
 
   jest-cli@29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)):
     dependencies:
-      '@jest/core': 29.7.0(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3))
+      '@jest/core': 29.7.0(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3))
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
       chalk: 4.1.2
-      create-jest: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3))
+      create-jest: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3))
       exit: 0.1.2
       import-local: 3.2.0
-      jest-config: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3))
+      jest-config: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3))
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -26905,7 +27055,7 @@ snapshots:
       strip-json-comments: 3.1.1
     optionalDependencies:
       '@types/node': 18.16.20
-      ts-node: 10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)
+      ts-node: 10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -27085,7 +27235,7 @@ snapshots:
       jest-util: 29.7.0
       natural-compare: 1.4.0
       pretty-format: 29.7.0
-      semver: 7.6.3
+      semver: 7.7.1
     transitivePeerDependencies:
       - supports-color
 
@@ -27133,10 +27283,10 @@ snapshots:
 
   jest@29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3)):
     dependencies:
-      '@jest/core': 29.7.0(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3))
+      '@jest/core': 29.7.0(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3))
       '@jest/types': 29.6.3
       import-local: 3.2.0
-      jest-cli: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3))
+      jest-cli: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3))
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
@@ -27652,7 +27802,17 @@ snapshots:
 
   methods@1.1.2: {}
 
+  micro-eth-signer@0.14.0:
+    dependencies:
+      '@noble/curves': 1.8.2
+      '@noble/hashes': 1.7.2
+      micro-packed: 0.7.2
+
   micro-ftch@0.3.1: {}
+
+  micro-packed@0.7.2:
+    dependencies:
+      '@scure/base': 1.2.4
 
   micromatch@4.0.8:
     dependencies:
@@ -28324,7 +28484,7 @@ snapshots:
     dependencies:
       hosted-git-info: 7.0.2
       proc-log: 3.0.0
-      semver: 7.6.3
+      semver: 7.7.1
       validate-npm-package-name: 5.0.1
 
   npm-run-path@2.0.2:
@@ -28371,7 +28531,7 @@ snapshots:
       npm-run-path: 4.0.1
       open: 8.4.2
       ora: 5.3.0
-      semver: 7.6.3
+      semver: 7.7.1
       string-width: 4.2.3
       strong-log-transformer: 2.1.0
       tar-stream: 2.2.0
@@ -28708,6 +28868,8 @@ snapshots:
       sha.js: 2.4.11
 
   peberminta@0.9.0: {}
+
+  peek-readable@7.0.0: {}
 
   peek-stream@1.1.3:
     dependencies:
@@ -29118,7 +29280,7 @@ snapshots:
       fixpack: 4.0.0
       get-port: 5.1.1
       mailparser: 3.7.2
-      nodemailer: 6.9.16
+      nodemailer: 6.10.1
       open: 7.4.2
       p-event: 4.2.0
       p-wait-for: 3.2.0
@@ -30500,7 +30662,7 @@ snapshots:
       bs-logger: 0.2.6
       ejs: 3.1.10
       fast-json-stable-stringify: 2.1.0
-      jest: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.20)(typescript@5.3.3))
+      jest: 29.7.0(@types/node@18.16.20)(ts-node@10.9.1(@swc/core@1.3.107(@swc/helpers@0.5.17))(@types/node@18.16.20)(typescript@5.3.3))
       jest-util: 29.7.0
       json5: 2.2.3
       lodash.memoize: 4.1.2
@@ -30548,7 +30710,7 @@ snapshots:
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     optionalDependencies:
-      '@swc/core': 1.3.107(@swc/helpers@0.5.15)
+      '@swc/core': 1.3.107(@swc/helpers@0.5.17)
 
   tsconfig-paths-webpack-plugin@4.0.0:
     dependencies:
@@ -30581,8 +30743,6 @@ snapshots:
   tweetnacl-util@0.15.1: {}
 
   tweetnacl@0.14.5: {}
-
-  tweetnacl@1.0.3: {}
 
   typanion@3.14.0: {}
 
@@ -30652,6 +30812,8 @@ snapshots:
   uid@2.0.2:
     dependencies:
       '@lukeed/csprng': 1.1.0
+
+  uint8array-extras@1.4.0: {}
 
   uint8arrays@2.1.10:
     dependencies:
@@ -30766,6 +30928,8 @@ snapshots:
   validate-npm-package-name@5.0.1: {}
 
   validator@13.12.0: {}
+
+  validator@13.15.0: {}
 
   varint@5.0.2: {}
 
@@ -30997,7 +31161,7 @@ snapshots:
       bonjour-service: 1.3.0
       chokidar: 3.6.0
       colorette: 2.0.20
-      compression: 1.7.5
+      compression: 1.8.0
       connect-history-api-fallback: 2.0.0
       default-gateway: 6.0.3
       express: 4.21.2

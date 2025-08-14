@@ -19,7 +19,7 @@ import {
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto
+  UpdateBeneficiaryGroupDto,
 } from '@rahataid/extensions';
 import {
   AAJobs,
@@ -30,7 +30,7 @@ import {
   GroupWithValidationAA,
   ProjectContants,
   TPIIData,
-  WalletJobs
+  WalletJobs,
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
@@ -39,14 +39,13 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   findTempBenefGroups,
   validateDupicatePhone,
-  validateDupicateWallet
+  validateDupicateWallet,
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
-
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 const BATCH_SIZE = 20;
@@ -65,8 +64,7 @@ export class BeneficiaryService {
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
     private eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
-    private readonly beneficiaryUtilsService: BeneficiaryUtilsService,
-
+    private readonly beneficiaryUtilsService: BeneficiaryUtilsService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -146,7 +144,6 @@ export class BeneficiaryService {
     return data;
   }
 
-
   async findOneBeneficiary(data: any) {
     const getBeneficiaryByWallet = await this.prisma.beneficiary.findUnique({
       where: {
@@ -154,12 +151,11 @@ export class BeneficiaryService {
       },
       include: {
         pii: true,
+      },
+    });
 
-      }
-    })
-
-    const { pii, ...rest } = getBeneficiaryByWallet
-    return { piiData: pii, projectData: rest, ...data }
+    const { pii, ...rest } = getBeneficiaryByWallet;
+    return { piiData: pii, projectData: rest, ...data };
   }
   async listBeneficiaryPiiByWalletAddress(data: any) {
     if (!data?.data?.length) return data;
@@ -189,6 +185,27 @@ export class BeneficiaryService {
     return await this.prisma.beneficiaryGroup.findUnique({
       where: {
         uuid: uuid,
+      },
+      include: {
+        groupedBeneficiaries: {
+          where: {
+            deletedAt: null,
+          },
+          include: {
+            Beneficiary: {
+              include: {
+                pii: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+  async listGroupByUUid(uuid: UUID[]) {
+    return await this.prisma.beneficiaryGroup.findMany({
+      where: {
+        uuid: { in: uuid },
       },
       include: {
         groupedBeneficiaries: {
@@ -369,7 +386,6 @@ export class BeneficiaryService {
     return mergedData;
   }
 
-
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
     const { piiData, projectUUIDs, walletAddress, ...data } = dto;
 
@@ -448,7 +464,7 @@ export class BeneficiaryService {
     });
 
     // Map id to uuid for quick lookup
-    const idToUuid = new Map(beneficiaries.map(b => [b.id, b.uuid]));
+    const idToUuid = new Map(beneficiaries.map((b) => [b.id, b.uuid]));
 
     // Fetch PII data for these beneficiaries
     const piiList = await this.prisma.beneficiaryPii.findMany({
@@ -461,11 +477,11 @@ export class BeneficiaryService {
         beneficiaryId: true,
         phone: true,
         name: true,
-      }
+      },
     });
 
     // Attach uuid to each PII record
-    return piiList.map(pii => ({
+    return piiList.map((pii) => ({
       uuid: idToUuid.get(pii.beneficiaryId),
       phone: pii.phone,
       name: pii.name,
@@ -492,8 +508,8 @@ export class BeneficiaryService {
         .then((beneficiary) =>
           beneficiary
             ? this.rsprisma.beneficiaryPii.findUnique({
-              where: { beneficiaryId: beneficiary.id },
-            })
+                where: { beneficiaryId: beneficiary.id },
+              })
             : null
         ),
     ]);
@@ -533,37 +549,37 @@ export class BeneficiaryService {
     }));
   }
 
-
-  async findOneByPhone(phone: string) {
-    const piiData = await this.rsprisma.beneficiaryPii.findFirst({
+  async findOneByPhone(payload: { phone: string; projectUUID: string }) {
+    const beneficiary = await this.prisma.beneficiary.findFirst({
       where: {
-        phone: {
-          contains: phone,
-        },
-      },
-    });
-    if (!piiData) return null;
-
-    const beneficiary = await this.rsprisma.beneficiary.findUnique({
-      where: { id: piiData.beneficiaryId },
-      include: {
-        BeneficiaryProject: {
-          include: {
-            Project: true,
+        AND: [
+          {
+            BeneficiaryProject: {
+              some: {
+                projectId: payload.projectUUID,
+              },
+            },
           },
-        },
-        groupedBeneficiaries: {
-          select: {
-            beneficiaryGroupId: true
-          }
-        },
+          {
+            pii: {
+              phone: payload.phone,
+            },
+          },
+        ],
+      },
+      include: {
+        pii: true,
       },
     });
 
     if (!beneficiary) return null;
+    let piiData = null;
+    if (beneficiary.pii) {
+      piiData = beneficiary.pii;
+      delete beneficiary.pii;
+    }
 
-    beneficiary.piiData = piiData;
-    return beneficiary;
+    return { ...beneficiary, piiData };
   }
 
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
@@ -809,26 +825,44 @@ export class BeneficiaryService {
   ) {
     try {
       this.beneficiaryUtilsService.ensurePhoneNumbers(dtos);
+      const validDtos: CreateBeneficiaryDto[] = [];
       for (const dto of dtos) {
-        await this.beneficiaryUtilsService.ensureUniquePhone(
-          dto.piiData.phone.toString()
-        );
-        dto.walletAddress =
-          await this.beneficiaryUtilsService.ensureValidWalletAddress(
-            dto.walletAddress
+        try {
+          await this.beneficiaryUtilsService.ensureUniquePhone(
+            dto.piiData.phone.toString()
           );
+        } catch (error) {
+          console.log(
+            `Skipping entry due to duplicate phone: ${dto.piiData.phone}`
+          );
+          continue;
+        }
+
+        try {
+          dto.walletAddress =
+            await this.beneficiaryUtilsService.ensureValidWalletAddress(
+              dto.walletAddress
+            );
+        } catch (error) {
+          console.log(
+            `Skipping entry due to duplicate/invalid wallet address: ${dto.walletAddress}`
+          );
+          continue;
+        }
+
         dto.uuid = dto.uuid || uuidv4();
+        validDtos.push(dto);
       }
 
       const { beneficiariesData, piiDataList } =
-        this.beneficiaryUtilsService.prepareBulkInsertData(dtos);
+        this.beneficiaryUtilsService.prepareBulkInsertData(validDtos);
 
       // Insert beneficiaries in bulk
       const insertedBeneficiariesWithPii =
         await this.beneficiaryUtilsService.insertBeneficiariesAndPIIData(
           beneficiariesData,
           piiDataList,
-          dtos
+          validDtos
         );
 
       // Assign beneficiaries to the project if a projectUuid is provided
@@ -884,19 +918,17 @@ export class BeneficiaryService {
       // Return some form of success indicator, as createMany does not return the records themselves
       return {
         success: true,
-        count: dtos.length,
+        count: validDtos.length,
         beneficiariesData: insertedBeneficiariesWithPii,
       };
     } catch (e) {
       console.log(e);
       return {
-        success: false
-      }
+        success: false,
+      };
       // throw new RpcException(e)
-
     }
   }
-
 
   async syncProjectStats(projectUuid) {
     return await this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
@@ -913,7 +945,6 @@ export class BeneficiaryService {
       batch: CreateBeneficiaryDto[],
       prisma: PrismaService
     ) => {
-
       const walletAddresses = batch
         .map((beneficiary) => beneficiary.walletAddress)
         .filter(Boolean);
@@ -927,9 +958,15 @@ export class BeneficiaryService {
           : [];
 
       console.log(`
-        Found ${duplicatePhones.length} existing beneficiaries phone numbers i: ${duplicatePhones.join(', ')}
-        Found ${duplicateWallets.length} existing beneficiaries wallet addresses: ${duplicateWallets.join(', ')}
-        `)
+        Found ${
+          duplicatePhones.length
+        } existing beneficiaries phone numbers i: ${duplicatePhones.join(', ')}
+        Found ${
+          duplicateWallets.length
+        } existing beneficiaries wallet addresses: ${duplicateWallets.join(
+        ', '
+      )}
+        `);
 
       if (!ignoreExisting) {
         if (duplicatePhones.length > 0) {
@@ -960,7 +997,7 @@ export class BeneficiaryService {
       this.prisma
     );
 
-    if (allData?.automatedGroupOption?.createAutomatedGroup === 'true') {
+    if (allData?.automatedGroupOption?.createAutomatedGroup === true) {
       uniqueGroupKeys = [
         ...new Set(
           filteredBeneficiaries.map(
@@ -969,8 +1006,6 @@ export class BeneficiaryService {
         ),
       ];
       // Utility function to sanitize input by removing special characters
-
-
 
       // Sanitize and map uniqueGroupKeys to groupData
       const groupData = uniqueGroupKeys.map((g) => ({
@@ -982,7 +1017,6 @@ export class BeneficiaryService {
       await this.prisma.beneficiaryGroup.createManyAndReturn({
         data: groupData,
         skipDuplicates: true,
-
       });
     }
     // Break beneficiaries into batches
@@ -990,8 +1024,12 @@ export class BeneficiaryService {
 
     console.log(`Creating ${batches.length} batches of beneficiaries.
     Total beneficiaries: ${filteredBeneficiaries.length}
-    Duplicate phone numbers: ${filteredBeneficiaries.length - batches.flat().length}
-    Duplicate wallet addresses: ${filteredBeneficiaries.length - batches.flat().length}
+    Duplicate phone numbers: ${
+      filteredBeneficiaries.length - batches.flat().length
+    }
+    Duplicate wallet addresses: ${
+      filteredBeneficiaries.length - batches.flat().length
+    }
       `);
 
     const bulkQueueData = batches.map((batch, index) => ({
@@ -1097,7 +1135,6 @@ export class BeneficiaryService {
   }
 
   async addGroup(dto: CreateBeneficiaryGroupsDto) {
-
     const benGroup = await this.prisma.beneficiaryGroup.findFirst({
       where: {
         name: dto.name,
@@ -1106,7 +1143,6 @@ export class BeneficiaryService {
 
     if (benGroup) {
       throw new RpcException('Beneficiary group already exist.');
-
     }
 
     const group = await this.prisma.beneficiaryGroup.create({
@@ -1152,7 +1188,7 @@ export class BeneficiaryService {
                 pii: true,
               },
             },
-          }
+          },
         },
         beneficiaryGroupProject: {
           select: {
@@ -1160,10 +1196,10 @@ export class BeneficiaryService {
               select: {
                 id: true,
                 name: true,
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       },
     });
 
@@ -1177,7 +1213,7 @@ export class BeneficiaryService {
         ...group,
         isGroupValidForAA: false,
         isAnyBeneficiaryInvalid: false,
-      }
+      };
     }
 
     // If group is found, check if it is valid for AA
@@ -1190,7 +1226,10 @@ export class BeneficiaryService {
     let isAnyBeneficiaryInvalid = false;
 
     // Only check for errors if groupPurpose is not COMMUNICATION and group is not valid for AA
-    if (finalData.groupPurpose !== GroupPurpose.COMMUNICATION && !finalData.isGroupValidForAA) {
+    if (
+      finalData.groupPurpose !== GroupPurpose.COMMUNICATION &&
+      !finalData.isGroupValidForAA
+    ) {
       for (const bef of finalData.groupedBeneficiaries) {
         const extras = bef.Beneficiary.extras as Record<string, any>;
         if (extras?.error) {
@@ -1202,7 +1241,7 @@ export class BeneficiaryService {
 
     return {
       ...finalData,
-      isAnyBeneficiaryInvalid
+      isAnyBeneficiaryInvalid,
     };
   }
 
@@ -1233,9 +1272,9 @@ export class BeneficiaryService {
       return false;
     }
 
-
     const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
-      (d) => d.Beneficiary)
+      (d) => d.Beneficiary
+    );
 
     if (!benfsInGroup) return false;
 
@@ -1279,23 +1318,25 @@ export class BeneficiaryService {
         return {
           success: false,
           message: `Invalid group purpose: ${groupPurpose}.`,
-        }
+        };
       }
     }
   }
 
   async groupPhoneCheck(uuid: string, benfGroup: GroupWithValidationAA) {
-    const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
-      (d) => d.Beneficiary
-    ).filter((benf) => !(benf.extras as any)?.validPhoneNumber);
+    const benfsInGroup = benfGroup.groupedBeneficiaries
+      ?.map((d) => d.Beneficiary)
+      .filter((benf) => !(benf.extras as any)?.validPhoneNumber);
 
-    this.logger.log(`Group phone check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`);
+    this.logger.log(
+      `Group phone check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`
+    );
 
     const bulkQueueData = benfsInGroup.map((benf) => ({
       name: BeneficiaryJobs.CHECK_BENEFICIARY_PHONE_NUMBER,
       data: {
         uuid: benf.uuid,
-        phone: (benf.pii as BeneficiaryPii)?.phone
+        phone: (benf.pii as BeneficiaryPii)?.phone,
       },
       opts: {
         attempts: 3,
@@ -1312,11 +1353,13 @@ export class BeneficiaryService {
   }
 
   async groupAccountCheck(uuid: string, benfGroup: GroupWithValidationAA) {
-    const benfsInGroup = benfGroup.groupedBeneficiaries?.map(
-      (d) => d.Beneficiary
-    ).filter((benf) => !(benf.extras as any)?.validBankAccount);
+    const benfsInGroup = benfGroup.groupedBeneficiaries
+      ?.map((d) => d.Beneficiary)
+      .filter((benf) => !(benf.extras as any)?.validBankAccount);
 
-    this.logger.log(`Group account check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`);
+    this.logger.log(
+      `Group account check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`
+    );
 
     const bulkQueueData = benfsInGroup.map((benf) => ({
       name: BeneficiaryJobs.CHECK_BENEFICIARY_BANK_ACCOUNT,
@@ -1326,7 +1369,7 @@ export class BeneficiaryService {
         extras: {
           bank_name: (benf.extras as any)?.bank_name as string,
           bank_ac_name: (benf.extras as any)?.bank_ac_name as string,
-          bank_ac_number: (benf.extras as any)?.bank_ac_number as string
+          bank_ac_number: (benf.extras as any)?.bank_ac_number as string,
         },
       },
       opts: {
@@ -1343,7 +1386,6 @@ export class BeneficiaryService {
     };
   }
 
-
   async getGroupBeneficiariesFailedAccount(uuid: string) {
     return this.prisma.groupedBeneficiaries.findMany({
       where: {
@@ -1358,8 +1400,8 @@ export class BeneficiaryService {
       select: {
         beneficiaryGroup: {
           select: {
-            name: true
-          }
+            name: true,
+          },
         },
         Beneficiary: {
           include: {
@@ -1367,17 +1409,13 @@ export class BeneficiaryService {
               select: {
                 name: true,
                 phone: true,
-
-              }
-            }
-          }
-        }
-      }
-    })
+              },
+            },
+          },
+        },
+      },
+    });
   }
-
-
-
 
   async removeOneGroup(uuid: string) {
     const benfGroup = await this.prisma.beneficiaryGroup.findUnique({
@@ -1408,7 +1446,9 @@ export class BeneficiaryService {
 
     if (!benefGroup) {
       this.logger.warn(`Group not found or already deleted: ${uuid}`);
-      throw new RpcException('Beneficiary group not found or has already been deleted.');
+      throw new RpcException(
+        'Beneficiary group not found or has already been deleted.'
+      );
     }
 
     const groupProjects = await this.prisma.beneficiaryGroupProject.findMany({
@@ -1417,15 +1457,20 @@ export class BeneficiaryService {
 
     if (groupProjects.length > 0) {
       this.logger.warn(`Group ${uuid} is linked to projects.`);
-      throw new RpcException('Cannot delete group: it is currently assigned to one or more projects. Please remove the group from all projects first.');
+      throw new RpcException(
+        'Cannot delete group: it is currently assigned to one or more projects. Please remove the group from all projects first.'
+      );
     }
 
-    const groupedBeneficiaries = await this.prisma.groupedBeneficiaries.findMany({
-      where: { beneficiaryGroupId: uuid },
-      select: { beneficiaryId: true },
-    });
+    const groupedBeneficiaries =
+      await this.prisma.groupedBeneficiaries.findMany({
+        where: { beneficiaryGroupId: uuid },
+        select: { beneficiaryId: true },
+      });
 
-    const beneficiaryIds = [...new Set(groupedBeneficiaries.map(b => b.beneficiaryId))];
+    const beneficiaryIds = [
+      ...new Set(groupedBeneficiaries.map((b) => b.beneficiaryId)),
+    ];
 
     if (beneficiaryIds.length === 0) {
       await this.prisma.beneficiaryGroup.delete({ where: { uuid } });
@@ -1448,12 +1493,14 @@ export class BeneficiaryService {
 
     const allAssignedBeneficiaryIds = [
       ...new Set([
-        ...assignedToOtherGroups.map(b => b.beneficiaryId),
-        ...assignedToProjects.map(b => b.beneficiaryId),
+        ...assignedToOtherGroups.map((b) => b.beneficiaryId),
+        ...assignedToProjects.map((b) => b.beneficiaryId),
       ]),
     ];
 
-    const unassignedBeneficiaryIds = beneficiaryIds.filter(id => !allAssignedBeneficiaryIds.includes(id));
+    const unassignedBeneficiaryIds = beneficiaryIds.filter(
+      (id) => !allAssignedBeneficiaryIds.includes(id)
+    );
 
     await this.prisma.$transaction([
       this.prisma.beneficiaryPii.deleteMany({
@@ -1470,7 +1517,9 @@ export class BeneficiaryService {
       }),
     ]);
 
-    return { message: 'Group and all associated beneficiaries successfully deleted.' };
+    return {
+      message: 'Group and all associated beneficiaries successfully deleted.',
+    };
   }
 
   async getAllGroups(dto: ListBeneficiaryGroupDto) {
@@ -1480,21 +1529,21 @@ export class BeneficiaryService {
 
     const where = projectUUID
       ? {
-        deletedAt: null,
-        beneficiaryGroupProject:
-          projectUUID === 'NOT_ASSGNED'
-            ? {
-              none: {},
-            }
-            : {
-              some: {
-                projectId: projectUUID,
-              },
-            },
-      }
+          deletedAt: null,
+          beneficiaryGroupProject:
+            projectUUID === 'NOT_ASSGNED'
+              ? {
+                  none: {},
+                }
+              : {
+                  some: {
+                    projectId: projectUUID,
+                  },
+                },
+        }
       : {
-        deletedAt: null,
-      };
+          deletedAt: null,
+        };
 
     const data = await paginate(
       this.prisma.beneficiaryGroup,
@@ -1529,7 +1578,7 @@ export class BeneficiaryService {
             where: {
               deletedAt: null,
             },
-          }
+          },
         },
         orderBy,
       },
@@ -1539,12 +1588,14 @@ export class BeneficiaryService {
       }
     );
 
-    const d = await Promise.all(data.data.map(async (group: any) => {
-      return {
-        ...group,
-        isGroupValidForAA: await this.isGroupValidForAA(group.uuid),
-      }
-    }))
+    const d = await Promise.all(
+      data.data.map(async (group: any) => {
+        return {
+          ...group,
+          isGroupValidForAA: await this.isGroupValidForAA(group.uuid),
+        };
+      })
+    );
 
     return { ...data, data: d };
   }
@@ -1641,21 +1692,23 @@ export class BeneficiaryService {
   async addGroupPurpose(dto: AddGroupsPurposeDto) {
     const group = await this.prisma.beneficiaryGroup.findUnique({
       where: {
-        uuid: dto.uuid
-      }
-    })
+        uuid: dto.uuid,
+      },
+    });
 
-    if (!group) throw new RpcException('Group not found')
+    if (!group) throw new RpcException('Group not found');
     await this.prisma.beneficiaryGroup.update({
       where: {
-        uuid: dto.uuid
+        uuid: dto.uuid,
       },
       data: {
-        groupPurpose: dto.groupPurpose
-      }
-    })
+        groupPurpose: dto.groupPurpose,
+      },
+    });
 
-    return { success: `Group purpose successfully updated to ${dto.groupPurpose}` }
+    return {
+      success: `Group purpose successfully updated to ${dto.groupPurpose}`,
+    };
   }
 
   async saveBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
@@ -1681,7 +1734,9 @@ export class BeneficiaryService {
 
       if (project && project.type.toLocaleLowerCase() === 'aa') {
         // check if groups has any benf that doesn't have valid bank account
-        const isGroupValidForAA = await this.isGroupValidForAA(beneficiaryGroupId);
+        const isGroupValidForAA = await this.isGroupValidForAA(
+          beneficiaryGroupId
+        );
 
         if (!isGroupValidForAA) {
           throw new RpcException('Group is not valid for AA.');
@@ -1726,52 +1781,50 @@ export class BeneficiaryService {
 
       const chain = await this.beneficiaryUtilsService.getChainName();
 
-      console.log(chain, "is chain")
+      console.log(chain, 'is chain');
 
       // Get secret of beneficiaries
       // todoNewChain
       if (chain === 'stellar') {
         await handleMicroserviceCall({
           client: this.walletClient.send(
-            { cmd: WalletJobs.GET_BULK_SECRET_BY_WALLET }, { walletAddresses: unassignedBenfs.map((d) => d.walletAddress) }
+            { cmd: WalletJobs.GET_BULK_SECRET_BY_WALLET },
+            { walletAddresses: unassignedBenfs.map((d) => d.walletAddress) }
           ),
           onSuccess: async (response) => {
-
             let benWallets = response.map((d) => ({
               address: d.publicKey,
-              secret: d.privateKey
+              secret: d.privateKey,
             }));
 
             // Create stellar account and add trustline for beneficiaries
             await handleMicroserviceCall({
               client: this.client.send(
-                { cmd: AAJobs.STELLAR.INTERNAL_FAUCET_TRUSTLINE, uuid: project.uuid }, { wallets: benWallets }
+                {
+                  cmd: AAJobs.STELLAR.INTERNAL_FAUCET_TRUSTLINE,
+                  uuid: project.uuid,
+                },
+                { wallets: benWallets }
               ),
               onSuccess: async (response) => {
                 return response;
               },
               onError(error) {
-                console.log(
-                  'Error adding trustline to beneficiaries',
-                  error
-                );
+                console.log('Error adding trustline to beneficiaries', error);
                 throw new RpcException(error.message);
               },
-            })
+            });
 
             return response;
           },
           onError(error) {
-            console.log(
-              'Error getting secrets of beneficiaries',
-              error
-            );
+            console.log('Error getting secrets of beneficiaries', error);
             throw new RpcException(error.message);
           },
-        })
+        });
       }
 
-      console.log(unassignedBenfs?.length)
+      console.log(unassignedBenfs?.length);
 
       // todo: Remove loop while assigning beneficiary to project
       if (unassignedBenfs?.length) {
@@ -1783,7 +1836,7 @@ export class BeneficiaryService {
         }
       }
 
-      console.log(unassignedBenfs?.length)
+      console.log(unassignedBenfs?.length);
 
       // add as required by project specifics
       const projectPayload = {
@@ -1793,7 +1846,7 @@ export class BeneficiaryService {
       //2.Save beneficiary group to project
       await this.saveBeneficiaryGroupToProject(dto);
 
-      console.log("adding beneficiary group")
+      console.log('adding beneficiary group');
       //3. Sync beneficiary to project
       return this.client.send(
         { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
@@ -1804,8 +1857,6 @@ export class BeneficiaryService {
       throw new RpcException(err.message);
     }
   }
-
-
 
   async listTempBeneficiaries(uuid: string, query: ListTempBeneficiariesDto) {
     const tempGroupWithBeneficiaries = await this.prisma.tempGroup.findUnique({
@@ -1936,58 +1987,61 @@ export class BeneficiaryService {
   }
 
   async importBeneficiariesFromTool(data: any) {
-    console.log("🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ data:", data)
+    console.log(
+      '🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ data:',
+      data
+    );
     const dataFromBuffer = Buffer.from(data);
     const bufferString = dataFromBuffer.toString('utf-8');
+    1570;
     const jsonData = JSON.parse(bufferString) || null;
-    console.log("🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ jsonData:", jsonData)
+    console.log(
+      '🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ jsonData:',
+      jsonData
+    );
 
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
 
     const walletAddress = await handleMicroserviceCall({
       client: this.walletClient.send(
-        { cmd: WalletJobs.CREATE_BULK }, { count: beneficiaries.length }
+        { cmd: WalletJobs.CREATE_BULK },
+        { count: beneficiaries.length }
       ),
       onSuccess: (response) => {
-        console.log(
-          `Response`, response
-        );
+        console.log(`Response`, response);
         return response;
       },
       onError(error) {
-        console.log(
-          'Error assiging Beneficiaries to project.',
-          error
-        );
+        console.log('Error assiging Beneficiaries to project.', error);
         throw new RpcException(error.message);
       },
-    })
+    });
 
+    const beneficiaryData = await Promise.all(
+      beneficiaries.map(async (d: any, index: number) => {
+        return {
+          firstName: d.firstName,
+          lastName: d.lastName,
+          walletAddress: walletAddress[index]?.address,
+          govtIDNumber: d.govtIDNumber,
+          gender: d.gender,
+          bankedStatus: d.bankedStatus,
+          phoneStatus: d.phoneStatus,
+          internetStatus: d.internetStatus,
+          email: d.email || null,
+          phone: d.phone || null,
+          birthDate: d.birthDate || null,
+          location: d.location || null,
+          latitude: d.latitude || null,
+          longitude: d.longitude || null,
+          notes: d.notes || null,
+          extras: d.extras || null,
+        };
+      })
+    );
 
-    const beneficiaryData = await Promise.all(beneficiaries.map(async (d: any, index: number) => {
-
-      return {
-        firstName: d.firstName,
-        lastName: d.lastName,
-        walletAddress: walletAddress[index]?.address,
-        govtIDNumber: d.govtIDNumber,
-        gender: d.gender,
-        bankedStatus: d.bankedStatus,
-        phoneStatus: d.phoneStatus,
-        internetStatus: d.internetStatus,
-        email: d.email || null,
-        phone: d.phone || null,
-        birthDate: d.birthDate || null,
-        location: d.location || null,
-        latitude: d.latitude || null,
-        longitude: d.longitude || null,
-        notes: d.notes || null,
-        extras: d.extras || null,
-      };
-    }))
-
-    console.log(beneficiaryData)
+    console.log(beneficiaryData);
     const tempBenefPhone = await this.listTempBenefPhone();
     return this.prisma.$transaction(async (txn) => {
       // 1. Upsert temp group by name
@@ -2047,16 +2101,19 @@ export class BeneficiaryService {
   }
 
   async importTempBeneficiaries(dto: ImportTempBenefDto) {
-    const groups = await findTempBenefGroups(this.prisma, dto.groupUUID);
+    const groups = await findTempBenefGroups(this.prisma as any, dto.groupUUID);
     if (!groups.length) throw new Error('No groups found!');
     const beneficiaries = groups.map((f) => f.tempBeneficiary);
     if (!beneficiaries.length) throw new Error('No benficiaries found!');
 
-    const dupliPhones = await validateDupicatePhone(this.prisma, beneficiaries);
+    const dupliPhones = await validateDupicatePhone(
+      this.prisma as any,
+      beneficiaries
+    );
     if (dupliPhones.length)
       throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
     const dupliWallets = await validateDupicateWallet(
-      this.prisma,
+      this.prisma as any,
       beneficiaries
     );
     if (dupliWallets.length)
@@ -2084,11 +2141,8 @@ export class BeneficiaryService {
     });
   }
 
-
   async deleteBenefAndPii(payload: any) {
-
     return this.delete(payload.benefId);
-
   }
 }
 
@@ -2118,8 +2172,4 @@ async function checkWalletAddress(
     select: { walletAddress: true },
   });
   return duplicates.map((dup) => dup.walletAddress);
-
-
 }
-
-

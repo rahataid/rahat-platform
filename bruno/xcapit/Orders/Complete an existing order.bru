@@ -1,0 +1,22 @@
+meta {
+  name: Complete an existing order
+  type: http
+  seq: 2
+}
+
+post {
+  url: http:/localhost:3000//api/orders/complete
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "phoneNumber": "",
+    "otp": ""
+  }
+}

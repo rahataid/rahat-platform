@@ -1,0 +1,21 @@
+meta {
+  name: Simulate incoming SMS -test only-
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{xcapitURL}}/api/sms/incoming-test
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "message": ""
+  }
+}
