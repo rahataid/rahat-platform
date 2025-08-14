@@ -37,6 +37,12 @@ export class OtpService {
             data.amount)
         const sms = await this.loadSmsModule();
 
+        console.log(data.phoneNumber, message, {
+            transportId,
+            appId,
+            url
+        })
+
         await sms(data.phoneNumber, message, {
             transportId,
             appId,
