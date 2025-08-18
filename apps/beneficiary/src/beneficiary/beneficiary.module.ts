@@ -15,6 +15,7 @@ import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
 import { VerificationService } from './verification.service';
+import { XcapitUtilsService } from './xcapit.utils.service';
 @Module({
   imports: [
     ClientsModule.registerAsync([
@@ -75,7 +76,8 @@ import { VerificationService } from './verification.service';
     BeneficiaryStatService,
     VerificationService,
     BeneficiaryConsumer,
-    BeneficiaryUtilsService
+    BeneficiaryUtilsService,
+    XcapitUtilsService
   ],
 })
 export class BeneficiaryModule { }

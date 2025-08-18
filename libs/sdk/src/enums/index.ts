@@ -69,3 +69,8 @@ export enum BeneficiaryGroupAttribute {
   PHONE = 'PHONE',
   ACCOUNT = 'ACCOUNT',
 }
+
+export enum WalletService {
+  INTERNAL = 'INTERNAL',
+  XCAPIT = 'XCAPIT'
+}

@@ -32,6 +32,7 @@ import {
   TPIIData,
   WalletJobs,
 } from '@rahataid/sdk';
+import { WalletService } from '@rahataid/sdk/enums';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -46,9 +47,12 @@ import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
+import { XcapitUtilsService } from './xcapit.utils.service';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 const BATCH_SIZE = 20;
+const useExternalWallet = process.env.USE_EXTERNAL_WALLET;
+const externalWalletService = process.env.EXTERNAL_WALLET_SERVICE;
 
 @Injectable()
 export class BeneficiaryService {
@@ -64,7 +68,8 @@ export class BeneficiaryService {
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
     private eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
-    private readonly beneficiaryUtilsService: BeneficiaryUtilsService
+    private readonly beneficiaryUtilsService: BeneficiaryUtilsService,
+    private readonly xcapitService: XcapitUtilsService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -387,7 +392,17 @@ export class BeneficiaryService {
   }
 
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
-    const { piiData, projectUUIDs, walletAddress, ...data } = dto;
+    const { piiData, projectUUIDs, ...data } = dto;
+    let { walletAddress, walletService } = data;
+
+    if (useExternalWallet === 'true' && externalWalletService === WalletService.XCAPIT) {
+      walletAddress = `xcapit-${piiData?.name?.toLowerCase().split(' ').join('-')}`;
+      walletService = WalletService.XCAPIT;
+    } else {
+      walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(
+        walletAddress
+      );
+    }
 
     if (!piiData.phone) throw new RpcException('Phone number is required');
     await this.beneficiaryUtilsService.ensureUniquePhone(
@@ -396,7 +411,7 @@ export class BeneficiaryService {
 
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const createdBeneficiary = await this.rsprisma.beneficiary.create({
-      data: { ...data, walletAddress },
+      data: { ...data, walletAddress, walletService },
     });
 
     await this.beneficiaryUtilsService.addPIIData(
@@ -508,8 +523,8 @@ export class BeneficiaryService {
         .then((beneficiary) =>
           beneficiary
             ? this.rsprisma.beneficiaryPii.findUnique({
-                where: { beneficiaryId: beneficiary.id },
-              })
+              where: { beneficiaryId: beneficiary.id },
+            })
             : null
         ),
     ]);
@@ -667,29 +682,43 @@ export class BeneficiaryService {
     );
   }
 
-  async bulkAssignToProject(dto) {
+  async bulkAssignToProject(dto: { beneficiaryIds: string[], projectId: string }) {
     const { beneficiaryIds, projectId } = dto;
-    const projectPayloads = [];
-    const benProjectData = [];
 
-    await Promise.all(
-      beneficiaryIds.map(async (beneficiaryId) => {
-        const beneficiaryData = await this.rsprisma.beneficiary.findUnique({
-          where: { uuid: beneficiaryId },
-        });
-        const projectPayload = {
-          uuid: beneficiaryData.uuid,
-          walletAddress: beneficiaryData.walletAddress,
-          extras: beneficiaryData?.extras || null,
-          type: BeneficiaryConstants.Types.ENROLLED,
-        };
-        benProjectData.push({
-          projectId,
-          beneficiaryId,
-        });
-        projectPayloads.push(projectPayload);
-      })
-    );
+    let benfs: Beneficiary[] = [];
+
+    const beneficiaries = await this.prisma.beneficiary.findMany({
+      where: { uuid: { in: beneficiaryIds } },
+      include: { pii: true }
+    })
+
+    if (beneficiaries.length > 0 && externalWalletService === WalletService.XCAPIT) {
+      const benfsPhoneNumber = beneficiaries.map((ben) => ({
+        phoneNumber: ben.pii?.phone,
+      }));
+
+      const res = await this.xcapitService.bulkGenerateXcapitWallet(benfsPhoneNumber);
+      benfs = await Promise.all(
+        res.map((xBen) => {
+          const match = beneficiaries.find((b) => b.pii.phone === xBen.phoneNumber)
+          return this.prisma.beneficiary.update({
+            where: { uuid: match.uuid },
+            data: { walletAddress: xBen.walletAddress }
+          })
+        })
+      )
+    } else {
+      benfs = beneficiaries
+    }
+
+    const projectPayloads = beneficiaries?.map((ben) => ({
+      uuid: ben.uuid,
+      walletAddress: ben.walletAddress,
+      extras: ben?.extras || null,
+      type: BeneficiaryConstants.Types.ENROLLED,
+    }))
+
+    const benProjectData = beneficiaries?.map((ben) => ({ projectId, beneficiaryId: ben.uuid }))
 
     //2.Save beneficiary to project
     await this.prisma.beneficiaryProject.createMany({
@@ -958,14 +987,12 @@ export class BeneficiaryService {
           : [];
 
       console.log(`
-        Found ${
-          duplicatePhones.length
+        Found ${duplicatePhones.length
         } existing beneficiaries phone numbers i: ${duplicatePhones.join(', ')}
-        Found ${
-          duplicateWallets.length
+        Found ${duplicateWallets.length
         } existing beneficiaries wallet addresses: ${duplicateWallets.join(
-        ', '
-      )}
+          ', '
+        )}
         `);
 
       if (!ignoreExisting) {
@@ -1024,12 +1051,10 @@ export class BeneficiaryService {
 
     console.log(`Creating ${batches.length} batches of beneficiaries.
     Total beneficiaries: ${filteredBeneficiaries.length}
-    Duplicate phone numbers: ${
-      filteredBeneficiaries.length - batches.flat().length
-    }
-    Duplicate wallet addresses: ${
-      filteredBeneficiaries.length - batches.flat().length
-    }
+    Duplicate phone numbers: ${filteredBeneficiaries.length - batches.flat().length
+      }
+    Duplicate wallet addresses: ${filteredBeneficiaries.length - batches.flat().length
+      }
       `);
 
     const bulkQueueData = batches.map((batch, index) => ({
@@ -1529,21 +1554,21 @@ export class BeneficiaryService {
 
     const where = projectUUID
       ? {
-          deletedAt: null,
-          beneficiaryGroupProject:
-            projectUUID === 'NOT_ASSGNED'
-              ? {
-                  none: {},
-                }
-              : {
-                  some: {
-                    projectId: projectUUID,
-                  },
-                },
-        }
+        deletedAt: null,
+        beneficiaryGroupProject:
+          projectUUID === 'NOT_ASSGNED'
+            ? {
+              none: {},
+            }
+            : {
+              some: {
+                projectId: projectUUID,
+              },
+            },
+      }
       : {
-          deletedAt: null,
-        };
+        deletedAt: null,
+      };
 
     const data = await paginate(
       this.prisma.beneficiaryGroup,

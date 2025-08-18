@@ -1,5 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Beneficiary, Enums, TPIIData } from '@rahataid/sdk';
+import { WalletService } from '@rahataid/sdk/enums';
 import {
   ArrayNotEmpty,
   IsDate,
@@ -158,4 +159,14 @@ export class CreateBeneficiaryDto implements Beneficiary {
   @ArrayNotEmpty()
 
   projectUUIDs?: string[];
+
+  @ApiPropertyOptional({
+    type: 'string',
+    example: 'XCAPIT',
+    description: 'Beneficiary wallet service'
+  })
+  @IsOptional()
+  @IsEnum(WalletService)
+
+  walletService?: WalletService
 }

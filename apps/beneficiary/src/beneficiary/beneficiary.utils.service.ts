@@ -19,9 +19,11 @@ import {
   ProjectContants,
   WalletJobs,
 } from '@rahataid/sdk';
+import { WalletService } from '@rahataid/sdk/enums';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { XcapitUtilsService } from './xcapit.utils.service';
 
 @Injectable()
 export class BeneficiaryUtilsService {
@@ -30,8 +32,9 @@ export class BeneficiaryUtilsService {
     private eventEmitter: EventEmitter2,
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
-    private readonly settings: SettingsService
-  ) {}
+    private readonly settings: SettingsService,
+    private readonly xcapitService: XcapitUtilsService
+  ) { }
 
   buildWhereClause(dto: ListBeneficiaryDto): Record<string, any> {
     const { projectId, startDate, endDate } = dto;
@@ -161,6 +164,18 @@ export class BeneficiaryUtilsService {
       if (!projectData) return;
       if (!beneficiaryData) throw new RpcException('Beneficiary not Found.');
 
+      let beneficiary: Beneficiary;
+
+      if (beneficiaryData?.walletService === WalletService.XCAPIT) {
+        const res = await this.xcapitService.generateXCapitWallet(beneficiaryData?.pii?.phone);
+        beneficiary = await this.prismaService.beneficiary.update({
+          where: { uuid: beneficiaryId },
+          data: { walletAddress: res.address }
+        })
+      } else {
+        beneficiary = beneficiaryData;
+      }
+
       //Build Project Payload
       const projectPayload = this.buildProjectPayload(
         projectData,
@@ -195,6 +210,7 @@ export class BeneficiaryUtilsService {
       console.log('Error in assigning beneficiary to project:', e);
     }
   }
+
 
   private buildProjectPayload(projectData: any, beneficiaryData: any) {
     const payload: BeneficiaryPayload = {

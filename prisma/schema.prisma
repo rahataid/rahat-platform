@@ -261,6 +261,7 @@ model Beneficiary {
   updatedAt      DateTime?      @updatedAt()
   deletedAt      DateTime?
   isVerified     Boolean        @default(false)
+  walletService  String         @default("INTERNAL")
 
 
   pii                  BeneficiaryPii?        @relation("BeneficiaryToPii")
@@ -702,7 +703,7 @@ model OfframpRequest {
   amount        Float
   requestId     String?             @unique
   escrowAddress String?
-  status        String       @default("PENDING")
+  status        String              @default("PENDING")
   transaction   OfframpTransaction? @relation("RequestTransaction")
   extras        Json?               @db.JsonB()
   createdAt     DateTime            @default(now())
@@ -724,7 +725,7 @@ model OfframpTransaction {
   chain          String?
   token          String?
   referenceId    String?
-  status         String  @default("PENDING")
+  status         String         @default("PENDING")
   extras         Json?          @db.JsonB()
   createdAt      DateTime       @default(now())
   updatedAt      DateTime?      @updatedAt()
