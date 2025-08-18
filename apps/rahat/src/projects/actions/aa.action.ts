@@ -517,4 +517,30 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.PAYOUT.EXPORT_PAYOUT_LOGS, uuid }, payload),
   // **** Payout end **** //
 
+  // **** Vendor start **** //
+  [MS_ACTIONS.AAPROJECT.VENDOR.TEST_OFFLINE_PAYOUT]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.VENDOR.TEST_OFFLINE_PAYOUT, uuid }, payload),
+
+  // **** Token Redemption start **** //
+  [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.CREATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.GET, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.UPDATE_STATUS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.UPDATE_STATUS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.LIST, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.GET_VENDOR_REDEMPTIONS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.GET_VENDOR_REDEMPTIONS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.GET_STATS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.GET_STATS, uuid }, payload),
+  // **** Token Redemption end **** //
+
+  // **** Vendor end **** //
+
 };
