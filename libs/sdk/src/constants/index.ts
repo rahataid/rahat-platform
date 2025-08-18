@@ -305,6 +305,10 @@ export const MS_ACTIONS = {
       CZBIL_ACCOUNTS: 'aa.bank-scrape.czbil.accounts',
       CZBIL_TRANSACTIONS: 'aa.bank-scrape.czbil.transactions',
     },
+    CASH_TRACKER: {
+      EXECUTE_ACTION: 'aa.cash-tracker.executeAction',
+      GET_TRANSACTIONS: 'aa.cash-tracker.getTransactions',
+    },
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',

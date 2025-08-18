@@ -556,4 +556,12 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.BANK_SCRAPE.CZBIL_TRANSACTIONS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.BANK_SCRAPE.CZBIL_TRANSACTIONS, uuid }, payload),
   // **** bank scrape end **** //
+
+  // **** cash tracker start **** //
+  [MS_ACTIONS.AAPROJECT.CASH_TRACKER.EXECUTE_ACTION]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.CASH_TRACKER.EXECUTE_ACTION, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CASH_TRACKER.GET_TRANSACTIONS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.CASH_TRACKER.GET_TRANSACTIONS, uuid }, payload),
+  // **** cash tracker end **** //
 };
