@@ -1,6 +1,6 @@
 import { Body, Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { CreateClaimDto } from '@rahataid/extensions';
+import { BulkOtpDto, CreateClaimDto } from '@rahataid/extensions';
 import { OTPJobs } from '@rahataid/sdk';
 import { OtpService } from './otp.service';
 
@@ -11,5 +11,10 @@ export class OtpController {
   @MessagePattern({ cmd: OTPJobs.SEND_OTP })
   addOtpToClaim(@Body() data: CreateClaimDto) {
     return this.otpService.addOtpToClaim(data);
+  }
+
+  @MessagePattern({ cmd: OTPJobs.SEND_BULK_OTP })
+  sendBulkOtp(@Body() data: BulkOtpDto) {
+    return this.otpService.sendBulkOtp(data);
   }
 }

@@ -124,6 +124,18 @@ export const JOBS = {
     GET_PAYOUT_DETAILS: 'aa.jobs.payout.getPayoutDetails',
     EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
   },
+  VENDOR: {
+    // Remove after test
+    TEST_OFFLINE_PAYOUT: 'aa.jobs.vendor.test_offline_payout',
+    TOKEN_REDEMPTION: {
+      CREATE: 'aa.jobs.vendor.token_redemption.create',
+      GET: 'aa.jobs.vendor.token_redemption.get',
+      UPDATE_STATUS: 'aa.jobs.vendor.token_redemption.update_status',
+      LIST: 'aa.jobs.vendor.token_redemption.list',
+      GET_VENDOR_REDEMPTIONS: 'aa.jobs.vendor.token_redemption.get_vendor_redemptions',
+      GET_STATS: 'aa.jobs.vendor.token_redemption.get_stats',
+    },
+  },
   CHAIN: {
     DISBURSE: 'jobs.chain.disburse',
     SEND_OTP: 'jobs.chain.sendOtp',
