@@ -15,6 +15,7 @@ import {
   UsersModule,
 } from '@rumsan/user';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
+import { CommsModule } from '../comms/comms.module';
 import { ExternalAppGuard } from '../decorators';
 import { GrievanceModule } from '../grievance/grievance.module';
 import { ListenersModule } from '../listeners/listeners.module';
@@ -70,6 +71,8 @@ import { AppService } from './app.service';
     QueueModule,
     WalletModule,
     NotificationModule,
+    CommsModule.forRoot(),
+
   ],
   controllers: [AppController],
   providers: [
@@ -80,5 +83,6 @@ import { AppService } from './app.service';
       useClass: ExternalAppGuard,
     },
   ],
+  exports: [AppService]
 })
 export class AppModule { }
