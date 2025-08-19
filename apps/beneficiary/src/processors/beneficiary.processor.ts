@@ -93,6 +93,9 @@ export class BeneficiaryProcessor {
       }
       // ====Txn start end===
       await removeTempGroup(this.prisma, tempGroup.uuid);
+      this.eventEmitter.emit(
+        BeneficiaryEvents.IMPORT_TEMP_BENEFICIARIES_FROM_CT,
+      );
     } catch (err) {
       console.log('Import Error=>', err.message);
       throw err;
