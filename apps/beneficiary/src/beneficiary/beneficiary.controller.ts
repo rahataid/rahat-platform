@@ -1,6 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Controller, Param } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   addBulkBeneficiaryToProject,
@@ -15,6 +16,7 @@ import {
   UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
+  BeneficiaryEvents,
   BeneficiaryJobs,
   ValidateWallet
 } from '@rahataid/sdk';
@@ -30,7 +32,9 @@ export class BeneficiaryController {
     private readonly service: BeneficiaryService,
     private readonly utilService: BeneficiaryUtilsService,
     private readonly statsService: BeneficiaryStatService,
-    private readonly verificationService: VerificationService
+    private readonly verificationService: VerificationService,
+    private eventEmitter: EventEmitter2,
+
   ) { }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE })
@@ -64,14 +68,19 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
-  createBulk(@Payload() data) {
+  async createBulk(@Payload() data) {
     // const payloadData = Array.isArray(data?.data) ? data?.data : data?.payload;
 
-    return this.service.createBulk(
+    const rData = await this.service.createBulk(
       data?.payload,
       data?.data?.projectUUID,
       data?.data?.walkinBulk
     );
+    this.eventEmitter.emit(
+      BeneficiaryEvents.IMPORT_TEMP_BENEFICIARIES_FROM_EXCEL,
+    );
+
+    return rData;
   }
 
   @MessagePattern({
