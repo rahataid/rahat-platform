@@ -11,11 +11,11 @@ const main = async () => {
         name: 'XCAPIT',
         dataType: 'OBJECT',
         value: {
-          URL: 'https://qa.ltw.xcapit.com',
-          TOKEN:
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJhaGF0QHhjYXBpdC5jb20iLCJpYXQiOjE3NTQ5OTc1MjksImV4cCI6MTc1NTA4MzkyOX0.ef3QOBggtDdm0bKERNu8cR7wjIx5TYIwBAIc1JVL-VA',
+          BASEURL: 'https://qa.ltw.xcapit.com',
+          EMAIL: 'rahat@xcapit.com',
+          PASSWORD: 'nYph!TUd[!6u#Jp',
         },
-        requiredFields: ['URL', 'TOKEN'],
+        requiredFields: ['BASEURL', 'EMAIL', 'PASSWORD'],
       },
     });
     console.log('xcapit settings created successfully');
