@@ -24,7 +24,7 @@ export class WalletInterceptor implements NestInterceptor {
     private readonly prismaService: PrismaService,
     private readonly walletService: WalletService,
     private readonly xcapitService: XcapitService
-  ) { }
+  ) {}
 
   async intercept(
     context: ExecutionContext,
@@ -43,27 +43,7 @@ export class WalletInterceptor implements NestInterceptor {
         useExternalWallet === 'true' &&
         externalWalletService === WalletServiceType.XCAPIT
       ) {
-        // Collect phones
-        const phones = items
-          .map((d) => d?.piiData?.phone)
-          .filter(Boolean)
-          .map((phone) => ({ phoneNumber: phone }));
-
-        // Bulk generate wallets
-        const bulkRes = await this.xcapitService.bulkGenerateXcapitWallet(
-          phones
-        );
-
-        // Build phone → wallet mapping
-        const phoneToWallet = Object.fromEntries(
-          bulkRes?.map((b) => [b.phoneNumber, b.walletAddress]) || []
-        );
-
-        // Attach wallet addresses to items
-        updatedItems = items.map((d) => ({
-          ...d,
-          walletAddress: phoneToWallet[d?.piiData?.phone] || d.walletAddress,
-        }));
+        updatedItems = await this.attachXcapitWallets(items);
       } else {
         // Validate/ensure wallet addresses for all items
         updatedItems = await Promise.all(
@@ -87,6 +67,28 @@ export class WalletInterceptor implements NestInterceptor {
         ? error
         : new RpcException('Wallet processing failed');
     }
+  }
+
+  private async attachXcapitWallets(items: any[]) {
+    // Collect phones
+    const phones = items
+      .map((d) => d?.piiData?.phone)
+      .filter(Boolean)
+      .map((phone) => ({ phoneNumber: phone }));
+
+    // Bulk generate wallets
+    const bulkRes = await this.xcapitService.bulkGenerateXcapitWallet(phones);
+
+    // Build phone → wallet mapping
+    const phoneToWallet = Object.fromEntries(
+      bulkRes?.map((b) => [b.phoneNumber, b.walletAddress]) || []
+    );
+
+    // Attach wallet addresses to items
+    return items.map((d) => ({
+      ...d,
+      walletAddress: phoneToWallet[d?.piiData?.phone] || d.walletAddress,
+    }));
   }
 
   private async ensureValidWalletAddress(
