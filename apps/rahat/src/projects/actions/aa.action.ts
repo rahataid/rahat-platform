@@ -521,6 +521,12 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.VENDOR.TEST_OFFLINE_PAYOUT]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.VENDOR.TEST_OFFLINE_PAYOUT, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.VENDOR.FETCH_OFFLINE_BENEFICIARIES]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.VENDOR.FETCH_OFFLINE_BENEFICIARIES, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.SYNC_OFFLINE_DATA]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.VENDOR.SYNC_OFFLINE_DATA, uuid }, payload),
+
   // **** Token Redemption start **** //
   [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.CREATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.CREATE, uuid }, payload),
