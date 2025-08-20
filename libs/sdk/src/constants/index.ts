@@ -477,6 +477,7 @@ export const MS_ACTIONS = {
     UPDATE_STATUS: 'ms.activities.updateStatus',
     LIST_PROJECT_SPECIFIC: 'ms.activities.listProjectSpecific',
     COMMUNICATION: {
+      GET_COMMS: 'ms.activities.getComms',
       TRIGGER: 'ms.activities.communication.trigger',
       SESSION_LOGS: 'ms.activities.communication.sessionLogs',
       RETRY_FAILED: 'ms.activities.communication.retryFailed',
