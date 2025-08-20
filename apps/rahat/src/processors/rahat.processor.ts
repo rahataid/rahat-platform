@@ -4,10 +4,14 @@ import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { APP_JOBS, BQUEUE } from '@rahataid/sdk';
 import { Job } from 'bull';
+import { EmailService } from '../listeners/email.service';
 
 @Processor(BQUEUE.RAHAT)
 export class RahatProcessor {
   private readonly logger = new Logger(RahatProcessor.name);
+  constructor(
+    private emailService: EmailService
+  ) { }
 
   @Process(APP_JOBS.EMAIL)
   async sendEmail(job: Job<any>) {
@@ -18,6 +22,21 @@ export class RahatProcessor {
     //   'OTP for login',
     //   `<h1>OTP for login</h1><p>${job.data.otp}</p>`
     // );
+  }
+
+  @Process(APP_JOBS.NOTIFY)
+  async sendNotifyEmail(job: Job<{ usersEmail: string[], subject: string, text: string }>) {
+    const data = job.data;
+    const { usersEmail, subject, text } = data;
+    await this.emailService.sendEmail(
+      usersEmail,
+      subject,
+      `
+      Hi,
+
+      ${text}
+      `
+    );
   }
 
 }
