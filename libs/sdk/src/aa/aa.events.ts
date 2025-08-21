@@ -124,6 +124,20 @@ export const JOBS = {
     GET_PAYOUT_DETAILS: 'aa.jobs.payout.getPayoutDetails',
     EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
   },
+  VENDOR: {
+    // Remove after test
+    TEST_OFFLINE_PAYOUT: 'aa.jobs.vendor.test_offline_payout',
+    FETCH_OFFLINE_BENEFICIARIES: 'aa.jobs.vendor.fetch_offline_beneficiaries',
+    SYNC_OFFLINE_DATA: 'aa.jobs.vendor.sync_offline_data',
+    TOKEN_REDEMPTION: {
+      CREATE: 'aa.jobs.vendor.token_redemption.create',
+      GET: 'aa.jobs.vendor.token_redemption.get',
+      UPDATE_STATUS: 'aa.jobs.vendor.token_redemption.update_status',
+      LIST: 'aa.jobs.vendor.token_redemption.list',
+      GET_VENDOR_REDEMPTIONS: 'aa.jobs.vendor.token_redemption.get_vendor_redemptions',
+      GET_STATS: 'aa.jobs.vendor.token_redemption.get_stats',
+    },
+  },
   CHAIN: {
     DISBURSE: 'aa.jobs.chain.disburse',
     SEND_OTP: 'aa.jobs.chain.sendOtp',
