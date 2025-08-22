@@ -5,12 +5,13 @@ import { NotificationController } from './notification.controller';
 import { NotificationService } from './notification.service';
 
 @Module({
-    imports: [
-        BullModule.registerQueue({
-            name: BQUEUE.RAHAT,
-        }),
-    ],
-    controllers: [NotificationController],
-    providers: [NotificationService],
+  imports: [
+    BullModule.registerQueue({
+      name: BQUEUE.RAHAT,
+    }),
+  ],
+  controllers: [NotificationController],
+  providers: [NotificationService],
+  exports: [NotificationService],
 })
 export class NotificationModule { }
