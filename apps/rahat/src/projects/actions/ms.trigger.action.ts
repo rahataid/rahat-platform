@@ -36,6 +36,7 @@ export const MS_TRIGGERS_JOBS = {
   WATER_LEVELS: {
     GET_DHM: 'ms.jobs.waterLevels.getDhm',
     GET_GLOFAS: 'ms.jobs.waterLevels.getGlofas',
+    GET_GFH: 'ms.jobs.waterLevels.getGfh',
   },
   RAINFALL_LEVELS: {
     GET_DHM: 'ms.jobs.rainfallLevels.getDhm',
@@ -257,6 +258,15 @@ export const msTriggerActions: ProjectActionFunc = {
 
     return sendCommand(
       { cmd: MS_TRIGGERS_JOBS.WATER_LEVELS.GET_GLOFAS },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_WATER_LEVELS.GET_GFH]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.WATER_LEVELS.GET_GFH },
       payload
     );
   },

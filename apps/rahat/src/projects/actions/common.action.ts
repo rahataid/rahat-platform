@@ -88,6 +88,10 @@ export const vendorActions: ProjectActionFunc = {
   [MS_ACTIONS.VENDOR.LIST_WITH_PROJECT_DATA]: (uuid, payload, sendCommand) => sendCommand(
     { cmd: VendorJobs.LIST_WITH_PROJECT_DATA, uuid },
     payload
+  ),
+  [MS_ACTIONS.VENDOR.GET_BENEFICIARIES]: (uuid, payload, sendCommand) => sendCommand(
+    { cmd: VendorJobs.GET_BENEFICIARIES, uuid },
+    payload
   )
 
 

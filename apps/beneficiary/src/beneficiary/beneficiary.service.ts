@@ -433,28 +433,43 @@ export class BeneficiaryService {
     return data;
   }
 
-  async findPhoneByUUID(uuid: UUID[]) {
-    const beneficiaryIds = await this.rsprisma.beneficiary.findMany({
+  async findPhoneByUUID(uuids: UUID[]) {
+    // Fetch both id and uuid for mapping
+    const beneficiaries = await this.rsprisma.beneficiary.findMany({
       where: {
         uuid: {
-          in: uuid,
+          in: uuids,
         },
       },
       select: {
         id: true,
+        uuid: true,
       },
     });
 
-    return this.prisma.beneficiaryPii.findMany({
+    // Map id to uuid for quick lookup
+    const idToUuid = new Map(beneficiaries.map(b => [b.id, b.uuid]));
+
+    // Fetch PII data for these beneficiaries
+    const piiList = await this.prisma.beneficiaryPii.findMany({
       where: {
         beneficiaryId: {
-          in: beneficiaryIds.map((b) => b.id),
+          in: beneficiaries.map((b) => b.id),
         },
       },
       select: {
-        phone: true
+        beneficiaryId: true,
+        phone: true,
+        name: true,
       }
     });
+
+    // Attach uuid to each PII record
+    return piiList.map(pii => ({
+      uuid: idToUuid.get(pii.beneficiaryId),
+      phone: pii.phone,
+      name: pii.name,
+    }));
   }
 
   async findOneByWallet(walletAddress: string) {
@@ -1152,9 +1167,42 @@ export class BeneficiaryService {
       },
     });
 
-    return {
+    if (!group) {
+      throw new RpcException('Group not found');
+    }
+
+    // If groupPurpose is not found and groupedBeneficiaries is empty, return group with isGroupValidForAA as false
+    if (!group.groupPurpose || !group.groupedBeneficiaries?.length) {
+      return {
+        ...group,
+        isGroupValidForAA: false,
+        isAnyBeneficiaryInvalid: false,
+      }
+    }
+
+    // If group is found, check if it is valid for AA
+    const finalData = {
       ...group,
       isGroupValidForAA: await this.isGroupValidForAA(group.uuid),
+    };
+
+    // Check if any beneficiary has invalid account or phone number
+    let isAnyBeneficiaryInvalid = false;
+
+    // Only check for errors if groupPurpose is not COMMUNICATION and group is not valid for AA
+    if (finalData.groupPurpose !== GroupPurpose.COMMUNICATION && !finalData.isGroupValidForAA) {
+      for (const bef of finalData.groupedBeneficiaries) {
+        const extras = bef.Beneficiary.extras as Record<string, any>;
+        if (extras?.error) {
+          isAnyBeneficiaryInvalid = true;
+          break;
+        }
+      }
+    }
+
+    return {
+      ...finalData,
+      isAnyBeneficiaryInvalid
     };
   }
 
