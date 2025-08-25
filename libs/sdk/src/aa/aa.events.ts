@@ -138,6 +138,8 @@ export const JOBS = {
     HBL_ACCOUNTS: 'aa.jobs.bank-scrape.hbl.accounts',
     HBL_TRANSACTIONS: 'aa.jobs.bank-scrape.hbl.transactions',
     CZBIL_ACCOUNTS: 'aa.jobs.bank-scrape.czbil.accounts',
-    CZBIL_TRANSACTIONS: 'aa.jobs.bank-scrape.czbil.transactions'
+    CZBIL_TRANSACTIONS: 'aa.jobs.bank-scrape.czbil.transactions',
+    BANKS: 'aa.jobs.bank-scrape.banks',
+    TRANSACTIONS: 'aa.jobs.bank-scrape.transactions',
   },
 };

@@ -298,6 +298,8 @@ export const MS_ACTIONS = {
       HBL_TRANSACTIONS: 'aa.bank-scrape.hbl.transactions',
       CZBIL_ACCOUNTS: 'aa.bank-scrape.czbil.accounts',
       CZBIL_TRANSACTIONS: 'aa.bank-scrape.czbil.transactions',
+      BANKS: 'aa.bank-scrape.banks',
+      TRANSACTIONS: 'aa.bank-scrape.transactions'
     },
   },
   C2CProject: {
