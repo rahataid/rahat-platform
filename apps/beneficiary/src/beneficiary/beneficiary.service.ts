@@ -1642,10 +1642,33 @@ export class BeneficiaryService {
     const group = await this.prisma.beneficiaryGroup.findUnique({
       where: {
         uuid: dto.uuid
+      },
+      select: {
+        beneficiaryGroupProject: {
+          select: {
+            Project: {
+              select: {
+                name: true
+              }
+            }
+          }
+        }
       }
     })
 
     if (!group) throw new RpcException('Group not found')
+
+    // Check if the group is assigned to AA project (case-insensitive)
+    const isAssignedToAA = group.beneficiaryGroupProject.some(
+      (g) => g.Project?.name?.toLowerCase() === 'aa'
+    );
+
+    if (isAssignedToAA) {
+      throw new RpcException(
+        'Group purpose cannot be changed because this group is already assigned to the AA project.'
+      );
+    }
+
     await this.prisma.beneficiaryGroup.update({
       where: {
         uuid: dto.uuid
