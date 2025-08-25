@@ -84,6 +84,7 @@
     "@rumsan/rabbitmq": "^0.0.1",
     "@rumsan/sdk": "0.0.47",
     "@rumsan/user": "3.0.169",
+    "@rumsan/connect": "1.0.8",
     "@stellar/stellar-sdk": "^13.3.0",
     "@types/amqplib": "^0.10.6",
     "@urql/core": "^5.0.4",

@@ -127,6 +127,8 @@ export const JOBS = {
   VENDOR: {
     // Remove after test
     TEST_OFFLINE_PAYOUT: 'aa.jobs.vendor.test_offline_payout',
+    FETCH_OFFLINE_BENEFICIARIES: 'aa.jobs.vendor.fetch_offline_beneficiaries',
+    SYNC_OFFLINE_DATA: 'aa.jobs.vendor.sync_offline_data',
     TOKEN_REDEMPTION: {
       CREATE: 'aa.jobs.vendor.token_redemption.create',
       GET: 'aa.jobs.vendor.token_redemption.get',

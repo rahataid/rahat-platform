@@ -104,4 +104,10 @@ export const JOBS = {
     LIST_EYE_CHECKEUP_LINE: 'rahat.jobs.reporting.list_eye_checkup_line',
     LIST_PURCHASE_OF_GLASSESS_LINE: 'rahat.jobs.reporting.list_purchase_of_glassess',
   },
+
+  NOTIFICATION: {
+    CREATE: 'rahat.jobs.notification.create',
+    LIST: 'rahat.jobs.notification.list',
+    GET: 'rahat.jobs.notification.get',
+  },
 };
