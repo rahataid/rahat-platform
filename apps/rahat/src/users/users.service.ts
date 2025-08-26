@@ -3,6 +3,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateUserDto, ListUserDto } from '@rumsan/extensions/dtos';
 import { PrismaService } from '@rumsan/prisma';
 import { UsersService as RSUserService } from '@rumsan/user';
+import { NotificationService } from '../notification/notification.service';
 import { WalletService } from '../wallet/wallet.service';
 
 @Injectable()
@@ -10,7 +11,8 @@ export class UsersService extends RSUserService {
   constructor(
     protected readonly prisma: PrismaService,
     protected readonly eventEmitter: EventEmitter2,
-    protected readonly walletService: WalletService
+    protected readonly walletService: WalletService,
+    protected readonly notificationService: NotificationService
   ) {
     super(prisma, eventEmitter);
   }
@@ -32,7 +34,13 @@ export class UsersService extends RSUserService {
 
       userData.wallet = randomWallet.address;
 
-      return super.create(userData);
+      const res = super.create(userData);
+      await this.notificationService.createNotification({
+        title: "User has been added",
+        description: `A new user has been added Name: ${userData.name}`,
+        group: "User Management"
+      })
+      return res
     } catch (error) {
       console.error('Error creating user wallet:', error);
       throw error;
