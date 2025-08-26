@@ -1160,6 +1160,7 @@ export class BeneficiaryService {
               select: {
                 id: true,
                 name: true,
+                type: true,
               }
             }
           }
@@ -1648,7 +1649,7 @@ export class BeneficiaryService {
           select: {
             Project: {
               select: {
-                name: true
+                type: true
               }
             }
           }
@@ -1660,7 +1661,7 @@ export class BeneficiaryService {
 
     // Check if the group is assigned to AA project (case-insensitive)
     const isAssignedToAA = group.beneficiaryGroupProject.some(
-      (g) => g.Project?.name?.toLowerCase() === 'aa'
+      (g) => g.Project?.type?.toLowerCase() === 'aa'
     );
 
     if (isAssignedToAA) {
