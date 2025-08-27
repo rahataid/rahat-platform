@@ -5,8 +5,8 @@ export const EVENTS = {
   BENEFICIARY_UPDATED: 'beneficiary.updated',
   BENEFICIARY_ASSIGNED_TO_PROJECT: 'beneficiary.projectAssigned',
   VENDORS_CREATED: 'vendors.created',
-  IMPORT_TEMP_BENEFICIARIES_FROM_CT: 'beneficiary.import_temp_beneficiaries_from_ct',
-  IMPORT_TEMP_BENEFICIARIES_FROM_EXCEL: "beneficiary.import_temp_beneficiaries_from_excel",
+  IMPORTED_TEMP_BENEFICIARIES_FROM_CT: 'beneficiary.imported_temp_beneficiaries_from_ct',
+  IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL: "beneficiary.imported_temp_beneficiaries_from_excel",
 };
 
 export const JOBS = {
