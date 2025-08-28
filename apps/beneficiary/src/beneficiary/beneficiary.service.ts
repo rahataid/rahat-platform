@@ -43,7 +43,7 @@ import {
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
-import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
+import { sanitizeNonAlphaNumericValue, sanitizePhone } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
@@ -1990,7 +1990,7 @@ export class BeneficiaryService {
         phoneStatus: d.phoneStatus,
         internetStatus: d.internetStatus,
         email: d.email || null,
-        phone: d.phone || null,
+        phone: sanitizePhone(d.phone) || null,
         birthDate: d.birthDate || null,
         location: d.location || null,
         latitude: d.latitude || null,
@@ -2000,7 +2000,6 @@ export class BeneficiaryService {
       };
     }))
 
-    console.log(beneficiaryData)
     const tempBenefPhone = await this.listTempBenefPhone();
     return this.prisma.$transaction(async (txn) => {
       // 1. Upsert temp group by name

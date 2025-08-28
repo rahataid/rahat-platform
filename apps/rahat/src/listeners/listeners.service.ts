@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { BQUEUE, ProjectEvents, ProjectJobs } from '@rahataid/sdk';
 import { Project } from '@rahataid/sdk/project/project.types';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { EVENTS } from '@rumsan/user';
 import { Queue } from 'bull';
@@ -68,6 +69,9 @@ export class ListenersService {
   }
   @OnEvent(EVENTS.USER_CREATED)
   async sendUserCreatedEmail(data: any) {
+    const settings = new SettingsService(this.prisma);
+    const frontendURL: any = await settings.getSettingsByName('FRONTEND_URL');
+
     this.emailService.sendEmail(
       data.address,
       'Welcome to Rahat.',
@@ -76,7 +80,7 @@ export class ListenersService {
 
       We're thrilled to have you on board! You've been successfully added to Rahat dashboard.
 
-      Click the link to access the Rahat dashboard: ${this.configService.get('FRONTEND_URL')}.
+      Click the link to access the Rahat dashboard: ${frontendURL["value"]}.
 
       Best regards,
       Rahat Team
@@ -99,7 +103,7 @@ export class ListenersService {
 
             <h3 style="color: #374151; font-size: 14px; line-height: 1.6; margin-bottom: 20px; text-align: center;">
 
-           Click the link to access the Rahat dashboard: ${this.configService.get('FRONTEND_URL')}
+           Click the link to access the Rahat dashboard: ${frontendURL["value"]}
             </h3>
 
             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
