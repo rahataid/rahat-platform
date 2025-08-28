@@ -67,6 +67,7 @@ export class BeneficiaryService {
     private readonly verificationService: VerificationService,
     private readonly beneficiaryUtilsService: BeneficiaryUtilsService,
 
+
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -897,7 +898,19 @@ export class BeneficiaryService {
     }
   }
 
+  async createBulkBeneficiaries(dtos: CreateBeneficiaryDto[],
+    projectUuid?: string, conditional?: boolean) {
+    try {
+      const result = this.createBulk(dtos, projectUuid, conditional)
+      this.eventEmitter.emit(
+        BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL,
+      );
+      return result
+    } catch (error) {
+      this.logger.error(error.message)
+    }
 
+  }
   async syncProjectStats(projectUuid) {
     return await this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
       projectUuid,
