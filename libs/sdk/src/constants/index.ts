@@ -505,6 +505,9 @@ export const MS_ACTIONS = {
     REMOVE: 'ms.dailyMonitoring.remove',
     DELETE: 'ms.dailyMonitoring.delete',
   },
+  AIDLINKProject: {
+    GET_SAFE_OWNER: 'aidlink.getSafeOwner',
+  }
 };
 
 export const RABBIT_MQ = {

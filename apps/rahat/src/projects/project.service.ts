@@ -30,6 +30,7 @@ import { createExtrasAndPIIData } from '../utils';
 import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import {
   aaActions,
+  aidLinkActions,
   beneficiaryActions,
   beneficiaryGroupActions,
   c2cActions,
@@ -252,6 +253,7 @@ export class ProjectService {
       ...c2cActions,
       ...cvaActions,
       ...rpActions,
+      ...aidLinkActions,
       ...commsActions,
       ...msTriggerActions,
     };
