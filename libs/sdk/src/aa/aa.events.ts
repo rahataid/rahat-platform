@@ -143,6 +143,7 @@ export const JOBS = {
     SEND_OTP: 'aa.jobs.chain.sendOtp',
     SEND_ASSET: 'aa.jobs.chain.sendAsset',
     GET_DISBURSEMENT_STATS: 'aa.jobs.chain.getDisbursementStats',
+    GET_WALLET_BALANCE: 'aa.jobs.chain.getWalletBalance',
   },
   GRIEVANCES: {
     CREATE: 'aa.jobs.grievances.create',

@@ -408,6 +408,13 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.CHAIN.SEND_ASSET]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.CHAIN.SEND_ASSET, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.CHAIN.GET_WALLET_BALANCE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.CHAIN.GET_WALLET_BALANCE, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.CHAIN.GET_DISBURSEMENT_STATS]: (
     uuid,
     payload,

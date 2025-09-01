@@ -62,15 +62,15 @@ interface BulkResponse {
 const BASE_URL = 'http://localhost:5500/v1';
 const PROJECT_ID = '30d1a534-b02f-4135-87e3-e820aede1dce';
 const ACCESS_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcklkIjoxLCJ1dWlkIjoiYzZlZWY0ZmEtM2ZjOC00ZjU2LWE3M2YtMWQyMDI5Y2NmZGNiIiwibmFtZSI6IlJ1bXNhbiBBZG1pbiIsImVtYWlsIjoicnVtc2FuQG1haWxpbmF0b3IuY29tIiwicGhvbmUiOm51bGwsIndhbGxldCI6IjB4QUM2YkZhZjEwZTg5MjAyYzI5M2RENzk1ZUNlMTgwQkJmMTQzMGQ3QiIsInJvbGVzIjpbIkFkbWluIl0sInBlcm1pc3Npb25zIjpbeyJhY3Rpb24iOiJtYW5hZ2UiLCJzdWJqZWN0IjoiYWxsIiwiaW52ZXJ0ZWQiOmZhbHNlLCJjb25kaXRpb25zIjpudWxsfV0sInNlc3Npb25JZCI6ImQ5ZDc3NGVhLWFhZDMtNGFiZS1iOGNhLTY1YmY5NjU4MjhkMyIsImlhdCI6MTc1NjI5NTMzMywiZXhwIjoxNzU2MzgxNzMzfQ.7aDLFe3N1lNYXyPlEoG_5ISXmqql9tlFTdSqqzMPtnI';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcklkIjoxLCJ1dWlkIjoiYmNkNGM1MTktNDJkOC00MGQzLWFkODYtYWU3NTdkNmExOTBkIiwibmFtZSI6IlJ1bXNhbiBBZG1pbiIsImVtYWlsIjoicnVtc2FuQG1haWxpbmF0b3IuY29tIiwicGhvbmUiOm51bGwsIndhbGxldCI6IjB4QUM2YkZhZjEwZTg5MjAyYzI5M2RENzk1ZUNlMTgwQkJmMTQzMGQ3QiIsInJvbGVzIjpbIkFkbWluIl0sInBlcm1pc3Npb25zIjpbeyJhY3Rpb24iOiJtYW5hZ2UiLCJzdWJqZWN0IjoiYWxsIiwiaW52ZXJ0ZWQiOmZhbHNlLCJjb25kaXRpb25zIjpudWxsfV0sInNlc3Npb25JZCI6IjNhNzAwOTUzLTVkN2QtNGQ1ZC05NGQ2LWE0NzEwYjI4YjE5YyIsImlhdCI6MTc1NjcxNjU1NCwiZXhwIjoxNzU2ODAyOTU0fQ.j9yNld1HuCeX-5Jf2qm_WMssgCK-yhOgNCMVS-Cixog';
 
 const headers = {
   Authorization: `Bearer ${ACCESS_TOKEN}`,
   'Content-Type': 'application/json',
 };
 
-const numberOfBeneficiaries = 3000; // Reduced for testing
-const BATCH_SIZE = 1500; // Process beneficiaries in batches of 10
+const numberOfBeneficiaries = 10; // Reduced for testing
+const BATCH_SIZE = 10; // Process beneficiaries in batches of 10
 const CONCURRENT_LIMIT = 10; // Limit concurrent requests to 5
 
 // Track used wallet addresses to ensure uniqueness
