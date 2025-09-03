@@ -14,6 +14,8 @@ export class CorsConfigService {
         const allowedOrigins = this.configService.get<string>('ALLOWED_ORIGINS');
         const defaultOrigins = ['http://localhost:3000', 'http://localhost:3001'];
 
+        this.logger.warn(`CORS config service initialized with allowed origins: ${allowedOrigins}`);
+
         let corsOrigins: string[];
 
         if (allowedOrigins) {
