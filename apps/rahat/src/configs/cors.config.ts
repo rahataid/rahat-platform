@@ -12,11 +12,12 @@ export class CorsConfigService {
 
     createCorsOptions(): CorsOptions {
         const allowedOrigins = this.configService.get<string>('ALLOWED_ORIGINS');
-        const defaultOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+        const defaultStringOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+        const rahatDomainRegex = /^https?:\/\/(.+\.)?rahat\.io$/;
 
-        this.logger.warn(`CORS config service initialized with allowed origins: ${allowedOrigins}`);
+        this.logger.log(`CORS config service initialized with allowed origins: ${allowedOrigins || 'none (using defaults)'}`);
 
-        let corsOrigins: string[];
+        let corsOrigins: (string | RegExp)[];
 
         if (allowedOrigins) {
             corsOrigins = allowedOrigins
@@ -27,12 +28,18 @@ export class CorsConfigService {
             this.logger.log(`CORS configured with allowed origins: ${corsOrigins.join(', ')}`);
         } else {
             const nodeEnv = this.configService.get<string>('NODE_ENV');
-            corsOrigins = nodeEnv === 'production' ? [] : defaultOrigins;
+            corsOrigins = nodeEnv === 'production'
+                ? [rahatDomainRegex] // Only allow rahat.io domains in production
+                : [...defaultStringOrigins, rahatDomainRegex]; // Allow localhost + rahat.io in development
+
+            const originsDescription = nodeEnv === 'production'
+                ? 'rahat.io domains only'
+                : `${defaultStringOrigins.join(', ')} + rahat.io domains`;
 
             this.logger.warn(
                 nodeEnv === 'production'
-                    ? 'ALLOWED_ORIGINS not set in production - CORS will block all origins'
-                    : `ALLOWED_ORIGINS not set - using default development origins: ${defaultOrigins.join(', ')}`
+                    ? 'ALLOWED_ORIGINS not set in production - allowing rahat.io domains only'
+                    : `ALLOWED_ORIGINS not set - using default development origins: ${originsDescription}`
             );
         }
 
