@@ -24,10 +24,11 @@ export class CorsConfigService {
 
             this.logger.log(`CORS configured with allowed origins: ${corsOrigins.join(', ')}`);
         } else {
-            corsOrigins = process.env.NODE_ENV === 'production' ? [] : defaultOrigins;
+            const nodeEnv = this.configService.get<string>('NODE_ENV');
+            corsOrigins = nodeEnv === 'production' ? [] : defaultOrigins;
 
             this.logger.warn(
-                process.env.NODE_ENV === 'production'
+                nodeEnv === 'production'
                     ? 'ALLOWED_ORIGINS not set in production - CORS will block all origins'
                     : `ALLOWED_ORIGINS not set - using default development origins: ${defaultOrigins.join(', ')}`
             );
