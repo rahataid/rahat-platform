@@ -31,3 +31,21 @@ export const sanitizeTrimValue = (input: string): string => {
 export const trimNonAlphaNumericValue = (input: string): string => {
   return input.replace(/^\W+|\W+$/g, ''); // Remove all non-alphanumeric characters from the beginning and end of the string
 }
+
+export const sanitizePhone = (phone?: string): string | null => {
+  if (!phone) return null;
+
+  // Remove all whitespace and non-numeric characters except leading +
+  let cleaned = phone.replace(/\s+/g, "").replace(/[^\d+]/g, "");
+
+  // Ensure it starts with +977, otherwise prepend
+  if (!cleaned.startsWith("+977")) {
+    // If starts with 0, remove it and prepend +977
+    if (cleaned.startsWith("0")) {
+      cleaned = cleaned.slice(1);
+    }
+    cleaned = `+977${cleaned}`;
+  }
+
+  return cleaned;
+}
