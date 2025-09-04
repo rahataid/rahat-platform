@@ -849,32 +849,32 @@ export class BeneficiaryService {
         );
         //COMMENTING THIS BECAUSE ALREADY ADDED TO PROJECT
 
-        // const assignPromises = insertedBeneficiariesWithPii.map(
-        //   (b) => {
-        //     const projectPayload = {
-        //       uuid: b.uuid,
-        //       walletAddress: b.walletAddress,
-        //       extras: b?.extras || null,
-        //       type: BeneficiaryConstants.Types.ENROLLED,
-        //       isVerified: b?.isVerified,
-        //     };
-        // return handleMicroserviceCall({
-        //   client: this.client.send(
-        //     { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUuid },
-        //     projectPayload
-        //  ),
-        //   onSuccess(response) {
-        //         console.log('response', response);
-        //       },
-        //       onError(error) {
-        //         console.log('error', error);
-        //         throw new RpcException(error.message);
-        //       },
-        //     });
-        // }
-        //   this.assignBeneficiaryGroupToProject({ beneficiaryId: b.uuid, projectId: projectUuid })
-        // );
-        // await Promise.all(assignPromises);
+        const assignPromises = insertedBeneficiariesWithPii.map(
+          (b) => {
+            const projectPayload = {
+              uuid: b.uuid,
+              walletAddress: b.walletAddress,
+              extras: b?.extras || null,
+              type: BeneficiaryConstants.Types.ENROLLED,
+              isVerified: b?.isVerified,
+            };
+            return handleMicroserviceCall({
+              client: this.client.send(
+                { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUuid },
+                projectPayload
+              ),
+              onSuccess(response) {
+                console.log('response', response);
+              },
+              onError(error) {
+                console.log('error', error);
+                throw new RpcException(error.message);
+              },
+            });
+          }
+          // this.assignBeneficiaryGroupToProject({ beneficiaryId: b.uuid, projectId: projectUuid })
+        );
+        await Promise.all(assignPromises);
       }
 
       this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
@@ -888,9 +888,9 @@ export class BeneficiaryService {
         beneficiariesData: insertedBeneficiariesWithPii,
       };
     } catch (e) {
-      console.log(e);
       return {
-        success: false
+        success: false,
+        message: e?.message || 'Failed to create beneficiary group. Please try again.'
       }
       // throw new RpcException(e)
 

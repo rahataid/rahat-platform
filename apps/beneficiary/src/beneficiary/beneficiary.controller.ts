@@ -69,7 +69,7 @@ export class BeneficiaryController {
 
     return this.service.createBulk(
       data?.payload,
-      data?.data?.projectUUID,
+      data?.projectUUID,
       data?.data?.walkinBulk
     );
   }

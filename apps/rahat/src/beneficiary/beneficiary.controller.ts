@@ -212,8 +212,8 @@ export class BeneficiaryController {
       age: b['Age'] || null,
       walletAddress: b['Wallet Address'],
       piiData: {
-        name: b['Name*'] || 'Unknown',
-        phone: b['Whatsapp Number*'] || b['Phone Number*'],
+        name: b['Name*'] || b['Name'] || 'Unknown',
+        phone: b['Whatsapp Number*'] || b['Phone Number*'] || b['Phone Number'],
         extras: {
           isAdult:
             getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age*']) > 18,
