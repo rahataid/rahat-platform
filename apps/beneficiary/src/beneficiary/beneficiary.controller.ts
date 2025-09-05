@@ -300,4 +300,9 @@ export class BeneficiaryController {
   async deleteBenefAndPii(payload: any) {
     return this.service.deleteBenefAndPii(payload);
   }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BEN_REPORTING_LOGS })
+  async getBenReportingLogs(payload: any) {
+    return this.service.getBenReportingLogs(payload);
+  }
 }

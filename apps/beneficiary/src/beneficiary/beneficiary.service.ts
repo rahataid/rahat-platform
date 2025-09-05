@@ -2076,6 +2076,41 @@ export class BeneficiaryService {
     });
   }
 
+  async getBenReportingLogs(
+    payload) {
+    const { fromDate, toDate } = payload;
+    if (!fromDate || !toDate) return [];
+    const benDetails = await this.prisma.beneficiary.findMany({
+      where: {
+        createdAt: {
+          gte: new Date(fromDate),
+          lte: new Date(toDate)
+        }
+      },
+
+      select: {
+        pii: {
+          select: {
+            name: true,
+            phone: true,
+          }
+        },
+        walletAddress: true,
+        createdAt: true,
+        updatedAt: true,
+        uuid: true,
+
+      }
+    });
+    return this.client.send({
+      cmd: 'rahat.jobs.beneficiary.get_ben_reporting_logs', uuid: payload.projectId
+    }, {
+      benDetails
+    })
+
+  }
+
+
   async allDataSource() {
     return this.prisma.stats.findMany({
       where: {

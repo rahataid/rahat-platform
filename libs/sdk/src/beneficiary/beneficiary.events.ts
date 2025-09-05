@@ -78,5 +78,6 @@ export const JOBS = {
   CHECK_BENEFICIARY_BANK_ACCOUNT: 'rahat.jobs.beneficiary.check_beneficiary_bank_account',
   CHECK_BENEFICIARY_PHONE_NUMBER: 'rahat.jobs.beneficiary.check_beneficiary_phone_number',
   DELETE_BENEFICIARY_AND_PII: 'rahat.jobs.beneficiary.delete_beneficiary_and_pii',
-  GET_SAFE_OWNER: 'rahat.jobs.safe_wallet.get_owner'
+  GET_SAFE_OWNER: 'rahat.jobs.safe_wallet.get_owner',
+  GET_BEN_REPORTING_LOGS: 'rahat.jobs.beneficiary.get_ben_reporting_logs',
 };
