@@ -904,6 +904,9 @@ export class BeneficiaryService {
       const result = this.createBulk(dtos, projectUuid, conditional)
       this.eventEmitter.emit(
         BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL,
+        {
+          projectUuid: null,
+        }
       );
       return result
     } catch (error) {
