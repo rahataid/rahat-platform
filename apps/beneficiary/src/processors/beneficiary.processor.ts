@@ -40,7 +40,7 @@ export class BeneficiaryProcessor {
     private readonly mailerService: MailerService,
     private readonly prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
-    private eventEmitter: EventEmitter2,
+    private readonly eventEmitter: EventEmitter2,
     private readonly settingsService: SettingsService
   ) { }
 
@@ -93,11 +93,9 @@ export class BeneficiaryProcessor {
       }
       // ====Txn start end===
       await removeTempGroup(this.prisma, tempGroup.uuid);
-      this.eventEmitter.emit(
+      await this.eventEmitter.emitAsync(
         BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_CT,
-        {
-          projectUuid: null,
-        }
+        { projectUuid: null }
       );
     } catch (err) {
       console.log('Import Error=>', err.message);
