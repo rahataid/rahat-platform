@@ -543,9 +543,9 @@ export class BeneficiaryController {
     );
   }
 
-  // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
-  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post('import-temp')
   async importTempBeneficiaries(@Body() dto: ImportTempBenefDto) {
     return this.client.send(
