@@ -4,6 +4,7 @@ export const APP_JOBS = {
   EMAIL: 'email',
   SLACK: 'slack',
   OTP: 'otp',
+  NOTIFY: 'notify'
 };
 
 export const MS_TIMEOUT = 500000;
@@ -18,6 +19,7 @@ export const BQUEUE = {
 
 export const UserRoles = {
   ADMIN: 'Admin',
+  MANAGER: 'Manager',
   USER: 'User',
   VENDOR: 'Vendor',
 };
@@ -289,10 +291,13 @@ export const MS_ACTIONS = {
       GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
       GET_PAYOUT_DETAILS: 'aa.payout.getPayoutDetails',
       EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+      VERIFY_MANUAL_PAYOUT: 'aa.payout.verifyManualPayout',
     },
     VENDOR: {
       // Remove after test
       TEST_OFFLINE_PAYOUT: 'aaProject.vendor.testOfflinePayout',
+      FETCH_OFFLINE_BENEFICIARIES: 'aaProject.vendor.fetch_offline_beneficiaries',
+      SYNC_OFFLINE_DATA: 'aaProject.vendor.sync_offline_data',
       TOKEN_REDEMPTION: {
         CREATE: 'aa.vendor.token_redemption.create',
         GET: 'aa.vendor.token_redemption.get',
@@ -499,6 +504,13 @@ export const MS_ACTIONS = {
     REMOVE: 'ms.dailyMonitoring.remove',
     DELETE: 'ms.dailyMonitoring.delete',
   },
+
+  NOTIFICATION: {
+    CREATE: 'notification.create',
+    LIST: 'notification.list',
+    GET: 'notification.get',
+  },
+
   OTP: {
     SEND_OTP: 'otp.sendOtp',
     SEND_BULK_OTP: 'otp.sendBulkOtp',

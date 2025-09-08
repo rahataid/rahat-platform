@@ -43,7 +43,7 @@ import {
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
-import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
+import { sanitizeNonAlphaNumericValue, sanitizePhone } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
@@ -1160,6 +1160,7 @@ export class BeneficiaryService {
               select: {
                 id: true,
                 name: true,
+                type: true,
               }
             }
           }
@@ -1642,10 +1643,33 @@ export class BeneficiaryService {
     const group = await this.prisma.beneficiaryGroup.findUnique({
       where: {
         uuid: dto.uuid
+      },
+      select: {
+        beneficiaryGroupProject: {
+          select: {
+            Project: {
+              select: {
+                type: true
+              }
+            }
+          }
+        }
       }
     })
 
     if (!group) throw new RpcException('Group not found')
+
+    // Check if the group is assigned to AA project (case-insensitive)
+    const isAssignedToAA = group.beneficiaryGroupProject.some(
+      (g) => g.Project?.type?.toLowerCase() === 'aa'
+    );
+
+    if (isAssignedToAA) {
+      throw new RpcException(
+        'Group purpose cannot be changed because this group is already assigned to the AA project.'
+      );
+    }
+
     await this.prisma.beneficiaryGroup.update({
       where: {
         uuid: dto.uuid
@@ -1966,7 +1990,7 @@ export class BeneficiaryService {
         phoneStatus: d.phoneStatus,
         internetStatus: d.internetStatus,
         email: d.email || null,
-        phone: d.phone || null,
+        phone: sanitizePhone(d.phone) || null,
         birthDate: d.birthDate || null,
         location: d.location || null,
         latitude: d.latitude || null,
@@ -1976,7 +2000,6 @@ export class BeneficiaryService {
       };
     }))
 
-    console.log(beneficiaryData)
     const tempBenefPhone = await this.listTempBenefPhone();
     return this.prisma.$transaction(async (txn) => {
       // 1. Upsert temp group by name
