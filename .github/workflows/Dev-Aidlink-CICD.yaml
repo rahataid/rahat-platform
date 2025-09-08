@@ -2,10 +2,10 @@ name: DEV Aidlink CI/CD
 on:
   push:
     branches:
-      - 'dev'
+      - 'aidlink-actions'
   pull_request:
     branches:
-      - 'dev'
+      - 'aidlink-actions'
   workflow_dispatch:
 
 env:
