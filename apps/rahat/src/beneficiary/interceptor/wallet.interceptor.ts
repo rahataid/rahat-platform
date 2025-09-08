@@ -15,16 +15,13 @@ import { map } from 'rxjs/operators';
 import { WalletService } from '../../wallet/wallet.service';
 import { XcapitService } from '../../wallet/xcapit.service';
 
-const useExternalWallet = process.env.USE_EXTERNAL_WALLET;
-const externalWalletService = process.env.EXTERNAL_WALLET_SERVICE;
-
 @Injectable()
 export class WalletInterceptor implements NestInterceptor {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly walletService: WalletService,
     private readonly xcapitService: XcapitService
-  ) {}
+  ) { }
 
   async intercept(
     context: ExecutionContext,
@@ -33,16 +30,17 @@ export class WalletInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const data = request.body;
 
+    const xcapit = await this.prismaService.setting.findUnique({
+      where: { name: WalletServiceType.XCAPIT },
+    });
+
     try {
       const isArrayInput = Array.isArray(data);
       const items = isArrayInput ? data : [data]; // normalize to array
 
       let updatedItems: any[];
 
-      if (
-        useExternalWallet === 'true' &&
-        externalWalletService === WalletServiceType.XCAPIT
-      ) {
+      if (xcapit) {
         updatedItems = await this.attachXcapitWallets(items);
       } else {
         // Validate/ensure wallet addresses for all items
