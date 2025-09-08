@@ -412,8 +412,7 @@ export const aaActions: ProjectActionFunc = {
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand({ cmd: AAJobs.CHAIN.GET_WALLET_BALANCE, uuid }, payload),
+  ) => sendCommand({ cmd: AAJobs.CHAIN.GET_WALLET_BALANCE, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.CHAIN.GET_DISBURSEMENT_STATS]: (
     uuid,
@@ -607,11 +606,8 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.VENDOR.SYNC_OFFLINE_DATA, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.VENDOR.BATCH_TRANSFER]: (
-    uuid,
-    payload,
-    sendCommand
-  ) => sendCommand({ cmd: AAJobs.VENDOR.BATCH_TRANSFER, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.VENDOR.BATCH_TRANSFER]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.VENDOR.BATCH_TRANSFER, uuid }, payload),
 
   // **** Token Redemption start **** //
   [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.CREATE]: (
