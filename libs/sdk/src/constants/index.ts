@@ -4,6 +4,7 @@ export const APP_JOBS = {
   EMAIL: 'email',
   SLACK: 'slack',
   OTP: 'otp',
+  NOTIFY: 'notify'
 };
 
 export const MS_TIMEOUT = 500000;
@@ -18,6 +19,7 @@ export const BQUEUE = {
 
 export const UserRoles = {
   ADMIN: 'Admin',
+  MANAGER: 'Manager',
   USER: 'User',
   VENDOR: 'Vendor',
 };
@@ -289,7 +291,21 @@ export const MS_ACTIONS = {
       GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
       GET_PAYOUT_DETAILS: 'aa.payout.getPayoutDetails',
       EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
-
+      VERIFY_MANUAL_PAYOUT: 'aa.payout.verifyManualPayout',
+    },
+    VENDOR: {
+      // Remove after test
+      TEST_OFFLINE_PAYOUT: 'aaProject.vendor.testOfflinePayout',
+      FETCH_OFFLINE_BENEFICIARIES: 'aaProject.vendor.fetch_offline_beneficiaries',
+      SYNC_OFFLINE_DATA: 'aaProject.vendor.sync_offline_data',
+      TOKEN_REDEMPTION: {
+        CREATE: 'aa.vendor.token_redemption.create',
+        GET: 'aa.vendor.token_redemption.get',
+        UPDATE_STATUS: 'aa.vendor.token_redemption.update_status',
+        LIST: 'aa.vendor.token_redemption.list',
+        GET_VENDOR_REDEMPTIONS: 'aa.vendor.token_redemption.get_vendor_redemptions',
+        GET_STATS: 'aa.vendor.token_redemption.get_stats',
+      },
     },
     GRIEVANCES: {
       CREATE: 'aa.grievances.create',
@@ -482,6 +498,7 @@ export const MS_ACTIONS = {
     UPDATE_STATUS: 'ms.activities.updateStatus',
     LIST_PROJECT_SPECIFIC: 'ms.activities.listProjectSpecific',
     COMMUNICATION: {
+      GET_COMMS: 'ms.activities.getComms',
       TRIGGER: 'ms.activities.communication.trigger',
       SESSION_LOGS: 'ms.activities.communication.sessionLogs',
       RETRY_FAILED: 'ms.activities.communication.retryFailed',
@@ -508,7 +525,17 @@ export const MS_ACTIONS = {
   AIDLINKProject: {
     GET_SAFE_OWNER: 'aidlink.getSafeOwner',
     GET_BEN_REPORTING_LOGS: 'aidlink.getBenReportingLogs',
-  }
+  },
+  NOTIFICATION: {
+    CREATE: 'notification.create',
+    LIST: 'notification.list',
+    GET: 'notification.get',
+  },
+
+  OTP: {
+    SEND_OTP: 'otp.sendOtp',
+    SEND_BULK_OTP: 'otp.sendBulkOtp',
+  },
 };
 
 export const RABBIT_MQ = {
