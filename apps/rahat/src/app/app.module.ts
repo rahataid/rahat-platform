@@ -19,6 +19,7 @@ import { CommsModule } from '../comms/comms.module';
 import { ExternalAppGuard } from '../decorators';
 import { GrievanceModule } from '../grievance/grievance.module';
 import { ListenersModule } from '../listeners/listeners.module';
+import { NotificationModule } from '../notification/notification.module';
 import { OfframpModule } from '../offramp/offramp.module';
 import { OtpModule } from '../otp/otp.module';
 import { MetaTxnProcessorsModule } from '../processors/meta-transaction/metaTransaction.module';
@@ -52,7 +53,7 @@ import { AppService } from './app.service';
       }),
       inject: [ConfigService],
     }),
-    EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false }),
+    EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false, verboseMemoryLeak: false }),
     ListenersModule,
     AppUsersModule,
     OtpModule,
@@ -69,6 +70,7 @@ import { AppService } from './app.service';
     RequestContextModule,
     QueueModule,
     WalletModule,
+    NotificationModule,
     CommsModule.forRoot(),
 
   ],

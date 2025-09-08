@@ -95,6 +95,9 @@ export class BeneficiaryProcessor {
       await removeTempGroup(this.prisma, tempGroup.uuid);
       this.eventEmitter.emit(
         BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_CT,
+        {
+          projectUuid: null,
+        }
       );
     } catch (err) {
       console.log('Import Error=>', err.message);

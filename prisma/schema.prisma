@@ -423,6 +423,7 @@ model Project {
   BeneficiaryProject      BeneficiaryProject[]
   ProjectVendors          ProjectVendors[]
   beneficiaryGroupProject BeneficiaryGroupProject[]
+  notifications           Notification[]
 
   Grievance Grievance[]
 
@@ -728,3 +729,22 @@ model OfframpTransaction {
 }
 
 // endregion: @rahat/offramp
+
+// ++++++++++++++++++ START: Notification ++++++++++++++++++++
+
+model Notification {
+  id             Int            @id @default(autoincrement())
+  title          String           
+  projectId      String?        @db.Uuid()
+  project        Project?       @relation(fields: [projectId], references: [uuid])
+  description    String
+  group          String 
+  createdAt      DateTime       @default(now())   
+  notify         Boolean        @default(false)
+
+  @@map("tbl_notifications")
+}
+
+// ++++++++++++++++++ END: Notification ++++++++++++++++++++
+
+
