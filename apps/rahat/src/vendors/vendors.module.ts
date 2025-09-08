@@ -6,6 +6,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { AuthsModule } from '@rumsan/user';
+import { NotificationModule } from '../notification/notification.module';
 import { UsersModule } from '../users/users.module';
 import { VendorsController } from './vendors.controller';
 import { VendorsService } from './vendors.service';
@@ -28,7 +29,8 @@ import { VendorsService } from './vendors.service';
       name: BQUEUE.RAHAT
     }),
     AuthsModule,
-    UsersModule
+    UsersModule,
+    NotificationModule
   ],
   controllers: [VendorsController],
   providers: [VendorsService, PrismaService]
