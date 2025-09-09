@@ -26,8 +26,7 @@ import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
 import {
   findTempBenefGroups,
-  validateDupicatePhone,
-  validateDupicateWallet,
+  validateDupicateWallet
 } from './processor.utils';
 
 const BATCH_SIZE = 500;
@@ -62,12 +61,12 @@ export class BeneficiaryProcessor {
       if (!beneficiaries.length) return;
 
       // Validate duplicate phones and wallets
-      const dupliPhones = await validateDupicatePhone(
-        this.prisma,
-        beneficiaries
-      );
-      if (dupliPhones.length)
-        throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
+      // const dupliPhones = await validateDupicatePhone(
+      //   this.prisma,
+      //   beneficiaries
+      // );
+      // if (dupliPhones.length)
+      //   throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
       const dupliWallets = await validateDupicateWallet(
         this.prisma,
         beneficiaries
@@ -617,7 +616,7 @@ export class BeneficiaryProcessor {
           validBankAccount: false,
         });
         return;
-      };
+      }
 
       this.logger.log(`Bank account is valid for benf: ${uuid}`);
 
@@ -744,7 +743,7 @@ async function importAndAddToGroup({ txn, beneficiaries, tempGroup }) {
   for (const benef of beneficiaries) {
     const { uuid, ...rest } = benef;
     const { piiData, nonPii } = splitBeneficiaryPII(rest);
-    const newBenef = await upsertBeneficiary(txn, nonPii);
+    const newBenef = await upsertBeneficiary(txn, nonPii, piiData);
     const piiDataPayload = { ...piiData, beneficiaryId: newBenef.id };
     await upsertPiiData(txn, piiDataPayload);
     await addBenefToGroup(txn, group.uuid, newBenef.uuid);
@@ -753,12 +752,22 @@ async function importAndAddToGroup({ txn, beneficiaries, tempGroup }) {
   }
 }
 
-async function upsertBeneficiary(txn: any, data: any) {
-  return txn.beneficiary.upsert({
-    where: { walletAddress: data.walletAddress },
-    update: data,
-    create: data,
+async function upsertBeneficiary(txn: any, data: any, piiData: any) {
+  const pii = await txn.beneficiaryPii.findUnique({
+    where: { phone: piiData.phone },
+    select: { beneficiaryId: true },
   });
+
+  if (pii) {
+    return txn.beneficiary.update({
+      where: { id: pii.beneficiaryId },
+      data: data,
+    });
+  } else {
+    return txn.beneficiary.create({
+      data: data,
+    });
+  }
 }
 
 async function upsertPiiData(txn: any, data: any) {
