@@ -134,4 +134,17 @@ export const beneficiaryGroupActions: ProjectActionFunc = {
     sendCommand({ cmd: ProjectJobs.BENEFICIARY_GROUP.LIST_BY_GROUP, uuid }, payload),
 };
 
-
+export const notificationActions: ProjectActionFunc = {
+  [MS_ACTIONS.NOTIFICATION.CREATE]: (uuid, payload, sendCommand) => {
+    payload.projectId = uuid || payload.projectId;
+    return sendCommand({ cmd: ProjectJobs.NOTIFICATION.CREATE }, payload);
+  },
+  [MS_ACTIONS.NOTIFICATION.LIST]: (uuid, payload, sendCommand) => {
+    payload.projectId = uuid || payload.projectId;
+    return sendCommand({ cmd: ProjectJobs.NOTIFICATION.LIST }, payload);
+  },
+  [MS_ACTIONS.NOTIFICATION.GET]: (uuid, payload, sendCommand) => {
+    payload.projectId = uuid || payload.projectId;
+    return sendCommand({ cmd: ProjectJobs.NOTIFICATION.GET }, payload);
+  }
+};
