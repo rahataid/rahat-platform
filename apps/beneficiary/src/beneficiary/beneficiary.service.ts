@@ -38,7 +38,6 @@ import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import {
   findTempBenefGroups,
-  validateDupicatePhone,
   validateDupicateWallet
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
@@ -63,7 +62,7 @@ export class BeneficiaryService {
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
-    private eventEmitter: EventEmitter2,
+    private readonly eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
     private readonly beneficiaryUtilsService: BeneficiaryUtilsService,
 
@@ -76,7 +75,10 @@ export class BeneficiaryService {
       data: dto,
     });
   }
-
+  async refreshStats() {
+    this.eventEmitter.emit(BeneficiaryEvents.REFRESH_STATS, { projectUUID: null });
+    return { message: 'Beneficiary stats refresh started' };
+  }
   async listPiiData(dto: any) {
     const repository = dto.projectId
       ? this.rsprisma.beneficiaryProject
@@ -897,7 +899,22 @@ export class BeneficiaryService {
     }
   }
 
+  async createBulkBeneficiaries(dtos: CreateBeneficiaryDto[],
+    projectUuid?: string, conditional?: boolean) {
+    try {
+      const result = this.createBulk(dtos, projectUuid, conditional)
+      this.eventEmitter.emit(
+        BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL,
+        {
+          projectUuid: null,
+        }
+      );
+      return result
+    } catch (error) {
+      this.logger.error(error.message)
+    }
 
+  }
   async syncProjectStats(projectUuid) {
     return await this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
       projectUuid,
@@ -2075,9 +2092,9 @@ export class BeneficiaryService {
     const beneficiaries = groups.map((f) => f.tempBeneficiary);
     if (!beneficiaries.length) throw new Error('No benficiaries found!');
 
-    const dupliPhones = await validateDupicatePhone(this.prisma, beneficiaries);
-    if (dupliPhones.length)
-      throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
+    // const dupliPhones = await validateDupicatePhone(this.prisma, beneficiaries);
+    // if (dupliPhones.length)
+    //   throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
     const dupliWallets = await validateDupicateWallet(
       this.prisma,
       beneficiaries

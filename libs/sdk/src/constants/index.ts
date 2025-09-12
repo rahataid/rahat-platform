@@ -293,6 +293,7 @@ export const MS_ACTIONS = {
       GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
       GET_PAYOUT_DETAILS: 'aa.payout.getPayoutDetails',
       EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+      VERIFY_MANUAL_PAYOUT: 'aa.payout.verifyManualPayout',
     },
     VENDOR: {
       // Remove after test
