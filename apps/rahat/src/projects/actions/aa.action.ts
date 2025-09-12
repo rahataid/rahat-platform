@@ -421,6 +421,12 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.CHAIN.GET_DISBURSEMENT_STATS, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.CHAIN.GET_RAHAT_TOKEN_BALANCE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.CHAIN.GET_RAHAT_TOKEN_BALANCE, uuid }, payload),
+
   // remove after testing
   [MS_ACTIONS.AAPROJECT.STELLAR.INTERNAL_FAUCET_TRUSTLINE]: (
     uuid,

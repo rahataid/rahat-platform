@@ -145,6 +145,7 @@ export const JOBS = {
     SEND_ASSET: 'aa.jobs.chain.sendAsset',
     GET_DISBURSEMENT_STATS: 'aa.jobs.chain.getDisbursementStats',
     GET_WALLET_BALANCE: 'aa.jobs.chain.getWalletBalance',
+    GET_RAHAT_TOKEN_BALANCE: 'aa.jobs.chain.getRahatTokenBalance',
   },
   GRIEVANCES: {
     CREATE: 'aa.jobs.grievances.create',

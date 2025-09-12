@@ -252,6 +252,7 @@ export const MS_ACTIONS = {
       SEND_ASSET: 'aa.chain.sendAsset',
       GET_DISBURSEMENT_STATS: 'aa.chain.getDisbursementStats',
       GET_WALLET_BALANCE: 'aa.chain.getWalletBalance',
+      GET_RAHAT_TOKEN_BALANCE: 'aa.chain.getRahatTokenBalance',
     },
     STELLAR: {
       DISBURSE: 'aa.stellar.disburse',
