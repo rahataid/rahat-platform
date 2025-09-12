@@ -44,6 +44,13 @@ export class BeneficiaryController {
     return this.service.findOne(uuid);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.REFRESH_STATS })
+  async refreshStats() {
+    return this.service.refreshStats();
+  }
+
+
+
   @MessagePattern({ cmd: BeneficiaryJobs.FIND_PHONE_BY_UUID })
   async findPhoneByUUID(uuid: UUID[]) {
     return this.service.findPhoneByUUID(uuid);

@@ -7,6 +7,7 @@ export const EVENTS = {
   VENDORS_CREATED: 'vendors.created',
   IMPORTED_TEMP_BENEFICIARIES_FROM_CT: 'beneficiary.imported_temp_beneficiaries_from_ct',
   IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL: "beneficiary.imported_temp_beneficiaries_from_excel",
+  REFRESH_STATS: "beneficiary.refresh_stats",
 };
 
 export const JOBS = {
@@ -74,6 +75,7 @@ export const JOBS = {
   REMOVE_ONE_GROUP: 'rahat.jobs.beneficiary.remove_one_group',
   DELETE_ONE_GROUP: 'rahat.jobs.beneficiary.delete_one_group',
   GET_STATS: 'rahat.jobs.projects.get_stats',
+  REFRESH_STATS: 'rahat.jobs.projects.refresh_stats',
   GET_ALL_STATS: 'rahat.jobs.projects.get_all_stats',
   CALCULATE_STATS: 'rahat.jobs.projects.calculate_stats',
   IMPORT_BENEFICIARY_LARGE_QUEUE: 'rahat.jobs.beneficiary.import_beneficiary_large_queue',

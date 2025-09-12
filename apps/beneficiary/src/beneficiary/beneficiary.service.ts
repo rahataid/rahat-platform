@@ -75,7 +75,10 @@ export class BeneficiaryService {
       data: dto,
     });
   }
-
+  async refreshStats() {
+    this.eventEmitter.emit(BeneficiaryEvents.REFRESH_STATS, { projectUUID: null });
+    return { message: 'Beneficiary stats refresh started' };
+  }
   async listPiiData(dto: any) {
     const repository = dto.projectId
       ? this.rsprisma.beneficiaryProject
