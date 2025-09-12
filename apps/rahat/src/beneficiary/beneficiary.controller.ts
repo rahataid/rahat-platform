@@ -126,6 +126,8 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.LIST_PII }, dto);
   }
 
+
+
   // @ApiBearerAuth(APP.JWT_BEARER)
   // @UseGuards(JwtGuard, AbilitiesGuard)
   // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
@@ -135,6 +137,16 @@ export class BeneficiaryController {
     const benefStats = await firstValueFrom(this.client.send({ cmd: BeneficiaryJobs.STATS }, {}));
     return { data: { commsStats: commsStats.data, benefStats: benefStats } };
   }
+
+  @Get('stats/refresh')
+  async refreshStats() {
+    console.log("first")
+    return this.client.send(
+      { cmd: BeneficiaryJobs.REFRESH_STATS }, {}
+    );
+  }
+
+
 
   // @ApiBearerAuth(APP.JWT_BEARER)
   // @UseGuards(JwtGuard, AbilitiesGuard)
@@ -553,4 +565,6 @@ export class BeneficiaryController {
       dto
     );
   }
+
+
 }
