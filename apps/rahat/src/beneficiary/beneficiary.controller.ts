@@ -126,9 +126,9 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.LIST_PII }, dto);
   }
 
-  // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
-  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('stats')
   async getStats() {
     const commsStats = await this.commsClient.broadcast.getReport({})
@@ -136,15 +136,15 @@ export class BeneficiaryController {
     return { data: { commsStats: commsStats.data, benefStats: benefStats } };
   }
 
-  // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @Get('statsSource')
   async getStatsSource() {
     return this.client.send({ cmd: BeneficiaryJobs.GET_ALL_STATS }, {});
   }
 
-  // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('table-stats')
   async getTableStats() {
@@ -409,6 +409,9 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET }, uuid);
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('wallet/:wallet')
   @ApiParam({ name: 'wallet', required: true })
   async getBeneficiaryByWallet(@Param('wallet') wallet: string) {
