@@ -525,6 +525,8 @@ export const MS_ACTIONS = {
   AIDLINKProject: {
     GET_SAFE_OWNER: 'aidlink.getSafeOwner',
     GET_BEN_REPORTING_LOGS: 'aidlink.getBenReportingLogs',
+    GET_OFFRAMP_DETAILS: 'aidlink.getOfframpDetails',
+
   },
   NOTIFICATION: {
     CREATE: 'notification.create',

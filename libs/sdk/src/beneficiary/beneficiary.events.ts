@@ -80,4 +80,6 @@ export const JOBS = {
   DELETE_BENEFICIARY_AND_PII: 'rahat.jobs.beneficiary.delete_beneficiary_and_pii',
   GET_SAFE_OWNER: 'rahat.jobs.safe_wallet.get_owner',
   GET_BEN_REPORTING_LOGS: 'rahat.jobs.beneficiary.get_ben_reporting_logs',
+  GET_OFFRAMP_DETAILS: 'rahat.jobs.beneficiary.get_offramp_details',
+
 };
