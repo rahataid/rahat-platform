@@ -13,7 +13,7 @@ import {
   BeneficiaryJobs,
   BQUEUE,
   generateRandomWallet,
-  ProjectContants
+  ProjectContants,
 } from '@rahataid/sdk';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
@@ -41,7 +41,7 @@ export class BeneficiaryProcessor {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly eventEmitter: EventEmitter2,
     private readonly settingsService: SettingsService
-  ) { }
+  ) {}
 
   @Process(BeneficiaryJobs.UPDATE_STATS)
   async sample(job: Job<any>) {
@@ -133,7 +133,7 @@ export class BeneficiaryProcessor {
       totalBatches: number;
       automatedGroupOption: {
         groupKey: string;
-        createAutomatedGroup: boolean
+        createAutomatedGroup: boolean;
       };
     }>
   ) {
@@ -145,7 +145,6 @@ export class BeneficiaryProcessor {
       totalBatches,
       automatedGroupOption,
     } = job.data;
-
 
     // const canProceed = await canProcessJob(job, this.logger);
     // if (!canProceed) {
@@ -235,13 +234,12 @@ export class BeneficiaryProcessor {
           }));
 
           // Insert beneficiaries in bulk
-          const insertedBeneficiaries =
-            await txn.beneficiary.createManyAndReturn({
+          const insertedBeneficiaries = await txn.beneficiary
+            .createManyAndReturn({
               data: beneficiariesData,
-            }).catch((error) => {
-              console.error(
-                `Failed to insert beneficiaries: ${error.message}`
-              );
+            })
+            .catch((error) => {
+              console.error(`Failed to insert beneficiaries: ${error.message}`);
               throw new RpcException(
                 `Failed to insert beneficiaries: ${error.message}`
               );
@@ -277,11 +275,15 @@ export class BeneficiaryProcessor {
             const uniqueGroup = [
               ...new Set(
                 beneficiaries.map(
-                  (b) => b[trimNonAlphaNumericValue(automatedGroupOption?.groupKey).toLowerCase()]
+                  (b) =>
+                    b[
+                      trimNonAlphaNumericValue(
+                        automatedGroupOption?.groupKey
+                      ).toLowerCase()
+                    ]
                 )
               ),
             ];
-
 
             const groups = await txn.beneficiaryGroup.findMany({
               where: {
@@ -290,13 +292,18 @@ export class BeneficiaryProcessor {
                 },
               },
             });
-            console.log('groups', groups)
+            console.log('groups', groups);
 
             const beneficiaryGroupData = insertedBeneficiaries.map((b) => {
               const beneficiaryId = b.uuid;
               const beneficiaryGroupId = groups.find(
                 (g) =>
-                  g.name === b[trimNonAlphaNumericValue(automatedGroupOption?.groupKey).toLowerCase()]
+                  g.name ===
+                  b[
+                    trimNonAlphaNumericValue(
+                      automatedGroupOption?.groupKey
+                    ).toLowerCase()
+                  ]
               ).uuid;
               return {
                 beneficiaryId,
@@ -304,8 +311,8 @@ export class BeneficiaryProcessor {
               };
             });
 
-            createdBenGroups =
-              await txn.groupedBeneficiaries.createManyAndReturn({
+            createdBenGroups = await txn.groupedBeneficiaries
+              .createManyAndReturn({
                 data: beneficiaryGroupData,
                 skipDuplicates: true,
                 select: {
@@ -313,7 +320,8 @@ export class BeneficiaryProcessor {
                   beneficiaryGroup: true,
                   uuid: true,
                 },
-              }).catch((error) => {
+              })
+              .catch((error) => {
                 console.error(
                   `Failed to insert beneficiaries: ${error.message}`
                 );
@@ -326,19 +334,21 @@ export class BeneficiaryProcessor {
           // Assign beneficiaries to the project if projectUUID is provided
           if (projectUUID) {
             // if (projectUUID && !automatedGroupOption.groupKey) {
-            await txn.beneficiaryProject.createMany({
-              data: insertedBeneficiaries.map(({ uuid }) => ({
-                beneficiaryId: uuid,
-                projectId: projectUUID,
-              })),
-            }).catch((error) => {
-              console.error(
-                `Failed to assign beneficiaries to project: ${error.message}`
-              );
-              throw new RpcException(
-                `Failed to assign beneficiaries to project: ${error.message}`
-              );
-            });
+            await txn.beneficiaryProject
+              .createMany({
+                data: insertedBeneficiaries.map(({ uuid }) => ({
+                  beneficiaryId: uuid,
+                  projectId: projectUUID,
+                })),
+              })
+              .catch((error) => {
+                console.error(
+                  `Failed to assign beneficiaries to project: ${error.message}`
+                );
+                throw new RpcException(
+                  `Failed to assign beneficiaries to project: ${error.message}`
+                );
+              });
 
             const assignPromises = insertedBeneficiaries.map((b) => {
               const projectPayload = {
@@ -410,19 +420,16 @@ export class BeneficiaryProcessor {
         }
       )
       .catch((error) => {
-        console.log('Error importing Beneficiaries', error)
+        console.log('Error importing Beneficiaries', error);
         console.error(
           `Failed to process batch ${batchNumber}: ${error.message}`
         );
         throw new RpcException(`Batch ${batchNumber} failed: ${error.message}`);
       });
 
-    this.eventEmitter.emit(
-      BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-      {
-        projectUuid: projectUUID,
-      }
-    );
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
+      projectUuid: projectUUID,
+    });
 
     return {
       success: true,
@@ -533,21 +540,24 @@ export class BeneficiaryProcessor {
     name: BeneficiaryJobs.CHECK_BENEFICIARY_BANK_ACCOUNT,
     concurrency: 1,
   })
-  async checkBeneficiaryAccount(job: Job<{
-    uuid: string;
-    walletAddress: string;
-    extras: {
-      bank_name: string;
-      bank_ac_name: string;
-      bank_ac_number: string;
-    };
-  }>) {
-    this.logger.log(`Checking beneficiary bank account for benf: ${job.data.uuid}`);
+  async checkBeneficiaryAccount(
+    job: Job<{
+      uuid: string;
+      walletAddress: string;
+      extras: {
+        bank_name: string;
+        bank_ac_name: string;
+        bank_ac_number: string;
+      };
+    }>
+  ) {
+    this.logger.log(
+      `Checking beneficiary bank account for benf: ${job.data.uuid}`
+    );
 
     const { uuid, extras } = job.data;
 
     try {
-
       const benf = await this.prisma.beneficiary.findUnique({
         where: { uuid },
       });
@@ -558,9 +568,11 @@ export class BeneficiaryProcessor {
       }
 
       if (!extras) {
-        this.logger.error(`Beneficiary does not have bank account for benf: ${uuid}`);
+        this.logger.error(
+          `Beneficiary does not have bank account for benf: ${uuid}`
+        );
         await this.updateBenfExtras(uuid, {
-          ...(JSON.parse(JSON.stringify(benf.extras))),
+          ...JSON.parse(JSON.stringify(benf.extras)),
           bankedStatus: 'ERROR',
           error: 'Beneficiary does not have bank account',
         });
@@ -572,7 +584,9 @@ export class BeneficiaryProcessor {
       const benfExtras = JSON.parse(JSON.stringify(benf.extras));
 
       if (!bank_name || !bank_ac_name || !bank_ac_number) {
-        this.logger.error(`Beneficiary does not have bank account for benf: ${uuid}`);
+        this.logger.error(
+          `Beneficiary does not have bank account for benf: ${uuid}`
+        );
 
         await this.updateBenfExtras(uuid, {
           ...benfExtras,
@@ -595,7 +609,11 @@ export class BeneficiaryProcessor {
         return;
       }
 
-      const bankAccount = await this.checkBankAccount(bankId, bank_ac_number, bank_ac_name);
+      const bankAccount = await this.checkBankAccount(
+        bankId,
+        bank_ac_number,
+        bank_ac_name
+      );
       if (!bankAccount.isValid) {
         this.logger.error(`Invalid bank account for benf: ${uuid}`);
         await this.updateBenfExtras(uuid, {
@@ -635,7 +653,11 @@ export class BeneficiaryProcessor {
     }
   }
 
-  async checkBankAccount(bankId: string, bank_ac_number: string, bank_ac_name: string) {
+  async checkBankAccount(
+    bankId: string,
+    bank_ac_number: string,
+    bank_ac_name: string
+  ) {
     try {
       const res = await this.settingsService.getPublic('OFFRAMP_SETTINGS');
 
@@ -655,15 +677,17 @@ export class BeneficiaryProcessor {
       }
 
       const payload = {
-        "provider": "cips",
-        "method": "validateAccount",
-        "params": {
-          "bankId": bankId,
-          "accountName": bank_ac_name,
-          "accountId": bank_ac_number
-        }
-      }
-      const { data: { data } } = await this.httpService.axiosRef.post<{
+        provider: 'cips',
+        method: 'validateAccount',
+        params: {
+          bankId: bankId,
+          accountName: bank_ac_name,
+          accountId: bank_ac_number,
+        },
+      };
+      const {
+        data: { data },
+      } = await this.httpService.axiosRef.post<{
         data: {
           isValid: boolean;
         }
@@ -677,7 +701,7 @@ export class BeneficiaryProcessor {
 
       return {
         success: true,
-        isValid: data.isValid
+        isValid: data.isValid,
       };
     } catch (error) {
       const errorMessage = error?.response?.data?.message || error?.message;
@@ -695,10 +719,10 @@ export class BeneficiaryProcessor {
     return await this.prisma.beneficiary.update({
       where: { uuid },
       data: {
-        bankedStatus: extras.bankedStatus === 'BANKED' ? "BANKED" : 'UNBANKED',
+        bankedStatus: extras.bankedStatus === 'BANKED' ? 'BANKED' : 'UNBANKED',
         extras: {
-          ...(JSON.parse(JSON.stringify(extras))),
-        }
+          ...JSON.parse(JSON.stringify(extras)),
+        },
       },
     });
   }
