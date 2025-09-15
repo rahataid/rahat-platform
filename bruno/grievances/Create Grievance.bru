@@ -1,0 +1,25 @@
+meta {
+  name: Create Grievance
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aa.grievances.create",
+    "payload": {
+      "reportedBy": "John Strong",
+      "reporterUserId": 1,
+      "reporterContact": "johnstrong@example.com",
+      "title": "No Electricity",
+      "type": "FINANCIAL",
+      "description": "Unable to add beneficiary to the system since morning due to electricity issues."
+    }
+  }
+}

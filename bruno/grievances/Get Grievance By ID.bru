@@ -1,0 +1,20 @@
+meta {
+  name: Get Grievance By ID
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aa.grievances.get",
+    "payload": {
+      "uuid": "a806b86d-81fe-497f-8b60-b40c1e63610c"
+    }
+  }
+}

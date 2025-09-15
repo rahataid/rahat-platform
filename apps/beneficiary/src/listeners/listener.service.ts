@@ -23,7 +23,10 @@ export class ListenersService {
   @OnEvent(BeneficiaryEvents.BENEFICIARY_REMOVED)
   @OnEvent(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT)
   @OnEvent(BeneficiaryEvents.VENDORS_CREATED)
-  async onBeneficiaryChanged(eventObject) {
+  @OnEvent(BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_CT)
+  @OnEvent(BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL)
+  @OnEvent(BeneficiaryEvents.REFRESH_STATS)
+  async onBeneficiaryChanged(eventObject: any) {
     await this.benStats.saveAllStats(eventObject.projectUuid);
   }
 
@@ -64,7 +67,4 @@ export class ListenersService {
       `
     );
   }
-
-
-
 }
