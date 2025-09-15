@@ -3,13 +3,17 @@ export enum GrievanceStatus {
   NEW = 'NEW',
   UNDER_REVIEW = 'UNDER_REVIEW',
   RESOLVED = 'RESOLVED',
-  CLOSED = 'CLOSED'
+  CLOSED = 'CLOSED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  REJECTED = 'REJECTED'
 }
 
 export enum GrievanceType {
   TECHNICAL = 'TECHNICAL',
   NON_TECHNICAL = 'NON_TECHNICAL',
-  OTHER = 'OTHER'
+  OTHER = 'OTHER',
+  OPERATIONAL = 'OPERATIONAL',
+  FINANCIAL = 'FINANCIAL',
 }
 
 export type Grievance = {

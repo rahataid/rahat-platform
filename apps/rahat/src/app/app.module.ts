@@ -53,7 +53,7 @@ import { AppService } from './app.service';
       }),
       inject: [ConfigService],
     }),
-    EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false }),
+    EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false, verboseMemoryLeak: false }),
     ListenersModule,
     AppUsersModule,
     OtpModule,

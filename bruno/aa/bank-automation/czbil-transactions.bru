@@ -1,0 +1,35 @@
+meta {
+  name: czbil-transactions
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.bank-scrape.czbil.transactions",
+    "payload": {
+      "accountNumber": "1234567890",
+      "username": "custom_user",
+      "password": "custom_pass",
+      "totpSecret": "123456",
+      "fromDate": "2024-01-01",
+      "toDate": "2024-01-31",
+      "transactionType": "ALL"
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  console.log('CZBIL Transactions Response:', responseData);
+}
