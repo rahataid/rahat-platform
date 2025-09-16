@@ -130,6 +130,7 @@ export const JOBS = {
     TEST_OFFLINE_PAYOUT: 'aa.jobs.vendor.test_offline_payout',
     FETCH_OFFLINE_BENEFICIARIES: 'aa.jobs.vendor.fetch_offline_beneficiaries',
     SYNC_OFFLINE_DATA: 'aa.jobs.vendor.sync_offline_data',
+    BATCH_TRANSFER: 'aa.jobs.vendor.batch_transfer',
     TOKEN_REDEMPTION: {
       CREATE: 'aa.jobs.vendor.token_redemption.create',
       GET: 'aa.jobs.vendor.token_redemption.get',
@@ -144,6 +145,8 @@ export const JOBS = {
     SEND_OTP: 'aa.jobs.chain.sendOtp',
     SEND_ASSET: 'aa.jobs.chain.sendAsset',
     GET_DISBURSEMENT_STATS: 'aa.jobs.chain.getDisbursementStats',
+    GET_WALLET_BALANCE: 'aa.jobs.chain.getWalletBalance',
+    GET_RAHAT_TOKEN_BALANCE: 'aa.jobs.chain.getRahatTokenBalance',
   },
   GRIEVANCES: {
     CREATE: 'aa.jobs.grievances.create',

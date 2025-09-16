@@ -20,6 +20,7 @@ import { APP } from '@rahataid/sdk';
 import helmet from 'helmet';
 import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app/app.module';
+import { CorsConfigService } from './configs/cors.config';
 import { loggerInstance } from './logger/winston.logger';
 
 // import { GlobalExceptionFilter } from './utils/exceptions/rpcException.filter';
@@ -34,7 +35,10 @@ async function bootstrap() {
     }),
   });
   const globalPrefix = 'v1';
-  app.enableCors();
+
+  // Configure CORS using dedicated service
+  const corsConfigService = new CorsConfigService(configService);
+  app.enableCors(corsConfigService.createCorsOptions());
 
   const microservice = app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.REDIS,

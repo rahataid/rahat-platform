@@ -251,6 +251,8 @@ export const MS_ACTIONS = {
       SEND_OTP: 'aa.chain.sendOtp',
       SEND_ASSET: 'aa.chain.sendAsset',
       GET_DISBURSEMENT_STATS: 'aa.chain.getDisbursementStats',
+      GET_WALLET_BALANCE: 'aa.chain.getWalletBalance',
+      GET_RAHAT_TOKEN_BALANCE: 'aa.chain.getRahatTokenBalance',
     },
     STELLAR: {
       DISBURSE: 'aa.stellar.disburse',
@@ -298,6 +300,7 @@ export const MS_ACTIONS = {
       TEST_OFFLINE_PAYOUT: 'aaProject.vendor.testOfflinePayout',
       FETCH_OFFLINE_BENEFICIARIES: 'aaProject.vendor.fetch_offline_beneficiaries',
       SYNC_OFFLINE_DATA: 'aaProject.vendor.sync_offline_data',
+      BATCH_TRANSFER: 'aa.vendor.batch_transfer',
       TOKEN_REDEMPTION: {
         CREATE: 'aa.vendor.token_redemption.create',
         GET: 'aa.vendor.token_redemption.get',

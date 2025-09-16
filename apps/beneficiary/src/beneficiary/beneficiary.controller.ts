@@ -30,7 +30,8 @@ export class BeneficiaryController {
     private readonly service: BeneficiaryService,
     private readonly utilService: BeneficiaryUtilsService,
     private readonly statsService: BeneficiaryStatService,
-    private readonly verificationService: VerificationService
+    private readonly verificationService: VerificationService,
+
   ) { }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE })
@@ -42,6 +43,13 @@ export class BeneficiaryController {
   async getBeneficiary(uuid: UUID) {
     return this.service.findOne(uuid);
   }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.REFRESH_STATS })
+  async refreshStats() {
+    return this.service.refreshStats();
+  }
+
+
 
   @MessagePattern({ cmd: BeneficiaryJobs.FIND_PHONE_BY_UUID })
   async findPhoneByUUID(uuid: UUID[]) {
@@ -64,14 +72,15 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
-  createBulk(@Payload() data) {
+  async createBulk(@Payload() data) {
     // const payloadData = Array.isArray(data?.data) ? data?.data : data?.payload;
 
-    return this.service.createBulk(
+    return await this.service.createBulkBeneficiaries(
       data?.payload,
       data?.projectUUID,
       data?.data?.walkinBulk
     );
+
   }
 
   @MessagePattern({
