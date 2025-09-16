@@ -19,7 +19,7 @@ import {
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto,
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
   AAJobs,
@@ -44,8 +44,7 @@ import {
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import {
-  sanitizeNonAlphaNumericValue,
-  sanitizePhone,
+  sanitizeNonAlphaNumericValue
 } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
@@ -188,6 +187,27 @@ export class BeneficiaryService {
     return await this.prisma.beneficiaryGroup.findUnique({
       where: {
         uuid: uuid,
+      },
+      include: {
+        groupedBeneficiaries: {
+          where: {
+            deletedAt: null,
+          },
+          include: {
+            Beneficiary: {
+              include: {
+                pii: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+  async listGroupByUUid(uuid: UUID[]) {
+    return await this.prisma.beneficiaryGroup.findMany({
+      where: {
+        uuid: { in: uuid },
       },
       include: {
         groupedBeneficiaries: {
@@ -531,36 +551,37 @@ export class BeneficiaryService {
     }));
   }
 
-  async findOneByPhone(phone: string) {
-    const piiData = await this.rsprisma.beneficiaryPii.findFirst({
+  async findOneByPhone(payload: { phone: string; projectUUID: string }) {
+    const beneficiary = await this.prisma.beneficiary.findFirst({
       where: {
-        phone: {
-          contains: phone,
-        },
+        AND: [
+          {
+            BeneficiaryProject: {
+              some: {
+                projectId: payload.projectUUID,
+              },
+            },
+          },
+          {
+            pii: {
+              phone: payload.phone,
+            },
+          },
+        ],
       },
-    });
-    if (!piiData) return null;
-
-    const beneficiary = await this.rsprisma.beneficiary.findUnique({
-      where: { id: piiData.beneficiaryId },
       include: {
-        BeneficiaryProject: {
-          include: {
-            Project: true,
-          },
-        },
-        groupedBeneficiaries: {
-          select: {
-            beneficiaryGroupId: true,
-          },
-        },
+        pii: true,
       },
     });
 
     if (!beneficiary) return null;
+    let piiData = null;
+    if (beneficiary.pii) {
+      piiData = beneficiary.pii;
+      delete beneficiary.pii;
+    }
 
-    beneficiary.piiData = piiData;
-    return beneficiary;
+    return { ...beneficiary, piiData };
   }
 
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
@@ -806,26 +827,44 @@ export class BeneficiaryService {
   ) {
     try {
       this.beneficiaryUtilsService.ensurePhoneNumbers(dtos);
+      const validDtos: CreateBeneficiaryDto[] = [];
       for (const dto of dtos) {
-        await this.beneficiaryUtilsService.ensureUniquePhone(
-          dto.piiData.phone.toString()
-        );
-        dto.walletAddress =
-          await this.beneficiaryUtilsService.ensureValidWalletAddress(
-            dto.walletAddress
+        try {
+          await this.beneficiaryUtilsService.ensureUniquePhone(
+            dto.piiData.phone.toString()
           );
+        } catch (error) {
+          console.log(
+            `Skipping entry due to duplicate phone: ${dto.piiData.phone}`
+          );
+          continue;
+        }
+
+        try {
+          dto.walletAddress =
+            await this.beneficiaryUtilsService.ensureValidWalletAddress(
+              dto.walletAddress
+            );
+        } catch (error) {
+          console.log(
+            `Skipping entry due to duplicate/invalid wallet address: ${dto.walletAddress}`
+          );
+          continue;
+        }
+
         dto.uuid = dto.uuid || uuidv4();
+        validDtos.push(dto);
       }
 
       const { beneficiariesData, piiDataList } =
-        this.beneficiaryUtilsService.prepareBulkInsertData(dtos);
+        this.beneficiaryUtilsService.prepareBulkInsertData(validDtos);
 
       // Insert beneficiaries in bulk
       const insertedBeneficiariesWithPii =
         await this.beneficiaryUtilsService.insertBeneficiariesAndPIIData(
           beneficiariesData,
           piiDataList,
-          dtos
+          validDtos
         );
 
       // Assign beneficiaries to the project if a projectUuid is provided
@@ -881,14 +920,12 @@ export class BeneficiaryService {
       // Return some form of success indicator, as createMany does not return the records themselves
       return {
         success: true,
-        count: dtos.length,
+        count: validDtos.length,
         beneficiariesData: insertedBeneficiariesWithPii,
       };
     } catch (e) {
       return {
         success: false,
-        message:
-          e?.message || 'Failed to create beneficiary group. Please try again.',
       };
       // throw new RpcException(e)
     }
@@ -959,7 +996,7 @@ export class BeneficiaryService {
       this.prisma
     );
 
-    if (allData?.automatedGroupOption?.createAutomatedGroup === 'true') {
+    if (allData?.automatedGroupOption?.createAutomatedGroup === true) {
       uniqueGroupKeys = [
         ...new Set(
           filteredBeneficiaries.map(
@@ -1156,7 +1193,6 @@ export class BeneficiaryService {
               select: {
                 id: true,
                 name: true,
-                type: true,
               },
             },
           },
@@ -1655,32 +1691,9 @@ export class BeneficiaryService {
       where: {
         uuid: dto.uuid,
       },
-      select: {
-        beneficiaryGroupProject: {
-          select: {
-            Project: {
-              select: {
-                type: true,
-              },
-            },
-          },
-        },
-      },
     });
 
     if (!group) throw new RpcException('Group not found');
-
-    // Check if the group is assigned to AA project (case-insensitive)
-    const isAssignedToAA = group.beneficiaryGroupProject.some(
-      (g) => g.Project?.type?.toLowerCase() === 'aa'
-    );
-
-    if (isAssignedToAA) {
-      throw new RpcException(
-        'Group purpose cannot be changed because this group is already assigned to the AA project.'
-      );
-    }
-
     await this.prisma.beneficiaryGroup.update({
       where: {
         uuid: dto.uuid,
@@ -1977,6 +1990,7 @@ export class BeneficiaryService {
     );
     const dataFromBuffer = Buffer.from(data);
     const bufferString = dataFromBuffer.toString('utf-8');
+    1570;
     const jsonData = JSON.parse(bufferString) || null;
     console.log(
       '🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ jsonData:',
@@ -2013,7 +2027,7 @@ export class BeneficiaryService {
           phoneStatus: d.phoneStatus,
           internetStatus: d.internetStatus,
           email: d.email || null,
-          phone: sanitizePhone(d.phone) || null,
+          phone: d.phone || null,
           birthDate: d.birthDate || null,
           location: d.location || null,
           latitude: d.latitude || null,
@@ -2024,6 +2038,7 @@ export class BeneficiaryService {
       })
     );
 
+    console.log(beneficiaryData);
     const tempBenefPhone = await this.listTempBenefPhone();
     return this.prisma.$transaction(async (txn) => {
       // 1. Upsert temp group by name
@@ -2083,16 +2098,19 @@ export class BeneficiaryService {
   }
 
   async importTempBeneficiaries(dto: ImportTempBenefDto) {
-    const groups = await findTempBenefGroups(this.prisma, dto.groupUUID);
+    const groups = await findTempBenefGroups(this.prisma as any, dto.groupUUID);
     if (!groups.length) throw new Error('No groups found!');
     const beneficiaries = groups.map((f) => f.tempBeneficiary);
     if (!beneficiaries.length) throw new Error('No benficiaries found!');
 
-    const dupliPhones = await validateDupicatePhone(this.prisma, beneficiaries);
+    const dupliPhones = await validateDupicatePhone(
+      this.prisma as any,
+      beneficiaries
+    );
     if (dupliPhones.length)
       throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
     const dupliWallets = await validateDupicateWallet(
-      this.prisma,
+      this.prisma as any,
       beneficiaries
     );
     if (dupliWallets.length)

@@ -1,21 +1,19 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateOfframpProviderDto, CreateOfframpRequestDto, ListOfframpProviderDto, ProviderActionDto } from '@rahataid/extensions';
+import {
+  CreateOfframpProviderDto,
+  CreateOfframpRequestDto,
+  ListOfframpProviderDto,
+  ProviderActionDto,
+} from '@rahataid/extensions';
 import { OfframpService } from './offramp.service';
 
 @Controller('offramps')
 @ApiTags('Offramps')
 export class OfframpController {
-  constructor(private readonly offrampService: OfframpService) { }
+  constructor(private readonly offrampService: OfframpService) {}
 
   @Post('')
   createOfframpRequest(@Body() data: CreateOfframpRequestDto) {
@@ -47,21 +45,33 @@ export class OfframpController {
     return this.offrampService.providerActions(data);
   }
 
-
   @Get()
   findAllOfframpRequests() {
     return this.offrampService.findAllOfframpRequests();
   }
 
   @Get('/single')
-  findOne(@Query() payload: {
-    uuid?: string;
-    id?: number;
-    requestId?: string;
-  }) {
+  findOne(
+    @Query() payload: { uuid?: string; id?: number; requestId?: string }
+  ) {
     return this.offrampService.findOne(payload);
   }
 
+  @Get('transactions')
+  findTransactions(
+    @Query()
+    payload: {
+      uuid?: string;
+      id?: number;
+      requestId?: string;
+      status?: string;
+      page?: number;
+      perPage?: number;
+      senderAddress?: string;
+    }
+  ) {
+    return this.offrampService.getOfframpTransactions(payload);
+  }
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateOfframpDto: any) {
   //   return this.offrampService.update(+id, updateOfframpDto);

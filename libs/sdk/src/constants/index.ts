@@ -343,6 +343,7 @@ export const MS_ACTIONS = {
     GET_SAFE_TRANSACTION: 'c2cProject.getSafeTransaction',
     GET_SAFE_PENDING: 'c2cProject.getSafePending',
     CREATE_CAMPAIGN: 'c2cProject.campaign.create',
+    UPDATE_CAMPAIGN: 'c2cProject.campaign.update',
     CREATE_AUDIENCE: 'c2cProject.campaign.create_audience',
     GET_ALL_CAMPAIGN: 'c2cProject.campaign.get',
     GET_CAMPAIGN: 'c2cProject.campaign.getOne',
