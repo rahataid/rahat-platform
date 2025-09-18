@@ -148,48 +148,53 @@ export class BeneficiaryUtilsService {
 
     const { beneficiaryId, projectId } = assignBeneficiaryDto;
 
-    //fetch project and beneficiary detail in parallel
-    const [projectData, beneficiaryData] = await Promise.all([
-      this.prismaService.project.findUnique({ where: { uuid: projectId } }),
-      this.prismaService.beneficiary.findUnique({
-        where: { uuid: beneficiaryId },
-        include: { pii: true },
-      }),
-    ]);
+    try {
 
-    if (!projectData) return;
-    if (!beneficiaryData) throw new RpcException('Beneficiary not Found.');
+      //fetch project and beneficiary detail in parallel
+      const [projectData, beneficiaryData] = await Promise.all([
+        this.prismaService.project.findUnique({ where: { uuid: projectId } }),
+        this.prismaService.beneficiary.findUnique({
+          where: { uuid: beneficiaryId },
+          include: { pii: true },
+        }),
+      ]);
 
-    //Build Project Payload
-    const projectPayload = this.buildProjectPayload(
-      projectData,
-      beneficiaryData
-    );
+      if (!projectData) return;
+      if (!beneficiaryData) throw new RpcException('Beneficiary not Found.');
 
-    //Save beneficiary to Project
-    await this.saveBeneficiaryToProject({
-      beneficiaryId,
-      projectId,
-    });
+      //Build Project Payload
+      const projectPayload = this.buildProjectPayload(
+        projectData,
+        beneficiaryData
+      );
 
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
-      projectUuid: projectId,
-    });
+      //Save beneficiary to Project
+      await this.saveBeneficiaryToProject({
+        beneficiaryId,
+        projectId,
+      });
 
-    //3. Sync beneficiary to project
-    return this.handleMicroserviceCall({
-      client: this.client.send(
-        { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
-        projectPayload
-      ),
-      onSuccess(response) {
-        console.log('response', response);
-      },
-      onError(error) {
-        console.log('error', error);
-        throw new RpcException(error.message);
-      },
-    });
+      this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
+        projectUuid: projectId,
+      });
+
+      //3. Sync beneficiary to project
+      return this.handleMicroserviceCall({
+        client: this.client.send(
+          { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectId },
+          projectPayload
+        ),
+        onSuccess(response) {
+          console.log('response', response);
+        },
+        onError(error) {
+          console.log('error', error);
+          throw new RpcException(error.message);
+        },
+      });
+    } catch (e) {
+      console.log('Error in assigning beneficiary to project:', e);
+    }
   }
 
   private buildProjectPayload(projectData: any, beneficiaryData: any) {

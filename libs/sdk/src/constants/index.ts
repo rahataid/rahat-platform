@@ -346,6 +346,7 @@ export const MS_ACTIONS = {
     GET_SAFE_TRANSACTION: 'c2cProject.getSafeTransaction',
     GET_SAFE_PENDING: 'c2cProject.getSafePending',
     CREATE_CAMPAIGN: 'c2cProject.campaign.create',
+    UPDATE_CAMPAIGN: 'c2cProject.campaign.update',
     CREATE_AUDIENCE: 'c2cProject.campaign.create_audience',
     GET_ALL_CAMPAIGN: 'c2cProject.campaign.get',
     GET_CAMPAIGN: 'c2cProject.campaign.getOne',
@@ -525,7 +526,12 @@ export const MS_ACTIONS = {
     REMOVE: 'ms.dailyMonitoring.remove',
     DELETE: 'ms.dailyMonitoring.delete',
   },
+  AIDLINKProject: {
+    GET_SAFE_OWNER: 'aidlink.getSafeOwner',
+    GET_BEN_REPORTING_LOGS: 'aidlink.getBenReportingLogs',
+    GET_OFFRAMP_DETAILS: 'aidlink.getOfframpDetails',
 
+  },
   NOTIFICATION: {
     CREATE: 'notification.create',
     LIST: 'notification.list',

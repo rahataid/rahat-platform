@@ -130,7 +130,7 @@
     "zlib": "^1.0.5"
   },
   "devDependencies": {
-    "@atixlabs/hardhat-time-n-mine": "^0.0.5",
+    "@atixlabs/hardhat-time-n-mine": "0.0.5",
     "@compodoc/compodoc": "^1.1.26",
     "@faker-js/faker": "^8.4.1",
     "@graphprotocol/graph-cli": "^0.82.0",

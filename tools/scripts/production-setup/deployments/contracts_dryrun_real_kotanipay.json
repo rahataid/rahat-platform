@@ -1,0 +1,28 @@
+{
+  "contracts": {
+    "RahatAccessManager": {
+      "address": "0xBa030435D5d37523470B6e00d447877fBddc1874",
+      "startBlock": 28180742
+    },
+    "RahatTreasury": {
+      "address": "0x33f89D91e06E3F35C86BD5df6a73Cd930FECaA7e",
+      "startBlock": 28180748
+    },
+    "RahatToken": {
+      "address": "0x99f1A8fBC322116FaeD03f312AB35CCa0EB3b09f",
+      "startBlock": 28180751
+    },
+    "ERC2771Forwarder": {
+      "address": "0xA6a9Db07D211B9fCAeB6cE82AD9179e94c029745",
+      "startBlock": 28180745
+    }
+  },
+  "chainSettings": {
+    "rpcUrl": "https://base-mainnet.g.alchemy.com/v2/YDVzs6mf-bf64oq5uGWuO-XDFtUT96gk",
+    "chainName": "BASE",
+    "nativeCurrency": {
+      "name": "ETH",
+      "symbol": "ETH"
+    }
+  }
+}

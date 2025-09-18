@@ -228,8 +228,8 @@ export class BeneficiaryController {
       age: b['Age'] || null,
       walletAddress: b['Wallet Address'],
       piiData: {
-        name: b['Name*'] || 'Unknown',
-        phone: b['Whatsapp Number*'] || b['Phone Number*'],
+        name: b['Name*'] || b['Name'] || 'Unknown',
+        phone: b['Whatsapp Number*'] || b['Phone Number*'] || b['Phone Number'],
         extras: {
           isAdult:
             getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age*']) > 18,
@@ -430,10 +430,17 @@ export class BeneficiaryController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
-  @Get('phone/:phone')
+  @Get('phone/:phone/:projectUUID')
   @ApiParam({ name: 'phone', required: true })
-  async getBeneficiaryByPhone(@Param('phone') phone: string) {
-    return this.client.send({ cmd: BeneficiaryJobs.GET_BY_PHONE }, phone);
+  @ApiParam({ name: 'projectUUID', required: true })
+  async getBeneficiaryByPhone(
+    @Param('phone') phone: string,
+    @Param('projectUUID') projectUUID: string
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.GET_BY_PHONE },
+      { phone, projectUUID }
+    );
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
