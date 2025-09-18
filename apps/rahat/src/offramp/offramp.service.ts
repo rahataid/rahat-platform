@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { OfframpStatus, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import {
   CreateOfframpProviderDto,
   CreateOfframpRequestDto,
@@ -18,7 +18,7 @@ export class OfframpService {
   constructor(
     private prisma: PrismaService,
     private kotaniPayService: KotaniPayService
-  ) {}
+  ) { }
 
   registerProvider(createOfframpDto: CreateOfframpProviderDto) {
     console.log({ createOfframpDto });
@@ -121,6 +121,8 @@ export class OfframpService {
   async executeOfframpRequest(executeOfframpData: any) {
     console.log({ executeOfframpData });
     const { providerUuid, ...data } = executeOfframpData;
+
+
 
     const executionData = {
       mobileMoneyReceiver: data.data.mobileMoneyReceiver,
@@ -272,7 +274,7 @@ export class OfframpService {
 
     // Filter by status
     if (payload.status) {
-      where.status = payload.status as OfframpStatus;
+      where.status = payload.status;
     }
 
     // Filter by a JSON key "senderAddress" inside `extras`
