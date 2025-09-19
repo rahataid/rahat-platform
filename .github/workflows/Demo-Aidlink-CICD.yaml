@@ -66,8 +66,8 @@ jobs:
           # push: ${{ github.event_name == 'push' && 'true' || 'false' }}
           push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
           tags: |
-            esatya/rahat-platform-beneficiary:dev-aidlink
-            esatya/rahat-platform-beneficiary:dev-aidlink-${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.run_id_short }}
+            esatya/rahat-platform-beneficiary:demo-aidlink
+            esatya/rahat-platform-beneficiary:demo-aidlink-${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.run_id_short }}
 
       # Rahat Image
       - name: build && push rahat
