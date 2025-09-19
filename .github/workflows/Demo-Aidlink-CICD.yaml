@@ -1,11 +1,11 @@
-name: DEV Aidlink CI/CD
+name: Demo Aidlink CI/CD
 on:
   push:
     branches:
-      - 'aidlink-actions'
+      - 'aidlink-demo'
   pull_request:
     branches:
-      - 'aidlink-actions'
+      - 'aidlink-demo'
   workflow_dispatch:
 
 env:
@@ -78,6 +78,6 @@ jobs:
           file: Dockerfile.rahat
           # push: ${{ github.event_name == 'push' && 'true' || 'false' }}
           push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-          tags: | 
-            esatya/rahat-platform-rahat:dev-aidlink
-            esatya/rahat-platform-rahat:dev-aidlink-${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.run_id_short }}
+          tags: |
+            esatya/rahat-platform-rahat:demo-aidlink
+            esatya/rahat-platform-rahat:demo-aidlink-${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.run_id_short }}
