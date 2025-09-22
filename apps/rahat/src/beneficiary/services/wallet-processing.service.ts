@@ -1,5 +1,5 @@
 // wallet-processing.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { WalletServiceType } from '@rahataid/sdk/enums';
 import { ChainType } from '@rahataid/wallet';
@@ -10,6 +10,7 @@ import { XcapitService } from '../../wallet/xcapit.service';
 
 @Injectable()
 export class WalletProcessingService {
+    private readonly logger = new Logger(WalletProcessingService.name)
     constructor(
         private readonly prismaService: PrismaService,
         private readonly walletService: WalletService,
@@ -18,11 +19,11 @@ export class WalletProcessingService {
 
     async processBeneficiariesWithWallets(beneficiaries: any[]): Promise<any[]> {
         if (!beneficiaries || !Array.isArray(beneficiaries)) {
-            console.log('No beneficiaries provided for wallet processing');
+            this.logger.log('No beneficiaries provided for wallet processing');
             return beneficiaries;
         }
 
-        console.log(`Processing wallet addresses for ${beneficiaries.length} beneficiaries`);
+        this.logger.log(`Processing wallet addresses for ${beneficiaries.length} beneficiaries`);
 
         const xcapit = await this.prismaService.setting.findUnique({
             where: { name: WalletServiceType.XCAPIT },
@@ -33,7 +34,6 @@ export class WalletProcessingService {
 
             if (xcapit) {
                 updatedBeneficiaries = await this.attachXcapitWallets(beneficiaries);
-                console.log({ updatedBeneficiaries });
             } else {
                 // Validate/ensure wallet addresses for all items
                 updatedBeneficiaries = await Promise.all(
@@ -48,7 +48,7 @@ export class WalletProcessingService {
 
             return updatedBeneficiaries;
         } catch (error) {
-            console.error('Wallet processing failed:', error);
+            this.logger.error('Wallet processing failed:', error);
 
             throw error instanceof RpcException
                 ? error
@@ -64,11 +64,10 @@ export class WalletProcessingService {
                 .filter(Boolean)
                 .map((phone) => ({ phoneNumber: phone }));
 
-            console.log('Processing phones for Xcapit wallets:', phones);
+            this.logger.log('Processing phones for Xcapit wallets:', phones);
 
             // Bulk generate wallets
             const bulkRes = await this.xcapitService.bulkGenerateXcapitWallet(phones);
-            console.log(bulkRes)
 
             // Build phone → wallet mapping
             const phoneToWallet = Object.fromEntries(
@@ -81,7 +80,7 @@ export class WalletProcessingService {
                 walletAddress: phoneToWallet[d?.piiData?.phone] || d.walletAddress,
             }));
         } catch (e) {
-            console.log(e)
+            this.logger.log(e)
         }
     }
 
@@ -90,7 +89,7 @@ export class WalletProcessingService {
     ): Promise<string> {
         if (!walletAddress) {
             const result = await this.walletService.createWallet();
-            console.log('Created new wallet for chain:', result.address);
+            this.logger.log('Created new wallet for chain:', result.address);
             return result.address;
         }
 
@@ -114,7 +113,7 @@ export class WalletProcessingService {
         );
 
         if (existingBeneficiary) {
-            console.log('Wallet address already exists');
+            this.logger.log('Wallet address already exists');
             throw new RpcException('Wallet address already exists');
         }
 
