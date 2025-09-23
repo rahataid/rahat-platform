@@ -389,6 +389,12 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STELLAR.GET_ONCHAIN_TRIGGER, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_STELLAR_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_STELLAR_STATS, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.CHAIN.GET_DISBURSEMENT_STATS]: (
     uuid,
     payload,
