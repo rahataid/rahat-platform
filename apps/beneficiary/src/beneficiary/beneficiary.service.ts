@@ -38,12 +38,11 @@ import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import {
   findTempBenefGroups,
-  validateDupicatePhone,
   validateDupicateWallet
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
-import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
+import { sanitizeNonAlphaNumericValue, sanitizePhone } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
@@ -63,7 +62,7 @@ export class BeneficiaryService {
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
-    private eventEmitter: EventEmitter2,
+    private readonly eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
     private readonly beneficiaryUtilsService: BeneficiaryUtilsService,
 
@@ -76,7 +75,10 @@ export class BeneficiaryService {
       data: dto,
     });
   }
-
+  async refreshStats() {
+    this.eventEmitter.emit(BeneficiaryEvents.REFRESH_STATS, { projectUUID: null });
+    return { message: 'Beneficiary stats refresh started' };
+  }
   async listPiiData(dto: any) {
     const repository = dto.projectId
       ? this.rsprisma.beneficiaryProject
@@ -897,7 +899,22 @@ export class BeneficiaryService {
     }
   }
 
+  async createBulkBeneficiaries(dtos: CreateBeneficiaryDto[],
+    projectUuid?: string, conditional?: boolean) {
+    try {
+      const result = this.createBulk(dtos, projectUuid, conditional)
+      this.eventEmitter.emit(
+        BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL,
+        {
+          projectUuid: null,
+        }
+      );
+      return result
+    } catch (error) {
+      this.logger.error(error.message)
+    }
 
+  }
   async syncProjectStats(projectUuid) {
     return await this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
       projectUuid,
@@ -1749,46 +1766,53 @@ export class BeneficiaryService {
       });
 
       const chain = await this.beneficiaryUtilsService.getChainName();
+
+      console.log(chain, "is chain")
+
       // Get secret of beneficiaries
-      await handleMicroserviceCall({
-        client: this.walletClient.send(
-          { cmd: WalletJobs.GET_BULK_SECRET_BY_WALLET }, { walletAddresses: unassignedBenfs.map((d) => d.walletAddress) }
-        ),
-        onSuccess: async (response) => {
+      // todoNewChain
+      if (chain === 'stellar') {
+        await handleMicroserviceCall({
+          client: this.walletClient.send(
+            { cmd: WalletJobs.GET_BULK_SECRET_BY_WALLET }, { walletAddresses: unassignedBenfs.map((d) => d.walletAddress) }
+          ),
+          onSuccess: async (response) => {
 
-          let benWallets = response.map((d) => ({
-            address: d.publicKey,
-            secret: d.privateKey
-          }));
+            let benWallets = response.map((d) => ({
+              address: d.publicKey,
+              secret: d.privateKey
+            }));
 
-          // Create stellar account and add trustline for beneficiaries
-          await handleMicroserviceCall({
-            client: this.client.send(
-              { cmd: AAJobs.STELLAR.INTERNAL_FAUCET_TRUSTLINE, uuid: project.uuid }, { wallets: benWallets }
-            ),
-            onSuccess: async (response) => {
-              return response;
-            },
-            onError(error) {
-              console.log(
-                'Error adding trustline to beneficiaries',
-                error
-              );
-              throw new RpcException(error.message);
-            },
-          })
+            // Create stellar account and add trustline for beneficiaries
+            await handleMicroserviceCall({
+              client: this.client.send(
+                { cmd: AAJobs.STELLAR.INTERNAL_FAUCET_TRUSTLINE, uuid: project.uuid }, { wallets: benWallets }
+              ),
+              onSuccess: async (response) => {
+                return response;
+              },
+              onError(error) {
+                console.log(
+                  'Error adding trustline to beneficiaries',
+                  error
+                );
+                throw new RpcException(error.message);
+              },
+            })
 
-          return response;
-        },
-        onError(error) {
-          console.log(
-            'Error getting secrets of beneficiaries',
-            error
-          );
-          throw new RpcException(error.message);
-        },
-      })
+            return response;
+          },
+          onError(error) {
+            console.log(
+              'Error getting secrets of beneficiaries',
+              error
+            );
+            throw new RpcException(error.message);
+          },
+        })
+      }
 
+      console.log(unassignedBenfs?.length)
 
       // todo: Remove loop while assigning beneficiary to project
       if (unassignedBenfs?.length) {
@@ -1800,6 +1824,8 @@ export class BeneficiaryService {
         }
       }
 
+      console.log(unassignedBenfs?.length)
+
       // add as required by project specifics
       const projectPayload = {
         beneficiaryGroupData,
@@ -1807,6 +1833,8 @@ export class BeneficiaryService {
 
       //2.Save beneficiary group to project
       await this.saveBeneficiaryGroupToProject(dto);
+
+      console.log("adding beneficiary group")
       //3. Sync beneficiary to project
       return this.client.send(
         { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
@@ -1990,7 +2018,7 @@ export class BeneficiaryService {
         phoneStatus: d.phoneStatus,
         internetStatus: d.internetStatus,
         email: d.email || null,
-        phone: d.phone || null,
+        phone: sanitizePhone(d.phone) || null,
         birthDate: d.birthDate || null,
         location: d.location || null,
         latitude: d.latitude || null,
@@ -2000,7 +2028,6 @@ export class BeneficiaryService {
       };
     }))
 
-    console.log(beneficiaryData)
     const tempBenefPhone = await this.listTempBenefPhone();
     return this.prisma.$transaction(async (txn) => {
       // 1. Upsert temp group by name
@@ -2065,9 +2092,9 @@ export class BeneficiaryService {
     const beneficiaries = groups.map((f) => f.tempBeneficiary);
     if (!beneficiaries.length) throw new Error('No benficiaries found!');
 
-    const dupliPhones = await validateDupicatePhone(this.prisma, beneficiaries);
-    if (dupliPhones.length)
-      throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
+    // const dupliPhones = await validateDupicatePhone(this.prisma, beneficiaries);
+    // if (dupliPhones.length)
+    //   throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
     const dupliWallets = await validateDupicateWallet(
       this.prisma,
       beneficiaries

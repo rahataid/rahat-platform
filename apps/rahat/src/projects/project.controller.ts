@@ -101,6 +101,8 @@ export class ProjectController {
   async upload(@Param('uuid') uuid: UUID, @UploadedFile() file: TFile, @Req() req: Request) {
     const projectId = uuid
     const action = req.body['action']
+    const payload = req.body['payload']
+
     if (!action || !projectId) {
       throw new BadRequestException('Missing action or project id');
     }
@@ -111,7 +113,12 @@ export class ProjectController {
     const response = await this.projectService.handleProjectActions({
       action,
       uuid: projectId,
-      payload: rawData,
+      payload: payload ? {
+        ...(JSON.parse(payload)),
+        data: {
+          ...rawData,
+        }
+      } : rawData,
       user: null,
       trigger: null,
     });

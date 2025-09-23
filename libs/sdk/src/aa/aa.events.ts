@@ -123,12 +123,14 @@ export const JOBS = {
     GET_PAYOUT_LOG: 'aa.jobs.payout.getPayoutLog',
     GET_PAYOUT_DETAILS: 'aa.jobs.payout.getPayoutDetails',
     EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+    VERIFY_MANUAL_PAYOUT: 'aa.jobs.payout.verifyManualPayout',
   },
   VENDOR: {
     // Remove after test
     TEST_OFFLINE_PAYOUT: 'aa.jobs.vendor.test_offline_payout',
     FETCH_OFFLINE_BENEFICIARIES: 'aa.jobs.vendor.fetch_offline_beneficiaries',
     SYNC_OFFLINE_DATA: 'aa.jobs.vendor.sync_offline_data',
+    BATCH_TRANSFER: 'aa.jobs.vendor.batch_transfer',
     TOKEN_REDEMPTION: {
       CREATE: 'aa.jobs.vendor.token_redemption.create',
       GET: 'aa.jobs.vendor.token_redemption.get',
@@ -139,10 +141,29 @@ export const JOBS = {
     },
   },
   CHAIN: {
-    DISBURSE: 'jobs.chain.disburse',
-    SEND_OTP: 'jobs.chain.sendOtp',
-    SEND_ASSET: 'jobs.chain.sendAsset',
+    DISBURSE: 'aa.jobs.chain.disburse',
+    SEND_OTP: 'aa.jobs.chain.sendOtp',
+    SEND_ASSET: 'aa.jobs.chain.sendAsset',
     GET_DISBURSEMENT_STATS: 'aa.jobs.chain.getDisbursementStats',
-
+    GET_WALLET_BALANCE: 'aa.jobs.chain.getWalletBalance',
+    GET_RAHAT_TOKEN_BALANCE: 'aa.jobs.chain.getRahatTokenBalance',
+  },
+  GRIEVANCES: {
+    CREATE: 'aa.jobs.grievances.create',
+    LIST: 'aa.jobs.grievances.list',
+    GET: 'aa.jobs.grievances.get',
+    UPDATE: 'aa.jobs.grievances.update',
+    REMOVE: 'aa.jobs.grievances.remove',
+    UPDATE_STATUS: 'aa.jobs.grievances.updateStatus',
+  },
+  BANK_SCRAPE: {
+    HBL_ACCOUNTS: 'aa.jobs.bank-scrape.hbl.accounts',
+    HBL_TRANSACTIONS: 'aa.jobs.bank-scrape.hbl.transactions',
+    CZBIL_ACCOUNTS: 'aa.jobs.bank-scrape.czbil.accounts',
+    CZBIL_TRANSACTIONS: 'aa.jobs.bank-scrape.czbil.transactions',
+  },
+  CASH_TRACKER: {
+    EXECUTE_ACTION: 'aa.jobs.cash-tracker.executeAction',
+    GET_TRANSACTIONS: 'aa.jobs.cash-tracker.getTransactions',
   },
 };

@@ -246,13 +246,13 @@ export const MS_ACTIONS = {
     },
 
     // new chain
-
     CHAIN: {
       DISBURSE: 'aa.chain.disburse',
       SEND_OTP: 'aa.chain.sendOtp',
       SEND_ASSET: 'aa.chain.sendAsset',
       GET_DISBURSEMENT_STATS: 'aa.chain.getDisbursementStats',
-
+      GET_WALLET_BALANCE: 'aa.chain.getWalletBalance',
+      GET_RAHAT_TOKEN_BALANCE: 'aa.chain.getRahatTokenBalance',
     },
     STELLAR: {
       DISBURSE: 'aa.stellar.disburse',
@@ -293,12 +293,14 @@ export const MS_ACTIONS = {
       GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
       GET_PAYOUT_DETAILS: 'aa.payout.getPayoutDetails',
       EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+      VERIFY_MANUAL_PAYOUT: 'aa.payout.verifyManualPayout',
     },
     VENDOR: {
       // Remove after test
       TEST_OFFLINE_PAYOUT: 'aaProject.vendor.testOfflinePayout',
       FETCH_OFFLINE_BENEFICIARIES: 'aaProject.vendor.fetch_offline_beneficiaries',
       SYNC_OFFLINE_DATA: 'aaProject.vendor.sync_offline_data',
+      BATCH_TRANSFER: 'aa.vendor.batch_transfer',
       TOKEN_REDEMPTION: {
         CREATE: 'aa.vendor.token_redemption.create',
         GET: 'aa.vendor.token_redemption.get',
@@ -307,6 +309,24 @@ export const MS_ACTIONS = {
         GET_VENDOR_REDEMPTIONS: 'aa.vendor.token_redemption.get_vendor_redemptions',
         GET_STATS: 'aa.vendor.token_redemption.get_stats',
       },
+    },
+    GRIEVANCES: {
+      CREATE: 'aa.grievances.create',
+      LIST: 'aa.grievances.list',
+      GET: 'aa.grievances.get',
+      UPDATE: 'aa.grievances.update',
+      REMOVE: 'aa.grievances.remove',
+      UPDATE_STATUS: 'aa.grievances.updateStatus',
+    },
+    BANK_SCRAPE: {
+      HBL_ACCOUNTS: 'aa.bank-scrape.hbl.accounts',
+      HBL_TRANSACTIONS: 'aa.bank-scrape.hbl.transactions',
+      CZBIL_ACCOUNTS: 'aa.bank-scrape.czbil.accounts',
+      CZBIL_TRANSACTIONS: 'aa.bank-scrape.czbil.transactions',
+    },
+    CASH_TRACKER: {
+      EXECUTE_ACTION: 'aa.cash-tracker.executeAction',
+      GET_TRANSACTIONS: 'aa.cash-tracker.getTransactions',
     },
   },
   C2CProject: {

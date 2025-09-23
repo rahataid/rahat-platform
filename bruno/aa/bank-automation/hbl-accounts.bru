@@ -1,0 +1,31 @@
+meta {
+  name: hbl-accounts
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.bank-scrape.hbl.accounts",
+    "payload": {
+      "username": "custom_user",
+      "password": "custom_pass",
+      "totp": "123456"
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  console.log('HBL Accounts Response:', responseData);
+}
