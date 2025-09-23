@@ -142,5 +142,7 @@ export const JOBS = {
     DISBURSE: 'jobs.chain.disburse',
     SEND_OTP: 'jobs.chain.sendOtp',
     SEND_ASSET: 'jobs.chain.sendAsset',
+    GET_DISBURSEMENT_STATS: 'aa.jobs.chain.getDisbursementStats',
+
   },
 };
