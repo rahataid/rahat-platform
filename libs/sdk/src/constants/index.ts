@@ -530,6 +530,7 @@ export const MS_ACTIONS = {
     GET_SAFE_OWNER: 'aidlink.getSafeOwner',
     GET_BEN_REPORTING_LOGS: 'aidlink.getBenReportingLogs',
     GET_OFFRAMP_DETAILS: 'aidlink.getOfframpDetails',
+    GET_BEN_DISBURSEMENT_DETAILS: 'aidlink.getBenDisbursementDetails'
 
   },
   NOTIFICATION: {
