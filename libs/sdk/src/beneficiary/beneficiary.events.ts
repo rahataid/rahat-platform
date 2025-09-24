@@ -86,5 +86,7 @@ export const JOBS = {
   GET_SAFE_OWNER: 'rahat.jobs.safe_wallet.get_owner',
   GET_BEN_REPORTING_LOGS: 'rahat.jobs.beneficiary.get_ben_reporting_logs',
   GET_OFFRAMP_DETAILS: 'rahat.jobs.beneficiary.get_offramp_details',
-  GET_BEN_DISBURSEMENT: 'rahat.jobs.beneficiary.get_ben_disbursement_details'
+  GET_BEN_DISBURSEMENT: 'rahat.jobs.beneficiary.get_ben_disbursement_details',
+  DISBURSEMENT_BALANCE_CHART: 'rahat.jobs.disbursement.balance.get'
+
 };

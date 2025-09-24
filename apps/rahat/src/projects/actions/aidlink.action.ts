@@ -51,4 +51,17 @@ export const aidLinkActions: ProjectActionFunc = {
             { projectId: uuid, ...payload },
             50000
         ),
+    [MS_ACTIONS.AIDLINKProject.GET_DISBURSEMENT_SAFE_CHART]: (
+        uuid,
+        payload,
+        sendCommand
+    ) =>
+        sendCommand(
+            {
+                cmd: BeneficiaryJobs.DISBURSEMENT_BALANCE_CHART,
+                uuid,
+            },
+            { projectId: uuid, ...payload },
+            50000
+        ),
 };
