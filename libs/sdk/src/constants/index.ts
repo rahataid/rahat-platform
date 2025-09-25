@@ -328,6 +328,10 @@ export const MS_ACTIONS = {
       EXECUTE_ACTION: 'aa.cash-tracker.executeAction',
       GET_TRANSACTIONS: 'aa.cash-tracker.getTransactions',
     },
+    INKIND_TRACKER: {
+      EXECUTE_ACTION: 'aa.inkind-tracker.executeAction',
+      GET_TRANSACTIONS: 'aa.inkind-tracker.getTransactions',
+    },
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',
