@@ -450,6 +450,7 @@ export const MS_ACTIONS = {
   MS_SOURCES: {
     GET_ALL: 'ms.sources.getAll',
     GET_ONE: 'ms.sources.getOne',
+    GET_HEALTH: 'ms.sources.getHealth',
   },
   MS_TRIGGERS: {
     DEV_ONLY: 'ms.triggers.devOnly',
