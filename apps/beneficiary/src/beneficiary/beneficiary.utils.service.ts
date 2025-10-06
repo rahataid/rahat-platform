@@ -192,6 +192,63 @@ export class BeneficiaryUtilsService {
     });
   }
 
+  async bulkAssignBeneficiaryToProject(assignBeneficiaryDtos: AddToProjectDto[]) {
+    if (!assignBeneficiaryDtos?.length) return;
+
+    const allProjectPayloads = [];
+
+    // Process each assignment and build payloads
+    for (const assignBeneficiaryDto of assignBeneficiaryDtos) {
+      const { beneficiaryId, projectId } = assignBeneficiaryDto;
+
+      //fetch project and beneficiary detail in parallel
+      const [projectData, beneficiaryData] = await Promise.all([
+        this.prismaService.project.findUnique({ where: { uuid: projectId } }),
+        this.prismaService.beneficiary.findUnique({
+          where: { uuid: beneficiaryId },
+          include: { pii: true },
+        }),
+      ]);
+
+      if (!projectData) continue;
+      if (!beneficiaryData) {
+        console.warn(`Beneficiary ${beneficiaryId} not found, skipping assignment`);
+        continue;
+      }
+
+      //Build Project Payload and add to array
+      const projectPayload = this.buildProjectPayload(projectData, beneficiaryData);
+      allProjectPayloads.push(projectPayload);
+
+      //Save beneficiary to Project
+      await this.saveBeneficiaryToProject({
+        beneficiaryId,
+        projectId,
+      });
+    }
+
+    // Single bulk microservice call for all beneficiaries
+    if (allProjectPayloads.length > 0) {
+      await this.handleMicroserviceCall({
+        client: this.client.send(
+          { cmd: 'rahat.jobs.beneficiary.create_bulk', uuid: assignBeneficiaryDtos[0].projectId },
+          { beneficiaries: allProjectPayloads }
+        ),
+        onSuccess(response) {
+          console.log('Bulk assignment response', response);
+        },
+        onError(error) {
+          console.log('Bulk assignment error', error);
+          throw new RpcException(error.message);
+        },
+      });
+    }
+
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
+      projectUuid: assignBeneficiaryDtos[0].projectId,
+    });
+  }
+
   private buildProjectPayload(projectData: any, beneficiaryData: any) {
     const payload: BeneficiaryPayload = {
       uuid: beneficiaryData.uuid,

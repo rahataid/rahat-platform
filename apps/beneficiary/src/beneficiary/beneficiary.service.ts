@@ -1767,8 +1767,6 @@ export class BeneficiaryService {
 
       const chain = await this.beneficiaryUtilsService.getChainName();
 
-      console.log(chain, "is chain")
-
       // Get secret of beneficiaries
       // todoNewChain
       if (chain === 'stellar') {
@@ -1812,19 +1810,15 @@ export class BeneficiaryService {
         })
       }
 
-      console.log(unassignedBenfs?.length)
-
-      // todo: Remove loop while assigning beneficiary to project
+      // Bulk assign unassigned beneficiaries to project
       if (unassignedBenfs?.length) {
-        for (const unassignedBenf of unassignedBenfs) {
-          await this.beneficiaryUtilsService.assignBeneficiaryToProject({
-            beneficiaryId: unassignedBenf.uuid,
-            projectId: project.uuid,
-          });
-        }
-      }
+        const assignDtos = unassignedBenfs.map(beneficiary => ({
+          beneficiaryId: beneficiary.uuid,
+          projectId: project.uuid,
+        }));
 
-      console.log(unassignedBenfs?.length)
+        await this.beneficiaryUtilsService.bulkAssignBeneficiaryToProject(assignDtos);
+      }
 
       // add as required by project specifics
       const projectPayload = {
