@@ -166,4 +166,8 @@ export const JOBS = {
     EXECUTE_ACTION: 'aa.jobs.cash-tracker.executeAction',
     GET_TRANSACTIONS: 'aa.jobs.cash-tracker.getTransactions',
   },
+  INKIND_TRACKER: {
+    EXECUTE_ACTION: 'aa.jobs.inkind-tracker.executeAction',
+    GET_TRANSACTIONS: 'aa.jobs.inkind-tracker.getTransactions',
+  },
 };

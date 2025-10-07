@@ -1,13 +1,14 @@
 import { Global, Module } from '@nestjs/common';
-import { SettingsModule } from '@rumsan/extensions/settings';
 import { EVMWallet, StellarWallet } from '@rahataid/wallet';
+import { SettingsModule } from '@rumsan/extensions/settings';
+import {
+  BLOCKCHAIN_REGISTRY_TOKEN,
+  BlockchainProviderRegistry,
+} from './providers/blockchain-provider.registry';
+import { FileWalletStorage } from './storages/fs.storage';
 import { WalletController } from './wallet.controller';
 import { WalletService } from './wallet.service';
-import { FileWalletStorage } from './storages/fs.storage';
-import {
-  BlockchainProviderRegistry,
-  BLOCKCHAIN_REGISTRY_TOKEN,
-} from './providers/blockchain-provider.registry';
+import { XcapitService } from './xcapit.service';
 
 @Global()
 @Module({
@@ -27,7 +28,8 @@ import {
         },
       },
     }),
+    XcapitService,
   ],
-  exports: [WalletService, BLOCKCHAIN_REGISTRY_TOKEN],
+  exports: [WalletService, BLOCKCHAIN_REGISTRY_TOKEN, XcapitService],
 })
 export class WalletModule {}

@@ -48,6 +48,7 @@ export const JOBS = {
   LIST_BY_PROJECT_FIND_ONE_BENEFICIARY: " rahat.jobs.beneficiary.list_by_project_find_one_beneficiary",
   LIST_GROUP_BY_PROJECT: 'rahat.jobs.beneficiary.list_group_by_project',
   GET_ONE_GROUP_BY_PROJECT: 'rahat.jobs.beneficiary.get_one_group_by_project',
+  LIST_GROUP_BY_UUID: 'rahat.jobs.beneficiary.list_group_by_uuid',
   VENDOR_REFERRAL: 'rahat.jobs.beneficiary.get_referred',
   LIST_REFERRAL: 'rahat.jobs.beneficiary.list_referred',
   LIST_BEN_VENDOR_COUNT: 'rahat.jobs.beneficiary.count_ben_vendor',
@@ -82,4 +83,10 @@ export const JOBS = {
   CHECK_BENEFICIARY_BANK_ACCOUNT: 'rahat.jobs.beneficiary.check_beneficiary_bank_account',
   CHECK_BENEFICIARY_PHONE_NUMBER: 'rahat.jobs.beneficiary.check_beneficiary_phone_number',
   DELETE_BENEFICIARY_AND_PII: 'rahat.jobs.beneficiary.delete_beneficiary_and_pii',
+  GET_SAFE_OWNER: 'rahat.jobs.safe_wallet.get_owner',
+  GET_BEN_REPORTING_LOGS: 'rahat.jobs.beneficiary.get_ben_reporting_logs',
+  GET_OFFRAMP_DETAILS: 'rahat.jobs.beneficiary.get_offramp_details',
+  GET_BEN_DISBURSEMENT: 'rahat.jobs.beneficiary.get_ben_disbursement_details',
+  DISBURSEMENT_BALANCE_CHART: 'rahat.jobs.disbursement.balance.get'
+
 };

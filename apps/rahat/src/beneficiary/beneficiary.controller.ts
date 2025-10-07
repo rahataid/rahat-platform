@@ -59,6 +59,7 @@ import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
 import { WalletInterceptor } from './interceptor/wallet.interceptor';
 import { DocParser } from './parser';
+import { WalletProcessingService } from './services/wallet-processing.service';
 
 function getDateInfo(dateString) {
   try {
@@ -84,7 +85,8 @@ export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
     @Inject('COMMS_CLIENT') private commsClient: CommsClient,
-    @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue
+    @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue,
+    private readonly walletProcessingService: WalletProcessingService
   ) { }
 
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -228,8 +230,8 @@ export class BeneficiaryController {
       age: b['Age'] || null,
       walletAddress: b['Wallet Address'],
       piiData: {
-        name: b['Name*'] || 'Unknown',
-        phone: b['Whatsapp Number*'] || b['Phone Number*'],
+        name: b['Name*'] || b['Name'] || 'Unknown',
+        phone: b['Whatsapp Number*'] || b['Phone Number*'] || b['Phone Number'],
         extras: {
           isAdult:
             getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age*']) > 18,
@@ -238,10 +240,13 @@ export class BeneficiaryController {
       },
     }));
 
+    // Process wallet addresses using the wallet processing service
+    const beneficiariesWithWallets = await this.walletProcessingService.processBeneficiariesWithWallets(beneficiariesMapped);
+
     return this.client
       .send(
         { cmd: BeneficiaryJobs.CREATE_BULK },
-        { payload: beneficiariesMapped, projectUUID: projectId }
+        { payload: beneficiariesWithWallets, projectUUID: projectId }
       )
       .pipe(
         catchError((error) => {
@@ -346,11 +351,14 @@ export class BeneficiaryController {
 
     console.log(`Trying to upload ${beneficiariesMapped.length} beneficiaries through queue. Unique phone numbers: ${uniquePhoneNumberedBeneficiaries.length}, Duplicate phone numbers: ${beneficiariesMapped.length - uniquePhoneNumberedBeneficiaries.length}`);
 
+    // Process wallet addresses using the wallet processing service
+    const beneficiariesWithWallets = await this.walletProcessingService.processBeneficiariesWithWallets(uniquePhoneNumberedBeneficiaries);
+
     return handleMicroserviceCall({
       client: this.client.send(
         { cmd: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE },
         {
-          data: uniquePhoneNumberedBeneficiaries,
+          data: beneficiariesWithWallets,
           projectUUID: projectId,
           ignoreExisting: true,
           automatedGroupOption,
@@ -430,10 +438,17 @@ export class BeneficiaryController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
-  @Get('phone/:phone')
+  @Get('phone/:phone/:projectUUID')
   @ApiParam({ name: 'phone', required: true })
-  async getBeneficiaryByPhone(@Param('phone') phone: string) {
-    return this.client.send({ cmd: BeneficiaryJobs.GET_BY_PHONE }, phone);
+  @ApiParam({ name: 'projectUUID', required: true })
+  async getBeneficiaryByPhone(
+    @Param('phone') phone: string,
+    @Param('projectUUID') projectUUID: string
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.GET_BY_PHONE },
+      { phone, projectUUID }
+    );
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -565,6 +580,7 @@ export class BeneficiaryController {
       dto
     );
   }
+
 
 
 }

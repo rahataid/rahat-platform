@@ -596,6 +596,22 @@ export const aaActions: ProjectActionFunc = {
   ) =>
     sendCommand({ cmd: AAJobs.CASH_TRACKER.GET_TRANSACTIONS, uuid }, payload),
   // **** cash tracker end **** //
+
+  // **** inkind tracker start **** //
+  [MS_ACTIONS.AAPROJECT.INKIND_TRACKER.EXECUTE_ACTION]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.CASH_TRACKER.EXECUTE_ACTION, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND_TRACKER.GET_TRANSACTIONS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.CASH_TRACKER.GET_TRANSACTIONS, uuid }, payload),
+  // **** inkind tracker end **** //
+
   // **** Vendor start **** //
   [MS_ACTIONS.AAPROJECT.VENDOR.TEST_OFFLINE_PAYOUT]: (
     uuid,
