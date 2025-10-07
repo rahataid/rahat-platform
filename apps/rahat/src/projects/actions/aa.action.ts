@@ -609,7 +609,7 @@ export const aaActions: ProjectActionFunc = {
     payload,
     sendCommand
   ) =>
-    sendCommand({ cmd: AAJobs.CASH_TRACKER.GET_TRANSACTIONS, uuid }, payload),
+    sendCommand({ cmd: AAJobs.INKIND_TRACKER.GET_TRANSACTIONS, uuid }, payload),
   // **** inkind tracker end **** //
 
   // **** Vendor start **** //
