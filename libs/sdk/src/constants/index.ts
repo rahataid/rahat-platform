@@ -317,6 +317,7 @@ export const MS_ACTIONS = {
       UPDATE: 'aa.grievances.update',
       REMOVE: 'aa.grievances.remove',
       UPDATE_STATUS: 'aa.grievances.updateStatus',
+      GET_OVERVIEW_STATS: 'aa.grievances.getOverviewStats',
     },
     BANK_SCRAPE: {
       HBL_ACCOUNTS: 'aa.bank-scrape.hbl.accounts',
