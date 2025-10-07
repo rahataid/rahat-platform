@@ -341,6 +341,7 @@ export const MS_ACTIONS = {
     GET_DISBURSEMENT: 'c2cProject.disbursement.getOne',
     GET_DISBURSEMENT_TRANSACTIONS: 'c2cProject.disbursement.transactions.get',
     GET_DISBURESEMENT_APPROVALS: 'c2cProject.disbursement.approvals.get',
+    GET_PENDING_DISBURSEMENT: 'c2cProject.disbursements.pending.get',
     UPDATE_DISBURSEMENT: 'c2cProject.disbursement.update',
     ADD_GROUP: 'c2cProject.beneficiary.addGroup',
     GET_ALL_GROUPS: 'c2cProject.beneficiary.getAllGroups',
