@@ -536,7 +536,8 @@ export const MS_ACTIONS = {
     GET_BEN_REPORTING_LOGS: 'aidlink.getBenReportingLogs',
     GET_OFFRAMP_DETAILS: 'aidlink.getOfframpDetails',
     GET_BEN_DISBURSEMENT_DETAILS: 'aidlink.getBenDisbursementDetails',
-    GET_DISBURSEMENT_SAFE_CHART: 'aidlink.getDisbursementSafeChart'
+    GET_DISBURSEMENT_SAFE_CHART: 'aidlink.getDisbursementSafeChart',
+    GET_PENDING_DISBURSEMENT: 'aidlink.disbursements.pending.get',
 
   },
   NOTIFICATION: {
