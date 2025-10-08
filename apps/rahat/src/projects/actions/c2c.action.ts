@@ -56,13 +56,6 @@ export const c2cActions: ProjectActionFunc = {
       500000
     ),
 
-  [MS_ACTIONS.C2CProject.GET_PENDING_DISBURSEMENT]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: BeneficiaryJobs.GET_PENDING_DISBURSEMENT, uuid },
-      payload,
-      500000
-    ),
-
   [MS_ACTIONS.C2CProject.CREATE_SAFE_TRANSACTION]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.CREATE_SAFE_TRANSACTION, uuid },

@@ -341,7 +341,6 @@ export const MS_ACTIONS = {
     GET_DISBURSEMENT: 'c2cProject.disbursement.getOne',
     GET_DISBURSEMENT_TRANSACTIONS: 'c2cProject.disbursement.transactions.get',
     GET_DISBURESEMENT_APPROVALS: 'c2cProject.disbursement.approvals.get',
-    GET_PENDING_DISBURSEMENT: 'c2cProject.disbursements.pending.get',
     UPDATE_DISBURSEMENT: 'c2cProject.disbursement.update',
     ADD_GROUP: 'c2cProject.beneficiary.addGroup',
     GET_ALL_GROUPS: 'c2cProject.beneficiary.getAllGroups',
@@ -537,7 +536,8 @@ export const MS_ACTIONS = {
     GET_BEN_REPORTING_LOGS: 'aidlink.getBenReportingLogs',
     GET_OFFRAMP_DETAILS: 'aidlink.getOfframpDetails',
     GET_BEN_DISBURSEMENT_DETAILS: 'aidlink.getBenDisbursementDetails',
-    GET_DISBURSEMENT_SAFE_CHART: 'aidlink.getDisbursementSafeChart'
+    GET_DISBURSEMENT_SAFE_CHART: 'aidlink.getDisbursementSafeChart',
+    GET_PENDING_DISBURSEMENT: 'aidlink.disbursements.pending.get',
 
   },
   NOTIFICATION: {
