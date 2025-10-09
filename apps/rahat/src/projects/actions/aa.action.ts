@@ -267,6 +267,16 @@ export const aaActions: ProjectActionFunc = {
       payload
     ),
 
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_BALANCE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.BENEFICIARY.GET_BALANCE, uuid },
+      payload
+    ),
+
   [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_REDEEM_INFO]: (
     uuid,
     payload,
