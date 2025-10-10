@@ -329,6 +329,7 @@ export const MS_ACTIONS = {
     CASH_TRACKER: {
       EXECUTE_ACTION: 'aa.cash-tracker.executeAction',
       GET_TRANSACTIONS: 'aa.cash-tracker.getTransactions',
+      CREATE_BUDGET: 'aa.cash-tracker.createBudget',
     },
     INKIND_TRACKER: {
       EXECUTE_ACTION: 'aa.inkind-tracker.executeAction',
