@@ -22,6 +22,7 @@ export const UserRoles = {
   MANAGER: 'Manager',
   USER: 'User',
   VENDOR: 'Vendor',
+  AIDLINK_PROJECT_MANAGER: 'AidLinkProjectManager'
 };
 
 export const ACTIONS = {
