@@ -67,6 +67,7 @@ export const JOBS = {
     GET_ALL_TOKEN_RESERVATION: 'aa.jobs.beneficiary.getAllTokenReservation',
     GET_ONE_TOKEN_RESERVATION: 'aa.jobs.beneficiary.getOneTokenReservation',
     GET_RESERVATION_STATS: 'aa.jobs.beneficiary.getReservationStats',
+    GET_BALANCE: 'aa.jobs.beneficiary.getBalance',
     GET_REDEEM_INFO: 'aa.jobs.beneficiary.getRedeemInfo',
   },
   CONTRACT: {
@@ -165,6 +166,7 @@ export const JOBS = {
   CASH_TRACKER: {
     EXECUTE_ACTION: 'aa.jobs.cash-tracker.executeAction',
     GET_TRANSACTIONS: 'aa.jobs.cash-tracker.getTransactions',
+    CREATE_BUDGET: 'aa.jobs.cash-tracker.createBudget',
   },
   INKIND_TRACKER: {
     EXECUTE_ACTION: 'aa.jobs.inkind-tracker.executeAction',

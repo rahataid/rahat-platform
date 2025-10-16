@@ -232,6 +232,8 @@ export const MS_ACTIONS = {
         'aaProject.beneficiary.get_one_token_reservation',
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats',
       GET_REDEEM_INFO: 'aaProject.beneficiary.getRedeemInfo',
+      GET_BALANCE: 'aaProject.beneficiary.getBalance',
+
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
@@ -328,6 +330,7 @@ export const MS_ACTIONS = {
     CASH_TRACKER: {
       EXECUTE_ACTION: 'aa.cash-tracker.executeAction',
       GET_TRANSACTIONS: 'aa.cash-tracker.getTransactions',
+      CREATE_BUDGET: 'aa.cash-tracker.createBudget',
     },
     INKIND_TRACKER: {
       EXECUTE_ACTION: 'aa.inkind-tracker.executeAction',

@@ -267,6 +267,16 @@ export const aaActions: ProjectActionFunc = {
       payload
     ),
 
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_BALANCE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.BENEFICIARY.GET_BALANCE, uuid },
+      payload
+    ),
+
   [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_REDEEM_INFO]: (
     uuid,
     payload,
@@ -595,6 +605,14 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) =>
     sendCommand({ cmd: AAJobs.CASH_TRACKER.GET_TRANSACTIONS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CASH_TRACKER.CREATE_BUDGET]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.CASH_TRACKER.CREATE_BUDGET, uuid }, payload),
+
   // **** cash tracker end **** //
 
   // **** inkind tracker start **** //
