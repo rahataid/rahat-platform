@@ -64,4 +64,10 @@ export const aidLinkActions: ProjectActionFunc = {
             { projectId: uuid, ...payload },
             50000
         ),
+    [MS_ACTIONS.AIDLINKProject.GET_PENDING_DISBURSEMENT]: (uuid, payload, sendCommand) =>
+        sendCommand(
+            { cmd: BeneficiaryJobs.GET_PENDING_DISBURSEMENT, uuid },
+            payload,
+            500000
+        ),
 };

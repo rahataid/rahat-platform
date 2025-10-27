@@ -22,6 +22,7 @@ export const UserRoles = {
   MANAGER: 'Manager',
   USER: 'User',
   VENDOR: 'Vendor',
+  AIDLINK_PROJECT_MANAGER: 'AidLinkProjectManager'
 };
 
 export const ACTIONS = {
@@ -231,6 +232,8 @@ export const MS_ACTIONS = {
         'aaProject.beneficiary.get_one_token_reservation',
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats',
       GET_REDEEM_INFO: 'aaProject.beneficiary.getRedeemInfo',
+      GET_BALANCE: 'aaProject.beneficiary.getBalance',
+
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
@@ -327,6 +330,11 @@ export const MS_ACTIONS = {
     CASH_TRACKER: {
       EXECUTE_ACTION: 'aa.cash-tracker.executeAction',
       GET_TRANSACTIONS: 'aa.cash-tracker.getTransactions',
+      CREATE_BUDGET: 'aa.cash-tracker.createBudget',
+    },
+    INKIND_TRACKER: {
+      EXECUTE_ACTION: 'aa.inkind-tracker.executeAction',
+      GET_TRANSACTIONS: 'aa.inkind-tracker.getTransactions',
     },
   },
   C2CProject: {
@@ -451,6 +459,7 @@ export const MS_ACTIONS = {
   MS_SOURCES: {
     GET_ALL: 'ms.sources.getAll',
     GET_ONE: 'ms.sources.getOne',
+    GET_HEALTH: 'ms.sources.getHealth',
   },
   MS_TRIGGERS: {
     DEV_ONLY: 'ms.triggers.devOnly',
@@ -531,7 +540,8 @@ export const MS_ACTIONS = {
     GET_BEN_REPORTING_LOGS: 'aidlink.getBenReportingLogs',
     GET_OFFRAMP_DETAILS: 'aidlink.getOfframpDetails',
     GET_BEN_DISBURSEMENT_DETAILS: 'aidlink.getBenDisbursementDetails',
-    GET_DISBURSEMENT_SAFE_CHART: 'aidlink.getDisbursementSafeChart'
+    GET_DISBURSEMENT_SAFE_CHART: 'aidlink.getDisbursementSafeChart',
+    GET_PENDING_DISBURSEMENT: 'aidlink.disbursements.pending.get',
 
   },
   NOTIFICATION: {
