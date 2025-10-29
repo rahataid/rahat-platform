@@ -17,10 +17,20 @@ export class WalletProcessingService {
         private readonly xcapitService: XcapitService
     ) { }
 
-    async processBeneficiariesWithWallets(beneficiaries: any[]): Promise<any[]> {
+    async processBeneficiariesWithWallets(beneficiaries: any[]): Promise<{
+        validBeneficiaries: any[];
+        discardedBeneficiaries: { phoneNumber: string; status: string }[];
+        totalProcessed: number;
+        totalDiscarded: number;
+    }> {
         if (!beneficiaries || !Array.isArray(beneficiaries)) {
             this.logger.log('No beneficiaries provided for wallet processing');
-            return beneficiaries;
+            return {
+                validBeneficiaries: beneficiaries,
+                discardedBeneficiaries: [],
+                totalProcessed: beneficiaries.length,
+                totalDiscarded: 0
+            };
         }
 
         this.logger.log(`Processing wallet addresses for ${beneficiaries.length} beneficiaries`);
@@ -30,13 +40,18 @@ export class WalletProcessingService {
         });
 
         try {
-            let updatedBeneficiaries: any[];
+            let result: {
+                validBeneficiaries: any[];
+                discardedBeneficiaries: { phoneNumber: string; status: string }[];
+                totalProcessed: number;
+                totalDiscarded: number;
+            };
 
             if (xcapit) {
-                updatedBeneficiaries = await this.attachXcapitWallets(beneficiaries);
+                result = await this.attachXcapitWallets(beneficiaries);
             } else {
                 // Validate/ensure wallet addresses for all items
-                updatedBeneficiaries = await Promise.all(
+                const updatedBeneficiaries = await Promise.all(
                     beneficiaries.map(async (item) => {
                         const walletAddress = await this.ensureValidWalletAddress(
                             item.walletAddress
@@ -44,9 +59,15 @@ export class WalletProcessingService {
                         return { ...item, walletAddress };
                     })
                 );
+                result = {
+                    validBeneficiaries: updatedBeneficiaries,
+                    discardedBeneficiaries: [],
+                    totalProcessed: updatedBeneficiaries.length,
+                    totalDiscarded: 0
+                };
             }
-
-            return updatedBeneficiaries;
+            this.logger.log(`Beneficiaires processed, ${result.totalProcessed},tota discarded ,${result?.totalDiscarded}`)
+            return result;
         } catch (error) {
             this.logger.error('Wallet processing failed:', error);
 
@@ -56,7 +77,12 @@ export class WalletProcessingService {
         }
     }
 
-    private async attachXcapitWallets(items: any[]) {
+    private async attachXcapitWallets(items: any[]): Promise<{
+        validBeneficiaries: any[];
+        discardedBeneficiaries: { phoneNumber: string; status: string }[];
+        totalProcessed: number;
+        totalDiscarded: number;
+    }> {
         // Collect phones
         try {
             const phones = items
@@ -69,19 +95,49 @@ export class WalletProcessingService {
             // Bulk generate wallets
             const bulkRes = await this.xcapitService.bulkGenerateXcapitWallet(phones);
 
-            // Build phone → wallet mapping
+            // Filter successful responses and build phone → wallet mapping
+            const successfulResponses = bulkRes?.filter((response) =>
+                response.status === 'success' && response.walletAddress
+            ) || [];
+
+            const failedResponses = bulkRes?.filter((response) =>
+                response.status !== 'success' || !response.walletAddress
+            ) || [];
+
+            // Build phone → wallet mapping only for successful responses
             const phoneToWallet = Object.fromEntries(
-                bulkRes?.map((b) => [b.phoneNumber, b.walletAddress]) || []
+                successfulResponses.map((b) => [b.phoneNumber, b.walletAddress])
             );
 
-            // Attach wallet addresses to items
-            return items.map((d) => ({
+            // Filter items to only include those with successful wallet creation
+            const validItems = items.filter((item) => {
+                const phone = item?.piiData?.phone;
+                return phone && phoneToWallet.hasOwnProperty(phone);
+            });
+
+            // Attach wallet addresses to valid items
+            const updatedItems = validItems.map((d) => ({
                 ...d,
                 walletAddress: phoneToWallet[d?.piiData?.phone] || d.walletAddress,
             }));
+
+            this.logger.log(`Successfully processed ${updatedItems.length} out of ${items.length} beneficiaries with Xcapit wallets`);
+
+            return {
+                validBeneficiaries: updatedItems,
+                discardedBeneficiaries: failedResponses.map(response => ({
+                    phoneNumber: response.phoneNumber,
+                    status: response.status
+                })),
+                totalProcessed: items.length,
+                totalDiscarded: failedResponses.length
+            };
         } catch (e) {
+            console.log(e)
             this.logger.log(e)
+            throw e instanceof RpcException ? e : new RpcException('Xcapit Wallet creation  failed');
         }
+
     }
 
     private async ensureValidWalletAddress(
@@ -147,3 +203,4 @@ export class WalletProcessingService {
         return contractValue.type as ChainType;
     }
 }
+
