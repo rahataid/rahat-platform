@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { WalletServiceType } from '@rahataid/sdk/enums';
 import { PrismaService } from '@rumsan/prisma';
@@ -103,11 +103,11 @@ export class XcapitService {
     try {
       const client = await this.getAxiosClient();
       const response = await client.post('/api/beneficiaries/bulk', payload);
-      this.logger.log(response.data)
+      this.logger.log("response", { ...response.data })
       return response.data;
     } catch (e: any) {
       this.logger.log(e)
-      throw new BadRequestException(e);
+      throw new RpcException(e);
     }
   }
 
@@ -120,7 +120,7 @@ export class XcapitService {
       const response = await client.post('/api/beneficiaries', { phoneNumber });
       return response.data;
     } catch (e: any) {
-      throw new BadRequestException(e.response?.data || e.message);
+      throw new RpcException(e.response?.data || e.message);
     }
   }
 }
