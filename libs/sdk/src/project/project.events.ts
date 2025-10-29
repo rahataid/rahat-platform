@@ -51,6 +51,7 @@ export const JOBS = {
     FINDONE_DISBURSEMENT_PLAN: 'rahat.jobs.disbursement_plan.listone',
     UPDATE_DISBURSEMENT_PLAN: 'rahat.jobs.disbursement_plan.update',
     BULK_CREATE_DISBURSEMENT: 'rahat.jobs.disbursement.bulk_create',
+    SEND_EMAIL_NOTIFICATION: 'rahat.jobs.disbursement.send_email_notification',
   },
   CAMPAIGN: {
     CREATE_CAMPAIGN: 'rahat.jobs.campaign.create',
