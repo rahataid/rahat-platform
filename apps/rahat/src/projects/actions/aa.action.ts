@@ -620,7 +620,7 @@ export const aaActions: ProjectActionFunc = {
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.CASH_TRACKER.EXECUTE_ACTION, uuid }, payload),
+  ) => sendCommand({ cmd: AAJobs.INKIND_TRACKER.EXECUTE_ACTION, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.INKIND_TRACKER.GET_TRANSACTIONS]: (
     uuid,

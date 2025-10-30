@@ -51,7 +51,7 @@ import {
 } from '@rumsan/user';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { catchError, firstValueFrom, throwError, timeout } from 'rxjs';
+import { catchError, firstValueFrom, map, throwError, timeout } from 'rxjs';
 import { CommsClient } from '../comms/comms.service';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
 import { removeSpaces } from '../utils';
@@ -241,14 +241,32 @@ export class BeneficiaryController {
     }));
 
     // Process wallet addresses using the wallet processing service
-    const beneficiariesWithWallets = await this.walletProcessingService.processBeneficiariesWithWallets(beneficiariesMapped);
-
+    const walletProcessingResult = await this.walletProcessingService.processBeneficiariesWithWallets(beneficiariesMapped);
     return this.client
       .send(
         { cmd: BeneficiaryJobs.CREATE_BULK },
-        { payload: beneficiariesWithWallets, projectUUID: projectId }
+        { payload: walletProcessingResult.validBeneficiaries, projectUUID: projectId }
       )
       .pipe(
+        map((response) => {
+          if (walletProcessingResult.discardedBeneficiaries.length > 0) {
+            console.warn(`WARNING: ${walletProcessingResult.totalDiscarded} out of ${walletProcessingResult.totalProcessed} beneficiaries were discarded due to Xcapit wallet creation failures:`);
+            walletProcessingResult.discardedBeneficiaries.forEach((discarded) => {
+              console.warn(`   - Phone: ${discarded.phoneNumber}, Reason: ${discarded.status}`);
+            });
+            console.warn(`Successfully processed ${walletProcessingResult.validBeneficiaries.length} beneficiaries with valid wallets.`);
+          }
+
+          return {
+            ...response,
+            discardedBeneficiaries: walletProcessingResult.discardedBeneficiaries,
+            walletProcessingSummary: {
+              totalProcessed: walletProcessingResult.totalProcessed,
+              totalDiscarded: walletProcessingResult.totalDiscarded,
+              totalValid: walletProcessingResult.validBeneficiaries.length
+            }
+          };
+        }),
         catchError((error) => {
           console.log('error', error);
           return throwError(() => new BadRequestException(error.message));
