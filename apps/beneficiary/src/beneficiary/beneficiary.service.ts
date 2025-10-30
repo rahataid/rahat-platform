@@ -2141,11 +2141,15 @@ export class BeneficiaryService {
   async getBenReportingLogs(payload) {
     const { fromDate, toDate } = payload;
     if (!fromDate || !toDate) return [];
+
+    const newTODate = new Date(toDate)
+    newTODate.setHours(23, 59, 59, 999)
+
     const benDetails = await this.prisma.beneficiaryProject.findMany({
       where: {
         createdAt: {
           gte: new Date(fromDate),
-          lte: new Date(toDate),
+          lte: newTODate,
         },
         projectId: payload.projectId,
       },
