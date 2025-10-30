@@ -177,7 +177,7 @@ export class NotificationService {
         text: `
       <p>
       A new disbursement of <strong>${amount} USDC</strong> 
-      to <strong>${beneficiariesCount} beneficiary${beneficiariesCount > 1 ? 'ies' : ''}</strong> 
+      to <strong>${beneficiariesCount} beneficiar${beneficiariesCount > 1 ? 'ies' : 'y'}</strong> 
       has been initiated for the AidLink Project.
       </p>
 
