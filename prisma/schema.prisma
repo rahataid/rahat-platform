@@ -553,6 +553,8 @@ model Grievance {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   deletedAt       DateTime?
+  resolvedAt      DateTime?
+  closedAt        DateTime?
 
   @@map("tbl_grievances")
 }
