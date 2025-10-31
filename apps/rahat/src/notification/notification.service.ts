@@ -173,45 +173,80 @@ export class NotificationService {
     if (actionType === 'INITIATED') {
       queueData = {
         usersEmail,
-        subject: `Disbursement of ${amount} USDC Initiated for AidLink Project - Action Required`,
+        subject: `Disbursement Initiated for AidLink Project`,
         text: `
-      The disbursement of ${amount} USDC to ${beneficiariesCount} project beneficiaries has been initiated for the AidLink Project.
-      Please review the disbursement details and proceed with the next steps:
+      <p>
+      A new disbursement of <strong>${amount} USDC</strong> 
+      to <strong>${beneficiariesCount} beneficiar${beneficiariesCount > 1 ? 'ies' : 'y'}</strong> 
+      has been initiated for the AidLink Project.
+      </p>
 
-      🔹 Disbursement Details: ${process.env.FRONTEND_URL}/projects/aidlink/${projectId}/disbursement/${disbursementId}
-      🔹 Token: USDC (${network} Network)
-      🔹 Beneficiaries: ${beneficiariesCount}
-      🔹 Amount per beneficiary: ${Number(amount) / beneficiariesCount} USDC 
+       <p>
+      Please review and approve the transaction on the Gnosis Safe to proceed.
+      </p>
 
-      We request the Project Manager to kindly coordinate with the Safe Wallet owners to review and approve the transaction on the Gnosis Safe wallet.
+      <div style="background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <p><strong>Summary:</strong></p>
+      <p>Token: USDC (${network} Network)</p>
+      <p>Beneficiaries: ${beneficiariesCount}</p>
+      <p>Amount per beneficiary: ${Number(amount) / beneficiariesCount} USDC</p>
+      <p>
+        View Details: 
+        <a href="${process.env.FRONTEND_URL}/projects/aidlink/${projectId}/disbursement/${disbursementId}" target="_blank" style="color: #1a73e8; text-decoration: none;">
+          View Disbursement ↗
+        </a>
+      </p>
+      </div>
 
-      Once all signatures are approved, the system will automatically execute the transfer, and the USDC will be disbursed to the verified beneficiary wallets.
+       <p>
+      Once all signatures are completed, the transfer will be executed and funds will be sent to the verified wallet.
+      </p>
 
-      Best regards,
-      Team Rahat
+      <p>Best regards, </p>
+      <p>Team Rahat </p>
       `,
       };
+
     } else if (actionType === 'EXECUTED') {
       queueData = {
         usersEmail,
-        subject: `Disbursement Successfully Executed for AidLink Project`,
+        subject: `Disbursement Successfully Executed`,
         text: `
-      We are pleased to inform you that the ${amount} USDC disbursement for the AidLink Project has been successfully executed.
+      <p>
+      The <strong>${amount} USDC</strong> disbursement for the <strong>AidLink Project</strong> 
+      has been successfully executed. All verified beneficiaries have received their tokens 
+      in their wallets.
+    </p>
 
-      All verified beneficiaries have now received their allocated tokens in their respective wallets.
-      You can review the transaction details and disbursement summary below:
+    <div style="border: 1px solid #eee; padding: 16px; border-radius: 8px; background: #fafafa; margin-top: 20px;">
+      <p style="font-weight: bold; margin-bottom: 10px;">Summary:</p>
+      <p><strong>Token:</strong> USDC (${network} Network)</p>
+      <p><strong>Total Distributed:</strong> ${amount} USDC</p>
+      <p><strong>Beneficiaries:</strong> ${beneficiariesCount}</p>
+      <p>
+        <strong>View Details:</strong>
+        <a href="${process.env.FRONTEND_URL}/projects/aidlink/${projectId}/disbursement/${disbursementId}" 
+           style="color: #1a73e8; text-decoration: none;">
+          View Disbursement ↗
+        </a>
+      </p>
+    </div>
 
-      🔹 Disbursement Summary: ${process.env.FRONTEND_URL}/projects/aidlink/${projectId}/disbursement/${disbursementId}
-      🔹 Token: USDC (${network} Network)
-      🔹 Total Amount Distributed: ${amount}
-      🔹 Number of Beneficiaries: ${beneficiariesCount}
+    <p style="margin-top: 20px;">
+      Please coordinate with local partners to confirm receipt and verification. 
+      A complete transaction report is available in the 
+      <strong>Rahat Dashboard → Project Reports</strong> section.
+    </p>
 
-      We request the Project Manager to kindly coordinate with the local community partners and field representatives to confirm that beneficiaries have successfully received the tokens.
+    <div style="margin-top: 30px;">
+      <a href="${process.env.FRONTEND_URL}/projects/aidlink/${projectId}" 
+         style="display: inline-block; background-color: #1a73e8; color: white; 
+                padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500;">
+         Open Dashboard
+      </a>
+    </div>
 
-      A complete transaction report can be accessed via the Project Reports section on the Rahat Dashboard.
-
-      Best regards,
-      Team Rahat
+    <p style="margin-top: 30px;">Best regards,<br>Team Rahat</p>
       `,
       };
     }
