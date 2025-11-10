@@ -2,123 +2,132 @@
 
 ## Overview
 
-This document describes the implementation approach for integrating Gnosis Safe multi-signature wallet functionality into the Rahat token disbursement system. The diagram below illustrates the comparison between the current implementation and the proposed Gnosis Safe implementation.
+This document describes the implementation approach for integrating Gnosis Safe multi-signature wallet functionality into the Rahat token disbursement system. The integration adds a secure fund transfer mechanism where tokens stored in a Gnosis Safe wallet are transferred to the AA Contract through a multi-signature approval process before being assigned and disbursed to beneficiaries.
 
 ## Diagram
 
-![Gnosis Safe Implementation Flow](./diagrams/gnosis.excalidraw.svg)
+![Gnosis Safe Implementation Flow](./diagrams/gnosis_aa.png)
 
-## Current Implementation
+## Pre-requisites
 
-The current implementation follows a straightforward, linear flow for token disbursement:
+Before the disbursement process begins, the following must be in place:
 
-### Flow Description
+- **Tokens Created**: Tokens (USDC, Rahat Token, or other supported tokens) must already be created and deployed on the blockchain.
 
-1. **Create RahatToken/CashToken**
+- **Tokens Stored in Gnosis Safe Wallet**: The tokens must be stored in a Gnosis Safe multi-signature wallet. This wallet acts as the secure treasury from which funds will be transferred to the AA Contract.
 
-   - The process begins with the creation of the token contract (RahatToken or CashToken). This establishes the token that will be used for beneficiary disbursements.
+- **Gnosis Safe Configuration**: The Gnosis Safe wallet must be configured with:
+  - Authorized signers who can approve transactions
+  - Approval threshold (minimum number of signers required to approve a transaction)
+  - Network configuration matching the AA Contract deployment
 
-2. **Assign Token**
+## Gnosis Safe Implementation Flow
 
-   - Tokens are assigned to beneficiaries. This step allocates a specific amount of tokens to each beneficiary address, preparing them for future disbursement.
-
-3. **Disbursement (if triggered)**
-   - When a trigger condition is met, tokens are directly disbursed to beneficiaries. This is a conditional step that executes the actual transfer of tokens from the contract to beneficiary addresses.
-
-### Characteristics
-
-- **Direct Execution**: The disbursement happens immediately when triggered, without additional approval steps.
-- **Single Authority**: The process relies on a single authority or automated trigger to execute disbursements.
-- **Simplified Workflow**: The flow is linear and straightforward, minimizing complexity and transaction overhead.
-
-## Gnosis Safe Implementation
-
-The Gnosis Safe implementation introduces a multi-signature approval mechanism that adds an additional layer of security and governance to the token disbursement process.
+The Gnosis Safe implementation introduces a multi-signature approval mechanism for fund transfers, ensuring that funds can only be moved from the Gnosis Safe wallet to the AA Contract after receiving the required number of approvals from authorized signers.
 
 ### Flow Description
 
-1. **Gnosis Safe Wallet**
+1. **Fund Management (AA Project Proposes Transaction)**
 
-   - The process is managed through a Gnosis Safe multi-signature wallet. This wallet acts as the central control point for all token operations, requiring multiple approvals before any transaction can be executed.
+   - The AA Project initiates the process by proposing a transaction through the Fund Management system. This proposal includes:
+     - The amount of tokens to be transferred
+     - The destination address (AA Contract)
+     - Transaction metadata and purpose
 
-2. **Signers**
+2. **Create Transaction Proposal**
 
-   - Authorized signers are designated individuals or entities that have the authority to approve transactions. These signers can review and approve token operations before they are executed.
+   - The system creates a transaction proposal in the Gnosis Safe wallet. This proposal represents a pending transaction that will transfer funds from the Gnosis Safe wallet to the AA Contract. The transaction is created but not yet executed, awaiting approvals.
 
-3. **Gets Token Info**
+3. **Gnosis Safe Approval Process**
 
-   - The signers retrieve information about the tokens to be assigned, including beneficiary details, token amounts, and other relevant metadata. This step ensures signers have complete context before making approval decisions.
+   - The transaction proposal enters the Gnosis Safe approval workflow:
+     - **Signers Notified**: Authorized signers are notified of the pending transaction
+     - **Signers Review**: Each signer reviews the transaction details, including:
+       - Token amount to be transferred
+       - Destination contract address
+       - Transaction purpose and metadata
+     - **Signers Approve**: Signers individually approve the transaction using their private keys
+     - **Approval Tracking**: The system tracks how many signers have approved and whether the threshold has been met
 
-4. **Assign Token**
+4. **Approval Threshold Check**
 
-   - Similar to the current implementation, tokens are assigned to beneficiaries. However, in this flow, the assignment transaction is created but requires approval before execution.
+   - The system continuously checks if the required number of approvals has been received:
+     - **Threshold Not Met**: If insufficient approvals have been received, the transaction remains pending, and the system continues to wait for additional approvals
+     - **Threshold Met**: Once the required number of signers have approved, the transaction is ready for execution
 
-5. **Sends for Approval**
+5. **Fund Transfer to AA Contract**
 
-   - The assignment transaction is submitted to the Gnosis Safe wallet for approval. This creates a pending transaction that requires the necessary number of signer approvals before it can be executed.
+   - After receiving the required approvals, the transaction is executed automatically (or manually triggered). The funds are transferred from the Gnosis Safe wallet to the AA Contract. This step moves the tokens from the secure multi-signature wallet to the contract that will manage beneficiary assignments.
 
-6. **Waits for Approval**
+6. **Token Assignment to Beneficiaries**
 
-   - The system enters a waiting state while signers review and approve the transaction. During this period, the transaction remains pending in the Gnosis Safe wallet.
+   - Once the AA Contract has received the funds, tokens can be assigned to beneficiaries. This step allocates specific amounts of tokens to each beneficiary address, preparing them for disbursement. The assignment process follows the same logic as the current implementation but now operates with funds that have been securely transferred through the Gnosis Safe approval process.
 
-7. **Gets Approvals**
+7. **Disbursement**
 
-   - The system checks the current approval status of the pending transaction, determining how many signers have approved and whether the required threshold has been met.
-
-8. **Approved? (Decision Point)**
-
-   - This is a critical decision point in the flow:
-     - **No**: If the required number of approvals has not been met, the flow returns to the "waits for approval" state, allowing more time for signers to review and approve.
-     - **Yes**: If sufficient approvals have been received, the flow proceeds to disbursement.
-
-9. **Disbursement**
-   - Once approved, tokens are disbursed to beneficiaries. This final step executes the actual token transfer, moving tokens from the contract to beneficiary addresses.
+   - The disbursement process proceeds as in the current implementation. When triggered, tokens are disbursed directly to beneficiary addresses. This final step executes the actual token transfer from the AA Contract to individual beneficiaries.
 
 ### Characteristics
 
-- **Multi-Signature Security**: Requires multiple approvals before any transaction can be executed, reducing the risk of unauthorized or erroneous disbursements.
-- **Governance Layer**: Introduces a governance mechanism where multiple parties must agree before tokens are disbursed.
-- **Audit Trail**: All transactions and approvals are recorded on-chain, providing a complete audit trail of the disbursement process.
-- **Flexible Approval Thresholds**: The number of required approvals can be configured based on organizational needs and security requirements.
+- **Secure Fund Management**: Tokens are stored in a multi-signature wallet, requiring multiple approvals before any transfer can occur.
 
-## Key Differences
+- **Governance Layer**: The approval process introduces a governance mechanism where multiple parties must agree before funds are moved to the AA Contract.
 
-### Security
+- **Separation of Concerns**: Fund storage (Gnosis Safe) is separated from fund distribution (AA Contract), providing better security and control.
 
-- **Current**: Single point of control, faster execution but higher risk if the controlling authority is compromised.
-- **Gnosis Safe**: Distributed control requiring multiple approvals, slower execution but significantly higher security.
+- **Audit Trail**: All transaction proposals, approvals, and executions are recorded on-chain, providing a complete audit trail of the fund transfer process.
 
-### Governance
+- **Flexible Approval Thresholds**: The number of required approvals can be configured based on organizational needs, security requirements, and the amount being transferred.
 
-- **Current**: Centralized decision-making with immediate execution.
-- **Gnosis Safe**: Decentralized decision-making requiring consensus among signers.
+## Key Differences from Current Implementation
+
+### Fund Storage
+
+- **Current**: Tokens are managed directly within the AA Contract or a single wallet.
+- **Gnosis Safe**: Tokens are stored in a multi-signature wallet, requiring multiple approvals for any transfer.
+
+### Fund Transfer Process
+
+- **Current**: Funds are directly available in the AA Contract or can be transferred by a single authority.
+- **Gnosis Safe**: Funds must be transferred from the Gnosis Safe wallet to the AA Contract through a multi-signature approval process before they can be assigned to beneficiaries.
+
+### Security Model
+
+- **Current**: Single point of control for fund transfers, faster execution but higher risk if the controlling authority is compromised.
+- **Gnosis Safe**: Distributed control requiring multiple approvals, slower execution but significantly higher security through multi-signature protection.
 
 ### Transaction Flow
 
-- **Current**: Linear flow with conditional trigger.
-- **Gnosis Safe**: Cyclic flow with approval loop until consensus is reached.
+- **Current**: Linear flow: Create Token → Assign Token → Disbursement (if triggered).
+- **Gnosis Safe**: Enhanced flow: Tokens in Gnosis Safe → Propose Transfer → Multi-Signature Approval → Transfer to AA Contract → Assign Token → Disbursement.
 
 ### Use Cases
 
-- **Current**: Suitable for scenarios requiring fast execution with trusted single authority.
-- **Gnosis Safe**: Ideal for scenarios requiring enhanced security, multi-party governance, and regulatory compliance.
+- **Current**: Suitable for scenarios requiring fast execution with trusted single authority and lower security requirements.
+- **Gnosis Safe**: Ideal for scenarios requiring enhanced security, multi-party governance, regulatory compliance, and protection of significant token amounts.
 
 ## Implementation Considerations
 
 ### Benefits of Gnosis Safe Implementation
 
-1. **Enhanced Security**: Multi-signature requirements prevent single points of failure and unauthorized transactions.
-2. **Regulatory Compliance**: Multiple approvals provide better compliance with financial regulations requiring oversight.
-3. **Risk Mitigation**: Reduces the risk of errors or malicious actions by requiring consensus.
-4. **Transparency**: All approvals and transactions are recorded on-chain for complete transparency.
+1. **Enhanced Security**: Multi-signature requirements prevent single points of failure and unauthorized fund transfers. Even if one signer's key is compromised, funds remain protected.
+
+2. **Regulatory Compliance**: Multiple approvals provide better compliance with financial regulations requiring oversight and multi-party authorization for fund movements.
+
+3. **Risk Mitigation**: Reduces the risk of errors or malicious actions by requiring consensus among multiple authorized parties before funds are moved.
+
+4. **Transparency**: All transaction proposals, approvals, and executions are recorded on-chain, providing complete transparency and auditability.
+
+5. **Flexible Governance**: Approval thresholds can be configured based on transaction amounts, with larger transfers requiring more approvals.
 
 ### Trade-offs
 
-1. **Execution Speed**: The approval process adds latency to disbursements, which may not be suitable for time-sensitive operations.
-2. **Complexity**: The additional approval workflow increases system complexity and requires more coordination.
-3. **Operational Overhead**: Managing multiple signers and approval processes requires more operational resources.
-4. **Gas Costs**: Multiple transactions (proposal, approvals, execution) may result in higher gas costs compared to single transactions.
+1. **Execution Speed**: The approval process adds latency to fund transfers, which may not be suitable for time-sensitive operations requiring immediate fund availability.
 
-## Conclusion
+2. **Complexity**: The additional approval workflow increases system complexity and requires coordination among multiple signers.
 
-The Gnosis Safe implementation provides a more secure and governance-oriented approach to token disbursement, suitable for scenarios where security and multi-party oversight are prioritized over execution speed. The choice between implementations should be based on specific organizational needs, security requirements, and operational constraints.
+3. **Operational Overhead**: Managing multiple signers, tracking approvals, and ensuring timely responses requires more operational resources and coordination.
+
+4. **Gas Costs**: Multiple transactions (proposal creation, individual approvals, execution) may result in higher gas costs compared to single transactions.
+
+5. **Dependency on Signers**: The process depends on signers being available and responsive, which could delay fund transfers if signers are unavailable.
