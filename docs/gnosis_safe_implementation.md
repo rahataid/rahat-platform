@@ -6,7 +6,7 @@ This document describes the implementation approach for integrating Gnosis Safe 
 
 ## Diagram
 
-![Gnosis Safe Implementation Flow](./gnosis.excalidraw.svg)
+![Gnosis Safe Implementation Flow](./diagrams/gnosis.excalidraw.svg)
 
 ## Current Implementation
 
