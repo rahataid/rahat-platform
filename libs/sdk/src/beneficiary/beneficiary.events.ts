@@ -88,6 +88,7 @@ export const JOBS = {
   GET_BEN_REPORTING_LOGS: 'rahat.jobs.beneficiary.get_ben_reporting_logs',
   GET_OFFRAMP_DETAILS: 'rahat.jobs.beneficiary.get_offramp_details',
   GET_BEN_DISBURSEMENT: 'rahat.jobs.beneficiary.get_ben_disbursement_details',
-  DISBURSEMENT_BALANCE_CHART: 'rahat.jobs.disbursement.balance.get'
+  DISBURSEMENT_BALANCE_CHART: 'rahat.jobs.disbursement.balance.get',
+  GET_OFFRAMP_SUMMARY: 'rahat.jobs.beneficiary.get_offramp_summary'
 
 };
