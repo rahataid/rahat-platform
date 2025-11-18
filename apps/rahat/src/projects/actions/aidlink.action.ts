@@ -70,4 +70,10 @@ export const aidLinkActions: ProjectActionFunc = {
             payload,
             500000
         ),
+    [MS_ACTIONS.AIDLINKProject.GET_OFFRAMP_SUMMARY]: (uuid, payload, sendCommand) =>
+        sendCommand(
+            { cmd: BeneficiaryJobs.GET_OFFRAMP_SUMMARY, uuid },
+            payload,
+            500000
+        ),
 };
