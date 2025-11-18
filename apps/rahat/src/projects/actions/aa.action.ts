@@ -711,4 +711,26 @@ export const aaActions: ProjectActionFunc = {
   // **** Token Redemption end **** //
 
   // **** Vendor end **** //
+
+  // **** Multisig Start **** //
+  [MS_ACTIONS.AAPROJECT.MULTISIG.GET_SAFE_OWNER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.MULTISIG.GET_SAFE_OWNER, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.MULTISIG.CREATE_SAFE_TRANSACTION]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.MULTISIG.CREATE_SAFE_TRANSACTION, uuid },
+      payload
+    ),
+  // **** Multisig End **** //
 };

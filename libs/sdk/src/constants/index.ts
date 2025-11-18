@@ -336,6 +336,11 @@ export const MS_ACTIONS = {
       EXECUTE_ACTION: 'aa.inkind-tracker.executeAction',
       GET_TRANSACTIONS: 'aa.inkind-tracker.getTransactions',
     },
+    MULTISIG: {
+      GET_SAFE_OWNER: 'aa.getSafeOwner',
+      CREATE_SAFE_TRANSACTION: "aa.createSafeTransaction"
+    }
+
   },
   C2CProject: {
     UPDATE_STATUS: 'c2cProject.updateStatus',
