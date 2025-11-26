@@ -514,6 +514,7 @@ enum TransactionStatus {
 enum GrievanceStatus {
   NEW
   IN_PROGRESS
+  UNDER_REVIEW
   RESOLVED
   CLOSED
   REJECTED
@@ -521,6 +522,7 @@ enum GrievanceStatus {
 
 enum GrievanceType {
   TECHNICAL
+  NON_TECHNICAL
   OPERATIONAL
   FINANCIAL
   OTHER
@@ -540,6 +542,7 @@ model Grievance {
   reporterUserId  Int
   reporterUser    User            @relation("UserGrievances", fields: [reporterUserId], references: [id])
   reporterContact String
+  tags            String[]
   title           String
   type            GrievanceType
   projectId       String          @db.Uuid()
@@ -550,6 +553,8 @@ model Grievance {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   deletedAt       DateTime?
+  resolvedAt      DateTime?
+  closedAt        DateTime?
 
   @@map("tbl_grievances")
 }

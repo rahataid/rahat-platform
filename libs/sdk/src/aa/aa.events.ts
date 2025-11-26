@@ -156,6 +156,7 @@ export const JOBS = {
     UPDATE: 'aa.jobs.grievances.update',
     REMOVE: 'aa.jobs.grievances.remove',
     UPDATE_STATUS: 'aa.jobs.grievances.updateStatus',
+    GET_OVERVIEW_STATS: 'aa.jobs.grievances.getOverviewStats',
   },
   BANK_SCRAPE: {
     HBL_ACCOUNTS: 'aa.jobs.bank-scrape.hbl.accounts',
