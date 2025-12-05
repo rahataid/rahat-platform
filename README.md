@@ -73,17 +73,31 @@ Before you begin, ensure your system has the following dependencies installed:
 
    Clone the project you want to run and follow the instructions in its README.md file.
 
-4. **Run the Rahat Project**
+4. **Run the Rahat UI**
 
-   Initiate the Rahat Core by executing the following commands in separate terminals:
+   Follow these steps to run the Rahat web UI locally:
 
-   ```bash
-   pnpm rahat
-   ```
+    - Clone the UI repository and change into its directory:
 
-   ```bash
-   pnpm beneficiary
-   ```
+      ```bash
+      git clone https://github.com/rahataid/rahat-ui.git
+      cd rahat-ui
+      ```
+
+    -  Copy the example environment file and update values as needed:
+
+      ```bash
+      cp .env.example .env
+      ```
+
+    -  Install dependencies and start the development server (or follow the commands in the UI repo README):
+
+      ```bash
+      pnpm install
+      pnpm dev
+      ```
+
+    - Open the UI in your browser at the address shown by the dev server (`http://localhost:3000`).
 
 5. **Access API Documentation**
 
