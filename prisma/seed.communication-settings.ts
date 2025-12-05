@@ -10,9 +10,16 @@ const main = async () => {
       data: {
         name: "COMMUNICATION",
         dataType: "OBJECT",
-        value: {
-          URL: "http://localhost:3333/v1",
-          APP_ID: "xyz"
+        "value": {
+          "URL": "https://connect.rumsan.net/api/v1/broadcasts",
+          "APP_ID": "cmagktyta00d8293dcdcm32qd",
+          "SMS_TRANSPORT_ID": "gdw9i6lrezuedxzlvl4h4h74",
+          "PROVIDER": "prabhu",
+          "MESSAGE": "Hi, your OTP is ${otp} and the amount is ${amount}",
+          "USE_STATIC_OTP": false,
+          "STATIC_OTP": 1234,
+          // Pilot
+          // APP_ID: "cm1t9iuny001bsahfkjy7quia"
         },
         requiredFields: ["URL", "APP_ID"]
       }

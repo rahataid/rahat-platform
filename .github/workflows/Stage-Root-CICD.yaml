@@ -11,7 +11,7 @@ on:
 env:
   CI: false
   PLATFORM_MANIFEST_FILE: 'K8s-Manifest/Rahat/AA-Stage/Argo-Rollout/platform.yaml'
-  BENEFICIARY_MANIFEST_FILE: 'K8s-Manifest/Rahat/AA-Stage/Argo-Rollout/beneficiary.yaml'
+  BENEFICIARY_MANIFEST_FILE: 'K8s-Manifest/Rahat/AA-Stage/Argo-Rolloutbeneficiary.yaml'
 
 jobs:
   deploy:

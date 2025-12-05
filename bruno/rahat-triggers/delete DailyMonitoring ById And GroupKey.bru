@@ -1,0 +1,75 @@
+meta {
+  name: delete DailyMonitoring ById And GroupKey
+  type: http
+  seq: 38
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.dailyMonitoring.update",
+    "payload": {
+      "uuid": "e1579764-9e11-4223-bcde-7c9fe9397a91",
+      "dataEntryBy": "Rumsan Admin",
+      "riverBasin": "Mahakali",
+      "data": [
+         {
+            "today": "Miserable Fluctuations",
+            "source": "DHM",
+            "forecast": "3 Days RainFall Forecast Bulletin",
+            "tomorrow": "Miserable Fluctuations",
+            "dayAfterTomorrow": "Miserable Fluctuations" ,
+           "id": 78
+          },
+                     {
+                        "id": 76,
+            "today": "Miserable Fluctuations",
+            "source": "DHM",
+            "forecast": "3 Days RainFall Forecast Bulletin",
+            "tomorrow": "Miserable Fluctuations",
+            "dayAfterTomorrow": "Miserable Fluctuations"
+            
+          },
+         {
+            "id": 77,
+            "today": "Nothing",
+            "source": "DHM",
+            "forecast": "3 Days RainFall Forecast Bulletin",
+            "tomorrow": "Nothing",
+            "dayAfterTomorrow": "Nothing"
+            
+          },
+          {
+            "days3": "Check 1",
+            "days5": "Check 2",
+            "source": "GLOFAS",
+            "todayGLOFAS": "assd",
+            "id": 2
+          },
+          {
+            "today": "Nothing",
+            "source": "DHM",
+            "forecast": "3 Days RainFall Forecast Bulletin",
+            "tomorrow": "Minor Fluctuations",
+            "dayAfterTomorrow": "Nothing",
+            "id": 3
+          }
+        
+  
+      ]
+  }
+  }
+  
+  
+  
+  
+}

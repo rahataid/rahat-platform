@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { AAJobs, MS_ACTIONS } from '@rahataid/sdk';
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
 
@@ -41,15 +43,35 @@ export const aaActions: ProjectActionFunc = {
   // **** river stations end ******//
 
   // **** activities start ******//
-  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.SESSION_LOGS]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.ACTIVITIES.COMMUNICATION.SESSION_LOGS, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.SESSION_LOGS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.ACTIVITIES.COMMUNICATION.SESSION_LOGS, uuid },
+      payload
+    ),
 
+  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.RETRY_FAILED]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.ACTIVITIES.COMMUNICATION.RETRY_FAILED, uuid },
+      payload
+    ),
 
-  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.RETRY_FAILED]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.ACTIVITIES.COMMUNICATION.RETRY_FAILED, uuid }, payload),
-
-  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.TRIGGER]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.ACTIVITIES.COMMUNICATION.TRIGGER, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.TRIGGER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.ACTIVITIES.COMMUNICATION.TRIGGER, uuid },
+      payload
+    ),
 
   [MS_ACTIONS.AAPROJECT.ACTIVITIES.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.ACTIVITIES.ADD, uuid }, payload),
@@ -78,8 +100,15 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.ACTIVITIES.UPDATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.ACTIVITIES.UPDATE, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.GET_STATS]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.ACTIVITIES.COMMUNICATION.GET_STATS, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.ACTIVITIES.COMMUNICATION.GET_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.ACTIVITIES.COMMUNICATION.GET_STATS, uuid },
+      payload
+    ),
   // **** activities end ******//
 
   // **** activity categories start ******//
@@ -126,6 +155,9 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.ADD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STAKEHOLDERS.ADD, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.BULK_ADD]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STAKEHOLDERS.BULK_ADD, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.REMOVE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STAKEHOLDERS.REMOVE, uuid }, payload),
 
@@ -134,6 +166,10 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STAKEHOLDERS.GET_ALL, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STAKEHOLDERS.GET_ONE, uuid }, payload),
+
   // **** stakeholders end ******//
 
   // **** Stakeholders groups ******//
@@ -231,9 +267,18 @@ export const aaActions: ProjectActionFunc = {
       payload
     ),
 
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_REDEEM_INFO]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.BENEFICIARY.GET_REDEEM_INFO, uuid }, payload),
+
   // **** fund mgmt end ****//
 
   // **** stats ****//
+  [MS_ACTIONS.AAPROJECT.STATS.GET_MAP_LOCATION]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STATS.GET_MAP_LOCATION, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.STATS.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STATS.GET_ALL, uuid }, payload),
 
@@ -269,4 +314,367 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.DAILY_MONITORING.REMOVE, uuid }, payload),
   // **** daily monitoring end ****//
+
+  // **** Stellar start **** //
+  [MS_ACTIONS.AAPROJECT.STELLAR.DISBURSE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STELLAR.DISBURSE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.SEND_OTP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STELLAR.SEND_OTP, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.SEND_GROUP_OTP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STELLAR.SEND_GROUP_OTP, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.SEND_ASSET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STELLAR.SEND_ASSET_TO_VENDOR, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.SEND_ASSET_WITH_ADDRESS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.STELLAR.SEND_ASSET_WITH_ADDRESS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.TRANSFER_TO_OFFRAMP]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.TRANSFER_TO_OFFRAMP, uuid }, payload),
+
+  // [MS_ACTIONS.AAPROJECT.STELLAR.GET_WALLET_BY_PHONE]: (
+  //   uuid,
+  //   payload,
+  //   sendCommand
+  // ) => sendCommand({ cmd: WalletJobs.GET_WALLET_BY_PHONE }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.ADD_ONCHAIN_TRIGGER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.ADD_ONCHAIN_TRIGGER, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.CHECK_TRUSTLINE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.CHECK_TRUSTLINE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.CHECK_BULK_TRUSTLINE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.CHECK_BULK_TRUSTLINE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.TRUSTLINE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STELLAR.FAUCET, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.UPDATE_ONCHAIN_TRIGGER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.STELLAR.UPDATE_ONCHAIN_TRIGGER, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_ONCHAIN_TRIGGER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_ONCHAIN_TRIGGER, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_STELLAR_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_STELLAR_STATS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_TRANSACTIONS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_TRANSACTIONS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_WALLET_BALANCE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_WALLET_BALANCE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CHAIN.DISBURSE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.CHAIN.DISBURSE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CHAIN.SEND_OTP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.CHAIN.SEND_OTP, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CHAIN.SEND_ASSET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.CHAIN.SEND_ASSET, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CHAIN.GET_WALLET_BALANCE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.CHAIN.GET_WALLET_BALANCE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CHAIN.GET_DISBURSEMENT_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.CHAIN.GET_DISBURSEMENT_STATS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CHAIN.GET_RAHAT_TOKEN_BALANCE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.CHAIN.GET_RAHAT_TOKEN_BALANCE, uuid }, payload),
+
+  // remove after testing
+  [MS_ACTIONS.AAPROJECT.STELLAR.INTERNAL_FAUCET_TRUSTLINE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.STELLAR.INTERNAL_FAUCET_TRUSTLINE, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_VENDOR_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_VENDOR_STATS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.GET_REDEMPTION_REQUEST]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.STELLAR.GET_REDEMPTION_REQUEST, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STELLAR.RAHAT_FAUCET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STELLAR.RAHAT_FAUCET, uuid }, payload),
+
+  // **** Stellar end **** //
+
+  // **** Payout start **** //
+  [MS_ACTIONS.AAPROJECT.PAYOUT.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.CREATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.LIST, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.GET, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.UPDATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.UPDATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.ASSIGN_TOKEN]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.ASSIGN_TOKEN, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYMENT_PROVIDERS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYMENT_PROVIDERS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.TRIGGER_PAYOUT]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.TRIGGER_PAYOUT, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.TRIGGER_FAILED_PAYOUT_REQUEST]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.PAYOUT.TRIGGER_FAILED_PAYOUT_REQUEST, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.TRIGGER_ONE_FAILED_PAYOUT_REQUEST]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.PAYOUT.TRIGGER_ONE_FAILED_PAYOUT_REQUEST, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYOUT_LOGS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYOUT_LOGS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYOUT_LOG]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYOUT_LOG, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYOUT_DETAILS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYOUT_DETAILS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.GET_PAYOUT_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.PAYOUT.GET_STATS, uuid }, payload),
+
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.EXPORT_PAYOUT_LOGS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.EXPORT_PAYOUT_LOGS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.VERIFY_MANUAL_PAYOUT]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.PAYOUT.VERIFY_MANUAL_PAYOUT, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.PAYOUT.EXPORT_PAYOUT_LOGS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.PAYOUT.EXPORT_PAYOUT_LOGS, uuid }, payload),
+  // **** Payout end **** //
+
+  // **** grievance start **** //
+  [MS_ACTIONS.AAPROJECT.GRIEVANCES.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GRIEVANCES.CREATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GRIEVANCES.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GRIEVANCES.LIST, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GRIEVANCES.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GRIEVANCES.GET, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GRIEVANCES.UPDATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GRIEVANCES.UPDATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GRIEVANCES.UPDATE_STATUS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.GRIEVANCES.UPDATE_STATUS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GRIEVANCES.REMOVE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GRIEVANCES.REMOVE, uuid }, payload),
+  // **** grievance end **** //
+
+  // **** bank scrape start **** //
+  [MS_ACTIONS.AAPROJECT.BANK_SCRAPE.HBL_ACCOUNTS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.BANK_SCRAPE.HBL_ACCOUNTS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.BANK_SCRAPE.HBL_TRANSACTIONS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.BANK_SCRAPE.HBL_TRANSACTIONS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.BANK_SCRAPE.CZBIL_ACCOUNTS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.BANK_SCRAPE.CZBIL_ACCOUNTS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.BANK_SCRAPE.CZBIL_TRANSACTIONS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.BANK_SCRAPE.CZBIL_TRANSACTIONS, uuid }, payload),
+  // **** bank scrape end **** //
+
+  // **** cash tracker start **** //
+  [MS_ACTIONS.AAPROJECT.CASH_TRACKER.EXECUTE_ACTION]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.CASH_TRACKER.EXECUTE_ACTION, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CASH_TRACKER.GET_TRANSACTIONS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.CASH_TRACKER.GET_TRANSACTIONS, uuid }, payload),
+  // **** cash tracker end **** //
+  // **** Vendor start **** //
+  [MS_ACTIONS.AAPROJECT.VENDOR.TEST_OFFLINE_PAYOUT]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.VENDOR.TEST_OFFLINE_PAYOUT, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.FETCH_OFFLINE_BENEFICIARIES]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.VENDOR.FETCH_OFFLINE_BENEFICIARIES, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.SYNC_OFFLINE_DATA]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.VENDOR.SYNC_OFFLINE_DATA, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.BATCH_TRANSFER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.VENDOR.BATCH_TRANSFER, uuid }, payload),
+
+  // **** Token Redemption start **** //
+  [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.CREATE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.CREATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.GET]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.GET, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.UPDATE_STATUS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.UPDATE_STATUS, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.LIST]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.LIST, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.GET_VENDOR_REDEMPTIONS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.GET_VENDOR_REDEMPTIONS, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.GET_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.GET_STATS, uuid },
+      payload
+    ),
+  // **** Token Redemption end **** //
+
+  // **** Vendor end **** //
 };

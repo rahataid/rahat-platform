@@ -25,7 +25,6 @@ const contractNames = [
   'RahatTreasury',
   'RahatToken',
   'ERC2771Forwarder',
-
 ];
 
 const prisma = new PrismaService();
@@ -44,14 +43,12 @@ class DeploymentUpdater {
     return contract;
   }
 
-
-  private async getDeployedContractDetails(
-    contractNames: string[]
-  ) {
+  private async getDeployedContractDetails(contractNames: string[]) {
     const contractDetails: ContractDetails = {};
     await Promise.all(
       contractNames.map(async (contract) => {
-        const address = await this.deploymentSettings.contracts[contract].address;
+        const address = await this.deploymentSettings.contracts[contract]
+          .address;
         const { abi } = await this.getContractArtifacts(contract);
         contractDetails[contract] = { address, abi };
       })
@@ -60,7 +57,7 @@ class DeploymentUpdater {
   }
 
   public async addBlockchainSettings() {
-    console.log("Adding Blockchain settings")
+    console.log('Adding Blockchain settings');
 
     // await settings.create({
     //   name: 'Blockchain',
@@ -71,19 +68,17 @@ class DeploymentUpdater {
     const data = {
       name: 'Blockchain',
       value: this.deploymentSettings.chainSettings,
-      isPrivate: false
+      isPrivate: false,
     };
 
     const url = `${process.env.RAHAT_CORE_URL}/v1/settings`;
-    await axios.post(url, this.deploymentSettings.chainSettings);
-    console.log("Blockchain settings Added")
-
-
+    await axios.post(url, data);
+    console.log('Blockchain settings Added');
   }
 
   public async addGraphSettings() {
-    console.log("Subgraph url adding")
-    const formattedURL = this.deploymentSettings.subgraphUrl
+    console.log('Subgraph url adding');
+    const formattedURL = this.deploymentSettings.subgraphUrl;
     const url = `${process.env.RAHAT_CORE_URL}/v1/settings`;
     // await settings.create({
     //   name: 'SUBGRAPH_URL',
@@ -96,21 +91,18 @@ class DeploymentUpdater {
     const data = {
       name: 'SUBGRAPH_URL',
       value: { URL: formattedURL },
-      isPrivate: false
+      isPrivate: false,
     };
 
     await axios.post(url, data);
-    console.log("Subgraph url added")
-
-
+    console.log('Subgraph url added');
   }
 
-
-
   public async addTreasurySettings() {
-
-    console.log("Adding settings in core")
-    const contractDetails = await this.getDeployedContractDetails(contractNames)
+    console.log('Adding settings in core');
+    const contractDetails = await this.getDeployedContractDetails(
+      contractNames
+    );
     // const contractDetails = this.deploymentSettings
 
     const url = `${process.env.RAHAT_CORE_URL}/v1/settings`;
@@ -135,40 +127,36 @@ class DeploymentUpdater {
       isReadOnly: true,
       dataType: 'OBJECT',
       requiredFields: [],
-    }
+    };
 
-    console.log(url)
+    console.log(url);
 
-    const tx = await axios.post(url, data)
-    console.log("Core settings added")
-
+    const tx = await axios.post(url, data);
+    console.log('Core settings added');
   }
 
-
   public async addContractSettings() {
-    console.log("Adding contract settings")
+    console.log('Adding contract settings');
 
     const contracts = await this.getDeployedContractDetails(contractNames);
     const data = {
       name: 'Contracts',
       value: contracts,
-      isPrivate: false
+      isPrivate: false,
     };
 
     const url = `${process.env.RAHAT_CORE_URL}/v1/settings`;
     await axios.post(url, data);
-    console.log("Contract settings Added")
-
+    console.log('Contract settings Added');
   }
 }
 async function main() {
   const deploymentUpdater = new DeploymentUpdater();
 
-  // await deploymentUpdater.addContractSettings();
-  // await deploymentUpdater.addBlockchainSettings();
+  await deploymentUpdater.addContractSettings();
+  await deploymentUpdater.addBlockchainSettings();
   await deploymentUpdater.addGraphSettings();
   // await deploymentUpdater.addTreasurySettings();
-
 
   process.exit(0);
 }

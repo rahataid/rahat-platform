@@ -1,0 +1,42 @@
+meta {
+  name: phase revert create
+  type: http
+  seq: 41
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.revertPhase.create",
+    "payload": {
+      "name": "READINESS",
+      "requiredMandatoryTriggers": 0,
+      "requiredOptionalTriggers": 0,
+      "receivedMandatoryTriggers": 0,
+      "receivedOptionalTriggers": 0,
+      "canRevert": false,
+      "canTriggerPayout": false,
+      "river_basin": "karnali", // location
+      "source": "DHM",
+      "appId": "{{appId}}",
+      "activeYear": "2025"
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("phaseId", responseData.data?.uuid);
+  
+  
+  
+}

@@ -1,0 +1,26 @@
+meta {
+  name: groupbenef get all
+  type: http
+  seq: 32
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "action": "aaProject.beneficiary.getAllGroups",
+      "payload": {
+          "perPage": "100",
+          "tokenAssigned": true
+      }
+  }
+  
+}

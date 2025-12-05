@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Process, Processor } from '@nestjs/bull';
 import { Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -13,7 +15,7 @@ export class ProjectProcessor {
 
   constructor(
     @Inject('DEPLOYMENT_CLIENT') private readonly client: ClientProxy,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) { }
 
   @Process(ProjectJobs.PROJECT_CREATE)

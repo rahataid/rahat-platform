@@ -15,14 +15,16 @@ datasource db {
 
 // =================== User Module ==================
 model User {
-  id     Int     @id @default(autoincrement())
-  uuid   String  @unique @default(uuid())
-  name   String?
-  gender Gender  @default(UNKNOWN)
-  email  String?
-  phone  String?
-  wallet String?
-  extras Json?   @db.JsonB()
+  id        Int     @id @default(autoincrement())
+  uuid      String  @unique @default(uuid())
+  name      String?
+  gender    Gender  @default(UNKNOWN)
+  email     String?
+  phone     String?
+  wallet    String?
+  extras    Json?   @db.JsonB()
+  notes     String? @db.Text()
+  sessionId String?
 
   Auth          Auth[]
   UserRole      UserRole[]
@@ -32,13 +34,30 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
   deletedAt DateTime?
-  createdBy Int?
-  updatedBy Int?
+  createdBy String?
+  updatedBy String?
 
   grievances Grievance[] @relation("UserGrievances")
+  // wallets    UserWallets[]
 
   @@map("tbl_users")
 }
+
+// model UserWallets {
+//   id         Int       @id @default(autoincrement())
+//   userId     Int
+//   chain      String
+//   address    String
+//   privateKey String
+//   createdAt  DateTime  @default(now())
+//   updatedAt  DateTime? @updatedAt()
+//   deletedAt  DateTime?
+
+//   user User @relation(fields: [userId], references: [id])
+
+//   @@unique([userId, chain])
+//   @@map("tbl_users_wallets")
+// }
 
 enum Gender {
   MALE
@@ -243,6 +262,7 @@ model Beneficiary {
   deletedAt      DateTime?
   isVerified     Boolean        @default(false)
 
+
   pii                  BeneficiaryPii?        @relation("BeneficiaryToPii")
   BeneficiaryProject   BeneficiaryProject[]
   groupedBeneficiaries GroupedBeneficiaries[]
@@ -277,6 +297,7 @@ model BeneficiaryGroup {
   uuid String @unique @default(uuid()) @db.Uuid()
 
   name String @unique
+  groupPurpose GroupPurpose?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -329,6 +350,13 @@ model BeneficiaryProject {
   @@index([beneficiaryId])
   @@index([deletedAt])
   @@map("tbl_beneficiaries_projects")
+}
+
+
+enum GroupPurpose {
+BANK_TRANSFER
+MOBILE_MONEY
+COMMUNICATION
 }
 
 // ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
@@ -395,6 +423,7 @@ model Project {
   BeneficiaryProject      BeneficiaryProject[]
   ProjectVendors          ProjectVendors[]
   beneficiaryGroupProject BeneficiaryGroupProject[]
+  notifications           Notification[]
 
   Grievance Grievance[]
 
@@ -425,7 +454,7 @@ model Vendors {
   email     String?
   phone     String?
   location  String?
-  wallet    String?
+  wallet    String? // Todo: Remove this after wallet integration
   extras    Json?     @db.JsonB()
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -483,17 +512,25 @@ enum TransactionStatus {
 // ++++++++++++++++++ START: @rahat/grievances - Grievances ++++++++++++++++++++
 
 enum GrievanceStatus {
-  //  'New', 'Under Review', 'Resolved', 'Closed
   NEW
-  UNDER_REVIEW
+  IN_PROGRESS
   RESOLVED
   CLOSED
+  REJECTED
 }
 
 enum GrievanceType {
   TECHNICAL
-  NON_TECHNICAL
+  OPERATIONAL
+  FINANCIAL
   OTHER
+}
+
+enum GrievancePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
 
 model Grievance {
@@ -509,6 +546,7 @@ model Grievance {
   project         Project         @relation(fields: [projectId], references: [uuid])
   description     String
   status          GrievanceStatus @default(NEW)
+  priority        GrievancePriority @default(LOW)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   deletedAt       DateTime?
@@ -560,28 +598,22 @@ enum KoboBeneficiaryStatus {
 }
 
 model KoboBeneficiary {
-  id                       Int                    @id @default(autoincrement())
-  uuid                     String                 @unique @default(uuid()) @db.Uuid()
-  name                     String
-  healthWorkerName         String?
-  gender                   Gender                 @default(UNKNOWN)
-  type                     KoboBeneficiaryType    @default(SALE)
-  status                   KoboBeneficiaryStatus  @default(PENDING)
-  phone                    String
-  age                      Int?
-  email                    String?
-  wallet                   String?
-  latitude                 Float?
-  longitude                Float?
-  altitude                 Float?
-  accuracy                 Float?
-  leadInterests            String[]
-  meta                     Json?                  @db.JsonB()
+  id            Int                   @id @default(autoincrement())
+  uuid          String                @unique @default(uuid()) @db.Uuid()
+  name          String
+  gender        Gender                @default(UNKNOWN)
+  type          KoboBeneficiaryType   @default(SALE)
+  status        KoboBeneficiaryStatus @default(PENDING)
+  phone         String
+  age           Int?
+  email         String?
+  wallet        String?
+  leadInterests String[]
+  extras        Json?                 @db.JsonB()
 
-
-  createdAt                DateTime               @default(now())
-  updatedAt                DateTime?              @updatedAt()
-  deletedAt                DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
 
   @@map("tbl_kobo_beneficiaries")
 }
@@ -636,3 +668,92 @@ model Token {
 }
 
 // ===========End Tokens=============
+
+// region: @rahat/offramp
+
+model OfframpProvider {
+  id          Int       @id @default(autoincrement())
+  uuid        String    @unique @default(uuid())
+  name        String    @unique()
+  description String?
+  config      Json      @db.JsonB()
+  extras      Json?     @db.JsonB()
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt()
+  deletedAt   DateTime?
+  createdBy   Int?
+  updatedBy   Int?
+
+  @@map("tbl_offramp_providers")
+}
+
+enum OfframpStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model OfframpRequest {
+  id            Int                 @id @default(autoincrement())
+  uuid          String              @unique @default(uuid())
+  chain         String
+  token         String
+  senderAddress String
+  amount        Float
+  requestId     String?             @unique
+  escrowAddress String?
+  status        OfframpStatus       @default(PENDING)
+  transaction   OfframpTransaction? @relation("RequestTransaction")
+  extras        Json?               @db.JsonB()
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime?           @updatedAt()
+  deletedAt     DateTime?
+  createdBy     Int?
+  updatedBy     Int?
+
+  @@map("tbl_offramps")
+}
+
+model OfframpTransaction {
+  id             Int            @id @default(autoincrement())
+  uuid           String         @unique @default(uuid())
+  requestId      String         @unique
+  txHash         String
+  walletId       String?
+  customerKey    String?
+  chain          String?
+  token          String?
+  referenceId    String?
+  status         OfframpStatus  @default(PENDING)
+  extras         Json?          @db.JsonB()
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime?      @updatedAt()
+  deletedAt      DateTime?
+  createdBy      Int?
+  updatedBy      Int?
+  offrampRequest OfframpRequest @relation("RequestTransaction", fields: [requestId], references: [requestId])
+
+  @@map("tbl_offramp_transactions")
+}
+
+// endregion: @rahat/offramp
+
+// ++++++++++++++++++ START: Notification ++++++++++++++++++++
+
+model Notification {
+  id             Int            @id @default(autoincrement())
+  title          String           
+  projectId      String?        @db.Uuid()
+  project        Project?       @relation(fields: [projectId], references: [uuid])
+  description    String
+  group          String 
+  createdAt      DateTime       @default(now())   
+  notify         Boolean        @default(false)
+
+  @@map("tbl_notifications")
+}
+
+// ++++++++++++++++++ END: Notification ++++++++++++++++++++
+
+

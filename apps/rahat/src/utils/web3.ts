@@ -1,9 +1,12 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
   Contract,
   JsonRpcProvider,
   ethers
 } from 'ethers';
-
+import { StrKey } from 'stellar-sdk';
+import { Address, IsAddressOptions, isAddress as isEthAddress } from 'viem';
 
 export async function createContractSigner(abi: any, address: string) {
 
@@ -14,4 +17,27 @@ export async function createContractSigner(abi: any, address: string) {
   //  Create an instance of the contract
   const contracts = new Contract(address, abi, wallet);
   return contracts
+}
+
+export async function getBlocktimeStamp(txHash: string) {
+  const provider = new JsonRpcProvider(process.env.NETWORK_PROVIDER);
+  const receipt = await provider.waitForTransaction(txHash);
+  if (!receipt) {
+    console.error('Transaction is not mined or does not exist.');
+    return null;
+  }
+  const block = await provider.getBlock(receipt.blockNumber);
+  return block.timestamp;
+}
+
+const isStellarAddress = (address: string): boolean => {
+  return typeof address === 'string' && StrKey.isValidEd25519PublicKey(address)
+}
+
+export function isAddress(
+  address: string,
+  options?: IsAddressOptions,
+): address is Address {
+  if (isStellarAddress(address)) return true
+  return isEthAddress(address, options)
 }

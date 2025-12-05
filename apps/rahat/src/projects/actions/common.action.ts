@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
   BeneficiaryJobs,
   MS_ACTIONS,
@@ -42,6 +44,16 @@ export const beneficiaryActions: ProjectActionFunc = {
       { cmd: BeneficiaryJobs.LIST, uuid },
       { projectId: uuid, ...payload }
     ),
+  [MS_ACTIONS.BENEFICIARY.GET_ONE_BENEFICARY]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.GET_ONE_BENEFICIARY, uuid },
+      { projectId: uuid, ...payload }
+    ),
+  [MS_ACTIONS.BENEFICIARY.LIST_FULL_DATA_BY_PROJECT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.LIST_FULL_DATA, uuid },
+      { projectId: uuid, ...payload }
+    ),
   [MS_ACTIONS.BENEFICIARY.GET_PROJECT_SPECIFIC]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.GET_PROJECT_SPECIFIC },
@@ -66,6 +78,23 @@ export const vendorActions: ProjectActionFunc = {
       { cmd: VendorJobs.LIST_BY_PROJECT },
       { projectId: uuid, ...payload }
     ),
+
+  [MS_ACTIONS.VENDOR.GET_BY_UUID]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: VendorJobs.GET_BY_UUID },
+      { projectId: uuid, ...payload }
+    ),
+
+  [MS_ACTIONS.VENDOR.LIST_WITH_PROJECT_DATA]: (uuid, payload, sendCommand) => sendCommand(
+    { cmd: VendorJobs.LIST_WITH_PROJECT_DATA, uuid },
+    payload
+  ),
+  [MS_ACTIONS.VENDOR.GET_BENEFICIARIES]: (uuid, payload, sendCommand) => sendCommand(
+    { cmd: VendorJobs.GET_BENEFICIARIES, uuid },
+    payload
+  )
+
+
 };
 
 export const settingActions: ProjectActionFunc = {
@@ -75,7 +104,7 @@ export const settingActions: ProjectActionFunc = {
   [MS_ACTIONS.SETTINGS.GET]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.PROJECT_SETTINGS_GET, uuid },
-      payload
+      { projectId: uuid, ...payload }
     ),
 
 }
@@ -83,4 +112,39 @@ export const settingActions: ProjectActionFunc = {
 export const projectActions: ProjectActionFunc = {
   [MS_ACTIONS.PROJECT.SETUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.PROJECT_SETUP, uuid }, payload),
+  [MS_ACTIONS.PROJECT.REFRESH_REPORTING_STATS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.REPORTING_REFRESH, uuid }, payload),
+};
+
+export const groupActions: ProjectActionFunc = {
+  [MS_ACTIONS.GROUP.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.GROUP.CREATE, uuid }, payload),
+  [MS_ACTIONS.GROUP.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.GROUP.LIST, uuid }, payload),
+  [MS_ACTIONS.GROUP.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.GROUP.GET, uuid }, payload),
+};
+
+export const beneficiaryGroupActions: ProjectActionFunc = {
+  [MS_ACTIONS.BENEFICIARY_GROUP.BULK_ASSIGN]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY_GROUP.BULK_ASSIGN, uuid }, payload),
+  [MS_ACTIONS.BENEFICIARY_GROUP.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY_GROUP.LIST, uuid }, payload),
+  [MS_ACTIONS.BENEFICIARY_GROUP.LIST_BY_GROUP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY_GROUP.LIST_BY_GROUP, uuid }, payload),
+};
+
+export const notificationActions: ProjectActionFunc = {
+  [MS_ACTIONS.NOTIFICATION.CREATE]: (uuid, payload, sendCommand) => {
+    payload.projectId = uuid || payload.projectId;
+    return sendCommand({ cmd: ProjectJobs.NOTIFICATION.CREATE }, payload);
+  },
+  [MS_ACTIONS.NOTIFICATION.LIST]: (uuid, payload, sendCommand) => {
+    payload.projectId = uuid || payload.projectId;
+    return sendCommand({ cmd: ProjectJobs.NOTIFICATION.LIST }, payload);
+  },
+  [MS_ACTIONS.NOTIFICATION.GET]: (uuid, payload, sendCommand) => {
+    payload.projectId = uuid || payload.projectId;
+    return sendCommand({ cmd: ProjectJobs.NOTIFICATION.GET }, payload);
+  }
 };

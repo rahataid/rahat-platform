@@ -1,8 +1,13 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
-import { AuthsModule, UsersModule } from '@rumsan/user';
+import { PrismaService } from '@rumsan/prisma';
+import { AuthsModule } from '@rumsan/user';
+import { NotificationModule } from '../notification/notification.module';
+import { UsersModule } from '../users/users.module';
 import { VendorsController } from './vendors.controller';
 import { VendorsService } from './vendors.service';
 
@@ -24,9 +29,10 @@ import { VendorsService } from './vendors.service';
       name: BQUEUE.RAHAT
     }),
     AuthsModule,
-    UsersModule
+    UsersModule,
+    NotificationModule
   ],
   controllers: [VendorsController],
-  providers: [VendorsService]
+  providers: [VendorsService, PrismaService]
 })
 export class AppUsersModule { }

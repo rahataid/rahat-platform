@@ -1,7 +1,10 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Module } from "@nestjs/common";
-import { RahatProcessor } from "./rahat.processor";
-import { ProjectProcessor } from "./project.processor";
 import { ClientsModule, Transport } from "@nestjs/microservices";
+import { EmailService } from "../listeners/email.service";
+import { ProjectProcessor } from "./project.processor";
+import { RahatProcessor } from "./rahat.processor";
 
 @Module({
     imports: [
@@ -17,6 +20,6 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
             },
         ])
     ],
-    providers: [RahatProcessor, ProjectProcessor]
+    providers: [RahatProcessor, ProjectProcessor, EmailService]
 })
 export class ProcessorsModule { }

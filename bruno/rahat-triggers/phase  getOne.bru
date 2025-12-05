@@ -1,0 +1,36 @@
+meta {
+  name: phase  getOne
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  // {
+  //   "action": "settings.get",
+  //   "payload": {
+      
+  //     "name": "PROJECTINFO"
+  // //     "appId": "{{appId}}",
+  // //     "uuid": "e3a39f29-c514-4a57-b429-cb902d7056ab"
+  // //     "phase": "PREPAREDNESS"
+  // //     "source": "GLOFAS"
+  //   }
+  // }
+  
+  {
+      "action": "aa.stellar.sendOtp",
+      "payload": {
+          "phoneNumber": "+9779808982517"
+      }
+  }
+}

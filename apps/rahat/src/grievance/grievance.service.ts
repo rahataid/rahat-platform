@@ -1,7 +1,8 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
-import { ChangeGrievanceStatusDTO, CreateGrievanceDTO, ListGrievanceDTO } from "@rahataid/extensions";
-import { GrievanceStatus } from "@rahataid/sdk";
+import { ChangeGrievanceStatusDTO, ListGrievanceDTO } from "@rahataid/extensions";
 import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
 
 
@@ -14,22 +15,11 @@ export class GrievanceService {
     private readonly prisma: PrismaService
   ) { }
 
-  async createGrievance(data: CreateGrievanceDTO, userId: number) {
-    const { projectId, ...rest } = data;
+  async createGrievance(data: any, userId: number) {
     return this.prisma.grievance.create({
       data: {
-        ...rest,
-        project: {
-          connect: {
-            uuid: projectId
-          }
-        },
-        reporterUser: {
-          connect: {
-            id: userId
-          }
-        },
-        status: GrievanceStatus.NEW
+        ...data,
+        reporterUserId: userId
       }
     })
   }
@@ -60,9 +50,19 @@ export class GrievanceService {
       }
     }
 
+    if (query.title) {
+      where.title = {
+        contains: query.title,
+        mode: 'insensitive'
+      }
+    }
+
     return paginate(this.prisma.grievance, {
       include,
-      where
+      where,
+      orderBy: {
+        createdAt: 'desc'
+      }
     }, {
       page: query.page,
       perPage: query.perPage,
@@ -76,7 +76,7 @@ export class GrievanceService {
         uuid
       },
       data: {
-        status
+        status: status as any
       }
     })
   }
@@ -113,6 +113,29 @@ export class GrievanceService {
         deletedAt: new Date()
       }
     })
+  }
+
+  async updateProjectGrievance(uuid: string, data: any) {
+    const { projectId, userId, ...updateData } = data;
+
+    const updatePayload: any = { ...updateData };
+
+    if (projectId) {
+      updatePayload.project = {
+        connect: { uuid: projectId }
+      };
+    }
+
+    if (userId) {
+      updatePayload.reporterUser = {
+        connect: { id: userId }
+      };
+    }
+
+    return this.prisma.grievance.update({
+      where: { uuid },
+      data: updatePayload
+    });
   }
 
 }

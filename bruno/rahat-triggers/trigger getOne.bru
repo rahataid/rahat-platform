@@ -1,0 +1,24 @@
+meta {
+  name: trigger getOne
+  type: http
+  seq: 20
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.triggers.getOne",
+    "payload": {
+    "repeatKey": "e2658343-57d1-4a5b-9b5a-348be5b57339"
+    }
+  }
+}

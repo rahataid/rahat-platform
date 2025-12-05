@@ -5,6 +5,12 @@ export enum Gender {
   UKNOWN = 'UNKNOWN',
 }
 
+export enum KoboBeneficiaryStatus {
+  PENDING = 'PENDING',
+  FAILED = 'FAILED',
+  SUCCESS = 'SUCCESS'
+}
+
 export enum BeneficiaryType {
   REFERRED = 'REFERRED',
   ENROLLED = 'ENROLLED',
@@ -53,10 +59,13 @@ export enum ProjectStatus {
   CLOSED = 'CLOSED'
 }
 
-
-
 export enum DisbursementConditionType {
   BALANCE_CHECK = 'BALANCE_CHECK',
   APPROVER_SIGNATURE = 'APPROVER_SIGNATURE',
   SCHEDULED_TIME = 'SCHEDULED_TIME',
+}
+
+export enum BeneficiaryGroupAttribute {
+  PHONE = 'PHONE',
+  ACCOUNT = 'ACCOUNT',
 }

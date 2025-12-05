@@ -27,7 +27,7 @@ export class AddBenToProjectDto implements CreateBeneficiaryDto {
     description: 'UUID of the beneficiary',
   })
   @IsUUID()
-  referrerBeneficiary: UUID | undefined;
+  referrerBeneficiary: UUID | string;
 
   @ApiProperty({
     type: 'uuid',
@@ -35,7 +35,7 @@ export class AddBenToProjectDto implements CreateBeneficiaryDto {
     description: 'UUID of the vendor',
   })
   @IsUUID()
-  referrerVendor: UUID | undefined;
+  referrerVendor: UUID | string;
 
   @ApiProperty({
     example: '1997-03-08',
@@ -176,7 +176,7 @@ export class AddBenToProjectDto implements CreateBeneficiaryDto {
     },
   })
   @IsOptional()
-  piiData?: TPIIData;
+  piiData: TPIIData;
 }
 
 export type referrerBeneficiary = UUID | undefined

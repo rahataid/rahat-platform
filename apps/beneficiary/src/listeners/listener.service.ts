@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -14,15 +16,17 @@ export class ListenersService {
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY) private readonly queue: Queue,
     private readonly benStats: BeneficiaryStatService,
     private emailService: EmailService,
-
-
   ) { }
 
   @OnEvent(BeneficiaryEvents.BENEFICIARY_CREATED)
   @OnEvent(BeneficiaryEvents.BENEFICIARY_UPDATED)
   @OnEvent(BeneficiaryEvents.BENEFICIARY_REMOVED)
   @OnEvent(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT)
-  async onBeneficiaryChanged(eventObject) {
+  @OnEvent(BeneficiaryEvents.VENDORS_CREATED)
+  @OnEvent(BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_CT)
+  @OnEvent(BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL)
+  @OnEvent(BeneficiaryEvents.REFRESH_STATS)
+  async onBeneficiaryChanged(eventObject: any) {
     await this.benStats.saveAllStats(eventObject.projectUuid);
   }
 
@@ -63,7 +67,4 @@ export class ListenersService {
       `
     );
   }
-
-
-
 }

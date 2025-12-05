@@ -1,0 +1,40 @@
+meta {
+  name: get vendor steallar stats
+  type: http
+  seq: 41
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.stellar.getRedemptionRequest",
+    "payload": {
+      "uuid": "edbe2602-da00-479d-9660-5471747194f4",
+      "page":1,
+      "perPage":2
+    }
+  }
+  
+  // {
+  //   "action": "aa.stellar.getRedemptionRequest",
+  //   "payload": {
+  //     "uuid": "edbe2602-da00-479d-9660-5471747194f4"
+  //     }
+  // }
+  
+  
+  
+  
+  
+  
+  
+}

@@ -89,9 +89,6 @@ export class CreateBeneficiaryDto implements Beneficiary {
     description: 'Ethereum address',
   })
   @IsOptional()
-  // @IsEthereumAddress({
-  //  always: false,
-  // })
   walletAddress: string;
 
   @ApiProperty({
@@ -151,7 +148,7 @@ export class CreateBeneficiaryDto implements Beneficiary {
     },
   })
   @IsOptional()
-  piiData?: TPIIData;
+  piiData: TPIIData;
 
   @ApiProperty({
     example: [randomUUID().toString()],

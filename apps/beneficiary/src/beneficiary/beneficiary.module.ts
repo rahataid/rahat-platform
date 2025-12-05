@@ -1,3 +1,5 @@
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { BullModule } from '@nestjs/bull';
@@ -10,10 +12,25 @@ import { PrismaModule } from '@rumsan/prisma';
 import { BeneficiaryConsumer } from '../consumers/beneficiary.consumer';
 import { BeneficiaryController } from './beneficiary.controller';
 import { BeneficiaryService } from './beneficiary.service';
+import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
 import { VerificationService } from './verification.service';
 @Module({
   imports: [
+    ClientsModule.registerAsync([
+      {
+        name: 'RAHAT_CLIENT',
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.REDIS,
+          options: {
+            host: configService.get('REDIS_HOST'),
+            port: configService.get('REDIS_PORT'),
+            password: configService.get('REDIS_PASSWORD'),
+          },
+        }),
+        inject: [ConfigService],
+      }
+    ]),
     ClientsModule.register([
       {
         name: ProjectContants.ELClient,
@@ -58,6 +75,7 @@ import { VerificationService } from './verification.service';
     BeneficiaryStatService,
     VerificationService,
     BeneficiaryConsumer,
+    BeneficiaryUtilsService
   ],
 })
 export class BeneficiaryModule { }
