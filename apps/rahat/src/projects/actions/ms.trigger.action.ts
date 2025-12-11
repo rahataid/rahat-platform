@@ -80,6 +80,9 @@ export const MS_TRIGGERS_JOBS = {
     GET_ALL: 'ms.jobs.sources.getAll',
     GET_HEALTH: 'ms.jobs.sources.getHealth',
   },
+  SETTINGS: {
+    GET: 'ms.jobs.settings.get'
+  }
 };
 
 export const msTriggerActions: ProjectActionFunc = {
@@ -542,4 +545,12 @@ export const msTriggerActions: ProjectActionFunc = {
       payload
     );
   },
+
+  // **** settings start ****//
+  [MS_ACTIONS.MS_SETTINGS.GET]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.SETTINGS.GET }, payload);
+  },
+  // **** settings end ****//
 };
