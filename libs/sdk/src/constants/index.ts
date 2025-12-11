@@ -4,6 +4,7 @@ export const APP_JOBS = {
   EMAIL: 'email',
   SLACK: 'slack',
   OTP: 'otp',
+  NOTIFY: 'notify'
 };
 
 export const MS_TIMEOUT = 500000;
@@ -18,6 +19,7 @@ export const BQUEUE = {
 
 export const UserRoles = {
   ADMIN: 'Admin',
+  MANAGER: 'Manager',
   USER: 'User',
   VENDOR: 'Vendor',
 };
@@ -129,6 +131,7 @@ export const MS_ACTIONS = {
     LIST: 'vendor.list',
     GET_BY_UUID: 'vendor.get_by_uuid',
     LIST_WITH_PROJECT_DATA: 'vendor.list_with_project_data',
+    GET_BENEFICIARIES: 'vendor.get_beneficiaries',
   },
   USER: {},
   ELPROJECT: {
@@ -227,9 +230,11 @@ export const MS_ACTIONS = {
       GET_ONE_TOKEN_RESERVATION:
         'aaProject.beneficiary.get_one_token_reservation',
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats',
+      GET_REDEEM_INFO: 'aaProject.beneficiary.getRedeemInfo',
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
+      GET_MAP_LOCATION: 'aaProject.stats.getMapLocation',
       GET_ONE: 'aaProject.stats.getOne',
     },
     DAILY_MONITORING: {
@@ -241,11 +246,13 @@ export const MS_ACTIONS = {
     },
 
     // new chain
-
     CHAIN: {
       DISBURSE: 'aa.chain.disburse',
       SEND_OTP: 'aa.chain.sendOtp',
       SEND_ASSET: 'aa.chain.sendAsset',
+      GET_DISBURSEMENT_STATS: 'aa.chain.getDisbursementStats',
+      GET_WALLET_BALANCE: 'aa.chain.getWalletBalance',
+      GET_RAHAT_TOKEN_BALANCE: 'aa.chain.getRahatTokenBalance',
     },
     STELLAR: {
       DISBURSE: 'aa.stellar.disburse',
@@ -284,6 +291,42 @@ export const MS_ACTIONS = {
       GET_PAYOUT_LOGS: 'aa.payout.getPayoutLogs',
       GET_PAYOUT_LOG: 'aa.payout.getPayoutLog',
       GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
+      GET_PAYOUT_DETAILS: 'aa.payout.getPayoutDetails',
+      EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+      VERIFY_MANUAL_PAYOUT: 'aa.payout.verifyManualPayout',
+    },
+    VENDOR: {
+      // Remove after test
+      TEST_OFFLINE_PAYOUT: 'aaProject.vendor.testOfflinePayout',
+      FETCH_OFFLINE_BENEFICIARIES: 'aaProject.vendor.fetch_offline_beneficiaries',
+      SYNC_OFFLINE_DATA: 'aaProject.vendor.sync_offline_data',
+      BATCH_TRANSFER: 'aa.vendor.batch_transfer',
+      TOKEN_REDEMPTION: {
+        CREATE: 'aa.vendor.token_redemption.create',
+        GET: 'aa.vendor.token_redemption.get',
+        UPDATE_STATUS: 'aa.vendor.token_redemption.update_status',
+        LIST: 'aa.vendor.token_redemption.list',
+        GET_VENDOR_REDEMPTIONS: 'aa.vendor.token_redemption.get_vendor_redemptions',
+        GET_STATS: 'aa.vendor.token_redemption.get_stats',
+      },
+    },
+    GRIEVANCES: {
+      CREATE: 'aa.grievances.create',
+      LIST: 'aa.grievances.list',
+      GET: 'aa.grievances.get',
+      UPDATE: 'aa.grievances.update',
+      REMOVE: 'aa.grievances.remove',
+      UPDATE_STATUS: 'aa.grievances.updateStatus',
+    },
+    BANK_SCRAPE: {
+      HBL_ACCOUNTS: 'aa.bank-scrape.hbl.accounts',
+      HBL_TRANSACTIONS: 'aa.bank-scrape.hbl.transactions',
+      CZBIL_ACCOUNTS: 'aa.bank-scrape.czbil.accounts',
+      CZBIL_TRANSACTIONS: 'aa.bank-scrape.czbil.transactions',
+    },
+    CASH_TRACKER: {
+      EXECUTE_ACTION: 'aa.cash-tracker.executeAction',
+      GET_TRANSACTIONS: 'aa.cash-tracker.getTransactions',
     },
   },
   C2CProject: {
@@ -408,6 +451,7 @@ export const MS_ACTIONS = {
   MS_SOURCES: {
     GET_ALL: 'ms.sources.getAll',
     GET_ONE: 'ms.sources.getOne',
+    GET_HEALTH: 'ms.sources.getHealth',
   },
   MS_TRIGGERS: {
     DEV_ONLY: 'ms.triggers.devOnly',
@@ -443,6 +487,7 @@ export const MS_ACTIONS = {
   MS_WATER_LEVELS: {
     GET_DHM: 'ms.waterLevels.getDhm',
     GET_GLOFAS: 'ms.waterLevels.getGlofas',
+    GET_GFH: 'ms.waterLevels.getGfh',
   },
   MS_RAINFALL_LEVELS: {
     GET_DHM: 'ms.rainfallLevels.getDhm',
@@ -458,6 +503,7 @@ export const MS_ACTIONS = {
     UPDATE_STATUS: 'ms.activities.updateStatus',
     LIST_PROJECT_SPECIFIC: 'ms.activities.listProjectSpecific',
     COMMUNICATION: {
+      GET_COMMS: 'ms.activities.getComms',
       TRIGGER: 'ms.activities.communication.trigger',
       SESSION_LOGS: 'ms.activities.communication.sessionLogs',
       RETRY_FAILED: 'ms.activities.communication.retryFailed',
@@ -480,6 +526,21 @@ export const MS_ACTIONS = {
     UPDATE: 'ms.dailyMonitoring.update',
     REMOVE: 'ms.dailyMonitoring.remove',
     DELETE: 'ms.dailyMonitoring.delete',
+  },
+
+  MS_SETTINGS: {
+    GET: 'ms.settings.get',
+  },
+
+  NOTIFICATION: {
+    CREATE: 'notification.create',
+    LIST: 'notification.list',
+    GET: 'notification.get',
+  },
+
+  OTP: {
+    SEND_OTP: 'otp.sendOtp',
+    SEND_BULK_OTP: 'otp.sendBulkOtp',
   },
 };
 

@@ -5,7 +5,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
-  NotFoundException,
+  NotFoundException
 } from '@nestjs/common';
 // import * as jwt from '@nestjs/jwt';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
@@ -24,6 +24,7 @@ import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
+import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
 import { isAddress } from '../utils/web3';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
@@ -36,8 +37,10 @@ export class VendorsService {
     private readonly prisma: PrismaService,
     private readonly authService: AuthsService,
     private readonly usersService: UsersService,
+    private readonly notificationService: NotificationService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
+
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
@@ -90,6 +93,12 @@ export class VendorsService {
       return user;
     });
 
+    this.notificationService.createNotification({
+      title: `Vendor Waiting for Approval`,
+      description: `Vendor ${vendor.name} is waiting for admin approval`,
+      group: 'Vendor Management',
+      notify: true,
+    })
     return vendor;
   }
 

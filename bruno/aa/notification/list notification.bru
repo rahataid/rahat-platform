@@ -1,0 +1,33 @@
+meta {
+  name: list notification
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:5500/v1/projects/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "action": "notification.list",
+      "payload": {
+  //       "title": "Testing Email",
+  //       "group": "Yooo"
+  //       "projectId": "u-u-u-i-d"
+  //       "page": 1,
+  //       "perPage": 1
+      }
+  
+  }
+}
+
+settings {
+  encodeUrl: true
+}

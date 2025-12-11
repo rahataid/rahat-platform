@@ -423,6 +423,7 @@ model Project {
   BeneficiaryProject      BeneficiaryProject[]
   ProjectVendors          ProjectVendors[]
   beneficiaryGroupProject BeneficiaryGroupProject[]
+  notifications           Notification[]
 
   Grievance Grievance[]
 
@@ -511,17 +512,25 @@ enum TransactionStatus {
 // ++++++++++++++++++ START: @rahat/grievances - Grievances ++++++++++++++++++++
 
 enum GrievanceStatus {
-  //  'New', 'Under Review', 'Resolved', 'Closed
   NEW
-  UNDER_REVIEW
+  IN_PROGRESS
   RESOLVED
   CLOSED
+  REJECTED
 }
 
 enum GrievanceType {
   TECHNICAL
-  NON_TECHNICAL
+  OPERATIONAL
+  FINANCIAL
   OTHER
+}
+
+enum GrievancePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
 
 model Grievance {
@@ -537,6 +546,7 @@ model Grievance {
   project         Project         @relation(fields: [projectId], references: [uuid])
   description     String
   status          GrievanceStatus @default(NEW)
+  priority        GrievancePriority @default(LOW)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   deletedAt       DateTime?
@@ -728,3 +738,22 @@ model OfframpTransaction {
 }
 
 // endregion: @rahat/offramp
+
+// ++++++++++++++++++ START: Notification ++++++++++++++++++++
+
+model Notification {
+  id             Int            @id @default(autoincrement())
+  title          String           
+  projectId      String?        @db.Uuid()
+  project        Project?       @relation(fields: [projectId], references: [uuid])
+  description    String
+  group          String 
+  createdAt      DateTime       @default(now())   
+  notify         Boolean        @default(false)
+
+  @@map("tbl_notifications")
+}
+
+// ++++++++++++++++++ END: Notification ++++++++++++++++++++
+
+
