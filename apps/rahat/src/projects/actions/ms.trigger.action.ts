@@ -57,7 +57,7 @@ export const MS_TRIGGERS_JOBS = {
       SESSION_LOGS: 'ms.jobs.activities.communication.sessionLogs',
       // RETRY_FAILED: 'ms.jobs.activities.communication.retryFailed',
       GET_STATS: 'ms.jobs.activities.communication.getStats',
-      GET_STATS_GROUP: "ms.jobs.triggers.getTransportSessionStatsByGroup"
+      GET_STATS_GROUP: 'ms.jobs.triggers.getTransportSessionStatsByGroup',
     },
   },
 
@@ -77,7 +77,11 @@ export const MS_TRIGGERS_JOBS = {
     DELETE: 'ms.jobs.dailyMonitoring.delete',
   },
   SOURCE: {
-    GET_ALL: 'ms.jobs.sources.getAll'
+    GET_ALL: 'ms.jobs.sources.getAll',
+    GET_HEALTH: 'ms.jobs.sources.getHealth',
+  },
+  SETTINGS: {
+    GET: 'ms.jobs.settings.get'
   }
 };
 
@@ -86,8 +90,6 @@ export const msTriggerActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
     return sendCommand({ cmd: 'try.trigger' }, payload);
   },
-
-
 
   // **** triggers start ******//
   [MS_ACTIONS.MS_TRIGGERS.ADD]: (uuid, payload, sendCommand) => {
@@ -203,11 +205,12 @@ export const msTriggerActions: ProjectActionFunc = {
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.ACTIVATE }, payload);
   },
 
-
-
   [MS_ACTIONS.MS_PHASES.CONFIGURE_THRESHOLD]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
-    return sendCommand({ cmd: MS_TRIGGERS_JOBS.PHASES.CONFIGURE_THRESHOLD }, payload);
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PHASES.CONFIGURE_THRESHOLD },
+      payload
+    );
   },
   // // **** phases end ******//
 
@@ -216,6 +219,11 @@ export const msTriggerActions: ProjectActionFunc = {
   [MS_ACTIONS.MS_SOURCES.GET_ALL]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.SOURCE.GET_ALL }, payload);
+  },
+
+  [MS_ACTIONS.MS_SOURCES.GET_HEALTH]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.SOURCE.GET_HEALTH }, payload);
   },
 
   // **** source start ******//
@@ -266,10 +274,7 @@ export const msTriggerActions: ProjectActionFunc = {
   [MS_ACTIONS.MS_WATER_LEVELS.GET_GFH]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
 
-    return sendCommand(
-      { cmd: MS_TRIGGERS_JOBS.WATER_LEVELS.GET_GFH },
-      payload
-    );
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.WATER_LEVELS.GET_GFH }, payload);
   },
 
   [MS_ACTIONS.MS_RAINFALL_LEVELS.GET_DHM]: (uuid, payload, sendCommand) => {
@@ -453,7 +458,7 @@ export const msTriggerActions: ProjectActionFunc = {
   // **** daily monitoring start ****//
   [MS_ACTIONS.MS_DAILY_MONITORING.ADD]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
-    return sendCommand({ cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.ADD, }, payload,);
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.DAILY_MONITORING.ADD }, payload);
   },
 
   [MS_ACTIONS.MS_DAILY_MONITORING.GET_ALL]: (uuid, payload, sendCommand) => {
@@ -474,7 +479,11 @@ export const msTriggerActions: ProjectActionFunc = {
     );
   },
 
-  [MS_ACTIONS.MS_DAILY_MONITORING.GET_Gauge_Reading]: (uuid, payload, sendCommand) => {
+  [MS_ACTIONS.MS_DAILY_MONITORING.GET_Gauge_Reading]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
     payload.appId = uuid || payload.appId;
 
     return sendCommand(
@@ -483,7 +492,11 @@ export const msTriggerActions: ProjectActionFunc = {
     );
   },
 
-  [MS_ACTIONS.MS_DAILY_MONITORING.GET_Gauge_Forecast]: (uuid, payload, sendCommand) => {
+  [MS_ACTIONS.MS_DAILY_MONITORING.GET_Gauge_Forecast]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
     payload.appId = uuid || payload.appId;
 
     return sendCommand(
@@ -520,11 +533,24 @@ export const msTriggerActions: ProjectActionFunc = {
   },
   // **** daily monitoring end ****//
 
-
-
   // ****group stats by benef and stakeholders ****//
-  [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.GET_GROUP_STATS]: (uuid, payload, sendCommand) => {
+  [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.GET_GROUP_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
     payload.appId = uuid || payload.appId;
-    return sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.GET_STATS_GROUP }, payload);
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.GET_STATS_GROUP },
+      payload
+    );
   },
+
+  // **** settings start ****//
+  [MS_ACTIONS.MS_SETTINGS.GET]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.SETTINGS.GET }, payload);
+  },
+  // **** settings end ****//
 };
