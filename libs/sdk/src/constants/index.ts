@@ -527,6 +527,10 @@ export const MS_ACTIONS = {
     DELETE: 'ms.dailyMonitoring.delete',
   },
 
+  MS_SETTINGS: {
+    GET: 'ms.settings.get',
+  },
+
   NOTIFICATION: {
     CREATE: 'notification.create',
     LIST: 'notification.list',
