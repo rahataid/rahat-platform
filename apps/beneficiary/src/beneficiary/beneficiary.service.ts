@@ -2144,6 +2144,7 @@ export class BeneficiaryService {
 
     const newTODate = new Date(toDate)
     newTODate.setUTCHours(23, 59, 59, 999)
+    this.logger.log(`Fetching beneficiary reporting logs from ${fromDate} to ${newTODate} for project ${payload.projectId}`);
 
     const benDetails = await this.prisma.beneficiaryProject.findMany({
       where: {
