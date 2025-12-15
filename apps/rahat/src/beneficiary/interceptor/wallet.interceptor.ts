@@ -3,6 +3,7 @@ import {
   CallHandler,
   ExecutionContext,
   Injectable,
+  Logger,
   NestInterceptor,
 } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
@@ -17,6 +18,8 @@ import { XcapitService } from '../../wallet/xcapit.service';
 
 @Injectable()
 export class WalletInterceptor implements NestInterceptor {
+  private readonly logger = new Logger(WalletInterceptor.name);
+
   constructor(
     private readonly prismaService: PrismaService,
     private readonly walletService: WalletService,
@@ -41,7 +44,22 @@ export class WalletInterceptor implements NestInterceptor {
       let updatedItems: any[];
 
       if (xcapit) {
-        updatedItems = await this.attachXcapitWallets(items);
+        const result = await this.attachXcapitWallets(items);
+        updatedItems = result.validBeneficiaries;
+
+        if (result.discardedBeneficiaries.length > 0) {
+          this.logger.warn(
+            `WARNING: ${result.totalDiscarded} out of ${result.totalProcessed} beneficiaries were discarded due to Xcapit wallet creation failures:`
+          );
+          result.discardedBeneficiaries.forEach((discarded) => {
+            this.logger.warn(
+              `- Phone: ${discarded.phoneNumber}, Reason: ${discarded.status}`
+            );
+          });
+          this.logger.warn(
+            `Successfully processed ${result.validBeneficiaries.length} beneficiaries with valid wallets.`
+          );
+        }
       } else {
         // Validate/ensure wallet addresses for all items
         updatedItems = await Promise.all(
@@ -67,7 +85,12 @@ export class WalletInterceptor implements NestInterceptor {
     }
   }
 
-  private async attachXcapitWallets(items: any[]) {
+  private async attachXcapitWallets(items: any[]): Promise<{
+    validBeneficiaries: any[];
+    discardedBeneficiaries: { phoneNumber: string; status: string }[];
+    totalProcessed: number;
+    totalDiscarded: number;
+  }> {
     // Collect phones
     const phones = items
       .map((d) => d?.piiData?.phone)
@@ -77,16 +100,42 @@ export class WalletInterceptor implements NestInterceptor {
     // Bulk generate wallets
     const bulkRes = await this.xcapitService.bulkGenerateXcapitWallet(phones);
 
-    // Build phone → wallet mapping
+    // Filter successful responses and build phone → wallet mapping
+    const successfulResponses =
+      bulkRes?.filter(
+        (response) => response.status === 'success' && response.walletAddress
+      ) || [];
+
+    const failedResponses =
+      bulkRes?.filter(
+        (response) => response.status !== 'success' || !response.walletAddress
+      ) || [];
+
+    // Build phone → wallet mapping only for successful responses
     const phoneToWallet = Object.fromEntries(
-      bulkRes?.map((b) => [b.phoneNumber, b.walletAddress]) || []
+      successfulResponses.map((b) => [b.phoneNumber, b.walletAddress])
     );
 
-    // Attach wallet addresses to items
-    return items.map((d) => ({
+    // Filter items to only include those with successful wallet creation
+    const validItems = items.filter((item) => {
+      const phone = item?.piiData?.phone;
+      return phone && phoneToWallet.hasOwnProperty(phone);
+    });
+
+    const updatedItems = validItems.map((d) => ({
       ...d,
       walletAddress: phoneToWallet[d?.piiData?.phone] || d.walletAddress,
     }));
+
+    return {
+      validBeneficiaries: updatedItems,
+      discardedBeneficiaries: failedResponses.map((response) => ({
+        phoneNumber: response.phoneNumber,
+        status: response.status,
+      })),
+      totalProcessed: items.length,
+      totalDiscarded: failedResponses.length,
+    };
   }
 
   private async ensureValidWalletAddress(
@@ -94,11 +143,9 @@ export class WalletInterceptor implements NestInterceptor {
   ): Promise<string> {
     if (!walletAddress) {
       const result = await this.walletService.createWallet();
-      console.log('Created new wallet for chain:', result.address);
       return result.address;
     }
 
-    // Validate address format and detect chain type
     try {
       const isValid = await this.walletService.validateAddress(walletAddress);
       if (!isValid) {
@@ -110,7 +157,6 @@ export class WalletInterceptor implements NestInterceptor {
       throw new RpcException(`Invalid wallet address: ${error.message}`);
     }
 
-    // Check if wallet address already exists
     const existingBeneficiary = await this.prismaService.beneficiary.findUnique(
       {
         where: { walletAddress },

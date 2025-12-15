@@ -70,6 +70,7 @@ export const JOBS = {
   UPDATE_DISBURSEMENT: 'rahat.jobs.disbursement.update',
   GET_DISBURSEMENT_TRANSACTIONS: 'rahat.jobs.disbursement.transactions.get',
   GET_DISBURSEMENT_APPROVALS: 'rahat.jobs.disbursement.approvals.get',
+  GET_PENDING_DISBURSEMENT: 'rahat.jobs.disbursements.pending.get',
   CREATE_SAFE_TRANSACTION: 'rahat.jobs.safe_transaction.create',
   GET_SAFE_TRANSACTION: 'rahat.jobs.safe_transaction.get',
   GET_SAFE_PENDING: 'rahat.jobs.safe_transaction.get_pending',
@@ -87,6 +88,7 @@ export const JOBS = {
   GET_BEN_REPORTING_LOGS: 'rahat.jobs.beneficiary.get_ben_reporting_logs',
   GET_OFFRAMP_DETAILS: 'rahat.jobs.beneficiary.get_offramp_details',
   GET_BEN_DISBURSEMENT: 'rahat.jobs.beneficiary.get_ben_disbursement_details',
-  DISBURSEMENT_BALANCE_CHART: 'rahat.jobs.disbursement.balance.get'
+  DISBURSEMENT_BALANCE_CHART: 'rahat.jobs.disbursement.balance.get',
+  GET_OFFRAMP_SUMMARY: 'rahat.jobs.beneficiary.get_offramp_summary'
 
 };
