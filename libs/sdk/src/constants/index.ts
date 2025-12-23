@@ -553,6 +553,9 @@ export const MS_ACTIONS = {
   MS_SETTINGS: {
     GET: 'ms.settings.get',
   },
+  MS_SOURCES_DATA: {
+    GET_SERIES_BY_DATA_SOURCE: 'ms.sourcesData.getSeriesByDataSource',
+  },
 
   NOTIFICATION: {
     CREATE: 'notification.create',

@@ -80,6 +80,9 @@ export const MS_TRIGGERS_JOBS = {
     GET_ALL: 'ms.jobs.sources.getAll',
     GET_HEALTH: 'ms.jobs.sources.getHealth',
   },
+  SOURCE_DATA: {
+    GET_SERIES_BY_DATA_SOURCE: 'ms.jobs.sources-data.getSeriesByDataSource',
+  },
   SETTINGS: {
     GET: 'ms.jobs.settings.get'
   }
@@ -552,5 +555,12 @@ export const msTriggerActions: ProjectActionFunc = {
 
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.SETTINGS.GET }, payload);
   },
-  // **** settings end ****//
+  // **** settings end ****//https://api-aa-dev.rahat.io
+
+
+  [MS_ACTIONS.MS_SOURCES_DATA.GET_SERIES_BY_DATA_SOURCE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.SOURCE_DATA.GET_SERIES_BY_DATA_SOURCE }, payload);
+  },
 };
