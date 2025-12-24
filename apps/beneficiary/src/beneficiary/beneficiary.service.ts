@@ -19,7 +19,7 @@ import {
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto
+  UpdateBeneficiaryGroupDto,
 } from '@rahataid/extensions';
 import {
   AAJobs,
@@ -42,9 +42,7 @@ import {
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
-import {
-  sanitizeNonAlphaNumericValue
-} from '../utils/sanitize-data';
+import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
@@ -76,7 +74,9 @@ export class BeneficiaryService {
     });
   }
   async refreshStats() {
-    this.eventEmitter.emit(BeneficiaryEvents.REFRESH_STATS, { projectUUID: null });
+    this.eventEmitter.emit(BeneficiaryEvents.REFRESH_STATS, {
+      projectUUID: null,
+    });
     return { message: 'Beneficiary stats refresh started' };
   }
   async listPiiData(dto: any) {
@@ -512,8 +512,8 @@ export class BeneficiaryService {
         .then((beneficiary) =>
           beneficiary
             ? this.rsprisma.beneficiaryPii.findUnique({
-              where: { beneficiaryId: beneficiary.id },
-            })
+                where: { beneficiaryId: beneficiary.id },
+              })
             : null
         ),
     ]);
@@ -564,6 +564,7 @@ export class BeneficiaryService {
               },
             },
           },
+
           {
             pii: {
               phone: payload.phone,
@@ -573,6 +574,7 @@ export class BeneficiaryService {
       },
       include: {
         pii: true,
+        groupedBeneficiaries: true,
       },
     });
 
@@ -583,7 +585,11 @@ export class BeneficiaryService {
       delete beneficiary.pii;
     }
 
-    return { ...beneficiary, piiData };
+    return {
+      ...beneficiary,
+      piiData,
+      groupedBeneficiaries: beneficiary.groupedBeneficiaries,
+    };
   }
 
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
@@ -932,21 +938,23 @@ export class BeneficiaryService {
       // throw new RpcException(e)
     }
   }
-  async createBulkBeneficiaries(dtos: CreateBeneficiaryDto[],
-    projectUuid?: string, conditional?: boolean) {
+  async createBulkBeneficiaries(
+    dtos: CreateBeneficiaryDto[],
+    projectUuid?: string,
+    conditional?: boolean
+  ) {
     try {
-      const result = this.createBulk(dtos, projectUuid, conditional)
+      const result = this.createBulk(dtos, projectUuid, conditional);
       this.eventEmitter.emit(
         BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL,
         {
           projectUuid: null,
         }
       );
-      return result
+      return result;
     } catch (error) {
-      this.logger.error(error.message)
+      this.logger.error(error.message);
     }
-
   }
   async syncProjectStats(projectUuid) {
     return await this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
@@ -976,12 +984,14 @@ export class BeneficiaryService {
           : [];
 
       console.log(`
-        Found ${duplicatePhones.length
+        Found ${
+          duplicatePhones.length
         } existing beneficiaries phone numbers i: ${duplicatePhones.join(', ')}
-        Found ${duplicateWallets.length
+        Found ${
+          duplicateWallets.length
         } existing beneficiaries wallet addresses: ${duplicateWallets.join(
-          ', '
-        )}
+        ', '
+      )}
         `);
 
       if (!ignoreExisting) {
@@ -1040,10 +1050,12 @@ export class BeneficiaryService {
 
     console.log(`Creating ${batches.length} batches of beneficiaries.
     Total beneficiaries: ${filteredBeneficiaries.length}
-    Duplicate phone numbers: ${filteredBeneficiaries.length - batches.flat().length
-      }
-    Duplicate wallet addresses: ${filteredBeneficiaries.length - batches.flat().length
-      }
+    Duplicate phone numbers: ${
+      filteredBeneficiaries.length - batches.flat().length
+    }
+    Duplicate wallet addresses: ${
+      filteredBeneficiaries.length - batches.flat().length
+    }
       `);
 
     const bulkQueueData = batches.map((batch, index) => ({
@@ -1543,21 +1555,21 @@ export class BeneficiaryService {
 
     const where = projectUUID
       ? {
-        deletedAt: null,
-        beneficiaryGroupProject:
-          projectUUID === 'NOT_ASSGNED'
-            ? {
-              none: {},
-            }
-            : {
-              some: {
-                projectId: projectUUID,
-              },
-            },
-      }
+          deletedAt: null,
+          beneficiaryGroupProject:
+            projectUUID === 'NOT_ASSGNED'
+              ? {
+                  none: {},
+                }
+              : {
+                  some: {
+                    projectId: projectUUID,
+                  },
+                },
+        }
       : {
-        deletedAt: null,
-      };
+          deletedAt: null,
+        };
 
     const data = await paginate(
       this.prisma.beneficiaryGroup,
@@ -1838,12 +1850,14 @@ export class BeneficiaryService {
 
       // Bulk assign unassigned beneficiaries to project
       if (unassignedBenfs?.length) {
-        const assignDtos = unassignedBenfs.map(beneficiary => ({
+        const assignDtos = unassignedBenfs.map((beneficiary) => ({
           beneficiaryId: beneficiary.uuid,
           projectId: project.uuid,
         }));
 
-        await this.beneficiaryUtilsService.bulkAssignBeneficiaryToProject(assignDtos);
+        await this.beneficiaryUtilsService.bulkAssignBeneficiaryToProject(
+          assignDtos
+        );
       }
 
       // add as required by project specifics
@@ -2142,8 +2156,8 @@ export class BeneficiaryService {
     const { fromDate, toDate } = payload;
     if (!fromDate || !toDate) return [];
 
-    const newTODate = new Date(toDate)
-    newTODate.setUTCHours(23, 59, 59, 999)
+    const newTODate = new Date(toDate);
+    newTODate.setUTCHours(23, 59, 59, 999);
 
     const benDetails = await this.prisma.beneficiaryProject.findMany({
       where: {
