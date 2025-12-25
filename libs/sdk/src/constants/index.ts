@@ -500,6 +500,7 @@ export const MS_ACTIONS = {
   },
   MS_WATER_LEVELS: {
     GET_DHM: 'ms.waterLevels.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.waterLevels.getDhmSingleSeries',
     GET_GLOFAS: 'ms.waterLevels.getGlofas',
     GET_GFH: 'ms.waterLevels.getGfh',
   },
