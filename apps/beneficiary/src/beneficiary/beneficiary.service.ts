@@ -512,8 +512,8 @@ export class BeneficiaryService {
         .then((beneficiary) =>
           beneficiary
             ? this.rsprisma.beneficiaryPii.findUnique({
-                where: { beneficiaryId: beneficiary.id },
-              })
+              where: { beneficiaryId: beneficiary.id },
+            })
             : null
         ),
     ]);
@@ -984,14 +984,12 @@ export class BeneficiaryService {
           : [];
 
       console.log(`
-        Found ${
-          duplicatePhones.length
+        Found ${duplicatePhones.length
         } existing beneficiaries phone numbers i: ${duplicatePhones.join(', ')}
-        Found ${
-          duplicateWallets.length
+        Found ${duplicateWallets.length
         } existing beneficiaries wallet addresses: ${duplicateWallets.join(
-        ', '
-      )}
+          ', '
+        )}
         `);
 
       if (!ignoreExisting) {
@@ -1050,12 +1048,10 @@ export class BeneficiaryService {
 
     console.log(`Creating ${batches.length} batches of beneficiaries.
     Total beneficiaries: ${filteredBeneficiaries.length}
-    Duplicate phone numbers: ${
-      filteredBeneficiaries.length - batches.flat().length
-    }
-    Duplicate wallet addresses: ${
-      filteredBeneficiaries.length - batches.flat().length
-    }
+    Duplicate phone numbers: ${filteredBeneficiaries.length - batches.flat().length
+      }
+    Duplicate wallet addresses: ${filteredBeneficiaries.length - batches.flat().length
+      }
       `);
 
     const bulkQueueData = batches.map((batch, index) => ({
@@ -1555,21 +1551,21 @@ export class BeneficiaryService {
 
     const where = projectUUID
       ? {
-          deletedAt: null,
-          beneficiaryGroupProject:
-            projectUUID === 'NOT_ASSGNED'
-              ? {
-                  none: {},
-                }
-              : {
-                  some: {
-                    projectId: projectUUID,
-                  },
-                },
-        }
+        deletedAt: null,
+        beneficiaryGroupProject:
+          projectUUID === 'NOT_ASSGNED'
+            ? {
+              none: {},
+            }
+            : {
+              some: {
+                projectId: projectUUID,
+              },
+            },
+      }
       : {
-          deletedAt: null,
-        };
+        deletedAt: null,
+      };
 
     const data = await paginate(
       this.prisma.beneficiaryGroup,
@@ -2205,6 +2201,41 @@ export class BeneficiaryService {
 
   async deleteBenefAndPii(payload: any) {
     return this.delete(payload.benefId);
+  }
+
+  async getBenefDetailsByProject(payload: any) {
+    const { projectId } = payload;
+    const benDetails = await this.prisma.beneficiaryProject.findMany({
+      where: {
+        projectId: projectId,
+        deletedAt: null,
+      },
+      include: {
+        Beneficiary: {
+          select: {
+            pii: {
+              select: {
+                name: true,
+                phone: true,
+              },
+            },
+            walletAddress: true,
+          },
+        },
+      },
+    });
+
+    // for now this action is handled by aidlink microservice
+    return this.client.send(
+      {
+        cmd: BeneficiaryJobs.GET_BENEFICIARYS_PROJECT_DETAILS,
+        uuid: payload.projectId,
+      },
+      {
+        benDetails,
+        payload,
+      }
+    );
   }
 }
 
