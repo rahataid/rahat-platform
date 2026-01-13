@@ -19,7 +19,7 @@ import {
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto
+  UpdateBeneficiaryGroupDto,
 } from '@rahataid/extensions';
 import {
   AAJobs,
@@ -42,9 +42,7 @@ import {
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
-import {
-  sanitizeNonAlphaNumericValue
-} from '../utils/sanitize-data';
+import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
@@ -76,7 +74,9 @@ export class BeneficiaryService {
     });
   }
   async refreshStats() {
-    this.eventEmitter.emit(BeneficiaryEvents.REFRESH_STATS, { projectUUID: null });
+    this.eventEmitter.emit(BeneficiaryEvents.REFRESH_STATS, {
+      projectUUID: null,
+    });
     return { message: 'Beneficiary stats refresh started' };
   }
   async listPiiData(dto: any) {
@@ -564,6 +564,7 @@ export class BeneficiaryService {
               },
             },
           },
+
           {
             pii: {
               phone: payload.phone,
@@ -573,6 +574,7 @@ export class BeneficiaryService {
       },
       include: {
         pii: true,
+        groupedBeneficiaries: true,
       },
     });
 
@@ -583,7 +585,11 @@ export class BeneficiaryService {
       delete beneficiary.pii;
     }
 
-    return { ...beneficiary, piiData };
+    return {
+      ...beneficiary,
+      piiData,
+      groupedBeneficiaries: beneficiary.groupedBeneficiaries,
+    };
   }
 
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
@@ -932,21 +938,23 @@ export class BeneficiaryService {
       // throw new RpcException(e)
     }
   }
-  async createBulkBeneficiaries(dtos: CreateBeneficiaryDto[],
-    projectUuid?: string, conditional?: boolean) {
+  async createBulkBeneficiaries(
+    dtos: CreateBeneficiaryDto[],
+    projectUuid?: string,
+    conditional?: boolean
+  ) {
     try {
-      const result = this.createBulk(dtos, projectUuid, conditional)
+      const result = this.createBulk(dtos, projectUuid, conditional);
       this.eventEmitter.emit(
         BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL,
         {
           projectUuid: null,
         }
       );
-      return result
+      return result;
     } catch (error) {
-      this.logger.error(error.message)
+      this.logger.error(error.message);
     }
-
   }
   async syncProjectStats(projectUuid) {
     return await this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
@@ -1838,12 +1846,14 @@ export class BeneficiaryService {
 
       // Bulk assign unassigned beneficiaries to project
       if (unassignedBenfs?.length) {
-        const assignDtos = unassignedBenfs.map(beneficiary => ({
+        const assignDtos = unassignedBenfs.map((beneficiary) => ({
           beneficiaryId: beneficiary.uuid,
           projectId: project.uuid,
         }));
 
-        await this.beneficiaryUtilsService.bulkAssignBeneficiaryToProject(assignDtos);
+        await this.beneficiaryUtilsService.bulkAssignBeneficiaryToProject(
+          assignDtos
+        );
       }
 
       // add as required by project specifics
@@ -2192,6 +2202,41 @@ export class BeneficiaryService {
 
   async deleteBenefAndPii(payload: any) {
     return this.delete(payload.benefId);
+  }
+
+  async getBenefDetailsByProject(payload: any) {
+    const { projectId } = payload;
+    const benDetails = await this.prisma.beneficiaryProject.findMany({
+      where: {
+        projectId: projectId,
+        deletedAt: null,
+      },
+      include: {
+        Beneficiary: {
+          select: {
+            pii: {
+              select: {
+                name: true,
+                phone: true,
+              },
+            },
+            walletAddress: true,
+          },
+        },
+      },
+    });
+
+    // for now this action is handled by aidlink microservice
+    return this.client.send(
+      {
+        cmd: BeneficiaryJobs.GET_BENEFICIARYS_PROJECT_DETAILS,
+        uuid: payload.projectId,
+      },
+      {
+        benDetails,
+        payload,
+      }
+    );
   }
 }
 

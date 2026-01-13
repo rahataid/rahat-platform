@@ -318,4 +318,9 @@ export class BeneficiaryController {
   async getBenReportingLogs(payload: any) {
     return this.service.getBenReportingLogs(payload);
   }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BENEF_DETAILS_BY_PROJECT })
+  async getBenefDetailsByProject(data: any) {
+    return this.service.getBenefDetailsByProject(data);
+  }
 }

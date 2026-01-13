@@ -35,6 +35,7 @@ export const MS_TRIGGERS_JOBS = {
   },
   WATER_LEVELS: {
     GET_DHM: 'ms.jobs.waterLevels.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.jobs.waterLevels.getDhmSingleSeries',
     GET_GLOFAS: 'ms.jobs.waterLevels.getGlofas',
     GET_GFH: 'ms.jobs.waterLevels.getGfh',
   },
@@ -80,6 +81,12 @@ export const MS_TRIGGERS_JOBS = {
     GET_ALL: 'ms.jobs.sources.getAll',
     GET_HEALTH: 'ms.jobs.sources.getHealth',
   },
+  SOURCE_DATA: {
+    GET_SERIES_BY_DATA_SOURCE: 'ms.jobs.sources-data.getSeriesByDataSource',
+  },
+  SETTINGS: {
+    GET: 'ms.jobs.settings.get'
+  }
 };
 
 export const msTriggerActions: ProjectActionFunc = {
@@ -257,6 +264,12 @@ export const msTriggerActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
 
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.WATER_LEVELS.GET_DHM }, payload);
+  },
+
+  [MS_ACTIONS.MS_WATER_LEVELS.GET_DHM_SINGLE_SERIES]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.WATER_LEVELS.GET_DHM_SINGLE_SERIES }, payload);
   },
 
   [MS_ACTIONS.MS_WATER_LEVELS.GET_GLOFAS]: (uuid, payload, sendCommand) => {
@@ -541,5 +554,20 @@ export const msTriggerActions: ProjectActionFunc = {
       { cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.GET_STATS_GROUP },
       payload
     );
+  },
+
+  // **** settings start ****//
+  [MS_ACTIONS.MS_SETTINGS.GET]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.SETTINGS.GET }, payload);
+  },
+  // **** settings end ****//https://api-aa-dev.rahat.io
+
+
+  [MS_ACTIONS.MS_SOURCES_DATA.GET_SERIES_BY_DATA_SOURCE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.SOURCE_DATA.GET_SERIES_BY_DATA_SOURCE }, payload);
   },
 };

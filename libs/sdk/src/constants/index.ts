@@ -4,7 +4,7 @@ export const APP_JOBS = {
   EMAIL: 'email',
   SLACK: 'slack',
   OTP: 'otp',
-  NOTIFY: 'notify'
+  NOTIFY: 'notify',
 };
 
 export const MS_TIMEOUT = 500000;
@@ -22,7 +22,7 @@ export const UserRoles = {
   MANAGER: 'Manager',
   USER: 'User',
   VENDOR: 'Vendor',
-  AIDLINK_PROJECT_MANAGER: 'AidLinkProjectManager'
+  AIDLINK_PROJECT_MANAGER: 'AidLinkProjectManager',
 };
 
 export const ACTIONS = {
@@ -123,6 +123,7 @@ export const MS_ACTIONS = {
     LIST_FULL_DATA_BY_PROJECT: 'beneficiary.list_full_data_by_project',
     GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',
     GET_ONE_BENEFICARY: 'beneficiary.get_one_beneficiary',
+    GET_BENEFICIARY_DETAILS_BY_PROJECT: 'beneficiary.get_beneficiary_details_by_project',
   },
   VENDOR: {
     REGISTER: 'vendor.register',
@@ -233,7 +234,6 @@ export const MS_ACTIONS = {
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats',
       GET_REDEEM_INFO: 'aaProject.beneficiary.getRedeemInfo',
       GET_BALANCE: 'aaProject.beneficiary.getBalance',
-
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
@@ -301,7 +301,8 @@ export const MS_ACTIONS = {
     VENDOR: {
       // Remove after test
       TEST_OFFLINE_PAYOUT: 'aaProject.vendor.testOfflinePayout',
-      FETCH_OFFLINE_BENEFICIARIES: 'aaProject.vendor.fetch_offline_beneficiaries',
+      FETCH_OFFLINE_BENEFICIARIES:
+        'aaProject.vendor.fetch_offline_beneficiaries',
       SYNC_OFFLINE_DATA: 'aaProject.vendor.sync_offline_data',
       BATCH_TRANSFER: 'aa.vendor.batch_transfer',
       TOKEN_REDEMPTION: {
@@ -309,7 +310,8 @@ export const MS_ACTIONS = {
         GET: 'aa.vendor.token_redemption.get',
         UPDATE_STATUS: 'aa.vendor.token_redemption.update_status',
         LIST: 'aa.vendor.token_redemption.list',
-        GET_VENDOR_REDEMPTIONS: 'aa.vendor.token_redemption.get_vendor_redemptions',
+        GET_VENDOR_REDEMPTIONS:
+          'aa.vendor.token_redemption.get_vendor_redemptions',
         GET_STATS: 'aa.vendor.token_redemption.get_stats',
       },
     },
@@ -320,6 +322,7 @@ export const MS_ACTIONS = {
       UPDATE: 'aa.grievances.update',
       REMOVE: 'aa.grievances.remove',
       UPDATE_STATUS: 'aa.grievances.updateStatus',
+      GET_OVERVIEW_STATS: 'aa.grievances.getOverviewStats',
     },
     BANK_SCRAPE: {
       HBL_ACCOUNTS: 'aa.bank-scrape.hbl.accounts',
@@ -335,6 +338,10 @@ export const MS_ACTIONS = {
     INKIND_TRACKER: {
       EXECUTE_ACTION: 'aa.inkind-tracker.executeAction',
       GET_TRANSACTIONS: 'aa.inkind-tracker.getTransactions',
+    },
+    MULTISIG: {
+      GET_SAFE_OWNER: 'aa.getSafeOwner',
+      CREATE_SAFE_TRANSACTION: 'aa.createSafeTransaction',
     },
   },
   C2CProject: {
@@ -494,6 +501,7 @@ export const MS_ACTIONS = {
   },
   MS_WATER_LEVELS: {
     GET_DHM: 'ms.waterLevels.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.waterLevels.getDhmSingleSeries',
     GET_GLOFAS: 'ms.waterLevels.getGlofas',
     GET_GFH: 'ms.waterLevels.getGfh',
   },
@@ -542,9 +550,15 @@ export const MS_ACTIONS = {
     GET_BEN_DISBURSEMENT_DETAILS: 'aidlink.getBenDisbursementDetails',
     GET_DISBURSEMENT_SAFE_CHART: 'aidlink.getDisbursementSafeChart',
     GET_PENDING_DISBURSEMENT: 'aidlink.disbursements.pending.get',
-    GET_OFFRAMP_SUMMARY: 'aidlink.getOffRampStatus'
-
+    GET_OFFRAMP_SUMMARY: 'aidlink.getOffRampStatus',
   },
+  MS_SETTINGS: {
+    GET: 'ms.settings.get',
+  },
+  MS_SOURCES_DATA: {
+    GET_SERIES_BY_DATA_SOURCE: 'ms.sourcesData.getSeriesByDataSource',
+  },
+
   NOTIFICATION: {
     CREATE: 'notification.create',
     LIST: 'notification.list',

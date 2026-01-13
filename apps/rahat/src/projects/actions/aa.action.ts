@@ -563,6 +563,9 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.GRIEVANCES.REMOVE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GRIEVANCES.REMOVE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GRIEVANCES.GET_OVERVIEW_STATS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GRIEVANCES.GET_OVERVIEW_STATS, uuid }, payload),
   // **** grievance end **** //
 
   // **** bank scrape start **** //
@@ -711,4 +714,26 @@ export const aaActions: ProjectActionFunc = {
   // **** Token Redemption end **** //
 
   // **** Vendor end **** //
+
+  // **** Multisig Start **** //
+  [MS_ACTIONS.AAPROJECT.MULTISIG.GET_SAFE_OWNER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.MULTISIG.GET_SAFE_OWNER, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.MULTISIG.CREATE_SAFE_TRANSACTION]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.MULTISIG.CREATE_SAFE_TRANSACTION, uuid },
+      payload
+    ),
+  // **** Multisig End **** //
 };
