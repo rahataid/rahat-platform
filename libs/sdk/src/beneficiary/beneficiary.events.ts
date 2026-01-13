@@ -91,5 +91,5 @@ export const JOBS = {
   GET_BEN_DISBURSEMENT: 'rahat.jobs.beneficiary.get_ben_disbursement_details',
   DISBURSEMENT_BALANCE_CHART: 'rahat.jobs.disbursement.balance.get',
   GET_OFFRAMP_SUMMARY: 'rahat.jobs.beneficiary.get_offramp_summary',
-  GET_BENEFICIARYS_PROJECT_DETAILS: 'rahat.jobs.beneficiary.getBeneficiarysProjectDetails',
+  GET_BENEFICIARIES_PROJECT_DETAILS: 'rahat.jobs.beneficiary.get_beneficiaries_project_details',
 };

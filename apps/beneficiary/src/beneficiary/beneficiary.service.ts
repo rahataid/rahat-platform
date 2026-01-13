@@ -2229,7 +2229,7 @@ export class BeneficiaryService {
     // for now this action is handled by aidlink microservice
     return this.client.send(
       {
-        cmd: BeneficiaryJobs.GET_BENEFICIARYS_PROJECT_DETAILS,
+        cmd: BeneficiaryJobs.GET_BENEFICIARIES_PROJECT_DETAILS,
         uuid: payload.projectId,
       },
       {
