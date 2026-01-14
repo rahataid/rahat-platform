@@ -19,6 +19,7 @@ export const JOBS = {
   GET: 'rahat.jobs.beneficiary.get',
   FIND_PHONE_BY_UUID: 'rahat.jobs.beneficiary.find_phone_by_uuid',
   GET_PROJECT_SPECIFIC: 'rahat.jobs.beneficiary.get_project_specific',
+  GET_BENEF_DETAILS_BY_PROJECT: 'rahat.jobs.beneficiary.get_benef_details_by_project',
   GET_BY_WALLET: 'rahat.jobs.beneficiary.get_by_wallet',
   GET_BULK_BY_WALLET: 'rahat.jobs.beneficiary.get_bulk_by_wallet',
   GET_BY_PHONE: 'rahat.jobs.beneficiary.get_by_phone',
@@ -89,6 +90,6 @@ export const JOBS = {
   GET_OFFRAMP_DETAILS: 'rahat.jobs.beneficiary.get_offramp_details',
   GET_BEN_DISBURSEMENT: 'rahat.jobs.beneficiary.get_ben_disbursement_details',
   DISBURSEMENT_BALANCE_CHART: 'rahat.jobs.disbursement.balance.get',
-  GET_OFFRAMP_SUMMARY: 'rahat.jobs.beneficiary.get_offramp_summary'
-
+  GET_OFFRAMP_SUMMARY: 'rahat.jobs.beneficiary.get_offramp_summary',
+  GET_BENEFICIARYS_PROJECT_DETAILS: 'rahat.jobs.beneficiary.getBeneficiarysProjectDetails',
 };
