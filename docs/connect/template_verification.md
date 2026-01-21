@@ -81,92 +81,71 @@ Does transport have capabilities?
 
 ## How It Works: Complete Walkthrough
 
-### Stage 1: Initial Setup (One-Time)
+### Stage 1: Initial Setup (SDK-Driven, One-Time)
 
-#### Admin Creates Templates in External System
-
-**Where**: Meta Business Manager (for WhatsApp), Twilio Console (for SMS), etc.
-
-**What Happens**:
-
-1. Admin logs into the provider's dashboard
-2. Creates a new message template with the required format
-3. Submits for approval
-4. Waits for provider approval (24-48 hours typical)
-
-**Example for WhatsApp**:
-
-- Navigate to Meta Business Manager → Message Templates
-- Click "Create Template"
-- Name: `order_confirmation`
-- Category: Utility
-- Content: `Hi {{1}}, your order {{2}} is ready for pickup!`
-- Submit for approval
-- Wait for Meta to review and approve
-
-**Outcome**: Template exists in provider's system with status "APPROVED"
+All template and transport setup is handled **entirely through RS Connect SDK**.  
+RS Connect acts as the **single control plane**, while provider-specific APIs (Meta, Twilio, Viber, etc.) are called internally.
 
 ---
 
-#### Admin Configures Transport in RS Connect
+#### 1 Admin Creates Templates via RS Connect SDK
 
-**Where**: RS Connect admin panel or API
-
-**What Happens**:
-
-1. Admin creates or updates a transport
-2. Selects which capabilities this transport needs
-3. Provides any verification credentials or IDs
-4. Saves transport configuration
-
-**Example**:
-
-- Create new transport: "WhatsApp Main Channel"
-- Type: API
-- Capabilities:
-  - ✓ Template Verification
-  - ✓ Media Support
-- Config: WhatsApp phone ID, access token
-- Save
-
-**Outcome**: Transport is registered with its required capabilities
+**Where**: RS Connect Template SDK  
+**Who**: Admin  
+**How**: Connect template sdk calls from different clients
 
 ---
 
-#### Admin Syncs Templates into RS Connect
+#### What Happens
 
-**Where**: RS Connect template management interface
+1. Admin calls RS Connect to create a template
+2. RS Connect:
+   - Identifies the selected transport
+   - Resolves the provider (Meta, Twilio, etc.)
+   - Transforms the template into provider-specific format
+3. RS Connect sends the template creation request to the provider API
+4. Provider validates and registers the template
+5. Provider returns a template ID and initial status (`PENDING_APPROVAL`)
+6. RS Connect stores the template locally
 
-**What Happens**:
+---
 
-1. Admin navigates to template management
-2. Selects the WhatsApp transport
-3. Clicks "Sync Templates"
-4. System connects to Meta API
-5. Fetches all templates for this account
-6. Saves them in RS Connect database with their current status
-7. Shows summary of what was synced
+#### Example: WhatsApp Template Creation
 
-**Example Sync Result**:
+**API Call**
+```http
+POST /api/templates
 
+{
+  "transportId": "cuid_whatsapp_main",
+  "name": "order_confirmation",
+  "category": "UTILITY",
+  "language": "en",
+  "content": "Hi {{1}}, your order {{2}} is ready for pickup!",
+  "parameters": ["text", "text"]
+}
 ```
-Sync Complete!
-✓ Found 15 templates
-✓ Active (Approved): 12
-⏳ Pending Approval: 2
-❌ Rejected/Disabled: 1
+#### Internal Processing in RS Connect
 
-Active Templates Ready to Use:
-- order_confirmation (2 parameters)
-- welcome_message (1 parameter)
-- appointment_reminder (3 parameters)
-- shipping_notification (2 parameters)
-... and 8 more
+- Transport type: API
+- Provider resolved: WhatsApp
+- Capability detected: TEMPLATE_VERIFICATION
+- Template is submitted for provider approval
+
+#### Stored Template Record (RS Connect)
 ```
+{
+  "name": "order_confirmation",
+  "externalId": "whatsapp_tpl_12345",
+  "status": "PENDING",
+  "isActive": false
+}
+```
+#### Outcome
 
-**Outcome**: RS Connect now has a local copy of all available templates
-
----
+- Template is created in provider system
+- Approval process initiated
+- RS Connect tracks template lifecycle
 
 ### Stage 2: Sending Messages (Every Time)
 
