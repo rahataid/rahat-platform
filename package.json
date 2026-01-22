@@ -175,11 +175,6 @@
     "verdaccio": "^5.29.2",
     "webpack-cli": "^5.1.4"
   },
-  "pnpm": {
-    "overrides": {
-      "@rumsan/sdk": "0.0.47-rc.1"
-    }
-  },
   "nx": {
     "includedScripts": []
   },

@@ -18,7 +18,7 @@ import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
-import { AuthsService } from '@rumsan/user';
+import { AuthsService, SignupsService } from '@rumsan/user';
 import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
@@ -29,6 +29,7 @@ import { UsersService } from '../users/users.service';
 import { isAddress } from '../utils/web3';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 import { OtpDto, OtpLoginDto } from '@rumsan/extensions/dtos';
+import { Request } from '@rumsan/sdk/types';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -39,6 +40,7 @@ export class VendorsService {
     private readonly authService: AuthsService,
     private readonly usersService: UsersService,
     private readonly notificationService: NotificationService,
+    private readonly signupService: SignupsService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) {}
 
@@ -358,7 +360,7 @@ export class VendorsService {
     return this.authService.getOtp(dto, rdetails);
   }
 
-  async verifyOtp(dto: OtpLoginDto, rdetails) {
+  async verifyOtp(dto: OtpLoginDto, rdetails: Request) {
     const res = await this.authService.loginByOtp(dto, rdetails);
     console.log(res);
     if (res.accessToken) {
@@ -481,5 +483,80 @@ export class VendorsService {
         User: true,
       },
     });
+  }
+
+  // async loginByPassword(dto: V, rdetails: Request) {
+  //   return this.authService.createAuthSessionAndToken(dto, rdetails);
+  // }
+
+  async registerVendorWithPassword(dto: VendorRegisterDto, rdetails: Request) {
+    // Auto-generate username from name
+    const username = this.generateUsername(dto.name);
+    
+    // Auto-generate secure password
+    const autoPassword = this.generateSecurePassword();
+    
+    // Create signup request using SignupsService with USERNAME service
+    const signupData = {
+      name: dto.name,
+      username: username,
+      email: dto.email,
+      phone: dto.phone,
+      password: autoPassword,
+      confirmPassword: autoPassword, // Same as password for auto-generated
+      service: Service.USERNAME, // Use USERNAME service for password-based auth
+      extras: { 
+        ...dto.extras,
+        isVendor: true,
+        wallet: dto.wallet, // Store wallet in extras
+        authWallet: dto.authWallet,
+      },
+    };
+    
+    // Use SignupsService to handle signup with password
+    const signup = await this.signupService.signup(signupData);
+    
+    return {
+      signup,
+      credentials: {
+        username,
+        tempPassword: autoPassword,
+      },
+      message: 'Vendor signup request created successfully. Requires admin approval. After approval, vendor can login at /v1/auth/login/password with these credentials.',
+      note: 'Please share these credentials securely with the vendor.',
+    };
+  }
+
+  // Helper to generate username from name
+  private generateUsername(name: string): string {
+    // Convert to lowercase, replace spaces with underscore, remove special chars
+    const base = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+    // Add random suffix to ensure uniqueness
+    const suffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    return `${base}_${suffix}`;
+  }
+
+  // Helper to generate secure password
+  private generateSecurePassword(length: number = 12): string {
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    const special = '!@#$%^&*';
+    const allChars = uppercase + lowercase + numbers + special;
+
+    let password = '';
+    // Ensure at least one of each type
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += lowercase[Math.floor(Math.random() * lowercase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
+    password += special[Math.floor(Math.random() * special.length)];
+
+    // Fill the rest randomly
+    for (let i = password.length; i < length; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+
+    // Shuffle the password
+    return password.split('').sort(() => Math.random() - 0.5).join('');
   }
 }

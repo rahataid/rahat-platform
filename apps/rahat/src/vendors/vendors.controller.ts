@@ -24,6 +24,7 @@ import { UUID } from 'crypto';
 import { Address } from 'viem';
 import { VendorsService } from './vendors.service';
 import { OtpDto } from '@rumsan/extensions/dtos';
+import { Request } from '@rumsan/sdk/types';
 
 @ApiTags('Vendors')
 @Controller('vendors')
@@ -103,5 +104,12 @@ export class VendorsController {
   @MessagePattern({ cmd: VendorJobs.GET_BY_UUID })
   getVenderByUuid(@Payload() dto) {
     return this.vendorService.getVendorByUuid(dto);
+  }
+
+
+
+  @Post('password-register')
+  passwordRegister(@Body() dto: VendorRegisterDto, @RequestDetails() rdetails: Request) {
+    return this.vendorService.registerVendorWithPassword(dto, rdetails);
   }
 }

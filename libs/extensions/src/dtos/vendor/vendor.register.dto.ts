@@ -43,3 +43,23 @@ export class VendorRegisterDto implements VendorCreateInput {
   @IsObject()
   extras?: object;
 }
+
+
+export class VendorPasswordLoginDto {
+  @ApiProperty({ example: 'john@mailinator.com' })
+  @IsString()
+  email: string;
+
+  @ApiProperty({ example: 'password' })
+  @IsString()
+  password: string;
+}
+export class VendorSignupDto {
+  @ApiProperty({ example: 'john@mailinator.com' })
+  @IsString()
+  email: string;
+
+  @ApiProperty({ example: 'password' })
+  @IsString()
+  password: string;
+}
