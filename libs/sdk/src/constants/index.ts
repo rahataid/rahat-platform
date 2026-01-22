@@ -502,12 +502,16 @@ export const MS_ACTIONS = {
   MS_WATER_LEVELS: {
     GET_DHM: 'ms.waterLevels.getDhm',
     GET_DHM_SINGLE_SERIES: 'ms.waterLevels.getDhmSingleSeries',
-    GET_GLOFAS: 'ms.waterLevels.getGlofas',
+    // GET_GLOFAS: 'ms.waterLevels.getGlofas',
     GET_GFH: 'ms.waterLevels.getGfh',
   },
   MS_RAINFALL_LEVELS: {
     GET_DHM: 'ms.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.rainfallLevels.getGlofas',
+  },
+  MS_PROB_FLOOD: {
+    GET_ALL_GLOFAS: 'ms.probFlood.getAllGlofas',
+    GET_ONE_GLOFAS: 'ms.probFlood.getOneGlofas',
   },
   MS_ACTIVITIES: {
     GET_ONE: 'ms.activities.getOne',
