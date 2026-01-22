@@ -3,7 +3,7 @@ import { VendorCreateInput } from '@rahataid/sdk';
 import { Service } from '@rumsan/sdk/enums';
 import { IsObject, IsOptional, IsString } from 'class-validator';
 
-export class VendorRegisterDto implements VendorCreateInput {
+export class VendorRegisterDto {
   id?: number | undefined;
   uuid: string;
   location?: string | null | undefined;
@@ -36,8 +36,9 @@ export class VendorRegisterDto implements VendorCreateInput {
 
   @ApiProperty({ example: '0x000000000000000000000', required: false })
   @IsString()
+  @IsOptional()
   // @IsEthereumAddress()
-  wallet: string;
+  wallet?: string;
 
   @ApiProperty({ example: { isVendor: true }, required: false })
   @IsObject()
@@ -63,3 +64,4 @@ export class VendorSignupDto {
   @IsString()
   password: string;
 }
+

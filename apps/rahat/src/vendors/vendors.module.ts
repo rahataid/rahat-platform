@@ -8,6 +8,7 @@ import { PrismaService } from '@rumsan/prisma';
 import { AuthsModule, SignupModule } from '@rumsan/user';
 import { NotificationModule } from '../notification/notification.module';
 import { UsersModule } from '../users/users.module';
+import { WalletModule } from '../wallet/wallet.module';
 import { VendorsController } from './vendors.controller';
 import { VendorsService } from './vendors.service';
 
@@ -32,6 +33,7 @@ import { VendorsService } from './vendors.service';
     AuthsModule,
     SignupModule.forRoot({ autoApprove: true }),
     UsersModule,
+    WalletModule,
     NotificationModule
   ],
   controllers: [VendorsController],
