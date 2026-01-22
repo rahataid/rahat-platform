@@ -12,6 +12,7 @@ import {
   AuthsModule,
   RSUserModule,
   RolesModule,
+  SignupModule,
   UsersModule,
 } from '@rumsan/user';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
@@ -57,7 +58,7 @@ import { AppService } from './app.service';
     ListenersModule,
     AppUsersModule,
     OtpModule,
-    RSUserModule.forRoot([AuthsModule, UsersModule, RolesModule]),
+    RSUserModule.forRoot([AuthsModule, UsersModule, RolesModule,   SignupModule.forRoot({ autoApprove: true }),]),
     ProjectModule,
     StatsModule,
     ProcessorsModule,

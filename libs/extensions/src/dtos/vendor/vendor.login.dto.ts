@@ -25,4 +25,7 @@ export class VerifyVendorOtp {
     @ApiProperty({ example: '' })
     @IsString()
     otp: string
+
+    @ApiProperty({ example: Service.EMAIL })
+    service: Service | null
 }

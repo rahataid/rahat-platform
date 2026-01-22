@@ -28,6 +28,7 @@ import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
 import { isAddress } from '../utils/web3';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
+import { OtpDto, OtpLoginDto } from '@rumsan/extensions/dtos';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -353,11 +354,11 @@ export class VendorsService {
     return { data: combinedData, meta: data.meta };
   }
 
-  async getOtp(dto: GetVendorOtp, rdetails) {
+  async getOtp(dto: OtpDto, rdetails) {
     return this.authService.getOtp(dto, rdetails);
   }
 
-  async verifyOtp(dto, rdetails) {
+  async verifyOtp(dto: OtpLoginDto, rdetails) {
     const res = await this.authService.loginByOtp(dto, rdetails);
     console.log(res);
     if (res.accessToken) {
@@ -365,7 +366,7 @@ export class VendorsService {
     }
   }
 
-  async getUserDetails(dto) {
+  async getUserDetails(dto: OtpLoginDto) {
     const challengeData = decryptChallenge(
       getSecret(),
       dto.challenge,

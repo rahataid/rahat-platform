@@ -23,6 +23,7 @@ import { RequestDetails } from '@rumsan/extensions/decorators';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
 import { VendorsService } from './vendors.service';
+import { OtpDto } from '@rumsan/extensions/dtos';
 
 @ApiTags('Vendors')
 @Controller('vendors')
@@ -57,7 +58,7 @@ export class VendorsController {
   }
 
   @Post('/getOtp')
-  getOtp(@Body() dto: GetVendorOtp, @RequestDetails() rdetails: any) {
+  getOtp(@Body() dto: OtpDto, @RequestDetails() rdetails: any) {
     return this.vendorService.getOtp(dto, rdetails);
   }
 
