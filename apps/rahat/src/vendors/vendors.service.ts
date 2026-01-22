@@ -516,13 +516,54 @@ export class VendorsService {
     // Use SignupsService to handle signup with password
     const signup = await this.signupService.signup(signupData);
     
+    // Since autoApprove is true, the user is created immediately
+    // We need to assign the VENDOR role
+    if (signup.status === 'APPROVED') {
+      // Find the created user by username
+      const auth = await this.prisma.auth.findUnique({
+        where: {
+          authIdentifier: {
+            service: Service.USERNAME,
+            serviceId: username,
+          },
+        },
+      });
+
+      if (auth) {
+        // Find VENDOR role
+        const vendorRole = await this.prisma.role.findFirst({
+          where: { name: UserRoles.VENDOR },
+        });
+
+        if (vendorRole) {
+          // Check if role is already assigned
+          const existingRole = await this.prisma.userRole.findFirst({
+            where: {
+              userId: auth.userId,
+              roleId: vendorRole.id,
+            },
+          });
+
+          // Assign VENDOR role if not already assigned
+          if (!existingRole) {
+            await this.prisma.userRole.create({
+              data: {
+                userId: auth.userId,
+                roleId: vendorRole.id,
+              },
+            });
+          }
+        }
+      }
+    }
+    
     return {
       signup,
       credentials: {
         username,
         tempPassword: autoPassword,
       },
-      message: 'Vendor signup request created successfully. Requires admin approval. After approval, vendor can login at /v1/auth/login/password with these credentials.',
+      message: 'Vendor registered successfully with VENDOR role. Vendor can login at /v1/auth/login/password with these credentials.',
       note: 'Please share these credentials securely with the vendor.',
     };
   }
