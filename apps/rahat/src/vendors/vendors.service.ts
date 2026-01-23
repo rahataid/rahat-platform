@@ -29,7 +29,7 @@ import { UsersService } from '../users/users.service';
 import { WalletService } from '../wallet/wallet.service';
 import { isAddress } from '../utils/web3';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
-import { OtpDto, OtpLoginDto } from '@rumsan/extensions/dtos';
+import { OtpDto, OtpLoginDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
 import { Request } from '@rumsan/sdk/types';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -778,5 +778,62 @@ export class VendorsService {
     }
     
     return passwordArray.join('');
+  }
+
+  async loginByPassword(dto: PasswordLoginDto, rdetails: Request) {
+    // Step 1: Validate user credentials (password check)
+    const user = await this.authService.validateUser(
+      dto.identifier,
+      dto.password,
+      dto.service,
+    );
+
+    if (!user) {
+      throw new BadRequestException('Invalid credentials');
+    }
+
+    // Step 2: Check if user has VENDOR role
+    const userRoles = await this.prisma.userRole.findMany({
+      where: { userId: user.id },
+      include: {
+        Role: {
+          select: { name: true },
+        },
+      },
+    });
+
+    const isVendor = userRoles.some(
+      (userRole) => userRole.Role.name === UserRoles.VENDOR,
+    );
+
+    if (!isVendor) {
+      throw new ForbiddenException('User is not a vendor');
+    }
+
+    // Step 3: Create auth session and token
+    const authSession = await this.authService.createAuthSessionAndToken(user, rdetails);
+
+    // Step 4: Get vendor's wallet details
+    let wallet = null;
+    try {
+      wallet = await this.walletService.getSecretByWallet(user.wallet);
+      
+    } catch (error) {
+      this.logger.error('Failed to retrieve wallet:', error);
+      // Don't fail login if wallet retrieval fails
+    }
+
+    return {
+      accessToken: authSession.accessToken,
+      user: {
+        id: user.id,
+        uuid: user.uuid,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        wallet: user.wallet,
+      },
+      wallet,
+    };
   }
 }

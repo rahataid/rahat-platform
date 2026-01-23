@@ -23,7 +23,7 @@ import { RequestDetails } from '@rumsan/extensions/decorators';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
 import { VendorsService } from './vendors.service';
-import { OtpDto } from '@rumsan/extensions/dtos';
+import { OtpDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
 import { Request } from '@rumsan/sdk/types';
 
 @ApiTags('Vendors')
@@ -111,5 +111,10 @@ export class VendorsController {
   @Post('password-register')
   passwordRegister(@Body() dto: VendorRegisterDto, @RequestDetails() rdetails: Request) {
     return this.vendorService.registerVendorWithPassword(dto, rdetails);
+  }
+
+  @Post('password-login')
+  passwordLogin(@Body() dto: PasswordLoginDto, @RequestDetails() rdetails: Request) {
+    return this.vendorService.loginByPassword(dto, rdetails);
   }
 }
