@@ -178,6 +178,13 @@
   "nx": {
     "includedScripts": []
   },
+  "pnpm": {
+    "overrides": {
+      "@rumsan/sdk": "0.0.47-rc.1",
+      "@rumsan/extensions": "0.0.38-rc.1",
+      "@rumsan/user": "3.0.170-rc.2"
+    }
+  },
   "prisma": {
     "seed": "ts-node prisma/seed.user.ts"
   }
