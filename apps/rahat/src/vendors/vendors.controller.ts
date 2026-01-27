@@ -14,6 +14,7 @@ import { ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   GetVendorOtp,
   VendorAddToProjectDto,
+  VendorPasswordRegisterDto,
   VendorRegisterDto,
   VendorUpdateDto,
   VerifyVendorOtp,
@@ -29,7 +30,7 @@ import { Request } from '@rumsan/sdk/types';
 @ApiTags('Vendors')
 @Controller('vendors')
 export class VendorsController {
-  constructor(private readonly vendorService: VendorsService) { }
+  constructor(private readonly vendorService: VendorsService) {}
 
   @Post('')
   registerVendor(@Body() dto: VendorRegisterDto) {
@@ -53,9 +54,8 @@ export class VendorsController {
 
   @ApiParam({ name: 'id', required: true })
   @Get('/:id')
-  getVendor(@Param('id') id: UUID | Address,
-  ) {
-    return this.vendorService.getVendor(id,);
+  getVendor(@Param('id') id: UUID | Address) {
+    return this.vendorService.getVendor(id);
   }
 
   @Post('/getOtp')
@@ -106,15 +106,19 @@ export class VendorsController {
     return this.vendorService.getVendorByUuid(dto);
   }
 
-
-
   @Post('password-register')
-  passwordRegister(@Body() dto: VendorRegisterDto, @RequestDetails() rdetails: Request) {
+  passwordRegister(
+    @Body() dto: VendorPasswordRegisterDto,
+    @RequestDetails() rdetails: Request
+  ) {
     return this.vendorService.registerVendorWithPassword(dto, rdetails);
   }
 
   @Post('password-login')
-  passwordLogin(@Body() dto: PasswordLoginDto, @RequestDetails() rdetails: Request) {
+  passwordLogin(
+    @Body() dto: PasswordLoginDto,
+    @RequestDetails() rdetails: Request
+  ) {
     return this.vendorService.loginByPassword(dto, rdetails);
   }
 }

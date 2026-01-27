@@ -5,13 +5,14 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 // import * as jwt from '@nestjs/jwt';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import {
   GetVendorOtp,
   VendorAddToProjectDto,
+  VendorPasswordRegisterDto,
   VendorRegisterDto,
 } from '@rahataid/extensions';
 import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
@@ -48,7 +49,6 @@ export class VendorsService {
     private readonly walletService: WalletService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) {}
-
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
@@ -106,7 +106,7 @@ export class VendorsService {
       description: `Vendor ${vendor.name} is waiting for admin approval`,
       group: 'Vendor Management',
       notify: true,
-    })
+    });
     return vendor;
   }
 
@@ -494,16 +494,23 @@ export class VendorsService {
   //   return this.authService.createAuthSessionAndToken(dto, rdetails);
   // }
 
-  async registerVendorWithPassword(dto: VendorRegisterDto, rdetails: Request) {
+  async registerVendorWithPassword(
+    dto: VendorPasswordRegisterDto,
+    rdetails: Request
+  ) {
     // Validate input
     if (!dto.name || dto.name.trim().length === 0) {
-      throw new BadRequestException('Vendor name is required and cannot be empty');
+      throw new BadRequestException(
+        'Vendor name is required and cannot be empty'
+      );
     }
 
     // Validate and get VENDOR role (with caching)
     const vendorRole = await this.getVendorRole();
     if (!vendorRole) {
-      throw new NotFoundException('VENDOR role not found in system. Please contact administrator.');
+      throw new NotFoundException(
+        'VENDOR role not found in system. Please contact administrator.'
+      );
     }
 
     let walletCreated = false;
@@ -513,25 +520,20 @@ export class VendorsService {
       // Step 1: Check for duplicate email/phone/username BEFORE creating wallet
       await this.checkForDuplicates(dto);
 
-      // Step 2: Generate unique username
-      const username = await this.generateUniqueUsername(dto.name);
-      
-      // Step 3: Generate and validate password
-      const autoPassword = this.generateSecurePassword();
-      this.validateGeneratedPassword(autoPassword);
-      
       // Step 4: Create wallet using WalletService
       try {
         randomWallet = await this.walletService.createWallet();
         walletCreated = true;
-        
+
         this.logger.log('Vendor wallet created:', {
           address: randomWallet.address,
           blockchain: randomWallet.blockchain || 'evm',
         });
       } catch (walletError) {
         this.logger.error('Failed to create wallet:', walletError);
-        throw new BadRequestException('Failed to create vendor wallet. Please try again.');
+        throw new BadRequestException(
+          'Failed to create vendor wallet. Please try again.'
+        );
       }
 
       // Step 5: Use transaction to ensure atomicity
@@ -539,29 +541,29 @@ export class VendorsService {
         // Create signup request using SignupsService with USERNAME service
         const signupData = {
           name: dto.name,
-          username: username,
+          username: dto.username,
           email: dto.email,
           phone: dto.phone,
-          password: autoPassword,
-          confirmPassword: autoPassword,
+          password: dto.password,
+          confirmPassword: dto.password,
           service: Service.USERNAME,
           wallet: randomWallet.address,
-          extras: { 
+          extras: {
             ...dto.extras,
             isVendor: true,
             walletBlockchain: randomWallet.blockchain || 'evm',
           },
         };
-        
+
         // Create signup (auto-approved)
         const signup = await this.signupService.signup(signupData);
-      
+
         // Find the created user's auth record
         const auth = await tx.auth.findUnique({
           where: {
             authIdentifier: {
               service: Service.USERNAME,
-              serviceId: username,
+              serviceId: dto.username,
             },
           },
           include: {
@@ -570,7 +572,9 @@ export class VendorsService {
         });
 
         if (!auth) {
-          throw new NotFoundException('Auth record not found after signup. Please contact administrator.');
+          throw new NotFoundException(
+            'Auth record not found after signup. Please contact administrator.'
+          );
         }
 
         // Assign VENDOR role (no need to check if exists - it's a new user)
@@ -581,14 +585,14 @@ export class VendorsService {
           },
         });
 
-        return { signup, auth, username, autoPassword };
+        return { signup, auth, username: dto.username };
       });
 
       // Send notification about new vendor
       try {
         await this.notificationService.createNotification({
           title: 'New Vendor Registered',
-          description: `Vendor ${dto.name} (${username}) has been registered with password authentication.`,
+          description: `Vendor ${dto.name} (${dto.username}) has been registered with password authentication.`,
           group: 'Vendor Management',
         });
       } catch (notificationError) {
@@ -596,39 +600,50 @@ export class VendorsService {
         this.logger.error('Failed to send notification:', notificationError);
       }
 
+      // Create auth session and generate access token
+      const authSession = await this.authService.createAuthSessionAndToken(
+        result.auth.User,
+        rdetails
+      );
+
       // Return response with credentials (private key should be handled securely)
       return {
         success: true,
         data: {
-          signup: result.signup,
+          // signup: result.signup,
+          accessToken: authSession.accessToken,
           user: {
             id: result.auth.User.id,
             uuid: result.auth.User.uuid,
             name: result.auth.User.name,
             wallet: result.auth.User.wallet,
+            username: result.auth.User.username,
+            email: result.auth.User.email,
+            phone: result.auth.User.phone,
+            extras: result.auth.User.extras,
           },
-          credentials: {
-            username: result.username,
-            tempPassword: result.autoPassword,
-          },
+
           wallet: {
             address: randomWallet.address,
             blockchain: randomWallet.blockchain || 'evm',
             // SECURITY: Consider encrypting private key or delivering via secure channel
             privateKey: randomWallet.privateKey,
+            mnemonic: randomWallet.mnemonic,
           },
-          message: 'Vendor registered successfully with VENDOR role and auto-generated wallet. Vendor can login at /v1/auth/login/password with these credentials.',
-          note: 'IMPORTANT: Save these credentials securely. The private key will not be shown again.',
+          message:
+            'Vendor registered successfully with VENDOR role and auto-generated wallet. ',
         },
       };
-
     } catch (error) {
       // Cleanup: If wallet was created but signup failed, log for manual cleanup
       if (walletCreated && randomWallet) {
-        this.logger.error('Vendor registration failed after wallet creation. Orphaned wallet:', {
-          address: randomWallet.address,
-          error: error.message,
-        });
+        this.logger.error(
+          'Vendor registration failed after wallet creation. Orphaned wallet:',
+          {
+            address: randomWallet.address,
+            error: error.message,
+          }
+        );
         // TODO: Implement wallet cleanup/recovery mechanism
       }
 
@@ -691,10 +706,10 @@ export class VendorsService {
   // Helper: Generate unique username with collision prevention
   private async generateUniqueUsername(name: string): Promise<string> {
     const maxAttempts = 10;
-    
+
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const username = this.generateUsername(name);
-      
+
       // Check if username exists
       const existing = await this.prisma.auth.findFirst({
         where: {
@@ -711,42 +726,59 @@ export class VendorsService {
     }
 
     // Fallback to UUID-based username if all attempts fail
-    const fallbackUsername = `${name.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-    this.logger.warn('Failed to generate unique username after 10 attempts, using fallback:', fallbackUsername);
+    const fallbackUsername = `${name
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '_')}_${Date.now()}_${Math.floor(
+      Math.random() * 1000
+    )}`;
+    this.logger.warn(
+      'Failed to generate unique username after 10 attempts, using fallback:',
+      fallbackUsername
+    );
     return fallbackUsername;
   }
 
   // Helper: Validate generated password meets requirements
   private validateGeneratedPassword(password: string) {
-    const { validatePasswordStrength } = require('@rumsan/user/lib/utils/password.utils');
-    
+    const {
+      validatePasswordStrength,
+    } = require('@rumsan/user/lib/utils/password.utils');
+
     const validation = validatePasswordStrength(password);
     if (!validation.isValid) {
-      throw new Error(`Generated password does not meet requirements: ${validation.errors.join(', ')}`);
+      throw new Error(
+        `Generated password does not meet requirements: ${validation.errors.join(
+          ', '
+        )}`
+      );
     }
   }
 
   // Helper to generate username from name (base version - doesn't check uniqueness)
   private generateUsername(name: string): string {
     // Convert to lowercase, replace spaces with underscore, remove special chars
-    const base = name.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
-    
+    const base = name
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-z0-9_]/g, '');
+
     // Ensure base is not empty
     if (!base || base.length === 0) {
       return `vendor_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
     }
-    
+
     // Use crypto for better randomness
     const crypto = require('crypto');
     const randomBytes = crypto.randomBytes(3).toString('hex'); // 6 char hex
-    
+
     return `${base}_${randomBytes}`;
   }
 
   // Helper to generate secure password with stronger randomness
   private generateSecurePassword(length: number = 14): string {
     const crypto = require('crypto');
-    
+
     const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const lowercase = 'abcdefghijklmnopqrstuvwxyz';
     const numbers = '0123456789';
@@ -754,7 +786,7 @@ export class VendorsService {
     const allChars = uppercase + lowercase + numbers + special;
 
     let password = '';
-    
+
     // Ensure at least 2 of each type for stronger passwords
     password += uppercase[crypto.randomInt(0, uppercase.length)];
     password += uppercase[crypto.randomInt(0, uppercase.length)];
@@ -774,9 +806,12 @@ export class VendorsService {
     const passwordArray = password.split('');
     for (let i = passwordArray.length - 1; i > 0; i--) {
       const j = crypto.randomInt(0, i + 1);
-      [passwordArray[i], passwordArray[j]] = [passwordArray[j], passwordArray[i]];
+      [passwordArray[i], passwordArray[j]] = [
+        passwordArray[j],
+        passwordArray[i],
+      ];
     }
-    
+
     return passwordArray.join('');
   }
 
@@ -785,7 +820,7 @@ export class VendorsService {
     const user = await this.authService.validateUser(
       dto.identifier,
       dto.password,
-      dto.service,
+      dto.service
     );
 
     if (!user) {
@@ -803,7 +838,7 @@ export class VendorsService {
     });
 
     const isVendor = userRoles.some(
-      (userRole) => userRole.Role.name === UserRoles.VENDOR,
+      (userRole) => userRole.Role.name === UserRoles.VENDOR
     );
 
     if (!isVendor) {
@@ -811,13 +846,15 @@ export class VendorsService {
     }
 
     // Step 3: Create auth session and token
-    const authSession = await this.authService.createAuthSessionAndToken(user, rdetails);
+    const authSession = await this.authService.createAuthSessionAndToken(
+      user,
+      rdetails
+    );
 
     // Step 4: Get vendor's wallet details
     let wallet = null;
     try {
       wallet = await this.walletService.getSecretByWallet(user.wallet);
-      
     } catch (error) {
       this.logger.error('Failed to retrieve wallet:', error);
       // Don't fail login if wallet retrieval fails

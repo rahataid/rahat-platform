@@ -45,6 +45,15 @@ export class VendorRegisterDto {
   extras?: object;
 }
 
+export class VendorPasswordRegisterDto extends VendorRegisterDto {
+  @ApiProperty({ example: 'john_vendor_1234' })
+  @IsString()
+  username: string;
+
+  @ApiProperty({ example: 'password' })
+  @IsString()
+  password: string;
+}
 
 export class VendorPasswordLoginDto {
   @ApiProperty({ example: 'john@mailinator.com' })
@@ -64,4 +73,3 @@ export class VendorSignupDto {
   @IsString()
   password: string;
 }
-
