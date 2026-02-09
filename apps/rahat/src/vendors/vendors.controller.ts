@@ -111,10 +111,10 @@ export class VendorsController {
       name: v['Customer name'],
       phone: v['Phone no.'],
       location: v['Region'],
+      lastPurchaseDate: v['Last purchase'],
       extras: {
         email: v['Email'],
         channel: v['Channel'],
-        lastPurchaseDate: v['Last purchase'],
       }
     }))
 
