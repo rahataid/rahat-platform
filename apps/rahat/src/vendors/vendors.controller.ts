@@ -156,4 +156,9 @@ export class VendorsController {
   getVenderByUuid(@Payload() dto) {
     return this.vendorService.getVendorByUuid(dto);
   }
+
+  @MessagePattern({ cmd: VendorJobs.CREATE })
+  create(@Payload() dto) {
+    return this.vendorService.create(dto);
+  }
 }

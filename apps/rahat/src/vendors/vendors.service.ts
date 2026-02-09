@@ -39,7 +39,7 @@ export class VendorsService {
     private readonly usersService: UsersService,
     private readonly notificationService: NotificationService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
-  ) {}
+  ) { }
 
 
   //TODO: Fix allow duplicate users?
@@ -480,5 +480,81 @@ export class VendorsService {
         User: true,
       },
     });
+  }
+
+  async create(payload: any) {
+    const { projectId, vendors: vendorsList } = payload;
+
+    try {
+      const result = await this.prisma.$transaction(async (prisma) => {
+        const createdVendors = [];
+        const role = await prisma.role.findFirst({
+          where: { name: UserRoles.VENDOR },
+        });
+
+        if (!role) throw new Error('Vendor role not found');
+
+        // Create vendors in both User and Vendors tables
+        for (const vendorData of vendorsList) {
+          // Create in Vendors table
+          const createdVendor = await prisma.vendors.create({
+            data: {
+              name: vendorData.name,
+              email: vendorData.extras?.email,
+              phone: vendorData.phone,
+              location: vendorData.location,
+              uuid: vendorData.uuid,
+              extras: vendorData.extras,
+            },
+          });
+
+          // Create in User table with vendor info
+          const createdUser = await prisma.user.create({
+            data: {
+              name: vendorData.name,
+              email: vendorData.extras?.email,
+              phone: vendorData.phone,
+              extras: vendorData.extras,
+            },
+          });
+
+          // Assign vendor role to user
+          await prisma.userRole.create({
+            data: {
+              userId: createdUser.id,
+              roleId: role.id,
+            },
+          });
+
+          // Create project vendor association if projectId is provided
+          if (projectId) {
+            await prisma.projectVendors.create({
+              data: {
+                projectId,
+                vendorId: createdUser.uuid,
+              },
+            });
+          }
+
+          createdVendors.push({
+            vendor: createdVendor,
+            user: createdUser,
+          });
+        }
+
+        return {
+          success: true,
+          data: createdVendors,
+          message: `${createdVendors.length} vendor(s) created successfully`,
+        };
+      });
+
+      return result;
+    } catch (error) {
+      console.error('Error creating vendors:', error);
+      throw new RpcException(
+        error.message || 'Failed to create vendors. Transaction rolled back.'
+      );
+    }
   }
 }
