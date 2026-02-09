@@ -151,6 +151,10 @@ export const MS_ACTIONS = {
     GET_ALL_STATS: 'elProject.getAllStats',
     LIST_BEN_VENDOR_COUNT: 'elProject.count_ben_vendor',
     GET_VENDOR_STATS: 'elProject.getVendorStats',
+
+    CRM: {
+      GET_ALL_VENDOR: 'elProject.crm.getAllVendor'
+    }
   },
   SETTINGS: {
     LIST: 'settings.list',

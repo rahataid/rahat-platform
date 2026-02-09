@@ -60,4 +60,10 @@ export const elActions: ProjectActionFunc = {
       { cmd: VendorJobs.GET_VENDOR_STATS }, { projectId: uuid },
       500000
     ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.GET_ALL_VENDOR]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: VendorJobs.LIST }, { projectId: uuid, ...payload },
+      500000
+    ),
 };
