@@ -14,5 +14,7 @@ export const JOBS = {
   GET_VENDOR_STATS: 'rahat.jobs.get_project_vendor_stats',
   GET_BY_UUID: 'rahat.jobs.vendor.get.uuid',
   LIST_WITH_PROJECT_DATA: 'rahat.jobs.vendor.list_with_project_data',
-  GET_BENEFICIARIES: 'rahat.jobs.vendor.get_beneficiaries'
+  GET_BENEFICIARIES: 'rahat.jobs.vendor.get_beneficiaries',
+  IMPORT: 'rahat.jobs.vendor.import',
+  CREATE: 'rahat.jobs.vendor.create'
 };
