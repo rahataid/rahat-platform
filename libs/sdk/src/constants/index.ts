@@ -153,7 +153,9 @@ export const MS_ACTIONS = {
     GET_VENDOR_STATS: 'elProject.getVendorStats',
 
     CRM: {
-      GET_ALL_VENDOR: 'elProject.crm.getAllVendor'
+      GET_ALL_VENDOR: 'elProject.crm.getAllVendor',
+      CREATE_TEMPLATE: 'elProject.campaign.create_template',
+      LIST_TEMPLATES: 'elProject.campaign.list_templates',
     }
   },
   SETTINGS: {
