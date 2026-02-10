@@ -109,7 +109,7 @@ export class VendorsController {
     const mappedVendors = vendors.map((v) => ({
       customerCode: v['Customer code'],
       name: v['Customer name'],
-      phone: v['Phone no.'],
+      phone: v['Mobile no.'],
       location: v['Region'],
       lastPurchaseDate: v['Last purchase'],
       extras: {
