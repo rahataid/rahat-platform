@@ -1,20 +1,19 @@
 meta {
-  name: login
+  name: service login
   type: http
-  seq: 4
+  seq: 6
 }
 
 post {
-  url: {{url}}/auth/login
+  url: {{url}}/auth/service/token
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "challenge": "{{challenge}}",
-    "otp": "140023",
-    "service": "EMAIL"
+   "clientId": "cmlgd0qes0000o0sfie8gi4m7",
+    "clientSecret": "1096bba44ef2bbe8d56e289346bbfbb7124fbfd33ee0879820b78d40cf06a2ba"
   }
 }
 
