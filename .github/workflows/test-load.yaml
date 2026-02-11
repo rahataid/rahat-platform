@@ -1,11 +1,5 @@
 name: AA Test Load CI/CD
 on:
-  push:
-    branches:
-      - 'test-load'
-  pull_request:
-    branches:
-      - 'test-load'
   workflow_dispatch:
 
 env:
@@ -15,7 +9,6 @@ jobs:
   deploy:
     name: build && push image to Docker hub
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, 'action') || contains(github.event.pull_request.title, 'action') || github.event_name == 'workflow_dispatch'
 
     steps:
       - uses: actions/checkout@v4
