@@ -1,0 +1,22 @@
+meta {
+  name: Create Service
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{url}}/auth/service/clients
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "name": "SMS Bridge",
+    "description": "External SMS gateway bridge service"
+  }
+}

@@ -6,12 +6,14 @@ import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BeneficiaryConstants, BQUEUE } from '@rahataid/sdk';
 import { PrismaModule } from '@rumsan/prisma';
+import { AuthsModule } from '@rumsan/user';
 import { ProjectController } from './project.controller';
 import { ProjectService } from './project.service';
 
 @Module({
   imports: [
     PrismaModule,
+    AuthsModule,
     ClientsModule.registerAsync([
       {
         name: 'RAHAT_CLIENT',
