@@ -29,7 +29,7 @@ import { QueueModule } from '../queue/queue.module';
 import { RequestContextModule } from '../request-context/request-context.module';
 import { TokenModule } from '../token/token.module';
 import { UploadModule } from '../upload/upload.module';
-import { AppUsersModule } from '../vendors/vendors.module';
+import { VendorsModule } from '../vendors/vendors.module';
 import { WalletModule } from '../wallet/wallet.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -55,7 +55,7 @@ import { AppService } from './app.service';
     }),
     EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false, verboseMemoryLeak: false }),
     ListenersModule,
-    AppUsersModule,
+    VendorsModule,
     OtpModule,
     RSUserModule.forRoot([AuthsModule, UsersModule, RolesModule]),
     ProjectModule,

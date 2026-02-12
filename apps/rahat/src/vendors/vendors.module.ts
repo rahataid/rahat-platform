@@ -35,4 +35,4 @@ import { VendorsService } from './vendors.service';
   controllers: [VendorsController],
   providers: [VendorsService, PrismaService]
 })
-export class AppUsersModule { }
+export class VendorsModule { }
