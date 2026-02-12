@@ -531,6 +531,10 @@ export const MS_ACTIONS = {
       GET_GROUP_STATS: 'ms.triggers.getTransportSessionStatsByGroup',
     },
   },
+  MS_LIBRARY: {
+    GET_ACTIVITY_TEMPLATES: 'ms.library.getActivityTemplates',
+    GET_ACTIVITY_TEMPLATE_BY_ID: 'ms.library.getActivityTemplateById',
+  },
   MS_CATEGORIES: {
     GET_ALL: 'ms.activityCategories.getAll',
     ADD: 'ms.activityCategories.add',

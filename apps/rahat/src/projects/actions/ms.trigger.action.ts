@@ -64,8 +64,12 @@ export const MS_TRIGGERS_JOBS = {
       GET_STATS: 'ms.jobs.activities.communication.getStats',
       GET_STATS_GROUP: 'ms.jobs.triggers.getTransportSessionStatsByGroup',
     },
-  },
 
+  },
+  LIBRARY: {
+    GET_ACTIVITY_TEMPLATES: 'ms.jobs.library.getActivityTemplates',
+    GET_ACTIVITY_TEMPLATE_BY_ID: 'ms.jobs.library.getActivityTemplateById',
+  },
   CATEGORIES: {
     GET_ALL: 'ms.jobs.categories.getAll',
     ADD: 'ms.jobs.categories.add',
@@ -401,6 +405,18 @@ export const msTriggerActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
 
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.GET_ONE }, payload);
+  },
+
+  [MS_ACTIONS.MS_LIBRARY.GET_ACTIVITY_TEMPLATE_BY_ID]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.LIBRARY.GET_ACTIVITY_TEMPLATE_BY_ID }, payload);
+  },
+
+  [MS_ACTIONS.MS_LIBRARY.GET_ACTIVITY_TEMPLATES]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.LIBRARY.GET_ACTIVITY_TEMPLATES }, payload);
   },
 
   [MS_ACTIONS.MS_ACTIVITIES.UPDATE_STATUS]: (uuid, payload, sendCommand) => {
