@@ -1,25 +1,76 @@
 name: AA Test Load CI/CD
+
 on:
   workflow_dispatch:
+    inputs:
+      apps_to_build:
+        description: 'Apps to build (comma-separated: beneficiary,rahat or leave empty for all)'
+        required: false
+        default: ''
+        type: string
+      tag_suffix:
+        description: 'Tag suffix (e.g., test-load)'
+        required: true
+        default: 'test-load'
+        type: string
 
 env:
   CI: false
 
 jobs:
-  deploy:
-    name: build && push image to Docker hub
+  setup:
+    name: Setup Build Matrix
     runs-on: ubuntu-latest
-
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Set build matrix
+        id: set-matrix
+        run: |
+          if [ -n "${{ inputs.apps_to_build }}" ]; then
+            APPS="${{ inputs.apps_to_build }}"
+          else
+            APPS="beneficiary,rahat"
+          fi
+          
+          JSON_ARRAY=$(echo $APPS | jq -R -s -c 'split(",") | map(select(length > 0))')
+          echo "matrix={\"app\":$JSON_ARRAY}" >> $GITHUB_OUTPUT
 
-      - name: Get short SHA and short Run ID
+  build:
+    name: Build ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    needs: setup
+    strategy:
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get short SHA and Run ID
         id: vars
         run: |
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "run_id_short=${GITHUB_RUN_ID:0:3}" >> $GITHUB_OUTPUT
 
-      - name: Import Secrets
+      - name: Set app-specific variables
+        id: app-vars
+        run: |
+          case "${{ matrix.app }}" in
+            beneficiary)
+              echo "dockerfile=Dockerfile.beneficiary" >> $GITHUB_OUTPUT
+              echo "image_name=rahat-platform-beneficiary" >> $GITHUB_OUTPUT
+              ;;
+            rahat)
+              echo "dockerfile=Dockerfile.rahat" >> $GITHUB_OUTPUT
+              echo "image_name=rahat-platform-rahat" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "dockerfile=Dockerfile.${{ matrix.app }}" >> $GITHUB_OUTPUT
+              echo "image_name=rahat-platform-${{ matrix.app }}" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Import Secrets from Vault
         id: vault
         uses: hashicorp/vault-action@v2.4.0
         with:
@@ -29,11 +80,12 @@ jobs:
             github/data/general/docker/esatya username | DOCKERHUB_USERNAME ;
             github/data/general/docker/esatya password | DOCKERHUB_TOKEN ;
 
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: 20.10.0
 
-      - name: install dependencies and build apps
+      - name: Install dependencies and build apps
         run: |
           npm install -g pnpm@8.14.1
           pnpm install
@@ -44,32 +96,27 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: docker login
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ steps.vault.outputs.DOCKERHUB_USERNAME }}
           password: ${{ steps.vault.outputs.DOCKERHUB_TOKEN }}
 
-      # Beneficiary Image
-      - name: build && push beneficiary
-        id: build-push-beneficiary
+      - name: Build and Push Docker Image
+        id: build-push
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Dockerfile.beneficiary
-          push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+          file: ${{ steps.app-vars.outputs.dockerfile }}
+          push: true
           tags: |
-            esatya/rahat-platform-beneficiary:test-load
-            esatya/rahat-platform-beneficiary:test-load-${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.run_id_short }}
+            esatya/${{ steps.app-vars.outputs.image_name }}:${{ inputs.tag_suffix }}
+            esatya/${{ steps.app-vars.outputs.image_name }}:${{ inputs.tag_suffix }}-${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.run_id_short }}
 
-      # Rahat Image
-      - name: build && push rahat
-        id: build-push-rahat
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: Dockerfile.rahat
-          push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-          tags: |
-            esatya/rahat-platform-rahat:test-load
-            esatya/rahat-platform-rahat:test-load-${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.run_id_short }}
+      - name: Image digest
+        run: echo ${{ steps.build-push.outputs.digest }}
+
+    outputs:
+      sha_short: ${{ steps.vars.outputs.sha_short }}
+      run_id_short: ${{ steps.vars.outputs.run_id_short }}
+      image_tag: esatya/${{ steps.app-vars.outputs.image_name }}:${{ inputs.tag_suffix }}-${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.run_id_short }}
