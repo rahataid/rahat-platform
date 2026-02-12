@@ -4,18 +4,31 @@ on:
   workflow_dispatch:
     inputs:
       apps_to_build:
-        description: 'Apps to build (comma-separated: beneficiary,rahat or leave empty for all)'
+        description: "Apps to build (comma-separated: beneficiary,rahat or leave empty for all)"
         required: false
-        default: ''
+        default: ""
         type: string
       tag_suffix:
-        description: 'Tag suffix (e.g., test-load)'
+        description: "Tag suffix (e.g., test-load)"
         required: true
-        default: 'test-load'
+        default: "test-load"
         type: string
+      env_secret_name:
+        description: "Environment secret name"
+        required: true
+        default: "ENV_AA_TEST_LOAD"
+        type: string
+
+concurrency:
+  group: aa-test-load-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   CI: false
+  NODE_VERSION: "20.10.0"
+  PNPM_VERSION: "8.14.1"
+  REGISTRY: docker.io
+  IMAGE_NAMESPACE: esatya
 
 jobs:
   setup:
@@ -24,52 +37,65 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - name: Set build matrix
+      - name: Generate Build Matrix
         id: set-matrix
         run: |
-          if [ -n "${{ inputs.apps_to_build }}" ]; then
-            APPS="${{ inputs.apps_to_build }}"
-          else
+          APPS="${{ inputs.apps_to_build }}"
+          if [ -z "$APPS" ]; then
             APPS="beneficiary,rahat"
           fi
-          
-          JSON_ARRAY=$(echo $APPS | jq -R -s -c 'split(",") | map(select(length > 0))')
-          echo "matrix={\"app\":$JSON_ARRAY}" >> $GITHUB_OUTPUT
+          JSON=$(printf '%s\n' "$APPS" | awk -F',' '{printf "["; for(i=1;i<=NF;i++) printf "\"%s\"%s",$i,(i==NF?"":","); printf "]"}')
+          echo "matrix={\"app\":$JSON}" >> $GITHUB_OUTPUT
 
   build:
-    name: Build ${{ matrix.app }}
+    name: Build & Push - ${{ matrix.app }}
     runs-on: ubuntu-latest
     needs: setup
     strategy:
+      fail-fast: false
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get short SHA and Run ID
-        id: vars
-        run: |
-          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          echo "run_id_short=${GITHUB_RUN_ID:0:3}" >> $GITHUB_OUTPUT
+      # -----------------------------
+      # Node + PNPM Setup
+      # -----------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+      
+      - name: Ensure PNPM cache folder exists
+        run: mkdir -p ~/.pnpm-store
 
-      - name: Set app-specific variables
-        id: app-vars
-        run: |
-          case "${{ matrix.app }}" in
-            beneficiary)
-              echo "dockerfile=Dockerfile.beneficiary" >> $GITHUB_OUTPUT
-              echo "image_name=rahat-platform-beneficiary" >> $GITHUB_OUTPUT
-              ;;
-            rahat)
-              echo "dockerfile=Dockerfile.rahat" >> $GITHUB_OUTPUT
-              echo "image_name=rahat-platform-rahat" >> $GITHUB_OUTPUT
-              ;;
-            *)
-              echo "dockerfile=Dockerfile.${{ matrix.app }}" >> $GITHUB_OUTPUT
-              echo "image_name=rahat-platform-${{ matrix.app }}" >> $GITHUB_OUTPUT
-              ;;
-          esac
+      - name: Enable PNPM via Corepack
+        run: corepack enable
 
+      - name: Install Dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm prisma:generate
+
+      - name: Build Application
+        run: npx nx build ${{ matrix.app }}
+
+      # -----------------------------
+      # Inject Environment
+      # -----------------------------
+      - name: Inject Environment File
+        run: |
+          echo "${{ secrets[inputs.env_secret_name] }}" > .env
+
+      # -----------------------------
+      # Vault Import
+      # -----------------------------
       - name: Import Secrets from Vault
         id: vault
         uses: hashicorp/vault-action@v2.4.0
@@ -79,21 +105,10 @@ jobs:
           secrets: |
             github/data/general/docker/esatya username | DOCKERHUB_USERNAME ;
             github/data/general/docker/esatya password | DOCKERHUB_TOKEN ;
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20.10.0
-
-      - name: Install dependencies and build apps
-        run: |
-          npm install -g pnpm@8.14.1
-          pnpm install
-          npx nx reset
-          pnpm prisma:generate
-          pnpm build:all
-
-      - name: Set up Docker Buildx
+      # -----------------------------
+      # Docker Setup
+      # -----------------------------
+      - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
@@ -102,21 +117,23 @@ jobs:
           username: ${{ steps.vault.outputs.DOCKERHUB_USERNAME }}
           password: ${{ steps.vault.outputs.DOCKERHUB_TOKEN }}
 
+      - name: Extract Git Metadata
+        id: meta
+        run: |
+          echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          echo "run_number=${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
+
+      # -----------------------------
+      # Docker Build & Push
+      # -----------------------------
       - name: Build and Push Docker Image
-        id: build-push
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ${{ steps.app-vars.outputs.dockerfile }}
+          file: Dockerfile.${{ matrix.app }}
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
-            esatya/${{ steps.app-vars.outputs.image_name }}:${{ inputs.tag_suffix }}
-            esatya/${{ steps.app-vars.outputs.image_name }}:${{ inputs.tag_suffix }}-${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.run_id_short }}
-
-      - name: Image digest
-        run: echo ${{ steps.build-push.outputs.digest }}
-
-    outputs:
-      sha_short: ${{ steps.vars.outputs.sha_short }}
-      run_id_short: ${{ steps.vars.outputs.run_id_short }}
-      image_tag: esatya/${{ steps.app-vars.outputs.image_name }}:${{ inputs.tag_suffix }}-${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.run_id_short }}
+            ${{ env.IMAGE_NAMESPACE }}/rahat-platform-${{ matrix.app }}:${{ inputs.tag_suffix }}
+            ${{ env.IMAGE_NAMESPACE }}/rahat-platform-${{ matrix.app }}:${{ inputs.tag_suffix }}-${{ steps.meta.outputs.short_sha }}-${{ steps.meta.outputs.run_number }}
