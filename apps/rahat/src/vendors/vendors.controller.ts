@@ -98,8 +98,8 @@ export class VendorsController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
-  @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
+  @Post('upload')
   async upload(@UploadedFile() file: TFile, @Req() req: Request) {
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
