@@ -66,17 +66,18 @@ jobs:
       # -----------------------------
       # Node + PNPM Setup
       # -----------------------------
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
-      
-      - name: Ensure PNPM cache folder exists
-        run: mkdir -p ~/.pnpm-store
-
-      - name: Enable PNPM via Corepack
-        run: corepack enable
 
       - name: Install Dependencies
         run: |
@@ -85,6 +86,7 @@ jobs:
 
       - name: Build Application
         run: npx nx build ${{ matrix.app }}
+
 
       # -----------------------------
       # Inject Environment
