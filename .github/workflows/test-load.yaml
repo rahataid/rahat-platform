@@ -66,25 +66,30 @@ jobs:
       # -----------------------------
       # Node + PNPM Setup
       # -----------------------------
+
+      # Setup Node FIRST
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
-      
-      - name: Ensure PNPM cache folder exists
-        run: mkdir -p ~/.pnpm-store
 
-      - name: Enable PNPM via Corepack
-        run: corepack enable
+      # Then setup PNPM
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
 
       - name: Install Dependencies
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install
           pnpm prisma:generate
 
       - name: Build Application
         run: npx nx build ${{ matrix.app }}
+
 
       # -----------------------------
       # Inject Environment
