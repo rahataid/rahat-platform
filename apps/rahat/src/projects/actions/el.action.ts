@@ -76,4 +76,30 @@ export const elActions: ProjectActionFunc = {
       { cmd: ProjectJobs.CAMPAIGN.LIST_TEMPLATES, uuid }, { ...payload },
       500000
     ),
+  [MS_ACTIONS.ELPROJECT.CRM.CREATE_CAMPAIGN]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.CREATE_CAMPAIGN, uuid }, { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.GET_ALL_CAMPAIGN]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.LIST_CAMPAIGN, uuid }, { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.GET_CAMPAIGN]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.FINDONE_CAMPAIGN, uuid }, { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.GET_ALL_TRANSPORT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.GET_ALL_TRANSPORT, uuid }, { ...payload },
+      500000
+    ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.TRIGGER_CAMPAIGN]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.TRIGGER_CAMPAIGN, uuid }, { ...payload },
+      500000
+    ),
 };
