@@ -1,6 +1,9 @@
 name: AA Test Load
 
 on:
+  push:
+    branches:
+      - test-load
   workflow_dispatch:
 
 jobs:
