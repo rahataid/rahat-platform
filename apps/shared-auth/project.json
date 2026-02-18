@@ -1,0 +1,53 @@
+{
+  "name": "shared-auth",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/shared-auth/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "dependsOn": ["mainBuild"],
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "cp -r prisma/ dist/apps/shared-auth/prisma && node apps/shared-auth/modify-package.js"
+          }
+        ]
+      }
+    },
+    "mainBuild": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "generatePackageJson": true,
+        "outputPath": "dist/apps/shared-auth",
+        "main": "apps/shared-auth/src/main.ts",
+        "tsConfig": "apps/shared-auth/tsconfig.app.json",
+        "assets": [],
+        "webpackConfig": "apps/shared-auth/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "shared-auth:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "shared-auth:build:development"
+        },
+        "production": {
+          "buildTarget": "shared-auth:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}
