@@ -1,0 +1,28 @@
+{
+  "base-sepolia": {
+    "RahatCvaCambodia": {
+      "address": "0x96969D06c9B017B770cCa46Ef5a7cbcB99fcf8e5",
+      "startBlock": 23649759
+    },
+    "RahatToken": {
+      "address": "0x690D1C55d6B2Eed550a0dCc90131Bf34C19894cc",
+      "startBlock": 23649759
+    },
+    "RahatClaim": {
+      "address": "0xf4f72450fd7657c762b3D54b1292EDd7CB72d351",
+      "startBlock": 23649759
+    },
+    "Redemptions": {
+      "address": "0x5C81495db01740220cE5d9d4C2a1142490916689",
+      "startBlock": 23649759
+    },
+    "Vendor": {
+      "address": "0x0189C285BDF76DC311cd00253d603E8579C004A4",
+      "startBlock": 23649759
+    },
+    "RahatOtp": {
+      "address": "0x84713A48b9B2C27E5609a6B7BE4b858aF9EeFe9d",
+      "startBlock": 23649759
+    }
+  }
+}

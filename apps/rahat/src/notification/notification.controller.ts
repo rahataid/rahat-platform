@@ -1,10 +1,13 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
-import { MessagePattern } from "@nestjs/microservices";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { CreateNotificationDto, ListNotificationsDto, } from "@rahataid/extensions";
-import { ACTIONS, APP, ProjectJobs, SUBJECTS } from "@rahataid/sdk";
-import { AbilitiesGuard, CheckAbilities, JwtGuard } from "@rumsan/user";
-import { NotificationService } from "./notification.service";
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  CreateNotificationDto,
+  ListNotificationsDto,
+} from '@rahataid/extensions';
+import { ACTIONS, APP, ProjectJobs, SUBJECTS } from '@rahataid/sdk';
+import { AbilitiesGuard, CheckAbilities, JwtGuard } from '@rumsan/user';
+import { NotificationService } from './notification.service';
 
 @Controller('notifications')
 @ApiTags('Notifications')
@@ -32,9 +35,22 @@ export class NotificationController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @Get()
   list(@Query() query: ListNotificationsDto) {
-    console.log("Listing notifications");
+    console.log('Listing notifications');
     return this.notificationService.listNotifications(query);
   }
 
-
+  @MessagePattern({
+    cmd: ProjectJobs.DISBURSEMENT_PLAN.SEND_EMAIL_NOTIFICATION,
+  })
+  async sendDisbursementEmailNotification(data: {
+    actionType: 'INITIATED' | 'EXECUTED';
+    projectId: string;
+    disbursementId: string;
+    disbursementType: 'INDIVIDUAL' | 'GROUP';
+    amount: string;
+    beneficiariesCount: number;
+    network: string;
+  }) {
+    return this.notificationService.sendDisbursementEmailNotification(data);
+  }
 }

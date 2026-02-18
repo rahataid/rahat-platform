@@ -1,0 +1,23 @@
+meta {
+  name: service login
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{url}}/auth/service/token
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+   "clientId": "cmlgd0qes0000o0sfie8gi4m7",
+    "clientSecret": "1096bba44ef2bbe8d56e289346bbfbb7124fbfd33ee0879820b78d40cf06a2ba"
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("access_token", responseData.data?.accessToken);
+}

@@ -7,6 +7,8 @@ import { BQUEUE, BeneficiaryConstants } from '@rahataid/sdk';
 import { WalletService } from '../wallet/wallet.service';
 import { BeneficiaryController } from './beneficiary.controller';
 import { WalletInterceptor } from './interceptor/wallet.interceptor';
+import { WalletProcessingService } from './services/wallet-processing.service';
+
 
 @Module({
   imports: [
@@ -28,6 +30,6 @@ import { WalletInterceptor } from './interceptor/wallet.interceptor';
     }),
   ],
   controllers: [BeneficiaryController],
-  providers: [WalletInterceptor, WalletService],
+  providers: [WalletInterceptor, WalletService, WalletProcessingService],
 })
 export class BeneficiaryModule { }
