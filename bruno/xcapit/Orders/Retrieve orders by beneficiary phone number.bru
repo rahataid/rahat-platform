@@ -1,0 +1,23 @@
+meta {
+  name: Retrieve orders by beneficiary phone number
+  type: http
+  seq: 4
+}
+
+get {
+  url: http:/localhost:3000//api/orders/beneficiaries/:phoneNumber
+  body: none
+  auth: bearer
+}
+
+params:query {
+  ~limit: 
+}
+
+params:path {
+  phoneNumber: 
+}
+
+auth:bearer {
+  token: {{token}}
+}

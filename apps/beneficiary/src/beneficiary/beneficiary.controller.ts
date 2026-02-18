@@ -67,8 +67,8 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BY_PHONE })
-  async getBeneficiaryByPhone(phone: string) {
-    return this.service.findOneByPhone(phone);
+  async getBeneficiaryByPhone(payload: { phone: string, projectUUID: string }) {
+    return this.service.findOneByPhone(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK })
@@ -77,7 +77,7 @@ export class BeneficiaryController {
 
     return await this.service.createBulkBeneficiaries(
       data?.payload,
-      data?.data?.projectUUID,
+      data?.projectUUID,
       data?.data?.walkinBulk
     );
 
@@ -267,6 +267,10 @@ export class BeneficiaryController {
   async getOneGroupByProject(uuid: UUID) {
     return this.service.getOneGroupByProject(uuid);
   }
+  @MessagePattern({ cmd: BeneficiaryJobs.LIST_GROUP_BY_UUID })
+  async listGroupByUuid(uuid: UUID[]) {
+    return this.service.listGroupByUUid(uuid);
+  }
 
   @MessagePattern({
     cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL,
@@ -308,5 +312,15 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.DELETE_BENEFICIARY_AND_PII })
   async deleteBenefAndPii(payload: any) {
     return this.service.deleteBenefAndPii(payload);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BEN_REPORTING_LOGS })
+  async getBenReportingLogs(payload: any) {
+    return this.service.getBenReportingLogs(payload);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BENEF_DETAILS_BY_PROJECT })
+  async getBenefDetailsByProject(data: any) {
+    return this.service.getBenefDetailsByProject(data);
   }
 }

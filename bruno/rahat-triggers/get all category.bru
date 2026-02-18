@@ -1,13 +1,17 @@
 meta {
   name: get all category
   type: http
-  seq: 2
+  seq: 3
 }
 
 post {
   url: {{url}}/projects/{{uuid}}/actions
   body: json
   auth: bearer
+}
+
+headers {
+  x-impersonate-id: 1
 }
 
 auth:bearer {

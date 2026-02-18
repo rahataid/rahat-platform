@@ -267,6 +267,16 @@ export const aaActions: ProjectActionFunc = {
       payload
     ),
 
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_BALANCE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.BENEFICIARY.GET_BALANCE, uuid },
+      payload
+    ),
+
   [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_REDEEM_INFO]: (
     uuid,
     payload,
@@ -553,6 +563,9 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.GRIEVANCES.REMOVE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GRIEVANCES.REMOVE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GRIEVANCES.GET_OVERVIEW_STATS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GRIEVANCES.GET_OVERVIEW_STATS, uuid }, payload),
   // **** grievance end **** //
 
   // **** bank scrape start **** //
@@ -595,7 +608,31 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) =>
     sendCommand({ cmd: AAJobs.CASH_TRACKER.GET_TRANSACTIONS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CASH_TRACKER.CREATE_BUDGET]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.CASH_TRACKER.CREATE_BUDGET, uuid }, payload),
+
   // **** cash tracker end **** //
+
+  // **** inkind tracker start **** //
+  [MS_ACTIONS.AAPROJECT.INKIND_TRACKER.EXECUTE_ACTION]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.INKIND_TRACKER.EXECUTE_ACTION, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND_TRACKER.GET_TRANSACTIONS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.INKIND_TRACKER.GET_TRANSACTIONS, uuid }, payload),
+  // **** inkind tracker end **** //
+
   // **** Vendor start **** //
   [MS_ACTIONS.AAPROJECT.VENDOR.TEST_OFFLINE_PAYOUT]: (
     uuid,
@@ -677,4 +714,26 @@ export const aaActions: ProjectActionFunc = {
   // **** Token Redemption end **** //
 
   // **** Vendor end **** //
+
+  // **** Multisig Start **** //
+  [MS_ACTIONS.AAPROJECT.MULTISIG.GET_SAFE_OWNER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.MULTISIG.GET_SAFE_OWNER, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.MULTISIG.CREATE_SAFE_TRANSACTION]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.MULTISIG.CREATE_SAFE_TRANSACTION, uuid },
+      payload
+    ),
+  // **** Multisig End **** //
 };
