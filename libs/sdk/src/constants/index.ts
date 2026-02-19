@@ -156,6 +156,10 @@ export const MS_ACTIONS = {
       GET_ALL_VENDOR: 'elProject.crm.getAllVendor',
       CREATE_TEMPLATE: 'elProject.campaign.create_template',
       LIST_TEMPLATES: 'elProject.campaign.list_templates',
+      SYNC_TEMPLATES: 'elProject.campaign.sync_templates',
+      BROADCAST_COUNT: 'elProject.campaign.broadcast_count',
+      SESSION_BROADCASTS: 'elProject.campaign.list_session_broadcasts',
+      RETRY_SESSION: 'elProject.campaign.retry_session',
 
       CREATE_CAMPAIGN: 'elProject.campaign.create',
       UPDATE_CAMPAIGN: 'elProject.campaign.update',
