@@ -18,14 +18,16 @@ import { ClientProxy, MessagePattern, Payload, RpcException } from '@nestjs/micr
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
-  GetVendorOtp,
   VendorAddToProjectDto,
+  VendorPasswordRegisterDto,
   VendorRegisterDto,
   VendorUpdateDto,
-  VerifyVendorOtp,
+  VerifyVendorOtp
 } from '@rahataid/extensions';
 import { APP, Enums, ProjectContants, TFile, VendorJobs } from '@rahataid/sdk';
 import { RequestDetails } from '@rumsan/extensions/decorators';
+import { OtpDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
+import { Request } from '@rumsan/sdk/types';
 import { AbilitiesGuard, ACTIONS, CheckAbilities, JwtGuard, SUBJECTS } from '@rumsan/user';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
@@ -63,13 +65,12 @@ export class VendorsController {
 
   @ApiParam({ name: 'id', required: true })
   @Get('/:id')
-  getVendor(@Param('id') id: UUID | Address,
-  ) {
-    return this.vendorService.getVendor(id,);
+  getVendor(@Param('id') id: UUID | Address) {
+    return this.vendorService.getVendor(id);
   }
 
   @Post('/getOtp')
-  getOtp(@Body() dto: GetVendorOtp, @RequestDetails() rdetails: any) {
+  getOtp(@Body() dto: OtpDto, @RequestDetails() rdetails: any) {
     return this.vendorService.getOtp(dto, rdetails);
   }
 
@@ -155,6 +156,22 @@ export class VendorsController {
   @MessagePattern({ cmd: VendorJobs.GET_BY_UUID })
   getVenderByUuid(@Payload() dto) {
     return this.vendorService.getVendorByUuid(dto);
+  }
+
+  @Post('password-register')
+  passwordRegister(
+    @Body() dto: VendorPasswordRegisterDto,
+    @RequestDetails() rdetails: Request
+  ) {
+    return this.vendorService.registerVendorWithPassword(dto, rdetails);
+  }
+
+  @Post('password-login')
+  passwordLogin(
+    @Body() dto: PasswordLoginDto,
+    @RequestDetails() rdetails: Request
+  ) {
+    return this.vendorService.loginByPassword(dto, rdetails);
   }
 
   @MessagePattern({ cmd: VendorJobs.CREATE })

@@ -25,6 +25,8 @@ model User {
   extras    Json?   @db.JsonB()
   notes     String? @db.Text()
   sessionId String?
+  username     String? @unique              
+  usernameLower String? @unique   
 
   Auth          Auth[]
   UserRole      UserRole[]
@@ -129,9 +131,14 @@ model Auth {
   isLocked      Boolean   @default(false)
   lockedOnAt    DateTime?
   lastLoginAt   DateTime?
+  serviceIdLower String?                    
+  passwordHash  String? 
+  lockCount     Int       @default(0)  
+  lastFailedAt  DateTime? 
 
   User    User          @relation(fields: [userId], references: [id])
   AuthLog AuthSession[]
+  LoginAttempt LoginAttempt[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -166,6 +173,26 @@ enum Service {
   TWITTER
   GITHUB
   LINKEDIN
+  USERNAME 
+}
+
+model LoginAttempt {
+  id         Int      @id @default(autoincrement())
+  authId     Int?     // Nullable: might not exist for invalid usernames
+  identifier String   // Username/email/phone attempted
+  service    Service
+  ip         String
+  userAgent  String?
+  success    Boolean
+  failReason String?
+  createdAt  DateTime @default(now())
+  
+  Auth Auth? @relation(fields: [authId], references: [id])
+  
+  @@index([ip, createdAt])
+  @@index([identifier, createdAt])
+  @@index([authId, createdAt])
+  @@map("tbl_login_attempts")
 }
 
 // ++++++++++++++++++ END: @rumsan/user - Role/Auth ++++++++++++++++++++++++
