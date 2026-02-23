@@ -4,33 +4,44 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
   Query,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ClientProxy, MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
-  GetVendorOtp,
   VendorAddToProjectDto,
   VendorPasswordRegisterDto,
   VendorRegisterDto,
   VendorUpdateDto,
-  VerifyVendorOtp,
+  VerifyVendorOtp
 } from '@rahataid/extensions';
-import { VendorJobs } from '@rahataid/sdk';
+import { APP, Enums, ProjectContants, TFile, VendorJobs } from '@rahataid/sdk';
 import { RequestDetails } from '@rumsan/extensions/decorators';
-import { UUID } from 'crypto';
-import { Address } from 'viem';
-import { VendorsService } from './vendors.service';
 import { OtpDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
 import { Request } from '@rumsan/sdk/types';
+import { AbilitiesGuard, ACTIONS, CheckAbilities, JwtGuard, SUBJECTS } from '@rumsan/user';
+import { UUID } from 'crypto';
+import { Address } from 'viem';
+import { DocParser } from '../utils/doc-parser';
+import { handleMicroserviceCall } from './handleMicroServiceCall.util';
+import { VendorsService } from './vendors.service';
 
 @ApiTags('Vendors')
 @Controller('vendors')
 export class VendorsController {
-  constructor(private readonly vendorService: VendorsService) {}
+  constructor(
+    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
+    private readonly vendorService: VendorsService
+  ) { }
 
   @Post('')
   registerVendor(@Body() dto: VendorRegisterDto) {
@@ -85,6 +96,47 @@ export class VendorsController {
     return this.vendorService.removeVendor(vendorId, projectId);
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async upload(@UploadedFile() file: TFile, @Req() req: Request) {
+    const docType: Enums.UploadFileType =
+      req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
+    const projectId = req.body['projectId'];
+    const vendors = await DocParser(docType, file.buffer);
+
+    const mappedVendors = vendors.map((v) => ({
+      customerCode: v['Customer code'],
+      name: v['Customer name'],
+      phone: v['Mobile no.'],
+      location: v['Region'],
+      lastPurchaseDate: v['Last purchase'],
+      extras: {
+        email: v['Email'],
+        channel: v['Channel'],
+      }
+    }))
+
+    return handleMicroserviceCall({
+      client: this.client.send(
+        { cmd: VendorJobs.IMPORT, uuid: projectId },
+        mappedVendors
+      ),
+      onSuccess(res) {
+        console.log('Vendors imported successfully:', res);
+        return res;
+      },
+      onError(err) {
+        console.error('Error importing vendors:', err);
+        throw new RpcException(err.message || 'Failed to import vendors')
+      }
+    })
+
+
+  }
+
   ///microservice
   @MessagePattern({ cmd: VendorJobs.GET_REDEMPTION_VENDORS })
   listRedemptionVendors(data) {
@@ -120,5 +172,10 @@ export class VendorsController {
     @RequestDetails() rdetails: Request
   ) {
     return this.vendorService.loginByPassword(dto, rdetails);
+  }
+
+  @MessagePattern({ cmd: VendorJobs.CREATE })
+  create(@Payload() dto) {
+    return this.vendorService.create(dto);
   }
 }

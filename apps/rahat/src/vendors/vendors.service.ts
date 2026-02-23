@@ -10,15 +10,16 @@ import {
 // import * as jwt from '@nestjs/jwt';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import {
-  GetVendorOtp,
   VendorAddToProjectDto,
   VendorPasswordRegisterDto,
-  VendorRegisterDto,
+  VendorRegisterDto
 } from '@rahataid/extensions';
 import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
+import { OtpDto, OtpLoginDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
+import { Request } from '@rumsan/sdk/types';
 import { AuthsService, SignupsService } from '@rumsan/user';
 import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
@@ -27,11 +28,9 @@ import { UUID } from 'crypto';
 import { Address } from 'viem';
 import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
-import { WalletService } from '../wallet/wallet.service';
 import { isAddress } from '../utils/web3';
+import { WalletService } from '../wallet/wallet.service';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
-import { OtpDto, OtpLoginDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
-import { Request } from '@rumsan/sdk/types';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -48,7 +47,7 @@ export class VendorsService {
     private readonly signupService: SignupsService,
     private readonly walletService: WalletService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
-  ) {}
+  ) { }
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
@@ -729,8 +728,8 @@ export class VendorsService {
     const fallbackUsername = `${name
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '_')}_${Date.now()}_${Math.floor(
-      Math.random() * 1000
-    )}`;
+        Math.random() * 1000
+      )}`;
     this.logger.warn(
       'Failed to generate unique username after 10 attempts, using fallback:',
       fallbackUsername
@@ -872,5 +871,38 @@ export class VendorsService {
       },
       wallet,
     };
+  }
+  async create(payload: any) {
+    const { projectId, vendors: vendorsList } = payload;
+
+    try {
+      const result = await this.prisma.$transaction(async (prisma) => {
+
+        for (const vendorData of vendorsList) {
+          await prisma.vendors.create({
+            data: {
+              name: vendorData.name,
+              email: vendorData.extras?.email,
+              phone: vendorData.phone,
+              location: vendorData.location,
+              uuid: vendorData.uuid,
+              extras: vendorData.extras,
+            },
+          });
+        }
+
+        return {
+          success: true,
+          message: "Vendors created successfully",
+        };
+      });
+
+      return result;
+    } catch (error) {
+      console.error('Error creating vendors:', error);
+      throw new RpcException(
+        error.message || 'Failed to create vendors. Transaction rolled back.'
+      );
+    }
   }
 }

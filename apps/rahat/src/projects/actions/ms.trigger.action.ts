@@ -36,12 +36,16 @@ export const MS_TRIGGERS_JOBS = {
   WATER_LEVELS: {
     GET_DHM: 'ms.jobs.waterLevels.getDhm',
     GET_DHM_SINGLE_SERIES: 'ms.jobs.waterLevels.getDhmSingleSeries',
-    GET_GLOFAS: 'ms.jobs.waterLevels.getGlofas',
+    // GET_GLOFAS: 'ms.jobs.waterLevels.getGlofas',
     GET_GFH: 'ms.jobs.waterLevels.getGfh',
   },
   RAINFALL_LEVELS: {
     GET_DHM: 'ms.jobs.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.jobs.rainfallLevels.getGlofas',
+  },
+  PROB_FLOOD: {
+    GET_ALL_GLOFAS: 'ms.jobs.probFlood.getAllGlofas',
+    GET_ONE_GLOFAS: 'ms.jobs.probFlood.getOneGlofas',
   },
   ACTIVITIES: {
     GET_ONE: 'ms.jobs.activities.getOne',
@@ -272,11 +276,20 @@ export const msTriggerActions: ProjectActionFunc = {
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.WATER_LEVELS.GET_DHM_SINGLE_SERIES }, payload);
   },
 
-  [MS_ACTIONS.MS_WATER_LEVELS.GET_GLOFAS]: (uuid, payload, sendCommand) => {
+  [MS_ACTIONS.MS_PROB_FLOOD.GET_ALL_GLOFAS]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
 
     return sendCommand(
-      { cmd: MS_TRIGGERS_JOBS.WATER_LEVELS.GET_GLOFAS },
+      { cmd: MS_TRIGGERS_JOBS.PROB_FLOOD.GET_ALL_GLOFAS },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_PROB_FLOOD.GET_ONE_GLOFAS]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PROB_FLOOD.GET_ONE_GLOFAS },
       payload
     );
   },

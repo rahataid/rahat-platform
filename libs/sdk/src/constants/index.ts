@@ -151,6 +151,31 @@ export const MS_ACTIONS = {
     GET_ALL_STATS: 'elProject.getAllStats',
     LIST_BEN_VENDOR_COUNT: 'elProject.count_ben_vendor',
     GET_VENDOR_STATS: 'elProject.getVendorStats',
+
+    CRM: {
+      GET_ALL_VENDOR: 'elProject.crm.getAllVendor',
+      CREATE_TEMPLATE: 'elProject.campaign.create_template',
+      LIST_TEMPLATES: 'elProject.campaign.list_templates',
+      GET_FAILED_BATCH: 'elProject.crm.getFailedBatch',
+      RETRY_IMPORT: 'elProject.crm.retryImport',
+      SYNC_TEMPLATES: 'elProject.campaign.sync_templates',
+      BROADCAST_COUNT: 'elProject.campaign.broadcast_count',
+      SESSION_BROADCASTS: 'elProject.campaign.list_session_broadcasts',
+      RETRY_SESSION: 'elProject.campaign.retry_session',
+
+      CREATE_CAMPAIGN: 'elProject.campaign.create',
+      UPDATE_CAMPAIGN: 'elProject.campaign.update',
+      CREATE_AUDIENCE: 'elProject.campaign.create_audience',
+      CREATE_BULK_AUDIENCE: 'elProject.campaign.create_bulk_audience',
+      GET_ALL_CAMPAIGN: 'elProject.campaign.get',
+      GET_CAMPAIGN: 'elProject.campaign.getOne',
+      GET_ALL_TRANSPORT: 'elProject.campaign.get_transport',
+      GET_ALL_AUDIENCE: 'elProject.campaign.get_audience',
+      TRIGGER_CAMPAIGN: 'elProject.campaign.trigger',
+      GET_ALL_COMMUNICATION_LOGS: 'elProject.campaign.communication_logs',
+      GET_ALL_COMMUNICATION_STATS: 'elProject.campaign.communication_stats',
+      GET_CAMPAIGN_LOG: 'elProject.campaign.log',
+    }
   },
   SETTINGS: {
     LIST: 'settings.list',
@@ -502,12 +527,16 @@ export const MS_ACTIONS = {
   MS_WATER_LEVELS: {
     GET_DHM: 'ms.waterLevels.getDhm',
     GET_DHM_SINGLE_SERIES: 'ms.waterLevels.getDhmSingleSeries',
-    GET_GLOFAS: 'ms.waterLevels.getGlofas',
+    // GET_GLOFAS: 'ms.waterLevels.getGlofas',
     GET_GFH: 'ms.waterLevels.getGfh',
   },
   MS_RAINFALL_LEVELS: {
     GET_DHM: 'ms.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.rainfallLevels.getGlofas',
+  },
+  MS_PROB_FLOOD: {
+    GET_ALL_GLOFAS: 'ms.probFlood.getAllGlofas',
+    GET_ONE_GLOFAS: 'ms.probFlood.getOneGlofas',
   },
   MS_ACTIVITIES: {
     GET_ONE: 'ms.activities.getOne',

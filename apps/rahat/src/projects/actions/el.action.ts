@@ -60,4 +60,81 @@ export const elActions: ProjectActionFunc = {
       { cmd: VendorJobs.GET_VENDOR_STATS }, { projectId: uuid },
       500000
     ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.GET_ALL_VENDOR]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: VendorJobs.LIST }, { projectId: uuid, ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.CREATE_TEMPLATE]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.CREATE_TEMPLATE, uuid }, { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.LIST_TEMPLATES]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.LIST_TEMPLATES, uuid }, { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.GET_FAILED_BATCH]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: VendorJobs.LIST_FAILED_BATCH }, { projectId: uuid, ...payload },
+      500000
+    ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.RETRY_IMPORT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: VendorJobs.RETRY_IMPORT }, { projectId: uuid, ...payload },
+      500000
+    ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.SYNC_TEMPLATES]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.SYNC_TEMPLATES, uuid }, { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.CREATE_CAMPAIGN]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.CREATE_CAMPAIGN, uuid }, { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.GET_ALL_CAMPAIGN]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.LIST_CAMPAIGN, uuid }, { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.GET_CAMPAIGN]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.FINDONE_CAMPAIGN, uuid }, { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.GET_ALL_TRANSPORT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.GET_ALL_TRANSPORT, uuid }, { ...payload },
+      500000
+    ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.TRIGGER_CAMPAIGN]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.TRIGGER_CAMPAIGN, uuid }, { ...payload },
+      500000
+    ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.BROADCAST_COUNT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.BROADCAST_COUNT, uuid }, { ...payload },
+      500000
+    ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.SESSION_BROADCASTS]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.LIST_SESSION_BROADCASTS, uuid }, { ...payload },
+      500000
+    ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.RETRY_SESSION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.RETRY_SESSION, uuid }, { ...payload },
+      500000
+    ),
 };

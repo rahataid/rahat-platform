@@ -66,6 +66,13 @@ export const JOBS = {
     CREATE_AUDIENCE: 'rahat.jobs.campaign.create_audience',
     CREATE_BULK_AUDIENCE: 'rahat.jobs.campaign.create_bulk_audience',
     GET_CAMPAIGN_LOG: 'rahat.jobs.campaign.log',
+    CREATE_TEMPLATE: 'rahat.jobs.campaign.create_template',
+    LIST_TEMPLATES: 'rahat.jobs.campaign.list_templates',
+    SYNC_TEMPLATES: 'rahat.jobs.campaign.sync_templates',
+    BROADCAST_COUNT: 'rahat.jobs.campaign.broadcast_count',
+    LIST_SESSION_BROADCASTS: 'rahat.jobs.campaign.list_session_broadcasts',
+    RETRY_SESSION: 'rahat.jobs.campaign.retry_session',
+
   },
   OFFLINE_BENEFICIARIES: {
     SYNC_BENEFICIARIES: 'rahat.jobs.sync_beneficiaries',
