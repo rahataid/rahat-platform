@@ -559,12 +559,25 @@ export class BeneficiaryService {
         AND: [
           {
             BeneficiaryProject: {
-              some: {
+              every: {
                 projectId: payload.projectUUID,
               },
             },
-          },
 
+          },
+          {
+            groupedBeneficiaries: {
+              every: {
+                beneficiaryGroup: {
+                  beneficiaryGroupProject: {
+                    every: {
+                      projectId: payload.projectUUID,
+                    }
+                  }
+                }
+              }
+            }
+          },
           {
             pii: {
               phone: payload.phone,
@@ -574,7 +587,15 @@ export class BeneficiaryService {
       },
       include: {
         pii: true,
-        groupedBeneficiaries: true,
+        groupedBeneficiaries: {
+          include: {
+            beneficiaryGroup: {
+              include: {
+                beneficiaryGroupProject: true,
+              }
+            }
+          }
+        },
       },
     });
 
@@ -584,11 +605,17 @@ export class BeneficiaryService {
       piiData = beneficiary.pii;
       delete beneficiary.pii;
     }
+    const groupedBeneficiaries =
+      beneficiary.groupedBeneficiaries.filter(gb => {
+        const { beneficiaryGroupProject } = gb.beneficiaryGroup;
+        const hasProject = beneficiaryGroupProject.length > 0 && beneficiaryGroupProject.some(bgp => bgp.projectId === payload.projectUUID);
+        return hasProject;
+      })
 
     return {
       ...beneficiary,
       piiData,
-      groupedBeneficiaries: beneficiary.groupedBeneficiaries,
+      groupedBeneficiaries,
     };
   }
 
