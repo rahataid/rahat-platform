@@ -76,4 +76,15 @@ export const elActions: ProjectActionFunc = {
       { cmd: ProjectJobs.CAMPAIGN.LIST_TEMPLATES, uuid }, { ...payload },
       500000
     ),
+  [MS_ACTIONS.ELPROJECT.CRM.GET_FAILED_BATCH]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: VendorJobs.LIST_FAILED_BATCH }, { projectId: uuid, ...payload },
+      500000
+    ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.RETRY_IMPORT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: VendorJobs.RETRY_IMPORT }, { projectId: uuid, ...payload },
+      500000
+    ),
 };

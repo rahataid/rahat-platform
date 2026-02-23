@@ -156,6 +156,8 @@ export const MS_ACTIONS = {
       GET_ALL_VENDOR: 'elProject.crm.getAllVendor',
       CREATE_TEMPLATE: 'elProject.campaign.create_template',
       LIST_TEMPLATES: 'elProject.campaign.list_templates',
+      GET_FAILED_BATCH: 'elProject.crm.getFailedBatch',
+      RETRY_IMPORT: 'elProject.crm.retryImport'
     }
   },
   SETTINGS: {
