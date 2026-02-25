@@ -323,4 +323,9 @@ export class BeneficiaryController {
   async getBenefDetailsByProject(data: any) {
     return this.service.getBenefDetailsByProject(data);
   }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_GROUP_DETAILS_BY_UUIDS })
+  async getGroupDetailsByUuids(uuids: UUID[]) {
+    return this.service.getGroupDetailsByUuids(uuids);
+  }
 }

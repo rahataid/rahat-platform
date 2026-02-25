@@ -206,6 +206,29 @@ export class BeneficiaryService {
       },
     });
   }
+
+  async getGroupDetailsByUuids(uuids: UUID[]) {
+    this.logger.debug(`Fetching group details for UUIDs: ${uuids.join(', ')}`);
+    const groups = await this.prisma.beneficiaryGroup.findMany({
+      where: {
+        uuid: { in: uuids },
+      },
+      include: {
+        groupedBeneficiaries: {
+          include: {
+            Beneficiary: {
+              include: {
+                pii: true,
+              }
+            }
+          }
+        }
+      }
+    });
+
+    return groups;
+  }
+
   async listGroupByUUid(uuid: UUID[]) {
     return await this.prisma.beneficiaryGroup.findMany({
       where: {
