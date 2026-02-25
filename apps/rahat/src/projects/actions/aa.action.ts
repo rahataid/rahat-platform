@@ -179,6 +179,12 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.STAKEHOLDERS.GET_ALL_GROUPS, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.GET_GROUP_DETAILS_BY_UUIDS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STAKEHOLDERS.GET_GROUP_DETAILS_BY_UUIDS, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.GET_ONE_GROUP]: (
     uuid,
     payload,

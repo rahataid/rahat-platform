@@ -599,6 +599,11 @@ export class BeneficiaryController {
     );
   }
 
-
-
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Post('groupDetails')
+  async getReferredBeneficiary(@Body() uuids: UUID[]) {
+    return this.client.send({ cmd: BeneficiaryJobs.GET_GROUP_DETAILS_BY_UUIDS }, uuids);
+  }
 }
