@@ -1682,11 +1682,19 @@ export class BeneficiaryService {
 
     if (!existingGroup) throw new Error('Group not found.');
 
+    if (!dto.name && !dto.beneficiaries?.length) {
+      throw new RpcException('Nothing to update. Provide a name or beneficiaries.');
+    }
+
     // Update the group's name if provided
     const updatedData = await this.prisma.beneficiaryGroup.update({
       where: { uuid: uuid },
       data: { name: dto?.name || existingGroup?.name },
     });
+
+    if (!dto.beneficiaries?.length) {
+      return { success: true, message: 'Group name updated successfully.' };
+    }
 
     // Delete all existing grouped beneficiaries for the group
     await this.prisma.groupedBeneficiaries.deleteMany({
