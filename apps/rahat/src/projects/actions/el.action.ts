@@ -71,6 +71,11 @@ export const elActions: ProjectActionFunc = {
       { cmd: ProjectJobs.CAMPAIGN.CREATE_TEMPLATE, uuid }, { ...payload },
       500000
     ),
+  [MS_ACTIONS.ELPROJECT.CRM.DELETE_TEMPLATE]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.DELETE_TEMPLATE, uuid }, { ...payload },
+      500000
+    ),
   [MS_ACTIONS.ELPROJECT.CRM.LIST_TEMPLATES]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.CAMPAIGN.LIST_TEMPLATES, uuid }, { ...payload },
