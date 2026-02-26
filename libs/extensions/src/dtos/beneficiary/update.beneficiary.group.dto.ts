@@ -33,8 +33,10 @@ export class UpdateBeneficiaryGroupDto {
         description: 'Array of beneficiaries',
         type: [Beneficiary],
     })
+
     @IsArray()
+    @IsOptional()
     @ValidateNested({ each: true })
     @Type(() => Beneficiary)
-    beneficiaries: Beneficiary[];
+    beneficiaries?: Beneficiary[];
 }
