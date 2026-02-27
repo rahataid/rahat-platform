@@ -101,7 +101,7 @@ export class VendorsController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  async upload(@UploadedFile() file: TFile, @Req() req: Request) {
+  async upload(@UploadedFile() file: TFile, @Req() req: any) {
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const projectId = req.body['projectId'];
