@@ -75,6 +75,19 @@ export class VendorsService {
 
       const user = await prisma.user.create({ data: { ...rest, wallet } });
 
+      const authServiceId =
+        service === Service.WALLET
+          ? authWallet || wallet
+          : service === Service.EMAIL
+          ? dto.email
+          : service === Service.PHONE
+          ? dto.phone
+          : (dto as any)[service?.toLowerCase?.()];
+
+      if (!authServiceId) {
+        throw new BadRequestException(`Invalid ${service}!`);
+      }
+
       // Add to UserRole table
       const userRolePayload = { userId: user.id, roleId: role.id };
       await prisma.userRole.create({ data: userRolePayload });
@@ -83,7 +96,7 @@ export class VendorsService {
         data: {
           userId: +user.id,
           service: dto.service as any,
-          serviceId: dto.authWallet ? authWallet : wallet,
+          serviceId: authServiceId,
           details: dto.extras,
         },
       });
@@ -227,6 +240,11 @@ export class VendorsService {
         User: true,
       },
     });
+
+    if (projectData.length === 0) {
+      return data;
+    }
+
     // const vendorIdentifier = projectData[0]?.extras;
     // const projects = projectData.map((project) => project.Project);
     // const userdata = { ...data, projects, vendorIdentifier };
