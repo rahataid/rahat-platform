@@ -1,4 +1,4 @@
-name: EL Release CI/CD
+name: EL Release 2026 CI/CD
 on:
   workflow_dispatch:
 
