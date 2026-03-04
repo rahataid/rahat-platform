@@ -61,6 +61,7 @@ export const JOBS = {
   },
   BENEFICIARY: {
     ADD_GROUP: 'aa.jobs.beneficiary.addGroup',
+    VALIDATE_TOKEN_ASSIGNMENT: 'aa.jobs.beneficiary.validate_token_assignment',
     RESERVE_TOKEN_TO_GROUP: 'aa.jobs.beneficiary.reserve_token_to_group',
     ASSIGN_TOKEN_TO_GROUP: 'aa.jobs.beneficiary.assign_token_to_group',
     GET_ALL_GROUPS: 'aa.jobs.beneficiary.getAllGroups',

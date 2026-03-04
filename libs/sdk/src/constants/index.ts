@@ -227,6 +227,7 @@ export const MS_ACTIONS = {
       GET_ALL_GROUPS: 'aaProject.beneficiary.getAllGroups',
       GET_ONE_GROUP: 'aaProject.beneficiary.getOneGroup',
       ASSIGN_TOKEN_TO_GROUP: 'aaProject.beneficiary.assign_token_to_group',
+      VALIDATE_TOKEN_ASSIGNMENT: 'aaProject.beneficiary.validate_token_assignment',
       RESERVE_TOKEN_TO_GROUP: 'aaProject.beneficiary.reserve_token_to_group',
       GET_ALL_TOKEN_RESERVATION:
         'aaProject.beneficiary.get_all_token_reservation',
