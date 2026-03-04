@@ -58,7 +58,7 @@ async function bootstrap() {
         preload: true,
       },
       crossOriginOpenerPolicy: {
-        policy: 'allow-popup', // Allow popups for OAuth flows like Google login
+        policy: 'same-origin-allow-popups', // Allow popups for OAuth flows like Google login
       },
     })
   );
