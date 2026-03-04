@@ -233,6 +233,16 @@ export const aaActions: ProjectActionFunc = {
   // **** Beneficiary Groups end **** //
 
   // **** fund mgmt ****//
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.VALIDATE_TOKEN_ASSIGNMENT]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.BENEFICIARY.VALIDATE_TOKEN_ASSIGNMENT, uuid },
+      payload
+    ),
+
   [MS_ACTIONS.AAPROJECT.BENEFICIARY.RESERVE_TOKEN_TO_GROUP]: (
     uuid,
     payload,
