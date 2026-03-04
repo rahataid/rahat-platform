@@ -57,6 +57,9 @@ async function bootstrap() {
         includeSubDomains: true,
         preload: true,
       },
+      crossOriginOpenerPolicy: {
+        policy: 'allow-popup', // Allow popups for OAuth flows like Google login
+      },
     })
   );
 
@@ -79,7 +82,6 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
   app.disable('etag');
-
 
   const port = process.env.PORT || 3333;
 
