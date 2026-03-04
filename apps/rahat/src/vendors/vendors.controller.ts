@@ -108,9 +108,10 @@ export class VendorsController {
     const vendors = await DocParser(docType, file.buffer);
 
     const mappedVendors = vendors.map((v) => ({
-      customerCode: v['Customer code'],
+      customerCode: v['Customer Code'],
       name: v['Customer name'],
-      phone: v['Mobile no.'],
+      source: v['Source'],
+      phone: v['Mobile No.'],
       location: v['Region'],
       lastPurchaseDate: v['Last purchase'],
       extras: {
