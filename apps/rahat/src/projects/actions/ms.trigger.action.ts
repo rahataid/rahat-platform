@@ -62,6 +62,7 @@ export const MS_TRIGGERS_JOBS = {
       SESSION_LOGS: 'ms.jobs.activities.communication.sessionLogs',
       // RETRY_FAILED: 'ms.jobs.activities.communication.retryFailed',
       GET_STATS: 'ms.jobs.activities.communication.getStats',
+      GET_TRANSPORT_SESSION_STATS: 'ms.jobs.activities.communication.getTransportSessionStats',
       GET_STATS_GROUP: 'ms.jobs.triggers.getTransportSessionStatsByGroup',
     },
 
@@ -432,6 +433,19 @@ export const msTriggerActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
 
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.UPDATE }, payload);
+  },
+
+  [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.GET_TRANSPORT_SESSION_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.GET_TRANSPORT_SESSION_STATS },
+      payload
+    );
   },
 
   [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.GET_STATS]: (

@@ -530,6 +530,7 @@ export const MS_ACTIONS = {
       SESSION_LOGS: 'ms.activities.communication.sessionLogs',
       RETRY_FAILED: 'ms.activities.communication.retryFailed',
       GET_STATS: 'ms.activities.communication.getStats',
+      GET_TRANSPORT_SESSION_STATS: 'ms.activities.communication.getTransportSessionStats',
       GET_GROUP_STATS: 'ms.triggers.getTransportSessionStatsByGroup',
     },
   },
