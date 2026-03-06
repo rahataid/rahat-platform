@@ -18,5 +18,6 @@ export const JOBS = {
   IMPORT: 'rahat.jobs.vendor.import',
   CREATE: 'rahat.jobs.vendor.create',
   LIST_FAILED_BATCH: 'rahat.jobs.vendor.list_failed_batch',
+  GET_ONE_FAILED_BATCH: 'rahat.jobs.vendor.get_one_failed_batch',
   RETRY_IMPORT: 'rahat.jobs.vendor.retry_import',
 };
