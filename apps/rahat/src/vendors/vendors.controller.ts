@@ -107,6 +107,29 @@ export class VendorsController {
     const projectId = req.body['projectId'];
     const vendors = await DocParser(docType, file.buffer);
 
+    if (!vendors.length) {
+      throw new RpcException('Uploaded file is empty');
+    }
+
+    const headers = Object.keys(vendors[0]);
+
+    const expectedHeaders = [
+      'Customer Code',
+      'Customer name',
+      'Source',
+      'Mobile No.',
+      'Region',
+      'Last purchase',
+      'Email',
+      'Channel',
+    ];
+
+    const missingHeaders = expectedHeaders.filter(h => !headers.includes(h));
+
+    if (missingHeaders.length > 0) {
+      throw new RpcException(`Invalid template. Missing headers: ${missingHeaders.join(', ')}`);
+    }
+
     const mappedVendors = vendors.map((v) => ({
       customerCode: v['Customer Code'],
       name: v['Customer name'],
@@ -118,7 +141,7 @@ export class VendorsController {
         email: v['Email'],
         channel: v['Channel'],
       }
-    }))
+    }));
 
     return handleMicroserviceCall({
       client: this.client.send(
