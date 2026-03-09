@@ -54,9 +54,9 @@ jobs:
           file: Dockerfile.beneficiary
           push: ${{ github.event_name == 'workflow_dispatch' }}
           tags: |
-            esatya/rahat-platform-beneficiary:el-2026-release
-            esatya/rahat-platform-beneficiary:el-2026-release-${{ env.VERSION }}
-            esatya/rahat-platform-beneficiary:el-2026-release-${{ env.VERSION }}-${{ env.timestamp }}
+            esatya/rahat-platform-beneficiary:el-release
+            esatya/rahat-platform-beneficiary:el-release-${{ env.VERSION }}
+            esatya/rahat-platform-beneficiary:el-release-${{ env.VERSION }}-${{ env.timestamp }}
 
       # Rahat Image
       - name: build && push rahat
@@ -67,6 +67,6 @@ jobs:
           file: Dockerfile.rahat
           push: ${{ github.event_name == 'workflow_dispatch' }}
           tags: |
-            esatya/rahat-platform-rahat:el-2026-release
-            esatya/rahat-platform-rahat:el-2026-release-${{ env.VERSION }}
-            esatya/rahat-platform-rahat:el-2026-release-${{ env.VERSION }}-${{ env.timestamp }}
+            esatya/rahat-platform-rahat:el-release
+            esatya/rahat-platform-rahat:el-release-${{ env.VERSION }}
+            esatya/rahat-platform-rahat:el-release-${{ env.VERSION }}-${{ env.timestamp }}
