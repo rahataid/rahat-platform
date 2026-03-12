@@ -1,4 +1,4 @@
-name: EL 2026 Extension Release CI/CD
+name: EL SMS VOUCHER Release CI/CD
 on:
   workflow_dispatch:
 
@@ -6,7 +6,7 @@ env:
   CI: false
 
 jobs:
-  rahat-platform:
+ rahat-platform:
     name: rahat-platform
     runs-on: ubuntu-latest
     if: startsWith(github.ref_name, 'release/') && github.event_name == 'workflow_dispatch'
@@ -54,9 +54,9 @@ jobs:
           file: Dockerfile.beneficiary
           push: ${{ github.event_name == 'workflow_dispatch' }}
           tags: |
-            esatya/rahat-platform-beneficiary:el-release
-            esatya/rahat-platform-beneficiary:el-release-${{ env.VERSION }}
-            esatya/rahat-platform-beneficiary:el-release-${{ env.VERSION }}-${{ env.timestamp }}
+            esatya/rahat-platform-beneficiary:el-release-smsvoucher
+            esatya/rahat-platform-beneficiary:el-release-smsvoucher-${{ env.VERSION }}
+            esatya/rahat-platform-beneficiary:el-release-smsvoucher-${{ env.VERSION }}-${{ env.timestamp }}
 
       # Rahat Image
       - name: build && push rahat
@@ -67,6 +67,6 @@ jobs:
           file: Dockerfile.rahat
           push: ${{ github.event_name == 'workflow_dispatch' }}
           tags: |
-            esatya/rahat-platform-rahat:el-release
-            esatya/rahat-platform-rahat:el-release-${{ env.VERSION }}
-            esatya/rahat-platform-rahat:el-release-${{ env.VERSION }}-${{ env.timestamp }}
+            esatya/rahat-platform-rahat:el-release-smsvoucher
+            esatya/rahat-platform-rahat:el-release-smsvoucher-${{ env.VERSION }}
+            esatya/rahat-platform-rahat:el-release-smsvoucher-${{ env.VERSION }}-${{ env.timestamp }}
