@@ -102,13 +102,16 @@ model Permission {
 }
 
 model UserRole {
-  id     Int       @id @default(autoincrement())
-  userId Int
-  roleId Int
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  roleId    Int
+  projectId String? @db.Uuid()
+
   expiry DateTime?
 
-  User User @relation(fields: [userId], references: [id])
-  Role Role @relation(fields: [roleId], references: [id])
+  User    User     @relation(fields: [userId], references: [id])
+  Role    Role     @relation(fields: [roleId], references: [id])
+  Project Project? @relation(fields: [projectId], references: [uuid])
 
   createdAt DateTime @default(now())
   createdBy Int?
@@ -451,6 +454,7 @@ model Project {
   notifications           Notification[]
 
   Grievance Grievance[]
+  userRoles UserRole[]
 
   @@map("tbl_projects")
 }
