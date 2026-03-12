@@ -84,6 +84,30 @@ export const elActions: ProjectActionFunc = {
       { ...payload },
       500000
     ),
+  [MS_ACTIONS.ELPROJECT.CRM.CREATE_AUTOMATION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.CREATE_AUTOMATION, uuid },
+      { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.UPDATE_AUTOMATION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.UPDATE_AUTOMATION, uuid },
+      { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.GET_AUTOMATION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.GET_AUTOMATION, uuid },
+      { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.DELETE_AUTOMATION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.DELETE_AUTOMATION, uuid },
+      { ...payload },
+      500000
+    ),
   [MS_ACTIONS.ELPROJECT.CRM.GET_FAILED_BATCH]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: VendorJobs.LIST_FAILED_BATCH },
