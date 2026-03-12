@@ -123,7 +123,8 @@ export const MS_ACTIONS = {
     LIST_FULL_DATA_BY_PROJECT: 'beneficiary.list_full_data_by_project',
     GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',
     GET_ONE_BENEFICARY: 'beneficiary.get_one_beneficiary',
-    GET_BENEFICIARY_DETAILS_BY_PROJECT: 'beneficiary.get_beneficiary_details_by_project',
+    GET_BENEFICIARY_DETAILS_BY_PROJECT:
+      'beneficiary.get_beneficiary_details_by_project',
   },
   VENDOR: {
     REGISTER: 'vendor.register',
@@ -157,6 +158,8 @@ export const MS_ACTIONS = {
       CREATE_TEMPLATE: 'elProject.campaign.create_template',
       DELETE_TEMPLATE: 'elProject.campaign.delete_template',
       LIST_TEMPLATES: 'elProject.campaign.list_templates',
+      LIST_AUTOMATION: 'elProject.campaign.automation.list',
+      TOGGLE_AUTOMATION: 'elProject.campaign.automation.toggle',
       GET_FAILED_BATCH: 'elProject.crm.getFailedBatch',
       GET_ONE_FAILED_BATCH: 'elProject.crm.getOneFailedBatch',
       RETRY_IMPORT: 'elProject.crm.retryImport',
@@ -177,7 +180,7 @@ export const MS_ACTIONS = {
       GET_ALL_COMMUNICATION_LOGS: 'elProject.campaign.communication_logs',
       GET_ALL_COMMUNICATION_STATS: 'elProject.campaign.communication_stats',
       GET_CAMPAIGN_LOG: 'elProject.campaign.log',
-    }
+    },
   },
   SETTINGS: {
     LIST: 'settings.list',

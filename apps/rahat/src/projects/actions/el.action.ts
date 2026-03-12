@@ -5,36 +5,25 @@ import {
   BeneficiaryJobs,
   MS_ACTIONS,
   ProjectJobs,
-  VendorJobs
+  VendorJobs,
 } from '@rahataid/sdk';
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
 
 export const elActions: ProjectActionFunc = {
-
   [MS_ACTIONS.ELPROJECT.UPDATE_STATUS]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: ProjectJobs.REDEEM_VOUCHER, uuid },
-      payload),
+    sendCommand({ cmd: ProjectJobs.REDEEM_VOUCHER, uuid }, payload),
 
-  [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION_BE]: async (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: ProjectJobs.REQUEST_REDEMPTION, uuid },
-      payload,
-      500000
-    ),
+  [MS_ACTIONS.ELPROJECT.REQUEST_REDEMPTION_BE]: async (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: ProjectJobs.REQUEST_REDEMPTION, uuid }, payload, 500000),
 
   [MS_ACTIONS.ELPROJECT.UPDATE_REDEMPTION]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: ProjectJobs.UPDATE_REDEMPTION, uuid },
-      payload,
-      500000
-    ),
+    sendCommand({ cmd: ProjectJobs.UPDATE_REDEMPTION, uuid }, payload, 500000),
   [MS_ACTIONS.ELPROJECT.LIST_REDEMPTION]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: ProjectJobs.LIST_REDEMPTION, uuid },
-      payload,
-      500000
-    ),
+    sendCommand({ cmd: ProjectJobs.LIST_REDEMPTION, uuid }, payload, 500000),
   [MS_ACTIONS.ELPROJECT.GET_VENDOR_REDEMPTION]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.GET_VENDOR_REDEMPTION, uuid },
@@ -50,101 +39,131 @@ export const elActions: ProjectActionFunc = {
     ),
 
   [MS_ACTIONS.ELPROJECT.GET_ALL_STATS]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: ProjectJobs.GET_ALL_STATS, uuid },
-      500000
-    ),
+    sendCommand({ cmd: ProjectJobs.GET_ALL_STATS, uuid }, 500000),
 
   [MS_ACTIONS.ELPROJECT.GET_VENDOR_STATS]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: VendorJobs.GET_VENDOR_STATS }, { projectId: uuid },
+      { cmd: VendorJobs.GET_VENDOR_STATS },
+      { projectId: uuid },
       500000
     ),
 
   [MS_ACTIONS.ELPROJECT.CRM.GET_ALL_VENDOR]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: VendorJobs.LIST }, { projectId: uuid, ...payload },
+      { cmd: VendorJobs.LIST },
+      { projectId: uuid, ...payload },
       500000
     ),
   [MS_ACTIONS.ELPROJECT.CRM.CREATE_TEMPLATE]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.CAMPAIGN.CREATE_TEMPLATE, uuid }, { ...payload },
+      { cmd: ProjectJobs.CAMPAIGN.CREATE_TEMPLATE, uuid },
+      { ...payload },
       500000
     ),
   [MS_ACTIONS.ELPROJECT.CRM.DELETE_TEMPLATE]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.CAMPAIGN.DELETE_TEMPLATE, uuid }, { ...payload },
+      { cmd: ProjectJobs.CAMPAIGN.DELETE_TEMPLATE, uuid },
+      { ...payload },
       500000
     ),
   [MS_ACTIONS.ELPROJECT.CRM.LIST_TEMPLATES]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.CAMPAIGN.LIST_TEMPLATES, uuid }, { ...payload },
+      { cmd: ProjectJobs.CAMPAIGN.LIST_TEMPLATES, uuid },
+      { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.LIST_AUTOMATION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.LIST_AUTOMATION, uuid },
+      { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.TOGGLE_AUTOMATION]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.TOGGLE_AUTOMATION, uuid },
+      { ...payload },
       500000
     ),
   [MS_ACTIONS.ELPROJECT.CRM.GET_FAILED_BATCH]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: VendorJobs.LIST_FAILED_BATCH }, { projectId: uuid, ...payload },
+      { cmd: VendorJobs.LIST_FAILED_BATCH },
+      { projectId: uuid, ...payload },
       500000
     ),
-  [MS_ACTIONS.ELPROJECT.CRM.GET_ONE_FAILED_BATCH]: (uuid, payload, sendCommand) =>
+  [MS_ACTIONS.ELPROJECT.CRM.GET_ONE_FAILED_BATCH]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
     sendCommand(
-      { cmd: VendorJobs.GET_ONE_FAILED_BATCH }, { projectId: uuid, ...payload },
+      { cmd: VendorJobs.GET_ONE_FAILED_BATCH },
+      { projectId: uuid, ...payload },
       500000
     ),
 
   [MS_ACTIONS.ELPROJECT.CRM.RETRY_IMPORT]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: VendorJobs.RETRY_IMPORT }, { projectId: uuid, ...payload },
+      { cmd: VendorJobs.RETRY_IMPORT },
+      { projectId: uuid, ...payload },
       500000
     ),
 
   [MS_ACTIONS.ELPROJECT.CRM.SYNC_TEMPLATES]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.CAMPAIGN.SYNC_TEMPLATES, uuid }, { ...payload },
+      { cmd: ProjectJobs.CAMPAIGN.SYNC_TEMPLATES, uuid },
+      { ...payload },
       500000
     ),
   [MS_ACTIONS.ELPROJECT.CRM.CREATE_CAMPAIGN]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.CAMPAIGN.CREATE_CAMPAIGN, uuid }, { ...payload },
+      { cmd: ProjectJobs.CAMPAIGN.CREATE_CAMPAIGN, uuid },
+      { ...payload },
       500000
     ),
   [MS_ACTIONS.ELPROJECT.CRM.GET_ALL_CAMPAIGN]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.CAMPAIGN.LIST_CAMPAIGN, uuid }, { ...payload },
+      { cmd: ProjectJobs.CAMPAIGN.LIST_CAMPAIGN, uuid },
+      { ...payload },
       500000
     ),
   [MS_ACTIONS.ELPROJECT.CRM.GET_CAMPAIGN]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.CAMPAIGN.FINDONE_CAMPAIGN, uuid }, { ...payload },
+      { cmd: ProjectJobs.CAMPAIGN.FINDONE_CAMPAIGN, uuid },
+      { ...payload },
       500000
     ),
   [MS_ACTIONS.ELPROJECT.CRM.GET_ALL_TRANSPORT]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.CAMPAIGN.GET_ALL_TRANSPORT, uuid }, { ...payload },
+      { cmd: ProjectJobs.CAMPAIGN.GET_ALL_TRANSPORT, uuid },
+      { ...payload },
       500000
     ),
 
   [MS_ACTIONS.ELPROJECT.CRM.TRIGGER_CAMPAIGN]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.CAMPAIGN.TRIGGER_CAMPAIGN, uuid }, { ...payload },
+      { cmd: ProjectJobs.CAMPAIGN.TRIGGER_CAMPAIGN, uuid },
+      { ...payload },
       500000
     ),
 
   [MS_ACTIONS.ELPROJECT.CRM.BROADCAST_COUNT]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.CAMPAIGN.BROADCAST_COUNT, uuid }, { ...payload },
+      { cmd: ProjectJobs.CAMPAIGN.BROADCAST_COUNT, uuid },
+      { ...payload },
       500000
     ),
 
   [MS_ACTIONS.ELPROJECT.CRM.SESSION_BROADCASTS]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.CAMPAIGN.LIST_SESSION_BROADCASTS, uuid }, { ...payload },
+      { cmd: ProjectJobs.CAMPAIGN.LIST_SESSION_BROADCASTS, uuid },
+      { ...payload },
       500000
     ),
 
   [MS_ACTIONS.ELPROJECT.CRM.RETRY_SESSION]: (uuid, payload, sendCommand) =>
     sendCommand(
-      { cmd: ProjectJobs.CAMPAIGN.RETRY_SESSION, uuid }, { ...payload },
+      { cmd: ProjectJobs.CAMPAIGN.RETRY_SESSION, uuid },
+      { ...payload },
       500000
     ),
 };
