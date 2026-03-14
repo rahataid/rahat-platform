@@ -4,17 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to deploy"
+        description: "Environment to deploy (test-load, dev-unicef, redcross, aidlink-demo, aidlink-dev, main-aa)"
         required: true
-        type: choice
-        options:
-          - test-load
-          - dev-unicef
-          - redcross
-          - aidlink-demo
-          - aidlink-dev
-          - stage-el
-          - main-aa
+        type: string
+
       apps_to_build:
         description: "Apps to build (leave empty for defaults)"
         required: false
