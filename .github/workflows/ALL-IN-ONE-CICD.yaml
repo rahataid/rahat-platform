@@ -1,4 +1,4 @@
-name: AA AA-IN-ONE
+name: AA ALL-IN-ONE
 
 on:
   workflow_dispatch:
