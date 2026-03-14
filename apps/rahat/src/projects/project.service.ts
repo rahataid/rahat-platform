@@ -170,7 +170,7 @@ export class ProjectService {
       return client
         .send(cmd, {
           ...payload,
-          ...(requiresUser && { user }),
+          ...(true && { user }), // temp solution to send user context for actions that require authentication, will refactor later
         })
         .pipe(
           timeout(timeoutValue),
