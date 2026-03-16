@@ -114,14 +114,15 @@ export class VendorsController {
     const headers = Object.keys(vendors[0]);
 
     const expectedHeaders = [
+      'BDE/BDM',
       'Customer Code',
       'Customer name',
-      'Source',
       'Mobile No.',
-      'Region',
-      'Last purchase',
       'Email',
       'Channel',
+      'Region',
+      'Source',
+      'Last purchase',
     ];
 
     const missingHeaders = expectedHeaders.filter(h => !headers.includes(h));
@@ -140,6 +141,7 @@ export class VendorsController {
       extras: {
         email: v['Email'],
         channel: v['Channel'],
+        bde: v['BDE/BDM']
       }
     }));
 
