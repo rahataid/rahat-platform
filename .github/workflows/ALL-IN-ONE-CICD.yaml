@@ -1,0 +1,167 @@
+name: AA ALL-IN-ONE
+
+on:
+  workflow_dispatch:
+    inputs:
+      # ── Rahat App ─────────────────────────────────────────────────────────────
+      rahat_image_name:
+        description: 'Rahat — Docker image name'
+        required: true
+        default: 'rahat-platform-rahat'
+        type: string
+      rahat_dockerfile:
+        description: 'Rahat — Path to Dockerfile'
+        required: true
+        default: 'Dockerfile.rahat'
+        type: string
+      rahat_tag_prefix:
+        description: 'Rahat — Tag prefix (e.g. dev, staging, latest)'
+        required: true
+        default: 'dev'
+        type: string
+
+      # ── Beneficiary App ───────────────────────────────────────────────────────
+      beneficiary_image_name:
+        description: 'Beneficiary — Docker image name'
+        required: true
+        default: 'rahat-platform-beneficiary'
+        type: string
+      beneficiary_dockerfile:
+        description: 'Beneficiary — Path to Dockerfile'
+        required: true
+        default: 'Dockerfile.beneficiary'
+        type: string
+      beneficiary_tag_prefix:
+        description: 'Beneficiary — Tag prefix (e.g. dev, staging, latest)'
+        required: true
+        default: 'dev'
+        type: string
+
+concurrency:
+  group: aa-core-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: false
+  NODE_VERSION: '20.10.0'
+  PNPM_VERSION: '8.14.1'
+  IMAGE_NAMESPACE: esatya
+
+jobs:
+
+  # ── 1. Build matrix from inputs ─────────────────────────────────────────────
+  resolve:
+    name: Resolve Config
+    runs-on: ubuntu-latest
+    outputs:
+      matrix:     ${{ steps.build-matrix.outputs.matrix }}
+      sha_short:  ${{ steps.vars.outputs.sha_short }}
+      run_number: ${{ steps.vars.outputs.run_number }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get SHA & run number
+        id: vars
+        run: |
+          echo "sha_short=${GITHUB_SHA::7}"     >> $GITHUB_OUTPUT
+          echo "run_number=${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
+
+      - name: Build app matrix
+        id: build-matrix
+        run: |
+          MATRIX=$(cat <<EOF
+          [
+            {
+              "app": "rahat",
+              "image_name": "${{ inputs.rahat_image_name }}",
+              "dockerfile": "${{ inputs.rahat_dockerfile }}",
+              "tag_prefix": "${{ inputs.rahat_tag_prefix }}"
+            },
+            {
+              "app": "beneficiary",
+              "image_name": "${{ inputs.beneficiary_image_name }}",
+              "dockerfile": "${{ inputs.beneficiary_dockerfile }}",
+              "tag_prefix": "${{ inputs.beneficiary_tag_prefix }}"
+            }
+          ]
+          EOF
+          )
+          COMPACT=$(echo "$MATRIX" | tr -d '\n' | tr -s ' ')
+          echo "matrix=$COMPACT" >> $GITHUB_OUTPUT
+          echo "Matrix: $COMPACT"
+
+  # ── 2. Build & Push (parallel matrix) ───────────────────────────────────────
+  build:
+    name: Build & Push — ${{ matrix.app.app }}
+    runs-on: ubuntu-latest
+    needs: resolve
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJson(needs.resolve.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm prisma:generate
+
+      - name: Build app
+        run: npx nx build ${{ matrix.app.app }}
+
+      - name: Import Secrets from Vault
+        id: vault
+        uses: hashicorp/vault-action@v2.4.0
+        with:
+          url: ${{ secrets.VAULT_URL }}
+          token: ${{ secrets.VAULT_TOKEN }}
+          secrets: |
+            github/data/general/docker/esatya username | DOCKERHUB_USERNAME ;
+            github/data/general/docker/esatya password | DOCKERHUB_TOKEN ;
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ steps.vault.outputs.DOCKERHUB_USERNAME }}
+          password: ${{ steps.vault.outputs.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.app.dockerfile }}
+          push: true
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
+          tags: |
+            ${{ env.IMAGE_NAMESPACE }}/${{ matrix.app.image_name }}:${{ matrix.app.tag_prefix }}
+            ${{ env.IMAGE_NAMESPACE }}/${{ matrix.app.image_name }}:${{ matrix.app.tag_prefix }}-${{ needs.resolve.outputs.sha_short }}-${{ needs.resolve.outputs.run_number }}
+
+      - name: Summary
+        run: |
+          echo "### ${{ matrix.app.app }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: \`${{ env.IMAGE_NAMESPACE }}/${{ matrix.app.image_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Tags:" >> $GITHUB_STEP_SUMMARY
+          echo "  - \`${{ matrix.app.tag_prefix }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "  - \`${{ matrix.app.tag_prefix }}-${{ needs.resolve.outputs.sha_short }}-${{ needs.resolve.outputs.run_number }}\`" >> $GITHUB_STEP_SUMMARY
