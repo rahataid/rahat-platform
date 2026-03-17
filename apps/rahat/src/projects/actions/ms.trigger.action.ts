@@ -43,6 +43,10 @@ export const MS_TRIGGERS_JOBS = {
     GET_DHM: 'ms.jobs.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.jobs.rainfallLevels.getGlofas',
   },
+  TEMPERATURE: {
+    GET_DHM: 'ms.jobs.temperature.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.jobs.temperature.getDhmBySeries',
+  },
   PROB_FLOOD: {
     GET_ALL_GLOFAS: 'ms.jobs.probFlood.getAllGlofas',
     GET_ONE_GLOFAS: 'ms.jobs.probFlood.getOneGlofas',
@@ -340,6 +344,25 @@ export const msTriggerActions: ProjectActionFunc = {
       payload
     );
   },
+
+  [MS_ACTIONS.MS_TEMPERATURE.GET_DHM]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.TEMPERATURE.GET_DHM },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_TEMPERATURE.GET_DHM_SINGLE_SERIES]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.TEMPERATURE.GET_DHM_SINGLE_SERIES },
+      payload
+    );
+  },
+
   // **** river stations end ******//
 
   // **** activities start ******//
