@@ -675,6 +675,34 @@ model TempBeneficiaryGroup {
 
 // ===========End Temporary benef storage=============
 
+// ===========Beneficiary Import=============
+
+enum ImportStatus {
+  NEW
+  PROCESSING
+  IMPORTED
+  REJECTED
+  FAILED
+}
+
+model BeneficiaryImport {
+  id               Int          @id @default(autoincrement())
+  uuid             String       @unique @default(uuid()) @db.Uuid()
+  r2Key            String
+  fileUrl          String
+  groupName        String
+  groupUUID        String       @db.Uuid()
+  beneficiaryCount Int          @default(0)
+  status           ImportStatus @default(NEW)
+  extras           Json?        @db.JsonB()
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime?    @updatedAt()
+
+  @@map("tbl_beneficiary_imports")
+}
+
+// ===========End Beneficiary Import=============
+
 // ++++++++++++++++++ START: @rahat/tokens - Tokens ++++++++++++++++++++
 model Token {
   id              Int           @id @default(autoincrement())
