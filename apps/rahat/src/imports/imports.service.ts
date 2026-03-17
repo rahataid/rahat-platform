@@ -32,7 +32,7 @@ export class ImportsService {
     groupUUID: string;
     beneficiaryCount: number;
     meta?: Record<string, unknown>;
-  }) {
+  }, source?: string) {
     this.logger.log(`Creating import record for group: ${data.groupName}`);
 
     // 1. Download CSV from the temporary URL
@@ -64,6 +64,7 @@ export class ImportsService {
         groupName: data.groupName,
         groupUUID: data.groupUUID,
         beneficiaryCount: data.beneficiaryCount,
+        source: source || null,
         extras: {
           ...meta,
           originalFileUrl: data.fileUrl,
@@ -72,12 +73,18 @@ export class ImportsService {
     });
   }
 
-  async list(query?: { status?: string; page?: number; perPage?: number }) {
+  async list(query?: { status?: string; source?: string; page?: number; perPage?: number }) {
     const page = query?.page || 1;
     const perPage = query?.perPage || 20;
     const skip = (page - 1) * perPage;
 
-    const where = query?.status ? { status: query.status as any } : {};
+    const where: Record<string, unknown> = {};
+    if (query?.status) where.status = query.status;
+    if (query?.source === 'unknown') {
+      where.source = null;
+    } else if (query?.source) {
+      where.source = { contains: query.source, mode: 'insensitive' };
+    }
 
     const [data, total] = await Promise.all([
       this.prisma.beneficiaryImport.findMany({

@@ -693,6 +693,7 @@ model BeneficiaryImport {
   groupName        String
   groupUUID        String       @db.Uuid()
   beneficiaryCount Int          @default(0)
+  source           String?
   status           ImportStatus @default(NEW)
   extras           Json?        @db.JsonB()
   createdAt        DateTime     @default(now())

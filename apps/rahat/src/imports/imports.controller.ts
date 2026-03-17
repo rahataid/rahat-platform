@@ -5,8 +5,10 @@ import {
   Param,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { APP } from '@rahataid/sdk';
 import {
@@ -29,6 +31,7 @@ export class ImportsController {
   @UseGuards(ExternalAppGuard)
   @CheckHeaders('Signature')
   async create(
+    @Req() req: Request,
     @Body()
     body: {
       fileUrl: string;
@@ -38,7 +41,12 @@ export class ImportsController {
       meta?: Record<string, unknown>;
     }
   ) {
-    return this.importsService.create(body);
+    const origin = req.headers['origin'] || req.headers['referer'];
+    const source = origin
+      ? new URL(Array.isArray(origin) ? origin[0] : origin).host
+      : req.ip;
+
+    return this.importsService.create(body, source);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -46,14 +54,16 @@ export class ImportsController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get()
   @ApiQuery({ name: 'status', required: false, enum: ['NEW', 'PROCESSING', 'IMPORTED', 'FAILED'] })
+  @ApiQuery({ name: 'source', required: false, type: String })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'perPage', required: false, type: Number })
   async list(
     @Query('status') status?: string,
+    @Query('source') source?: string,
     @Query('page') page?: number,
     @Query('perPage') perPage?: number
   ) {
-    return this.importsService.list({ status, page: +page, perPage: +perPage });
+    return this.importsService.list({ status, source, page: +page, perPage: +perPage });
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
