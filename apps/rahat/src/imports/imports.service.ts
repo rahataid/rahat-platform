@@ -1,8 +1,10 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '@rumsan/prisma';
+import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { firstValueFrom } from 'rxjs';
+
+const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
 @Injectable()
 export class ImportsService {
@@ -75,10 +77,6 @@ export class ImportsService {
   }
 
   async list(query?: { status?: string; source?: string; page?: number; perPage?: number }) {
-    const page = query?.page || 1;
-    const perPage = query?.perPage || 20;
-    const skip = (page - 1) * perPage;
-
     const where: Record<string, unknown> = {};
     if (query?.status) where.status = query.status;
     if (query?.source === 'unknown') {
@@ -87,25 +85,13 @@ export class ImportsService {
       where.source = { contains: query.source, mode: 'insensitive' };
     }
 
-    const [data, total] = await Promise.all([
-      this.prisma.beneficiaryImport.findMany({
-        where,
-        skip,
-        take: perPage,
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.beneficiaryImport.count({ where }),
-    ]);
-
-    return {
-      data,
-      meta: {
-        total,
-        page,
-        perPage,
-        lastPage: Math.ceil(total / perPage),
-      },
-    };
+    return paginate(this.prisma.beneficiaryImport, {
+      where,
+      orderBy: { createdAt: 'desc' },
+    }, {
+      page: query?.page,
+      perPage: query?.perPage,
+    });
   }
 
   async findOne(uuid: string) {
