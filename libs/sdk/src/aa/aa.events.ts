@@ -48,6 +48,7 @@ export const JOBS = {
     GET_ALL: 'aa.jobs.stakeholders.getAll',
     GET_ONE: 'aa.jobs.stakeholders.getOne',
     ADD: 'aa.jobs.stakeholders.add',
+    VALIDATE_BULK_STAKEHOLDERS: 'aa.jobs.stakeholders.validateBulkStakeholders',
     BULK_ADD: 'aa.jobs.stakeholders.bulkAdd',
     REMOVE: 'aa.jobs.stakeholders.remove',
     UPDATE: 'aa.jobs.stakeholders.update',

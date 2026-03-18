@@ -208,6 +208,7 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.stakeholders.getAll',
       GET_ONE: 'aaProject.stakeholders.getOne',
       ADD: 'aaProject.stakeholders.add',
+      VALIDATE_BULK_STAKEHOLDERS: 'aaProject.stakeholders.validateBulkStakeholders',
       BULK_ADD: 'aaProject.stakeholders.bulkAdd',
       REMOVE: 'aaProject.stakeholders.remove',
       UPDATE: 'aaProject.stakeholders.update',
