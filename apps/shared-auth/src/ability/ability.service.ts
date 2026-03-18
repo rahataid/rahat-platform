@@ -35,11 +35,15 @@ export class AbilityService {
     action: string;
     subject: string;
     conditions?: any;
+    context?: Record<string, any>;
   }): Promise<{ allowed: boolean; reason?: string }> {
     try {
-      const { userId, action, subject } = payload;
+      const { userId, action, subject, context } = payload;
 
-      const cacheKey = `ability:${userId}:${action}:${subject}`;
+      const projectId = context?.projectId || null;
+
+      const cacheKey = `ability:${userId}:${action}:${subject}:${projectId || 'global'}`
+
       const cached = await this.redis.get(cacheKey);
 
       if (cached) {
@@ -50,7 +54,8 @@ export class AbilityService {
       // Build ability from user's roles and permissions
       const { permissions } = await loadUserRolesAndPermissions(
         this.prisma,
-        userId
+        userId,
+        projectId
       );
       console.log('user obj is: ', permissions);
 

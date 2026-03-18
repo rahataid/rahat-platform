@@ -1,4 +1,5 @@
 import { JwtService } from '@nestjs/jwt';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '@rumsan/prisma';
 import { CaslRule, UserContext } from '../types';
 
@@ -14,17 +15,27 @@ interface RolesAndPermissions {
 export async function loadUserRolesAndPermissions(
   prisma: PrismaService,
   userId: number,
+  contextProjectId: string | null = null
 ): Promise<RolesAndPermissions> {
   const now = new Date();
 
-  const userRoles = await prisma.userRole.findMany({
-    where: {
-      userId,
+  const queryCondition: Prisma.UserRoleWhereInput = {
+    userId,
+    OR: [{ expiry: null }, { expiry: { gt: now } }],
+    Role: {
       OR: [{ expiry: null }, { expiry: { gt: now } }],
-      Role: {
-        OR: [{ expiry: null }, { expiry: { gt: now } }],
-      },
     },
+  }
+if (contextProjectId) {
+    queryCondition.OR = [
+      { projectId: contextProjectId },  // Project-specific roles
+      { projectId: null }               // System-wide roles
+    ]
+  }
+
+
+  const userRoles = await prisma.userRole.findMany({
+    where: { ...queryCondition },
     include: {
       Role: {
         include: {
@@ -33,6 +44,7 @@ export async function loadUserRolesAndPermissions(
       },
     },
   });
+
 
   const roles: string[] = [];
   const permissions: CaslRule[] = [];
