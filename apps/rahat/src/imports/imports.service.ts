@@ -2,7 +2,6 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@rumsan/prisma';
-import { randomUUID } from 'crypto';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
@@ -42,7 +41,9 @@ export class ImportsService {
     const fileBuffer = Buffer.from(response.data);
 
     // 2. Generate a new R2 key and upload to our private bucket
-    const r2Key = `imports/${data.groupUUID}/${randomUUID()}.csv`;
+    const timestamp = Date.now();
+    // ${ metadata.groupUUID }_${ timestamp } -${ metadata.groupName }.csv
+    const r2Key = `imports/${timestamp}_${data.groupUUID}_${data.groupName}.csv`;
     await this.s3Client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
