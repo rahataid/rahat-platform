@@ -511,6 +511,10 @@ export const MS_ACTIONS = {
     GET_DHM: 'ms.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.rainfallLevels.getGlofas',
   },
+  MS_TEMPERATURE: {
+    GET_DHM: 'ms.temperature.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.temperature.getDhmSingleSeries',
+  },
   MS_PROB_FLOOD: {
     GET_ALL_GLOFAS: 'ms.probFlood.getAllGlofas',
     GET_ONE_GLOFAS: 'ms.probFlood.getOneGlofas',
