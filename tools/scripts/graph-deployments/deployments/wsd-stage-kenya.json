@@ -1,0 +1,28 @@
+{
+  "base-sepolia": {
+    "RahatCvaKenya": {
+      "address": "0x14E9BDaB867427913549630B9fDD20085457b874",
+      "startBlock": 16309098
+    },
+    "RahatToken": {
+      "address": "0x7f548c7895d274F13A61Fc2cA04B8821c9eDF369",
+      "startBlock": 16309098
+    },
+    "RahatClaim": {
+      "address": "0xDA89e550e7D2FBb4f19FC2877f5EA1a701Eb53b9",
+      "startBlock": 16309098
+    },
+    "Redemptions": {
+      "address": "0x7B9707f7dF2786234D7C0aB0EDA7dcC95fbBa31f",
+      "startBlock": 16309098
+    },
+    "Vendor": {
+      "address": "0x8b07EDcB98c4BB2E14aDB48e3e0A44C579cC914A",
+      "startBlock": 16309098
+    },
+    "RahatOtp": {
+      "address": "0xf702E1A8C43cD3eb23be034c0B7e00FA52ecaC22",
+      "startBlock": 16309098
+    }
+  }
+}

@@ -51,6 +51,7 @@ export const JOBS = {
     FINDONE_DISBURSEMENT_PLAN: 'rahat.jobs.disbursement_plan.listone',
     UPDATE_DISBURSEMENT_PLAN: 'rahat.jobs.disbursement_plan.update',
     BULK_CREATE_DISBURSEMENT: 'rahat.jobs.disbursement.bulk_create',
+    SEND_EMAIL_NOTIFICATION: 'rahat.jobs.disbursement.send_email_notification',
   },
   CAMPAIGN: {
     CREATE_CAMPAIGN: 'rahat.jobs.campaign.create',
@@ -65,6 +66,19 @@ export const JOBS = {
     CREATE_AUDIENCE: 'rahat.jobs.campaign.create_audience',
     CREATE_BULK_AUDIENCE: 'rahat.jobs.campaign.create_bulk_audience',
     GET_CAMPAIGN_LOG: 'rahat.jobs.campaign.log',
+    CREATE_TEMPLATE: 'rahat.jobs.campaign.create_template',
+    DELETE_TEMPLATE: 'rahat.jobs.campaign.delete_template',
+    LIST_TEMPLATES: 'rahat.jobs.campaign.list_templates',
+    LIST_AUTOMATION: 'rahat.jobs.campaign.automation.list',
+    TOGGLE_AUTOMATION: 'rahat.jobs.campaign.automation.toggle',
+    CREATE_AUTOMATION: 'rahat.jobs.campaign.automation.create',
+    UPDATE_AUTOMATION: 'rahat.jobs.campaign.automation.update',
+    GET_AUTOMATION: 'rahat.jobs.campaign.automation.get',
+    DELETE_AUTOMATION: 'rahat.jobs.campaign.automation.delete',
+    SYNC_TEMPLATES: 'rahat.jobs.campaign.sync_templates',
+    BROADCAST_COUNT: 'rahat.jobs.campaign.broadcast_count',
+    LIST_SESSION_BROADCASTS: 'rahat.jobs.campaign.list_session_broadcasts',
+    RETRY_SESSION: 'rahat.jobs.campaign.retry_session',
   },
   OFFLINE_BENEFICIARIES: {
     SYNC_BENEFICIARIES: 'rahat.jobs.sync_beneficiaries',
@@ -90,7 +104,8 @@ export const JOBS = {
     UPDATE_BENEFICIARY_REDEMPTION: 'rahat.jobs.beneficiary.update_redemption',
     LIST_BENEFICIARY_REIMBURSEMENTS:
       'rahat.jobs.beneficiary.list_reimbursements',
-    SYNC_OFFLINE_TRANSACTIONS: 'rahat.jobs.beneficiary.sync_offline_transactions',
+    SYNC_OFFLINE_TRANSACTIONS:
+      'rahat.jobs.beneficiary.sync_offline_transactions',
   },
 
   META_TRANSACTION: {
@@ -102,6 +117,13 @@ export const JOBS = {
     LIST: 'rahat.jobs.reporting.list',
     GET: 'rahat.jobs.reporting.get',
     LIST_EYE_CHECKEUP_LINE: 'rahat.jobs.reporting.list_eye_checkup_line',
-    LIST_PURCHASE_OF_GLASSESS_LINE: 'rahat.jobs.reporting.list_purchase_of_glassess',
+    LIST_PURCHASE_OF_GLASSESS_LINE:
+      'rahat.jobs.reporting.list_purchase_of_glassess',
+  },
+
+  NOTIFICATION: {
+    CREATE: 'rahat.jobs.notification.create',
+    LIST: 'rahat.jobs.notification.list',
+    GET: 'rahat.jobs.notification.get',
   },
 };

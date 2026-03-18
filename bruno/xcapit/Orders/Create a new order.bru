@@ -1,0 +1,25 @@
+meta {
+  name: Create a new order
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{xcapitURL}}/api/orders
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "amount": "",
+    "token": "",
+    "phoneNumber": "",
+    "description": "",
+    "merchAddress": ""
+  }
+}

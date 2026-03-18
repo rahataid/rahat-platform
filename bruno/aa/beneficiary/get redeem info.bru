@@ -1,0 +1,29 @@
+meta {
+  name: get redeem info
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aaProject.beneficiary.getRedeemInfo",
+    "payload": {
+      "beneficiaryUuid": "9f6df560-490f-4e8f-9940-048afe94c861"
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
+} 

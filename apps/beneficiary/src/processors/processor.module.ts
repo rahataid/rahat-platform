@@ -1,8 +1,9 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import { HttpModule } from '@nestjs/axios';
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
@@ -23,11 +24,12 @@ import { BeneficiaryProcessor } from './beneficiary.processor';
         },
       },
     ]),
+    HttpModule,
     BullModule.registerQueue({
       name: BQUEUE.RAHAT_BENEFICIARY,
     }),
-    BeneficiaryModule, EventEmitterModule],
-  providers: [PrismaService, BeneficiaryProcessor, EventEmitter2],
+    BeneficiaryModule, EventEmitterModule.forRoot()],
+  providers: [PrismaService, BeneficiaryProcessor],
   exports: [BeneficiaryProcessor],
 })
 export class ProcessorsModule { }

@@ -1,28 +1,32 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { MailerService } from '@nestjs-modules/mailer';
+import { HttpService } from '@nestjs/axios';
 import { Process, Processor } from '@nestjs/bull';
 import { BadRequestException, Inject, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { PhoneStatus } from '@prisma/client';
 import { CreateBeneficiaryDto } from '@rahataid/extensions';
 import {
   BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
   generateRandomWallet,
-  ProjectContants
+  ProjectContants,
 } from '@rahataid/sdk';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { Job } from 'bull';
 import { randomUUID, UUID } from 'crypto';
+import { PhoneNumberUtil } from 'google-libphonenumber';
 import { splitBeneficiaryPII } from '../beneficiary/helpers';
+import { getBankId } from '../utils/banks';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
 import {
   findTempBenefGroups,
-  validateDupicatePhone,
-  validateDupicateWallet,
+  validateDupicateWallet
 } from './processor.utils';
 
 const BATCH_SIZE = 500;
@@ -31,10 +35,12 @@ const BATCH_SIZE = 500;
 export class BeneficiaryProcessor {
   private readonly logger = new Logger(BeneficiaryProcessor.name);
   constructor(
+    private readonly httpService: HttpService,
     private readonly mailerService: MailerService,
     private readonly prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
-    private eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    private readonly settingsService: SettingsService
   ) { }
 
   @Process(BeneficiaryJobs.UPDATE_STATS)
@@ -55,12 +61,12 @@ export class BeneficiaryProcessor {
       if (!beneficiaries.length) return;
 
       // Validate duplicate phones and wallets
-      const dupliPhones = await validateDupicatePhone(
-        this.prisma as any,
-        beneficiaries
-      );
-      if (dupliPhones.length)
-        throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
+      // const dupliPhones = await validateDupicatePhone(
+      //   this.prisma,
+      //   beneficiaries
+      // );
+      // if (dupliPhones.length)
+      //   throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
       const dupliWallets = await validateDupicateWallet(
         this.prisma as any,
         beneficiaries
@@ -86,6 +92,10 @@ export class BeneficiaryProcessor {
       }
       // ====Txn start end===
       await removeTempGroup(this.prisma, tempGroup.uuid);
+      await this.eventEmitter.emitAsync(
+        BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_CT,
+        { projectUuid: null }
+      );
     } catch (err) {
       console.log('Import Error=>', err.message);
       throw err;
@@ -123,7 +133,7 @@ export class BeneficiaryProcessor {
       totalBatches: number;
       automatedGroupOption: {
         groupKey: string;
-        createAutomatedGroup: boolean
+        createAutomatedGroup: boolean;
       };
     }>
   ) {
@@ -135,7 +145,6 @@ export class BeneficiaryProcessor {
       totalBatches,
       automatedGroupOption,
     } = job.data;
-
 
     // const canProceed = await canProcessJob(job, this.logger);
     // if (!canProceed) {
@@ -225,13 +234,12 @@ export class BeneficiaryProcessor {
           }));
 
           // Insert beneficiaries in bulk
-          const insertedBeneficiaries =
-            await txn.beneficiary.createManyAndReturn({
+          const insertedBeneficiaries = await txn.beneficiary
+            .createManyAndReturn({
               data: beneficiariesData,
-            }).catch((error) => {
-              console.error(
-                `Failed to insert beneficiaries: ${error.message}`
-              );
+            })
+            .catch((error) => {
+              console.error(`Failed to insert beneficiaries: ${error.message}`);
               throw new RpcException(
                 `Failed to insert beneficiaries: ${error.message}`
               );
@@ -267,11 +275,15 @@ export class BeneficiaryProcessor {
             const uniqueGroup = [
               ...new Set(
                 beneficiaries.map(
-                  (b) => b[trimNonAlphaNumericValue(automatedGroupOption?.groupKey).toLowerCase()]
+                  (b) =>
+                    b[
+                    trimNonAlphaNumericValue(
+                      automatedGroupOption?.groupKey
+                    ).toLowerCase()
+                    ]
                 )
               ),
             ];
-
 
             const groups = await txn.beneficiaryGroup.findMany({
               where: {
@@ -280,13 +292,18 @@ export class BeneficiaryProcessor {
                 },
               },
             });
-            console.log('groups', groups)
+            console.log('groups', groups);
 
             const beneficiaryGroupData = insertedBeneficiaries.map((b) => {
               const beneficiaryId = b.uuid;
               const beneficiaryGroupId = groups.find(
                 (g) =>
-                  g.name === b[trimNonAlphaNumericValue(automatedGroupOption?.groupKey).toLowerCase()]
+                  g.name ===
+                  b[
+                  trimNonAlphaNumericValue(
+                    automatedGroupOption?.groupKey
+                  ).toLowerCase()
+                  ]
               ).uuid;
               return {
                 beneficiaryId,
@@ -294,8 +311,8 @@ export class BeneficiaryProcessor {
               };
             });
 
-            createdBenGroups =
-              await txn.groupedBeneficiaries.createManyAndReturn({
+            createdBenGroups = await txn.groupedBeneficiaries
+              .createManyAndReturn({
                 data: beneficiaryGroupData,
                 skipDuplicates: true,
                 select: {
@@ -303,7 +320,8 @@ export class BeneficiaryProcessor {
                   beneficiaryGroup: true,
                   uuid: true,
                 },
-              }).catch((error) => {
+              })
+              .catch((error) => {
                 console.error(
                   `Failed to insert beneficiaries: ${error.message}`
                 );
@@ -316,19 +334,21 @@ export class BeneficiaryProcessor {
           // Assign beneficiaries to the project if projectUUID is provided
           if (projectUUID) {
             // if (projectUUID && !automatedGroupOption.groupKey) {
-            await txn.beneficiaryProject.createMany({
-              data: insertedBeneficiaries.map(({ uuid }) => ({
-                beneficiaryId: uuid,
-                projectId: projectUUID,
-              })),
-            }).catch((error) => {
-              console.error(
-                `Failed to assign beneficiaries to project: ${error.message}`
-              );
-              throw new RpcException(
-                `Failed to assign beneficiaries to project: ${error.message}`
-              );
-            });
+            await txn.beneficiaryProject
+              .createMany({
+                data: insertedBeneficiaries.map(({ uuid }) => ({
+                  beneficiaryId: uuid,
+                  projectId: projectUUID,
+                })),
+              })
+              .catch((error) => {
+                console.error(
+                  `Failed to assign beneficiaries to project: ${error.message}`
+                );
+                throw new RpcException(
+                  `Failed to assign beneficiaries to project: ${error.message}`
+                );
+              });
 
             const assignPromises = insertedBeneficiaries.map((b) => {
               const projectPayload = {
@@ -400,28 +420,315 @@ export class BeneficiaryProcessor {
         }
       )
       .catch((error) => {
-        console.log('Error importing Beneficiaries', error)
+        console.log('Error importing Beneficiaries', error);
         console.error(
           `Failed to process batch ${batchNumber}: ${error.message}`
         );
         throw new RpcException(`Batch ${batchNumber} failed: ${error.message}`);
       });
 
-    this.eventEmitter.emit(
-      BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-      {
-        projectUuid: projectUUID,
-      }
-    );
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
+      projectUuid: projectUUID,
+    });
 
     return {
       success: true,
       message: `Batch ${batchNumber} of ${totalBatches} processed successfully.`,
     };
   }
+
+  @Process({
+    name: BeneficiaryJobs.CHECK_BENEFICIARY_PHONE_NUMBER,
+    concurrency: 1,
+  })
+  async checkBeneficiaryPhone(job: Job<{ uuid: string; phone: string; }>) {
+    const { uuid, phone } = job.data;
+    this.logger.log(`Checking beneficiary phone number for benf: ${uuid}`);
+
+    try {
+      const benf = await this.prisma.beneficiary.findUnique({ where: { uuid } });
+
+      if (!benf) {
+        this.logger.error(`Beneficiary not found: ${uuid}`);
+        return;
+      }
+
+      const benfExtras = benf.extras ? JSON.parse(JSON.stringify(benf.extras)) : {};
+
+      if (!phone) {
+        this.logger.error(`No phone number for beneficiary: ${uuid}`);
+        await this.updateExtras(uuid, {
+          phoneStatus: PhoneStatus.NO_PHONE,
+          extras: {
+            ...benfExtras,
+            error: 'Beneficiary does not have phone number',
+          },
+        });
+        return;
+      }
+
+      const { success, isValid } = await this.isValidNepaliNumber(phone);
+      if (!isValid) {
+        this.logger.warn(`Invalid phone number for beneficiary ${uuid}: ${phone}`);
+        await this.updateExtras(uuid, {
+          extras: {
+            ...benfExtras,
+            error: 'Invalid phone number',
+            validPhoneNumber: false,
+          },
+        });
+        return;
+      }
+
+      if (!success) {
+        this.logger.warn(`Error checking phone number for beneficiary ${uuid}: ${phone}`);
+        await this.updateExtras(uuid, {
+          extras: {
+            ...benfExtras,
+            error: 'Error checking phone number',
+            validPhoneNumber: false,
+          },
+        });
+        return;
+      }
+
+      this.logger.log(`Phone number is valid for beneficiary: ${uuid}`);
+
+      delete benfExtras.error;
+
+      await this.updateExtras(uuid, {
+        extras: {
+          ...benfExtras,
+          validPhoneNumber: true,
+        },
+      });
+
+      return;
+
+    } catch (error) {
+      this.logger.error('Error checking phone number', error);
+      return;
+    }
+  }
+
+  async updateExtras(uuid: string, data: Partial<{ phoneStatus: PhoneStatus; extras: Record<string, any> }>) {
+    await this.prisma.beneficiary.update({
+      where: { uuid },
+      data,
+    });
+  }
+
+  async isValidNepaliNumber(phone: string): Promise<{ success: boolean; isValid: boolean }> {
+    const phoneUtil = PhoneNumberUtil.getInstance();
+    try {
+      const number = phoneUtil.parse(phone, 'NP');
+      const isValid = phoneUtil.isValidNumber(number) && phoneUtil.getRegionCodeForNumber(number) === 'NP';
+      return {
+        success: true,
+        isValid,
+      };
+    } catch (e) {
+      this.logger.error('Error validating nepali number', e);
+      return {
+        success: false,
+        isValid: false,
+      };
+    }
+  }
+
+  @Process({
+    name: BeneficiaryJobs.CHECK_BENEFICIARY_BANK_ACCOUNT,
+    concurrency: 1,
+  })
+  async checkBeneficiaryAccount(
+    job: Job<{
+      uuid: string;
+      walletAddress: string;
+      extras: {
+        bank_name: string;
+        bank_ac_name: string;
+        bank_ac_number: string;
+      };
+    }>
+  ) {
+    this.logger.log(
+      `Checking beneficiary bank account for benf: ${job.data.uuid}`
+    );
+
+    const { uuid, extras } = job.data;
+
+    try {
+      const benf = await this.prisma.beneficiary.findUnique({
+        where: { uuid },
+      });
+
+      if (!benf) {
+        this.logger.error(`Beneficiary not found for benf: ${uuid}`);
+        return;
+      }
+
+      if (!extras) {
+        this.logger.error(
+          `Beneficiary does not have bank account for benf: ${uuid}`
+        );
+        await this.updateBenfExtras(uuid, {
+          ...JSON.parse(JSON.stringify(benf.extras)),
+          bankedStatus: 'ERROR',
+          error: 'Beneficiary does not have bank account',
+        });
+
+        return;
+      }
+
+      const { bank_name, bank_ac_name, bank_ac_number } = extras;
+      const benfExtras = JSON.parse(JSON.stringify(benf.extras));
+
+      if (!bank_name || !bank_ac_name || !bank_ac_number) {
+        this.logger.error(
+          `Beneficiary does not have bank account for benf: ${uuid}`
+        );
+
+        await this.updateBenfExtras(uuid, {
+          ...benfExtras,
+          bankedStatus: 'ERROR',
+          error: 'Beneficiary does not have bank account',
+        });
+
+        return;
+      }
+
+      const bankId = getBankId(bank_name);
+      if (!bankId) {
+        this.logger.error(`Invalid bank name for benf: ${uuid}`);
+
+        await this.updateBenfExtras(uuid, {
+          ...benfExtras,
+          bankedStatus: 'ERROR',
+          error: 'Invalid bank name',
+        });
+        return;
+      }
+
+      const bankAccount = await this.checkBankAccount(
+        bankId,
+        bank_ac_number,
+        bank_ac_name
+      );
+      if (!bankAccount.isValid) {
+        this.logger.error(`Invalid bank account for benf: ${uuid}`);
+        await this.updateBenfExtras(uuid, {
+          ...benfExtras,
+          bankedStatus: 'ERROR',
+          error: bankAccount?.message || 'Invalid bank account',
+          validBankAccount: false,
+        });
+        return;
+      }
+
+      if (!bankAccount.success) {
+        this.logger.error(`Error checking bank account for benf: ${uuid}`);
+        await this.updateBenfExtras(uuid, {
+          ...benfExtras,
+          bankedStatus: 'ERROR',
+          error: 'Error checking bank account',
+          validBankAccount: false,
+        });
+        return;
+      }
+
+      this.logger.log(`Bank account is valid for benf: ${uuid}`);
+
+      delete benfExtras.error;
+
+      await this.updateBenfExtras(uuid, {
+        ...benfExtras,
+        validBankAccount: true,
+        bankedStatus: 'BANKED',
+      });
+
+      return;
+    } catch (error) {
+      this.logger.error('Error checking bank account', error);
+      return;
+    }
+  }
+
+  async checkBankAccount(
+    bankId: string,
+    bank_ac_number: string,
+    bank_ac_name: string
+  ) {
+    try {
+      const res = await this.settingsService.getPublic('OFFRAMP_SETTINGS');
+
+      if (!res) {
+        throw new Error(`Offramp not found in settings.`);
+      }
+
+      const baseUrl = (res?.value as any)?.URL as string;
+      const appId = (res?.value as any)?.APPID as string;
+
+      if (!baseUrl) {
+        throw new Error(`Offramp URL not found in settings.`);
+      }
+
+      if (!appId) {
+        throw new Error(`Offramp APP_ID not found in settings.`);
+      }
+
+      const payload = {
+        provider: 'cips',
+        method: 'validateAccount',
+        params: {
+          bankId: bankId,
+          accountName: bank_ac_name,
+          accountId: bank_ac_number,
+        },
+      };
+      const {
+        data: { data },
+      } = await this.httpService.axiosRef.post<{
+        data: {
+          isValid: boolean;
+        }
+      }>(
+        `${baseUrl}/payment-provider/json-rpc`
+        , payload, {
+        headers: {
+          'APP_ID': appId,
+        }
+      });
+
+      return {
+        success: true,
+        isValid: data.isValid,
+      };
+    } catch (error) {
+      const errorMessage = error?.response?.data?.message || error?.message;
+      this.logger.error(`Error checking bank account: '${errorMessage}'`);
+
+      return {
+        success: false,
+        isValid: false,
+        message: `Invalid bank account: '${errorMessage}'`,
+      };
+    }
+  }
+
+  async updateBenfExtras(uuid: string, extras: any) {
+    return await this.prisma.beneficiary.update({
+      where: { uuid },
+      data: {
+        bankedStatus: extras.bankedStatus === 'BANKED' ? 'BANKED' : 'UNBANKED',
+        extras: {
+          ...JSON.parse(JSON.stringify(extras)),
+        },
+      },
+    });
+  }
 }
 
-// Helper functions to check for duplicates
+// Helper function to check for duplicates
 
 async function checkPhoneNumber(
   beneficiaries: CreateBeneficiaryDto[],
@@ -460,7 +767,7 @@ async function importAndAddToGroup({ txn, beneficiaries, tempGroup }) {
   for (const benef of beneficiaries) {
     const { uuid, ...rest } = benef;
     const { piiData, nonPii } = splitBeneficiaryPII(rest);
-    const newBenef = await upsertBeneficiary(txn, nonPii);
+    const newBenef = await upsertBeneficiary(txn, nonPii, piiData);
     const piiDataPayload = { ...piiData, beneficiaryId: newBenef.id };
     await upsertPiiData(txn, piiDataPayload);
     await addBenefToGroup(txn, group.uuid, newBenef.uuid);
@@ -469,12 +776,22 @@ async function importAndAddToGroup({ txn, beneficiaries, tempGroup }) {
   }
 }
 
-async function upsertBeneficiary(txn: any, data: any) {
-  return txn.beneficiary.upsert({
-    where: { walletAddress: data.walletAddress },
-    update: data,
-    create: data,
+async function upsertBeneficiary(txn: any, data: any, piiData: any) {
+  const pii = await txn.beneficiaryPii.findUnique({
+    where: { phone: piiData.phone },
+    select: { beneficiaryId: true },
   });
+
+  if (pii) {
+    return txn.beneficiary.update({
+      where: { id: pii.beneficiaryId },
+      data: data,
+    });
+  } else {
+    return txn.beneficiary.create({
+      data: data,
+    });
+  }
 }
 
 async function upsertPiiData(txn: any, data: any) {

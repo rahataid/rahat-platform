@@ -1,0 +1,29 @@
+meta {
+  name: retry one payout
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.payout.triggerOneFailedPayoutRequest",
+    "payload": {
+      "beneficiaryRedeemUuid": "9f6df560-490f-4e8f-9940-048afe94c861"
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
+}

@@ -1,0 +1,43 @@
+meta {
+  name: trigger created
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.triggers.add",
+    "payload": {
+  //     "triggers": [
+  //       {
+          "title": "test1",
+          "repeatEvery": "Every day",
+          "triggerStatement": {
+            "isManualTrigger": true,
+            "maxLeadTimeDays": "10",
+            "minLeadTimeDays": "10"
+          },
+          "triggerDocuments": {
+            "documentKey": "documentValue",
+            "documentUrl": "https://example.com/document.pdf"
+          },
+          "notes": "Some notes about the trigger",
+          "phaseId": "c6169c0e-12b0-4e8e-927c-3992a959df1d",
+          "isMandatory": true,
+          "isTriggered": false,
+          "source": "MANUAL"
+  //       }
+  //     ]
+    }
+  }
+}

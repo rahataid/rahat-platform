@@ -1,0 +1,27 @@
+meta {
+  name: export group's benef fail account
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{url}}/beneficiaries/groups/6d068376-fecb-4c1e-a821-13f5e5dbdbc3/fail-account/export
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+  
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data: isArray
+}

@@ -63,6 +63,7 @@ const userAddUrl = `${baseUrl}/v1/users`;
     }
     console.log("Fetching data from Google Sheets");
     const users = await getGoogleSheetsData(sheetId, sheetName);
+
     for (const u of users) {
         const newUser: User = {
             name: u.get('name'),

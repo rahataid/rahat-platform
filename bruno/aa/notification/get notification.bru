@@ -1,0 +1,28 @@
+meta {
+  name: get notification
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:5500/v1/projects/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "notification.get",
+    "payload": {
+      "id": 2
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+}

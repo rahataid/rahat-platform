@@ -1,0 +1,31 @@
+meta {
+  name: "Municipality Confirms from FO"
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.cash-tracker.executeAction",
+    "payload": {
+      "from": "0xe5159f997F32D04F9276567bb2ED4CC0CdC9D8E4", // Municipality
+      "to": "0xB4b85A39C44667eDEc9F0eB5c328954e328E980B",   // Field Office
+      "alias": "Municipality",
+      "action": "confirm_transfer",
+      "amount": "500",
+      "description": "Municipality confirms transfer from FO"
+    }
+  }
+}
+
+
