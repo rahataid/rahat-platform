@@ -541,6 +541,22 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.PAYOUT.EXPORT_PAYOUT_LOGS, uuid }, payload),
   // **** Payout end **** //
+  // **** Inkind start **** //
+  [MS_ACTIONS.AAPROJECT.INKIND.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.CREATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.GET_ONE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.GET, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.UPDATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.UPDATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.DELETE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.DELETE, uuid }, payload),
+
 
   // **** grievance start **** //
   [MS_ACTIONS.AAPROJECT.GRIEVANCES.CREATE]: (uuid, payload, sendCommand) =>
