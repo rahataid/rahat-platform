@@ -513,7 +513,7 @@ export const MS_ACTIONS = {
   },
   MS_TEMPERATURE: {
     GET_DHM: 'ms.temperature.getDhm',
-    GET_DHM_SINGLE_SERIES: 'ms.temperature.getDhmBySeries',
+    GET_DHM_SINGLE_SERIES: 'ms.temperature.getDhmSingleSeries',
   },
   MS_PROB_FLOOD: {
     GET_ALL_GLOFAS: 'ms.probFlood.getAllGlofas',
