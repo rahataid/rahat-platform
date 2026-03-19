@@ -301,6 +301,13 @@ export const MS_ACTIONS = {
       EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
       VERIFY_MANUAL_PAYOUT: 'aa.payout.verifyManualPayout',
     },
+    INKIND: {
+      CREATE: 'aa.inkinds.create',
+      UPDATE: 'aa.inkinds.update',
+      DELETE: 'aa.inkinds.delete',
+      GET: 'aa.inkinds.get',
+      GET_ONE: 'aa.inkinds.getOne',
+    },
     VENDOR: {
       // Remove after test
       TEST_OFFLINE_PAYOUT: 'aaProject.vendor.testOfflinePayout',

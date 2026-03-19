@@ -129,6 +129,13 @@ export const JOBS = {
     EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
     VERIFY_MANUAL_PAYOUT: 'aa.jobs.payout.verifyManualPayout',
   },
+  INKIND: {
+    CREATE: 'aa.jobs.inkinds.create',
+    UPDATE: 'aa.jobs.inkinds.update',
+    DELETE: 'aa.jobs.inkinds.delete',
+    GET: 'aa.jobs.inkinds.get',
+    GET_ONE: 'aa.jobs.inkinds.getOne',
+  },
   VENDOR: {
     // Remove after test
     TEST_OFFLINE_PAYOUT: 'aa.jobs.vendor.test_offline_payout',
