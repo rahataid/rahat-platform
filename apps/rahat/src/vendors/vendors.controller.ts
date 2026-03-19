@@ -141,10 +141,8 @@ export class VendorsController {
       lastPurchaseDate: v['Last purchase'],
       bde: v['BDE'],
       bdm: v['BDM'],
-      extras: {
-        email: v['Email'],
-        channel: v['Channel'],
-      }
+      email: v['Email'],
+      channel: v['Channel'],
     }));
 
     return handleMicroserviceCall({
