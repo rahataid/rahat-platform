@@ -1,4 +1,5 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
@@ -76,7 +77,14 @@ export class ImportsService {
     });
   }
 
-  async list(query?: { status?: string; source?: string; page?: number; perPage?: number }) {
+  async list(query?: {
+    status?: string;
+    source?: string;
+    page?: number;
+    perPage?: number;
+    sort?: string;
+    order?: 'asc' | 'desc';
+  }) {
     const where: Record<string, unknown> = {};
     if (query?.status) where.status = query.status;
     if (query?.source === 'unknown') {
@@ -85,9 +93,12 @@ export class ImportsService {
       where.source = { contains: query.source, mode: 'insensitive' };
     }
 
+    const sortField = query?.sort || 'createdAt';
+    const sortOrder = query?.order || 'desc';
+
     return paginate(this.prisma.beneficiaryImport, {
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { [sortField]: sortOrder },
     }, {
       page: query?.page,
       perPage: query?.perPage,
@@ -95,9 +106,36 @@ export class ImportsService {
   }
 
   async findOne(uuid: string) {
-    return this.prisma.beneficiaryImport.findUniqueOrThrow({
+    const record = await this.prisma.beneficiaryImport.findUniqueOrThrow({
       where: { uuid },
     });
+
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: record.r2Key,
+    });
+    const fileUrl = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+
+    return { ...record, fileUrl };
+  }
+
+  async getFileStream(uuid: string) {
+    const record = await this.prisma.beneficiaryImport.findUniqueOrThrow({
+      where: { uuid },
+    });
+
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: record.r2Key,
+    });
+    const response = await this.s3Client.send(command);
+
+    const byteArray = await response.Body.transformToByteArray();
+
+    return {
+      buffer: Buffer.from(byteArray),
+      filename: record.r2Key.split('/').pop(),
+    };
   }
 
   async updateStatus(uuid: string, status: 'NEW' | 'PROCESSING' | 'IMPORTED' | 'FAILED') {

@@ -30,6 +30,8 @@ export type Import = {
 export type ImportListQuery = Partial<Pagination> & {
   status?: ImportStatus;
   source?: string;
+  sort?: string;
+  order?: 'asc' | 'desc';
 };
 
 export type ImportsClient = {
@@ -45,6 +47,10 @@ export type ImportsClient = {
     uuid: UUID,
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<Import>>;
+  getFile: (
+    uuid: UUID,
+    config?: AxiosRequestConfig
+  ) => Promise<FormattedResponse<Blob>>;
 };
 
 export const getImportsClient = (
@@ -67,6 +73,14 @@ export const getImportsClient = (
     get: async (uuid: UUID, config?: AxiosRequestConfig) => {
       const response = await client.get(`/imports/${uuid}`, config);
       return formatResponse<Import>(response);
+    },
+
+    getFile: async (uuid: UUID, config?: AxiosRequestConfig) => {
+      const response = await client.get(`/imports/${uuid}/file`, {
+        responseType: 'blob',
+        ...config,
+      });
+      return formatResponse<Blob>(response);
     },
   };
 };
