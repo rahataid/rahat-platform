@@ -114,7 +114,8 @@ export class VendorsController {
     const headers = Object.keys(vendors[0]);
 
     const expectedHeaders = [
-      'BDE/BDM',
+      'BDE',
+      'BDM',
       'Customer Code',
       'Customer name',
       'Mobile No.',
@@ -138,10 +139,11 @@ export class VendorsController {
       phone: v['Mobile No.'],
       location: v['Region'],
       lastPurchaseDate: v['Last purchase'],
+      bde: v['BDE'],
+      bdm: v['BDM'],
       extras: {
         email: v['Email'],
         channel: v['Channel'],
-        bde: v['BDE/BDM']
       }
     }));
 
