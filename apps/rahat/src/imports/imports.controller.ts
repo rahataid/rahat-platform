@@ -3,11 +3,13 @@ import {
   Controller,
   Get,
   Header,
+  MessageEvent,
   Param,
   Post,
   Query,
   Req,
   Res,
+  Sse,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
@@ -21,6 +23,8 @@ import {
 } from '@rumsan/user';
 import { UUID } from 'crypto';
 import { Request, Response } from 'express';
+import { from, interval, Observable } from 'rxjs';
+import { map, switchMap, takeWhile } from 'rxjs/operators';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
 import { ImportsService } from './imports.service';
 
@@ -88,7 +92,42 @@ export class ImportsController {
   @ApiParam({ name: 'uuid', required: true })
   async downloadFile(@Param('uuid') uuid: string, @Res() res: Response) {
     const { buffer, filename } = await this.importsService.getFileStream(uuid);
-    console.log({ filename, buffer })
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'text/csv');
+    res.send(buffer);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
+  @Post(':uuid/start')
+  @ApiParam({ name: 'uuid', required: true })
+  async startImport(@Param('uuid') uuid: string) {
+    console.log(`Starting import for UUID: ${uuid}`);
+    return this.importsService.startImport(uuid);
+  }
+
+  @Sse(':uuid/progress')
+  @ApiParam({ name: 'uuid', required: true })
+  progress(@Param('uuid') uuid: string): Observable<MessageEvent> {
+    return interval(1500).pipe(
+      switchMap(() => from(this.importsService.getProgress(uuid))),
+      map((progress) => ({ data: progress }) as MessageEvent),
+      takeWhile((event: MessageEvent) => {
+        const data = event.data as any;
+        return data?.phase !== 'completed' && data?.phase !== 'failed';
+      }, true),
+    );
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get(':uuid/errors')
+  @Header('Content-Type', 'text/csv')
+  @ApiParam({ name: 'uuid', required: true })
+  async downloadErrors(@Param('uuid') uuid: string, @Res() res: Response) {
+    const { buffer, filename } = await this.importsService.getErrorFile(uuid);
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Type', 'text/csv');
     res.send(buffer);

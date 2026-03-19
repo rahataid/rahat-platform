@@ -1,8 +1,12 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BQUEUE } from '@rahataid/sdk';
+import { BeneficiaryJobs } from '@rahataid/sdk/beneficiary';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
+import { Queue } from 'bull';
 import { firstValueFrom } from 'rxjs';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -15,7 +19,8 @@ export class ImportsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    @InjectQueue(BQUEUE.RAHAT_IMPORT) private readonly importQueue: Queue,
   ) {
     this.bucket = process.env.R2_BUCKET;
     this.s3Client = new S3Client({
@@ -142,6 +147,134 @@ export class ImportsService {
     return this.prisma.beneficiaryImport.update({
       where: { uuid },
       data: { status },
+    });
+  }
+
+  async startImport(uuid: string) {
+    const record = await this.prisma.beneficiaryImport.findUniqueOrThrow({
+      where: { uuid },
+    });
+
+    if (record.status !== 'NEW') {
+      throw new Error(`Import ${uuid} is not in NEW status (current: ${record.status})`);
+    }
+
+    // Update status to PROCESSING
+    await this.prisma.beneficiaryImport.update({
+      where: { uuid },
+      data: { status: 'PROCESSING' },
+    });
+
+    // Add job to the import queue
+    const job = await this.importQueue.add(BeneficiaryJobs.IMPORT_V2, {
+      importUuid: uuid,
+    }, {
+      attempts: 1,
+      removeOnComplete: false,
+      removeOnFail: false,
+    });
+
+    // Store jobId in extras for progress tracking
+    const currentExtras = (record.extras as Record<string, any>) || {};
+    await this.prisma.beneficiaryImport.update({
+      where: { uuid },
+      data: {
+        extras: { ...currentExtras, jobId: job.id },
+      },
+    });
+
+    this.logger.log(`Import job ${job.id} queued for import ${uuid}`);
+    return { jobId: job.id, status: 'PROCESSING' };
+  }
+
+  async getProgress(uuid: string) {
+    const record = await this.prisma.beneficiaryImport.findUniqueOrThrow({
+      where: { uuid },
+    });
+
+    const extras = (record.extras as Record<string, any>) || {};
+    const jobId = extras.jobId;
+
+    if (!jobId) {
+      return {
+        phase: record.status === 'NEW' ? 'pending' : record.status.toLowerCase(),
+        percent: 0,
+        total: record.beneficiaryCount,
+        processed: 0,
+        errors: extras.errors || [],
+      };
+    }
+
+    const job = await this.importQueue.getJob(jobId);
+    if (!job) {
+      return {
+        phase: record.status.toLowerCase(),
+        percent: record.status === 'IMPORTED' ? 100 : 0,
+        total: record.beneficiaryCount,
+        processed: 0,
+        errors: extras.errors || [],
+      };
+    }
+
+    const progress = job.progress() || {};
+    return {
+      phase: progress.phase || record.status.toLowerCase(),
+      percent: progress.percent || 0,
+      total: progress.total || record.beneficiaryCount,
+      processed: progress.processed || 0,
+      errors: progress.errors || extras.errors || [],
+      hasErrorFile: progress.hasErrorFile || !!extras.errorFileR2Key,
+    };
+  }
+
+  async getErrorFile(uuid: string) {
+    const record = await this.prisma.beneficiaryImport.findUniqueOrThrow({
+      where: { uuid },
+    });
+
+    const extras = (record.extras as Record<string, any>) || {};
+    const errorFileR2Key = extras.errorFileR2Key;
+
+    if (!errorFileR2Key) {
+      throw new NotFoundException(`No error file found for import ${uuid}`);
+    }
+
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: errorFileR2Key,
+    });
+    const response = await this.s3Client.send(command);
+    const byteArray = await response.Body.transformToByteArray();
+
+    return {
+      buffer: Buffer.from(byteArray),
+      filename: errorFileR2Key.split('/').pop(),
+    };
+  }
+
+  async uploadErrorFile(uuid: string, errorBuffer: Buffer) {
+    const r2Key = `imports/${uuid}_errors.csv`;
+    await this.s3Client.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: r2Key,
+        Body: errorBuffer,
+        ContentType: 'text/csv',
+      })
+    );
+    return r2Key;
+  }
+
+  async updateExtras(uuid: string, extras: Record<string, any>) {
+    const record = await this.prisma.beneficiaryImport.findUniqueOrThrow({
+      where: { uuid },
+    });
+    const currentExtras = (record.extras as Record<string, any>) || {};
+    return this.prisma.beneficiaryImport.update({
+      where: { uuid },
+      data: {
+        extras: { ...currentExtras, ...extras },
+      },
     });
   }
 }
