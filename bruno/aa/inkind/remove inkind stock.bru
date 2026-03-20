@@ -1,0 +1,26 @@
+meta {
+  name: remove inkind stock
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.inkindStock.remove",
+    "payload": {
+       "inkindUuid":"60a0b235-ffa4-4696-9acd-a17671ad6d3f",
+      "quantity":5
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

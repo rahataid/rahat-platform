@@ -1,0 +1,30 @@
+meta {
+  name: add Inkind stock
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.inkindStock.add",
+    "payload": {
+      "inkindId":"8e80e26d-3970-4e51-8d5c-fa13470f4a26",
+      "quantity":50,
+      "type":"ADD"
+      //     "groupInkindId":"",  optional
+  //     "redemptionId" :""   optional
+    }
+  }
+  // groupTypes:  ADD, REMOVE, LOCK, UNLOCK, REDEEM
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
