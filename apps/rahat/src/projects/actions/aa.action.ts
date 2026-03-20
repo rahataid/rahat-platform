@@ -576,6 +576,28 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.INKIND.DELETE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.DELETE, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.INKIND.ADD_INKIND_STOCK]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.ADD_INKIND_STOCK, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_ALL_STOCK_MOVEMENTS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.GET_ALL_STOCK_MOVEMENTS, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.REMOVE_INKIND_STOCK]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.REMOVE_INKIND_STOCK, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.ASSIGN_GROUP_INKIND]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.ASSIGN_GROUP_INKIND, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_BY_GROUP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.GET_BY_GROUP, uuid }, payload),
+
 
   // **** grievance start **** //
   [MS_ACTIONS.AAPROJECT.GRIEVANCES.CREATE]: (uuid, payload, sendCommand) =>

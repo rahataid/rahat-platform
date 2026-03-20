@@ -135,6 +135,12 @@ export const JOBS = {
     DELETE: 'aa.jobs.inkinds.delete',
     GET: 'aa.jobs.inkinds.get',
     GET_ONE: 'aa.jobs.inkinds.getOne',
+    ADD_INKIND_STOCK: 'aa.jobs.inkindStock.add',
+    GET_ALL_STOCK_MOVEMENTS: 'aa.jobs.inkindStock.getAllMovements',
+    REMOVE_INKIND_STOCK: 'aa.jobs.inkindStock.remove',
+    ASSIGN_GROUP_INKIND: 'aa.jobs.groupInkinds.assign',
+    GET_BY_GROUP: 'aa.jobs.groupInkinds.getByGroup',
+
   },
   VENDOR: {
     // Remove after test

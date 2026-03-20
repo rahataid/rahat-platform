@@ -307,6 +307,11 @@ export const MS_ACTIONS = {
       DELETE: 'aa.inkinds.delete',
       GET: 'aa.inkinds.get',
       GET_ONE: 'aa.inkinds.getOne',
+      ADD_INKIND_STOCK: 'aaProject.inkindStock.add',
+      GET_ALL_STOCK_MOVEMENTS: 'aaProject.inkindStock.getAllMovements',
+      REMOVE_INKIND_STOCK: 'aaProject.inkindStock.remove',
+      ASSIGN_GROUP_INKIND: 'aaProject.groupInkinds.assign',
+      GET_BY_GROUP: 'aaProject.groupInkinds.getByGroup',
     },
     VENDOR: {
       // Remove after test
