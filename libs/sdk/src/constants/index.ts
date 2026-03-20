@@ -509,6 +509,8 @@ export const MS_ACTIONS = {
     GET_BY_LOCATION: 'ms.phases.getByLocation',
     ACTIVATE: 'ms.phases.activate',
     CONFIGURE_THRESHOLD: 'ms.phase.configureThreshold',
+    UPDATE: 'ms.phases.update',
+    DELETE: 'ms.phases.delete',
   },
 
   MS_RIVER_STATIONS: {
