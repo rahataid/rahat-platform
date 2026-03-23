@@ -24,8 +24,6 @@ export const MS_TRIGGERS_JOBS = {
     GET_BY_LOCATION: 'ms.jobs.phases.getByLocation',
     ACTIVATE: 'ms.jobs.phases.activate',
     CONFIGURE_THRESHOLD: 'ms.jobs.phase.configureThreshold',
-    UPDATE: 'ms.jobs.phases.update',
-    DELETE: 'ms.jobs.phases.delete',
   },
   REVERT_PHASE: {
     CREATE: 'ms.jobs.revertPhase.create',
@@ -231,22 +229,6 @@ export const msTriggerActions: ProjectActionFunc = {
       payload
     );
   },
-
-  [MS_ACTIONS.MS_PHASES.UPDATE]: (uuid, payload, sendCommand) => {
-    payload.appId = uuid || payload.appId;
-    return sendCommand(
-      { cmd: MS_TRIGGERS_JOBS.PHASES.UPDATE },
-      payload
-    );
-  },
-
-  [MS_ACTIONS.MS_PHASES.DELETE]: (uuid, payload, sendCommand) => {
-    payload.appId = uuid || payload.appId;
-    return sendCommand(
-      { cmd: MS_TRIGGERS_JOBS.PHASES.DELETE },
-      payload
-    );
-  }
   // // **** phases end ******//
 
   // **** source start ******//
