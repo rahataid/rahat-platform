@@ -532,6 +532,10 @@ export const MS_ACTIONS = {
     GET_DHM: 'ms.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.rainfallLevels.getGlofas',
   },
+  MS_HUMIDITY: {
+    GET_DHM: 'ms.humidity.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.humidity.getDhmSingleSeries',
+  },
   MS_TEMPERATURE: {
     GET_DHM: 'ms.temperature.getDhm',
     GET_DHM_SINGLE_SERIES: 'ms.temperature.getDhmSingleSeries',
