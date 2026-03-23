@@ -1686,6 +1686,18 @@ export class BeneficiaryService {
       throw new RpcException('Nothing to update. Provide a name or beneficiaries.');
     }
 
+    if (dto.name) {
+      const benGroup = await this.prisma.beneficiaryGroup.findFirst({
+        where: {
+          name: dto.name,
+        },
+      });
+
+      if (benGroup) {
+        throw new RpcException('Beneficiary group already exist.');
+      }
+    }
+
     // Update the group's name if provided
     const updatedData = await this.prisma.beneficiaryGroup.update({
       where: { uuid: uuid },

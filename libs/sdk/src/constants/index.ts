@@ -209,6 +209,7 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.stakeholders.getAll',
       GET_ONE: 'aaProject.stakeholders.getOne',
       ADD: 'aaProject.stakeholders.add',
+      VALIDATE_BULK_STAKEHOLDERS: 'aaProject.stakeholders.validateBulkStakeholders',
       BULK_ADD: 'aaProject.stakeholders.bulkAdd',
       REMOVE: 'aaProject.stakeholders.remove',
       UPDATE: 'aaProject.stakeholders.update',
@@ -228,6 +229,7 @@ export const MS_ACTIONS = {
       GET_ALL_GROUPS: 'aaProject.beneficiary.getAllGroups',
       GET_ONE_GROUP: 'aaProject.beneficiary.getOneGroup',
       ASSIGN_TOKEN_TO_GROUP: 'aaProject.beneficiary.assign_token_to_group',
+      VALIDATE_TOKEN_ASSIGNMENT: 'aaProject.beneficiary.validate_token_assignment',
       RESERVE_TOKEN_TO_GROUP: 'aaProject.beneficiary.reserve_token_to_group',
       GET_ALL_TOKEN_RESERVATION:
         'aaProject.beneficiary.get_all_token_reservation',
@@ -299,6 +301,18 @@ export const MS_ACTIONS = {
       GET_PAYOUT_DETAILS: 'aa.payout.getPayoutDetails',
       EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
       VERIFY_MANUAL_PAYOUT: 'aa.payout.verifyManualPayout',
+    },
+    INKIND: {
+      CREATE: 'aa.inkinds.create',
+      UPDATE: 'aa.inkinds.update',
+      DELETE: 'aa.inkinds.delete',
+      GET: 'aa.inkinds.get',
+      GET_ONE: 'aa.inkinds.getOne',
+      ADD_INKIND_STOCK: 'aaProject.inkindStock.add',
+      GET_ALL_STOCK_MOVEMENTS: 'aaProject.inkindStock.getAllMovements',
+      REMOVE_INKIND_STOCK: 'aaProject.inkindStock.remove',
+      ASSIGN_GROUP_INKIND: 'aaProject.groupInkinds.assign',
+      GET_BY_GROUP: 'aaProject.groupInkinds.getByGroup',
     },
     VENDOR: {
       // Remove after test
@@ -496,6 +510,8 @@ export const MS_ACTIONS = {
     GET_BY_LOCATION: 'ms.phases.getByLocation',
     ACTIVATE: 'ms.phases.activate',
     CONFIGURE_THRESHOLD: 'ms.phase.configureThreshold',
+    UPDATE: 'ms.phases.update',
+    DELETE: 'ms.phases.delete',
   },
 
   MS_RIVER_STATIONS: {
@@ -510,6 +526,10 @@ export const MS_ACTIONS = {
   MS_RAINFALL_LEVELS: {
     GET_DHM: 'ms.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.rainfallLevels.getGlofas',
+  },
+  MS_TEMPERATURE: {
+    GET_DHM: 'ms.temperature.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.temperature.getDhmSingleSeries',
   },
   MS_PROB_FLOOD: {
     GET_ALL_GLOFAS: 'ms.probFlood.getAllGlofas',
@@ -530,6 +550,7 @@ export const MS_ACTIONS = {
       SESSION_LOGS: 'ms.activities.communication.sessionLogs',
       RETRY_FAILED: 'ms.activities.communication.retryFailed',
       GET_STATS: 'ms.activities.communication.getStats',
+      GET_TRANSPORT_SESSION_STATS: 'ms.activities.communication.getTransportSessionStats',
       GET_GROUP_STATS: 'ms.triggers.getTransportSessionStatsByGroup',
     },
   },

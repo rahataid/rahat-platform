@@ -48,6 +48,7 @@ export const JOBS = {
     GET_ALL: 'aa.jobs.stakeholders.getAll',
     GET_ONE: 'aa.jobs.stakeholders.getOne',
     ADD: 'aa.jobs.stakeholders.add',
+    VALIDATE_BULK_STAKEHOLDERS: 'aa.jobs.stakeholders.validateBulkStakeholders',
     BULK_ADD: 'aa.jobs.stakeholders.bulkAdd',
     REMOVE: 'aa.jobs.stakeholders.remove',
     UPDATE: 'aa.jobs.stakeholders.update',
@@ -61,6 +62,7 @@ export const JOBS = {
   },
   BENEFICIARY: {
     ADD_GROUP: 'aa.jobs.beneficiary.addGroup',
+    VALIDATE_TOKEN_ASSIGNMENT: 'aa.jobs.beneficiary.validate_token_assignment',
     RESERVE_TOKEN_TO_GROUP: 'aa.jobs.beneficiary.reserve_token_to_group',
     ASSIGN_TOKEN_TO_GROUP: 'aa.jobs.beneficiary.assign_token_to_group',
     GET_ALL_GROUPS: 'aa.jobs.beneficiary.getAllGroups',
@@ -126,6 +128,19 @@ export const JOBS = {
     GET_PAYOUT_DETAILS: 'aa.jobs.payout.getPayoutDetails',
     EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
     VERIFY_MANUAL_PAYOUT: 'aa.jobs.payout.verifyManualPayout',
+  },
+  INKIND: {
+    CREATE: 'aa.jobs.inkinds.create',
+    UPDATE: 'aa.jobs.inkinds.update',
+    DELETE: 'aa.jobs.inkinds.delete',
+    GET: 'aa.jobs.inkinds.get',
+    GET_ONE: 'aa.jobs.inkinds.getOne',
+    ADD_INKIND_STOCK: 'aa.jobs.inkindStock.add',
+    GET_ALL_STOCK_MOVEMENTS: 'aa.jobs.inkindStock.getAllMovements',
+    REMOVE_INKIND_STOCK: 'aa.jobs.inkindStock.remove',
+    ASSIGN_GROUP_INKIND: 'aa.jobs.groupInkinds.assign',
+    GET_BY_GROUP: 'aa.jobs.groupInkinds.getByGroup',
+
   },
   VENDOR: {
     // Remove after test

@@ -119,7 +119,6 @@ export const auths: Array<{
       service: Service.EMAIL,
       serviceId: 'rumsan@mailinator.com',
     },
-
   ];
 
 const projectTypes: Array<{
