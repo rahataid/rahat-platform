@@ -17,7 +17,7 @@ on:
           - "Cambodia-Stage"
           - "Cambodia-Prod-Replicate"
           - "OffRamp-Stage"
-          - "SMS-Voucher-Stage"
+          - "stage-sms-voucher"
           - "WSD-Stage"
       update_manifest:
         description: "Update Kubernetes manifest?"
@@ -67,7 +67,7 @@ jobs:
               BASE="K8s-Manifest/Rahat/Cambodia-Prod-Replicate/Argo-Rollout" ;;
             OffRamp-Stage)
               BASE="K8s-Manifest/Rahat/OffRamp-Stage/Argo-Rollout" ;;
-            SMS-Voucher-Stage)
+            stage-sms-voucher)
               BASE="K8s-Manifest/Rahat/SMS-Voucher-Stage/Argo-Rollout" ;;
             WSD-Stage)
               BASE="K8s-Manifest/Rahat/WSD-Stage/Argo-Rollout" ;;
