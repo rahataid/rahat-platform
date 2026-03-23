@@ -246,7 +246,7 @@ export const msTriggerActions: ProjectActionFunc = {
       { cmd: MS_TRIGGERS_JOBS.PHASES.DELETE },
       payload
     );
-  }
+  },
   // // **** phases end ******//
 
   // **** source start ******//
