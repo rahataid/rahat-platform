@@ -10,7 +10,7 @@ on:
         options:
           - "test-load"
           - "dev-unicef"
-          - "redcross"
+          - "demo-redcross"
           - "aidlink-demo"
           - "aidlink-dev"
           - "stage-el"
@@ -68,7 +68,7 @@ jobs:
               APPS="beneficiary,rahat"
               ;;
             redcross)
-              TAG="redcross"
+              TAG="demo-redcross"
               SECRET="ENV_AA_REDCROSS"
               APPS="beneficiary,rahat"
               ;;
