@@ -5,6 +5,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { BQUEUE } from '@rahataid/sdk';
 import { BeneficiaryJobs } from '@rahataid/sdk/beneficiary';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { firstValueFrom } from 'rxjs';
@@ -14,23 +15,39 @@ const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 @Injectable()
 export class ImportsService {
   private readonly logger = new Logger(ImportsService.name);
-  private readonly s3Client: S3Client;
-  private readonly bucket: string;
+  private s3Client: S3Client;
+  private bucket: string;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly httpService: HttpService,
     @InjectQueue(BQUEUE.RAHAT_IMPORT) private readonly importQueue: Queue,
-  ) {
-    this.bucket = process.env.R2_BUCKET;
+  ) {}
+
+  private async getR2Setting(key: string) {
+    const settings = new SettingsService(this.prisma);
+    const r2Settings: any = await settings.getSettingsByName('CLOUDFLARE_R2');
+    return r2Settings.value[key];
+  }
+
+  private async getS3Client(): Promise<S3Client> {
+    if (this.s3Client) return this.s3Client;
+
+    const accountId = await this.getR2Setting('R2_ACCOUNT_ID');
+    const accessKeyId = await this.getR2Setting('R2_ACCESS_KEY_ID');
+    const secretAccessKey = await this.getR2Setting('R2_SECRET_ACCESS_KEY');
+    this.bucket = await this.getR2Setting('R2_BUCKET');
+
     this.s3Client = new S3Client({
       region: 'auto',
-      endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
       credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+        accessKeyId: accessKeyId || '',
+        secretAccessKey: secretAccessKey || '',
       },
     });
+
+    return this.s3Client;
   }
 
   async create(data: {
@@ -49,10 +66,11 @@ export class ImportsService {
     const fileBuffer = Buffer.from(response.data);
 
     // 2. Generate a new R2 key and upload to our private bucket
+    const s3Client = await this.getS3Client();
     const timestamp = Date.now();
     // ${ metadata.groupUUID }_${ timestamp } -${ metadata.groupName }.csv
     const r2Key = `imports/${timestamp}_${data.groupUUID}_${data.groupName}.csv`;
-    await this.s3Client.send(
+    await s3Client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
         Key: r2Key,
@@ -115,11 +133,12 @@ export class ImportsService {
       where: { uuid },
     });
 
+    const s3Client = await this.getS3Client();
     const command = new GetObjectCommand({
       Bucket: this.bucket,
       Key: record.r2Key,
     });
-    const fileUrl = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+    const fileUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
 
     return { ...record, fileUrl };
   }
@@ -129,11 +148,12 @@ export class ImportsService {
       where: { uuid },
     });
 
+    const s3Client = await this.getS3Client();
     const command = new GetObjectCommand({
       Bucket: this.bucket,
       Key: record.r2Key,
     });
-    const response = await this.s3Client.send(command);
+    const response = await s3Client.send(command);
 
     const byteArray = await response.Body.transformToByteArray();
 
@@ -239,11 +259,12 @@ export class ImportsService {
       throw new NotFoundException(`No error file found for import ${uuid}`);
     }
 
+    const s3Client = await this.getS3Client();
     const command = new GetObjectCommand({
       Bucket: this.bucket,
       Key: errorFileR2Key,
     });
-    const response = await this.s3Client.send(command);
+    const response = await s3Client.send(command);
     const byteArray = await response.Body.transformToByteArray();
 
     return {
@@ -253,8 +274,9 @@ export class ImportsService {
   }
 
   async uploadErrorFile(uuid: string, errorBuffer: Buffer) {
+    const s3Client = await this.getS3Client();
     const r2Key = `imports/${uuid}_errors.csv`;
-    await this.s3Client.send(
+    await s3Client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
         Key: r2Key,

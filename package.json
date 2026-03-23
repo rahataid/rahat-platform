@@ -26,6 +26,7 @@
     "seed:kenyadevsettings": "ts-node prisma/seed.kenyadevsettings.ts",
     "seed:cambodiadevsettings": "ts-node prisma/seed.cambodiadevsettings.ts",
     "seed:chainsettings": "ts-node prisma/seed.chainsettings.ts",
+    "seed:cloudflare-r2": "ts-node prisma/seed.cloudflare-r2.ts",
     "seed:setup": "ts-node prisma/seed.settings.ts",
     "seed:contracts": "ts-node ./tools/scripts/local-setup/web3_setup/contractSeed.ts",
     "seed:graph": "ts-node ./tools/scripts/local-setup/web3_setup/graphSeed.ts",
