@@ -45,6 +45,10 @@ export const MS_TRIGGERS_JOBS = {
     GET_DHM: 'ms.jobs.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.jobs.rainfallLevels.getGlofas',
   },
+  HUMIDITY: {
+    GET_DHM: 'ms.jobs.humidity.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.jobs.humidity.getDhmSingleSeries',
+  },
   TEMPERATURE: {
     GET_DHM: 'ms.jobs.temperature.getDhm',
     GET_DHM_SINGLE_SERIES: 'ms.jobs.temperature.getDhmSingleSeries',
@@ -377,6 +381,24 @@ export const msTriggerActions: ProjectActionFunc = {
 
     return sendCommand(
       { cmd: MS_TRIGGERS_JOBS.TEMPERATURE.GET_DHM_SINGLE_SERIES },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_HUMIDITY.GET_DHM]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.HUMIDITY.GET_DHM },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_HUMIDITY.GET_DHM_SINGLE_SERIES]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.HUMIDITY.GET_DHM_SINGLE_SERIES },
       payload
     );
   },
