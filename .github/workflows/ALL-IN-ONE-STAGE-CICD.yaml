@@ -19,6 +19,7 @@ on:
           - "OffRamp-Stage"
           - "SMS-Voucher-Stage"
           - "WSD-Stage"
+          - "stage"
       update_manifest:
         description: "Update Kubernetes manifest?"
         required: true
@@ -71,6 +72,8 @@ jobs:
               BASE="K8s-Manifest/Rahat/SMS-Voucher-Stage/Argo-Rollout" ;;
             WSD-Stage)
               BASE="K8s-Manifest/Rahat/WSD-Stage/Argo-Rollout" ;;
+            stage)
+              BASE="K8s-Manifest/Rahat/AA-Stage/Argo-Rollout" ;;
           esac
           echo "platform=${BASE}/platform.yaml" >> $GITHUB_OUTPUT
           echo "beneficiary=${BASE}/beneficiary.yaml" >> $GITHUB_OUTPUT
