@@ -54,6 +54,12 @@ export const elActions: ProjectActionFunc = {
       { projectId: uuid, ...payload },
       500000
     ),
+  [MS_ACTIONS.ELPROJECT.CRM.EXPORT_VENDOR]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: VendorJobs.EXPORT },
+      { projectId: uuid, ...payload },
+      500000
+    ),
   [MS_ACTIONS.ELPROJECT.CRM.CREATE_TEMPLATE]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.CAMPAIGN.CREATE_TEMPLATE, uuid },
