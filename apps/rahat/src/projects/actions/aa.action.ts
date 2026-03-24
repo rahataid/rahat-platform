@@ -601,9 +601,14 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.INKIND.GET_AVAILABLE_INKIND_BENEFICIARY_PHONE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_AVAILABLE_INKIND_BENEFICIARY_PHONE, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.INKIND.REDEEM_BENEFICIARY_INKIND]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.INKIND.REDEEM_BENEFICIARY_INKIND, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.INKIND.BENEFICIARY_INKIND_REDEEM]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.BENEFICIARY_INKIND_REDEEM, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_GROUP_INKIND_LOGS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.GET_GROUP_INKIND_LOGS, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_GROUP_INKIND_LOGS_BY_VENDOR]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.GET_GROUP_INKIND_LOGS_BY_VENDOR, uuid }, payload),
   // **** grievance start **** //
   [MS_ACTIONS.AAPROJECT.GRIEVANCES.CREATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GRIEVANCES.CREATE, uuid }, payload),

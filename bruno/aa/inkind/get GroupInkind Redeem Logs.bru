@@ -1,0 +1,24 @@
+meta {
+  name: get GroupInkind Redeem Logs
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.inkindStock.getAllMovements",
+    "payload": {
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
