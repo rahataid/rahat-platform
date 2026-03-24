@@ -142,6 +142,7 @@ export const JOBS = {
     GET_BY_GROUP: 'aa.jobs.groupInkinds.getByGroup',
     GET_AVAILABLE_INKIND_BENEFICIARY_PHONE:
       'aa.jobs.groupInkinds.getAvailableInkindByBeneficiaryPhone',
+    REDEEM_BENEFICIARY_INKIND: 'aa.jobs.groupInkinds.redeemBeneficiaryInkind',
   },
   VENDOR: {
     // Remove after test

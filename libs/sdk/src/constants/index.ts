@@ -313,6 +313,7 @@ export const MS_ACTIONS = {
       ASSIGN_GROUP_INKIND: 'aaProject.groupInkinds.assign',
       GET_BY_GROUP: 'aaProject.groupInkinds.getByGroup',
       GET_AVAILABLE_INKIND_BENEFICIARY_PHONE: 'aaProject.groupInkinds.getAvailableInkindByBeneficiaryPhone',
+      REDEEM_BENEFICIARY_INKIND: 'aaProject.groupInkinds.redeemBeneficiaryInkind',
     },
     VENDOR: {
       // Remove after test

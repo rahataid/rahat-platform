@@ -1,0 +1,29 @@
+meta {
+  name: redeem Inkind by benf
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupInkinds.redeemBeneficiaryInkind",
+    "payload": {
+      "walletAddress": "0x701c8488dBC6E1FEE9fb71fAFc2e5c015F5eE3d3",
+      "inkinds": [{
+        "uuid": "a8a17528-9830-46db-88cb-60b99334455e",
+        "groupInkindUuid": "b424ada8-bd0f-4da9-a2b5-c6f58aa2abf5"
+      }]
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
