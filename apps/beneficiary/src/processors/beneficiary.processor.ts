@@ -41,7 +41,7 @@ export class BeneficiaryProcessor {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly eventEmitter: EventEmitter2,
     private readonly settingsService: SettingsService
-  ) {}
+  ) { }
 
   @Process(BeneficiaryJobs.UPDATE_STATS)
   async sample(job: Job<any>) {
@@ -55,7 +55,7 @@ export class BeneficiaryProcessor {
       const tempGroup = await this.prisma.tempGroup.findUnique({
         where: { uuid: groupUUID },
       });
-      const groups = await findTempBenefGroups(this.prisma, groupUUID);
+      const groups = await findTempBenefGroups(this.prisma as any, groupUUID);
       if (!groups.length) return;
       const beneficiaries = groups.map((f) => f.tempBeneficiary);
       if (!beneficiaries.length) return;
@@ -68,7 +68,7 @@ export class BeneficiaryProcessor {
       // if (dupliPhones.length)
       //   throw new Error(`Duplicate phones found: ${dupliPhones.toString()}`);
       const dupliWallets = await validateDupicateWallet(
-        this.prisma,
+        this.prisma as any,
         beneficiaries
       );
       if (dupliWallets.length)
@@ -277,9 +277,9 @@ export class BeneficiaryProcessor {
                 beneficiaries.map(
                   (b) =>
                     b[
-                      trimNonAlphaNumericValue(
-                        automatedGroupOption?.groupKey
-                      ).toLowerCase()
+                    trimNonAlphaNumericValue(
+                      automatedGroupOption?.groupKey
+                    ).toLowerCase()
                     ]
                 )
               ),
@@ -300,9 +300,9 @@ export class BeneficiaryProcessor {
                 (g) =>
                   g.name ===
                   b[
-                    trimNonAlphaNumericValue(
-                      automatedGroupOption?.groupKey
-                    ).toLowerCase()
+                  trimNonAlphaNumericValue(
+                    automatedGroupOption?.groupKey
+                  ).toLowerCase()
                   ]
               ).uuid;
               return {

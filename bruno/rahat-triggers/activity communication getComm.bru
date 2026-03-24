@@ -7,7 +7,11 @@ meta {
 post {
   url: {{url}}/projects/228e1da2-d1e8-4f63-8323-9e22917523d2/actions
   body: json
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
 }
 
 body:json {

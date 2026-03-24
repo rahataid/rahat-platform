@@ -67,6 +67,7 @@ export const JOBS = {
     GET_ALL_TOKEN_RESERVATION: 'aa.jobs.beneficiary.getAllTokenReservation',
     GET_ONE_TOKEN_RESERVATION: 'aa.jobs.beneficiary.getOneTokenReservation',
     GET_RESERVATION_STATS: 'aa.jobs.beneficiary.getReservationStats',
+    GET_BALANCE: 'aa.jobs.beneficiary.getBalance',
     GET_REDEEM_INFO: 'aa.jobs.beneficiary.getRedeemInfo',
   },
   CONTRACT: {
@@ -155,6 +156,7 @@ export const JOBS = {
     UPDATE: 'aa.jobs.grievances.update',
     REMOVE: 'aa.jobs.grievances.remove',
     UPDATE_STATUS: 'aa.jobs.grievances.updateStatus',
+    GET_OVERVIEW_STATS: 'aa.jobs.grievances.getOverviewStats',
   },
   BANK_SCRAPE: {
     HBL_ACCOUNTS: 'aa.jobs.bank-scrape.hbl.accounts',
@@ -165,5 +167,14 @@ export const JOBS = {
   CASH_TRACKER: {
     EXECUTE_ACTION: 'aa.jobs.cash-tracker.executeAction',
     GET_TRANSACTIONS: 'aa.jobs.cash-tracker.getTransactions',
+    CREATE_BUDGET: 'aa.jobs.cash-tracker.createBudget',
   },
+  INKIND_TRACKER: {
+    EXECUTE_ACTION: 'aa.jobs.inkind-tracker.executeAction',
+    GET_TRANSACTIONS: 'aa.jobs.inkind-tracker.getTransactions',
+  },
+  MULTISIG: {
+    GET_SAFE_OWNER: 'aa.jobs.safe-wallet.getOwner',
+    CREATE_SAFE_TRANSACTION: 'aa.jobs.safe-wallet.createSafeTransaction'
+  }
 };

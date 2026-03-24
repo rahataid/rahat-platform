@@ -79,12 +79,12 @@
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@openzeppelin/contracts": "^5.0.2",
     "@prisma/client": "5.20.0",
+    "@rumsan/connect": "1.0.8",
     "@rumsan/extensions": "0.0.38",
     "@rumsan/prisma": "1.0.133",
     "@rumsan/rabbitmq": "^0.0.1",
     "@rumsan/sdk": "0.0.47",
-    "@rumsan/user": "3.0.169",
-    "@rumsan/connect": "1.0.8",
+    "@rumsan/user": "3.0.170-rc.5",
     "@stellar/stellar-sdk": "^13.3.0",
     "@types/amqplib": "^0.10.6",
     "@urql/core": "^5.0.4",
@@ -130,7 +130,7 @@
     "zlib": "^1.0.5"
   },
   "devDependencies": {
-    "@atixlabs/hardhat-time-n-mine": "^0.0.5",
+    "@atixlabs/hardhat-time-n-mine": "0.0.5",
     "@compodoc/compodoc": "^1.1.26",
     "@faker-js/faker": "^8.4.1",
     "@graphprotocol/graph-cli": "^0.82.0",

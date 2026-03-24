@@ -136,7 +136,7 @@ class SeedProject extends commonLib {
 
 async function main() {
   const seedProject = new SeedProject();
-  //await seedProject.deployCoreContracts();
+  await seedProject.deployCoreContracts();
   await seedProject.addContractSettings();
 
   // await seedProject.updateProjectContractAddress();
