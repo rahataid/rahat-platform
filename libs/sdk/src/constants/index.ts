@@ -312,6 +312,7 @@ export const MS_ACTIONS = {
       REMOVE_INKIND_STOCK: 'aaProject.inkindStock.remove',
       ASSIGN_GROUP_INKIND: 'aaProject.groupInkinds.assign',
       GET_BY_GROUP: 'aaProject.groupInkinds.getByGroup',
+      GET_AVAILABLE_INKIND_BENEFICIARY_PHONE: 'aaProject.groupInkinds.getAvailableInkindByBeneficiaryPhone',
     },
     VENDOR: {
       // Remove after test

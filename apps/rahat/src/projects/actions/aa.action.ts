@@ -598,6 +598,9 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.INKIND.GET_BY_GROUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_BY_GROUP, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_AVAILABLE_INKIND_BENEFICIARY_PHONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.GET_AVAILABLE_INKIND_BENEFICIARY_PHONE, uuid }, payload),
+
 
   // **** grievance start **** //
   [MS_ACTIONS.AAPROJECT.GRIEVANCES.CREATE]: (uuid, payload, sendCommand) =>
