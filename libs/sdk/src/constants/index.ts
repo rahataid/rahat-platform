@@ -316,6 +316,8 @@ export const MS_ACTIONS = {
       GET_GROUP_INKIND_LOGS: 'aaProject.groupInkinds.getLogs',
       GET_GROUP_INKIND_LOGS_BY_VENDOR: 'aaProject.groupInkinds.getLogsByVendor',
       BENEFICIARY_INKIND_REDEEM: 'aaProject.beneficiaryInkinds.redeem',
+      SEND_BENEFICIARY_OTP: 'aaProject.inkinds.sendBeneficiaryOtp',
+      VALIDATE_BENEFICIARY_OTP: 'aaProject.inkinds.validateBeneficiaryOtp',
     },
     VENDOR: {
       // Remove after test

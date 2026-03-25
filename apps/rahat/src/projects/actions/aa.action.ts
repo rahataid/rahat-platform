@@ -609,6 +609,12 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.INKIND.GET_GROUP_INKIND_LOGS_BY_VENDOR]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_GROUP_INKIND_LOGS_BY_VENDOR, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.SEND_BENEFICIARY_OTP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.SEND_BENEFICIARY_OTP, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.VALIDATE_BENEFICIARY_OTP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.VALIDATE_BENEFICIARY_OTP, uuid }, payload),
   // **** grievance start **** //
   [MS_ACTIONS.AAPROJECT.GRIEVANCES.CREATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GRIEVANCES.CREATE, uuid }, payload),
