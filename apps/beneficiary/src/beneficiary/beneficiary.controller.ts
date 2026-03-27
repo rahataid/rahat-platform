@@ -8,6 +8,7 @@ import {
   AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  CreateBeneficiaryTransactionRepoDto,
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
@@ -333,5 +334,10 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GET_GROUP_DETAILS_BY_UUIDS })
   async getGroupDetailsByUuids(uuids: UUID[]) {
     return this.service.getGroupDetailsByUuids(uuids);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BENEFICIARY_WITH_DB_TRANSACTION })
+  async createBeneficiaryWithDbTransaction(data: CreateBeneficiaryTransactionRepoDto) {
+    return this.service.createBeneficiaryWithDbTransaction(data);
   }
 }

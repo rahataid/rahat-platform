@@ -14,6 +14,7 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  CreateBeneficiaryTransactionRepoDto,
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
@@ -31,11 +32,13 @@ import {
   GroupWithValidationAA,
   ProjectContants,
   TPIIData,
-  WalletJobs,
+  WalletJobs
 } from '@rahataid/sdk';
+import { JOBS } from '@rahataid/sdk/beneficiary/beneficiary.events';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
+import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
   findTempBenefGroups,
@@ -2391,6 +2394,136 @@ export class BeneficiaryService {
       }
     );
   }
+
+  async createBeneficiaryWithDbTransaction(payload: CreateBeneficiaryTransactionRepoDto) {
+    console.log('Creating beneficiary with DB transaction for project:', payload.projectId);
+    const { projectId, ...benfData } = payload;
+
+    const dbTxId = `db-tx-${Date.now()}`;
+
+    try {
+      // step 1: check and remove orphaned transactions
+      await this.cleanupOrphanedTransactions();
+
+      // step 2: begin transaction
+      await this.prisma.$executeRawUnsafe('BEGIN;');
+      await lastValueFrom(this.client.send(
+        { cmd: AAJobs.BENEFICIARY.CREATE_BENEFICIARY_WITH_DB_TRANSACTION, uuid: projectId },
+        {
+          action: 'BEGIN',
+          dbTxId,
+          payload: {},
+        }
+      ));
+      this.logger.log('Transaction started for creating beneficiary with DB transaction.');
+
+      // step 3: create new beneficiary and assign to project
+      // step 3.1 - create beneficiary record
+      const newBeneficiaryData = await this.create(benfData);
+
+      await this.prisma.beneficiaryProject.create({
+        data: {
+          beneficiaryId: newBeneficiaryData.uuid,
+          projectId: projectId,
+        }
+      });
+
+      const payload = {
+        uuid: newBeneficiaryData.uuid,
+        walletAddress: newBeneficiaryData.walletAddress,
+        extras: { ...newBeneficiaryData.extras, phone: newBeneficiaryData.pii.phone },
+        isVerified: newBeneficiaryData.isVerified,
+        gender: newBeneficiaryData.gender,
+      };
+
+      await lastValueFrom(this.client.send(
+        { cmd: JOBS.ADD_TO_PROJECT, uuid: projectId },
+        {
+          ...payload
+        }
+      ));
+
+      this.logger.log('Beneficiary creation and assignment to project completed successfully within transaction.');
+
+      // step 4: Prepare transaction
+      await this.prisma.$executeRawUnsafe(`PREPARE TRANSACTION '${dbTxId}';`);
+      await lastValueFrom(this.client.send(
+        { cmd: AAJobs.BENEFICIARY.CREATE_BENEFICIARY_WITH_DB_TRANSACTION, uuid: projectId },
+        {
+          action: 'PREPARE',
+          dbTxId,
+          payload: {},
+        }
+      ));
+      this.logger.log('Transaction prepared successfully.');
+
+      // step 5: Commit transaction
+      await this.prisma.$executeRawUnsafe(`COMMIT PREPARED '${dbTxId}';`);
+      await lastValueFrom(this.client.send(
+        { cmd: AAJobs.BENEFICIARY.CREATE_BENEFICIARY_WITH_DB_TRANSACTION, uuid: projectId },
+        {
+          action: 'COMMIT',
+          dbTxId,
+          payload: {},
+        }
+      ));
+      this.logger.log('Transaction committed successfully.');
+      return { success: true, message: 'Beneficiary created successfully with DB transaction.' };
+
+    } catch (error) {
+      this.logger.error('Error occurred during beneficiary creation with DB transaction:', error);
+
+      // step 6: Rollback
+      try {
+        // ✅ FIX 2: try ROLLBACK PREPARED first, fall back to plain ROLLBACK
+        try {
+          await this.prisma.$executeRawUnsafe(`ROLLBACK PREPARED '${dbTxId}';`);
+        } catch {
+          await this.prisma.$executeRawUnsafe('ROLLBACK;');
+        }
+
+        await lastValueFrom(this.client.send(
+          { cmd: AAJobs.BENEFICIARY.CREATE_BENEFICIARY_WITH_DB_TRANSACTION, uuid: projectId },
+          {
+            action: 'ROLLBACK',
+            dbTxId,
+            payload: {},
+          }
+        ));
+        this.logger.log('Transaction rolled back successfully after error.');
+      } catch (rollbackError) {
+        this.logger.error('Error occurred during transaction rollback:', rollbackError);
+      }
+      throw new RpcException(error.message);
+    }
+  }
+
+  async cleanupOrphanedTransactions() {
+    console.log('Checking for orphaned transactions...');
+    try {
+      const result = await this.prisma.$queryRawUnsafe(
+        'SELECT gid FROM pg_prepared_xacts;'
+      );
+
+      if (Array.isArray(result) && result.length > 0) {
+        console.log(`Found ${result.length} orphaned transactions in DB`);
+        for (const row of result) {
+          const gid = row.gid;
+          console.log(`Rolling back orphaned transaction: ${gid}`);
+          try {
+            await this.prisma.$executeRawUnsafe(`ROLLBACK PREPARED '${gid}';`);
+            console.log(`Successfully rolled back transaction: ${gid}`);
+          } catch (rollbackError) {
+            console.error(`Failed to rollback transaction ${gid}:`, rollbackError);
+          }
+        }
+      } else {
+        console.log('No orphaned transactions found in DB');
+      }
+    } catch (error) {
+      console.error('Error checking for orphaned transactions in DB:', error);
+    }
+  }
 }
 
 async function checkPhoneNumber(
@@ -2419,4 +2552,5 @@ async function checkWalletAddress(
     select: { walletAddress: true },
   });
   return duplicates.map((dup) => dup.walletAddress);
+
 }
