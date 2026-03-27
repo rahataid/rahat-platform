@@ -79,6 +79,7 @@
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@openzeppelin/contracts": "^5.0.2",
     "@prisma/client": "5.20.0",
+    "@rumsan/asset-uploader": "^1.0.0",
     "@rumsan/connect": "1.0.8",
     "@rumsan/extensions": "0.0.38-rc.2",
     "@rumsan/prisma": "1.0.133",

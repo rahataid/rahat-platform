@@ -100,11 +100,20 @@ export class VendorsController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
   async upload(@UploadedFile() file: TFile, @Req() req: any) {
+    if (!file?.buffer) {
+      throw new RpcException('No file provided');
+    }
+
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const projectId = req.body['projectId'];
+
+    if (!projectId) {
+      throw new RpcException('projectId is required');
+    }
+
     const vendors = await DocParser(docType, file.buffer);
 
     if (!vendors.length) {
@@ -114,14 +123,16 @@ export class VendorsController {
     const headers = Object.keys(vendors[0]);
 
     const expectedHeaders = [
+      'BDE',
+      'BDM',
       'Customer Code',
       'Customer name',
-      'Source',
       'Mobile No.',
-      'Region',
-      'Last purchase',
       'Email',
       'Channel',
+      'Region',
+      'Source',
+      'Last purchase',
     ];
 
     const missingHeaders = expectedHeaders.filter(h => !headers.includes(h));
@@ -137,10 +148,10 @@ export class VendorsController {
       phone: v['Mobile No.'],
       location: v['Region'],
       lastPurchaseDate: v['Last purchase'],
-      extras: {
-        email: v['Email'],
-        channel: v['Channel'],
-      }
+      bde: v['BDE'],
+      bdm: v['BDM'],
+      email: v['Email'],
+      channel: v['Channel'],
     }));
 
     return handleMicroserviceCall({
@@ -150,11 +161,9 @@ export class VendorsController {
       ),
       onSuccess(res) {
         console.log('Vendors imported successfully:', res);
-        return res;
       },
       onError(err) {
         console.error('Error importing vendors:', err);
-        throw new RpcException(err.message || 'Failed to import vendors')
       }
     })
 

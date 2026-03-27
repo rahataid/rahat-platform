@@ -155,6 +155,7 @@ export const MS_ACTIONS = {
 
     CRM: {
       GET_ALL_VENDOR: 'elProject.crm.getAllVendor',
+      EXPORT_VENDOR: 'elProject.crm.exportVendor',
       CREATE_TEMPLATE: 'elProject.campaign.create_template',
       DELETE_TEMPLATE: 'elProject.campaign.delete_template',
       LIST_TEMPLATES: 'elProject.campaign.list_templates',

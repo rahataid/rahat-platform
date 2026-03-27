@@ -16,6 +16,7 @@ export const JOBS = {
   LIST_WITH_PROJECT_DATA: 'rahat.jobs.vendor.list_with_project_data',
   GET_BENEFICIARIES: 'rahat.jobs.vendor.get_beneficiaries',
   IMPORT: 'rahat.jobs.vendor.import',
+  EXPORT: 'rahat.jobs.vendor.export',
   CREATE: 'rahat.jobs.vendor.create',
   LIST_FAILED_BATCH: 'rahat.jobs.vendor.list_failed_batch',
   GET_ONE_FAILED_BATCH: 'rahat.jobs.vendor.get_one_failed_batch',
