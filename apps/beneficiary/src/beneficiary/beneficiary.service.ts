@@ -1322,7 +1322,7 @@ export class BeneficiaryService {
 
     return {
       added: result.count,
-      isSucessful: true,
+      success: true,
       group,
     };
   }
