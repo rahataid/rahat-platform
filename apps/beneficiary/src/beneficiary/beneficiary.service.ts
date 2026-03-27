@@ -6,6 +6,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary, BeneficiaryPii, GroupPurpose } from '@prisma/client';
 import {
+  AddBeneficiariesToGroupDto,
   AddBenfGroupToProjectDto,
   AddBenToProjectDto,
   addBulkBeneficiaryToProject,
@@ -1220,8 +1221,10 @@ export class BeneficiaryService {
     const group = await this.prisma.beneficiaryGroup.create({
       data: {
         name: dto.name,
+        ...(dto.groupPurpose && { groupPurpose: dto.groupPurpose as GroupPurpose }),
       },
     });
+
     const createPayload = dto.beneficiaries.map((d) => ({
       beneficiaryGroupId: group.uuid,
       beneficiaryId: d.uuid,
@@ -1241,7 +1244,87 @@ export class BeneficiaryService {
       await (await this.assignBeneficiaryGroupToProject(payload)).toPromise();
     }
 
-    return groupedBeneficiaries;
+    return {
+      ...groupedBeneficiaries,
+      group,
+    };
+  }
+
+  async addBeneficiariesToGroup(dto: AddBeneficiariesToGroupDto) {
+    const { groupUuid, beneficiaries } = dto;
+    this.logger.log(`Adding beneficiaries to group ${groupUuid}: ${beneficiaries.map(b => b.uuid).join(', ')}`);
+
+    // Verify the group exists
+    const group = await this.prisma.beneficiaryGroup.findUnique({
+      where: { uuid: groupUuid },
+    });
+
+    if (!group) {
+      throw new RpcException('Beneficiary group not found.');
+    }
+
+    // Get existing beneficiary UUIDs in the group to avoid duplicates
+    const existingGroupedBeneficiaries = await this.prisma.groupedBeneficiaries.findMany({
+      where: {
+        beneficiaryGroupId: groupUuid,
+        deletedAt: null,
+      },
+      select: { beneficiaryId: true },
+    });
+
+    const existingBeneficiaryIds = new Set(
+      existingGroupedBeneficiaries.map((gb) => gb.beneficiaryId)
+    );
+
+    // Filter out beneficiaries that are already in the group
+    const newBeneficiaries = beneficiaries.filter(
+      (b) => !existingBeneficiaryIds.has(b.uuid)
+    );
+
+    if (newBeneficiaries.length === 0) {
+      return {
+        isSucessful: true,
+        message: 'All beneficiaries are already in the group.',
+        added: 0,
+        group,
+      };
+    }
+
+    // Verify all beneficiaries exist
+    const beneficiaryUuids = newBeneficiaries.map((b) => b.uuid);
+    const existingBeneficiaries = await this.prisma.beneficiary.findMany({
+      where: {
+        uuid: { in: beneficiaryUuids },
+        deletedAt: null,
+      },
+      select: { uuid: true },
+    });
+
+    const foundUuids = new Set(existingBeneficiaries.map((b) => b.uuid));
+    const notFoundUuids = beneficiaryUuids.filter((uuid) => !foundUuids.has(uuid));
+
+    if (notFoundUuids.length > 0) {
+      throw new RpcException(
+        `Beneficiaries not found: ${notFoundUuids.join(', ')}`
+      );
+    }
+
+    // Create the grouped beneficiaries
+    const createPayload = newBeneficiaries.map((b) => ({
+      beneficiaryGroupId: groupUuid,
+      beneficiaryId: b.uuid,
+    }));
+
+    const result = await this.prisma.groupedBeneficiaries.createMany({
+      data: createPayload,
+      skipDuplicates: true,
+    });
+
+    return {
+      added: result.count,
+      isSucessful: true,
+      group,
+    };
   }
 
   async getOneGroup(uuid: string): Promise<GroupWithValidationAA> {

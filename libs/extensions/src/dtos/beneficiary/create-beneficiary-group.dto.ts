@@ -27,6 +27,13 @@ export class CreateBeneficiaryGroupsDto {
   name: string;
 
   @ApiProperty({
+    example: 'MOBILE_MONEY',
+    description: 'Type of the beneficiary group',
+  })
+  @IsOptional()
+  groupPurpose?: string | null;
+
+  @ApiProperty({
     example: '11111111111111',
     description: 'Project id',
   })

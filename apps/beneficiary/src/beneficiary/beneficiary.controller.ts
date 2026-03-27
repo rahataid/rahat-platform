@@ -3,6 +3,7 @@
 import { Controller, Param } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
+  AddBeneficiariesToGroupDto,
   addBulkBeneficiaryToProject,
   AddGroupsPurposeDto,
   CreateBeneficiaryDto,
@@ -204,6 +205,11 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.ADD_GROUP })
   addGroup(payload: CreateBeneficiaryGroupsDto) {
     return this.service.addGroup(payload);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.ADD_BENEFICIARIES_TO_GROUP })
+  addBeneficiariesToGroup(payload: AddBeneficiariesToGroupDto) {
+    return this.service.addBeneficiariesToGroup(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP })

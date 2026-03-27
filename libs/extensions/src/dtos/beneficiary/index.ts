@@ -1,3 +1,4 @@
+export * from './add-beneficiaries-to-group.dto';
 export * from './add-group-purpose.dto';
 export * from './add-to-project.dto';
 export * from './add.beneficiary.project.dto';

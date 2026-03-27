@@ -21,6 +21,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
+  AddBeneficiariesToGroupDto,
   AddBenToProjectDto,
   AddGroupsPurposeDto,
   CreateBeneficiaryDto,
@@ -500,6 +501,14 @@ export class BeneficiaryController {
   @Post('groups')
   async createGroup(@Body() dto: CreateBeneficiaryGroupsDto) {
     return this.client.send({ cmd: BeneficiaryJobs.ADD_GROUP }, dto);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.USER })
+  @Post('groups/add-beneficiaries')
+  async addBeneficiariesToGroup(@Body() dto: AddBeneficiariesToGroupDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.ADD_BENEFICIARIES_TO_GROUP }, dto);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
