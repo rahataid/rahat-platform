@@ -190,4 +190,15 @@ export const elActions: ProjectActionFunc = {
       { ...payload },
       500000
     ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.GET_AUTOMATION_DETAIL]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.GET_AUTOMATION_DETAIL, uuid },
+      { ...payload },
+      500000
+    ),
 };
