@@ -34,7 +34,6 @@ import {
   TPIIData,
   WalletJobs
 } from '@rahataid/sdk';
-import { JOBS } from '@rahataid/sdk/beneficiary/beneficiary.events';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -417,7 +416,7 @@ export class BeneficiaryService {
     return mergedData;
   }
 
-  async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
+  async create(dto: CreateBeneficiaryDto, projectUuid?: string,) {
     const { piiData, projectUUIDs, walletAddress, ...data } = dto;
 
     if (!piiData.phone) throw new RpcException('Phone number is required');
@@ -2396,132 +2395,107 @@ export class BeneficiaryService {
   }
 
   async createBeneficiaryWithDbTransaction(payload: CreateBeneficiaryTransactionRepoDto) {
-    console.log('Creating beneficiary with DB transaction for project:', payload.projectId);
-    const { projectId, ...benfData } = payload;
-
+    const { projectId, piiData, ...benfData } = payload;
     const dbTxId = `db-tx-${Date.now()}`;
 
     try {
-      // step 1: check and remove orphaned transactions
       await this.cleanupOrphanedTransactions();
 
-      // step 2: begin transaction
+      // Phase 0: BEGIN on both sides
       await this.prisma.$executeRawUnsafe('BEGIN;');
-      await lastValueFrom(this.client.send(
-        { cmd: AAJobs.BENEFICIARY.CREATE_BENEFICIARY_WITH_DB_TRANSACTION, uuid: projectId },
-        {
-          action: 'BEGIN',
-          dbTxId,
-          payload: {},
-        }
-      ));
+      await this.sendAATxAction(projectId, 'BEGIN', dbTxId);
       this.logger.log('Transaction started for creating beneficiary with DB transaction.');
 
-      // step 3: create new beneficiary and assign to project
-      // step 3.1 - create beneficiary record
-      const newBeneficiaryData = await this.create(benfData);
+      // Phase 1: Execute writes on both sides
+      const createdBeneficiary = await this.prisma.beneficiary.create({
+        data: { ...benfData },
+      });
+
+      await this.prisma.beneficiaryPii.create({
+        data: {
+          beneficiaryId: createdBeneficiary.id,
+          phone: piiData.phone.toString(),
+          ...piiData,
+        },
+      });
 
       await this.prisma.beneficiaryProject.create({
         data: {
-          beneficiaryId: newBeneficiaryData.uuid,
-          projectId: projectId,
-        }
+          beneficiaryId: createdBeneficiary.uuid,
+          projectId,
+        },
       });
 
-      const payload = {
-        uuid: newBeneficiaryData.uuid,
-        walletAddress: newBeneficiaryData.walletAddress,
-        extras: { ...newBeneficiaryData.extras, phone: newBeneficiaryData.pii.phone },
-        isVerified: newBeneficiaryData.isVerified,
-        gender: newBeneficiaryData.gender,
+      const aaPayload = {
+        uuid: createdBeneficiary.uuid,
+        walletAddress: createdBeneficiary.walletAddress,
+        extras: {
+          ...((createdBeneficiary.extras ?? {}) as Record<string, any>),
+          phone: piiData.phone,
+        },
+        isVerified: createdBeneficiary.isVerified,
+        gender: createdBeneficiary.gender,
       };
 
-      await lastValueFrom(this.client.send(
-        { cmd: JOBS.ADD_TO_PROJECT, uuid: projectId },
-        {
-          ...payload
-        }
-      ));
-
+      await this.sendAATxAction(projectId, 'CREATE', dbTxId, aaPayload);
       this.logger.log('Beneficiary creation and assignment to project completed successfully within transaction.');
 
-      // step 4: Prepare transaction
+      // Phase 2: PREPARE on both sides
       await this.prisma.$executeRawUnsafe(`PREPARE TRANSACTION '${dbTxId}';`);
-      await lastValueFrom(this.client.send(
-        { cmd: AAJobs.BENEFICIARY.CREATE_BENEFICIARY_WITH_DB_TRANSACTION, uuid: projectId },
-        {
-          action: 'PREPARE',
-          dbTxId,
-          payload: {},
-        }
-      ));
+      await this.sendAATxAction(projectId, 'PREPARE', dbTxId);
       this.logger.log('Transaction prepared successfully.');
 
-      // step 5: Commit transaction
+      // Phase 3: COMMIT PREPARED on both sides
+      await this.sendAATxAction(projectId, 'COMMIT', dbTxId);
       await this.prisma.$executeRawUnsafe(`COMMIT PREPARED '${dbTxId}';`);
-      await lastValueFrom(this.client.send(
-        { cmd: AAJobs.BENEFICIARY.CREATE_BENEFICIARY_WITH_DB_TRANSACTION, uuid: projectId },
-        {
-          action: 'COMMIT',
-          dbTxId,
-          payload: {},
-        }
-      ));
       this.logger.log('Transaction committed successfully.');
-      return { success: true, message: 'Beneficiary created successfully with DB transaction.' };
 
+      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: createdBeneficiary };
     } catch (error) {
       this.logger.error('Error occurred during beneficiary creation with DB transaction:', error);
-
-      // step 6: Rollback
-      try {
-        // ✅ FIX 2: try ROLLBACK PREPARED first, fall back to plain ROLLBACK
-        try {
-          await this.prisma.$executeRawUnsafe(`ROLLBACK PREPARED '${dbTxId}';`);
-        } catch {
-          await this.prisma.$executeRawUnsafe('ROLLBACK;');
-        }
-
-        await lastValueFrom(this.client.send(
-          { cmd: AAJobs.BENEFICIARY.CREATE_BENEFICIARY_WITH_DB_TRANSACTION, uuid: projectId },
-          {
-            action: 'ROLLBACK',
-            dbTxId,
-            payload: {},
-          }
-        ));
-        this.logger.log('Transaction rolled back successfully after error.');
-      } catch (rollbackError) {
-        this.logger.error('Error occurred during transaction rollback:', rollbackError);
-      }
+      await this.rollback2PC(projectId, dbTxId);
       throw new RpcException(error.message);
     }
   }
 
-  async cleanupOrphanedTransactions() {
-    console.log('Checking for orphaned transactions...');
+  private async sendAATxAction(projectId: string, action: string, dbTxId: string, payload: Record<string, unknown> = {}) {
+    return lastValueFrom(this.client.send(
+      { cmd: AAJobs.BENEFICIARY.CREATE_BENEFICIARY_WITH_DB_TRANSACTION, uuid: projectId },
+      { action, dbTxId, payload },
+    ));
+  }
+
+  private async rollback2PC(projectId: string, dbTxId: string) {
     try {
-      const result = await this.prisma.$queryRawUnsafe(
+      try {
+        await this.prisma.$executeRawUnsafe(`ROLLBACK PREPARED '${dbTxId}';`);
+      } catch {
+        // Not in prepared state — plain ROLLBACK or already cleaned up
+      }
+      await this.sendAATxAction(projectId, 'ROLLBACK', dbTxId);
+      this.logger.log('Transaction rolled back successfully on both sides.');
+    } catch (rollbackError) {
+      this.logger.error('Error occurred during transaction rollback:', rollbackError);
+    }
+  }
+
+  private async cleanupOrphanedTransactions() {
+    try {
+      const result = await this.prisma.$queryRawUnsafe<{ gid: string }[]>(
         'SELECT gid FROM pg_prepared_xacts;'
       );
+      if (!result?.length) return;
 
-      if (Array.isArray(result) && result.length > 0) {
-        console.log(`Found ${result.length} orphaned transactions in DB`);
-        for (const row of result) {
-          const gid = row.gid;
-          console.log(`Rolling back orphaned transaction: ${gid}`);
-          try {
-            await this.prisma.$executeRawUnsafe(`ROLLBACK PREPARED '${gid}';`);
-            console.log(`Successfully rolled back transaction: ${gid}`);
-          } catch (rollbackError) {
-            console.error(`Failed to rollback transaction ${gid}:`, rollbackError);
-          }
+      this.logger.log(`Found ${result.length} orphaned prepared transaction(s). Rolling back...`);
+      for (const { gid } of result) {
+        try {
+          await this.prisma.$executeRawUnsafe(`ROLLBACK PREPARED '${gid}';`);
+        } catch (e) {
+          this.logger.error(`Failed to rollback orphaned transaction ${gid}:`, e);
         }
-      } else {
-        console.log('No orphaned transactions found in DB');
       }
     } catch (error) {
-      console.error('Error checking for orphaned transactions in DB:', error);
+      this.logger.error('Error checking for orphaned transactions:', error);
     }
   }
 }
