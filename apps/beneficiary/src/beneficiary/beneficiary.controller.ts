@@ -8,7 +8,7 @@ import {
   AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
-  CreateBeneficiaryTransactionRepoDto,
+  CreateBeneficiaryTransactionDto,
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
@@ -337,7 +337,7 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BENEFICIARY_WITH_DB_TRANSACTION })
-  async createBeneficiaryWithDbTransaction(data: CreateBeneficiaryTransactionRepoDto) {
+  async createBeneficiaryWithDbTransaction(data: CreateBeneficiaryTransactionDto) {
     return this.service.createBeneficiaryWithDbTransaction(data);
   }
 }

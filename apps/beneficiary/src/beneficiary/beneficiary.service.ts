@@ -14,7 +14,7 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
-  CreateBeneficiaryTransactionRepoDto,
+  CreateBeneficiaryTransactionDto,
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
@@ -2394,9 +2394,18 @@ export class BeneficiaryService {
     );
   }
 
-  async createBeneficiaryWithDbTransaction(payload: CreateBeneficiaryTransactionRepoDto) {
+  async createBeneficiaryWithDbTransaction(payload: CreateBeneficiaryTransactionDto) {
+    this.logger.log(`Starting beneficiary creation with DB transaction for project ${payload.projectId}`);
+
     const { projectId, piiData, ...benfData } = payload;
     const dbTxId = `db-tx-${Date.now()}`;
+
+    const walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress();
+
+    if (!walletAddress) {
+      this.logger.error('Failed to obtain a valid wallet address for the beneficiary.');
+      throw new RpcException('Failed to obtain a valid wallet address for the beneficiary. Please try again.');
+    }
 
     try {
       await this.cleanupOrphanedTransactions();
@@ -2408,7 +2417,7 @@ export class BeneficiaryService {
 
       // Phase 1: Execute writes on both sides
       const createdBeneficiary = await this.prisma.beneficiary.create({
-        data: { ...benfData },
+        data: { ...benfData, walletAddress },
       });
 
       await this.prisma.beneficiaryPii.create({
