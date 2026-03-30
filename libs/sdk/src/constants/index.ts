@@ -167,6 +167,7 @@ export const MS_ACTIONS = {
       DELETE_AUTOMATION: 'elProject.campaign.automation.delete',
       GET_FAILED_BATCH: 'elProject.crm.getFailedBatch',
       GET_ONE_FAILED_BATCH: 'elProject.crm.getOneFailedBatch',
+      DELETE_FAILED_BATCH: 'elProject.crm.deleteFailedBatch',
       RETRY_IMPORT: 'elProject.crm.retryImport',
       SYNC_TEMPLATES: 'elProject.campaign.sync_templates',
       BROADCAST_COUNT: 'elProject.campaign.broadcast_count',

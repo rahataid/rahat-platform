@@ -138,6 +138,13 @@ export const elActions: ProjectActionFunc = {
       500000
     ),
 
+  [MS_ACTIONS.ELPROJECT.CRM.DELETE_FAILED_BATCH]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: VendorJobs.DELETE_FAILED_BATCH },
+      { projectId: uuid, ...payload },
+      500000
+    ),
+
   [MS_ACTIONS.ELPROJECT.CRM.SYNC_TEMPLATES]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.CAMPAIGN.SYNC_TEMPLATES, uuid },
