@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { VendorCreateInput } from '@rahataid/sdk';
 import { Service } from '@rumsan/sdk/enums';
-import { IsEthereumAddress, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsObject, IsOptional, IsString } from 'class-validator';
 
-export class VendorRegisterDto implements VendorCreateInput {
+export class VendorRegisterDto {
   id?: number | undefined;
   uuid: string;
   location?: string | null | undefined;
@@ -28,12 +28,48 @@ export class VendorRegisterDto implements VendorCreateInput {
   @IsOptional()
   phone?: string;
 
+  //PATCH FIX
+  @ApiProperty({ example: '0x000000000', required: false })
+  @IsString()
+  @IsOptional()
+  authWallet?: string;
+
   @ApiProperty({ example: '0x000000000000000000000', required: false })
   @IsString()
-  @IsEthereumAddress()
-  wallet: string;
+  @IsOptional()
+  // @IsEthereumAddress()
+  wallet?: string;
 
   @ApiProperty({ example: { isVendor: true }, required: false })
   @IsObject()
   extras?: object;
+}
+
+export class VendorPasswordRegisterDto extends VendorRegisterDto {
+  @ApiProperty({ example: 'john_vendor_1234' })
+  @IsString()
+  username: string;
+
+  @ApiProperty({ example: 'password' })
+  @IsString()
+  password: string;
+}
+
+export class VendorPasswordLoginDto {
+  @ApiProperty({ example: 'john@mailinator.com' })
+  @IsString()
+  email: string;
+
+  @ApiProperty({ example: 'password' })
+  @IsString()
+  password: string;
+}
+export class VendorSignupDto {
+  @ApiProperty({ example: 'john@mailinator.com' })
+  @IsString()
+  email: string;
+
+  @ApiProperty({ example: 'password' })
+  @IsString()
+  password: string;
 }

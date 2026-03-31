@@ -1,0 +1,31 @@
+meta {
+  name: get all category
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.activityCategories.getAll",
+    "payload": {
+  //      "appId" : "{{appId}}"
+    }
+  }
+  
+  // {
+  //   "action": "settings.get",
+  //   "payload": {
+  //     "name": "PROJECTINFO"
+  //   }
+  // }
+}

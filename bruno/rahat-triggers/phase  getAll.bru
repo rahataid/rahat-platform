@@ -1,0 +1,30 @@
+meta {
+  name: phase  getAll
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.phases.getAll",
+    "payload": {
+     // "appId": "{{appId}}"
+  //     "name": "PREPAREDNESS"
+  //     "source": "GLOFAS"
+  //     "river_basin": "kar"
+      "riverBasin": "Mahakali",
+      "activeYear": "2024"
+  //     "name": "PROJECTINFO"
+    }
+  }
+}

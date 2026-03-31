@@ -6,9 +6,7 @@ import {
   IsInt,
   IsNumber,
   IsOptional,
-  IsString,
-  Length,
-  Matches,
+  IsString
 } from 'class-validator';
 import { UUID } from 'crypto';
 
@@ -94,13 +92,13 @@ export class UpdateBeneficiaryDto {
   })
   @IsOptional()
   @IsString()
-  @Length(42, 42, {
-    message: 'The Ethereum address must be 42 characters long',
-  })
-  @Matches(/^0x[a-fA-F0-9]{40}$/, {
-    message:
-      'Invalid Ethereum address format. It should start with "0x" and followed by 40 hexadecimal characters.',
-  })
+  // @Length(42, 42, {
+  //   message: 'The Ethereum address must be 42 characters long',
+  // })
+  // @Matches(/^0x[a-fA-F0-9]{40}$/, {
+  //   message:
+  //     'Invalid Ethereum address format. It should start with "0x" and followed by 40 hexadecimal characters.',
+  // })
   walletAddress?: string;
 
   @ApiProperty({

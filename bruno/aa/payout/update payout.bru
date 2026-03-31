@@ -1,0 +1,30 @@
+meta {
+  name: update payout
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.payout.update",
+    "payload": {
+      "uuid": "5d1556f6-f1d8-4431-a32a-aeb43479166b",
+      "status": "COMPLETED"
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
+}

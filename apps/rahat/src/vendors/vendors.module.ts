@@ -4,9 +4,14 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
-import { AuthsModule, UsersModule } from '@rumsan/user';
+import { PrismaService } from '@rumsan/prisma';
+import { AuthsModule, SignupModule } from '@rumsan/user';
+import { NotificationModule } from '../notification/notification.module';
+import { UsersModule } from '../users/users.module';
+import { WalletModule } from '../wallet/wallet.module';
 import { VendorsController } from './vendors.controller';
 import { VendorsService } from './vendors.service';
+
 
 @Module({
   imports: [
@@ -26,9 +31,12 @@ import { VendorsService } from './vendors.service';
       name: BQUEUE.RAHAT
     }),
     AuthsModule,
-    UsersModule
+    SignupModule.forRoot({ autoApprove: true }),
+    UsersModule,
+    WalletModule,
+    NotificationModule
   ],
   controllers: [VendorsController],
-  providers: [VendorsService]
+  providers: [VendorsService, PrismaService]
 })
 export class AppUsersModule { }

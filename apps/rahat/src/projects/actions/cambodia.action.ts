@@ -54,6 +54,12 @@ export const CAMBODIA_JOBS = {
 };
 
 export const cambodiaActions: ProjectActionFunc = {
+
+
+  ["cambodia.app.test"]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: "rahat.jobs.test", uuid }, payload),
+
+
   [MS_ACTIONS.CAMBODIA.APP.STATS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.APP.STATS, uuid }, payload),
 

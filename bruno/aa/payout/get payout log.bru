@@ -1,0 +1,29 @@
+meta {
+  name: get payout log
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.payout.getPayoutLog",
+    "payload": {
+      "uuid": "c09239c2-4400-439f-a206-a521857c130f"
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
+}

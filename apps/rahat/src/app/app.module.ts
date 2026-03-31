@@ -12,13 +12,17 @@ import {
   AuthsModule,
   RSUserModule,
   RolesModule,
+  SignupModule,
   UsersModule,
 } from '@rumsan/user';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
+import { CommsModule } from '../comms/comms.module';
 import { ExternalAppGuard } from '../decorators';
 import { GrievanceModule } from '../grievance/grievance.module';
 import { ListenersModule } from '../listeners/listeners.module';
+import { NotificationModule } from '../notification/notification.module';
 import { OfframpModule } from '../offramp/offramp.module';
+import { OtpModule } from '../otp/otp.module';
 import { MetaTxnProcessorsModule } from '../processors/meta-transaction/metaTransaction.module';
 import { ProcessorsModule } from '../processors/processors.module';
 import { ProjectModule } from '../projects/projects.module';
@@ -27,6 +31,7 @@ import { RequestContextModule } from '../request-context/request-context.module'
 import { TokenModule } from '../token/token.module';
 import { UploadModule } from '../upload/upload.module';
 import { AppUsersModule } from '../vendors/vendors.module';
+import { WalletModule } from '../wallet/wallet.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -41,7 +46,6 @@ import { AppService } from './app.service';
           host: configService.get('REDIS_HOST'),
           port: configService.get('REDIS_PORT'),
           password: configService.get('REDIS_PASSWORD'),
-
         },
         settings: {
           stalledInterval: 30000, // Time (ms) to check for stalled jobs, default is 30 seconds.
@@ -50,10 +54,11 @@ import { AppService } from './app.service';
       }),
       inject: [ConfigService],
     }),
-    EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false }),
+    EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false, verboseMemoryLeak: false }),
     ListenersModule,
     AppUsersModule,
-    RSUserModule.forRoot([AuthsModule, UsersModule, RolesModule]),
+    OtpModule,
+    RSUserModule.forRoot([AuthsModule, UsersModule, RolesModule,   SignupModule.forRoot({ autoApprove: true }),]),
     ProjectModule,
     StatsModule,
     ProcessorsModule,
@@ -65,11 +70,20 @@ import { AppService } from './app.service';
     OfframpModule,
     RequestContextModule,
     QueueModule,
+    WalletModule,
+    NotificationModule,
+    CommsModule.forRoot(),
+
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService, {
-    provide: APP_GUARD,
-    useClass: ExternalAppGuard,
-  }],
+  providers: [
+    AppService,
+    PrismaService,
+    {
+      provide: APP_GUARD,
+      useClass: ExternalAppGuard,
+    },
+  ],
+  exports: [AppService]
 })
 export class AppModule { }

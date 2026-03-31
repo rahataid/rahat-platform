@@ -1,0 +1,23 @@
+meta {
+  name: Delete Grievance
+  type: http
+  seq: 6
+}
+
+post {
+  url: @ApiProperty({ description: 'ID of the grievance' })
+  @IsNumber(){{url}}/projects/45606343-e6f5-475f-a2b3-f31d6ab10733/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aa.grievances.update",
+    "payload": {
+      "id": 1,
+      "status": "RESOLVED",
+      "title": "Updated Login Issues"
+    }
+  }
+}

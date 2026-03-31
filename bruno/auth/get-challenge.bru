@@ -13,7 +13,7 @@ post {
 assert {
   res.status: eq 201
   res.body.success: eq true
-  res.body.data: isJson 
+  res.body.data: isJson
 }
 
 script:post-response {

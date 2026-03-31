@@ -23,6 +23,10 @@ model User {
   phone     String?
   wallet    String?
   extras    Json?   @db.JsonB()
+  notes     String? @db.Text()
+  sessionId String?
+  username     String? @unique              
+  usernameLower String? @unique   
 
   Auth          Auth[]
   UserRole      UserRole[]
@@ -36,9 +40,26 @@ model User {
   updatedBy String?
 
   grievances Grievance[] @relation("UserGrievances")
+  // wallets    UserWallets[]
 
   @@map("tbl_users")
 }
+
+// model UserWallets {
+//   id         Int       @id @default(autoincrement())
+//   userId     Int
+//   chain      String
+//   address    String
+//   privateKey String
+//   createdAt  DateTime  @default(now())
+//   updatedAt  DateTime? @updatedAt()
+//   deletedAt  DateTime?
+
+//   user User @relation(fields: [userId], references: [id])
+
+//   @@unique([userId, chain])
+//   @@map("tbl_users_wallets")
+// }
 
 enum Gender {
   MALE
@@ -110,9 +131,14 @@ model Auth {
   isLocked      Boolean   @default(false)
   lockedOnAt    DateTime?
   lastLoginAt   DateTime?
+  serviceIdLower String?                    
+  passwordHash  String? 
+  lockCount     Int       @default(0)  
+  lastFailedAt  DateTime? 
 
   User    User          @relation(fields: [userId], references: [id])
   AuthLog AuthSession[]
+  LoginAttempt LoginAttempt[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -147,6 +173,26 @@ enum Service {
   TWITTER
   GITHUB
   LINKEDIN
+  USERNAME 
+}
+
+model LoginAttempt {
+  id         Int      @id @default(autoincrement())
+  authId     Int?     // Nullable: might not exist for invalid usernames
+  identifier String   // Username/email/phone attempted
+  service    Service
+  ip         String
+  userAgent  String?
+  success    Boolean
+  failReason String?
+  createdAt  DateTime @default(now())
+  
+  Auth Auth? @relation(fields: [authId], references: [id])
+  
+  @@index([ip, createdAt])
+  @@index([identifier, createdAt])
+  @@index([authId, createdAt])
+  @@map("tbl_login_attempts")
 }
 
 // ++++++++++++++++++ END: @rumsan/user - Role/Auth ++++++++++++++++++++++++
@@ -243,6 +289,7 @@ model Beneficiary {
   deletedAt      DateTime?
   isVerified     Boolean        @default(false)
 
+
   pii                  BeneficiaryPii?        @relation("BeneficiaryToPii")
   BeneficiaryProject   BeneficiaryProject[]
   groupedBeneficiaries GroupedBeneficiaries[]
@@ -277,6 +324,7 @@ model BeneficiaryGroup {
   uuid String @unique @default(uuid()) @db.Uuid()
 
   name String @unique
+  groupPurpose GroupPurpose?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -329,6 +377,13 @@ model BeneficiaryProject {
   @@index([beneficiaryId])
   @@index([deletedAt])
   @@map("tbl_beneficiaries_projects")
+}
+
+
+enum GroupPurpose {
+BANK_TRANSFER
+MOBILE_MONEY
+COMMUNICATION
 }
 
 // ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++
@@ -395,6 +450,7 @@ model Project {
   BeneficiaryProject      BeneficiaryProject[]
   ProjectVendors          ProjectVendors[]
   beneficiaryGroupProject BeneficiaryGroupProject[]
+  notifications           Notification[]
 
   Grievance Grievance[]
 
@@ -425,7 +481,7 @@ model Vendors {
   email     String?
   phone     String?
   location  String?
-  wallet    String?
+  wallet    String? // Todo: Remove this after wallet integration
   extras    Json?     @db.JsonB()
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -483,17 +539,27 @@ enum TransactionStatus {
 // ++++++++++++++++++ START: @rahat/grievances - Grievances ++++++++++++++++++++
 
 enum GrievanceStatus {
-  //  'New', 'Under Review', 'Resolved', 'Closed
   NEW
+  IN_PROGRESS
   UNDER_REVIEW
   RESOLVED
   CLOSED
+  REJECTED
 }
 
 enum GrievanceType {
   TECHNICAL
   NON_TECHNICAL
+  OPERATIONAL
+  FINANCIAL
   OTHER
+}
+
+enum GrievancePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
 
 model Grievance {
@@ -503,15 +569,19 @@ model Grievance {
   reporterUserId  Int
   reporterUser    User            @relation("UserGrievances", fields: [reporterUserId], references: [id])
   reporterContact String
+  tags            String[]
   title           String
   type            GrievanceType
   projectId       String          @db.Uuid()
   project         Project         @relation(fields: [projectId], references: [uuid])
   description     String
   status          GrievanceStatus @default(NEW)
+  priority        GrievancePriority @default(LOW)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   deletedAt       DateTime?
+  resolvedAt      DateTime?
+  closedAt        DateTime?
 
   @@map("tbl_grievances")
 }
@@ -560,18 +630,18 @@ enum KoboBeneficiaryStatus {
 }
 
 model KoboBeneficiary {
-  id                       Int                    @id @default(autoincrement())
-  uuid                     String                 @unique @default(uuid()) @db.Uuid()
-  name                     String
-  gender                   Gender                 @default(UNKNOWN)
-  type                     KoboBeneficiaryType    @default(SALE)
-  status                   KoboBeneficiaryStatus  @default(PENDING)
-  phone                    String
-  age                      Int?
-  email                    String?
-  wallet                   String?
-  leadInterests            String[]
-  extras                    Json?                  @db.JsonB()
+  id            Int                   @id @default(autoincrement())
+  uuid          String                @unique @default(uuid()) @db.Uuid()
+  name          String
+  gender        Gender                @default(UNKNOWN)
+  type          KoboBeneficiaryType   @default(SALE)
+  status        KoboBeneficiaryStatus @default(PENDING)
+  phone         String
+  age           Int?
+  email         String?
+  wallet        String?
+  leadInterests String[]
+  extras        Json?                 @db.JsonB()
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
@@ -700,3 +770,22 @@ model OfframpTransaction {
 }
 
 // endregion: @rahat/offramp
+
+// ++++++++++++++++++ START: Notification ++++++++++++++++++++
+
+model Notification {
+  id             Int            @id @default(autoincrement())
+  title          String           
+  projectId      String?        @db.Uuid()
+  project        Project?       @relation(fields: [projectId], references: [uuid])
+  description    String
+  group          String 
+  createdAt      DateTime       @default(now())   
+  notify         Boolean        @default(false)
+
+  @@map("tbl_notifications")
+}
+
+// ++++++++++++++++++ END: Notification ++++++++++++++++++++
+
+

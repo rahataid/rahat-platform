@@ -51,6 +51,7 @@ export const JOBS = {
     FINDONE_DISBURSEMENT_PLAN: 'rahat.jobs.disbursement_plan.listone',
     UPDATE_DISBURSEMENT_PLAN: 'rahat.jobs.disbursement_plan.update',
     BULK_CREATE_DISBURSEMENT: 'rahat.jobs.disbursement.bulk_create',
+    SEND_EMAIL_NOTIFICATION: 'rahat.jobs.disbursement.send_email_notification',
   },
   CAMPAIGN: {
     CREATE_CAMPAIGN: 'rahat.jobs.campaign.create',
@@ -65,6 +66,14 @@ export const JOBS = {
     CREATE_AUDIENCE: 'rahat.jobs.campaign.create_audience',
     CREATE_BULK_AUDIENCE: 'rahat.jobs.campaign.create_bulk_audience',
     GET_CAMPAIGN_LOG: 'rahat.jobs.campaign.log',
+    CREATE_TEMPLATE: 'rahat.jobs.campaign.create_template',
+    DELETE_TEMPLATE: 'rahat.jobs.campaign.delete_template',
+    LIST_TEMPLATES: 'rahat.jobs.campaign.list_templates',
+    SYNC_TEMPLATES: 'rahat.jobs.campaign.sync_templates',
+    BROADCAST_COUNT: 'rahat.jobs.campaign.broadcast_count',
+    LIST_SESSION_BROADCASTS: 'rahat.jobs.campaign.list_session_broadcasts',
+    RETRY_SESSION: 'rahat.jobs.campaign.retry_session',
+
   },
   OFFLINE_BENEFICIARIES: {
     SYNC_BENEFICIARIES: 'rahat.jobs.sync_beneficiaries',
@@ -103,5 +112,11 @@ export const JOBS = {
     GET: 'rahat.jobs.reporting.get',
     LIST_EYE_CHECKEUP_LINE: 'rahat.jobs.reporting.list_eye_checkup_line',
     LIST_PURCHASE_OF_GLASSESS_LINE: 'rahat.jobs.reporting.list_purchase_of_glassess',
+  },
+
+  NOTIFICATION: {
+    CREATE: 'rahat.jobs.notification.create',
+    LIST: 'rahat.jobs.notification.list',
+    GET: 'rahat.jobs.notification.get',
   },
 };

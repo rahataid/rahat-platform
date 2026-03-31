@@ -1,0 +1,18 @@
+meta {
+  name: User login
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{xcapitURL}}/api/users/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "rahat@xcapit.com",
+    "password": "nYph!TUd[!6u#Jp"
+  }
+}

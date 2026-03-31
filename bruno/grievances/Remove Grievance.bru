@@ -1,0 +1,20 @@
+meta {
+  name: Remove Grievance
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aa.grievances.remove",
+    "payload": {
+      "uuid": "a806b86d-81fe-497f-8b60-b40c1e63610c"
+    }
+  }
+}

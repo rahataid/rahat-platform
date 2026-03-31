@@ -1,0 +1,42 @@
+meta {
+  name: send bulk otp
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "otp.sendBulkOtp",
+    "payload": {
+      "requests": [
+        {
+          "phoneNumber": "98670023857",
+          "amount": "1000"
+        },
+        {
+          "phoneNumber": "98670023858",
+          "amount": "2000"
+        },
+        {
+          "phoneNumber": "98670023859",
+          "amount": "1500"
+        }
+      ]
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  console.log('Bulk OTP Response:', responseData);
+} 
