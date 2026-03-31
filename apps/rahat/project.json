@@ -52,7 +52,8 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/rahat/jest.config.ts"
+        "jestConfig": "apps/rahat/jest.config.ts",
+        "coverageReporters": ["html", "text-summary"]
       }
     }
   },
