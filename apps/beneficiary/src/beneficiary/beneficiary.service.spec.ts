@@ -783,7 +783,7 @@ describe('BeneficiaryService', () => {
       expect(prisma.groupedBeneficiaries.createMany).toHaveBeenCalledWith({
         data: expectedCreateManyPayload
       });
-      expect(result).toEqual(mockResponse);
+      expect(result).toEqual({ ...mockResponse, group: groupMockResponse });
     });
   });
 
