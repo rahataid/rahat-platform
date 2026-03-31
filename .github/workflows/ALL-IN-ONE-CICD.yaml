@@ -21,6 +21,7 @@ on:
           - "dev"
           - "main"
           - "dev-qa"
+          - "aa-heatwave-main"
 
       apps_to_build:
         description: "Apps to build (leave empty for defaults)"
@@ -120,6 +121,11 @@ jobs:
             dev-qa)
               TAG="dev-qa"
               SECRET="ENV_AA_DEV-QA"
+              APPS="beneficiary,rahat"
+              ;;
+            aa-heatwave-main)
+              TAG="aa-heatwave-main"
+              SECRET="ENV_AA_HEATWAVE"
               APPS="beneficiary,rahat"
               ;;
             *)
