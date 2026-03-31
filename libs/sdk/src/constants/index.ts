@@ -312,6 +312,12 @@ export const MS_ACTIONS = {
       REMOVE_INKIND_STOCK: 'aaProject.inkindStock.remove',
       ASSIGN_GROUP_INKIND: 'aaProject.groupInkinds.assign',
       GET_BY_GROUP: 'aaProject.groupInkinds.getByGroup',
+      GET_AVAILABLE_INKIND_BENEFICIARY_PHONE: 'aaProject.groupInkinds.getAvailableInkindByBeneficiaryPhone',
+      GET_GROUP_INKIND_LOGS: 'aaProject.groupInkinds.getLogs',
+      GET_GROUP_INKIND_LOGS_BY_VENDOR: 'aaProject.groupInkinds.getLogsByVendor',
+      BENEFICIARY_INKIND_REDEEM: 'aaProject.beneficiaryInkinds.redeem',
+      SEND_BENEFICIARY_OTP: 'aaProject.inkinds.sendBeneficiaryOtp',
+      VALIDATE_BENEFICIARY_OTP: 'aaProject.inkinds.validateBeneficiaryOtp',
     },
     VENDOR: {
       // Remove after test
