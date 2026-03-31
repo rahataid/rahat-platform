@@ -187,6 +187,8 @@ export const MS_ACTIONS = {
       GET_ALL_COMMUNICATION_STATS: 'elProject.campaign.communication_stats',
       GET_CAMPAIGN_LOG: 'elProject.campaign.log',
       GET_AUTOMATION_DETAIL: 'elProject.campaign.automation.detail',
+      LIST_AUTOMATION_LOGS: 'elProject.campaign.automation.logs',
+      TRIGGER_AUTOMATION_MANUAL: 'elProject.campaign.automation.trigger_manual',
     },
   },
   SETTINGS: {

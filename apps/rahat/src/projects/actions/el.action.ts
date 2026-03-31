@@ -214,4 +214,26 @@ export const elActions: ProjectActionFunc = {
       { ...payload },
       500000
     ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.LIST_AUTOMATION_LOGS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.LIST_AUTOMATION_LOGS, uuid },
+      { ...payload },
+      500000
+    ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.TRIGGER_AUTOMATION_MANUAL]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.TRIGGER_AUTOMATION_MANUAL, uuid },
+      { ...payload },
+      500000
+    ),
 };
