@@ -14,6 +14,7 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  CreateBeneficiaryTransactionDto,
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
@@ -31,11 +32,12 @@ import {
   GroupWithValidationAA,
   ProjectContants,
   TPIIData,
-  WalletJobs,
+  WalletJobs
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
+import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
   findTempBenefGroups,
@@ -414,7 +416,7 @@ export class BeneficiaryService {
     return mergedData;
   }
 
-  async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
+  async create(dto: CreateBeneficiaryDto, projectUuid?: string,) {
     const { piiData, projectUUIDs, walletAddress, ...data } = dto;
 
     if (!piiData.phone) throw new RpcException('Phone number is required');
@@ -2391,6 +2393,120 @@ export class BeneficiaryService {
       }
     );
   }
+
+  async createBeneficiaryWithDbTransaction(payload: CreateBeneficiaryTransactionDto) {
+    this.logger.log(`Starting beneficiary creation with DB transaction for project ${payload.projectId}`);
+
+    const { projectId, piiData, ...benfData } = payload;
+    const dbTxId = `db-tx-${Date.now()}`;
+
+    const walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress();
+
+    if (!walletAddress) {
+      this.logger.error('Failed to obtain a valid wallet address for the beneficiary.');
+      throw new RpcException('Failed to obtain a valid wallet address for the beneficiary. Please try again.');
+    }
+
+    try {
+      await this.cleanupOrphanedTransactions();
+
+      // Phase 0: BEGIN on both sides
+      await this.prisma.$executeRawUnsafe('BEGIN;');
+      await this.sendAATxAction(projectId, 'BEGIN', dbTxId);
+      this.logger.log('Transaction started for creating beneficiary with DB transaction.');
+
+      // Phase 1: Execute writes on both sides
+      const createdBeneficiary = await this.prisma.beneficiary.create({
+        data: { ...benfData, walletAddress },
+      });
+
+      await this.prisma.beneficiaryPii.create({
+        data: {
+          beneficiaryId: createdBeneficiary.id,
+          phone: piiData.phone.toString(),
+          ...piiData,
+        },
+      });
+
+      await this.prisma.beneficiaryProject.create({
+        data: {
+          beneficiaryId: createdBeneficiary.uuid,
+          projectId,
+        },
+      });
+
+      const aaPayload = {
+        uuid: createdBeneficiary.uuid,
+        walletAddress: createdBeneficiary.walletAddress,
+        extras: {
+          ...((createdBeneficiary.extras ?? {}) as Record<string, any>),
+          phone: piiData.phone,
+        },
+        isVerified: createdBeneficiary.isVerified,
+        gender: createdBeneficiary.gender,
+      };
+
+      await this.sendAATxAction(projectId, 'CREATE', dbTxId, aaPayload);
+      this.logger.log('Beneficiary creation and assignment to project completed successfully within transaction.');
+
+      // Phase 2: PREPARE on both sides
+      await this.prisma.$executeRawUnsafe(`PREPARE TRANSACTION '${dbTxId}';`);
+      await this.sendAATxAction(projectId, 'PREPARE', dbTxId);
+      this.logger.log('Transaction prepared successfully.');
+
+      // Phase 3: COMMIT PREPARED on both sides
+      await this.sendAATxAction(projectId, 'COMMIT', dbTxId);
+      await this.prisma.$executeRawUnsafe(`COMMIT PREPARED '${dbTxId}';`);
+      this.logger.log('Transaction committed successfully.');
+
+      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: createdBeneficiary };
+    } catch (error) {
+      this.logger.error('Error occurred during beneficiary creation with DB transaction:', error);
+      await this.rollback2PC(projectId, dbTxId);
+      throw new RpcException(error.message);
+    }
+  }
+
+  private async sendAATxAction(projectId: string, action: string, dbTxId: string, payload: Record<string, unknown> = {}) {
+    return lastValueFrom(this.client.send(
+      { cmd: AAJobs.BENEFICIARY.CREATE_BENEFICIARY_WITH_DB_TRANSACTION, uuid: projectId },
+      { action, dbTxId, payload },
+    ));
+  }
+
+  private async rollback2PC(projectId: string, dbTxId: string) {
+    try {
+      try {
+        await this.prisma.$executeRawUnsafe(`ROLLBACK PREPARED '${dbTxId}';`);
+      } catch {
+        // Not in prepared state — plain ROLLBACK or already cleaned up
+      }
+      await this.sendAATxAction(projectId, 'ROLLBACK', dbTxId);
+      this.logger.log('Transaction rolled back successfully on both sides.');
+    } catch (rollbackError) {
+      this.logger.error('Error occurred during transaction rollback:', rollbackError);
+    }
+  }
+
+  private async cleanupOrphanedTransactions() {
+    try {
+      const result = await this.prisma.$queryRawUnsafe<{ gid: string }[]>(
+        'SELECT gid FROM pg_prepared_xacts;'
+      );
+      if (!result?.length) return;
+
+      this.logger.log(`Found ${result.length} orphaned prepared transaction(s). Rolling back...`);
+      for (const { gid } of result) {
+        try {
+          await this.prisma.$executeRawUnsafe(`ROLLBACK PREPARED '${gid}';`);
+        } catch (e) {
+          this.logger.error(`Failed to rollback orphaned transaction ${gid}:`, e);
+        }
+      }
+    } catch (error) {
+      this.logger.error('Error checking for orphaned transactions:', error);
+    }
+  }
 }
 
 async function checkPhoneNumber(
@@ -2419,4 +2535,5 @@ async function checkWalletAddress(
     select: { walletAddress: true },
   });
   return duplicates.map((dup) => dup.walletAddress);
+
 }
