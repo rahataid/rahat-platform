@@ -43,10 +43,14 @@ describe('ProjectService', () => {
             },
             {
                 provide: 'RAHAT_CLIENT',
-                useValue: { 
-                    send: jest.fn(), 
+                useValue: {
+                    send: jest.fn(),
                     emit: jest.fn(),
                 },
+            },
+            {
+                provide: 'BullQueue_RAHAT.META_TXN',
+                useValue: { add: jest.fn() },
             },
         ]
       }).compile();

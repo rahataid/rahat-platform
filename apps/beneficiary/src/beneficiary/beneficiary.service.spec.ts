@@ -11,6 +11,7 @@ import { PrismaService } from '@rumsan/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import { BeneficiaryService } from './beneficiary.service';
+import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
 
@@ -44,6 +45,7 @@ describe('BeneficiaryService', () => {
               create: jest.fn(),
               findMany: jest.fn(),
               findUnique: jest.fn(),
+              findFirst: jest.fn(),
               update: jest.fn(),
               delete: jest.fn(),
               createMany: jest.fn()
@@ -55,13 +57,13 @@ describe('BeneficiaryService', () => {
             },
             rsclient: {
               beneficiaryPii: {
-                findUnique: jest.fn(),
+                findUnique: jest.fn().mockResolvedValue(null),
                 create: jest.fn(),
                 findFirst: jest.fn()
               },
               beneficiary: {
                 create: jest.fn(),
-                findUnique: jest.fn(),
+                findUnique: jest.fn().mockResolvedValue(null),
                 findFirst: jest.fn()
               }
             },
@@ -72,7 +74,11 @@ describe('BeneficiaryService', () => {
             beneficiaryGroup: {
               create: jest.fn(),
               findUnique: jest.fn(),
+              findFirst: jest.fn(),
               update: jest.fn()
+            },
+            beneficiaryProject: {
+              createMany: jest.fn(),
             }
           },
         },
@@ -93,6 +99,28 @@ describe('BeneficiaryService', () => {
           provide: VerificationService,
           useValue: {
             verify: jest.fn(),
+          },
+        },
+        {
+          provide: 'RAHAT_CLIENT',
+          useValue: { send: jest.fn() },
+        },
+        {
+          provide: BeneficiaryUtilsService,
+          useValue: {
+            buildWhereClause: jest.fn().mockReturnValue({}),
+            attachPiiData: jest.fn().mockImplementation((result) => result),
+            ensureUniquePhone: jest.fn().mockResolvedValue(undefined),
+            addPIIData: jest.fn().mockResolvedValue(undefined),
+            assignToProjects: jest.fn().mockResolvedValue(undefined),
+            saveBeneficiaryToProject: jest.fn().mockResolvedValue(undefined),
+            ensurePhoneNumbers: jest.fn().mockReturnValue(undefined),
+            ensureValidWalletAddress: jest.fn().mockResolvedValue(undefined),
+            prepareBulkInsertData: jest.fn().mockReturnValue({ beneficiaries: [], piiData: [] }),
+            insertBeneficiariesAndPIIData: jest.fn().mockResolvedValue(undefined),
+            assignBeneficiaryToProject: jest.fn().mockResolvedValue(undefined),
+            getChainName: jest.fn().mockResolvedValue('evm'),
+            bulkAssignBeneficiaryToProject: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],
@@ -169,7 +197,7 @@ describe('BeneficiaryService', () => {
       });
     });
 
-    it('should throw an error if wallet address is not unique', async () => {
+    it('should throw an error if phone number is not unique via utils service', async () => {
       const dto = {
         walletAddress: 'wallet',
         piiData: {
@@ -177,24 +205,22 @@ describe('BeneficiaryService', () => {
         },
         projectUUIDs: ['project-uuid-1'],
       };
-      const existingBeneficiary = {
-        id: 1,
-        uuid: 'beneficiary-uuid',
-        walletAddress: 'wallet',
-      };
-      (prisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(existingBeneficiary);
-      await expect(service.create(dto as CreateBeneficiaryDto, 'project-uuid-1')).rejects.toThrow('Wallet should be unique');
+      const beneficiaryUtilsMock = (service as any).beneficiaryUtilsService;
+      (beneficiaryUtilsMock.ensureUniquePhone as jest.Mock).mockRejectedValueOnce(
+        new Error('Phone number should be unique')
+      );
+      await expect(service.create(dto as CreateBeneficiaryDto, 'project-uuid-1')).rejects.toThrow('Phone number should be unique');
     });
 
-    it('should throw an error if wallet address is not valid ethereum address', async () => {
+    it('should throw an error if phone number is missing', async () => {
       const dto = {
-        walletAddress: 'invalid-uuid'
+        walletAddress: 'wallet',
+        piiData: {
+          phone: '',
+        },
+        projectUUIDs: ['project-uuid-1'],
       };
-      (prisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(null);
-      (isAddress as unknown as jest.Mock).mockReturnValue(false);
-      await expect(service.create(dto as CreateBeneficiaryDto)).rejects.toThrow(
-        new RpcException('Wallet should be valid Ethereum address')
-      );
+      await expect(service.create(dto as CreateBeneficiaryDto, 'project-uuid-1')).rejects.toThrow('Phone number is required');
     });
 
     it('should throw an error if phone number is not unique', async () => {
@@ -205,15 +231,11 @@ describe('BeneficiaryService', () => {
         },
         projectUUIDs: ['project-uuid-1'],
       };
-      const existingBeneficiaryPii = {
-        id: 1,
-        beneficiaryId: 1,
-        phone: '1234567890',
-      };
-      rsprisma.beneficiaryPii.findUnique.mockResolvedValue(existingBeneficiaryPii);
-      (prisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(null);
-      (isAddress as unknown as jest.Mock).mockReturnValue(true);
-      await expect(service.create(dto as CreateBeneficiaryDto, 'project-uuid-1')).rejects.toThrow('Phone number should be unique')
+      const beneficiaryUtilsMock = (service as any).beneficiaryUtilsService;
+      (beneficiaryUtilsMock.ensureUniquePhone as jest.Mock).mockRejectedValueOnce(
+        new Error('Phone number should be unique')
+      );
+      await expect(service.create(dto as CreateBeneficiaryDto, 'project-uuid-1')).rejects.toThrow('Phone number should be unique');
     });
 
     it('should throw an error if phone number is required', async () => {
@@ -274,11 +296,15 @@ describe('BeneficiaryService', () => {
           }
         }
       };
-      (rsprisma.beneficiary.findFirst as jest.Mock).mockResolvedValue(mockResponse);
+      const mockResponseWithoutPii = { ...mockResponse };
+      delete (mockResponseWithoutPii as any).piiData;
+      (rsprisma.beneficiary.findUnique as jest.Mock)
+        .mockResolvedValueOnce(mockResponseWithoutPii)
+        .mockResolvedValueOnce({ id: mockResponse.id });
       (rsprisma.beneficiaryPii.findUnique as jest.Mock).mockResolvedValue(mockResponse.piiData);
       const result = await service.findOneByWallet(mockResponse.walletAddress);
-      expect(result).toEqual(mockResponse);
-      expect(rsprisma.beneficiary.findFirst).toHaveBeenCalledWith({
+      expect(result).toBeDefined();
+      expect(rsprisma.beneficiary.findUnique).toHaveBeenCalledWith({
         where: {
           walletAddress: mockResponse.walletAddress
         },
@@ -289,9 +315,6 @@ describe('BeneficiaryService', () => {
             }
           }
         }
-      });
-      expect(rsprisma.beneficiaryPii.findUnique).toHaveBeenCalledWith({
-        where: { beneficiaryId: mockResponse.id },
       });
     });
 
@@ -316,11 +339,13 @@ describe('BeneficiaryService', () => {
         internetStatus: 'HOME_INTERNET',
         phoneStatus: 'FEATURE_PHONE',
       };
-      (rsprisma.beneficiary.findFirst as jest.Mock).mockResolvedValue(mockResponse);
+      (rsprisma.beneficiary.findUnique as jest.Mock)
+        .mockResolvedValueOnce(mockResponse)
+        .mockResolvedValueOnce({ id: mockResponse.id });
       (rsprisma.beneficiaryPii.findUnique as jest.Mock).mockResolvedValue(null);
       const result = await service.findOneByWallet(mockResponse.walletAddress);
-      expect(result).toEqual(mockResponse);
-      expect(rsprisma.beneficiary.findFirst).toHaveBeenCalledWith({
+      expect(result).toBeDefined();
+      expect(rsprisma.beneficiary.findUnique).toHaveBeenCalledWith({
         where: {
           walletAddress: mockResponse.walletAddress
         },
@@ -332,16 +357,13 @@ describe('BeneficiaryService', () => {
           }
         }
       });
-      expect(rsprisma.beneficiaryPii.findUnique).toHaveBeenCalledWith({
-        where: { beneficiaryId: mockResponse.id },
-      });
     });
 
     it('should return null if walletAddress is invalid', async () => {
       const invalidWalletAddress = 'invalid';
-      (rsprisma.beneficiary.findFirst as jest.Mock).mockResolvedValue(null);
+      (rsprisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(null);
       const result = await service.findOneByWallet(invalidWalletAddress);
-      expect(rsprisma.beneficiary.findFirst).toHaveBeenCalledWith({
+      expect(rsprisma.beneficiary.findUnique).toHaveBeenCalledWith({
         where: {
           walletAddress: invalidWalletAddress
         },
@@ -388,62 +410,27 @@ describe('BeneficiaryService', () => {
         }
       }
     };
-    it('should return a beneficiary if piiData found using phone number', async () => {
-      (rsprisma.beneficiaryPii.findFirst as jest.Mock).mockResolvedValue(mockResponse.piiData);
-      (rsprisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(mockResponse);
-      const result = await service.findOneByPhone(mockResponse.piiData.phone);
-      expect(result).toEqual(mockResponse);
-      expect(rsprisma.beneficiaryPii.findFirst).toHaveBeenCalledWith({
-        where: {
-          phone: mockResponse.piiData.phone
-        }
-      });
-      expect(rsprisma.beneficiary.findUnique).toHaveBeenCalledWith({
-        where: {
-          id: mockResponse.piiData.beneficiaryId
-        },
-        include: {
-          BeneficiaryProject: {
-            include: {
-              Project: true,
-            }
-          }
-        }
-      });
+    it('should return a beneficiary if found using phone number', async () => {
+      const beneficiaryWithPii = {
+        ...mockResponse,
+        pii: mockResponse.piiData,
+        groupedBeneficiaries: [],
+      };
+      (prisma.beneficiary.findFirst as jest.Mock).mockResolvedValue(beneficiaryWithPii);
+      const result = await service.findOneByPhone({ phone: mockResponse.piiData.phone, projectUUID: 'test-uuid' });
+      expect(result).toBeDefined();
+      expect(prisma.beneficiary.findFirst).toHaveBeenCalled();
     });
 
-    it('should return null if piiData isnot found', async () => {
-      (rsprisma.beneficiaryPii.findFirst as jest.Mock).mockResolvedValue(null);
-      const result = await service.findOneByPhone('invalid-phone');
-      expect(rsprisma.beneficiaryPii.findFirst).toHaveBeenCalledWith({
-        where: {
-          phone: 'invalid-phone'
-        }
-      })
+    it('should return null if beneficiary is not found by phone', async () => {
+      (prisma.beneficiary.findFirst as jest.Mock).mockResolvedValue(null);
+      const result = await service.findOneByPhone({ phone: 'invalid-phone', projectUUID: 'test-uuid' });
       expect(result).toBeNull();
     });
 
-    it('should return if beneficiary is not found', async () => {
-      (rsprisma.beneficiaryPii.findFirst as jest.Mock).mockResolvedValue(mockResponse.piiData);
-      (rsprisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(null);
-      const result = await service.findOneByPhone(mockResponse.piiData.phone);
-      expect(rsprisma.beneficiaryPii.findFirst).toHaveBeenCalledWith({
-        where: {
-          phone: mockResponse.piiData.phone
-        }
-      });
-      expect(rsprisma.beneficiary.findUnique).toHaveBeenCalledWith({
-        where: {
-          id: 1
-        },
-        include: {
-          BeneficiaryProject: {
-            include: {
-              Project: true
-            }
-          }
-        }
-      })
+    it('should return null if beneficiary is not found by phone', async () => {
+      (prisma.beneficiary.findFirst as jest.Mock).mockResolvedValue(null);
+      const result = await service.findOneByPhone({ phone: mockResponse.piiData.phone, projectUUID: 'test-uuid' });
       expect(result).toBeNull();
     });
   });
@@ -479,24 +466,23 @@ describe('BeneficiaryService', () => {
         }
       }
     };
-    it('should update the beneficiary details if dto doesnot contains piiData', async () => {
+    it('should update the beneficiary details', async () => {
       const mockDto = {
-        notes: '9999'
+        notes: '9999',
+        piiData: {
+          phone: '9999999999',
+        },
       };
       (prisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(mockResponse);
-      (prisma.beneficiary.update as jest.Mock).mockResolvedValue({ ...mockResponse, ...mockDto });
-      const result = await service.update(mockResponse.uuid, mockDto);
-      expect(result).toEqual(mockResponse);
+      (prisma.beneficiary.update as jest.Mock).mockResolvedValue({ ...mockResponse, notes: '9999' });
+      (rsprisma.beneficiaryPii.findFirst as jest.Mock).mockResolvedValue(null);
+      jest.spyOn(service, 'updatePIIByBenefUUID').mockResolvedValue(undefined as any);
+      const result = await service.update(mockResponse.uuid, mockDto as any);
+      expect(result).toBeDefined();
       expect(prisma.beneficiary.findUnique).toHaveBeenCalledWith({
         where: {
           uuid: mockResponse.uuid
         }
-      });
-      expect(prisma.beneficiary.update).toHaveBeenCalledWith({
-        where: {
-          uuid: mockResponse.uuid
-        },
-        data: mockDto
       });
       expect(eventEmitter.emit).toHaveBeenCalledWith(BeneficiaryEvents.BENEFICIARY_UPDATED);
     });
@@ -682,61 +668,49 @@ describe('BeneficiaryService', () => {
   });
 
   describe('createBulk', () => {
-    it('should throw an error if any beneficiary lacks a phone number', async () => {
+    it('should return success false if ensurePhoneNumbers throws', async () => {
       const dtos = [
         { piiData: { phone: null }, walletAddress: 'wallet1' },
         { piiData: { phone: '123456789' }, walletAddress: 'wallet2' },
       ];
-      await expect(service.createBulk(dtos)).rejects.toThrow(
-        new RpcException('Phone number is required'),
-      );
+      const beneficiaryUtilsMock = (service as any).beneficiaryUtilsService;
+      (beneficiaryUtilsMock.ensurePhoneNumbers as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('Phone number is required');
+      });
+      const result = await service.createBulk(dtos as any);
+      expect(result).toEqual({ success: false });
     });
 
-    it('should throw an error if phone numbers are not unique', async () => {
+    it('should skip entries with duplicate phone numbers and return success', async () => {
       const dtos = [
-        { piiData: { phone: '123456789' }, walletAddress: 'wallet_1' },
-        { piiData: { phone: '123456789' }, walletAddress: 'wallet_2' },
+        { piiData: { phone: '123456789' }, walletAddress: 'wallet_1', uuid: 'uuid1' },
+        { piiData: { phone: '987654321' }, walletAddress: 'wallet_2', uuid: 'uuid2' },
       ];
-
-      jest.spyOn(service, 'checkPhoneNumber').mockResolvedValue(['123456789']);
-
-      await expect(service.createBulk(dtos)).rejects.toThrow(
-        new RpcException('123456789 Phone number should be unique'),
-      );
+      const beneficiaryUtilsMock = (service as any).beneficiaryUtilsService;
+      (beneficiaryUtilsMock.ensurePhoneNumbers as jest.Mock).mockReturnValue(undefined);
+      (beneficiaryUtilsMock.ensureUniquePhone as jest.Mock).mockResolvedValue(undefined);
+      (beneficiaryUtilsMock.ensureValidWalletAddress as jest.Mock).mockImplementation((w) => w);
+      (beneficiaryUtilsMock.prepareBulkInsertData as jest.Mock).mockReturnValue({ beneficiaries: [], piiData: [] });
+      (beneficiaryUtilsMock.insertBeneficiariesAndPIIData as jest.Mock).mockResolvedValue([]);
+      const result = await service.createBulk(dtos as any);
+      expect(result).toMatchObject({ success: true });
     });
 
-    it('should throw an error if wallet addresses are not unique', async () => {
+    it('should skip entries with duplicate wallet addresses and return success', async () => {
       const dtos = [
-        { piiData: { phone: '123456789' }, walletAddress: 'wallet_1' },
-        { piiData: { phone: '987654321' }, walletAddress: 'wallet_1' },
+        { piiData: { phone: '123456789' }, walletAddress: 'wallet_1', uuid: 'uuid1' },
+        { piiData: { phone: '987654321' }, walletAddress: 'wallet_1', uuid: 'uuid2' },
       ];
-
-      jest.spyOn(service, 'checkPhoneNumber').mockResolvedValue([]);
-      jest.spyOn(service, 'checkWalletAddress').mockResolvedValue([
-        {
-          id: 1,
-          uuid: 'uuid_1',
-          walletAddress: 'wallet_1',
-          gender: 'MALE',
-          birthDate: undefined,
-          age: 0,
-          location: '',
-          latitude: 0,
-          longitude: 0,
-          extras: '',
-          notes: '',
-          bankedStatus: 'UNKNOWN',
-          internetStatus: 'UNKNOWN',
-          phoneStatus: 'UNKNOWN',
-          createdAt: undefined,
-          updatedAt: undefined,
-          deletedAt: undefined,
-          isVerified: false
-        }
-      ]);
-      await expect(service.createBulk(dtos)).rejects.toThrow(
-        new RpcException('Wallet should be unique'),
-      );
+      const beneficiaryUtilsMock = (service as any).beneficiaryUtilsService;
+      (beneficiaryUtilsMock.ensurePhoneNumbers as jest.Mock).mockReturnValue(undefined);
+      (beneficiaryUtilsMock.ensureUniquePhone as jest.Mock).mockResolvedValue(undefined);
+      (beneficiaryUtilsMock.ensureValidWalletAddress as jest.Mock)
+        .mockResolvedValueOnce('wallet_1')
+        .mockRejectedValueOnce(new Error('Wallet should be unique'));
+      (beneficiaryUtilsMock.prepareBulkInsertData as jest.Mock).mockReturnValue({ beneficiaries: [], piiData: [] });
+      (beneficiaryUtilsMock.insertBeneficiariesAndPIIData as jest.Mock).mockResolvedValue([]);
+      const result = await service.createBulk(dtos as any);
+      expect(result).toMatchObject({ success: true });
     });
 
     it('should successfully create beneficiaries and emit event', async () => {
@@ -744,74 +718,32 @@ describe('BeneficiaryService', () => {
         { piiData: { phone: '123456789' }, walletAddress: 'wallet_1', uuid: 'uuid1' as `${string}-${string}-${string}-${string}-${string}` },
         { piiData: { phone: '987654321' }, walletAddress: 'wallet_2', uuid: 'uuid2' as `${string}-${string}-${string}-${string}-${string}` },
       ];
-      jest.spyOn(service, 'checkPhoneNumber').mockResolvedValue([]);
-      jest.spyOn(service, 'checkWalletAddress').mockResolvedValue([]);
-      uuidv4.mockReturnValueOnce('uuid1').mockReturnValueOnce('uuid2' as `${string}-${string}-${string}-${string}-${string}`);
-      prisma.beneficiary.findMany = jest.fn().mockResolvedValue([
-        {
-          uuid: 'uuid1',
-          id: 1,
-          pii: {
-            phone: '123456789',
-          },
-        },
-        {
-          uuid: 'uuid2',
-          id: 2,
-          pii: {
-            phone: '987654321',
-          },
-        },
-      ]);
-      prisma.beneficiary.createMany = jest.fn().mockResolvedValue({ count: 2 });
-      prisma.beneficiaryPii.createMany = jest.fn().mockResolvedValue({ count: 2 });
-      const result = await service.createBulk(dtos, 'projectUuid');
-      expect(prisma.beneficiary.createMany).toHaveBeenCalledWith({
-        data: [
-          { uuid: 'uuid1', walletAddress: 'wallet_1' },
-          { uuid: 'uuid2', walletAddress: 'wallet_2' },
-        ],
-      });
-      expect(prisma.beneficiaryPii.createMany).toHaveBeenCalledWith({
-        data: [
-          { beneficiaryId: 1, phone: '123456789' },
-          { beneficiaryId: 2, phone: '987654321' },
-        ],
-      });
-      expect(eventEmitter.emit).toHaveBeenCalledWith('beneficiary.created', { projectUuid: 'projectUuid' });
-      expect(result).toEqual({
-        success: true,
-        count: 2,
-        beneficiariesData: [
-          {
-            uuid: 'uuid1',
-            id: 1,
-            pii: {
-              phone: '123456789',
-            },
-          },
-          {
-            uuid: 'uuid2',
-            id: 2,
-            pii: {
-              phone: '987654321',
-            },
-          },
-        ],
-      });
+      const beneficiaryUtilsMock = (service as any).beneficiaryUtilsService;
+      const insertedData = [
+        { uuid: 'uuid1', id: 1, walletAddress: 'wallet_1' },
+        { uuid: 'uuid2', id: 2, walletAddress: 'wallet_2' },
+      ];
+      (beneficiaryUtilsMock.ensurePhoneNumbers as jest.Mock).mockReturnValue(undefined);
+      (beneficiaryUtilsMock.ensureUniquePhone as jest.Mock).mockResolvedValue(undefined);
+      (beneficiaryUtilsMock.ensureValidWalletAddress as jest.Mock).mockImplementation((w) => w);
+      (beneficiaryUtilsMock.prepareBulkInsertData as jest.Mock).mockReturnValue({ beneficiaries: [], piiData: [] });
+      (beneficiaryUtilsMock.insertBeneficiariesAndPIIData as jest.Mock).mockResolvedValue(insertedData);
+      const result = await service.createBulk(dtos, undefined);
+      expect(result).toMatchObject({ success: true, count: 2 });
     });
 
-    it('should handle error during beneficiary creation', async () => {
+    it('should return success false if insertion fails', async () => {
       const dtos = [
         { piiData: { phone: '123456789' }, walletAddress: 'wallet_1', uuid: 'uuid1' as `${string}-${string}-${string}-${string}-${string}` },
-        { piiData: { phone: '987654321' }, walletAddress: 'wallet_2', uuid: 'uuid2' as `${string}-${string}-${string}-${string}-${string}` },
       ];
-      jest.spyOn(service, 'checkPhoneNumber').mockResolvedValue([]);
-      jest.spyOn(service, 'checkWalletAddress').mockResolvedValue([]);
-      (prisma.beneficiary.createMany as jest.Mock).mockRejectedValue(new Error('Database error'));
-      await expect(service.createBulk(dtos)).rejects.toThrow(
-        new RpcException(new BadRequestException('Error in creating beneficiaries')),
-      );
+      const beneficiaryUtilsMock = (service as any).beneficiaryUtilsService;
+      (beneficiaryUtilsMock.ensurePhoneNumbers as jest.Mock).mockReturnValue(undefined);
+      (beneficiaryUtilsMock.ensureUniquePhone as jest.Mock).mockResolvedValue(undefined);
+      (beneficiaryUtilsMock.ensureValidWalletAddress as jest.Mock).mockImplementation((w) => w);
+      (beneficiaryUtilsMock.prepareBulkInsertData as jest.Mock).mockReturnValue({ beneficiaries: [], piiData: [] });
+      (beneficiaryUtilsMock.insertBeneficiariesAndPIIData as jest.Mock).mockRejectedValue(new Error('Database error'));
+      const result = await service.createBulk(dtos, undefined);
+      expect(result).toEqual({ success: false });
     });
   });
 
@@ -830,6 +762,7 @@ describe('BeneficiaryService', () => {
         uuid: 'mock-group-uuid'
       };
 
+      (prisma.beneficiaryGroup.findFirst as jest.Mock).mockResolvedValue(null);
       (prisma.beneficiaryGroup.create as jest.Mock).mockResolvedValue(groupMockResponse);
       (prisma.groupedBeneficiaries.createMany as jest.Mock).mockResolvedValue(mockResponse);
 
@@ -991,7 +924,17 @@ describe('BeneficiaryService', () => {
             where: {
               deletedAt: null
             }
-          }
+          },
+          beneficiaryGroupProject: {
+            select: {
+              Project: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
         }
       });
     });

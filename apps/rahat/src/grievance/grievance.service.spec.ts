@@ -101,22 +101,8 @@ describe('GrievanceService', () => {
       //const result = await service.createGrievance(createGrievanceDTO, userId);
       expect(prismaGrievanceCreateMock).toHaveBeenCalledWith({
         data: {
-          title: createGrievanceDTO.title,
-          description: createGrievanceDTO.description,
-          reporterContact: createGrievanceDTO.reporterContact,
-          type: createGrievanceDTO.type,
-          reportedBy: createGrievanceDTO.reportedBy,
-          project: {
-            connect: {
-              uuid: createGrievanceDTO.projectId,
-            },
-          },
-          reporterUser: {
-            connect: {
-              id: userId,
-            },
-          },
-          status: GrievanceStatus.NEW
+          ...createGrievanceDTO,
+          reporterUserId: userId,
         }
       })
       expect(result).toEqual({
