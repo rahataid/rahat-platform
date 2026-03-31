@@ -51,7 +51,7 @@
     "contracts:coverage": "cd ./apps/contracts && hardhat coverage",
     "contracts:test": "cd ./libs/contracts && hardhat test",
     "contracts:compile": "cd ./libs/contracts && hardhat compile",
-    "test:coverage": "jest --config ./apps/rahat/jest.config.ts --projects ./apps/rahat ./apps/beneficiary --projects ./libs/sdk/jest.config.ts --coverage",
+    "test:coverage": "nx run-many -p rahat beneficiary --target=test --coverage",
     "test:grievance": "jest --config ./apps/rahat/jest.config.ts ./apps/rahat/src/grievance/grievance.service.spec.ts",
     "test:e2e": "jest --config ./apps/beneficiary-e2e/jest.config.ts",
     "test": "jest",
