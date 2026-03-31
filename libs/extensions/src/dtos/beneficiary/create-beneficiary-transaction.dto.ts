@@ -43,12 +43,3 @@ export class CreateBeneficiaryTransactionDto {
     @IsOptional()
     piiData: TPIIData;
 }
-
-export class CreateBeneficiaryTransactionRepoDto extends CreateBeneficiaryTransactionDto {
-    @ApiProperty({
-        example: '0x1234567890abcdef',
-        description: 'Wallet address of the beneficiary',
-    })
-    @IsString()
-    walletAddress: string;
-}
