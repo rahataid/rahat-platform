@@ -10,7 +10,7 @@ on:
         options:
           - "test-load"
           - "dev-unicef"
-          - "redcross"
+          - "demo-redcross"
           - "aidlink-demo"
           - "aidlink-dev"
           - "stage-el"
@@ -20,6 +20,7 @@ on:
           - "dev-crm"
           - "dev"
           - "main"
+          - "dev-qa"
 
       apps_to_build:
         description: "Apps to build (leave empty for defaults)"
@@ -62,12 +63,12 @@ jobs:
               APPS="beneficiary,rahat"
               ;;
             dev-unicef)
-              TAG="dev-unicef"
+              TAG="aa-dev-unicef"
               SECRET="ENV_AA_DEV_UNICEF"
               APPS="beneficiary,rahat"
               ;;
             redcross)
-              TAG="redcross"
+              TAG="demo-redcross"
               SECRET="ENV_AA_REDCROSS"
               APPS="beneficiary,rahat"
               ;;
@@ -114,6 +115,11 @@ jobs:
             main)
               TAG="latest"
               SECRET="ENV_AA_MAIN"
+              APPS="beneficiary,rahat"
+              ;;
+            dev-qa)
+              TAG="dev-qa"
+              SECRET="ENV_AA_DEV-QA"
               APPS="beneficiary,rahat"
               ;;
             *)
