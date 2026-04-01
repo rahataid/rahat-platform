@@ -601,6 +601,16 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.INKIND.GET_BY_GROUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_BY_GROUP, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_UNASSIGNED_GROUP_INKIND]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.GET_UNASSIGNED_GROUP_INKIND, uuid },
+      payload
+    ),
+
   [MS_ACTIONS.AAPROJECT.INKIND.GET_AVAILABLE_INKIND_BENEFICIARY_PHONE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_AVAILABLE_INKIND_BENEFICIARY_PHONE, uuid }, payload),
 
