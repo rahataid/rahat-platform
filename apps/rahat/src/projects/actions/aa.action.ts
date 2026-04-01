@@ -570,6 +570,9 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.INKIND.GET]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_SUMMARY]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.GET_SUMMARY, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.INKIND.UPDATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.UPDATE, uuid }, payload),
 

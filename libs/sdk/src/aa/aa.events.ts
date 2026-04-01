@@ -136,6 +136,7 @@ export const JOBS = {
     DELETE: 'aa.jobs.inkinds.delete',
     GET: 'aa.jobs.inkinds.get',
     GET_ONE: 'aa.jobs.inkinds.getOne',
+    GET_SUMMARY: 'aa.jobs.inkinds.getSummary',
     ADD_INKIND_STOCK: 'aa.jobs.inkindStock.add',
     GET_ALL_STOCK_MOVEMENTS: 'aa.jobs.inkindStock.getAllMovements',
     REMOVE_INKIND_STOCK: 'aa.jobs.inkindStock.remove',

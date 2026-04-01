@@ -306,6 +306,7 @@ export const MS_ACTIONS = {
       UPDATE: 'aa.inkinds.update',
       DELETE: 'aa.inkinds.delete',
       GET: 'aa.inkinds.get',
+      GET_SUMMARY: 'aa.inkinds.getSummary',
       GET_ONE: 'aa.inkinds.getOne',
       ADD_INKIND_STOCK: 'aaProject.inkindStock.add',
       GET_ALL_STOCK_MOVEMENTS: 'aaProject.inkindStock.getAllMovements',
