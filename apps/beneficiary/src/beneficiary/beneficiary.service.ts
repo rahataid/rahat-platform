@@ -2417,7 +2417,11 @@ export class BeneficiaryService {
 
       // Phase 1: Execute writes on both sides
       const createdBeneficiary = await this.prisma.beneficiary.create({
-        data: { ...benfData, walletAddress },
+        data: {
+          ...benfData, walletAddress, extras: {
+            "validPhoneNumber": true,
+          }
+        },
       });
 
       await this.prisma.beneficiaryPii.create({
