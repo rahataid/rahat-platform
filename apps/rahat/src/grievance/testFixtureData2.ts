@@ -34,7 +34,11 @@ export const updatedGrievance = {
   status: GrievanceStatus.UNDER_REVIEW,
   createdAt: new Date(),
   updatedAt: new Date(),
-  deletedAt: null
+  deletedAt: null,
+  tags: [],
+  closedAt: null,
+  priority: null,
+  resolvedAt: null
 };
 
 export const deletedGrievance = {
@@ -50,7 +54,11 @@ export const deletedGrievance = {
   status: GrievanceStatus.UNDER_REVIEW,
   createdAt: new Date(),
   updatedAt: new Date(),
-  deletedAt: new Date()
+  deletedAt: new Date(),
+  tags: [],
+  closedAt: null,
+  priority: null,
+  resolvedAt: null
 };
 
 export const grievanceQuery: ListGrievanceDTO = {
@@ -76,6 +84,10 @@ export const grievancesList = [
     createdAt: new Date("2024-08-21T15:54:32.779Z"),
     updatedAt: new Date("2024-08-21T15:54:32.779Z"),
     deletedAt: null,
+    tags: [],
+    closedAt: null,
+    priority: null,
+    resolvedAt: null,
     project: {
       name: faker.internet.domainWord(),
       uuid: process.env.PROJECT_ID
@@ -100,6 +112,10 @@ export const grievancesList = [
     createdAt: new Date("2024-08-21T15:54:32.779Z"),
     updatedAt: new Date("2024-08-21T15:54:32.779Z"),
     deletedAt: null,
+    tags: [],
+    closedAt: null,
+    priority: null,
+    resolvedAt: null,
     project: {
       name: faker.internet.domainWord(),
       uuid: process.env.PROJECT_ID

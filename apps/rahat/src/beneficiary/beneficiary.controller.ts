@@ -21,10 +21,12 @@ import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
+  AddBeneficiariesToGroupDto,
   AddBenToProjectDto,
   AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  CreateBeneficiaryTransactionDto,
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
@@ -32,7 +34,7 @@ import {
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto,
-  ValidateWalletDto
+  ValidateWalletDto,
 } from '@rahataid/extensions';
 import {
   APP,
@@ -57,6 +59,7 @@ import { CheckHeaders, ExternalAppGuard } from '../decorators';
 import { removeSpaces } from '../utils';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
+import { WalletService } from '../wallet/wallet.service';
 import { WalletInterceptor } from './interceptor/wallet.interceptor';
 import { DocParser } from './parser';
 import { WalletProcessingService } from './services/wallet-processing.service';
@@ -86,7 +89,8 @@ export class BeneficiaryController {
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
     @Inject('COMMS_CLIENT') private commsClient: CommsClient,
     @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue,
-    private readonly walletProcessingService: WalletProcessingService
+    private readonly walletProcessingService: WalletProcessingService,
+    private readonly wallet: WalletService
   ) { }
 
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -504,6 +508,14 @@ export class BeneficiaryController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.USER })
+  @Post('groups/add-beneficiaries')
+  async addBeneficiariesToGroup(@Body() dto: AddBeneficiariesToGroupDto) {
+    return this.client.send({ cmd: BeneficiaryJobs.ADD_BENEFICIARIES_TO_GROUP }, dto);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('groups/all')
   async getAllGroups(@Query() dto: ListBeneficiaryGroupDto) {
@@ -607,5 +619,13 @@ export class BeneficiaryController {
   @Post('groupDetails')
   async getReferredBeneficiary(@Body() uuids: UUID[]) {
     return this.client.send({ cmd: BeneficiaryJobs.GET_GROUP_DETAILS_BY_UUIDS }, uuids);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Post('beneficiaryWithDbTransaction')
+  async createBeneficiaryWithDbTransaction(@Body() body: CreateBeneficiaryTransactionDto) {
+    return await this.client.send({ cmd: BeneficiaryJobs.CREATE_BENEFICIARY_WITH_DB_TRANSACTION }, body);
   }
 }

@@ -24,6 +24,8 @@ export const MS_TRIGGERS_JOBS = {
     GET_BY_LOCATION: 'ms.jobs.phases.getByLocation',
     ACTIVATE: 'ms.jobs.phases.activate',
     CONFIGURE_THRESHOLD: 'ms.jobs.phase.configureThreshold',
+    UPDATE: 'ms.jobs.phases.update',
+    DELETE: 'ms.jobs.phases.delete',
   },
   REVERT_PHASE: {
     CREATE: 'ms.jobs.revertPhase.create',
@@ -42,6 +44,14 @@ export const MS_TRIGGERS_JOBS = {
   RAINFALL_LEVELS: {
     GET_DHM: 'ms.jobs.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.jobs.rainfallLevels.getGlofas',
+  },
+  HUMIDITY: {
+    GET_DHM: 'ms.jobs.humidity.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.jobs.humidity.getDhmSingleSeries',
+  },
+  TEMPERATURE: {
+    GET_DHM: 'ms.jobs.temperature.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.jobs.temperature.getDhmSingleSeries',
   },
   PROB_FLOOD: {
     GET_ALL_GLOFAS: 'ms.jobs.probFlood.getAllGlofas',
@@ -62,6 +72,7 @@ export const MS_TRIGGERS_JOBS = {
       SESSION_LOGS: 'ms.jobs.activities.communication.sessionLogs',
       // RETRY_FAILED: 'ms.jobs.activities.communication.retryFailed',
       GET_STATS: 'ms.jobs.activities.communication.getStats',
+      GET_TRANSPORT_SESSION_STATS: 'ms.jobs.activities.communication.getTransportSessionStats',
       GET_STATS_GROUP: 'ms.jobs.triggers.getTransportSessionStatsByGroup',
     },
 
@@ -224,6 +235,22 @@ export const msTriggerActions: ProjectActionFunc = {
       payload
     );
   },
+
+  [MS_ACTIONS.MS_PHASES.UPDATE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PHASES.UPDATE },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_PHASES.DELETE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PHASES.DELETE },
+      payload
+    );
+  },
   // // **** phases end ******//
 
   // **** source start ******//
@@ -339,6 +366,43 @@ export const msTriggerActions: ProjectActionFunc = {
       payload
     );
   },
+
+  [MS_ACTIONS.MS_TEMPERATURE.GET_DHM]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.TEMPERATURE.GET_DHM },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_TEMPERATURE.GET_DHM_SINGLE_SERIES]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.TEMPERATURE.GET_DHM_SINGLE_SERIES },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_HUMIDITY.GET_DHM]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.HUMIDITY.GET_DHM },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_HUMIDITY.GET_DHM_SINGLE_SERIES]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.HUMIDITY.GET_DHM_SINGLE_SERIES },
+      payload
+    );
+  },
+
   // **** river stations end ******//
 
   // **** activities start ******//
@@ -432,6 +496,19 @@ export const msTriggerActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
 
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.UPDATE }, payload);
+  },
+
+  [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.GET_TRANSPORT_SESSION_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.GET_TRANSPORT_SESSION_STATS },
+      payload
+    );
   },
 
   [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.GET_STATS]: (

@@ -1,0 +1,32 @@
+meta {
+  name: update inkind
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.inkinds.update",
+    "payload": {
+      "type": "PRE_DEFINED",
+      "name": "GAMCHA",
+      "description": "this is a random description"
+  //     "quantity": 1, 
+    }
+  }
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
+}

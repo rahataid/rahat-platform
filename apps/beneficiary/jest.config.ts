@@ -5,6 +5,18 @@ export default {
   displayName: 'beneficiary',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
+  collectCoverageFrom: [
+    '<rootDir>/src/app/app.controller.ts',
+    '<rootDir>/src/app/app.service.ts',
+  ],
+  coverageThreshold: {
+    global: {
+      lines: 80,
+      statements: 80,
+      functions: 80,
+      branches: 70,
+    },
+  },
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },

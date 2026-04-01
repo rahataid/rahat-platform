@@ -1,7 +1,7 @@
 meta {
-  name: Dummy Activate Phase
+  name: List heatwave single details
   type: http
-  seq: 6
+  seq: 45
 }
 
 post {
@@ -16,9 +16,10 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.phases.activate",
+    "action": "ms.humidity.getDhm",
     "payload": {
-     "phaseUuid":  "c0062778-e367-4bc4-86f3-725dbb6aeebb"
+      "riverBasin": "Doda river at East-West Highway",
+    "from": "2026/03/23"
     }
   }
 }

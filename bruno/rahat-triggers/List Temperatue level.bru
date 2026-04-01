@@ -1,7 +1,7 @@
 meta {
-  name: Dummy Activate Phase
+  name: List Temperatue level
   type: http
-  seq: 6
+  seq: 44
 }
 
 post {
@@ -16,9 +16,10 @@ auth:bearer {
 
 body:json {
   {
-    "action": "ms.phases.activate",
+    "action": "ms.rainfallLevels.getGlofas",
     "payload": {
-     "phaseUuid":  "c0062778-e367-4bc4-86f3-725dbb6aeebb"
+      "page": 1 ,
+      "perPage": 11
     }
   }
 }

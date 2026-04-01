@@ -55,6 +55,7 @@ export const JOBS = {
   LIST_BEN_VENDOR_COUNT: 'rahat.jobs.beneficiary.count_ben_vendor',
   LIST_BENEFICIARY_COUNT: 'rahat.jobs.beneficiary.count_beneficiary',
   ADD_GROUP: 'rahat.jobs.beneficiary.add_group',
+  ADD_BENEFICIARIES_TO_GROUP: 'rahat.jobs.beneficiary.add_beneficiaries_to_group',
   GET_ONE_GROUP: 'rahat.jobs.beneficiary.get_one_group',
   GET_GROUP_DETAILS_BY_UUIDS: 'rahat.jobs.beneficiary.get_group_details_by_uuids',
   GET_GROUP_BENEF_FAIL_ACCOUNT: 'rahat.jobs.beneficiary.get_group_benef_fail_account',
@@ -94,4 +95,5 @@ export const JOBS = {
   GET_OFFRAMP_SUMMARY: 'rahat.jobs.beneficiary.get_offramp_summary',
   GET_BENEFICIARYS_PROJECT_DETAILS: 'rahat.jobs.beneficiary.getBeneficiarysProjectDetails',
   IMPORT_V2: 'rahat.jobs.beneficiary.import_v2',
+  CREATE_BENEFICIARY_WITH_DB_TRANSACTION: 'rahat.jobs.beneficiary.create_beneficiary_with_db_transaction',
 };
