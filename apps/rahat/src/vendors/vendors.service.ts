@@ -902,47 +902,56 @@ export class VendorsService {
 
         if (!role) throw new Error('Vendor role not found');
 
-        // Create vendors in both User and Vendors tables
         for (const vendorData of vendorsList) {
-          // Create in Vendors table
-          const createdVendor = await prisma.vendors.create({
-            data: {
-              name: vendorData.name,
-              email: vendorData.extras?.email,
-              phone: vendorData.phone,
-              location: vendorData.location,
-              uuid: vendorData.uuid,
-              extras: vendorData.extras,
-            },
+          const vendorFields = {
+            name: vendorData.name,
+            email: vendorData.extras?.email,
+            phone: vendorData.phone,
+            location: vendorData.location,
+            extras: vendorData.extras,
+          };
+
+          const createdVendor = await prisma.vendors.upsert({
+            where: { uuid: vendorData.uuid },
+            create: { ...vendorFields, uuid: vendorData.uuid },
+            update: vendorFields,
           });
 
-          // Create in User table with vendor info
-          const createdUser = await prisma.user.create({
-            data: {
-              uuid: vendorData.uuid,
-              name: vendorData.name,
-              email: vendorData.extras?.email,
-              phone: vendorData.phone,
-              wallet: vendorData.wallet,
-              extras: vendorData.extras,
-            },
+          const userFields = {
+            name: vendorData.name,
+            email: vendorData.extras?.email,
+            phone: vendorData.phone,
+            wallet: vendorData.wallet,
+            extras: vendorData.extras,
+          };
+
+          const createdUser = await prisma.user.upsert({
+            where: { uuid: vendorData.uuid },
+            create: { ...userFields, uuid: vendorData.uuid },
+            update: userFields,
           });
 
-          // Assign vendor role to user
-          await prisma.userRole.create({
-            data: {
-              userId: createdUser.id,
-              roleId: role.id,
-            },
-          });
-
-          // Create project vendor association if projectId is provided
-          if (projectId) {
-            await prisma.projectVendors.create({
-              data: {
-                projectId,
-                vendorId: createdUser.uuid,
+          await prisma.userRole.upsert({
+            where: {
+              userRoleIdentifier: {
+                userId: createdUser.id,
+                roleId: role.id,
               },
+            },
+            create: { userId: createdUser.id, roleId: role.id },
+            update: {},
+          });
+
+          if (projectId) {
+            await prisma.projectVendors.upsert({
+              where: {
+                projectVendorIdentifier: {
+                  projectId,
+                  vendorId: createdUser.uuid,
+                },
+              },
+              create: { projectId, vendorId: createdUser.uuid },
+              update: {},
             });
           }
 
