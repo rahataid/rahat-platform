@@ -117,13 +117,13 @@
 <title>cluster_ProcessorsModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="162,-70 162,-268 334,-268 334,-70 162,-70"/>
 </g>
-<g id="clust3" class="cluster">
-<title>cluster_ProcessorsModule_imports</title>
-<polygon fill="none" stroke="black" points="178,-78 178,-130 318,-130 318,-78 178,-78"/>
-</g>
 <g id="clust4" class="cluster">
 <title>cluster_ProcessorsModule_exports</title>
 <polygon fill="none" stroke="black" points="170,-208 170,-260 326,-260 326,-208 170,-208"/>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_ProcessorsModule_imports</title>
+<polygon fill="none" stroke="black" points="178,-78 178,-130 318,-130 318,-78 178,-78"/>
 </g>
 <!-- BeneficiaryModule -->
 <g id="node1" class="node">
@@ -228,7 +228,9 @@
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { BullModule } from &#x27;@nestjs/bull&#x27;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import { BullModule } from &#x27;@nestjs/bull&#x27;;
 import { Module } from &#x27;@nestjs/common&#x27;;
 import { EventEmitter2, EventEmitterModule } from &#x27;@nestjs/event-emitter&#x27;;
 import { ClientsModule, Transport } from &#x27;@nestjs/microservices&#x27;;

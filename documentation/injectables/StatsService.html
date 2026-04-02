@@ -560,7 +560,7 @@ export class StatsService {
     if (data.group !&#x3D;&#x3D; &#x27;beneficiary&#x27;) {
       data.name &#x3D; data.name + &#x27;_ID_&#x27; + data.group;
     }
-    return this.prismaService.stats.upsert({
+    return this.prismaService[&quot;stats&quot;].upsert({
       where: { name: data.name },
       update: data,
       create: data,
@@ -571,24 +571,24 @@ export class StatsService {
     group: string,
     select: { name?: boolean; data?: boolean; group?: boolean } | null &#x3D; null
   ) {
-    return this.prismaService.stats.findMany({
+    return this.prismaService[&quot;stats&quot;].findMany({
       where: { group },
       select,
     });
   }
 
   findAll() {
-    return this.prismaService.stats.findMany();
+    return this.prismaService[&quot;stats&quot;].findMany();
   }
 
   findOne(name: string) {
-    return this.prismaService.stats.findUnique({
+    return this.prismaService[&quot;stats&quot;].findUnique({
       where: { name },
     });
   }
 
   remove(name: string) {
-    return this.prismaService.stats.delete({
+    return this.prismaService[&quot;stats&quot;].delete({
       where: { name },
     });
   }
@@ -600,7 +600,7 @@ export class StatsService {
   //   names: string[]
   //   group?: any;
   // }) {
-  //   const where: Prisma.StatsWhereInput &#x3D; {
+  //   const where: Prisma[&quot;stats&quot;]WhereInput &#x3D; {
   //     name: {
   //       in: names,
   //     },
@@ -610,7 +610,7 @@ export class StatsService {
   //     where.group &#x3D; group;
   //   }
   //   console.log(&#x27;where&#x27;, where, names, group)
-  //   return this.prismaService.stats.findMany({
+  //   return this.prismaService[&quot;stats&quot;].findMany({
   //     where
   //   });
 

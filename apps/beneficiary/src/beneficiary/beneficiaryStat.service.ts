@@ -2,6 +2,7 @@
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { Gender } from '@prisma/client';
 import { StatsService } from '@rahat/stats';
 import { MS_TIMEOUT, ProjectContants } from '@rahataid/sdk';
 import { SettingsService } from '@rumsan/extensions/settings';
@@ -49,7 +50,12 @@ export class BeneficiaryStatService {
           },
         })
         .then((projectBen) => projectBen.map((data) => data?.beneficiaryId));
-
+      if (beneficiaryIds.length === 0) {
+        return Object.values(Gender).map((gender) => ({
+          id: gender,
+          count: 0,
+        }));
+      }
       if (beneficiaryIds.length > 0) {
         filter.uuid = { in: beneficiaryIds };
       }
@@ -71,7 +77,13 @@ export class BeneficiaryStatService {
 
   async calculateAgeStats(projectUuid?: string) {
     const filter: any = {};
-
+    const range = [
+      { id: '0-20', count: 0 },
+      { id: '21-40', count: 0 },
+      { id: '41-60', count: 0 },
+      { id: '61-80', count: 0 },
+      { id: '80+', count: 0 },
+    ];
     // Add filter if projectUuid is provided
     if (projectUuid) {
       const beneficiaryIds = await this.prisma.beneficiaryProject
@@ -86,7 +98,12 @@ export class BeneficiaryStatService {
         .then((projectBen) =>
           projectBen.map((data: any) => data?.beneficiaryId)
         );
-
+      if (beneficiaryIds.length === 0) {
+        return range.map((value) => ({
+          id: value.id,
+          count: value.count
+        }))
+      }
       if (beneficiaryIds.length > 0) {
         filter.uuid = { in: beneficiaryIds };
       }
@@ -122,6 +139,9 @@ export class BeneficiaryStatService {
         })
         .then((projectBen) => projectBen.map((data) => data?.beneficiaryId));
 
+      if (beneficiaryIds.length === 0) {
+        return
+      }
       if (beneficiaryIds.length > 0) {
         filter.uuid = { in: beneficiaryIds };
       }
@@ -279,6 +299,9 @@ export class BeneficiaryStatService {
         .then((projectBen) =>
           projectBen.map((data: any) => data?.beneficiaryId)
         );
+      if (beneficiaryIds.length === 0) {
+        return { count: 0 }
+      }
       if (beneficiaryIds.length > 0) {
         filter.uuid = { in: beneficiaryIds };
       }
@@ -1045,4 +1068,3 @@ export class BeneficiaryStatService {
     return { gender, bankedStatus, internetStatus, phoneStatus, total };
   }
 }
-

@@ -13,9 +13,12 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
 import fs from 'fs';
 import inquirer from 'inquirer';
 import path from 'path';
+// Load environment variables from .env file
+dotenv.config();
 
 const aaConfig = JSON.parse(
   fs.readFileSync(path.join(__dirname, 'stats-configs', 'aa.json'), 'utf-8')
