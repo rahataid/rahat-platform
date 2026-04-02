@@ -32,6 +32,7 @@ import { AbilitiesGuard, ACTIONS, CheckAbilities, JwtGuard, SUBJECTS } from '@ru
 import { UUID } from 'crypto';
 import { Address } from 'viem';
 import { DocParser } from '../utils/doc-parser';
+import { generateIdempotencyKey } from '../utils/idempotency-key';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 import { VendorsService } from './vendors.service';
 
@@ -154,10 +155,15 @@ export class VendorsController {
       channel: v['Channel'],
     }));
 
+    const cmd = { cmd: VendorJobs.IMPORT, uuid: projectId };
+
     return handleMicroserviceCall({
       client: this.client.send(
-        { cmd: VendorJobs.IMPORT, uuid: projectId },
-        mappedVendors
+        cmd,
+        {
+          vendors: mappedVendors,
+          idempotencyKey: generateIdempotencyKey(cmd, mappedVendors),
+        }
       ),
       onSuccess(res) {
         console.log('Vendors imported successfully:', res);

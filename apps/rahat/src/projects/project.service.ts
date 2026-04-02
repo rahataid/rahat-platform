@@ -27,6 +27,7 @@ import { UUID } from 'crypto';
 import { switchMap, tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
 import { createExtrasAndPIIData } from '../utils';
+import { generateIdempotencyKey } from '../utils/idempotency-key';
 import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import {
   aaActions,
@@ -171,6 +172,7 @@ export class ProjectService {
         .send(cmd, {
           ...payload,
           ...(requiresUser && { user }),
+          idempotencyKey: generateIdempotencyKey(cmd, payload),
         })
         .pipe(
           timeout(timeoutValue),
