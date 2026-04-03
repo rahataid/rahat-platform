@@ -317,6 +317,7 @@ export const MS_ACTIONS = {
       GET_AVAILABLE_INKIND_BENEFICIARY_PHONE: 'aaProject.groupInkinds.getAvailableInkindByBeneficiaryPhone',
       GET_GROUP_INKIND_LOGS: 'aaProject.groupInkinds.getLogs',
       GET_GROUP_INKIND_LOGS_BY_VENDOR: 'aaProject.groupInkinds.getLogsByVendor',
+      GET_LOGS_DETAILS_BY_TX_HASH: 'aaProject.groupInkinds.getLogsDetailsByTxHash',
       BENEFICIARY_INKIND_REDEEM: 'aaProject.beneficiaryInkinds.redeem',
       SEND_BENEFICIARY_OTP: 'aaProject.inkinds.sendBeneficiaryOtp',
       VALIDATE_BENEFICIARY_OTP: 'aaProject.inkinds.validateBeneficiaryOtp',
