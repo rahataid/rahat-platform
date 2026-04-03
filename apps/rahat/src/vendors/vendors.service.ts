@@ -49,26 +49,66 @@ export class VendorsService {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) {}
 
-  //TODO: Fix allow duplicate users?
+  // Upsert: If vendor exists by wallet → login. If not → register.
   async registerVendor(dto: VendorRegisterDto) {
+    const { service, wallet, authWallet, ...rest } = dto;
+
+    // Check if vendor already exists by wallet address only
+    if (wallet) {
+      const existingVendor = await this.prisma.user.findFirst({
+        where: { wallet },
+        include: {
+          UserRole: { include: { Role: true } },
+          VendorProject: { include: { Project: true } },
+          Auth: true,
+        },
+      });
+
+      if (existingVendor) {
+        // Ensure Auth record exists for wallet (required for /auth/wallet endpoint)
+        const hasWalletAuth = existingVendor.Auth?.some(
+          (a) => a.service === Service.WALLET && a.serviceId === wallet
+        );
+
+        if (!hasWalletAuth) {
+          // Create missing Auth record for wallet
+          await this.prisma.auth.create({
+            data: {
+              userId: existingVendor.id,
+              service: Service.WALLET,
+              serviceId: wallet,
+              details: dto.extras,
+            },
+          });
+        }
+
+        // Vendor exists with this wallet → LOGIN (no updates to user data)
+        return { ...existingVendor, isNewVendor: false };
+      }
+    }
+
+    // Vendor doesn't exist with this wallet → REGISTER new
     const vendor = await this.prisma.$transaction(async (prisma) => {
       const role = await prisma.role.findFirst({
         where: { name: UserRoles.VENDOR },
       });
       if (!role) throw new Error('Role not found');
-      // Add to User table
-      const { service, wallet, authWallet, ...rest } = dto;
+
+      // Check email/phone uniqueness
       if (dto?.email || dto?.phone) {
         const userData = await prisma.user.findFirst({
           where: {
-            OR: [{ email: dto.email }, { phone: dto.phone }],
+            OR: [
+              ...(dto.email ? [{ email: dto.email }] : []),
+              ...(dto.phone ? [{ phone: dto.phone }] : []),
+            ],
           },
         });
 
         if (userData) {
-          if (userData?.email === dto.email)
+          if (dto.email && userData?.email === dto.email)
             throw new Error('Email must be unique');
-          if (userData?.phone === dto.phone)
+          if (dto.phone && userData?.phone === dto.phone)
             throw new Error('Phone Number must be unique');
         }
       }
@@ -91,6 +131,7 @@ export class VendorsService {
       // Add to UserRole table
       const userRolePayload = { userId: user.id, roleId: role.id };
       await prisma.userRole.create({ data: userRolePayload });
+
       // Add to Auth table
       await prisma.auth.create({
         data: {
@@ -100,6 +141,7 @@ export class VendorsService {
           details: dto.extras,
         },
       });
+
       if (dto.service === Service.WALLET) return user;
 
       await prisma.auth.create({
@@ -119,7 +161,8 @@ export class VendorsService {
       group: 'Vendor Management',
       notify: true,
     });
-    return vendor;
+
+    return { ...vendor, isNewVendor: true };
   }
 
   async assignToProject(dto: VendorAddToProjectDto) {
