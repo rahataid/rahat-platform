@@ -30,6 +30,7 @@ import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
 import { isAddress } from '../utils/web3';
 import { WalletService } from '../wallet/wallet.service';
+import { generateIdempotencyKey } from '../utils/idempotency-key';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -445,7 +446,11 @@ export class VendorsService {
       },
     });
 
-    return this.client.send({ cmd: VendorJobs.UPDATE }, result);
+    const cmd = { cmd: VendorJobs.UPDATE };
+    return this.client.send(cmd, {
+      ...result,
+      idempotencyKey: generateIdempotencyKey(cmd, result),
+    });
   }
 
   async removeVendor(uuid: UUID, projectId?: UUID) {
@@ -477,7 +482,11 @@ export class VendorsService {
       },
     });
 
-    return this.client.send({ cmd: VendorJobs.REMOVE }, uuid);
+    const cmd = { cmd: VendorJobs.REMOVE };
+    return this.client.send(cmd, {
+      uuid,
+      idempotencyKey: generateIdempotencyKey(cmd, { uuid }),
+    });
   }
 
   async getVendorClaimStats(dto) {
