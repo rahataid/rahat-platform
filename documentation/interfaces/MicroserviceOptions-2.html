@@ -122,7 +122,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>apps/rahat/src/vendors/handleMicroServiceCall.util.ts</code>
+            <code>apps/rahat/src/utils/handleMicroserviceCall.ts</code>
         </p>
 
 
@@ -288,36 +288,37 @@
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { lastValueFrom, Observable } from &#x27;rxjs&#x27;;
 
 interface MicroserviceOptions&lt;TRequest, TResponse&gt; {
-    client: Observable&lt;TResponse&gt;;
-    onSuccess?: (response: TResponse) &#x3D;&gt; Promise&lt;void&gt; | void;
-    onError?: (error: any) &#x3D;&gt; Promise&lt;void&gt; | void;
+  client: Observable&lt;TResponse&gt;;
+  onSuccess?: (response: TResponse) &#x3D;&gt; Promise&lt;void&gt; | void | any;
+  onError?: (error: any) &#x3D;&gt; Promise&lt;void&gt; | void | any;
 }
 
 export async function handleMicroserviceCall&lt;TRequest, TResponse&gt;(
-    options: MicroserviceOptions&lt;TRequest, TResponse&gt;
+  options: MicroserviceOptions&lt;TRequest, TResponse&gt;
 ): Promise&lt;TResponse&gt; {
-    const { client, onSuccess, onError } &#x3D; options;
+  const { client, onSuccess, onError } &#x3D; options;
 
-    try {
-        // Convert Observable to Promise and wait for the response
-        const response &#x3D; await lastValueFrom(client);
+  try {
+    // Convert Observable to Promise and wait for the response
+    const response &#x3D; await lastValueFrom(client);
 
-        // If onSuccess callback is provided, call it with the response
-        if (onSuccess) {
-            await onSuccess(response);
-        }
-
-        return response;
-    } catch (error) {
-        // If onError callback is provided, call it with the error
-        if (onError) {
-            await onError(error);
-        } else {
-            // Rethrow the error if no onError callback is provided
-            throw error;
-        }
+    // If onSuccess callback is provided, call it with the response
+    if (onSuccess) {
+      await onSuccess(response);
     }
-}</code></pre>
+
+    return response;
+  } catch (error) {
+    // If onError callback is provided, call it with the error
+    if (onError) {
+      await onError(error);
+    } else {
+      // Rethrow the error if no onError callback is provided
+      throw error;
+    }
+  }
+}
+</code></pre>
     </div>
 </div>
 

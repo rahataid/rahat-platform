@@ -31,7 +31,7 @@ function ExcelParser(buffer: Buffer): any[] {
   const sheet = workbook.Sheets[sheetName];
 
   // Directly convert sheet to JSON (assumes flat structure)
-  return xlsx.utils.sheet_to_json(sheet);
+  return xlsx.utils.sheet_to_json(sheet, { defval: '' });
 }
 
 export function JsonParser(buffer: Buffer) {

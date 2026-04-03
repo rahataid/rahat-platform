@@ -14,22 +14,19 @@ export async function handleMicroserviceCall<TRequest, TResponse>(
     const { client, onSuccess, onError } = options;
 
     try {
-        // Convert Observable to Promise and wait for the response
         const response = await lastValueFrom(client);
 
-        // If onSuccess callback is provided, call it with the response
         if (onSuccess) {
             await onSuccess(response);
         }
 
         return response;
     } catch (error) {
-        // If onError callback is provided, call it with the error
         if (onError) {
             await onError(error);
-        } else {
-            // Rethrow the error if no onError callback is provided
-            throw error;
         }
+        // Always rethrow — onError is a side-effect hook (logging, cleanup),
+        // not an error-swallowing mechanism.
+        throw error;
     }
 }

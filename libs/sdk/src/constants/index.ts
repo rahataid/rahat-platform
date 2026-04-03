@@ -123,7 +123,8 @@ export const MS_ACTIONS = {
     LIST_FULL_DATA_BY_PROJECT: 'beneficiary.list_full_data_by_project',
     GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',
     GET_ONE_BENEFICARY: 'beneficiary.get_one_beneficiary',
-    GET_BENEFICIARY_DETAILS_BY_PROJECT: 'beneficiary.get_beneficiary_details_by_project',
+    GET_BENEFICIARY_DETAILS_BY_PROJECT:
+      'beneficiary.get_beneficiary_details_by_project',
   },
   VENDOR: {
     REGISTER: 'vendor.register',
@@ -154,10 +155,19 @@ export const MS_ACTIONS = {
 
     CRM: {
       GET_ALL_VENDOR: 'elProject.crm.getAllVendor',
+      EXPORT_VENDOR: 'elProject.crm.exportVendor',
       CREATE_TEMPLATE: 'elProject.campaign.create_template',
       DELETE_TEMPLATE: 'elProject.campaign.delete_template',
       LIST_TEMPLATES: 'elProject.campaign.list_templates',
+      LIST_AUTOMATION: 'elProject.campaign.automation.list',
+      TOGGLE_AUTOMATION: 'elProject.campaign.automation.toggle',
+      CREATE_AUTOMATION: 'elProject.campaign.automation.create',
+      UPDATE_AUTOMATION: 'elProject.campaign.automation.update',
+      GET_AUTOMATION: 'elProject.campaign.automation.get',
+      DELETE_AUTOMATION: 'elProject.campaign.automation.delete',
       GET_FAILED_BATCH: 'elProject.crm.getFailedBatch',
+      GET_ONE_FAILED_BATCH: 'elProject.crm.getOneFailedBatch',
+      DELETE_FAILED_BATCH: 'elProject.crm.deleteFailedBatch',
       RETRY_IMPORT: 'elProject.crm.retryImport',
       SYNC_TEMPLATES: 'elProject.campaign.sync_templates',
       BROADCAST_COUNT: 'elProject.campaign.broadcast_count',
@@ -176,7 +186,8 @@ export const MS_ACTIONS = {
       GET_ALL_COMMUNICATION_LOGS: 'elProject.campaign.communication_logs',
       GET_ALL_COMMUNICATION_STATS: 'elProject.campaign.communication_stats',
       GET_CAMPAIGN_LOG: 'elProject.campaign.log',
-    }
+      GET_AUTOMATION_DETAIL: 'elProject.campaign.automation.detail',
+    },
   },
   SETTINGS: {
     LIST: 'settings.list',

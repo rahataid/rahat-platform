@@ -32,6 +32,7 @@ import { AbilitiesGuard, ACTIONS, CheckAbilities, JwtGuard, SUBJECTS } from '@ru
 import { UUID } from 'crypto';
 import { Address } from 'viem';
 import { DocParser } from '../utils/doc-parser';
+import { generateIdempotencyKey } from '../utils/idempotency-key';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 import { VendorsService } from './vendors.service';
 
@@ -100,12 +101,46 @@ export class VendorsController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
   async upload(@UploadedFile() file: TFile, @Req() req: any) {
+    if (!file?.buffer) {
+      throw new RpcException('No file provided');
+    }
+
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const projectId = req.body['projectId'];
+
+    if (!projectId) {
+      throw new RpcException('projectId is required');
+    }
+
     const vendors = await DocParser(docType, file.buffer);
+
+    if (!vendors.length) {
+      throw new RpcException('Uploaded file is empty');
+    }
+
+    const headers = Object.keys(vendors[0]);
+
+    const expectedHeaders = [
+      'BDE',
+      'BDM',
+      'Customer Code',
+      'Customer name',
+      'Mobile No.',
+      'Email',
+      'Channel',
+      'Region',
+      'Source',
+      'Last purchase',
+    ];
+
+    const missingHeaders = expectedHeaders.filter(h => !headers.includes(h));
+
+    if (missingHeaders.length > 0) {
+      throw new RpcException(`Invalid template. Missing headers: ${missingHeaders.join(', ')}`);
+    }
 
     const mappedVendors = vendors.map((v) => ({
       customerCode: v['Customer Code'],
@@ -114,24 +149,27 @@ export class VendorsController {
       phone: v['Mobile No.'],
       location: v['Region'],
       lastPurchaseDate: v['Last purchase'],
-      extras: {
-        email: v['Email'],
-        channel: v['Channel'],
-      }
-    }))
+      bde: v['BDE'],
+      bdm: v['BDM'],
+      email: v['Email'],
+      channel: v['Channel'],
+    }));
+
+    const cmd = { cmd: VendorJobs.IMPORT, uuid: projectId };
 
     return handleMicroserviceCall({
       client: this.client.send(
-        { cmd: VendorJobs.IMPORT, uuid: projectId },
-        mappedVendors
+        cmd,
+        {
+          vendors: mappedVendors,
+          idempotencyKey: generateIdempotencyKey(cmd, mappedVendors),
+        }
       ),
       onSuccess(res) {
         console.log('Vendors imported successfully:', res);
-        return res;
       },
       onError(err) {
         console.error('Error importing vendors:', err);
-        throw new RpcException(err.message || 'Failed to import vendors')
       }
     })
 
