@@ -199,7 +199,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="30" class="link-to-prism">apps/beneficiary/src/processors/beneficiary.processor.ts:30</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="32" class="link-to-prism">apps/beneficiary/src/processors/beneficiary.processor.ts:32</a></div>
                             </td>
                         </tr>
 
@@ -298,7 +298,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="30" class="link-to-prism">apps/beneficiary/src/processors/beneficiary.processor.ts:30</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="32" class="link-to-prism">apps/beneficiary/src/processors/beneficiary.processor.ts:32</a></div>
                         </td>
                     </tr>
 
@@ -342,8 +342,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="94"
-                                    class="link-to-prism">apps/beneficiary/src/processors/beneficiary.processor.ts:94</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="96"
+                                    class="link-to-prism">apps/beneficiary/src/processors/beneficiary.processor.ts:96</a></div>
                         </td>
                     </tr>
 
@@ -419,8 +419,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="115"
-                                    class="link-to-prism">apps/beneficiary/src/processors/beneficiary.processor.ts:115</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="117"
+                                    class="link-to-prism">apps/beneficiary/src/processors/beneficiary.processor.ts:117</a></div>
                         </td>
                     </tr>
 
@@ -496,8 +496,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="44"
-                                    class="link-to-prism">apps/beneficiary/src/processors/beneficiary.processor.ts:44</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="46"
+                                    class="link-to-prism">apps/beneficiary/src/processors/beneficiary.processor.ts:46</a></div>
                         </td>
                     </tr>
 
@@ -573,8 +573,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="39"
-                                    class="link-to-prism">apps/beneficiary/src/processors/beneficiary.processor.ts:39</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="41"
+                                    class="link-to-prism">apps/beneficiary/src/processors/beneficiary.processor.ts:41</a></div>
                         </td>
                     </tr>
 
@@ -679,20 +679,20 @@ export class BeneficiaryProcessor {
       const tempGroup &#x3D; await this.prisma.tempGroup.findUnique({
         where: { uuid: groupUUID },
       });
-      const groups &#x3D; await findTempBenefGroups(this.prisma, groupUUID);
+      const groups &#x3D; await findTempBenefGroups(this.prisma as any, groupUUID);
       if (!groups.length) return;
       const beneficiaries &#x3D; groups.map((f) &#x3D;&gt; f.tempBeneficiary);
       if (!beneficiaries.length) return;
 
       // Validate duplicate phones and wallets
       const dupliPhones &#x3D; await validateDupicatePhone(
-        this.prisma,
+        this.prisma as any,
         beneficiaries
       );
       if (dupliPhones.length)
         throw new Error(&#x60;Duplicate phones found: ${dupliPhones.toString()}&#x60;);
       const dupliWallets &#x3D; await validateDupicateWallet(
-        this.prisma,
+        this.prisma as any,
         beneficiaries
       );
       if (dupliWallets.length)
@@ -753,6 +753,7 @@ export class BeneficiaryProcessor {
       totalBatches: number;
       automatedGroupOption: {
         groupKey: string;
+        createAutomatedGroup: boolean
       };
     }&gt;
   ) {
@@ -764,6 +765,8 @@ export class BeneficiaryProcessor {
       totalBatches,
       automatedGroupOption,
     } &#x3D; job.data;
+
+
     // const canProceed &#x3D; await canProcessJob(job, this.logger);
     // if (!canProceed) {
     //   return; // Stop processing if the queue is busy
@@ -845,6 +848,7 @@ export class BeneficiaryProcessor {
           const beneficiariesData &#x3D; filteredBatch.map(
             ({ piiData, ...data }) &#x3D;&gt; data
           );
+
           const piiDataList &#x3D; filteredBatch.map(({ uuid, piiData }) &#x3D;&gt; ({
             ...piiData,
             uuid,
@@ -862,7 +866,7 @@ export class BeneficiaryProcessor {
                 &#x60;Failed to insert beneficiaries: ${error.message}&#x60;
               );
             });
-
+          // console.log(insertedBeneficiaries);
           // // Retrieve inserted beneficiaries for linking PII data
           // const insertedBeneficiaries &#x3D; await txn.beneficiary.findMany({
           //   where: {
@@ -889,7 +893,7 @@ export class BeneficiaryProcessor {
 
           // for automated grouping
           let createdBenGroups;
-          if (automatedGroupOption.groupKey) {
+          if (automatedGroupOption.createAutomatedGroup) {
             const uniqueGroup &#x3D; [
               ...new Set(
                 beneficiaries.map(
@@ -955,7 +959,6 @@ export class BeneficiaryProcessor {
                 &#x60;Failed to assign beneficiaries to project: ${error.message}&#x60;
               );
             });
-
 
             const assignPromises &#x3D; insertedBeneficiaries.map((b) &#x3D;&gt; {
               const projectPayload &#x3D; {

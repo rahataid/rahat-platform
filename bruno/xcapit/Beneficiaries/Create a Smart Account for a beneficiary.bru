@@ -1,0 +1,21 @@
+meta {
+  name: Create a Smart Account for a beneficiary
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{xcapitURL}}/api/beneficiaries
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{xcapit_token}}
+}
+
+body:json {
+  {
+    "phoneNumber": "+9779865430408"
+  }
+}

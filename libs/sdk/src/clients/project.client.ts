@@ -12,6 +12,10 @@ export const getProjectClient = (
             const response = await client.post(`/projects/${uuid}/actions`, data, config);
             return formatResponse<any>(response);
         },
+        generalActions: async ({ data }: { data: ProjectActions }, config?: AxiosRequestConfig) => {
+            const response = await client.post(`/projects/actions`, data, config);
+            return formatResponse<any>(response);
+        },
         addSettings: async ({ uuid, data }: { uuid: UUID; data }, config?: AxiosRequestConfig) => {
             const response = await client.post(`/projects/${uuid}/settings`, data, config);
             return formatResponse<any>(response)

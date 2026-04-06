@@ -1,0 +1,27 @@
+meta {
+  name: List Waterlevels for DHM
+  type: http
+  seq: 27
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.waterLevels.getDhm",
+    "payload": {
+      "riverBasin": "Mahakali",
+      "type": "HOURLY",
+      "from": "2025/04/01",
+      "to": "2025/04/04"
+    }
+  }
+}

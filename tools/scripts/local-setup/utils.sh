@@ -20,7 +20,6 @@ generate_mnemonic() {
 
 get_ganache_accounts() {
     docker cp ganache-rahat:/db/accounts ./accounts.json
-
 }
 
 migrate_seed() {
@@ -34,6 +33,7 @@ migrate_seed() {
     pnpm seed:cambodiadevsettings $current_dir
     pnpm seed:chainsettings
     npx ts-node prisma/seed.communication-settings.ts
+    npx ts-node prisma/seed.offramp.ts
 }
 
 create_rahat_volumes() {
@@ -89,7 +89,7 @@ rm_modules() {
 
 contract_setup(){
     pnpm seed:contracts
-    pnpm seed:network $current_dir
+    pnpm seed:graph $current_dir
 }
 
 graph_setup() {

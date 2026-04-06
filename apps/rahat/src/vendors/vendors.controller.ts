@@ -4,30 +4,45 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
   Query,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ClientProxy, MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
-  GetVendorOtp,
   VendorAddToProjectDto,
+  VendorPasswordRegisterDto,
   VendorRegisterDto,
   VendorUpdateDto,
-  VerifyVendorOtp,
+  VerifyVendorOtp
 } from '@rahataid/extensions';
-import { VendorJobs } from '@rahataid/sdk';
+import { APP, Enums, ProjectContants, TFile, VendorJobs } from '@rahataid/sdk';
 import { RequestDetails } from '@rumsan/extensions/decorators';
+import { OtpDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
+import { Request } from '@rumsan/sdk/types';
+import { AbilitiesGuard, ACTIONS, CheckAbilities, JwtGuard, SUBJECTS } from '@rumsan/user';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
+import { DocParser } from '../utils/doc-parser';
+import { generateIdempotencyKey } from '../utils/idempotency-key';
+import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 import { VendorsService } from './vendors.service';
 
 @ApiTags('Vendors')
 @Controller('vendors')
 export class VendorsController {
-  constructor(private readonly vendorService: VendorsService) { }
+  constructor(
+    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
+    private readonly vendorService: VendorsService
+  ) { }
 
   @Post('')
   registerVendor(@Body() dto: VendorRegisterDto) {
@@ -51,13 +66,12 @@ export class VendorsController {
 
   @ApiParam({ name: 'id', required: true })
   @Get('/:id')
-  getVendor(@Param('id') id: UUID | Address,
-  ) {
-    return this.vendorService.getVendor(id,);
+  getVendor(@Param('id') id: UUID | Address) {
+    return this.vendorService.getVendor(id);
   }
 
   @Post('/getOtp')
-  getOtp(@Body() dto: GetVendorOtp, @RequestDetails() rdetails: any) {
+  getOtp(@Body() dto: OtpDto, @RequestDetails() rdetails: any) {
     return this.vendorService.getOtp(dto, rdetails);
   }
 
@@ -83,6 +97,85 @@ export class VendorsController {
     return this.vendorService.removeVendor(vendorId, projectId);
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  async upload(@UploadedFile() file: TFile, @Req() req: any) {
+    if (!file?.buffer) {
+      throw new RpcException('No file provided');
+    }
+
+    const docType: Enums.UploadFileType =
+      req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
+    const projectId = req.body['projectId'];
+
+    if (!projectId) {
+      throw new RpcException('projectId is required');
+    }
+
+    const vendors = await DocParser(docType, file.buffer);
+
+    if (!vendors.length) {
+      throw new RpcException('Uploaded file is empty');
+    }
+
+    const headers = Object.keys(vendors[0]);
+
+    const expectedHeaders = [
+      'BDE',
+      'BDM',
+      'Customer Code',
+      'Customer name',
+      'Mobile No.',
+      'Email',
+      'Channel',
+      'Region',
+      'Source',
+      'Last purchase',
+    ];
+
+    const missingHeaders = expectedHeaders.filter(h => !headers.includes(h));
+
+    if (missingHeaders.length > 0) {
+      throw new RpcException(`Invalid template. Missing headers: ${missingHeaders.join(', ')}`);
+    }
+
+    const mappedVendors = vendors.map((v) => ({
+      customerCode: v['Customer Code'],
+      name: v['Customer name'],
+      source: v['Source'],
+      phone: v['Mobile No.'],
+      location: v['Region'],
+      lastPurchaseDate: v['Last purchase'],
+      bde: v['BDE'],
+      bdm: v['BDM'],
+      email: v['Email'],
+      channel: v['Channel'],
+    }));
+
+    const cmd = { cmd: VendorJobs.IMPORT, uuid: projectId };
+
+    return handleMicroserviceCall({
+      client: this.client.send(
+        cmd,
+        {
+          vendors: mappedVendors,
+          idempotencyKey: generateIdempotencyKey(cmd, mappedVendors),
+        }
+      ),
+      onSuccess(res) {
+        console.log('Vendors imported successfully:', res);
+      },
+      onError(err) {
+        console.error('Error importing vendors:', err);
+      }
+    })
+
+
+  }
+
   ///microservice
   @MessagePattern({ cmd: VendorJobs.GET_REDEMPTION_VENDORS })
   listRedemptionVendors(data) {
@@ -102,5 +195,26 @@ export class VendorsController {
   @MessagePattern({ cmd: VendorJobs.GET_BY_UUID })
   getVenderByUuid(@Payload() dto) {
     return this.vendorService.getVendorByUuid(dto);
+  }
+
+  @Post('password-register')
+  passwordRegister(
+    @Body() dto: VendorPasswordRegisterDto,
+    @RequestDetails() rdetails: Request
+  ) {
+    return this.vendorService.registerVendorWithPassword(dto, rdetails);
+  }
+
+  @Post('password-login')
+  passwordLogin(
+    @Body() dto: PasswordLoginDto,
+    @RequestDetails() rdetails: Request
+  ) {
+    return this.vendorService.loginByPassword(dto, rdetails);
+  }
+
+  @MessagePattern({ cmd: VendorJobs.CREATE })
+  create(@Payload() dto) {
+    return this.vendorService.create(dto);
   }
 }

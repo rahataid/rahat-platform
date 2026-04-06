@@ -15,20 +15,22 @@ import {
   BeneficiaryEvents,
   BeneficiaryJobs,
   BeneficiaryPayload,
-  generateRandomWallet,
   MicroserviceOptions,
   ProjectContants,
+  WalletJobs,
 } from '@rahataid/sdk';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService } from '@rumsan/prisma';
-import { lastValueFrom } from 'rxjs';
-import { isAddress } from 'viem';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class BeneficiaryUtilsService {
   constructor(
     private readonly prismaService: PrismaService,
     private eventEmitter: EventEmitter2,
-    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
+    @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
+    @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
+    private readonly settings: SettingsService
   ) { }
 
   buildWhereClause(dto: ListBeneficiaryDto): Record<string, any> {
@@ -77,8 +79,13 @@ export class BeneficiaryUtilsService {
   }
 
   async ensureValidWalletAddress(walletAddress?: string): Promise<string> {
+    const chain = await this.getChainName();
     if (!walletAddress) {
-      return generateRandomWallet().address;
+      const observable = this.walletClient.send({ cmd: WalletJobs.CREATE }, [
+        chain.toLowerCase(),
+      ]);
+      const result = await firstValueFrom(observable);
+      return result[0].address;
     }
 
     const existingBeneficiary = await this.prismaService.beneficiary.findUnique(
@@ -91,10 +98,9 @@ export class BeneficiaryUtilsService {
       console.log('Wallet address already exists');
       throw new RpcException('Wallet address already exists');
     }
-    if (!isAddress(walletAddress)) {
-      console.log('Wallet should be valid Ethereum Address');
-      throw new RpcException('Wallet should be valid Ethereum Address');
-    }
+    // if (!isAddress(walletAddress)) {
+    //   throw new RpcException('Wallet should be valid Ethereum Address');
+    // }
     return walletAddress;
   }
 
@@ -139,6 +145,7 @@ export class BeneficiaryUtilsService {
   }
 
   async assignBeneficiaryToProject(assignBeneficiaryDto: AddToProjectDto) {
+
     const { beneficiaryId, projectId } = assignBeneficiaryDto;
 
     try {
@@ -188,6 +195,63 @@ export class BeneficiaryUtilsService {
     } catch (e) {
       console.log('Error in assigning beneficiary to project:', e);
     }
+  }
+
+  async bulkAssignBeneficiaryToProject(assignBeneficiaryDtos: AddToProjectDto[]) {
+    if (!assignBeneficiaryDtos?.length) return;
+
+    const allProjectPayloads = [];
+
+    // Process each assignment and build payloads
+    for (const assignBeneficiaryDto of assignBeneficiaryDtos) {
+      const { beneficiaryId, projectId } = assignBeneficiaryDto;
+
+      //fetch project and beneficiary detail in parallel
+      const [projectData, beneficiaryData] = await Promise.all([
+        this.prismaService.project.findUnique({ where: { uuid: projectId } }),
+        this.prismaService.beneficiary.findUnique({
+          where: { uuid: beneficiaryId },
+          include: { pii: true },
+        }),
+      ]);
+
+      if (!projectData) continue;
+      if (!beneficiaryData) {
+        console.warn(`Beneficiary ${beneficiaryId} not found, skipping assignment`);
+        continue;
+      }
+
+      //Build Project Payload and add to array
+      const projectPayload = this.buildProjectPayload(projectData, beneficiaryData);
+      allProjectPayloads.push(projectPayload);
+
+      //Save beneficiary to Project
+      await this.saveBeneficiaryToProject({
+        beneficiaryId,
+        projectId,
+      });
+    }
+
+    // Single bulk microservice call for all beneficiaries
+    if (allProjectPayloads.length > 0) {
+      await this.handleMicroserviceCall({
+        client: this.client.send(
+          { cmd: 'rahat.jobs.beneficiary.create_bulk', uuid: assignBeneficiaryDtos[0].projectId },
+          { beneficiaries: allProjectPayloads }
+        ),
+        onSuccess(response) {
+          console.log('Bulk assignment response', response);
+        },
+        onError(error) {
+          console.log('Bulk assignment error', error);
+          throw new RpcException(error.message);
+        },
+      });
+    }
+
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
+      projectUuid: assignBeneficiaryDtos[0].projectId,
+    });
   }
 
   private buildProjectPayload(projectData: any, beneficiaryData: any) {
@@ -299,5 +363,19 @@ export class BeneficiaryUtilsService {
         throw error;
       }
     }
+  }
+
+  async getChainName(): Promise<string> {
+    const contractSettings = await this.settings.getByName('CHAIN_SETTINGS');
+    const value =
+      typeof contractSettings.value === 'string'
+        ? JSON.parse(contractSettings.value)
+        : contractSettings.value;
+
+    if (!value.currency?.symbol) {
+      throw new Error('Chain configuration must include currency.symbol');
+    }
+
+    return value.currency.symbol;
   }
 }

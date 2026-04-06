@@ -89,9 +89,6 @@ export class CreateBeneficiaryDto implements Beneficiary {
     description: 'Ethereum address',
   })
   @IsOptional()
-  // @IsEthereumAddress({
-  //  always: false,
-  // })
   walletAddress: string;
 
   @ApiProperty({

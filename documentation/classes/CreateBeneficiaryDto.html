@@ -227,7 +227,6 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier">Optional</span>
                                 <a href="#piiData" >piiData</a>
                             </li>
                             <li>
@@ -707,7 +706,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier">Optional</span>
                         <span ><b>piiData</b></span>
                         <a href="#piiData"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -1017,7 +1015,7 @@ export class CreateBeneficiaryDto implements Beneficiary {
     },
   })
   @IsOptional()
-  piiData?: TPIIData;
+  piiData: TPIIData;
 
   @ApiProperty({
     example: [randomUUID().toString()],

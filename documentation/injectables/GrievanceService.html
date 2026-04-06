@@ -178,7 +178,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="11" class="link-to-prism">apps/rahat/src/grievance/grievance.service.ts:11</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="13" class="link-to-prism">apps/rahat/src/grievance/grievance.service.ts:13</a></div>
                             </td>
                         </tr>
 
@@ -243,8 +243,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="72"
-                                    class="link-to-prism">apps/rahat/src/grievance/grievance.service.ts:72</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="84"
+                                    class="link-to-prism">apps/rahat/src/grievance/grievance.service.ts:84</a></div>
                         </td>
                     </tr>
 
@@ -324,8 +324,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="17"
-                                    class="link-to-prism">apps/rahat/src/grievance/grievance.service.ts:17</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="19"
+                                    class="link-to-prism">apps/rahat/src/grievance/grievance.service.ts:19</a></div>
                         </td>
                     </tr>
 
@@ -405,8 +405,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="37"
-                                    class="link-to-prism">apps/rahat/src/grievance/grievance.service.ts:37</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="39"
+                                    class="link-to-prism">apps/rahat/src/grievance/grievance.service.ts:39</a></div>
                         </td>
                     </tr>
 
@@ -474,8 +474,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="84"
-                                    class="link-to-prism">apps/rahat/src/grievance/grievance.service.ts:84</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="96"
+                                    class="link-to-prism">apps/rahat/src/grievance/grievance.service.ts:96</a></div>
                         </td>
                     </tr>
 
@@ -543,8 +543,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="107"
-                                    class="link-to-prism">apps/rahat/src/grievance/grievance.service.ts:107</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="119"
+                                    class="link-to-prism">apps/rahat/src/grievance/grievance.service.ts:119</a></div>
                         </td>
                     </tr>
 
@@ -658,9 +658,19 @@ export class GrievanceService {
       }
     }
 
+    if (query.title) {
+      where.title &#x3D; {
+        contains: query.title,
+        mode: &#x27;insensitive&#x27;
+      }
+    }
+
     return paginate(this.prisma.grievance, {
       include,
-      where
+      where,
+      orderBy: {
+        createdAt: &#x27;desc&#x27;
+      }
     }, {
       page: query.page,
       perPage: query.perPage,

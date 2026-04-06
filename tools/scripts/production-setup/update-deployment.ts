@@ -90,9 +90,7 @@ class DeploymentUpdater {
 
     const data = {
       name: 'SUBGRAPH_URL',
-      value: {
-        URL: 'https://api.studio.thegraph.com/query/42205/sms-southafrica/version/latest',
-      },
+      value: { URL: formattedURL },
       isPrivate: false,
     };
 
