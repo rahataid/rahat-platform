@@ -1,0 +1,15 @@
+meta {
+  name: Direct Withdraw Cancel -Local-Crypto-
+  type: http
+  seq: 14
+}
+
+put {
+  url: {{base_url}}/api/v2/payout/withdraw/{{drct_l2c_wdrw_prn}}/local/crypto/cancel
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}

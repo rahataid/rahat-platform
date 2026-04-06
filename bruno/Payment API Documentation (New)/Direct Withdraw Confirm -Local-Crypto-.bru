@@ -1,0 +1,15 @@
+meta {
+  name: Direct Withdraw Confirm -Local-Crypto-
+  type: http
+  seq: 13
+}
+
+put {
+  url: {{base_url}}/api/v2/payout/withdraw/{{drct_l2c_wdrw_prn}}/local/crypto/confirm
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
