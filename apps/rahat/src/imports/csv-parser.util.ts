@@ -1,5 +1,6 @@
 import { parse } from 'csv-parse/sync';
 import { generateRandomWallet } from '@rahataid/sdk/utils';
+import { STANDARD_FIELD_MAP, VALID_GENDERS } from './imports.constants';
 
 export interface MappedRow {
   rowIndex: number;
@@ -7,23 +8,6 @@ export interface MappedRow {
   pii: Record<string, any>;
   extras: Record<string, any>;
 }
-
-const STANDARD_FIELD_MAP: Record<string, { table: 'beneficiary' | 'pii'; field: string }> = {
-  'name': { table: 'pii', field: 'name' },
-  'phone': { table: 'pii', field: 'phone' },
-  'email': { table: 'pii', field: 'email' },
-  'gender': { table: 'beneficiary', field: 'gender' },
-  'walletaddress': { table: 'beneficiary', field: 'walletAddress' },
-  'birthdate': { table: 'beneficiary', field: 'birthDate' },
-  'age': { table: 'beneficiary', field: 'age' },
-  'location': { table: 'beneficiary', field: 'location' },
-  'latitude': { table: 'beneficiary', field: 'latitude' },
-  'longitude': { table: 'beneficiary', field: 'longitude' },
-  'notes': { table: 'beneficiary', field: 'notes' },
-  'bankedstatus': { table: 'beneficiary', field: 'bankedStatus' },
-  'internetstatus': { table: 'beneficiary', field: 'internetStatus' },
-  'phonestatus': { table: 'beneficiary', field: 'phoneStatus' },
-};
 
 export function parseCSVBuffer(buffer: Buffer): { headers: string[]; rows: Record<string, string>[] } {
   const records = parse(buffer, {
@@ -77,7 +61,7 @@ function mapCSVRow(row: Record<string, string>, rowIndex: number): MappedRow {
   // Normalize gender to uppercase enum value
   if (beneficiary.gender) {
     beneficiary.gender = String(beneficiary.gender).toUpperCase();
-    if (!['MALE', 'FEMALE', 'OTHER', 'UNKNOWN'].includes(beneficiary.gender)) {
+    if (!(VALID_GENDERS as readonly string[]).includes(beneficiary.gender)) {
       beneficiary.gender = 'UNKNOWN';
     }
   }
@@ -89,13 +73,19 @@ function convertValue(field: string, value: string): any {
   if (value === undefined || value === '') return undefined;
 
   switch (field) {
-    case 'age':
-      return parseInt(value, 10) || undefined;
+    case 'age': {
+      const n = parseInt(value, 10);
+      return Number.isNaN(n) ? undefined : n;
+    }
     case 'latitude':
-    case 'longitude':
-      return parseFloat(value) || undefined;
-    case 'birthDate':
-      return new Date(value) || undefined;
+    case 'longitude': {
+      const n = parseFloat(value);
+      return Number.isNaN(n) ? undefined : n;
+    }
+    case 'birthDate': {
+      const d = new Date(value);
+      return isNaN(d.getTime()) ? undefined : d;
+    }
     default:
       return value;
   }

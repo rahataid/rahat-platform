@@ -1,14 +1,13 @@
 import { Pagination } from '@rumsan/sdk/types';
 import { FormattedResponse, formatResponse } from '@rumsan/sdk/utils';
 import { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { UUID } from 'crypto';
 
-type ImportStatus = 'NEW' | 'PROCESSING' | 'IMPORTED' | 'FAILED';
+type ImportStatus = 'NEW' | 'PROCESSING' | 'IMPORTED' | 'FAILED' | 'REJECTED';
 
 export type ImportCreate = {
   fileUrl: string;
   groupName: string;
-  groupUUID: string;
+  groupstring: string;
   beneficiaryCount: number;
   meta?: Record<string, unknown>;
 };
@@ -18,7 +17,7 @@ export type Import = {
   r2Key: string;
   fileUrl: string;
   groupName: string;
-  groupUUID: string;
+  groupstring: string;
   beneficiaryCount: number;
   source?: string;
   status: ImportStatus;
@@ -44,11 +43,11 @@ export type ImportsClient = {
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<Import[]>>;
   get: (
-    uuid: UUID,
+    uuid: string,
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<Import>>;
   getFile: (
-    uuid: UUID,
+    uuid: string,
     config?: AxiosRequestConfig
   ) => Promise<FormattedResponse<Blob>>;
 };
@@ -70,12 +69,12 @@ export const getImportsClient = (
       return formatResponse<Import[]>(response);
     },
 
-    get: async (uuid: UUID, config?: AxiosRequestConfig) => {
+    get: async (uuid: string, config?: AxiosRequestConfig) => {
       const response = await client.get(`/imports/${uuid}`, config);
       return formatResponse<Import>(response);
     },
 
-    getFile: async (uuid: UUID, config?: AxiosRequestConfig) => {
+    getFile: async (uuid: string, config?: AxiosRequestConfig) => {
       const response = await client.get(`/imports/${uuid}/file`, {
         responseType: 'blob',
         ...config,

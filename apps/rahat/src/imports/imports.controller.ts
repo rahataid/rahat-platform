@@ -26,6 +26,7 @@ import { Request, Response } from 'express';
 import { from, interval, Observable } from 'rxjs';
 import { map, switchMap, takeWhile } from 'rxjs/operators';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
+import { SSE_POLL_INTERVAL_MS, TERMINAL_IMPORT_PHASES } from './imports.constants';
 import { ImportsService } from './imports.service';
 
 @Controller('imports')
@@ -48,9 +49,14 @@ export class ImportsController {
     }
   ) {
     const origin = req.headers['origin'] || req.headers['referer'];
-    const source = origin
-      ? new URL(Array.isArray(origin) ? origin[0] : origin).host
-      : req.ip;
+    let source: string = req.ip ?? 'unknown';
+    if (origin) {
+      try {
+        source = new URL(Array.isArray(origin) ? origin[0] : origin).host;
+      } catch {
+        source = req.ip ?? 'unknown';
+      }
+    }
 
     return this.importsService.create(body, source);
   }
@@ -110,12 +116,12 @@ export class ImportsController {
   @Sse(':uuid/progress')
   @ApiParam({ name: 'uuid', required: true })
   progress(@Param('uuid') uuid: string): Observable<MessageEvent> {
-    return interval(1500).pipe(
+    return interval(SSE_POLL_INTERVAL_MS).pipe(
       switchMap(() => from(this.importsService.getProgress(uuid))),
       map((progress) => ({ data: progress }) as MessageEvent),
       takeWhile((event: MessageEvent) => {
         const data = event.data as any;
-        return data?.phase !== 'completed' && data?.phase !== 'failed';
+        return !TERMINAL_IMPORT_PHASES.includes(data?.phase);
       }, true),
     );
   }
