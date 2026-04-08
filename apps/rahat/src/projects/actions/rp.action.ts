@@ -129,7 +129,11 @@ export const rpActions: ProjectActionFunc = {
     sendCommand({ cmd: ProjectJobs.UPDATE_REDEMPTION, uuid }, payload),
   [MS_ACTIONS.RPPROJECT.LIST_REDEMPTION]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.LIST_REDEMPTION, uuid }, payload),
-  [MS_ACTIONS.RPPROJECT.GET_BENEFICIARY_REDEMPTION]: (uuid, payload, sendCommand) =>
+  [MS_ACTIONS.RPPROJECT.GET_BENEFICIARY_REDEMPTION]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
     sendCommand({ cmd: ProjectJobs.GET_BENEFICIARY_REDEMPTION, uuid }, payload),
   [MS_ACTIONS.RPPROJECT.GET_VENDOR_REDEMPTION]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.GET_VENDOR_REDEMPTION, uuid }, payload),
@@ -274,27 +278,67 @@ export const rpActions: ProjectActionFunc = {
       payload
     ),
 
-  [MS_ACTIONS.RPPROJECT.CREATE_BULK_WALKIN_BENEFICIARIES]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: ProjectJobs.BENEFICIARY.CREATE_BULK_WALKIN_BENEFICIARY, uuid }, payload),
+  [MS_ACTIONS.RPPROJECT.CREATE_BULK_WALKIN_BENEFICIARIES]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: ProjectJobs.BENEFICIARY.CREATE_BULK_WALKIN_BENEFICIARY, uuid },
+      payload
+    ),
 
-  [MS_ACTIONS.RPPROJECT.SYNC_OFFLINE_TRANSACTIONS]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: ProjectJobs.BENEFICIARY.SYNC_OFFLINE_TRANSACTIONS, uuid }, payload),
+  [MS_ACTIONS.RPPROJECT.SYNC_STAGING_WALKIN]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.BENEFICIARY.SYNC_STAGING_WALKIN, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.RPPROJECT.SYNC_OFFLINE_TRANSACTIONS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: ProjectJobs.BENEFICIARY.SYNC_OFFLINE_TRANSACTIONS, uuid },
+      payload
+    ),
 
   [MS_ACTIONS.RPPROJECT.LIST_REPORTING]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.REPORTING.LIST, uuid }, payload),
 
   [MS_ACTIONS.RPPROJECT.LIST_EYE_CHECKEUP_LINE]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: ProjectJobs.REPORTING.LIST_EYE_CHECKEUP_LINE, uuid }, payload),
+    sendCommand(
+      { cmd: ProjectJobs.REPORTING.LIST_EYE_CHECKEUP_LINE, uuid },
+      payload
+    ),
 
-  [MS_ACTIONS.RPPROJECT.LIST_PURCHASE_OF_GLASSESS_LINE]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: ProjectJobs.REPORTING.LIST_PURCHASE_OF_GLASSESS_LINE, uuid }, payload),
+  [MS_ACTIONS.RPPROJECT.LIST_PURCHASE_OF_GLASSESS_LINE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: ProjectJobs.REPORTING.LIST_PURCHASE_OF_GLASSESS_LINE, uuid },
+      payload
+    ),
 
   [MS_ACTIONS.RPPROJECT.GET_REDEMPTION]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.GET_REDEMPTION, uuid }, payload),
 
   [MS_ACTIONS.RPPROJECT.UPDATE_BENEFICIARY]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: ProjectJobs.BENEFICIARY.UPDATE_BENEFICIARY_REDEMPTION, uuid }, payload),
+    sendCommand(
+      { cmd: ProjectJobs.BENEFICIARY.UPDATE_BENEFICIARY_REDEMPTION, uuid },
+      payload
+    ),
 
-  [MS_ACTIONS.RPPROJECT.LIST_BENEFICIARY_REIMBURSEMENTS]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: ProjectJobs.BENEFICIARY.LIST_BENEFICIARY_REIMBURSEMENTS, uuid }, payload),
+  [MS_ACTIONS.RPPROJECT.LIST_BENEFICIARY_REIMBURSEMENTS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: ProjectJobs.BENEFICIARY.LIST_BENEFICIARY_REIMBURSEMENTS, uuid },
+      payload
+    ),
 };
