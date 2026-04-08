@@ -1,0 +1,25 @@
+meta {
+  name: get benf avalible Inkind
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupInkinds.getAvailableInkindByBeneficiaryPhone",
+    "payload": {
+      "number": "+9779843212908"
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
