@@ -1,0 +1,29 @@
+meta {
+  name: create inkind benf
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{url}}/beneficiaries/beneficiaryWithDbTransaction
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "projectId":"{{uuid}}",
+    "name":"subash",
+    "gender":"MALE",
+    "age":25,
+    "piiData":{
+      "phone":"+9779840123008",
+      "name":"subash"
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

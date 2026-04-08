@@ -570,6 +570,9 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.INKIND.GET]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_SUMMARY]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.GET_SUMMARY, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.INKIND.UPDATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.UPDATE, uuid }, payload),
 
@@ -598,6 +601,16 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.INKIND.GET_BY_GROUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_BY_GROUP, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_UNASSIGNED_GROUP_INKIND]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.GET_UNASSIGNED_GROUP_INKIND, uuid },
+      payload
+    ),
+
   [MS_ACTIONS.AAPROJECT.INKIND.GET_AVAILABLE_INKIND_BENEFICIARY_PHONE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_AVAILABLE_INKIND_BENEFICIARY_PHONE, uuid }, payload),
 
@@ -609,6 +622,9 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.INKIND.GET_GROUP_INKIND_LOGS_BY_VENDOR]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_GROUP_INKIND_LOGS_BY_VENDOR, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_LOGS_DETAILS_BY_TX_HASH]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.GET_LOGS_DETAILS_BY_TX_HASH, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.INKIND.SEND_BENEFICIARY_OTP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.SEND_BENEFICIARY_OTP, uuid }, payload),

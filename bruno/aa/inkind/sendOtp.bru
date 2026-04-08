@@ -1,5 +1,5 @@
 meta {
-  name: get benf assigned Inkind
+  name: sendOtp
   type: http
   seq: 10
 }
@@ -12,9 +12,9 @@ post {
 
 body:json {
   {
-    "action": "aaProject.groupInkinds.getAvailableInkindByBeneficiaryPhone",
+    "action": "aaProject.inkinds.sendBeneficiaryOtp",
     "payload": {
-      "number": "+9779843212908"
+      "number":"+9779845085589"
     }
   }
 }
