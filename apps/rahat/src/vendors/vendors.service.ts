@@ -966,7 +966,7 @@ export class VendorsService {
           data: createdVendors,
           message: `${createdVendors.length} vendor(s) created successfully`,
         };
-      });
+      }, { maxWait: 5000, timeout: 25000 });
 
       return result;
     } catch (error) {
