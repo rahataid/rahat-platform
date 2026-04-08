@@ -145,6 +145,7 @@ export const JOBS = {
       'aa.jobs.groupInkinds.getAvailableInkindByBeneficiaryPhone',
     GET_GROUP_INKIND_LOGS: 'aa.jobs.groupInkinds.getLogs',
     GET_GROUP_INKIND_LOGS_BY_VENDOR: 'aa.jobs.groupInkinds.getLogsByVendor',
+    GET_LOGS_DETAILS_BY_VENDOR: 'aa.jobs.groupInkinds.getLogsDetailsByVendor',
     BENEFICIARY_INKIND_REDEEM: 'aa.jobs.beneficiaryInkinds.redeem',
     SEND_BENEFICIARY_OTP: 'aa.jobs.inkinds.sendBeneficiaryOtp',
     VALIDATE_BENEFICIARY_OTP: 'aa.jobs.inkinds.validateBeneficiaryOtp',
