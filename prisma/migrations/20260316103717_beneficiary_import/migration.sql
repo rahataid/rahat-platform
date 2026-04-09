@@ -11,6 +11,7 @@ CREATE TABLE "tbl_beneficiary_imports" (
     "groupUUID" UUID NOT NULL,
     "beneficiaryCount" INTEGER NOT NULL DEFAULT 0,
     "status" "ImportStatus" NOT NULL DEFAULT 'NEW',
+    "source" TEXT,
     "extras" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
