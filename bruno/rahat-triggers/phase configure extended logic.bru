@@ -1,0 +1,35 @@
+meta {
+  name: phase configure extended logic
+  type: http
+  seq: 48
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.phases.configureExtendedLogic",
+    "payload": {
+      "uuid": "{{phaseId}}",
+      "groups": [
+        {
+          "operator": "AND",
+          "triggers": ["dhm_water_level", "dhm_rainfall"]
+        },
+        {
+          "operator": "AND",
+          "triggers": ["glofas_flood_prob", "gfh_discharge"]
+        }
+      ],
+      "joinOperator": "OR"
+    }
+  }
+}

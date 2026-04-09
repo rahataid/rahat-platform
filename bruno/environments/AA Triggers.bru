@@ -1,10 +1,13 @@
 vars {
-  url: https://api-aa-dev.rahat.io/v1
+  url: {{process.env.AA_URL}}
   user_email: {{process.env.USER_EMAIL}}
   client_id: {{process.env.CLIENT_ID}}
   access_token: {{process.env.ACCESS_TOKEN}}
   private_key: {{process.env.PRIVATE_KEY}}
   project_id: {{process.env.PROJECT_ID}}
-  appId: 73887c41-2d49-445b-85da-f86c65608a23
-  uuid: 73887c41-2d49-445b-85da-f86c65608a23
+
+  uuid: {{process.env.AA_PROJECT_UUID}}
+
+  triggerId: {{process.env.AA_TRIGGER_ID}}
+  phaseId: {{process.env.AA_PHASE_ID}}
 }
