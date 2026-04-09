@@ -623,6 +623,8 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.INKIND.GET_GROUP_INKIND_LOGS_BY_VENDOR]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_GROUP_INKIND_LOGS_BY_VENDOR, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_LOGS_DETAILS_BY_VENDOR]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.INKIND.GET_LOGS_DETAILS_BY_VENDOR, uuid }, payload),
   [MS_ACTIONS.AAPROJECT.INKIND.GET_LOGS_DETAILS_BY_TX_HASH]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_LOGS_DETAILS_BY_TX_HASH, uuid }, payload),
 
