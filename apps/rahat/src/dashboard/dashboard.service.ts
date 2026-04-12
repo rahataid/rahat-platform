@@ -1,174 +1,225 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@rumsan/prisma';
 
-// ── Helper constants (replicated from beneficiary helpers) ──────────────
+type SeriesEntry = { label: string; value: number };
 
-const AGE_GROUPS = {
-  BELOW_20: '<20',
-  AGE_19_TO_29: '20-29',
-  AGE_30_TO_45: '30-45',
-  AGE_46_TO_59: '46-59',
-  ABOVE_60: '>60',
+type ExtraStat = {
+  key: string;
+  label: string;
+  classification: 'boolean' | 'numeric' | 'status' | 'category';
+  chart: 'pie' | 'bar' | 'metric';
+  coverage: { nonNull: number; pct: number };
+  series: SeriesEntry[];
+  summary?: { count: number; min: number; max: number; avg: number };
 };
 
-const TYPE_OF_SSA = {
-  SENIOR_CITIZEN_ABOVE_70: 'senior_citizen__70',
-  SENIOR_CITIZEN_DALIT_ABOVE_60: 'senior_citizen__60__dalit',
-  CHILD_NUTRITION: 'child_nutrition',
-  SINGLE_WOMEN: 'single_woman',
-  WIDOW: 'widow',
-  RED_CARD: 'red_class',
-  BLUE_CARD: 'blue_card',
-  INDIGENOUS_COMMUNITY: 'indigenous_community',
+type KeyAccumulator = {
+  nonNullCount: number;
+  uniqueValues: Map<string, number>;
+  numericCount: number;
+  min: number;
+  max: number;
+  sum: number;
 };
 
-const FIELD_MAP = {
-  NO_OF_LACTATING_WOMEN: 'no_of_lactating_women',
-  NO_OF_PERSONS_WITH_DISABILITY: 'no_of_persons_with_disability',
-  NO_OF_PREGNANT_WOMEN: 'no_of_pregnant_women',
-};
+const EXTRAS_DENY_LIST = new Set([
+  'validPhoneNumber',
+  'validBankAccount',
+  'error',
+  'bank_ac_name',
+  'bank_ac_number',
+  'transportId',
+  'url',
+  'appId',
+  'walletAddress',
+]);
 
-const FIELD_COMMUNICATION_CHANNEL = [
-  'channelcommunity',
-  'channelfm_radio',
-  'channelmobile_phone___sms',
-  'channelnewspaper',
-  'channelothers',
-  'channelpeople_representatives',
-  'channelrelatives',
-  'channelsocial_media',
-];
+const BOOLEAN_VALUES = new Set(['yes', 'no', 'true', 'false', '1', '0']);
 
-const VULNERABILITY_FIELD = {
-  HOW_MANY_LACTATING: 'if_yes_how_many_lactating',
-  HOW_MANY_PREGNANT: 'if_yes_how_many_pregnant',
-  TYPE_OF_SSA_1: 'type_of_ssa_1',
-  TYPE_OF_SSA_2: 'type_of_ssa_2',
-  TYPE_OF_SSA_3: 'type_of_ssa_3',
-};
+const UNIQUE_VALUES_CAP = 100;
+const TOP_K = 10;
+const MIN_NON_NULL_COUNT = 5;
 
-// ── Helper functions ────────────────────────────────────────────────────
+/**
+ * Flattens nested object to dot-path keys.
+ * { address: { city: 'NY' } } → { 'address.city': 'NY' }
+ */
+function flattenExtras(
+  obj: Record<string, unknown>,
+  prefix = '',
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+    if (
+      val !== null &&
+      val !== undefined &&
+      typeof val === 'object' &&
+      !Array.isArray(val)
+    ) {
+      Object.assign(result, flattenExtras(val as Record<string, unknown>, fullKey));
+    } else {
+      result[fullKey] = val;
+    }
+  }
+  return result;
+}
 
-function toPascalCase(input: string): string {
-  return input
-    .replace(/^channel/, '')
-    .replace(/_+/g, ' ')
+function keyToLabel(key: string): string {
+  const segment = key.split('.').pop() ?? key;
+  return segment
     .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/[_\-.]+/g, ' ')
     .split(' ')
     .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join('');
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
 }
 
-function getAgeGroup(age: number): string {
-  if (age < 20) return AGE_GROUPS.BELOW_20;
-  if (age >= 20 && age <= 29) return AGE_GROUPS.AGE_19_TO_29;
-  if (age >= 30 && age <= 45) return AGE_GROUPS.AGE_30_TO_45;
-  if (age >= 46 && age <= 59) return AGE_GROUPS.AGE_46_TO_59;
-  return AGE_GROUPS.ABOVE_60;
+function isBooleanClassification(acc: KeyAccumulator): boolean {
+  if (acc.nonNullCount < 1) return false;
+  for (const key of acc.uniqueValues.keys()) {
+    if (!BOOLEAN_VALUES.has(key.toLowerCase().trim())) return false;
+  }
+  return true;
 }
 
-function mapAgeGroupCounts(data: any[]): Array<{ id: string; count: number }> {
-  const counts: Record<string, number> = {
-    [AGE_GROUPS.BELOW_20]: 0,
-    [AGE_GROUPS.AGE_19_TO_29]: 0,
-    [AGE_GROUPS.AGE_30_TO_45]: 0,
-    [AGE_GROUPS.AGE_46_TO_59]: 0,
-    [AGE_GROUPS.ABOVE_60]: 0,
-  };
+function isIdentifierKey(key: string): boolean {
+  return /phone|account|id|address|wallet|transport/i.test(key);
+}
 
-  for (const item of data) {
-    const age = item?.extras?.interviewee_age;
-    if (typeof age === 'number') {
-      const group = getAgeGroup(age);
-      counts[group]++;
-    }
+function looksLikeEnumValues(values: Map<string, number>): boolean {
+  let enumLike = 0;
+  for (const k of values.keys()) {
+    if (/^[A-Z][A-Z0-9_]*$/.test(k)) enumLike++;
+  }
+  return enumLike / values.size >= 0.7;
+}
+
+/**
+ * Classifies an extras key using priority heuristics:
+ * boolean → numeric → status → category → null (skip high-cardinality free text).
+ */
+function classifyKey(
+  key: string,
+  acc: KeyAccumulator,
+  total: number,
+): 'boolean' | 'numeric' | 'status' | 'category' | null {
+  if (EXTRAS_DENY_LIST.has(key)) return null;
+
+  const pct = total > 0 ? (acc.nonNullCount / total) * 100 : 0;
+  if (acc.nonNullCount < MIN_NON_NULL_COUNT && pct < 5) return null;
+  if (acc.nonNullCount === 0) return null;
+
+  if (isBooleanClassification(acc)) return 'boolean';
+
+  const uniqueRatio = acc.uniqueValues.size / acc.nonNullCount;
+
+  if (
+    acc.numericCount === acc.nonNullCount &&
+    uniqueRatio < 0.8 &&
+    !isIdentifierKey(key)
+  ) {
+    return 'numeric';
   }
 
-  return Object.entries(counts).map(([id, count]) => ({ id, count }));
-}
+  const hasStatusKeyword = /status|state|type/.test(key.toLowerCase());
 
-function countResult(data: any[]): Record<string, number> {
-  const counts: Record<string, number> = {
-    [FIELD_MAP.NO_OF_LACTATING_WOMEN]: 0,
-    [FIELD_MAP.NO_OF_PERSONS_WITH_DISABILITY]: 0,
-    [FIELD_MAP.NO_OF_PREGNANT_WOMEN]: 0,
-  };
-
-  for (const item of data) {
-    const extras = item.extras || {};
-    for (const field of Object.values(FIELD_MAP)) {
-      const rawVal = extras[field];
-      if (rawVal === '' || rawVal === '-' || rawVal == null) continue;
-      const val = parseInt(rawVal);
-      if (!isNaN(val) && val > 0) {
-        counts[field] += val;
-      }
-    }
-  }
-  return counts;
-}
-
-function countBySSAType(
-  data: any[],
-): Array<{ id: string; count: number }> {
-  const counts: Record<string, number> = {};
-  Object.values(TYPE_OF_SSA).forEach((val) => {
-    counts[val] = 0;
-  });
-
-  for (const item of data) {
-    const ssaType = item?.extras?.type_of_ssa;
-    if (!ssaType || ssaType === '-') continue;
-    if (Object.values(TYPE_OF_SSA).includes(ssaType)) {
-      counts[ssaType] = (counts[ssaType] || 0) + 1;
-    }
+  if (
+    acc.uniqueValues.size <= 12 &&
+    (looksLikeEnumValues(acc.uniqueValues) || hasStatusKeyword)
+  ) {
+    return 'status';
   }
 
-  return Object.entries(counts).map(([id, count]) => ({ id, count }));
+  if (acc.uniqueValues.size <= 30) return 'category';
+
+  return null;
 }
 
-function mapVulnerabilityStatusCount(
-  data: any[],
-): Array<{ id: string; count: number }> {
-  const myData: Record<string, number> = {};
+function buildSeries(
+  acc: KeyAccumulator,
+  chart: 'pie' | 'bar' | 'metric',
+): SeriesEntry[] {
+  const entries: SeriesEntry[] = [];
+  for (const [label, value] of acc.uniqueValues.entries()) {
+    entries.push({ label, value });
+  }
+  entries.sort((a, b) => b.value - a.value);
 
-  const incrementCount = (key: string, count = 1) => {
-    if (key) {
-      myData[key] = (myData[key] || 0) + count;
-    }
-  };
-
-  for (const d of data) {
-    const extras = d?.extras ?? {};
-    incrementCount(
-      'Lactating',
-      +extras[VULNERABILITY_FIELD.HOW_MANY_LACTATING] || 0,
-    );
-    incrementCount(
-      'Pregnant',
-      +extras[VULNERABILITY_FIELD.HOW_MANY_PREGNANT] || 0,
-    );
-    incrementCount(extras[VULNERABILITY_FIELD.TYPE_OF_SSA_1]);
-    incrementCount(extras[VULNERABILITY_FIELD.TYPE_OF_SSA_2]);
-    incrementCount(extras[VULNERABILITY_FIELD.TYPE_OF_SSA_3]);
+  if (chart === 'bar' && entries.length > TOP_K) {
+    const topEntries = entries.slice(0, TOP_K);
+    const otherCount = entries.slice(TOP_K).reduce((s, e) => s + e.value, 0);
+    if (otherCount > 0) topEntries.push({ label: 'Other', value: otherCount });
+    return topEntries;
   }
 
-  return Object.entries(myData).map(([id, count]) => ({ id, count }));
+  return entries;
 }
 
-// ── Service ─────────────────────────────────────────────────────────────
+function ageToRange(age: number): string {
+  if (age <= 20) return '0-20';
+  if (age <= 40) return '21-40';
+  if (age <= 60) return '41-60';
+  if (age <= 80) return '61-80';
+  return '80+';
+}
 
 @Injectable()
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getDashboardStats() {
-    const [allBeneficiaries, projects] = await Promise.all([
+    const [
+      beneficiaryTotal,
+      vendorTotal,
+      genderStats,
+      ageRangeStats,
+      bankedStatusStats,
+      internetStatusStats,
+      phoneStatusStats,
+      extrasRows,
+      projects,
+    ] = await Promise.all([
+      this.prisma.beneficiary.count({ where: { deletedAt: null } }),
+
+      this.prisma.vendors.count({ where: { deletedAt: null } }),
+
+      this.prisma.beneficiary.groupBy({
+        by: ['gender'],
+        _count: { gender: true },
+        where: { deletedAt: null },
+      }),
+
+      this.prisma.beneficiary.groupBy({
+        by: ['age'],
+        _count: { age: true },
+        where: { deletedAt: null, age: { not: null } },
+      }),
+
+      this.prisma.beneficiary.groupBy({
+        by: ['bankedStatus'],
+        _count: { bankedStatus: true },
+        where: { deletedAt: null },
+      }),
+
+      this.prisma.beneficiary.groupBy({
+        by: ['internetStatus'],
+        _count: { internetStatus: true },
+        where: { deletedAt: null },
+      }),
+
+      this.prisma.beneficiary.groupBy({
+        by: ['phoneStatus'],
+        _count: { phoneStatus: true },
+        where: { deletedAt: null },
+      }),
+
       this.prisma.beneficiary.findMany({
         where: { deletedAt: null },
-        select: { id: true, extras: true, age: true },
+        select: { extras: true },
       }),
+
       this.prisma.project.findMany({
         select: {
           uuid: true,
@@ -182,348 +233,167 @@ export class DashboardService {
       }),
     ]);
 
-    // Run all stat calculations in parallel
-    const [
-      beneficiaryTotal,
-      vendorTotal,
-      genderStats,
-      ageRangeStats,
-      bankedStatusStats,
-      internetStatusStats,
-      phoneStatusStats,
-      mapStats,
-      phoneAvailabilityStats,
-      casteCountStats,
-      bankCountStats,
-      channelUsageStats,
-    ] = await Promise.all([
-      // beneficiary_total
-      this.prisma.beneficiary.count({ where: { deletedAt: null } }),
-      // vendor_total — uses User model via ProjectVendors (matches existing behavior)
-      this.prisma.user.count(),
-      // beneficiary_gender
-      this.prisma.beneficiary.groupBy({
-        by: ['gender'],
-        _count: { gender: true },
-        where: { deletedAt: null },
-      }),
-      // beneficiary_age_range
-      this.prisma.beneficiary.groupBy({
-        by: ['age'],
-        _count: { age: true },
-        where: { deletedAt: null },
-      }),
-      // beneficiary_bankedStatus
-      this.prisma.beneficiary.groupBy({
-        by: ['bankedStatus'],
-        _count: { bankedStatus: true },
-        where: { deletedAt: null },
-      }),
-      // beneficiary_internetStatus
-      this.prisma.beneficiary.groupBy({
-        by: ['internetStatus'],
-        _count: { internetStatus: true },
-        where: { deletedAt: null },
-      }),
-      // beneficiary_phoneStatus
-      this.prisma.beneficiary.groupBy({
-        by: ['phoneStatus'],
-        _count: { phoneStatus: true },
-        where: { deletedAt: null },
-      }),
-      // beneficiary_map_stats
-      this.prisma.beneficiary.findMany({
-        where: {
-          deletedAt: null,
-          latitude: { not: null },
-          longitude: { not: null },
-        },
-        include: { pii: true },
-      }),
-      // beneficiary_phone_availability_stats
-      this.prisma.beneficiaryPii.findMany({
-        select: { phone: true },
-      }),
-      // beneficiary_caste_count_stats
-      this.prisma.beneficiary.findMany({
-        where: {
-          extras: { path: ['caste'], not: null },
-        },
-        select: { extras: true },
-      }),
-      // bank_count_stats
-      this.prisma.beneficiary.findMany({
-        where: {
-          extras: { path: ['bank_name'], not: null },
-        },
-        select: { extras: true },
-      }),
-      // channel_usage_stats (needs extras)
-      Promise.resolve(null), // computed from allBeneficiaries below
-    ]);
-
-    // ── Transform Prisma results into stat shapes ───────────────────────
-
-    // beneficiary_gender: [{id, count}]
-    const beneficiary_gender = genderStats.map((s) => ({
-      id: s.gender,
-      count: s._count.gender,
+    const beneficiary_gender: SeriesEntry[] = genderStats.map((s) => ({
+      label: String(s.gender),
+      value: s._count.gender,
     }));
 
-    // beneficiary_age_range: [{id, count}] — bucketed
-    const ageRange = [
-      { id: '0-20', count: 0 },
-      { id: '21-40', count: 0 },
-      { id: '41-60', count: 0 },
-      { id: '61-80', count: 0 },
-      { id: '80+', count: 0 },
-    ];
+    const ageRangeBuckets: Record<string, number> = {
+      '0-20': 0,
+      '21-40': 0,
+      '41-60': 0,
+      '61-80': 0,
+      '80+': 0,
+    };
     for (const stat of ageRangeStats) {
-      const age = stat.age;
-      const count = stat._count.age;
-      if (age >= 0 && age <= 20) ageRange[0].count += count;
-      else if (age >= 21 && age <= 40) ageRange[1].count += count;
-      else if (age >= 41 && age <= 60) ageRange[2].count += count;
-      else if (age >= 61 && age <= 80) ageRange[3].count += count;
-      else if (age > 80) ageRange[4].count += count;
-    }
-
-    // beneficiary_bankedStatus: [{id, count}]
-    const beneficiary_bankedStatus = bankedStatusStats.map((s) => ({
-      id: s.bankedStatus,
-      count: s._count.bankedStatus,
-    }));
-
-    // beneficiary_internetStatus: [{id, count}]
-    const beneficiary_internetStatus = internetStatusStats.map((s) => ({
-      id: s.internetStatus,
-      count: s._count.internetStatus,
-    }));
-
-    // beneficiary_phoneStatus: [{id, count}]
-    const beneficiary_phoneStatus = phoneStatusStats.map((s) => ({
-      id: s.phoneStatus,
-      count: s._count.phoneStatus,
-    }));
-
-    // beneficiary_map_stats: [{name, latitude, longitude}]
-    const beneficiary_map_stats = mapStats.map((b) => ({
-      name: b?.pii?.name,
-      latitude: b.latitude,
-      longitude: b.longitude,
-    }));
-
-    // beneficiary_phone_availability_stats: [{id, count}]
-    let phonedCount = 0;
-    let unPhonedCount = 0;
-    for (const record of phoneAvailabilityStats) {
-      if (record.phone?.startsWith('999')) {
-        unPhonedCount++;
-      } else {
-        phonedCount++;
+      if (stat.age !== null && stat.age !== undefined) {
+        const bucket = ageToRange(stat.age);
+        ageRangeBuckets[bucket] = (ageRangeBuckets[bucket] ?? 0) + stat._count.age;
       }
     }
-    const beneficiary_phone_availability_stats = [
-      { id: 'Phoned', count: phonedCount },
-      { id: 'UnPhoned', count: unPhonedCount },
-    ];
-
-    // beneficiary_caste_count_stats: [{id, count}]
-    const casteCounts: Record<string, number> = {};
-    for (const item of casteCountStats) {
-      const caste = (item.extras as any)?.caste;
-      if (caste) {
-        casteCounts[caste] = (casteCounts[caste] || 0) + 1;
-      }
-    }
-    const beneficiary_caste_count_stats = Object.entries(casteCounts).map(
-      ([id, count]) => ({ id, count }),
+    const beneficiary_age_range: SeriesEntry[] = Object.entries(ageRangeBuckets).map(
+      ([label, value]) => ({ label, value }),
     );
 
-    // bank_count_stats: [{id, count}]
-    const bankCounts: Record<string, number> = {};
-    for (const item of bankCountStats) {
-      const bankName = (item.extras as any)?.bank_name;
-      if (bankName) {
-        bankCounts[bankName] = (bankCounts[bankName] || 0) + 1;
-      }
-    }
-    const bank_count_stats = Object.entries(bankCounts).map(
-      ([id, count]) => ({ id, count }),
-    );
+    const beneficiary_bankedStatus: SeriesEntry[] = bankedStatusStats.map((s) => ({
+      label: String(s.bankedStatus),
+      value: s._count.bankedStatus,
+    }));
 
-    // channel_usage_stats: [{id, count}]
-    const channelCounts: Record<string, number> = {};
-    for (const field of FIELD_COMMUNICATION_CHANNEL) {
-      channelCounts[field] = 0;
-    }
-    for (const item of allBeneficiaries) {
-      for (const field of FIELD_COMMUNICATION_CHANNEL) {
-        if ((item.extras as any)?.[field] === 1) {
-          channelCounts[field]++;
-        }
-      }
-    }
-    const channel_usage_stats = Object.entries(channelCounts).map(
-      ([key, count]) => ({ id: toPascalCase(key), count }),
-    );
+    const beneficiary_internetStatus: SeriesEntry[] = internetStatusStats.map((s) => ({
+      label: String(s.internetStatus),
+      value: s._count.internetStatus,
+    }));
 
-    // ── Extras-based yes/no stats ───────────────────────────────────────
+    const beneficiary_phoneStatus: SeriesEntry[] = phoneStatusStats.map((s) => ({
+      label: String(s.phoneStatus),
+      value: s._count.phoneStatus,
+    }));
 
-    const extrasData = allBeneficiaries;
+    const extraStats = this.discoverExtrasStats(extrasRows, beneficiaryTotal);
 
-    const bank_account_access = this.countExtrasYesNo(
-      extrasData,
-      'have_active_bank_ac',
-    );
-    const social_security_linked_to_bank_account = this.countExtrasYesNo(
-      extrasData,
-      'ssa_recipient_in_hh',
-    );
-    const mobile_access = this.countExtrasYesNo(
-      extrasData,
-      'do_you_have_access_to_mobile_phones',
-    );
-    const internet_access = this.countExtrasYesNo(
-      extrasData,
-      'do_you_have_access_to_internet',
-    );
-    const digital_wallet_use = this.countExtrasYesNo(
-      extrasData,
-      'use_digital_wallets',
-    );
-    const flood_impact_in_last_5years = this.countExtrasYesNo(
-      extrasData,
-      'flood_affected_in_5_years',
-    );
-    const acces_to_early_warning_information = this.countExtrasYesNo(
-      extrasData,
-      'receive_disaster_info',
-    );
+    const projectList = projects.map((p) => ({
+      uuid: p.uuid,
+      name: p.name,
+      type: p.type,
+      status: String(p.status),
+      createdAt: p.createdAt.toISOString(),
+      description: p.description ?? '',
+    }));
 
-    // ── Phone type stats ────────────────────────────────────────────────
-
-    const phoneTypeCounts: Record<string, number> = {
-      smartphone: 0,
-      keypad: 0,
-      both: 0,
-      brick: 0,
+    return {
+      scope: { beneficiaryCount: beneficiaryTotal },
+      coreStats: {
+        beneficiary_total: { count: beneficiaryTotal },
+        vendor_total: { count: vendorTotal },
+        beneficiary_gender,
+        beneficiary_age_range,
+        beneficiary_bankedStatus,
+        beneficiary_internetStatus,
+        beneficiary_phoneStatus,
+      },
+      extraStats,
+      projects: projectList,
     };
-    for (const item of extrasData) {
-      const rawVal = (item.extras as any)?.type_of_phone_set;
-      if (typeof rawVal === 'string') {
-        const normalized = rawVal.trim().toLowerCase();
-        if (normalized in phoneTypeCounts) {
-          phoneTypeCounts[normalized]++;
-        }
-      }
-    }
-    // beneficiary_phone_type_stats — raw values (excluding 'no')
-    const beneficiary_phone_type_stats = Object.entries(phoneTypeCounts)
-      .filter(([key]) => key.toUpperCase() !== 'NO')
-      .map(([id, count]) => ({
-        id: id.charAt(0).toUpperCase() + id.slice(1),
-        count,
-      }));
-
-    // type_of_phone — merged keypad/brick
-    const type_of_phone: Array<{ id: string; count: number }> = [];
-    let keypadBrickCount = 0;
-    for (const [key, count] of Object.entries(phoneTypeCounts)) {
-      if (key === 'keypad' || key === 'brick') {
-        keypadBrickCount += count;
-      } else {
-        type_of_phone.push({
-          id: key.charAt(0).toUpperCase() + key.slice(1),
-          count,
-        });
-      }
-    }
-    type_of_phone.push({ id: 'Keypad/Brick', count: keypadBrickCount });
-
-    // ── Complex stats from full beneficiary data ────────────────────────
-
-    const age_groups = mapAgeGroupCounts(allBeneficiaries);
-
-    const vulnerableRaw = countResult(allBeneficiaries);
-    const vulnerable_count_stats = Object.entries(vulnerableRaw).map(
-      ([id, count]) => ({ id, count }),
-    );
-
-    const beneficiary_vulnerability_count_stats =
-      mapVulnerabilityStatusCount(allBeneficiaries);
-
-    const household_receiving_social_protection_benefits =
-      countBySSAType(allBeneficiaries);
-
-    // total_number_family_members
-    let totalFamilyMembers = 0;
-    for (const ben of allBeneficiaries) {
-      const members = Number(
-        (ben.extras as any)?.total_number_of_family_members || 0,
-      );
-      totalFamilyMembers += members;
-    }
-
-    // ── Assemble final stats object ─────────────────────────────────────
-
-    const stats: Record<string, any> = {
-      beneficiary_total: { count: beneficiaryTotal },
-      vendor_total: { count: vendorTotal },
-      total_number_family_members: { count: totalFamilyMembers },
-      beneficiary_gender,
-      beneficiary_age_range: ageRange,
-      age_groups,
-      beneficiary_bankedStatus,
-      beneficiary_internetStatus,
-      beneficiary_phoneStatus,
-      beneficiary_map_stats,
-      beneficiary_phone_availability_stats,
-      beneficiary_vulnerability_count_stats,
-      vulnerable_count_stats,
-      beneficiary_caste_count_stats,
-      beneficiary_phone_type_stats,
-      type_of_phone,
-      channel_usage_stats,
-      bank_account_access,
-      social_security_linked_to_bank_account,
-      mobile_access,
-      internet_access,
-      digital_wallet_use,
-      flood_impact_in_last_5years,
-      acces_to_early_warning_information,
-      household_receiving_social_protection_benefits,
-      bank_count_stats,
-    };
-
-    return { stats, projects };
   }
 
-  // ── Private helpers ───────────────────────────────────────────────────
-
   /**
-   * Count yes/no values for a given extras field across all beneficiaries.
-   * Returns [{id: 'Yes', count: N}, {id: 'No', count: N}]
+   * Single-pass scan over all extras rows. Caps unique-value tracking at
+   * UNIQUE_VALUES_CAP to bound memory on high-cardinality string fields.
    */
-  private countExtrasYesNo(
-    data: Array<{ extras: any }>,
-    field: string,
-  ): Array<{ id: string; count: number }> {
-    let yesCount = 0;
-    let noCount = 0;
+  private discoverExtrasStats(
+    rows: Array<{ extras: unknown }>,
+    total: number,
+  ): ExtraStat[] {
+    const accumulators = new Map<string, KeyAccumulator>();
 
-    for (const item of data) {
-      const rawVal = item.extras?.[field];
-      if (typeof rawVal === 'string') {
-        const normalized = rawVal.trim().toLowerCase();
-        if (normalized === 'yes') yesCount++;
-        else if (normalized === 'no') noCount++;
+    const getOrCreate = (key: string): KeyAccumulator => {
+      let acc = accumulators.get(key);
+      if (!acc) {
+        acc = {
+          nonNullCount: 0,
+          uniqueValues: new Map(),
+          numericCount: 0,
+          min: Infinity,
+          max: -Infinity,
+          sum: 0,
+        };
+        accumulators.set(key, acc);
+      }
+      return acc;
+    };
+
+    for (const row of rows) {
+      if (!row.extras || typeof row.extras !== 'object') continue;
+      const flat = flattenExtras(row.extras as Record<string, unknown>);
+
+      for (const [key, rawVal] of Object.entries(flat)) {
+        if (rawVal === null || rawVal === undefined || rawVal === '') continue;
+
+        const acc = getOrCreate(key);
+        acc.nonNullCount++;
+
+        const strVal = String(rawVal).trim();
+
+        if (acc.uniqueValues.size < UNIQUE_VALUES_CAP) {
+          acc.uniqueValues.set(strVal, (acc.uniqueValues.get(strVal) ?? 0) + 1);
+        } else if (acc.uniqueValues.has(strVal)) {
+          acc.uniqueValues.set(strVal, (acc.uniqueValues.get(strVal) ?? 0) + 1);
+        }
+
+        const numVal = Number(rawVal);
+        if (!isNaN(numVal) && rawVal !== '' && rawVal !== true && rawVal !== false) {
+          acc.numericCount++;
+          if (numVal < acc.min) acc.min = numVal;
+          if (numVal > acc.max) acc.max = numVal;
+          acc.sum += numVal;
+        }
       }
     }
 
-    return [
-      { id: 'Yes', count: yesCount },
-      { id: 'No', count: noCount },
-    ];
+    const result: ExtraStat[] = [];
+
+    for (const [key, acc] of accumulators.entries()) {
+      const classification = classifyKey(key, acc, total);
+      if (classification === null) continue;
+
+      const pct = total > 0 ? Math.round((acc.nonNullCount / total) * 10000) / 100 : 0;
+
+      let chart: 'pie' | 'bar' | 'metric';
+      if (classification === 'boolean') {
+        chart = 'pie';
+      } else if (classification === 'numeric') {
+        chart = 'metric';
+      } else {
+        chart = acc.uniqueValues.size <= 6 ? 'pie' : 'bar';
+      }
+
+      const series = buildSeries(acc, chart);
+      if (series.length === 0) continue;
+
+      const stat: ExtraStat = {
+        key,
+        label: keyToLabel(key),
+        classification,
+        chart,
+        coverage: { nonNull: acc.nonNullCount, pct },
+        series,
+      };
+
+      if (classification === 'numeric' && acc.numericCount > 0) {
+        stat.summary = {
+          count: acc.numericCount,
+          min: acc.min,
+          max: acc.max,
+          avg: Math.round((acc.sum / acc.numericCount) * 100) / 100,
+        };
+      }
+
+      result.push(stat);
+    }
+
+    result.sort((a, b) => b.coverage.nonNull - a.coverage.nonNull);
+
+    return result;
   }
 }
