@@ -164,29 +164,23 @@ export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getDashboardStats() {
-    // Fetch all beneficiaries ONCE (used by many stats)
-    const [allBeneficiaries, allBeneficiariesWithExtras, projects] =
-      await Promise.all([
-        this.prisma.beneficiary.findMany({
-          where: { deletedAt: null },
-          select: { id: true, extras: true, age: true },
-        }),
-        this.prisma.beneficiary.findMany({
-          where: { deletedAt: null },
-          select: { extras: true },
-        }),
-        this.prisma.project.findMany({
-          select: {
-            uuid: true,
-            name: true,
-            type: true,
-            status: true,
-            createdAt: true,
-            description: true,
-          },
-          orderBy: { createdAt: 'desc' },
-        }),
-      ]);
+    const [allBeneficiaries, projects] = await Promise.all([
+      this.prisma.beneficiary.findMany({
+        where: { deletedAt: null },
+        select: { id: true, extras: true, age: true },
+      }),
+      this.prisma.project.findMany({
+        select: {
+          uuid: true,
+          name: true,
+          type: true,
+          status: true,
+          createdAt: true,
+          description: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
 
     // Run all stat calculations in parallel
     const [
@@ -265,7 +259,7 @@ export class DashboardService {
         select: { extras: true },
       }),
       // channel_usage_stats (needs extras)
-      Promise.resolve(null), // computed from allBeneficiariesWithExtras below
+      Promise.resolve(null), // computed from allBeneficiaries below
     ]);
 
     // ── Transform Prisma results into stat shapes ───────────────────────
@@ -363,7 +357,7 @@ export class DashboardService {
     for (const field of FIELD_COMMUNICATION_CHANNEL) {
       channelCounts[field] = 0;
     }
-    for (const item of allBeneficiariesWithExtras) {
+    for (const item of allBeneficiaries) {
       for (const field of FIELD_COMMUNICATION_CHANNEL) {
         if ((item.extras as any)?.[field] === 1) {
           channelCounts[field]++;
@@ -376,7 +370,7 @@ export class DashboardService {
 
     // ── Extras-based yes/no stats ───────────────────────────────────────
 
-    const extrasData = allBeneficiariesWithExtras;
+    const extrasData = allBeneficiaries;
 
     const bank_account_access = this.countExtrasYesNo(
       extrasData,
@@ -451,7 +445,10 @@ export class DashboardService {
 
     const age_groups = mapAgeGroupCounts(allBeneficiaries);
 
-    const vulnerable_count_stats = countResult(allBeneficiaries);
+    const vulnerableRaw = countResult(allBeneficiaries);
+    const vulnerable_count_stats = Object.entries(vulnerableRaw).map(
+      ([id, count]) => ({ id, count }),
+    );
 
     const beneficiary_vulnerability_count_stats =
       mapVulnerabilityStatusCount(allBeneficiaries);
