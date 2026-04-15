@@ -1,45 +1,37 @@
-name: Test Coverage CI/CD
-on:
-  push:
-    branches:
-      - 'benef-test'
-  pull_request:
-    branches:
-      - 'benef-test'
-  workflow_dispatch:
-
-env:
-  CI: false
-  env_npmrc: ${{ secrets.ENV_NPMRC }}
-
+name: Test Coveralls
+on: ["push", "pull_request"]
 jobs:
-  deploy:
-    name: build && push image to Docker hub
-    runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, 'action') || contains(github.event.pull_request.title, 'action') || github.event_name == 'workflow_dispatch'
 
+  test:
+    name: Test Coverage
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      # - name: import env file
-      #   run: |
-      #     touch ./.npmrc && echo "$env_npmrc" >> ./.npmrc
 
       - uses: actions/setup-node@v3
         with:
           node-version: 20.10.0
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: install dependencies and Bootstrap apps
+      - name: install dependencies and build apps
         run: |
-          npm install -g pnpm@8.14.1
+          npm install -g pnpm@8.14.1 only-allow
           pnpm install
-          pnpm bootstrap
-          pnpm rahat&
-          pnpm beneficiary&
-          sleep 5
 
-      - name: Run Test Coverage
-        run: pnpm test:coverage
+      - name: npm install, make test-coverage
+        run: |
+          pnpm test:coverage
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+
+      - name: Merge LCOV reports
+        run: |
+          npx lcov-result-merger 'coverage/apps/*/lcov.info' 'coverage/lcov.info'
+          test -f coverage/lcov.info
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
+        if: always()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          coveralls-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          path-to-lcov: coverage/lcov.info

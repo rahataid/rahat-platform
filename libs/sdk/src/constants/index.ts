@@ -123,6 +123,7 @@ export const MS_ACTIONS = {
     LIST_FULL_DATA_BY_PROJECT: 'beneficiary.list_full_data_by_project',
     GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',
     GET_ONE_BENEFICARY: 'beneficiary.get_one_beneficiary',
+    GET_BENEFICIARY_DETAILS_BY_PROJECT: 'beneficiary.get_beneficiary_details_by_project',
   },
   VENDOR: {
     REGISTER: 'vendor.register',
@@ -207,11 +208,13 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.stakeholders.getAll',
       GET_ONE: 'aaProject.stakeholders.getOne',
       ADD: 'aaProject.stakeholders.add',
+      VALIDATE_BULK_STAKEHOLDERS: 'aaProject.stakeholders.validateBulkStakeholders',
       BULK_ADD: 'aaProject.stakeholders.bulkAdd',
       REMOVE: 'aaProject.stakeholders.remove',
       UPDATE: 'aaProject.stakeholders.update',
       GET_GROUP: 'aaProject.stakeholders.getGroup',
       GET_ALL_GROUPS: 'aaProject.stakeholders.getAllGroups',
+      GET_GROUP_DETAILS_BY_UUIDS: 'aaProject.stakeholders.getGroupDetailsByUuids',
       GET_ONE_GROUP: 'aaProject.stakeholders.getOneGroup',
       ADD_GROUP: 'aaProject.stakeholders.addGroup',
       UPDATE_GROUP: 'aaProject.stakeholders.updateGroup',
@@ -225,6 +228,7 @@ export const MS_ACTIONS = {
       GET_ALL_GROUPS: 'aaProject.beneficiary.getAllGroups',
       GET_ONE_GROUP: 'aaProject.beneficiary.getOneGroup',
       ASSIGN_TOKEN_TO_GROUP: 'aaProject.beneficiary.assign_token_to_group',
+      VALIDATE_TOKEN_ASSIGNMENT: 'aaProject.beneficiary.validate_token_assignment',
       RESERVE_TOKEN_TO_GROUP: 'aaProject.beneficiary.reserve_token_to_group',
       GET_ALL_TOKEN_RESERVATION:
         'aaProject.beneficiary.get_all_token_reservation',
@@ -232,6 +236,7 @@ export const MS_ACTIONS = {
         'aaProject.beneficiary.get_one_token_reservation',
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats',
       GET_REDEEM_INFO: 'aaProject.beneficiary.getRedeemInfo',
+      GET_REDEEM_INFO_INKIND: 'aaProject.beneficiary.getRedeemInfoInkind',
       GET_BALANCE: 'aaProject.beneficiary.getBalance',
     },
     STATS: {
@@ -296,6 +301,28 @@ export const MS_ACTIONS = {
       GET_PAYOUT_DETAILS: 'aa.payout.getPayoutDetails',
       EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
       VERIFY_MANUAL_PAYOUT: 'aa.payout.verifyManualPayout',
+    },
+    INKIND: {
+      CREATE: 'aa.inkinds.create',
+      UPDATE: 'aa.inkinds.update',
+      DELETE: 'aa.inkinds.delete',
+      GET: 'aa.inkinds.get',
+      GET_SUMMARY: 'aa.inkinds.getSummary',
+      GET_ONE: 'aa.inkinds.getOne',
+      ADD_INKIND_STOCK: 'aaProject.inkindStock.add',
+      GET_ALL_STOCK_MOVEMENTS: 'aaProject.inkindStock.getAllMovements',
+      REMOVE_INKIND_STOCK: 'aaProject.inkindStock.remove',
+      ASSIGN_GROUP_INKIND: 'aaProject.groupInkinds.assign',
+      GET_BY_GROUP: 'aaProject.groupInkinds.getByGroup',
+      GET_UNASSIGNED_GROUP_INKIND: 'aaProject.groupInkinds.getUnassignedGroupInkind',
+      GET_AVAILABLE_INKIND_BENEFICIARY_PHONE: 'aaProject.groupInkinds.getAvailableInkindByBeneficiaryPhone',
+      GET_GROUP_INKIND_LOGS: 'aaProject.groupInkinds.getLogs',
+      GET_GROUP_INKIND_LOGS_BY_VENDOR: 'aaProject.groupInkinds.getLogsByVendor',
+      GET_LOGS_DETAILS_BY_VENDOR: 'aaProject.groupInkinds.getLogsDetailsByVendor',
+      GET_LOGS_DETAILS_BY_TX_HASH: 'aaProject.groupInkinds.getLogsDetailsByTxHash',
+      BENEFICIARY_INKIND_REDEEM: 'aaProject.beneficiaryInkinds.redeem',
+      SEND_BENEFICIARY_OTP: 'aaProject.inkinds.sendBeneficiaryOtp',
+      VALIDATE_BENEFICIARY_OTP: 'aaProject.inkinds.validateBeneficiaryOtp',
     },
     VENDOR: {
       // Remove after test
@@ -493,6 +520,11 @@ export const MS_ACTIONS = {
     GET_BY_LOCATION: 'ms.phases.getByLocation',
     ACTIVATE: 'ms.phases.activate',
     CONFIGURE_THRESHOLD: 'ms.phase.configureThreshold',
+    CONFIGURE_EXTENDED_LOGIC: 'ms.phases.configureExtendedLogic',
+    GET_EXTENDED_LOGIC: 'ms.phases.getExtendedLogic',
+    REMOVE_EXTENDED_LOGIC: 'ms.phases.removeExtendedLogic',
+    UPDATE: 'ms.phases.update',
+    DELETE: 'ms.phases.delete',
   },
 
   MS_RIVER_STATIONS: {
@@ -501,12 +533,24 @@ export const MS_ACTIONS = {
   MS_WATER_LEVELS: {
     GET_DHM: 'ms.waterLevels.getDhm',
     GET_DHM_SINGLE_SERIES: 'ms.waterLevels.getDhmSingleSeries',
-    GET_GLOFAS: 'ms.waterLevels.getGlofas',
+    // GET_GLOFAS: 'ms.waterLevels.getGlofas',
     GET_GFH: 'ms.waterLevels.getGfh',
   },
   MS_RAINFALL_LEVELS: {
     GET_DHM: 'ms.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.rainfallLevels.getGlofas',
+  },
+  MS_HUMIDITY: {
+    GET_DHM: 'ms.humidity.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.humidity.getDhmSingleSeries',
+  },
+  MS_TEMPERATURE: {
+    GET_DHM: 'ms.temperature.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.temperature.getDhmSingleSeries',
+  },
+  MS_PROB_FLOOD: {
+    GET_ALL_GLOFAS: 'ms.probFlood.getAllGlofas',
+    GET_ONE_GLOFAS: 'ms.probFlood.getOneGlofas',
   },
   MS_ACTIVITIES: {
     GET_ONE: 'ms.activities.getOne',
@@ -523,8 +567,13 @@ export const MS_ACTIONS = {
       SESSION_LOGS: 'ms.activities.communication.sessionLogs',
       RETRY_FAILED: 'ms.activities.communication.retryFailed',
       GET_STATS: 'ms.activities.communication.getStats',
+      GET_TRANSPORT_SESSION_STATS: 'ms.activities.communication.getTransportSessionStats',
       GET_GROUP_STATS: 'ms.triggers.getTransportSessionStatsByGroup',
     },
+  },
+  MS_LIBRARY: {
+    GET_ACTIVITY_TEMPLATES: 'ms.library.getActivityTemplates',
+    GET_ACTIVITY_TEMPLATE_BY_ID: 'ms.library.getActivityTemplateById',
   },
   MS_CATEGORIES: {
     GET_ALL: 'ms.activityCategories.getAll',

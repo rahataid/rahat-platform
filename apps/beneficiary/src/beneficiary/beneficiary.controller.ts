@@ -3,10 +3,12 @@
 import { Controller, Param } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
+  AddBeneficiariesToGroupDto,
   addBulkBeneficiaryToProject,
   AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  CreateBeneficiaryTransactionDto,
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
@@ -206,6 +208,11 @@ export class BeneficiaryController {
     return this.service.addGroup(payload);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.ADD_BENEFICIARIES_TO_GROUP })
+  addBeneficiariesToGroup(payload: AddBeneficiariesToGroupDto) {
+    return this.service.addBeneficiariesToGroup(payload);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP })
   getGroup(uuid: string) {
     return this.service.getOneGroup(uuid);
@@ -317,5 +324,20 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GET_BEN_REPORTING_LOGS })
   async getBenReportingLogs(payload: any) {
     return this.service.getBenReportingLogs(payload);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BENEF_DETAILS_BY_PROJECT })
+  async getBenefDetailsByProject(data: any) {
+    return this.service.getBenefDetailsByProject(data);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_GROUP_DETAILS_BY_UUIDS })
+  async getGroupDetailsByUuids(uuids: UUID[]) {
+    return this.service.getGroupDetailsByUuids(uuids);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BENEFICIARY_WITH_DB_TRANSACTION })
+  async createBeneficiaryWithDbTransaction(data: CreateBeneficiaryTransactionDto) {
+    return this.service.createBeneficiaryWithDbTransaction(data);
   }
 }

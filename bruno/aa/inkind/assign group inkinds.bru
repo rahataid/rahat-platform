@@ -1,0 +1,27 @@
+meta {
+  name: assign group inkinds
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupInkinds.assign",
+    "payload": {
+       "inkindId":"69e219ac-fad3-4d1d-90d4-391da280b5a2",
+      "groupId":"b8ed7be3-347e-4a9d-8fbb-db2a89008f6d",
+      "quantity":1
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

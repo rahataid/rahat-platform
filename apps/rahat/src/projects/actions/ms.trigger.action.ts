@@ -24,6 +24,11 @@ export const MS_TRIGGERS_JOBS = {
     GET_BY_LOCATION: 'ms.jobs.phases.getByLocation',
     ACTIVATE: 'ms.jobs.phases.activate',
     CONFIGURE_THRESHOLD: 'ms.jobs.phase.configureThreshold',
+    CONFIGURE_EXTENDED_LOGIC: 'ms.jobs.phases.configureExtendedLogic',
+    GET_EXTENDED_LOGIC: 'ms.jobs.phases.getExtendedLogic',
+    REMOVE_EXTENDED_LOGIC: 'ms.jobs.phases.removeExtendedLogic',
+    UPDATE: 'ms.jobs.phases.update',
+    DELETE: 'ms.jobs.phases.delete',
   },
   REVERT_PHASE: {
     CREATE: 'ms.jobs.revertPhase.create',
@@ -36,12 +41,24 @@ export const MS_TRIGGERS_JOBS = {
   WATER_LEVELS: {
     GET_DHM: 'ms.jobs.waterLevels.getDhm',
     GET_DHM_SINGLE_SERIES: 'ms.jobs.waterLevels.getDhmSingleSeries',
-    GET_GLOFAS: 'ms.jobs.waterLevels.getGlofas',
+    // GET_GLOFAS: 'ms.jobs.waterLevels.getGlofas',
     GET_GFH: 'ms.jobs.waterLevels.getGfh',
   },
   RAINFALL_LEVELS: {
     GET_DHM: 'ms.jobs.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.jobs.rainfallLevels.getGlofas',
+  },
+  HUMIDITY: {
+    GET_DHM: 'ms.jobs.humidity.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.jobs.humidity.getDhmSingleSeries',
+  },
+  TEMPERATURE: {
+    GET_DHM: 'ms.jobs.temperature.getDhm',
+    GET_DHM_SINGLE_SERIES: 'ms.jobs.temperature.getDhmSingleSeries',
+  },
+  PROB_FLOOD: {
+    GET_ALL_GLOFAS: 'ms.jobs.probFlood.getAllGlofas',
+    GET_ONE_GLOFAS: 'ms.jobs.probFlood.getOneGlofas',
   },
   ACTIVITIES: {
     GET_ONE: 'ms.jobs.activities.getOne',
@@ -58,10 +75,15 @@ export const MS_TRIGGERS_JOBS = {
       SESSION_LOGS: 'ms.jobs.activities.communication.sessionLogs',
       // RETRY_FAILED: 'ms.jobs.activities.communication.retryFailed',
       GET_STATS: 'ms.jobs.activities.communication.getStats',
+      GET_TRANSPORT_SESSION_STATS: 'ms.jobs.activities.communication.getTransportSessionStats',
       GET_STATS_GROUP: 'ms.jobs.triggers.getTransportSessionStatsByGroup',
     },
-  },
 
+  },
+  LIBRARY: {
+    GET_ACTIVITY_TEMPLATES: 'ms.jobs.library.getActivityTemplates',
+    GET_ACTIVITY_TEMPLATE_BY_ID: 'ms.jobs.library.getActivityTemplateById',
+  },
   CATEGORIES: {
     GET_ALL: 'ms.jobs.categories.getAll',
     ADD: 'ms.jobs.categories.add',
@@ -216,6 +238,44 @@ export const msTriggerActions: ProjectActionFunc = {
       payload
     );
   },
+
+  [MS_ACTIONS.MS_PHASES.CONFIGURE_EXTENDED_LOGIC]: (uuid, payload, sendCommand) => {
+    console.log('Configuring extended logic with payload:', payload);
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PHASES.CONFIGURE_EXTENDED_LOGIC },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_PHASES.GET_EXTENDED_LOGIC]: (uuid, payload, sendCommand) => {
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PHASES.GET_EXTENDED_LOGIC },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_PHASES.REMOVE_EXTENDED_LOGIC]: (uuid, payload, sendCommand) => {
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PHASES.REMOVE_EXTENDED_LOGIC },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_PHASES.UPDATE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PHASES.UPDATE },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_PHASES.DELETE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PHASES.DELETE },
+      payload
+    );
+  },
   // // **** phases end ******//
 
   // **** source start ******//
@@ -272,11 +332,20 @@ export const msTriggerActions: ProjectActionFunc = {
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.WATER_LEVELS.GET_DHM_SINGLE_SERIES }, payload);
   },
 
-  [MS_ACTIONS.MS_WATER_LEVELS.GET_GLOFAS]: (uuid, payload, sendCommand) => {
+  [MS_ACTIONS.MS_PROB_FLOOD.GET_ALL_GLOFAS]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
 
     return sendCommand(
-      { cmd: MS_TRIGGERS_JOBS.WATER_LEVELS.GET_GLOFAS },
+      { cmd: MS_TRIGGERS_JOBS.PROB_FLOOD.GET_ALL_GLOFAS },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_PROB_FLOOD.GET_ONE_GLOFAS]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PROB_FLOOD.GET_ONE_GLOFAS },
       payload
     );
   },
@@ -322,6 +391,43 @@ export const msTriggerActions: ProjectActionFunc = {
       payload
     );
   },
+
+  [MS_ACTIONS.MS_TEMPERATURE.GET_DHM]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.TEMPERATURE.GET_DHM },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_TEMPERATURE.GET_DHM_SINGLE_SERIES]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.TEMPERATURE.GET_DHM_SINGLE_SERIES },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_HUMIDITY.GET_DHM]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.HUMIDITY.GET_DHM },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_HUMIDITY.GET_DHM_SINGLE_SERIES]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.HUMIDITY.GET_DHM_SINGLE_SERIES },
+      payload
+    );
+  },
+
   // **** river stations end ******//
 
   // **** activities start ******//
@@ -390,6 +496,18 @@ export const msTriggerActions: ProjectActionFunc = {
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.GET_ONE }, payload);
   },
 
+  [MS_ACTIONS.MS_LIBRARY.GET_ACTIVITY_TEMPLATE_BY_ID]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.LIBRARY.GET_ACTIVITY_TEMPLATE_BY_ID }, payload);
+  },
+
+  [MS_ACTIONS.MS_LIBRARY.GET_ACTIVITY_TEMPLATES]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.LIBRARY.GET_ACTIVITY_TEMPLATES }, payload);
+  },
+
   [MS_ACTIONS.MS_ACTIVITIES.UPDATE_STATUS]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
 
@@ -403,6 +521,19 @@ export const msTriggerActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
 
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.UPDATE }, payload);
+  },
+
+  [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.GET_TRANSPORT_SESSION_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.ACTIVITIES.COMMUNICATION.GET_TRANSPORT_SESSION_STATS },
+      payload
+    );
   },
 
   [MS_ACTIONS.MS_ACTIVITIES.COMMUNICATION.GET_STATS]: (

@@ -1,0 +1,25 @@
+meta {
+  name: sendOtp
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.inkinds.sendBeneficiaryOtp",
+    "payload": {
+      "number":"+9779845085589"
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

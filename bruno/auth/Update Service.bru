@@ -1,0 +1,24 @@
+meta {
+  name: Update Service
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{url}}/auth/service/clients/cmlgd0qes0000o0sfie8gi4m7
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "canImpersonate": true,
+    "allowedRoles": [],
+    "rateLimit": 50,
+    "isActive": true
+  }
+}

@@ -40,6 +40,7 @@ import { CreateSettingDto } from '@rumsan/extensions/dtos';
 import {
   AbilitiesGuard,
   CheckAbilities,
+  HybridJwtGuard,
   JwtGuard,
   SUBJECTS,
 } from '@rumsan/user';
@@ -76,7 +77,7 @@ export class ProjectController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
+  @UseGuards(HybridJwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @Post('actions')
   msActions(
@@ -197,7 +198,7 @@ export class ProjectController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
+  @UseGuards(HybridJwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')

@@ -2,9 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from "@rumsan/prisma";
 import { VendorsService } from "./vendors.service";
 import { UserRoles } from '@rahataid/sdk';
-import { AuthsService, UsersService } from '@rumsan/user';
+import { AuthsService } from '@rumsan/user';
+import { UsersService } from '../users/users.service';
+import { NotificationService } from '../notification/notification.service';
 import { v4 as uuidv4 } from 'uuid';
-import { isAddress } from 'viem';
 import { VendorRegisterDto } from '@rahataid/extensions';
 import { Service } from '@rumsan/sdk/enums';
 
@@ -17,9 +18,11 @@ jest.mock('@rahataid/sdk', () => ({
   },
 }));
 
-jest.mock('viem', () => ({
+jest.mock('../utils/web3', () => ({
   isAddress: jest.fn()
 }));
+
+import { isAddress } from '../utils/web3';
 
 describe('VendorsService', () => {
   let service: VendorsService;
@@ -34,14 +37,14 @@ describe('VendorsService', () => {
         {
           provide: PrismaService,
           useValue: {
-            $transaction: jest.fn((fn) => fn(prisma)), 
+            $transaction: jest.fn((fn) => fn(prisma)),
             role: {
               findFirst: jest.fn(),
             },
             userRole: {
               findFirst: jest.fn(),
               create: jest.fn(),
-              count: jest.fn(), 
+              count: jest.fn(),
             },
             vendors: {
               create: jest.fn(),
@@ -54,11 +57,13 @@ describe('VendorsService', () => {
               findUnique: jest.fn(),
               create: jest.fn()
             },
-            auth: {  
+            auth: {
               create: jest.fn()
             },
             projectVendors: {
               findMany: jest.fn(),
+              findFirst: jest.fn(),
+              updateMany: jest.fn(),
             },
           },
         },
@@ -76,8 +81,12 @@ describe('VendorsService', () => {
           },
         },
         {
+          provide: NotificationService,
+          useValue: { send: jest.fn(), sendBulk: jest.fn(), createNotification: jest.fn() },
+        },
+        {
           provide: 'EL_PROJECT_CLIENT',
-          useValue: {}, 
+          useValue: {},
         },
       ],
     }).compile();
@@ -105,7 +114,7 @@ describe('VendorsService', () => {
     it('should throw error if role is not found', async () => {
       (prisma.role.findFirst as jest.Mock).mockResolvedValueOnce(null);
       await expect(service.registerVendor(requestMock as VendorRegisterDto)).rejects.toThrow('Role not found');
-    }); 
+    });
 
     it('should throw error if email already exists', async () => {
       const existingUser = { id: 1, email: requestMock.email };
@@ -113,7 +122,7 @@ describe('VendorsService', () => {
       (prisma.user.findFirst as jest.Mock).mockResolvedValueOnce(existingUser);
       await expect(service.registerVendor(requestMock as VendorRegisterDto)).rejects.toThrow('Email must be unique');
       expect(prisma.user.findFirst).toHaveBeenCalledWith({where: {
-        email: 'john@mailinator.com'
+        OR: [{ email: requestMock.email }, { phone: requestMock.phone }]
       }});
     });
 
@@ -153,57 +162,41 @@ describe('VendorsService', () => {
   });
 
   describe('get specific vendor details', () => {
-    it('should return userdata with projects when id is a UUID', async () => {
+    it('should return project data when id is a UUID', async () => {
       const id = uuidv4();
       const userMock = { uuid: id, name: 'Vendor1' };
       const projectMocks = [
-        { Project: { id: 1, name: 'Project1' } },
-        { Project: { id: 2, name: 'Project2' } },
+        { Project: { id: 1, name: 'Project1' }, User: userMock },
+        { Project: { id: 2, name: 'Project2' }, User: userMock },
       ];
+      (isAddress as unknown as jest.Mock).mockReturnValue(false);
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(userMock);
       (prisma.projectVendors.findMany as jest.Mock).mockResolvedValue(projectMocks);
-      const userdata = await service.getVendor(id);
+      const result = await service.getVendor(id as any);
       expect(prisma.user.findUnique).toHaveBeenCalledWith({ where: { uuid: id } });
-      expect(prisma.user.findFirst).not.toHaveBeenCalled();
-      expect(prisma.projectVendors.findMany).toHaveBeenCalledWith({
-        where: { vendorId: id },
-        include: { Project: true },
-      });
-      expect(userdata).toEqual({
-        ...userMock,
-        projects: projectMocks.map((p) => p.Project),
-      });
+      expect(result).toEqual(projectMocks);
     });
-  
-    it('should return userdata with projects when id is an Address', async () => {
+
+    it('should return project data when id is an Address', async () => {
       const id = '0x1234567890abcdef';
       const userMock = { uuid: uuidv4(), wallet: id, name: 'Vendor2' };
       const projectMocks = [
-        { Project: { id: 1, name: 'Project1' } },
-        { Project: { id: 2, name: 'Project2' } },
+        { Project: { id: 1, name: 'Project1' }, User: userMock },
       ];
       (isAddress as unknown as jest.Mock).mockReturnValue(true);
       (prisma.user.findFirst as jest.Mock).mockResolvedValue(userMock);
       (prisma.projectVendors.findMany as jest.Mock).mockResolvedValue(projectMocks);
-      const userdata = await service.getVendor(id);
+      const result = await service.getVendor(id as any);
       expect(isAddress).toHaveBeenCalledWith(id);
       expect(prisma.user.findFirst).toHaveBeenCalledWith({ where: { wallet: id } });
-      expect(prisma.user.findUnique).not.toHaveBeenCalled();
-      expect(prisma.projectVendors.findMany).toHaveBeenCalledWith({
-        where: { vendorId: userMock.uuid },
-        include: { Project: true },
-      });
-      expect(userdata).toEqual({
-        ...userMock,
-        projects: projectMocks.map((p) => p.Project),
-      });
+      expect(result).toEqual(projectMocks);
     });
-  
-    it('should throw error if id is invalid', async () => {
+
+    it('should throw error if vendor is not found', async () => {
       const id = uuidv4();
-      const error = new Error("Cannot read properties of undefined (reading 'uuid')");
-      (prisma.user.findUnique as jest.Mock).mockRejectedValue(error);
-      await expect(service.getVendor(id)).rejects.toThrow("Cannot read properties of undefined (reading 'uuid')");
+      (isAddress as unknown as jest.Mock).mockReturnValue(false);
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+      await expect(service.getVendor(id as any)).rejects.toThrow(`Vendor not found with id: ${id}`);
     });
   });
 
@@ -236,18 +229,21 @@ describe('VendorsService', () => {
       await expect(service.updateVendor(dto, uuid)).rejects.toThrow("Email must be unique");
       expect(prisma.user.findFirst).toHaveBeenCalledWith({
         where: {
-          email: dto.email
+          email: dto.email,
+          NOT: { uuid }
         }
       });
     });
 
     it('should update extras with existing vendors extras if dto consists extras', async() => {
       const existingExtras = { extras: { key1: 'value1' } };
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue({uuid,dto});
+      (prisma.user.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({uuid, ...existingExtras});
       dto.extras = { ...dto.extras, ...existingExtras.extras };
       const updatedDto = dto;
       (userService.update as jest.Mock).mockResolvedValue(responseMock);
-      const result = await service.updateVendor(dto, uuid);      
+      (prisma.projectVendors.findFirst as jest.Mock).mockResolvedValue(null);
+      const result = await service.updateVendor(dto, uuid);
       expect(prisma.user.findUnique).toHaveBeenCalledWith({ where: { uuid } });
       expect(userService.update).toHaveBeenCalledWith(uuid, updatedDto);
       expect(result).toEqual(responseMock);
@@ -257,10 +253,12 @@ describe('VendorsService', () => {
       const dto = { email: 'xyz@gmail.com' };
       (prisma.user.findFirst as jest.Mock).mockResolvedValue(null);
       (userService.update as jest.Mock).mockResolvedValue(responseMock);
+      (prisma.projectVendors.findFirst as jest.Mock).mockResolvedValue(null);
       const result = await service.updateVendor(dto, uuid);
       expect(prisma.user.findFirst).toHaveBeenCalledWith({
         where: {
-          email: dto.email
+          email: dto.email,
+          NOT: { uuid }
         }
       });
       expect(userService.update).toHaveBeenCalledWith(uuid, dto);

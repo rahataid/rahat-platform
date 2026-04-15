@@ -19,6 +19,7 @@ export const JOBS = {
   GET: 'rahat.jobs.beneficiary.get',
   FIND_PHONE_BY_UUID: 'rahat.jobs.beneficiary.find_phone_by_uuid',
   GET_PROJECT_SPECIFIC: 'rahat.jobs.beneficiary.get_project_specific',
+  GET_BENEF_DETAILS_BY_PROJECT: 'rahat.jobs.beneficiary.get_benef_details_by_project',
   GET_BY_WALLET: 'rahat.jobs.beneficiary.get_by_wallet',
   GET_BULK_BY_WALLET: 'rahat.jobs.beneficiary.get_bulk_by_wallet',
   GET_BY_PHONE: 'rahat.jobs.beneficiary.get_by_phone',
@@ -54,7 +55,9 @@ export const JOBS = {
   LIST_BEN_VENDOR_COUNT: 'rahat.jobs.beneficiary.count_ben_vendor',
   LIST_BENEFICIARY_COUNT: 'rahat.jobs.beneficiary.count_beneficiary',
   ADD_GROUP: 'rahat.jobs.beneficiary.add_group',
+  ADD_BENEFICIARIES_TO_GROUP: 'rahat.jobs.beneficiary.add_beneficiaries_to_group',
   GET_ONE_GROUP: 'rahat.jobs.beneficiary.get_one_group',
+  GET_GROUP_DETAILS_BY_UUIDS: 'rahat.jobs.beneficiary.get_group_details_by_uuids',
   GET_GROUP_BENEF_FAIL_ACCOUNT: 'rahat.jobs.beneficiary.get_group_benef_fail_account',
   GET_ALL_GROUPS: 'rahat.jobs.beneficiary.get_all_groups',
   UPDATE_GROUP: 'rahat.jobs.beneficiary.update_group',
@@ -89,6 +92,7 @@ export const JOBS = {
   GET_OFFRAMP_DETAILS: 'rahat.jobs.beneficiary.get_offramp_details',
   GET_BEN_DISBURSEMENT: 'rahat.jobs.beneficiary.get_ben_disbursement_details',
   DISBURSEMENT_BALANCE_CHART: 'rahat.jobs.disbursement.balance.get',
-  GET_OFFRAMP_SUMMARY: 'rahat.jobs.beneficiary.get_offramp_summary'
-
+  GET_OFFRAMP_SUMMARY: 'rahat.jobs.beneficiary.get_offramp_summary',
+  GET_BENEFICIARYS_PROJECT_DETAILS: 'rahat.jobs.beneficiary.getBeneficiarysProjectDetails',
+  CREATE_BENEFICIARY_WITH_DB_TRANSACTION: 'rahat.jobs.beneficiary.create_beneficiary_with_db_transaction',
 };

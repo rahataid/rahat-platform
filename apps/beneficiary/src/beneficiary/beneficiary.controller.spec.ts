@@ -3,6 +3,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BeneficiaryController } from './beneficiary.controller';
 import { BeneficiaryService } from './beneficiary.service';
+import { BeneficiaryUtilsService } from './beneficiary.utils.service';
+import { BeneficiaryStatService } from './beneficiaryStat.service';
+import { VerificationService } from './verification.service';
 
 describe('BeneficiaryController', () => {
   let controller: BeneficiaryController;
@@ -10,7 +13,24 @@ describe('BeneficiaryController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BeneficiaryController],
-      providers: [BeneficiaryService],
+      providers: [
+        {
+          provide: BeneficiaryService,
+          useValue: {},
+        },
+        {
+          provide: BeneficiaryUtilsService,
+          useValue: {},
+        },
+        {
+          provide: BeneficiaryStatService,
+          useValue: {},
+        },
+        {
+          provide: VerificationService,
+          useValue: {},
+        },
+      ],
     }).compile();
 
     controller = module.get<BeneficiaryController>(BeneficiaryController);

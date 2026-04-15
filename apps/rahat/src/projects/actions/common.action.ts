@@ -59,6 +59,11 @@ export const beneficiaryActions: ProjectActionFunc = {
       { cmd: BeneficiaryJobs.GET_PROJECT_SPECIFIC },
       { projectId: uuid, ...payload }
     ),
+  [MS_ACTIONS.BENEFICIARY.GET_BENEFICIARY_DETAILS_BY_PROJECT]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: BeneficiaryJobs.GET_BENEF_DETAILS_BY_PROJECT },
+      { projectId: uuid, ...payload }
+    ),
   [MS_ACTIONS.ELPROJECT.GET_VENDOR_REFERRER]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.VENDOR_REFERRAL, uuid },
