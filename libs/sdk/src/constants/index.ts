@@ -236,6 +236,7 @@ export const MS_ACTIONS = {
         'aaProject.beneficiary.get_one_token_reservation',
       GET_RESERVATION_STATS: 'aaProject.beneficiary.get_reservation_stats',
       GET_REDEEM_INFO: 'aaProject.beneficiary.getRedeemInfo',
+      GET_REDEEM_INFO_INKIND: 'aaProject.beneficiary.getRedeemInfoInkind',
       GET_BALANCE: 'aaProject.beneficiary.getBalance',
     },
     STATS: {

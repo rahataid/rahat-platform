@@ -302,6 +302,13 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.BENEFICIARY.GET_REDEEM_INFO, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_REDEEM_INFO_INKIND]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.BENEFICIARY.GET_REDEEM_INFO_INKIND, uuid }, payload),
+
+
   // **** fund mgmt end ****//
 
   // **** stats ****//
