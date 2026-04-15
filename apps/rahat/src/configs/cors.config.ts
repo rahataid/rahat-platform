@@ -1,8 +1,9 @@
 // // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-// // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2import { Logger } from '@nestjs/common';
-import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
-import { ConfigService } from '@nestjs/config';
-estjs / config';
+// // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+// import { Logger } from '@nestjs/common';
+// import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+// import { ConfigService } from '@nestjs/config';
 
 // export class CorsConfigService {
 //   private readonly logger = new Logger(CorsConfigService.name);
