@@ -525,6 +525,7 @@ export const MS_ACTIONS = {
     REMOVE_EXTENDED_LOGIC: 'ms.phases.removeExtendedLogic',
     UPDATE: 'ms.phases.update',
     DELETE: 'ms.phases.delete',
+    GET_PHASE_PAYOUT_STATUS: 'ms.phase.getPhasePayoutStatus',
   },
 
   MS_RIVER_STATIONS: {

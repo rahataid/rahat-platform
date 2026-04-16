@@ -29,6 +29,7 @@ export const MS_TRIGGERS_JOBS = {
     REMOVE_EXTENDED_LOGIC: 'ms.jobs.phases.removeExtendedLogic',
     UPDATE: 'ms.jobs.phases.update',
     DELETE: 'ms.jobs.phases.delete',
+    GET_PHASE_PAYOUT_STATUS: 'ms.jobs.phase.getPhasePayoutStatus',
   },
   REVERT_PHASE: {
     CREATE: 'ms.jobs.revertPhase.create',
@@ -273,6 +274,14 @@ export const msTriggerActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
     return sendCommand(
       { cmd: MS_TRIGGERS_JOBS.PHASES.DELETE },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_PHASES.GET_PHASE_PAYOUT_STATUS]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PHASES.GET_PHASE_PAYOUT_STATUS },
       payload
     );
   },
