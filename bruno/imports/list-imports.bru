@@ -1,0 +1,23 @@
+meta {
+  name: list-imports
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{url}}/imports?page=1&perPage=20
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  perPage: 20
+  ~status: NEW
+  ~source: unknown
+}
+
+script:pre-request {
+  // const { access_token } = require('./temp/auth-data.json');
+  req.setHeader("Authorization", `Bearer {{access_token}}`);
+}

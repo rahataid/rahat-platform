@@ -88,7 +88,7 @@ export const users: Array<{
 }> = [
     {
       id: 1,
-      name: 'Raghav',
+      name: 'Rumsan',
       email: 'rumsan@mailinator.com',
       wallet: '0x9bd3397E69392fE698A094B17CdABf2f6Ca6490B',
     },
