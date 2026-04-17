@@ -87,7 +87,7 @@ export class BeneficiaryService {
       ? this.rsprisma.beneficiaryProject
       : this.rsprisma.beneficiaryPii;
     const include = dto.projectId ? { Beneficiary: true } : {};
-    let where: any = dto.projectId ? { projectId: dto.projectId } : {};
+    const where: any = dto.projectId ? { projectId: dto.projectId } : {};
 
     const startDate = dto.startDate;
     const endDate = dto.endDate;
@@ -406,7 +406,7 @@ export class BeneficiaryService {
 
   async mergePIIData(data: any) {
     const mergedData = [];
-    for (let d of data) {
+    for (const d of data) {
       const piiData = await this.rsprisma.beneficiaryPii.findUnique({
         where: { beneficiaryId: d.id },
       });
@@ -1967,7 +1967,7 @@ export class BeneficiaryService {
             { walletAddresses: unassignedBenfs.map((d) => d.walletAddress) }
           ),
           onSuccess: async (response) => {
-            let benWallets = response.map((d) => ({
+            const benWallets = response.map((d) => ({
               address: d.publicKey,
               secret: d.privateKey,
             }));
@@ -2144,7 +2144,7 @@ export class BeneficiaryService {
   listTempGroups(query: ListTempGroupsDto) {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy['createdAt'] = query.order;
-    let filter = {} as any;
+    const filter = {} as any;
     if (query.name) filter.name = { contains: query.name, mode: 'insensitive' };
     return paginate(
       this.prisma.tempGroup,
@@ -2166,7 +2166,6 @@ export class BeneficiaryService {
     );
     const dataFromBuffer = Buffer.from(data);
     const bufferString = dataFromBuffer.toString('utf-8');
-    1570;
     const jsonData = JSON.parse(bufferString) || null;
     console.log(
       '🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ jsonData:',
@@ -2247,7 +2246,7 @@ export class BeneficiaryService {
     beneficiaries: any[],
     tempBenefPhone: any[]
   ) {
-    for (let b of beneficiaries) {
+    for (const b of beneficiaries) {
       const row = await txn.tempBeneficiary.create({
         data: b,
       });

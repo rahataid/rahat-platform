@@ -592,6 +592,7 @@ export class BeneficiaryController {
   @UseGuards(ExternalAppGuard)
   @CheckHeaders('Signature')
   async importBeneficiariesFromTool(@Req() req: Request) {
+    console.log('Received request to import beneficiaries from external tool');
     return this.client.send(
       {
         cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL,

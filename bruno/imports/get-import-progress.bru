@@ -1,0 +1,19 @@
+meta {
+  name: get-import-progress
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{url}}/imports/:uuid/progress
+  body: none
+  auth: none
+}
+
+params:path {
+  uuid: 00000000-0000-0000-0000-000000000000
+}
+
+headers {
+  Accept: text/event-stream
+}

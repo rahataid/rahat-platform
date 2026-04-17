@@ -15,6 +15,7 @@ export const BQUEUE = {
   RAHAT_BENEFICIARY: 'RAHAT.BENEFICIARY',
   HOST: 'RAHAT.HOST',
   META_TXN: 'RAHAT.META_TXN',
+  RAHAT_IMPORT: 'RAHAT.IMPORT',
 };
 
 export const UserRoles = {
@@ -525,6 +526,7 @@ export const MS_ACTIONS = {
     REMOVE_EXTENDED_LOGIC: 'ms.phases.removeExtendedLogic',
     UPDATE: 'ms.phases.update',
     DELETE: 'ms.phases.delete',
+    GET_PHASE_PAYOUT_STATUS: 'ms.phase.getPhasePayoutStatus',
   },
 
   MS_RIVER_STATIONS: {
