@@ -1,0 +1,33 @@
+meta {
+  name: Update vendor details
+  type: http
+  seq: 19
+}
+
+patch {
+  url: {{url}}/vendors/update/11d05dc2-45c9-4b4e-8249-c9e3837e21e6
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "extras": {
+          "isVendor": true,
+          "registeredApps": [
+              "CASH",
+              "INKIND"
+          ]
+      }
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
