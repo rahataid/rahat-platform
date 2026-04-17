@@ -407,7 +407,7 @@ export class VendorsService {
     }
 
     const result = await this.usersService.update(uuid, dto);
-    const isAssigned = await this.prisma.projectVendors.findFirst({
+    const isAssigned = await this.prisma.projectVendors.findMany({
       where: {
         vendorId: uuid,
       },
@@ -422,7 +422,16 @@ export class VendorsService {
         updatedAt: new Date(),
       },
     });
-    return lastValueFrom(this.client.send({ cmd: VendorJobs.UPDATE, uuid: isAssigned.projectId }, { uuid: result.uuid, ...dto }));
+
+    await Promise.allSettled(
+      isAssigned.map((project) =>
+        lastValueFrom(this.client.send({ cmd: VendorJobs.UPDATE, uuid: project.projectId }, { uuid, ...dto })).catch(
+          (error) => console.log(`Failed to update vendor in project ${project.projectId}:`, error),
+        ),
+      ),
+    );
+
+    return result;
   }
 
   async removeVendor(uuid: UUID, projectId?: UUID) {
