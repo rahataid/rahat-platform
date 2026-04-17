@@ -67,7 +67,7 @@ jobs:
               SECRET="ENV_AA_DEV_UNICEF"
               APPS="beneficiary,rahat"
               ;;
-            redcross)
+            demo-redcross)
               TAG="demo-redcross"
               SECRET="ENV_AA_REDCROSS"
               APPS="beneficiary,rahat"
