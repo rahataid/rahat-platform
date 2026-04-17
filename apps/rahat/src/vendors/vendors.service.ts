@@ -28,6 +28,7 @@ import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
 import { isAddress } from '../utils/web3';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
+import { lastValueFrom } from 'rxjs';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -39,7 +40,7 @@ export class VendorsService {
     private readonly usersService: UsersService,
     private readonly notificationService: NotificationService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
-  ) {}
+  ) { }
 
 
   //TODO: Fix allow duplicate users?
@@ -398,11 +399,13 @@ export class VendorsService {
           uuid,
         },
       });
+
       const extras = dto?.extras;
       const userExtras = Object(user?.extras || {});
 
-      dto.extras = { ...extras, ...userExtras };
+      dto.extras = { ...userExtras, ...extras };
     }
+
     const result = await this.usersService.update(uuid, dto);
     const isAssigned = await this.prisma.projectVendors.findFirst({
       where: {
@@ -419,8 +422,7 @@ export class VendorsService {
         updatedAt: new Date(),
       },
     });
-
-    return this.client.send({ cmd: VendorJobs.UPDATE }, result);
+    return lastValueFrom(this.client.send({ cmd: VendorJobs.UPDATE, uuid: isAssigned.projectId }, { uuid: result.uuid, ...dto }));
   }
 
   async removeVendor(uuid: UUID, projectId?: UUID) {
