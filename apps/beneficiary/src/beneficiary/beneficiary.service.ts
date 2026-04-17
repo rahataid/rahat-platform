@@ -27,6 +27,7 @@ import {
   BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
+  generateRandomWallet,
   GroupWithValidationAA,
   ProjectContants,
   TPIIData,
@@ -400,7 +401,7 @@ export class BeneficiaryService {
 
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const createdBeneficiary = await this.rsprisma.beneficiary.create({
-      data: { ...data, walletAddress },
+      data: { ...data, walletAddress: walletAddress || generateRandomWallet().address },
     });
 
     await this.beneficiaryUtilsService.addPIIData(

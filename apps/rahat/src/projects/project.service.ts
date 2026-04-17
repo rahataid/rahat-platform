@@ -14,6 +14,7 @@ import {
   BeneficiaryJobs,
   BQUEUE,
   genRandomPhone,
+  generateRandomWallet,
   MS_ACTIONS,
   MS_TIMEOUT,
   ProjectEvents,
