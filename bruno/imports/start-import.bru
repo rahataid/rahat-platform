@@ -1,0 +1,20 @@
+meta {
+  name: start-import
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{url}}/imports/:uuid/start
+  body: none
+  auth: none
+}
+
+params:path {
+  uuid: a9bf3587-2c3e-4e1d-a79c-5a6225e5f7c4
+}
+
+script:pre-request {
+  // const { access_token } = require('./temp/auth-data.json');
+  req.setHeader("Authorization", `Bearer {{access_token}}`);
+}

@@ -15,6 +15,7 @@ export const BQUEUE = {
   RAHAT_BENEFICIARY: 'RAHAT.BENEFICIARY',
   HOST: 'RAHAT.HOST',
   META_TXN: 'RAHAT.META_TXN',
+  RAHAT_IMPORT: 'RAHAT.IMPORT',
 };
 
 export const UserRoles = {

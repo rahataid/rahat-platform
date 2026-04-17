@@ -1,0 +1,20 @@
+meta {
+  name: download-import-errors
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{url}}/imports/:uuid/errors
+  body: none
+  auth: none
+}
+
+params:path {
+  uuid: 00000000-0000-0000-0000-000000000000
+}
+
+script:pre-request {
+  const { access_token } = require('./temp/auth-data.json');
+  req.setHeader("Authorization", `Bearer ${access_token}`);
+}

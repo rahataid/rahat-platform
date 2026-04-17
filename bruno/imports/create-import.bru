@@ -1,0 +1,28 @@
+meta {
+  name: create-import
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/imports
+  body: json
+  auth: none
+}
+
+headers {
+  Signature: {{signature}}
+}
+
+body:json {
+  {
+    "fileUrl": "https://example.com/temp/beneficiaries.csv",
+    "groupName": "Test Group",
+    "groupUUID": "00000000-0000-0000-0000-000000000000",
+    "beneficiaryCount": 100,
+    "meta": {
+      "tool": "community-tool",
+      "importedBy": "admin"
+    }
+  }
+}
