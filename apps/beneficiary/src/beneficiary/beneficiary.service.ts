@@ -2397,6 +2397,38 @@ export class BeneficiaryService {
     this.logger.log(`Starting beneficiary creation with DB transaction for project ${payload.projectId}`);
 
     const { projectId, piiData, ...benfData } = payload;
+
+    // Check if a beneficiary with this phone exists at all
+    const existingBeneficiary = await this.prisma.beneficiaryPii.findFirst({
+      where: { phone: piiData.phone.toString() },
+      select: { beneficiaryId: true, beneficiary: { select: { uuid: true } } },
+    });
+
+    if (existingBeneficiary) {
+      const beneficiaryUuid = existingBeneficiary.beneficiary.uuid;
+
+      // Check specifically if this beneficiary is already in the target project
+      const alreadyInProject = await this.prisma.beneficiaryProject.findFirst({
+        where: {
+          beneficiaryId: beneficiaryUuid,
+          projectId,
+        },
+      });
+
+      if (alreadyInProject) {
+        this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and is assigned to the same project ${projectId}.`);
+        throw new RpcException(`Beneficiary with phone ${piiData.phone} already exists and is assigned to this project.`);
+      }
+
+      // If beneficiary exists but not in the project, assign to project without creating new beneficiary
+      await this.beneficiaryUtilsService.assignBeneficiaryToProject(
+        { projectId: projectId as string, beneficiaryId: beneficiaryUuid }
+      );
+
+      this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and has been assigned to project ${projectId}.`);
+      return { success: true, message: `Beneficiary with phone ${piiData.phone} already exists and has been assigned to this project.`, data: null };
+    }
+
     const dbTxId = `db-tx-${Date.now()}`;
 
     const walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress();
