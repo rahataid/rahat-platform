@@ -1,0 +1,26 @@
+meta {
+  name: Check txhash logs
+  type: http
+  seq: 14
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupInkinds.getLogsDetailsByTxHash",
+    "payload": {
+      "txHash":"0x76924fab62d8598c9427bc69996424cb366c341f42909c7495656aeb1cae9d64",
+      "vendorUid":"b44464cd-2653-4e8e-91f1-2b3580e3e104"
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

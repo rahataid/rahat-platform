@@ -28,6 +28,7 @@ import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
 import { isAddress } from '../utils/web3';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
+import { lastValueFrom } from 'rxjs';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -39,7 +40,7 @@ export class VendorsService {
     private readonly usersService: UsersService,
     private readonly notificationService: NotificationService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
-  ) {}
+  ) { }
 
 
   //TODO: Fix allow duplicate users?
@@ -398,13 +399,15 @@ export class VendorsService {
           uuid,
         },
       });
+
       const extras = dto?.extras;
       const userExtras = Object(user?.extras || {});
 
-      dto.extras = { ...extras, ...userExtras };
+      dto.extras = { ...userExtras, ...extras };
     }
+
     const result = await this.usersService.update(uuid, dto);
-    const isAssigned = await this.prisma.projectVendors.findFirst({
+    const isAssigned = await this.prisma.projectVendors.findMany({
       where: {
         vendorId: uuid,
       },
@@ -420,7 +423,15 @@ export class VendorsService {
       },
     });
 
-    return this.client.send({ cmd: VendorJobs.UPDATE }, result);
+    await Promise.allSettled(
+      isAssigned.map((project) =>
+        lastValueFrom(this.client.send({ cmd: VendorJobs.UPDATE, uuid: project.projectId }, { uuid, ...dto })).catch(
+          (error) => console.log(`Failed to update vendor in project ${project.projectId}:`, error),
+        ),
+      ),
+    );
+
+    return result;
   }
 
   async removeVendor(uuid: UUID, projectId?: UUID) {
