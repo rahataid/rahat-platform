@@ -27,6 +27,7 @@ import {
   BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
+  generateRandomWallet,
   GroupWithValidationAA,
   ProjectContants,
   TPIIData,
@@ -400,7 +401,10 @@ export class BeneficiaryService {
 
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const createdBeneficiary = await this.rsprisma.beneficiary.create({
-      data: { ...data, walletAddress },
+      data: {
+        ...data,
+        walletAddress: walletAddress || generateRandomWallet().address,
+      },
     });
 
     await this.beneficiaryUtilsService.addPIIData(
@@ -512,8 +516,8 @@ export class BeneficiaryService {
         .then((beneficiary) =>
           beneficiary
             ? this.rsprisma.beneficiaryPii.findUnique({
-              where: { beneficiaryId: beneficiary.id },
-            })
+                where: { beneficiaryId: beneficiary.id },
+              })
             : null
         ),
     ]);
@@ -553,7 +557,30 @@ export class BeneficiaryService {
     }));
   }
 
+  private getPhoneSearchVariants(phone?: string): string[] {
+    if (!phone) return [];
+
+    const trimmedPhone = phone.trim();
+    const digitsOnly = trimmedPhone.replace(/\D/g, '');
+    const variants = new Set<string>([trimmedPhone]);
+
+    if (digitsOnly) {
+      variants.add(digitsOnly);
+      variants.add(`+${digitsOnly}`);
+
+      // Common variant: local numbers saved without country code.
+      if (digitsOnly.length > 10) {
+        variants.add(digitsOnly.slice(-10));
+        variants.add(`+${digitsOnly.slice(-10)}`);
+      }
+    }
+
+    return Array.from(variants);
+  }
+
   async findOneByPhone(payload: { phone: string; projectUUID: string }) {
+    const phoneVariants = this.getPhoneSearchVariants(payload.phone);
+
     const beneficiary = await this.prisma.beneficiary.findFirst({
       where: {
         AND: [
@@ -567,7 +594,11 @@ export class BeneficiaryService {
 
           {
             pii: {
-              phone: payload.phone,
+              is: {
+                phone: {
+                  in: phoneVariants,
+                },
+              },
             },
           },
         ],
@@ -984,12 +1015,14 @@ export class BeneficiaryService {
           : [];
 
       console.log(`
-        Found ${duplicatePhones.length
+        Found ${
+          duplicatePhones.length
         } existing beneficiaries phone numbers i: ${duplicatePhones.join(', ')}
-        Found ${duplicateWallets.length
+        Found ${
+          duplicateWallets.length
         } existing beneficiaries wallet addresses: ${duplicateWallets.join(
-          ', '
-        )}
+        ', '
+      )}
         `);
 
       if (!ignoreExisting) {
@@ -1048,10 +1081,12 @@ export class BeneficiaryService {
 
     console.log(`Creating ${batches.length} batches of beneficiaries.
     Total beneficiaries: ${filteredBeneficiaries.length}
-    Duplicate phone numbers: ${filteredBeneficiaries.length - batches.flat().length
-      }
-    Duplicate wallet addresses: ${filteredBeneficiaries.length - batches.flat().length
-      }
+    Duplicate phone numbers: ${
+      filteredBeneficiaries.length - batches.flat().length
+    }
+    Duplicate wallet addresses: ${
+      filteredBeneficiaries.length - batches.flat().length
+    }
       `);
 
     const bulkQueueData = batches.map((batch, index) => ({
@@ -1551,21 +1586,21 @@ export class BeneficiaryService {
 
     const where = projectUUID
       ? {
-        deletedAt: null,
-        beneficiaryGroupProject:
-          projectUUID === 'NOT_ASSGNED'
-            ? {
-              none: {},
-            }
-            : {
-              some: {
-                projectId: projectUUID,
-              },
-            },
-      }
+          deletedAt: null,
+          beneficiaryGroupProject:
+            projectUUID === 'NOT_ASSGNED'
+              ? {
+                  none: {},
+                }
+              : {
+                  some: {
+                    projectId: projectUUID,
+                  },
+                },
+        }
       : {
-        deletedAt: null,
-      };
+          deletedAt: null,
+        };
 
     const data = await paginate(
       this.prisma.beneficiaryGroup,
@@ -2152,9 +2187,11 @@ export class BeneficiaryService {
     const { fromDate, toDate } = payload;
     if (!fromDate || !toDate) return [];
 
-    const newTODate = new Date(toDate)
-    newTODate.setUTCHours(23, 59, 59, 999)
-    this.logger.log(`Fetching beneficiary reporting logs from ${fromDate} to ${newTODate} for project ${payload.projectId}`);
+    const newTODate = new Date(toDate);
+    newTODate.setUTCHours(23, 59, 59, 999);
+    this.logger.log(
+      `Fetching beneficiary reporting logs from ${fromDate} to ${newTODate} for project ${payload.projectId}`
+    );
 
     const benDetails = await this.prisma.beneficiaryProject.findMany({
       where: {
