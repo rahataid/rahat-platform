@@ -116,6 +116,11 @@ export class BeneficiaryController {
     return this.service.findOneBeneficiary(data);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BENEFICIARY_DETAILS_BY_PHONE })
+  async getBeneficiaryByPhoneOnly(payload: { phone: string }) {
+    return this.service.getBeneficiaryByPhoneOnly(payload);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_PII })
   async listPiiData(dto: any) {
     return this.service.listPiiData(dto);
