@@ -17,7 +17,9 @@ datasource db {
 model User {
   id        Int     @id @default(autoincrement())
   uuid      String  @unique @default(uuid())
-  name      String?
+  name      String
+  username String? @unique
+  usernameLower String? @unique // For case-insensitive username lookups
   gender    Gender  @default(UNKNOWN)
   email     String?
   phone     String?
@@ -123,20 +125,27 @@ model Auth {
   userId        Int
   service       Service
   serviceId     String
+  serviceIdLower String? // For case-insensitive lookups
   details       Json?     @db.JsonB()
   challenge     String?
+  passwordHash String?
   falseAttempts Int       @default(0)
   isLocked      Boolean   @default(false)
   lockedOnAt    DateTime?
+  lockCount Int      @default(0) // Track how many times locked
+  lastFailedAt  DateTime? // Track last failed attempt 
   lastLoginAt   DateTime?
 
   User    User          @relation(fields: [userId], references: [id])
   AuthLog AuthSession[]
+  LoginAttempt LoginAttempt[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
 
   @@unique([service, serviceId], name: "authIdentifier")
+  @@index([service, serviceIdLower]) // Performance index 
   @@map("tbl_auth")
 }
 
@@ -157,6 +166,7 @@ model AuthSession {
 }
 
 enum Service {
+  API
   EMAIL
   PHONE
   WALLET
@@ -166,6 +176,26 @@ enum Service {
   TWITTER
   GITHUB
   LINKEDIN
+  USERNAME
+}
+
+model LoginAttempt {
+  id Int @id @default(autoincrement())
+  authId Int? // Nullable: might not exist for invalid usernames
+  identifier String // e.g., email, phone, wallet address
+  service Service
+  ip String
+  userAgent String?
+  success Boolean
+  failReason String? // e.g., "Incorrect password", "Account locked"
+  createdAt DateTime @default(now())
+
+  Auth Auth? @relation(fields: [authId], references: [id])
+
+  @@index([ip, createdAt]) // For IP-based rate limiting
+  @@index([identifier, createdAt]) // For monitoring specific account attacks
+  @@index([authId, createdAt]) // For monitoring attacks on specific accounts
+  @@map("tbl_login_attempts")
 }
 
 // ++++++++++++++++++ END: @rumsan/user - Role/Auth ++++++++++++++++++++++++
@@ -195,6 +225,30 @@ enum SignupStatus {
   FAILED
   REJECTED
 }
+
+// ++++++++++++++++++ START: @rumsan/extensions/apps +++++++++++++++++++++++++++
+enum ApplicationEnvironment {
+  PRODUCTION
+  STAGING
+  DEVELOPMENT
+  TEST
+}
+
+model Application {
+  cuid        String                 @id @default(cuid())
+  name        String
+  publicKey   String?
+  description String?
+  environment ApplicationEnvironment
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("tbl_applications")
+}
+
+// ++++++++++++++++++ END: @rumsan/extensions/apps ++++++++++++++++++++++++++++++++
 
 // ++++++++++++++++++ START: Service Authentication (OAuth2 Client Credentials) +++
 // Stores external service clients that can authenticate via client_id/client_secret
