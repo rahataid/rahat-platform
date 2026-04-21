@@ -318,6 +318,12 @@ export const aaActions: ProjectActionFunc = {
       { cmd: AAJobs.BENEFICIARY.GET_REDEEM_INFO_INKIND, uuid },
       payload
     ),
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_TOKEN_DETAILS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.BENEFICIARY.GET_TOKEN_DETAILS, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.FUND_MANAGEMENT.ADD_FUND]: (
     uuid,

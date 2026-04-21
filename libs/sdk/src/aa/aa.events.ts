@@ -75,6 +75,7 @@ export const JOBS = {
     GET_REDEEM_INFO_INKIND: 'aa.jobs.beneficiary.getRedeemInfoInkind',
     CREATE_BENEFICIARY_WITH_DB_TRANSACTION:
       'aa.jobs.beneficiary.create_beneficiary_with_db_transaction',
+    GET_TOKEN_DETAILS: 'aa.jobs.beneficiary.getTokenDetails',
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget',

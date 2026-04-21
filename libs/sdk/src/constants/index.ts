@@ -242,6 +242,7 @@ export const MS_ACTIONS = {
       GET_REDEEM_INFO: 'aaProject.beneficiary.getRedeemInfo',
       GET_REDEEM_INFO_INKIND: 'aaProject.beneficiary.getRedeemInfoInkind',
       GET_BALANCE: 'aaProject.beneficiary.getBalance',
+      GET_TOKEN_DETAILS: 'aaProject.beneficiary.getTokenDetails',
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
