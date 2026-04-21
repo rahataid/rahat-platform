@@ -73,7 +73,8 @@ export const JOBS = {
     GET_BALANCE: 'aa.jobs.beneficiary.getBalance',
     GET_REDEEM_INFO: 'aa.jobs.beneficiary.getRedeemInfo',
     GET_REDEEM_INFO_INKIND: 'aa.jobs.beneficiary.getRedeemInfoInkind',
-    CREATE_BENEFICIARY_WITH_DB_TRANSACTION: 'aa.jobs.beneficiary.create_beneficiary_with_db_transaction',
+    CREATE_BENEFICIARY_WITH_DB_TRANSACTION:
+      'aa.jobs.beneficiary.create_beneficiary_with_db_transaction',
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget',
@@ -143,7 +144,8 @@ export const JOBS = {
     REMOVE_INKIND_STOCK: 'aa.jobs.inkindStock.remove',
     ASSIGN_GROUP_INKIND: 'aa.jobs.groupInkinds.assign',
     GET_BY_GROUP: 'aa.jobs.groupInkinds.getByGroup',
-    GET_UNASSIGNED_GROUP_INKIND: 'aa.jobs.groupInkinds.getUnassignedGroupInkind',
+    GET_UNASSIGNED_GROUP_INKIND:
+      'aa.jobs.groupInkinds.getUnassignedGroupInkind',
     GET_AVAILABLE_INKIND_BENEFICIARY_PHONE:
       'aa.jobs.groupInkinds.getAvailableInkindByBeneficiaryPhone',
     GET_GROUP_INKIND_LOGS: 'aa.jobs.groupInkinds.getLogs',
@@ -165,7 +167,8 @@ export const JOBS = {
       GET: 'aa.jobs.vendor.token_redemption.get',
       UPDATE_STATUS: 'aa.jobs.vendor.token_redemption.update_status',
       LIST: 'aa.jobs.vendor.token_redemption.list',
-      GET_VENDOR_REDEMPTIONS: 'aa.jobs.vendor.token_redemption.get_vendor_redemptions',
+      GET_VENDOR_REDEMPTIONS:
+        'aa.jobs.vendor.token_redemption.get_vendor_redemptions',
       GET_STATS: 'aa.jobs.vendor.token_redemption.get_stats',
     },
   },
@@ -203,6 +206,9 @@ export const JOBS = {
   },
   MULTISIG: {
     GET_SAFE_OWNER: 'aa.jobs.safe-wallet.getOwner',
-    CREATE_SAFE_TRANSACTION: 'aa.jobs.safe-wallet.createSafeTransaction'
-  }
+    CREATE_SAFE_TRANSACTION: 'aa.jobs.safe-wallet.createSafeTransaction',
+  },
+  FUND_MANAGEMENT: {
+    ADD_FUND: 'aa.jobs.fundManagement.add',
+  },
 };
