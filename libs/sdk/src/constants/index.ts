@@ -382,6 +382,7 @@ export const MS_ACTIONS = {
     },
     FUND_MANAGEMENT: {
       ADD_FUND: 'aa.addProjectFund',
+      TOKEN_DETAILS: 'aa.tokenDetails',
     },
   },
   C2CProject: {

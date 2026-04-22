@@ -331,6 +331,13 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.FUND_MANAGEMENT.ADD_FUND, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.FUND_MANAGEMENT.TOKEN_DETAILS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.FUND_MANAGEMENT.TOKEN_DETAILS, uuid }, payload),
+
   // **** fund mgmt end ****//
 
   // **** stats ****//
