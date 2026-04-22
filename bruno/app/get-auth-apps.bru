@@ -1,0 +1,20 @@
+meta {
+  name: get-auth-apps
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/app/auth-apps?page=1&perPage=10
+  body: none
+  auth: bearer
+}
+
+params:query {
+  page: 1
+  perPage: 10
+}
+
+auth:bearer {
+  token: {{access_token}}
+}

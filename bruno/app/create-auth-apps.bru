@@ -1,0 +1,23 @@
+meta {
+  name: create-auth-apps
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/app/auth-apps
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "name":"local community tool",
+    "address":"0x6ADB2d9d14fc8865D346f2956387E6E7E17e140b",
+    "description":"test"
+  }
+}
