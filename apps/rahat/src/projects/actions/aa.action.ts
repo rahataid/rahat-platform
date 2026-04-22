@@ -718,6 +718,17 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) =>
     sendCommand({ cmd: AAJobs.INKIND.VALIDATE_BENEFICIARY_OTP, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.BENEFICIARY_INKIND_DETAILS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.BENEFICIARY_INKIND_DETAILS, uuid },
+      payload
+    ),
+
   // **** grievance start **** //
   [MS_ACTIONS.AAPROJECT.GRIEVANCES.CREATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GRIEVANCES.CREATE, uuid }, payload),

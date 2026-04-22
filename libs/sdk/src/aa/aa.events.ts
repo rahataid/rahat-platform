@@ -156,6 +156,7 @@ export const JOBS = {
     BENEFICIARY_INKIND_REDEEM: 'aa.jobs.beneficiaryInkinds.redeem',
     SEND_BENEFICIARY_OTP: 'aa.jobs.inkinds.sendBeneficiaryOtp',
     VALIDATE_BENEFICIARY_OTP: 'aa.jobs.inkinds.validateBeneficiaryOtp',
+    BENEFICIARY_INKIND_DETAILS: 'aa.jobs.beneficiary.inKindDetails',
   },
   VENDOR: {
     // Remove after test

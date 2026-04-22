@@ -333,6 +333,7 @@ export const MS_ACTIONS = {
       BENEFICIARY_INKIND_REDEEM: 'aaProject.beneficiaryInkinds.redeem',
       SEND_BENEFICIARY_OTP: 'aaProject.inkinds.sendBeneficiaryOtp',
       VALIDATE_BENEFICIARY_OTP: 'aaProject.inkinds.validateBeneficiaryOtp',
+      BENEFICIARY_INKIND_DETAILS: 'aaProject.beneficiary.inKindsDetails',
     },
     VENDOR: {
       // Remove after test
