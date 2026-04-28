@@ -124,7 +124,8 @@ export const MS_ACTIONS = {
     LIST_FULL_DATA_BY_PROJECT: 'beneficiary.list_full_data_by_project',
     GET_PROJECT_SPECIFIC: 'beneficiary.project_specific',
     GET_ONE_BENEFICARY: 'beneficiary.get_one_beneficiary',
-    GET_BENEFICIARY_DETAILS_BY_PROJECT: 'beneficiary.get_beneficiary_details_by_project',
+    GET_BENEFICIARY_DETAILS_BY_PROJECT:
+      'beneficiary.get_beneficiary_details_by_project',
   },
   VENDOR: {
     REGISTER: 'vendor.register',
@@ -209,13 +210,15 @@ export const MS_ACTIONS = {
       GET_ALL: 'aaProject.stakeholders.getAll',
       GET_ONE: 'aaProject.stakeholders.getOne',
       ADD: 'aaProject.stakeholders.add',
-      VALIDATE_BULK_STAKEHOLDERS: 'aaProject.stakeholders.validateBulkStakeholders',
+      VALIDATE_BULK_STAKEHOLDERS:
+        'aaProject.stakeholders.validateBulkStakeholders',
       BULK_ADD: 'aaProject.stakeholders.bulkAdd',
       REMOVE: 'aaProject.stakeholders.remove',
       UPDATE: 'aaProject.stakeholders.update',
       GET_GROUP: 'aaProject.stakeholders.getGroup',
       GET_ALL_GROUPS: 'aaProject.stakeholders.getAllGroups',
-      GET_GROUP_DETAILS_BY_UUIDS: 'aaProject.stakeholders.getGroupDetailsByUuids',
+      GET_GROUP_DETAILS_BY_UUIDS:
+        'aaProject.stakeholders.getGroupDetailsByUuids',
       GET_ONE_GROUP: 'aaProject.stakeholders.getOneGroup',
       ADD_GROUP: 'aaProject.stakeholders.addGroup',
       UPDATE_GROUP: 'aaProject.stakeholders.updateGroup',
@@ -229,7 +232,8 @@ export const MS_ACTIONS = {
       GET_ALL_GROUPS: 'aaProject.beneficiary.getAllGroups',
       GET_ONE_GROUP: 'aaProject.beneficiary.getOneGroup',
       ASSIGN_TOKEN_TO_GROUP: 'aaProject.beneficiary.assign_token_to_group',
-      VALIDATE_TOKEN_ASSIGNMENT: 'aaProject.beneficiary.validate_token_assignment',
+      VALIDATE_TOKEN_ASSIGNMENT:
+        'aaProject.beneficiary.validate_token_assignment',
       RESERVE_TOKEN_TO_GROUP: 'aaProject.beneficiary.reserve_token_to_group',
       GET_ALL_TOKEN_RESERVATION:
         'aaProject.beneficiary.get_all_token_reservation',
@@ -239,6 +243,7 @@ export const MS_ACTIONS = {
       GET_REDEEM_INFO: 'aaProject.beneficiary.getRedeemInfo',
       GET_REDEEM_INFO_INKIND: 'aaProject.beneficiary.getRedeemInfoInkind',
       GET_BALANCE: 'aaProject.beneficiary.getBalance',
+      GET_TOKEN_DETAILS: 'aaProject.beneficiary.getTokenDetails',
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
@@ -315,15 +320,20 @@ export const MS_ACTIONS = {
       REMOVE_INKIND_STOCK: 'aaProject.inkindStock.remove',
       ASSIGN_GROUP_INKIND: 'aaProject.groupInkinds.assign',
       GET_BY_GROUP: 'aaProject.groupInkinds.getByGroup',
-      GET_UNASSIGNED_GROUP_INKIND: 'aaProject.groupInkinds.getUnassignedGroupInkind',
-      GET_AVAILABLE_INKIND_BENEFICIARY_PHONE: 'aaProject.groupInkinds.getAvailableInkindByBeneficiaryPhone',
+      GET_UNASSIGNED_GROUP_INKIND:
+        'aaProject.groupInkinds.getUnassignedGroupInkind',
+      GET_AVAILABLE_INKIND_BENEFICIARY_PHONE:
+        'aaProject.groupInkinds.getAvailableInkindByBeneficiaryPhone',
       GET_GROUP_INKIND_LOGS: 'aaProject.groupInkinds.getLogs',
       GET_GROUP_INKIND_LOGS_BY_VENDOR: 'aaProject.groupInkinds.getLogsByVendor',
-      GET_LOGS_DETAILS_BY_VENDOR: 'aaProject.groupInkinds.getLogsDetailsByVendor',
-      GET_LOGS_DETAILS_BY_TX_HASH: 'aaProject.groupInkinds.getLogsDetailsByTxHash',
+      GET_LOGS_DETAILS_BY_VENDOR:
+        'aaProject.groupInkinds.getLogsDetailsByVendor',
+      GET_LOGS_DETAILS_BY_TX_HASH:
+        'aaProject.groupInkinds.getLogsDetailsByTxHash',
       BENEFICIARY_INKIND_REDEEM: 'aaProject.beneficiaryInkinds.redeem',
       SEND_BENEFICIARY_OTP: 'aaProject.inkinds.sendBeneficiaryOtp',
       VALIDATE_BENEFICIARY_OTP: 'aaProject.inkinds.validateBeneficiaryOtp',
+      BENEFICIARY_INKIND_DETAILS: 'aaProject.beneficiary.inKindsDetails',
     },
     VENDOR: {
       // Remove after test
@@ -369,6 +379,10 @@ export const MS_ACTIONS = {
     MULTISIG: {
       GET_SAFE_OWNER: 'aa.getSafeOwner',
       CREATE_SAFE_TRANSACTION: 'aa.createSafeTransaction',
+    },
+    FUND_MANAGEMENT: {
+      ADD_FUND: 'aa.addProjectFund',
+      TOKEN_DETAILS: 'aa.tokenDetails',
     },
   },
   C2CProject: {
@@ -569,7 +583,8 @@ export const MS_ACTIONS = {
       SESSION_LOGS: 'ms.activities.communication.sessionLogs',
       RETRY_FAILED: 'ms.activities.communication.retryFailed',
       GET_STATS: 'ms.activities.communication.getStats',
-      GET_TRANSPORT_SESSION_STATS: 'ms.activities.communication.getTransportSessionStats',
+      GET_TRANSPORT_SESSION_STATS:
+        'ms.activities.communication.getTransportSessionStats',
       GET_GROUP_STATS: 'ms.triggers.getTransportSessionStatsByGroup',
     },
   },
