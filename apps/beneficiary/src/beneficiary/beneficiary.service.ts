@@ -166,7 +166,6 @@ export class BeneficiaryService {
   }
 
   async getBeneficiaryByPhoneOnly(payload: { phone: string }) {
-    console.log('Finding beneficiary by phone:', payload.phone);
     const getBeneficiaryByPhone = await this.prisma.beneficiaryPii.findUnique({
       where: {
         phone: payload.phone,
@@ -175,8 +174,6 @@ export class BeneficiaryService {
         beneficiary: true
     }
     });
-
-    console.log('Beneficiary found:', getBeneficiaryByPhone);
 
     if (!getBeneficiaryByPhone) return null;
 
