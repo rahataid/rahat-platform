@@ -14,6 +14,10 @@ headers {
   Authorization: Bearer {{access-token}}
 }
 
+vars:pre-request {
+  benef-phone: 9860877221
+}
+
 assert {
   res.status: eq 200
   res.body.data: isJson
