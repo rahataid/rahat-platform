@@ -475,6 +475,7 @@ export const MS_ACTIONS = {
     CREATE_WALKIN: 'rpProject.walkin.create',
     GET_WALKIN: 'rpProject.walkin.get',
     GET_ALL_WALKIN: 'rpProject.walkin.getAll',
+    GET_REFERRER_BY_PHONE: 'rpProject.walkin.referrer.getByPhone',
     CREATE_BULK_WALKIN_BENEFICIARIES: 'rpProject.walkin.createBulk',
     SYNC_STAGING_WALKIN: 'rpProject.walkin.syncStaging',
     LIST_REPORTING: 'rpProject.reporting.list',
