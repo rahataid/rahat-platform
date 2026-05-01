@@ -1,0 +1,15 @@
+meta {
+  name: Withdraw Details -Local-Crypto-
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{base_url}}/api/v1/payout/withdraw/{{l2c_wdrw_pyt_ref_num}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{wthdrw_access_token}}
+}

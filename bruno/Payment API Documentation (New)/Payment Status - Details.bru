@@ -1,0 +1,34 @@
+meta {
+  name: Payment Status - Details
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{base_url}}/api/v2/payment/{{page_pmt_ref_num}}?verbose=1
+  body: none
+  auth: bearer
+}
+
+params:query {
+  verbose: 1
+}
+
+auth:bearer {
+  token: {{page_token}}
+}
+
+tests {
+  const res = res.getBody();
+  
+  if (res.required_payer_data && res.required_payer_data.poi) {
+      let poi = res.required_payer_data.poi;
+      bru.setVar('poi_upload_url', poi.url);
+      bru.setVar('poi_upload_key', poi.fields.key);
+      bru.setVar('poi_upload_x_amz_alogrithm', poi.fields['X-Amz-Algorithm']);
+      bru.setVar('poi_upload_x_amz_credential', poi.fields['X-Amz-Credential']);
+      bru.setVar('poi_upload_x_amz_date', poi.fields['X-Amz-Date']);
+      bru.setVar('poi_upload_policy', poi.fields.Policy);
+      bru.setVar('poi_upload_x_amz_signature', poi.fields['X-Amz-Signature']);
+  }
+}

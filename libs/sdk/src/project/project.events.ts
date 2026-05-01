@@ -99,8 +99,10 @@ export const JOBS = {
     GET_UNSYNCED_BENEFICIARIES: 'rahat.jobs.beneficiary.get_unsynced',
     CREATE_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin',
     GET_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_walkin',
+    GET_REFERRER_BY_PHONE: 'rahat.jobs.beneficiary.get_walkin_referrer_by_phone',
     GET_ALL_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_all_walkin',
     CREATE_BULK_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin_bulk',
+    SYNC_STAGING_WALKIN: 'rahat.jobs.beneficiary.sync_walkin_staging',
     GET_UNSYNCED_BENEFICIARY_GROUP: 'rahat.jobs.beneficiary.group.get_unsynced',
     UPDATE_BENEFICIARY_REDEMPTION: 'rahat.jobs.beneficiary.update_redemption',
     LIST_BENEFICIARY_REIMBURSEMENTS:

@@ -1,0 +1,15 @@
+meta {
+  name: Direct Withdraw Refresh -Local-Crypto--DEPRECATED
+  type: http
+  seq: 12
+}
+
+put {
+  url: {{base_url}}/api/v2/payout/withdraw/{{drct_l2c_wdrw_prn}}/local/crypto/refresh
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
