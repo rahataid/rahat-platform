@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException
 } from '@nestjs/common';
 // import * as jwt from '@nestjs/jwt';
@@ -23,17 +24,20 @@ import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
 import { UUID } from 'crypto';
+import { lastValueFrom } from 'rxjs';
 import { Address } from 'viem';
 import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
 import { isAddress } from '../utils/web3';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
-import { lastValueFrom } from 'rxjs';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
 @Injectable()
 export class VendorsService {
+
+  private readonly logger = new Logger(VendorsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthsService,
@@ -386,52 +390,79 @@ export class VendorsService {
     return user;
   }
 
-  async updateVendor(dto, uuid) {
+  async updateVendor(dto, uuid: UUID) {
+    // STEP 1: Load current vendor state and validate it exists
+    this.logger.log(`Starting vendor update for UUID: ${uuid} with data: ${JSON.stringify(dto)}`);
+    const originalVendor = await this.prisma.user.findUnique({ where: { uuid } });
+    if (!originalVendor) throw new NotFoundException('Vendor not found');
+
+    // STEP 1.1: Validate email uniqueness if email is being updated
     if (dto?.email) {
-      const userData = await this.prisma.user.findFirst({
+      const duplicate = await this.prisma.user.findFirst({
         where: { email: dto.email, NOT: { uuid } },
       });
-      if (userData) throw new Error('Email must be unique');
+      if (duplicate) throw new BadRequestException('Email must be unique');
     }
+
+    // STEP 1.2: Merge extras with existing data to preserve unmodified fields
     if (dto.extras) {
-      const user = await this.prisma.user.findUnique({
-        where: {
-          uuid,
-        },
-      });
-
-      const extras = dto?.extras;
-      const userExtras = Object(user?.extras || {});
-
-      dto.extras = { ...userExtras, ...extras };
+      dto.extras = { ...Object(originalVendor.extras || {}), ...dto.extras };
     }
 
+    // STEP 1.3: Capture a snapshot of original vendor (excluding system fields) for saga rollback
+    const originalSnapshot = (({ id, uuid: _u, createdAt, updatedAt, ...rest }) => rest)(originalVendor);
+
+    // STEP 2: Persist vendor update to the local database
     const result = await this.usersService.update(uuid, dto);
-    const isAssigned = await this.prisma.projectVendors.findMany({
-      where: {
-        vendorId: uuid,
-      },
-    });
-    if (!isAssigned) return result;
 
+    // STEP 3: Fetch all projects this vendor is assigned to
+    const assignedProjects = await this.prisma.projectVendors.findMany({
+      where: { vendorId: uuid },
+    });
+    if (assignedProjects.length === 0) return result;
+
+    // STEP 3.1: Touch updatedAt on all project-vendor links to signal a sync is in progress
     await this.prisma.projectVendors.updateMany({
-      where: {
-        vendorId: uuid,
-      },
-      data: {
-        updatedAt: new Date(),
-      },
+      where: { vendorId: uuid },
+      data: { updatedAt: new Date() },
     });
 
-    await Promise.allSettled(
-      isAssigned.map((project) =>
-        lastValueFrom(this.client.send({ cmd: VendorJobs.UPDATE, uuid: project.projectId }, { uuid, ...dto })).catch(
-          (error) => console.log(`Failed to update vendor in project ${project.projectId}:`, error),
-        ),
-      ),
-    );
+    // STEP 4: Propagate the update to each assigned project microservice (saga forward phase)
+    const updatedProjects: string[] = [];
+
+    for (const project of assignedProjects) {
+      try {
+        // STEP 4.1: Send vendor update to the project microservice
+        this.logger.log(`Propagating vendor update to project ${project.projectId} for vendor UUID: ${uuid}`);
+        await lastValueFrom(
+          this.client.send({ cmd: VendorJobs.UPDATE, uuid: project.projectId }, { uuid, ...dto })
+        );
+        updatedProjects.push(project.projectId);
+      } catch (error) {
+        const err = error as Error;
+        this.logger.error(`Saga failed at project ${project.projectId}: ${err.message}`);
+
+        // STEP 4.2: Saga compensation — revert local vendor record to the original snapshot
+        await this.revertVendorUpdate(originalSnapshot, uuid);
+
+        // STEP 4.3: Saga compensation — re-send original snapshot to all previously updated projects
+        await Promise.allSettled(
+          updatedProjects.map((projectId) =>
+            lastValueFrom(
+              this.client.send({ cmd: VendorJobs.UPDATE, uuid: projectId }, { uuid, ...originalSnapshot })
+            ).catch((e: Error) => this.logger.error(`Failed to revert project ${projectId}: ${e.message}`))
+          )
+        );
+
+        throw new Error(`Vendor update saga failed at project ${project.projectId}: ${err.message}`);
+      }
+    }
 
     return result;
+  }
+
+  private async revertVendorUpdate(snapshot: Record<string, unknown>, uuid: string) {
+    await this.prisma.user.update({ where: { uuid }, data: snapshot });
   }
 
   async removeVendor(uuid: UUID, projectId?: UUID) {
