@@ -143,7 +143,7 @@ export class VendorsService {
     //   },
     // });
 
-    const response = await handleMicroserviceCall({
+    await handleMicroserviceCall({
       client: this.client.send(
         {
           cmd: VendorJobs.ADD_TO_PROJECT,
@@ -187,7 +187,23 @@ export class VendorsService {
       },
     });
 
-    return response;
+    return this.prisma.userRole.findFirst({
+      where: {
+        Role: { name: UserRoles.VENDOR },
+        User: { uuid: vendorId, deletedAt: null },
+      },
+      include: {
+        User: {
+          include: {
+            VendorProject: {
+              include: {
+                Project: true,
+              },
+            },
+          },
+        },
+      },
+    });
   }
 
   async getVendorAssignedToProject(vendorId: string, projectId: string) {
