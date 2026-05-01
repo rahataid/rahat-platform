@@ -1,5 +1,5 @@
-import { parse } from 'csv-parse/sync';
 import { generateRandomWallet } from '@rahataid/sdk/utils';
+import { parse } from 'csv-parse/sync';
 import { STANDARD_FIELD_MAP, VALID_GENDERS } from './imports.constants';
 
 export interface MappedRow {
@@ -45,6 +45,14 @@ function mapCSVRow(row: Record<string, string>, rowIndex: number): MappedRow {
         extras[csvColumn] = value;
       }
     }
+  }
+
+  // Handle name joining from firstName and lastName
+  const fName = extras['firstName'] || extras['firstname'] || extras['FirstName'];
+  const lName = extras['lastName'] || extras['lastname'] || extras['LastName'];
+
+  if (fName || lName) {
+    pii.name = `${fName || ''} ${lName || ''}`.trim();
   }
 
   // Generate wallet address if not provided
