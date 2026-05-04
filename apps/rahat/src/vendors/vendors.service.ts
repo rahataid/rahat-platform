@@ -29,6 +29,7 @@ import { Address } from 'viem';
 import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
 import { isAddress } from '../utils/web3';
+import { GetVendorsDTO } from './dto/get-vendors.dto';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -247,8 +248,10 @@ export class VendorsService {
     return projectData;
   }
 
-  async listVendor(dto) {
-    const { projectName, status, page, perPage } = dto;
+  async listVendor(dto: GetVendorsDTO) {
+    const { vendorName, projectName, status, page, perPage } = dto;
+    this.logger.log(`Listing vendors with filters - Vendor Name: ${vendorName}, Project Name: ${projectName}, Status: ${status}, Page: ${page}, Per Page: ${perPage}`);
+
     const where: any = {
       Role: {
         name: UserRoles.VENDOR,
@@ -257,6 +260,13 @@ export class VendorsService {
         deletedAt: null,
       },
     };
+
+    if (vendorName) {
+      where.User.name = {
+        contains: vendorName,
+        mode: 'insensitive',
+      };
+    }
 
     if (projectName) {
       where.User = {
