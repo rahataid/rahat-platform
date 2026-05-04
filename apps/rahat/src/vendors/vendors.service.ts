@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException
 } from '@nestjs/common';
 // import * as jwt from '@nestjs/jwt';
@@ -23,17 +24,19 @@ import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
 import { UUID } from 'crypto';
+import { lastValueFrom } from 'rxjs';
 import { Address } from 'viem';
 import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
 import { isAddress } from '../utils/web3';
+import { GetVendorsDTO } from './dto/get-vendors.dto';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
-import { lastValueFrom } from 'rxjs';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
 @Injectable()
 export class VendorsService {
+  private readonly logger = new Logger(VendorsService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthsService,
@@ -227,8 +230,10 @@ export class VendorsService {
     return projectData;
   }
 
-  async listVendor(dto) {
-    const { projectName, status, page, perPage } = dto;
+  async listVendor(dto: GetVendorsDTO) {
+    const { vendorName, projectName, status, page, perPage } = dto;
+    this.logger.log(`Listing vendors with filters - Vendor Name: ${vendorName}, Project Name: ${projectName}, Status: ${status}, Page: ${page}, Per Page: ${perPage}`);
+
     const where: any = {
       Role: {
         name: UserRoles.VENDOR,
@@ -237,6 +242,13 @@ export class VendorsService {
         deletedAt: null,
       },
     };
+
+    if (vendorName) {
+      where.User.name = {
+        contains: vendorName,
+        mode: 'insensitive',
+      };
+    }
 
     if (projectName) {
       where.User = {
