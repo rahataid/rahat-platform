@@ -1,0 +1,22 @@
+meta {
+  name: get-all-vendors
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/vendors
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~page: 1
+  ~perPage: 5
+  ~vendorName: re
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

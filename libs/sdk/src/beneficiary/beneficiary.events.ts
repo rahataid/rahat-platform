@@ -17,6 +17,7 @@ export const JOBS = {
   CREATE: 'rahat.jobs.beneficiary.create',
   CREATE_BULK: 'rahat.jobs.beneficiary.create_bulk',
   GET: 'rahat.jobs.beneficiary.get',
+  GET_BENEFICIARY_DETAILS_BY_PHONE: 'rahat.jobs.beneficiary.get_beneficiary_by_phone',
   FIND_PHONE_BY_UUID: 'rahat.jobs.beneficiary.find_phone_by_uuid',
   GET_PROJECT_SPECIFIC: 'rahat.jobs.beneficiary.get_project_specific',
   GET_BENEF_DETAILS_BY_PROJECT: 'rahat.jobs.beneficiary.get_benef_details_by_project',

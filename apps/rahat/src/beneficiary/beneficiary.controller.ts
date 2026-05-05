@@ -476,6 +476,18 @@ export class BeneficiaryController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get('phone/:phone')
+  @ApiParam({ name: 'phone', required: true })
+  async getBeneficiaryByPhoneOnly(@Param('phone') phone: string) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.GET_BENEFICIARY_DETAILS_BY_PHONE },
+      { phone }
+    );
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('verification-link/:uuid')
   @ApiParam({ name: 'uuid', required: true })
   async generateVerificationLink(@Param('uuid') uuid: UUID) {
