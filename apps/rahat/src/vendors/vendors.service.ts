@@ -268,35 +268,29 @@ export class VendorsService {
       };
     }
 
-    if (projectName) {
+    if (status === 'Pending') {
+      // Pending means no VendorProject rows at all, so projectName filter is irrelevant
       where.User = {
         ...where.User,
         VendorProject: {
-          some: {
-            Project: {
-              name: projectName,
-            },
-          },
+          none: {},
         },
       };
-    }
-
-    if (status) {
-      if (status === 'Assigned') {
-        where.User = {
-          ...where.User,
-          VendorProject: {
-            some: {},
-          },
-        };
-      } else if (status === 'Pending') {
-        where.User = {
-          ...where.User,
-          VendorProject: {
-            none: {},
-          },
-        };
-      }
+    } else if (projectName) {
+      const projectFilter = { Project: { name: projectName } };
+      where.User = {
+        ...where.User,
+        VendorProject: {
+          some: projectFilter,
+        },
+      };
+    } else if (status === 'Assigned') {
+      where.User = {
+        ...where.User,
+        VendorProject: {
+          some: {},
+        },
+      };
     }
     return paginate(
       this.prisma.userRole,
