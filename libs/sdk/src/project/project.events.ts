@@ -100,6 +100,7 @@ export const JOBS = {
     CREATE_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin',
     GET_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_walkin',
     GET_REFERRER_BY_PHONE: 'rahat.jobs.beneficiary.get_walkin_referrer_by_phone',
+    EXPORT_BENEFICIARY_REFERRAL: 'rahat.jobs.beneficiary.export_referral',
     GET_ALL_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_all_walkin',
     CREATE_BULK_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin_bulk',
     SYNC_STAGING_WALKIN: 'rahat.jobs.beneficiary.sync_walkin_staging',

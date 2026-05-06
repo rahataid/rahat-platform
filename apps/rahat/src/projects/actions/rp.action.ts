@@ -346,4 +346,13 @@ export const rpActions: ProjectActionFunc = {
       { cmd: ProjectJobs.BENEFICIARY.GET_REFERRER_BY_PHONE, uuid },
       payload
     ),
+  [MS_ACTIONS.RPPROJECT.EXPORT_BENEFICIARY_REFERRAL]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: ProjectJobs.BENEFICIARY.EXPORT_BENEFICIARY_REFERRAL, uuid },
+      payload
+    ),
 };
