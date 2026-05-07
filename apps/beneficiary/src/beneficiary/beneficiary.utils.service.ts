@@ -278,7 +278,7 @@ export class BeneficiaryUtilsService {
   }
 
   async saveBeneficiaryToProject(dto: AddToProjectDto) {
-    return this.prismaService.beneficiaryProject.create({ data: dto });
+    return await this.prismaService.beneficiaryProject.create({ data: dto });
   }
 
   prepareBulkInsertData(dtos: CreateBeneficiaryDto[]) {

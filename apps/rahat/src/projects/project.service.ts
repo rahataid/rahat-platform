@@ -88,7 +88,12 @@ export class ProjectService {
   }
 
   async list() {
-    return this.prisma.project.findMany();
+    return this.prisma.project.findMany({
+      where: {
+        deletedAt: null,
+      }
+    }
+    );
   }
 
   async findOne(uuid: UUID) {

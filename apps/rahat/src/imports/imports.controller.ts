@@ -1,0 +1,141 @@
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  MessageEvent,
+  Param,
+  Post,
+  Query,
+  Req,
+  Res,
+  Sse,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { APP } from '@rahataid/sdk';
+import {
+  AbilitiesGuard,
+  ACTIONS,
+  CheckAbilities,
+  JwtGuard,
+  SUBJECTS,
+} from '@rumsan/user';
+import { UUID } from 'crypto';
+import { Request, Response } from 'express';
+import { from, interval, Observable } from 'rxjs';
+import { map, switchMap, takeWhile } from 'rxjs/operators';
+import { CheckHeaders, ExternalAppGuard } from '../decorators';
+import { SSE_POLL_INTERVAL_MS, TERMINAL_IMPORT_PHASES } from './imports.constants';
+import { ImportsService } from './imports.service';
+
+@Controller('imports')
+@ApiTags('Imports')
+export class ImportsController {
+  constructor(private readonly importsService: ImportsService) { }
+
+  @Post()
+  @UseGuards(ExternalAppGuard)
+  @CheckHeaders('Signature')
+  async create(
+    @Req() req: Request,
+    @Body()
+    body: {
+      fileUrl: string;
+      groupName: string;
+      groupUUID: string;
+      beneficiaryCount: number;
+      meta?: Record<string, unknown>;
+    }
+  ) {
+    const origin = req.headers['origin'] || req.headers['referer'];
+    let source: string = req.ip ?? 'unknown';
+    if (origin) {
+      try {
+        source = new URL(Array.isArray(origin) ? origin[0] : origin).host;
+      } catch {
+        source = req.ip ?? 'unknown';
+      }
+    }
+
+    return this.importsService.create(body, source);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get()
+  @ApiQuery({ name: 'status', required: false, enum: ['NEW', 'PROCESSING', 'IMPORTED', 'FAILED'] })
+  @ApiQuery({ name: 'source', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'perPage', required: false, type: Number })
+  @ApiQuery({ name: 'sort', required: false, type: String, description: 'Field to sort by (default: createdAt)' })
+  @ApiQuery({ name: 'order', required: false, enum: ['asc', 'desc'], description: 'Sort order (default: desc)' })
+  async list(
+    @Query() query: { status?: string; source?: string; page?: number; perPage?: number; sort?: string; order?: 'asc' | 'desc' }
+  ) {
+    return this.importsService.list({
+      ...query,
+      page: query.page ? +query.page : undefined,
+      perPage: query.perPage ? +query.perPage : undefined,
+    });
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get(':uuid')
+  @ApiParam({ name: 'uuid', required: true })
+  async findOne(@Param('uuid') uuid: UUID) {
+    return this.importsService.findOne(uuid);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get(':uuid/file')
+  @Header('Content-Type', 'text/csv')
+  @ApiParam({ name: 'uuid', required: true })
+  async downloadFile(@Param('uuid') uuid: string, @Res() res: Response) {
+    const { buffer, filename } = await this.importsService.getFileStream(uuid);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'text/csv');
+    res.send(buffer);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.USER })
+  @Post(':uuid/start')
+  @ApiParam({ name: 'uuid', required: true })
+  async startImport(@Param('uuid') uuid: string) {
+    console.log(`Starting import for UUID: ${uuid}`);
+    return this.importsService.startImport(uuid);
+  }
+
+  @Sse(':uuid/progress')
+  @ApiParam({ name: 'uuid', required: true })
+  progress(@Param('uuid') uuid: string): Observable<MessageEvent> {
+    return interval(SSE_POLL_INTERVAL_MS).pipe(
+      switchMap(() => from(this.importsService.getProgress(uuid))),
+      map((progress) => ({ data: progress }) as MessageEvent),
+      takeWhile((event: MessageEvent) => {
+        const data = event.data as any;
+        return !TERMINAL_IMPORT_PHASES.includes(data?.phase);
+      }, true),
+    );
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get(':uuid/errors')
+  @Header('Content-Type', 'text/csv')
+  @ApiParam({ name: 'uuid', required: true })
+  async downloadErrors(@Param('uuid') uuid: string, @Res() res: Response) {
+    const { buffer, filename } = await this.importsService.getErrorFile(uuid);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'text/csv');
+    res.send(buffer);
+  }
+}

@@ -24,8 +24,12 @@ export const MS_TRIGGERS_JOBS = {
     GET_BY_LOCATION: 'ms.jobs.phases.getByLocation',
     ACTIVATE: 'ms.jobs.phases.activate',
     CONFIGURE_THRESHOLD: 'ms.jobs.phase.configureThreshold',
+    CONFIGURE_EXTENDED_LOGIC: 'ms.jobs.phases.configureExtendedLogic',
+    GET_EXTENDED_LOGIC: 'ms.jobs.phases.getExtendedLogic',
+    REMOVE_EXTENDED_LOGIC: 'ms.jobs.phases.removeExtendedLogic',
     UPDATE: 'ms.jobs.phases.update',
     DELETE: 'ms.jobs.phases.delete',
+    GET_PHASE_PAYOUT_STATUS: 'ms.jobs.phase.getPhasePayoutStatus',
   },
   REVERT_PHASE: {
     CREATE: 'ms.jobs.revertPhase.create',
@@ -236,6 +240,28 @@ export const msTriggerActions: ProjectActionFunc = {
     );
   },
 
+  [MS_ACTIONS.MS_PHASES.CONFIGURE_EXTENDED_LOGIC]: (uuid, payload, sendCommand) => {
+    console.log('Configuring extended logic with payload:', payload);
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PHASES.CONFIGURE_EXTENDED_LOGIC },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_PHASES.GET_EXTENDED_LOGIC]: (uuid, payload, sendCommand) => {
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PHASES.GET_EXTENDED_LOGIC },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_PHASES.REMOVE_EXTENDED_LOGIC]: (uuid, payload, sendCommand) => {
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PHASES.REMOVE_EXTENDED_LOGIC },
+      payload
+    );
+  },
+
   [MS_ACTIONS.MS_PHASES.UPDATE]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
     return sendCommand(
@@ -248,6 +274,14 @@ export const msTriggerActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
     return sendCommand(
       { cmd: MS_TRIGGERS_JOBS.PHASES.DELETE },
+      payload
+    );
+  },
+
+  [MS_ACTIONS.MS_PHASES.GET_PHASE_PAYOUT_STATUS]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.PHASES.GET_PHASE_PAYOUT_STATUS },
       payload
     );
   },

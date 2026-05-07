@@ -23,6 +23,7 @@ import { RequestDetails } from '@rumsan/extensions/decorators';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
 import { VendorsService } from './vendors.service';
+import { GetVendorsDTO } from './dto/get-vendors.dto';
 
 @ApiTags('Vendors')
 @Controller('vendors')
@@ -35,7 +36,7 @@ export class VendorsController {
   }
 
   @Get('')
-  listVendor(@Query() dto) {
+  listVendor(@Query() dto: GetVendorsDTO) {
     return this.vendorService.listVendor(dto);
   }
 

@@ -1,0 +1,24 @@
+meta {
+  name: phase remove extended logic
+  type: http
+  seq: 50
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.phases.removeExtendedLogic",
+    "payload": {
+      "uuid": "{{phaseId}}"
+    }
+  }
+}

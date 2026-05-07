@@ -6,6 +6,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary, BeneficiaryPii, GroupPurpose } from '@prisma/client';
 import {
+  AddBeneficiariesToGroupDto,
   AddBenfGroupToProjectDto,
   AddBenToProjectDto,
   addBulkBeneficiaryToProject,
@@ -13,6 +14,7 @@ import {
   AddToProjectDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  CreateBeneficiaryTransactionDto,
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
@@ -30,11 +32,12 @@ import {
   GroupWithValidationAA,
   ProjectContants,
   TPIIData,
-  WalletJobs,
+  WalletJobs
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
+import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
   findTempBenefGroups,
@@ -84,7 +87,7 @@ export class BeneficiaryService {
       ? this.rsprisma.beneficiaryProject
       : this.rsprisma.beneficiaryPii;
     const include = dto.projectId ? { Beneficiary: true } : {};
-    let where: any = dto.projectId ? { projectId: dto.projectId } : {};
+    const where: any = dto.projectId ? { projectId: dto.projectId } : {};
 
     const startDate = dto.startDate;
     const endDate = dto.endDate;
@@ -161,6 +164,24 @@ export class BeneficiaryService {
     const { pii, ...rest } = getBeneficiaryByWallet;
     return { piiData: pii, projectData: rest, ...data };
   }
+
+  async getBeneficiaryByPhoneOnly(payload: { phone: string }) {
+    const getBeneficiaryByPhone = await this.prisma.beneficiaryPii.findUnique({
+      where: {
+        phone: payload.phone,
+      },
+      include: {
+        beneficiary: true
+    }
+    });
+
+    if (!getBeneficiaryByPhone) return null;
+
+    const { beneficiary, ...piiData } = getBeneficiaryByPhone;
+
+    return { ...beneficiary, pii: piiData };
+  }
+
   async listBeneficiaryPiiByWalletAddress(data: any) {
     if (!data?.data?.length) return data;
     return this.prisma.beneficiary.findMany({
@@ -403,7 +424,7 @@ export class BeneficiaryService {
 
   async mergePIIData(data: any) {
     const mergedData = [];
-    for (let d of data) {
+    for (const d of data) {
       const piiData = await this.rsprisma.beneficiaryPii.findUnique({
         where: { beneficiaryId: d.id },
       });
@@ -413,7 +434,7 @@ export class BeneficiaryService {
     return mergedData;
   }
 
-  async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
+  async create(dto: CreateBeneficiaryDto, projectUuid?: string,) {
     const { piiData, projectUUIDs, walletAddress, ...data } = dto;
 
     if (!piiData.phone) throw new RpcException('Phone number is required');
@@ -1220,8 +1241,10 @@ export class BeneficiaryService {
     const group = await this.prisma.beneficiaryGroup.create({
       data: {
         name: dto.name,
+        ...(dto.groupPurpose && { groupPurpose: dto.groupPurpose as GroupPurpose }),
       },
     });
+
     const createPayload = dto.beneficiaries.map((d) => ({
       beneficiaryGroupId: group.uuid,
       beneficiaryId: d.uuid,
@@ -1241,7 +1264,87 @@ export class BeneficiaryService {
       await (await this.assignBeneficiaryGroupToProject(payload)).toPromise();
     }
 
-    return groupedBeneficiaries;
+    return {
+      ...groupedBeneficiaries,
+      group,
+    };
+  }
+
+  async addBeneficiariesToGroup(dto: AddBeneficiariesToGroupDto) {
+    const { groupUuid, beneficiaries } = dto;
+    this.logger.log(`Adding beneficiaries to group ${groupUuid}: ${beneficiaries.map(b => b.uuid).join(', ')}`);
+
+    // Verify the group exists
+    const group = await this.prisma.beneficiaryGroup.findUnique({
+      where: { uuid: groupUuid },
+    });
+
+    if (!group) {
+      throw new RpcException('Beneficiary group not found.');
+    }
+
+    // Get existing beneficiary UUIDs in the group to avoid duplicates
+    const existingGroupedBeneficiaries = await this.prisma.groupedBeneficiaries.findMany({
+      where: {
+        beneficiaryGroupId: groupUuid,
+        deletedAt: null,
+      },
+      select: { beneficiaryId: true },
+    });
+
+    const existingBeneficiaryIds = new Set(
+      existingGroupedBeneficiaries.map((gb) => gb.beneficiaryId)
+    );
+
+    // Filter out beneficiaries that are already in the group
+    const newBeneficiaries = beneficiaries.filter(
+      (b) => !existingBeneficiaryIds.has(b.uuid)
+    );
+
+    if (newBeneficiaries.length === 0) {
+      return {
+        isSucessful: true,
+        message: 'All beneficiaries are already in the group.',
+        added: 0,
+        group,
+      };
+    }
+
+    // Verify all beneficiaries exist
+    const beneficiaryUuids = newBeneficiaries.map((b) => b.uuid);
+    const existingBeneficiaries = await this.prisma.beneficiary.findMany({
+      where: {
+        uuid: { in: beneficiaryUuids },
+        deletedAt: null,
+      },
+      select: { uuid: true },
+    });
+
+    const foundUuids = new Set(existingBeneficiaries.map((b) => b.uuid));
+    const notFoundUuids = beneficiaryUuids.filter((uuid) => !foundUuids.has(uuid));
+
+    if (notFoundUuids.length > 0) {
+      throw new RpcException(
+        `Beneficiaries not found: ${notFoundUuids.join(', ')}`
+      );
+    }
+
+    // Create the grouped beneficiaries
+    const createPayload = newBeneficiaries.map((b) => ({
+      beneficiaryGroupId: groupUuid,
+      beneficiaryId: b.uuid,
+    }));
+
+    const result = await this.prisma.groupedBeneficiaries.createMany({
+      data: createPayload,
+      skipDuplicates: true,
+    });
+
+    return {
+      added: result.count,
+      success: true,
+      group,
+    };
   }
 
   async getOneGroup(uuid: string): Promise<GroupWithValidationAA> {
@@ -1882,7 +1985,7 @@ export class BeneficiaryService {
             { walletAddresses: unassignedBenfs.map((d) => d.walletAddress) }
           ),
           onSuccess: async (response) => {
-            let benWallets = response.map((d) => ({
+            const benWallets = response.map((d) => ({
               address: d.publicKey,
               secret: d.privateKey,
             }));
@@ -2059,7 +2162,7 @@ export class BeneficiaryService {
   listTempGroups(query: ListTempGroupsDto) {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy['createdAt'] = query.order;
-    let filter = {} as any;
+    const filter = {} as any;
     if (query.name) filter.name = { contains: query.name, mode: 'insensitive' };
     return paginate(
       this.prisma.tempGroup,
@@ -2081,7 +2184,6 @@ export class BeneficiaryService {
     );
     const dataFromBuffer = Buffer.from(data);
     const bufferString = dataFromBuffer.toString('utf-8');
-    1570;
     const jsonData = JSON.parse(bufferString) || null;
     console.log(
       '🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ jsonData:',
@@ -2162,7 +2264,7 @@ export class BeneficiaryService {
     beneficiaries: any[],
     tempBenefPhone: any[]
   ) {
-    for (let b of beneficiaries) {
+    for (const b of beneficiaries) {
       const row = await txn.tempBeneficiary.create({
         data: b,
       });
@@ -2308,6 +2410,156 @@ export class BeneficiaryService {
       }
     );
   }
+
+  async createBeneficiaryWithDbTransaction(payload: CreateBeneficiaryTransactionDto) {
+    this.logger.log(`Starting beneficiary creation with DB transaction for project ${payload.projectId}`);
+
+    const { projectId, piiData, ...benfData } = payload;
+
+    // Check if a beneficiary with this phone exists at all
+    const existingBeneficiary = await this.prisma.beneficiaryPii.findFirst({
+      where: { phone: piiData.phone.toString() },
+      select: { beneficiaryId: true, beneficiary: { select: { uuid: true } } },
+    });
+
+    if (existingBeneficiary) {
+      const beneficiaryUuid = existingBeneficiary.beneficiary.uuid;
+
+      // Check specifically if this beneficiary is already in the target project
+      const alreadyInProject = await this.prisma.beneficiaryProject.findFirst({
+        where: {
+          beneficiaryId: beneficiaryUuid,
+          projectId,
+        },
+      });
+
+      if (alreadyInProject) {
+        this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and is assigned to the same project ${projectId}.`);
+        throw new RpcException(`Beneficiary with phone ${piiData.phone} already exists and is assigned to ${projectId} project.`);
+      }
+
+      // If beneficiary exists but not in the project, assign to project without creating new beneficiary
+      await this.beneficiaryUtilsService.assignBeneficiaryToProject(
+        { projectId: projectId as string, beneficiaryId: beneficiaryUuid }
+      );
+
+      this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and has been assigned to project ${projectId}.`);
+      return { success: true, message: `Beneficiary with phone ${piiData.phone} already exists and has been assigned to ${projectId} project.`, data: null };
+    }
+
+    const dbTxId = `db-tx-${Date.now()}`;
+
+    const walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress();
+
+    if (!walletAddress) {
+      this.logger.error('Failed to obtain a valid wallet address for the beneficiary.');
+      throw new RpcException('Failed to obtain a valid wallet address for the beneficiary. Please try again.');
+    }
+
+    try {
+      await this.cleanupOrphanedTransactions();
+
+      // Phase 0: BEGIN on both sides
+      await this.prisma.$executeRawUnsafe('BEGIN;');
+      await this.sendAATxAction(projectId, 'BEGIN', dbTxId);
+      this.logger.log('Transaction started for creating beneficiary with DB transaction.');
+
+      // Phase 1: Execute writes on both sides
+      const createdBeneficiary = await this.prisma.beneficiary.create({
+        data: {
+          ...benfData, walletAddress, extras: {
+            "validPhoneNumber": true,
+          }
+        },
+      });
+
+      await this.prisma.beneficiaryPii.create({
+        data: {
+          beneficiaryId: createdBeneficiary.id,
+          phone: piiData.phone.toString(),
+          ...piiData,
+        },
+      });
+
+      await this.prisma.beneficiaryProject.create({
+        data: {
+          beneficiaryId: createdBeneficiary.uuid,
+          projectId,
+        },
+      });
+
+      const aaPayload = {
+        uuid: createdBeneficiary.uuid,
+        walletAddress: createdBeneficiary.walletAddress,
+        extras: {
+          ...((createdBeneficiary.extras ?? {}) as Record<string, any>),
+          phone: piiData.phone,
+        },
+        isVerified: createdBeneficiary.isVerified,
+        gender: createdBeneficiary.gender,
+      };
+
+      await this.sendAATxAction(projectId, 'CREATE', dbTxId, aaPayload);
+      this.logger.log('Beneficiary creation and assignment to project completed successfully within transaction.');
+
+      // Phase 2: PREPARE on both sides
+      await this.prisma.$executeRawUnsafe(`PREPARE TRANSACTION '${dbTxId}';`);
+      await this.sendAATxAction(projectId, 'PREPARE', dbTxId);
+      this.logger.log('Transaction prepared successfully.');
+
+      // Phase 3: COMMIT PREPARED on both sides
+      await this.sendAATxAction(projectId, 'COMMIT', dbTxId);
+      await this.prisma.$executeRawUnsafe(`COMMIT PREPARED '${dbTxId}';`);
+      this.logger.log('Transaction committed successfully.');
+
+      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: createdBeneficiary };
+    } catch (error) {
+      this.logger.error('Error occurred during beneficiary creation with DB transaction:', error);
+      await this.rollback2PC(projectId, dbTxId);
+      throw new RpcException(error.message);
+    }
+  }
+
+  private async sendAATxAction(projectId: string, action: string, dbTxId: string, payload: Record<string, unknown> = {}) {
+    return lastValueFrom(this.client.send(
+      { cmd: AAJobs.BENEFICIARY.CREATE_BENEFICIARY_WITH_DB_TRANSACTION, uuid: projectId },
+      { action, dbTxId, payload },
+    ));
+  }
+
+  private async rollback2PC(projectId: string, dbTxId: string) {
+    try {
+      try {
+        await this.prisma.$executeRawUnsafe(`ROLLBACK PREPARED '${dbTxId}';`);
+      } catch {
+        // Not in prepared state — plain ROLLBACK or already cleaned up
+      }
+      await this.sendAATxAction(projectId, 'ROLLBACK', dbTxId);
+      this.logger.log('Transaction rolled back successfully on both sides.');
+    } catch (rollbackError) {
+      this.logger.error('Error occurred during transaction rollback:', rollbackError);
+    }
+  }
+
+  private async cleanupOrphanedTransactions() {
+    try {
+      const result = await this.prisma.$queryRawUnsafe<{ gid: string }[]>(
+        'SELECT gid FROM pg_prepared_xacts;'
+      );
+      if (!result?.length) return;
+
+      this.logger.log(`Found ${result.length} orphaned prepared transaction(s). Rolling back...`);
+      for (const { gid } of result) {
+        try {
+          await this.prisma.$executeRawUnsafe(`ROLLBACK PREPARED '${gid}';`);
+        } catch (e) {
+          this.logger.error(`Failed to rollback orphaned transaction ${gid}:`, e);
+        }
+      }
+    } catch (error) {
+      this.logger.error('Error checking for orphaned transactions:', error);
+    }
+  }
 }
 
 async function checkPhoneNumber(
@@ -2336,4 +2588,5 @@ async function checkWalletAddress(
     select: { walletAddress: true },
   });
   return duplicates.map((dup) => dup.walletAddress);
+
 }

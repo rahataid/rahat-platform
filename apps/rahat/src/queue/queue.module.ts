@@ -36,6 +36,9 @@ import { QueueService } from './queue.service';
     BullModule.registerQueue({
       name: BQUEUE.META_TXN
     }),
+    BullModule.registerQueue({
+      name: BQUEUE.RAHAT_IMPORT,
+    }),
   ],
   providers: [PrismaService, QueueService],
   controllers: [QueueController],
