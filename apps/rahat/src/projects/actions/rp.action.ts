@@ -355,4 +355,6 @@ export const rpActions: ProjectActionFunc = {
       { cmd: ProjectJobs.BENEFICIARY.EXPORT_BENEFICIARY_REFERRAL, uuid },
       payload
     ),
+  [MS_ACTIONS.RPPROJECT.SYNC_LEGACY_IMPORTED]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.SYNC_LEGACY_IMPORTED, uuid }, payload),
 };
