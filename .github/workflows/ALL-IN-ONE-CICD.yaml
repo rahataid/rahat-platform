@@ -21,7 +21,7 @@ on:
           - "dev"
           - "main"
           - "dev-qa"
-          - "aa-heatwave-main"
+          - "release-v4.0.0-nrcs"
 
       apps_to_build:
         description: "Apps to build (leave empty for defaults)"
@@ -123,8 +123,8 @@ jobs:
               SECRET="ENV_AA_DEV-QA"
               APPS="beneficiary,rahat"
               ;;
-            aa-heatwave-main)
-              TAG="aa-heatwave-main"
+            release-v4.0.0-nrcs)
+              TAG="release-v4.0.0-nrcs"
               SECRET="ENV_AA_HEATWAVE"
               APPS="beneficiary,rahat"
               ;;
