@@ -345,18 +345,33 @@ export class BeneficiaryService {
     // const beneficiaries = []
 
     if (data && beneficiaries.length > 0) {
-      const combinedData = data.map((dat) => {
+      const combinedData = data.map((dat: Record<string, any>) => {
         const benDetails = beneficiaries.find(
           (ben) => ben.walletAddress === dat.walletAddress
         );
         const { pii, ...rest } = benDetails || {};
+        // Normalise Cambodia CHW relation (camelCase vs snake_case on the wire).
+        const cambodiaHealthWorker =
+          dat?.healthWorker ?? dat?.health_worker ?? null;
+
         return {
           piiData: pii,
           projectData: rest,
           ...dat,
+          healthWorker: cambodiaHealthWorker,
         };
       });
       return combinedData || [];
+    }
+
+    /** Cambodia villagers without a matching Rahat wallet keep list rows + VD link. */
+    if (data?.length && beneficiaries.length === 0) {
+      return data.map((dat: Record<string, any>) => ({
+        piiData: undefined,
+        projectData: {},
+        ...dat,
+        healthWorker: dat?.healthWorker ?? dat?.health_worker ?? null,
+      }));
     }
 
     // TODO: remove projectData and piiData that has been added manually, as it will affects the FE. NEEDS to be refactord in FE as well.
