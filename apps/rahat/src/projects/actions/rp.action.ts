@@ -341,4 +341,20 @@ export const rpActions: ProjectActionFunc = {
       { cmd: ProjectJobs.BENEFICIARY.LIST_BENEFICIARY_REIMBURSEMENTS, uuid },
       payload
     ),
+    [MS_ACTIONS.RPPROJECT.GET_REFERRER_BY_PHONE]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.BENEFICIARY.GET_REFERRER_BY_PHONE, uuid },
+      payload
+    ),
+  [MS_ACTIONS.RPPROJECT.EXPORT_BENEFICIARY_REFERRAL]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: ProjectJobs.BENEFICIARY.EXPORT_BENEFICIARY_REFERRAL, uuid },
+      payload
+    ),
+  [MS_ACTIONS.RPPROJECT.SYNC_LEGACY_IMPORTED]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.BENEFICIARY.SYNC_LEGACY_IMPORTED, uuid }, payload),
 };

@@ -15,7 +15,7 @@ create_env() {
 }
 
 generate_mnemonic() {
-    pnpm generate:mnemonic $current_dir
+    pnpm generate:mnemonic "$current_dir"
 }
 
 get_ganache_accounts() {
@@ -24,13 +24,14 @@ get_ganache_accounts() {
 
 migrate_seed() {
     pnpm migrate:dev
-    pnpm seed:eldevsettings $current_dir
-    pnpm seed:c2cdevsettings $current_dir
-    pnpm seed:aadevsettings $current_dir
-    pnpm seed:cvadevsettings $current_dir
-    pnpm seed:rpdevsettings $current_dir
-    pnpm seed:kenyadevsettings $current_dir
-    pnpm seed:cambodiadevsettings $current_dir
+    pnpm seed:eldevsettings "$current_dir"
+    pnpm seed:c2cdevsettings "$current_dir"
+    pnpm seed:aadevsettings "$current_dir"
+    pnpm seed:cvadevsettings "$current_dir"
+    pnpm seed:rpdevsettings "$current_dir"
+    pnpm seed:kenyadevsettings "$current_dir"
+    pnpm seed:elwomdevsettings "$current_dir"
+    pnpm seed:cambodiadevsettings "$current_dir"
     pnpm seed:chainsettings
     npx ts-node prisma/seed.communication-settings.ts
     npx ts-node prisma/seed.offramp.ts
@@ -55,7 +56,7 @@ start_dev_tools() {
 
     for project in "${composeDirs[@]}"; do
         compose_file="$project/docker-compose.yml"
-        docker compose -f $compose_file up -d
+        docker compose -f "$compose_file" up -d
     done
 
     echo "Waiting for dev tools to start..."
@@ -70,7 +71,7 @@ stop_dev_tools() {
 
     for project in "${composeDirs[@]}"; do
         compose_file="$project/docker-compose.yml"
-        docker compose -f $compose_file down
+        docker compose -f "$compose_file" down
     done
 }
 
@@ -89,7 +90,7 @@ rm_modules() {
 
 contract_setup(){
     pnpm seed:contracts
-    pnpm seed:graph $current_dir
+    pnpm seed:graph "$current_dir"
 }
 
 graph_setup() {

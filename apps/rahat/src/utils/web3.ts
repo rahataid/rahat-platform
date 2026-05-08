@@ -1,22 +1,49 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import {
-  Contract,
-  JsonRpcProvider,
-  ethers
-} from 'ethers';
+import { Contract, JsonRpcProvider, ethers } from 'ethers';
 import { StrKey } from 'stellar-sdk';
 import { Address, IsAddressOptions, isAddress as isEthAddress } from 'viem';
 
-export async function createContractSigner(abi: any, address: string) {
+function getSignerPrivateKey() {
+  const rawPrivateKey =
+    process.env.RAHAT_ADMIN_PRIVATE_KEY?.trim() ||
+    process.env.PRIVATE_KEY?.trim();
 
-  //  Create wallet from private key
-  const provider = new JsonRpcProvider(process.env.NETWORK_PROVIDER);
-  const privateKey = process.env.RAHAT_ADMIN_PRIVATE_KEY;
+  if (!rawPrivateKey) {
+    throw new Error(
+      'Missing RAHAT_ADMIN_PRIVATE_KEY or PRIVATE_KEY in environment. Set one to a valid 0x-prefixed private key.'
+    );
+  }
+
+  const normalizedPrivateKey = rawPrivateKey.startsWith('0x')
+    ? rawPrivateKey
+    : `0x${rawPrivateKey}`;
+
+  if (!/^0x[0-9a-fA-F]{64}$/.test(normalizedPrivateKey)) {
+    throw new Error(
+      `Private key has invalid format: ${rawPrivateKey}. Expected a 64-byte hex string with optional 0x prefix.`
+    );
+  }
+
+  return normalizedPrivateKey;
+}
+
+function getNetworkProvider() {
+  const providerUrl = process.env.NETWORK_PROVIDER?.trim();
+  if (!providerUrl) {
+    throw new Error(
+      'Missing NETWORK_PROVIDER in environment. Set NETWORK_PROVIDER to your JSON RPC endpoint.'
+    );
+  }
+  return new JsonRpcProvider(providerUrl);
+}
+
+export async function createContractSigner(abi: any, address: string) {
+  const provider = getNetworkProvider();
+  const privateKey = getSignerPrivateKey();
   const wallet = new ethers.Wallet(privateKey, provider);
-  //  Create an instance of the contract
   const contracts = new Contract(address, abi, wallet);
-  return contracts
+  return contracts;
 }
 
 export async function getBlocktimeStamp(txHash: string) {
@@ -27,17 +54,21 @@ export async function getBlocktimeStamp(txHash: string) {
     return null;
   }
   const block = await provider.getBlock(receipt.blockNumber);
+  if (!block) {
+    console.error('Block not found for transaction receipt.');
+    return null;
+  }
   return block.timestamp;
 }
 
 const isStellarAddress = (address: string): boolean => {
-  return typeof address === 'string' && StrKey.isValidEd25519PublicKey(address)
-}
+  return typeof address === 'string' && StrKey.isValidEd25519PublicKey(address);
+};
 
 export function isAddress(
   address: string,
-  options?: IsAddressOptions,
+  options?: IsAddressOptions
 ): address is Address {
-  if (isStellarAddress(address)) return true
-  return isEthAddress(address, options)
+  if (isStellarAddress(address)) return true;
+  return isEthAddress(address, options);
 }
