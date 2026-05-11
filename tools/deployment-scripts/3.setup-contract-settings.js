@@ -38,7 +38,7 @@ const {
 } = require('./_common');
 
 const prompt = inquirer.prompt ?? inquirer.default?.prompt;
-const CONTRACTS_DIR = path.resolve(__dirname, '../scripts/contracts');
+const CONTRACTS_DIR = path.resolve(__dirname, './contracts');
 const CHAIN_SETTINGS_NAME = 'CHAIN_SETTINGS';
 const CONTRACT_SETTING_NAME = 'CONTRACT';
 const CONTRACTS_SETTING_NAME = 'CONTRACTS';
@@ -89,6 +89,7 @@ function getRpcUrlFromChainSettings(payload) {
 
 async function readArtifact(contractName) {
   const filePath = path.join(CONTRACTS_DIR, `${contractName}.json`);
+  console.log(filePath)
   const content = await fs.readFile(filePath, 'utf8');
   return JSON.parse(content);
 }

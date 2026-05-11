@@ -36,9 +36,11 @@ const {
 } = require('./_common');
 
 const prompt = inquirer.prompt ?? inquirer.default?.prompt;
-const CONTRACTS_DIR = path.resolve(__dirname, '../scripts/contracts');
+const CONTRACTS_DIR = path.resolve(__dirname, './contracts');
 
 const ADMIN_ROLE = 0n; // ADMIN_ROLE is typically 0
+const CHAIN_SETTINGS_NAME = 'CHAIN_SETTINGS';
+const CONTRACT_SETTING_NAME = 'CONTRACT';
 
 async function getContractArtifact(contractName) {
   const artifactPath = path.join(CONTRACTS_DIR, `${contractName}.json`);
@@ -49,7 +51,7 @@ async function getContractArtifact(contractName) {
 async function getRahatAccessManagerAddress(deploymentData) {
   // Try to find the contract address from CONTRACT setting
   const contractSettings = deploymentData.settings?.find(
-    (s) => s.key === 'CONTRACT'
+    (s) => s.name === 'CONTRACT'
   );
 
   if (!contractSettings) {
@@ -69,36 +71,47 @@ async function getRahatAccessManagerAddress(deploymentData) {
       `Failed to parse CONTRACT settings: ${err.message}`
     );
   }
-
-  if (!contractValue.RahatAccessManager) {
+  if (!contractValue.RAHATACCESSMANAGER) {
     throw new Error('RahatAccessManager address not found in CONTRACT settings');
   }
 
-  return contractValue.RahatAccessManager;
+  return contractValue.RAHATACCESSMANAGER.address;
 }
 
-async function getChainSettings(deploymentData) {
-  const chainSettings = deploymentData.settings?.find(
-    (s) => s.key === 'CHAIN_SETTINGS'
+function getSetting(settings, name) {
+  return (Array.isArray(settings) ? settings : []).find(
+    (setting) => setting && setting.name === name
   );
+}
 
-  if (!chainSettings) {
-    throw new Error('CHAIN_SETTINGS not found in deployment file');
+function parseSettingValue(settingEntry) {
+  if (!settingEntry) {
+    return null;
   }
 
-  let chainValue;
-  try {
-    chainValue =
-      typeof chainSettings.value === 'string'
-        ? JSON.parse(chainSettings.value)
-        : chainSettings.value;
-  } catch (err) {
+  if (typeof settingEntry.value === 'string') {
+    try {
+      return JSON.parse(settingEntry.value);
+    } catch {
+      return null;
+    }
+  }
+
+  return settingEntry.value ?? null;
+}
+
+function getChainSettings(payload) {
+  const chainSettings = parseSettingValue(
+    getSetting(payload.settings, CHAIN_SETTINGS_NAME)
+  );
+
+  if (!chainSettings?.rpcUrl || typeof chainSettings.rpcUrl !== 'string') {
     throw new Error(
-      `Failed to parse CHAIN_SETTINGS: ${err.message}`
+      'CHAIN_SETTINGS.rpcUrl is missing. Please run 1.setup-chain-settings.js first.'
     );
   }
 
-  return chainValue;
+  return chainSettings;
 }
 
 async function askAdminSetupDetails() {
@@ -164,7 +177,6 @@ async function grantAdminRole({
     artifact.abi,
     signer
   );
-
   console.log('\n📝 Granting ADMIN_ROLE to:', newAdminAddress);
   console.log('   RahatAccessManager:', accessManagerAddress);
   console.log('   Execution Delay:', executionDelay, 'seconds');
@@ -223,7 +235,6 @@ async function main() {
 
     // Show summary
     console.log('\n📋 Setup Summary:');
-    console.log('   Deployment File:', path.basename(selectedFile));
     console.log('   AccessManager:', accessManagerAddress);
     console.log('   New Admin:', setupDetails.newAdminAddress);
     console.log('   RPC URL:', chainSettings.rpcUrl.substring(0, 50) + '...');
