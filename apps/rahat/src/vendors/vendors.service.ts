@@ -28,7 +28,7 @@ import { UUID } from 'crypto';
 import { Address } from 'viem';
 import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
-import { isAddress } from '../utils/web3';
+import { isAddress } from 'viem';
 import { WalletService } from '../wallet/wallet.service';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
@@ -49,26 +49,66 @@ export class VendorsService {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) {}
 
-  //TODO: Fix allow duplicate users?
+  // Upsert: If vendor exists by wallet → login. If not → register.
   async registerVendor(dto: VendorRegisterDto) {
+    const { service, wallet, authWallet, ...rest } = dto;
+
+    // Check if vendor already exists by wallet address only
+    if (wallet) {
+      const existingVendor = await this.prisma.user.findFirst({
+        where: { wallet },
+        include: {
+          UserRole: { include: { Role: true } },
+          VendorProject: { include: { Project: true } },
+          Auth: true,
+        },
+      });
+
+      if (existingVendor) {
+        // Ensure Auth record exists for wallet (required for /auth/wallet endpoint)
+        const hasWalletAuth = existingVendor.Auth?.some(
+          (a) => a.service === Service.WALLET && a.serviceId === wallet
+        );
+
+        if (!hasWalletAuth) {
+          // Create missing Auth record for wallet
+          await this.prisma.auth.create({
+            data: {
+              userId: existingVendor.id,
+              service: Service.WALLET,
+              serviceId: wallet,
+              details: dto.extras,
+            },
+          });
+        }
+
+        // Vendor exists with this wallet → LOGIN (no updates to user data)
+        return { ...existingVendor, isNewVendor: false };
+      }
+    }
+
+    // Vendor doesn't exist with this wallet → REGISTER new
     const vendor = await this.prisma.$transaction(async (prisma) => {
       const role = await prisma.role.findFirst({
         where: { name: UserRoles.VENDOR },
       });
       if (!role) throw new Error('Role not found');
-      // Add to User table
-      const { service, wallet, authWallet, ...rest } = dto;
+
+      // Check email/phone uniqueness
       if (dto?.email || dto?.phone) {
         const userData = await prisma.user.findFirst({
           where: {
-            OR: [{ email: dto.email }, { phone: dto.phone }],
+            OR: [
+              ...(dto.email ? [{ email: dto.email }] : []),
+              ...(dto.phone ? [{ phone: dto.phone }] : []),
+            ],
           },
         });
 
         if (userData) {
-          if (userData?.email === dto.email)
+          if (dto.email && userData?.email === dto.email)
             throw new Error('Email must be unique');
-          if (userData?.phone === dto.phone)
+          if (dto.phone && userData?.phone === dto.phone)
             throw new Error('Phone Number must be unique');
         }
       }
@@ -91,6 +131,7 @@ export class VendorsService {
       // Add to UserRole table
       const userRolePayload = { userId: user.id, roleId: role.id };
       await prisma.userRole.create({ data: userRolePayload });
+
       // Add to Auth table
       await prisma.auth.create({
         data: {
@@ -100,6 +141,7 @@ export class VendorsService {
           details: dto.extras,
         },
       });
+
       if (dto.service === Service.WALLET) return user;
 
       await prisma.auth.create({
@@ -119,7 +161,8 @@ export class VendorsService {
       group: 'Vendor Management',
       notify: true,
     });
-    return vendor;
+
+    return { ...vendor, isNewVendor: true };
   }
 
   async assignToProject(dto: VendorAddToProjectDto) {
@@ -496,10 +539,16 @@ export class VendorsService {
     );
   }
 
-  async getVendorByUuid(dto: { projectId: string; vendorId: string }) {
+  async getVendorByUuid(dto: {
+    projectId: string;
+    vendorId: string;
+    idempotencyKey?: string;
+    user?: unknown;
+  }) {
+    const { projectId, vendorId } = dto;
     return this.prisma.projectVendors.findUnique({
       where: {
-        projectVendorIdentifier: dto,
+        projectVendorIdentifier: { projectId, vendorId },
       },
       include: {
         User: true,
@@ -894,79 +943,82 @@ export class VendorsService {
     const { projectId, vendors: vendorsList } = payload;
 
     try {
-      const result = await this.prisma.$transaction(async (prisma) => {
-        const createdVendors = [];
-        const role = await prisma.role.findFirst({
-          where: { name: UserRoles.VENDOR },
-        });
-
-        if (!role) throw new Error('Vendor role not found');
-
-        for (const vendorData of vendorsList) {
-          const vendorFields = {
-            name: vendorData.name,
-            email: vendorData.extras?.email,
-            phone: vendorData.phone,
-            location: vendorData.location,
-            extras: vendorData.extras,
-          };
-
-          const createdVendor = await prisma.vendors.upsert({
-            where: { uuid: vendorData.uuid },
-            create: { ...vendorFields, uuid: vendorData.uuid },
-            update: vendorFields,
+      const result = await this.prisma.$transaction(
+        async (prisma) => {
+          const createdVendors = [];
+          const role = await prisma.role.findFirst({
+            where: { name: UserRoles.VENDOR },
           });
 
-          const userFields = {
-            name: vendorData.name,
-            email: vendorData.extras?.email,
-            phone: vendorData.phone,
-            wallet: vendorData.wallet,
-            extras: vendorData.extras,
-          };
+          if (!role) throw new Error('Vendor role not found');
 
-          const createdUser = await prisma.user.upsert({
-            where: { uuid: vendorData.uuid },
-            create: { ...userFields, uuid: vendorData.uuid },
-            update: userFields,
-          });
+          for (const vendorData of vendorsList) {
+            const vendorFields = {
+              name: vendorData.name,
+              email: vendorData.extras?.email,
+              phone: vendorData.phone,
+              location: vendorData.location,
+              extras: vendorData.extras,
+            };
 
-          await prisma.userRole.upsert({
-            where: {
-              userRoleIdentifier: {
-                userId: createdUser.id,
-                roleId: role.id,
-              },
-            },
-            create: { userId: createdUser.id, roleId: role.id },
-            update: {},
-          });
+            const createdVendor = await prisma.vendors.upsert({
+              where: { uuid: vendorData.uuid },
+              create: { ...vendorFields, uuid: vendorData.uuid },
+              update: vendorFields,
+            });
 
-          if (projectId) {
-            await prisma.projectVendors.upsert({
+            const userFields = {
+              name: vendorData.name,
+              email: vendorData.extras?.email,
+              phone: vendorData.phone,
+              wallet: vendorData.wallet,
+              extras: vendorData.extras,
+            };
+
+            const createdUser = await prisma.user.upsert({
+              where: { uuid: vendorData.uuid },
+              create: { ...userFields, uuid: vendorData.uuid },
+              update: userFields,
+            });
+
+            await prisma.userRole.upsert({
               where: {
-                projectVendorIdentifier: {
-                  projectId,
-                  vendorId: createdUser.uuid,
+                userRoleIdentifier: {
+                  userId: createdUser.id,
+                  roleId: role.id,
                 },
               },
-              create: { projectId, vendorId: createdUser.uuid },
+              create: { userId: createdUser.id, roleId: role.id },
               update: {},
+            });
+
+            if (projectId) {
+              await prisma.projectVendors.upsert({
+                where: {
+                  projectVendorIdentifier: {
+                    projectId,
+                    vendorId: createdUser.uuid,
+                  },
+                },
+                create: { projectId, vendorId: createdUser.uuid },
+                update: {},
+              });
+            }
+
+            createdVendors.push({
+              vendor: createdVendor,
+              user: createdUser,
             });
           }
 
-          createdVendors.push({
-            vendor: createdVendor,
-            user: createdUser,
-          });
-        }
-
-        return {
-          success: true,
-          data: createdVendors,
-          message: `${createdVendors.length} vendor(s) created successfully`,
-        };
-      }, { maxWait: 5000, timeout: 25000 });
+          return {
+            success: true,
+            data: createdVendors,
+            message: `${createdVendors.length} vendor(s) created successfully`,
+          };
+        },
+        { maxWait: 5000, timeout: 25000 }
+      );
 
       return result;
     } catch (error) {

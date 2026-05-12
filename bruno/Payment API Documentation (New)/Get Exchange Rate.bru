@@ -1,0 +1,11 @@
+meta {
+  name: Get Exchange Rate
+  type: http
+  seq: 15
+}
+
+get {
+  url: https://api.triple-a.io/api/v1/exchange_rate/{{drct_api_id}}/BTC/USD
+  body: none
+  auth: none
+}

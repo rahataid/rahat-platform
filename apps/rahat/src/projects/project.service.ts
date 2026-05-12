@@ -14,6 +14,7 @@ import {
   BeneficiaryJobs,
   BQUEUE,
   genRandomPhone,
+  generateRandomWallet,
   MS_ACTIONS,
   MS_TIMEOUT,
   ProjectEvents,
@@ -52,6 +53,8 @@ import { userRequiredActions } from './actions/user-required.action';
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const CAMBODIA_COUNTRY_CODE = '+855';
+const KOBO_COUNTRY_CODE =
+  process.env.KOBO_COUNTRY_CODE || process.env.DEFAULT_KOBO_COUNTRY_CODE;
 
 @Injectable()
 export class ProjectService {
@@ -61,7 +64,7 @@ export class ProjectService {
     private requestContextService: RequestContextService,
     @Inject('RAHAT_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.META_TXN) private readonly metaTransactionQueue: Queue
-  ) { }
+  ) {}
 
   async create(data: CreateProjectDto) {
     // TODO: refactor to proper validator
@@ -190,12 +193,16 @@ export class ProjectService {
 
     if (trigger) payload.trigger = trigger;
 
-    const res = await this.metaTransactionQueue.add(
+    const job = await this.metaTransactionQueue.add(
       JOBS.META_TRANSACTION.ADD_QUEUE,
       payload
     );
 
-    return { txHash: res.data.hash, status: res.data.status };
+    const result = await job.finished();
+    return {
+      txHash: result.transactionHash ?? result.hash,
+      status: result.status,
+    };
   }
 
   async sendSucessMessage(uuid, payload) {
@@ -331,13 +338,13 @@ export class ProjectService {
       );
   }
 
-  // TODO: fix cambodia specific country code
   async importKoboBeneficiary(uuid: UUID, data: any) {
     const benef: any = this.mapKoboFields(data);
+    if (!benef.type) benef.type = 'LEAD';
     if (benef.type) benef.type = benef.type.toUpperCase();
     if (benef.type !== 'LEAD') benef.phone = genRandomPhone('88');
     if (!benef.phone) throw new Error('Phone number is required!');
-    if (!benef.name) benef.name = "UNKNOWN";
+    if (!benef.name) benef.name = 'UNKNOWN';
 
     if (benef.gender) {
       if (benef.gender.toUpperCase() === 'OTHERS') benef.gender = 'OTHER';
@@ -349,15 +356,26 @@ export class ProjectService {
         .split(' ')
         .map((item: string) => item.trim().toUpperCase());
     }
-    console.log({ NODE_ENV });
-    if (NODE_ENV === 'production') {
-      benef.phone = `${CAMBODIA_COUNTRY_CODE}${benef.phone}`;
-    } else benef.phone = `+${benef.phone}`;
+    const countryCode =
+      KOBO_COUNTRY_CODE ||
+      (NODE_ENV === 'production' ? CAMBODIA_COUNTRY_CODE : '');
+    benef.phone = this.normalizeKoboPhone(benef.phone, countryCode);
     console.log('Beneficiary Phone', benef.phone);
 
     const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
     const extrasPayload = {
       meta: benef.meta,
+      healthWorkerName:
+        benef.healthWorkerName || benef.meta?.Health_Worker_Name,
+      villageDoctorUuid:
+        benef.villageDoctorUuid || benef.meta?.village_doctor_uuid,
+      koboUsername:
+        benef.koboUsername ||
+        benef.dataCollectorId ||
+        benef.meta?._submitted_by ||
+        benef.meta?.username ||
+        'UNKNOWN',
+      dataCollectorId: benef.dataCollectorId || benef.meta?._submitted_by,
       occupation: benef.occupation || 'UNKNOWN',
       province: benef.province || 'UNKNOWN',
       district: benef.district || 'UNKNOWN',
@@ -484,6 +502,27 @@ export class ProjectService {
       }
     }
     return { ...mappedPayload, meta };
+  }
+
+  normalizeKoboPhone(phone: string, countryCode = '') {
+    const rawPhone = String(phone || '').trim();
+    if (!rawPhone) throw new Error('Phone number is required!');
+
+    const normalizedCountryCode = countryCode
+      ? `+${String(countryCode).replace(/\D/g, '')}`
+      : '';
+    const digits = rawPhone.replace(/\D/g, '');
+
+    if (rawPhone.startsWith('+')) return `+${digits}`;
+
+    if (normalizedCountryCode) {
+      const countryDigits = normalizedCountryCode.replace(/\D/g, '');
+      if (digits.startsWith(countryDigits)) return `+${digits}`;
+
+      return `${normalizedCountryCode}${digits.replace(/^0+/, '')}`;
+    }
+
+    return `+${digits}`;
   }
 
   async sendTestMsg(uuid: UUID) {

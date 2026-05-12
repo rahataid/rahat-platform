@@ -1,0 +1,53 @@
+meta {
+  name: Create Payment With Account
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/api/v2/payment/account/{{drct_api_id}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "type": "triplea",
+      "order_currency": "USD",
+      "order_amount": 10,
+      "payer_id": "483490639429",
+      "payer_name": "Steven Chan",
+      "payer_email": "steven.chan@triple-a.io",
+      "success_url": "https://duckduckgo.com",
+      "cancel_url": "https://yahoo.com",
+      "notify_url": "https://webhook.site/73219945-9656-4324-bce5-a574c1816e64",
+      "notify_secret": "Herro123!@#",
+      "notify_txs": true,
+      "webhook_data": {
+          "order_id": "ABC12345-2"
+      },
+      "cart": {
+          "items": [
+              {
+                  "amount": 10.99,
+                  "quantity": 1,
+                  "label": "A tale of 2 cities",
+                  "sku": "2736829"
+              }
+          ],
+          "shipping_cost": 2.57,
+          "shipping_discount": 0,
+          "tax_cost": 0.73
+      }
+  }
+}
+
+tests {
+  // set the access token
+  bru.setVar('page_token', res.getBody().access_token);
+  bru.setVar('page_pmt_ref_num', res.getBody().payment_reference);
+}
