@@ -200,4 +200,15 @@ export const elActions: ProjectActionFunc = {
       { ...payload },
       500000
     ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.REFRESH_COMMUNICATION_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.REFRESH_COMMUNICATION_STATS, uuid },
+      { ...payload },
+      500000
+    ),
 };
