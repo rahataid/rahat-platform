@@ -1,0 +1,24 @@
+meta {
+  name: list-payments
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{sdp_url}}/payments
+  body: none
+  auth: none
+}
+
+query {
+  ~status:
+  ~type:
+  ~receiver_id:
+  ~disbursement_id:
+  ~created_at:
+  ~page:
+}
+
+headers {
+  Authorization: Bearer {{sdp_token}}
+}

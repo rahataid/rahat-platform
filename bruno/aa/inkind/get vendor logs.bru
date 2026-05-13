@@ -1,7 +1,7 @@
 meta {
-  name: create inkind
+  name: get vendor logs
   type: http
-  seq: 1
+  seq: 19
 }
 
 post {
@@ -16,12 +16,14 @@ auth:bearer {
 
 body:json {
   {
-    "action": "aa.inkinds.create",
+    "action": "aaProject.groupInkinds.getLogsByVendor",
     "payload": {
-      "type": "WALK_IN",
-      "name": "GAMCHA",
-      "description": "this is a random description",
-      "quantity": 100 
+          "vendorId": "f383a87a-c54a-4d96-817a-ee15b5f796ec",
+          "inkindType": "",
+          "page": 1,
+          "perPage": 10,
+          "search": "",
+          "order": "asc"
     }
   }
 }

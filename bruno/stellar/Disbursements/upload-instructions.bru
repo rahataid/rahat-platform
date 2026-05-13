@@ -1,0 +1,19 @@
+meta {
+  name: upload-instructions
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{sdp_url}}/disbursements/{{disbursementId}}/instructions
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{sdp_token}}
+}
+
+body:multipart-form {
+  file: @file(instructions.csv)
+}

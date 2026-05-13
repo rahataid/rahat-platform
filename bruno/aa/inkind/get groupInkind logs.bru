@@ -1,7 +1,7 @@
 meta {
-  name: create inkind
+  name: get groupInkind logs
   type: http
-  seq: 1
+  seq: 20
 }
 
 post {
@@ -16,12 +16,13 @@ auth:bearer {
 
 body:json {
   {
-    "action": "aa.inkinds.create",
+    "action": "aaProject.groupInkinds.getLogs",
     "payload": {
-      "type": "WALK_IN",
-      "name": "GAMCHA",
-      "description": "this is a random description",
-      "quantity": 100 
+    "groupInkindId": "0978d8ae-008d-4250-b7ff-9057e0c59fb1",
+    "sort": "redeemedAt",
+    "order": "desc",
+    "page": 1,
+    "perPage": 10
     }
   }
 }

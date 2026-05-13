@@ -1,0 +1,22 @@
+meta {
+  name: list-receivers
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{sdp_url}}/receivers
+  body: none
+  auth: none
+}
+
+query {
+  ~status:
+  ~page:
+  ~page_limit:
+  ~created_at:
+}
+
+headers {
+  Authorization: Bearer {{sdp_token}}
+}

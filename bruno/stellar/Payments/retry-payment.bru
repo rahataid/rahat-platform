@@ -1,0 +1,15 @@
+meta {
+  name: retry-payment
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{sdp_url}}/payments/{{paymentId}}/retry
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{sdp_token}}
+}

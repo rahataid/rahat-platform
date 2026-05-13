@@ -1,0 +1,15 @@
+meta {
+  name: get-statistics
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{sdp_url}}/statistics
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{sdp_token}}
+}

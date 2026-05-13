@@ -1,0 +1,22 @@
+meta {
+  name: update-payment-status
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{sdp_url}}/payments/{{paymentId}}/status
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{sdp_token}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "CANCELED"
+  }
+}

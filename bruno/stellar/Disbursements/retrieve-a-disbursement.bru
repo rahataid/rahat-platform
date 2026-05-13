@@ -1,0 +1,15 @@
+meta {
+  name: retrieve-a-disbursement
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{sdp_url}}/disbursements/{{disbursementId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{sdp_token}}
+}
