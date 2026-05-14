@@ -92,5 +92,7 @@ export const JOBS = {
   DISBURSEMENT_BALANCE_CHART: 'rahat.jobs.disbursement.balance.get',
   GET_OFFRAMP_SUMMARY: 'rahat.jobs.beneficiary.get_offramp_summary',
   GET_BENEFICIARYS_PROJECT_DETAILS: 'rahat.jobs.beneficiary.getBeneficiarysProjectDetails',
-  LIST_CONSUMER: 'rahat.jobs.beneficiary.list_consumer'
+  LIST_CONSUMER: 'rahat.jobs.beneficiary.list_consumer',
+  /** Cambodia villager list: resolve wallet addresses by PII name for project-scoped filtering. */
+  CAMBODIA_WALLET_FILTER_BY_NAME: 'rahat.jobs.beneficiary.cambodia_wallet_filter_by_name',
 };

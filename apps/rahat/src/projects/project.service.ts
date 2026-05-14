@@ -230,8 +230,15 @@ export class ProjectService {
     if (!actionFunc) {
       throw new Error('Please provide a valid action!');
     }
-    return await actionFunc(null, payload, (...args) =>
-      this.sendCommand(args[0], args[1], args[2], this.client, action, user)
+    return await actionFunc(null, payload, (cmdArg, payloadArg, timeoutArg) =>
+      this.sendCommand(
+        cmdArg,
+        payloadArg,
+        timeoutArg ?? MS_TIMEOUT,
+        this.client,
+        action,
+        user
+      )
     );
   }
 
@@ -274,8 +281,15 @@ export class ProjectService {
     if (!actionFunc) {
       throw new Error('Please provide a valid action!');
     }
-    return await actionFunc(uuid, payload, (...args) =>
-      this.sendCommand(args[0], args[1], args[2], this.client, action, user)
+    return await actionFunc(uuid, payload, (cmdArg, payloadArg, timeoutArg) =>
+      this.sendCommand(
+        cmdArg,
+        payloadArg,
+        timeoutArg ?? MS_TIMEOUT,
+        this.client,
+        action,
+        user
+      )
     );
   }
 
