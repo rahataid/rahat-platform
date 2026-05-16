@@ -164,6 +164,24 @@ export class BeneficiaryService {
     const { pii, ...rest } = getBeneficiaryByWallet;
     return { piiData: pii, projectData: rest, ...data };
   }
+
+  async getBeneficiaryByPhoneOnly(payload: { phone: string }) {
+    const getBeneficiaryByPhone = await this.prisma.beneficiaryPii.findUnique({
+      where: {
+        phone: payload.phone,
+      },
+      include: {
+        beneficiary: true
+    }
+    });
+
+    if (!getBeneficiaryByPhone) return null;
+
+    const { beneficiary, ...piiData } = getBeneficiaryByPhone;
+
+    return { ...beneficiary, pii: piiData };
+  }
+
   async listBeneficiaryPiiByWalletAddress(data: any) {
     if (!data?.data?.length) return data;
     return this.prisma.beneficiary.findMany({
@@ -2397,6 +2415,38 @@ export class BeneficiaryService {
     this.logger.log(`Starting beneficiary creation with DB transaction for project ${payload.projectId}`);
 
     const { projectId, piiData, ...benfData } = payload;
+
+    // Check if a beneficiary with this phone exists at all
+    const existingBeneficiary = await this.prisma.beneficiaryPii.findFirst({
+      where: { phone: piiData.phone.toString() },
+      select: { beneficiaryId: true, beneficiary: { select: { uuid: true } } },
+    });
+
+    if (existingBeneficiary) {
+      const beneficiaryUuid = existingBeneficiary.beneficiary.uuid;
+
+      // Check specifically if this beneficiary is already in the target project
+      const alreadyInProject = await this.prisma.beneficiaryProject.findFirst({
+        where: {
+          beneficiaryId: beneficiaryUuid,
+          projectId,
+        },
+      });
+
+      if (alreadyInProject) {
+        this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and is assigned to the same project ${projectId}.`);
+        throw new RpcException(`Beneficiary with phone ${piiData.phone} already exists and is assigned to ${projectId} project.`);
+      }
+
+      // If beneficiary exists but not in the project, assign to project without creating new beneficiary
+      await this.beneficiaryUtilsService.assignBeneficiaryToProject(
+        { projectId: projectId as string, beneficiaryId: beneficiaryUuid }
+      );
+
+      this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and has been assigned to project ${projectId}.`);
+      return { success: true, message: `Beneficiary with phone ${piiData.phone} already exists and has been assigned to ${projectId} project.`, data: null };
+    }
+
     const dbTxId = `db-tx-${Date.now()}`;
 
     const walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress();
