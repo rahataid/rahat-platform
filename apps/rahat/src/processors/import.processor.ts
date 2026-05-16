@@ -4,7 +4,6 @@ import { BQUEUE } from '@rahataid/sdk';
 import { BeneficiaryJobs } from '@rahataid/sdk/beneficiary';
 import { PrismaService } from '@rumsan/prisma';
 import { Job } from 'bull';
-import { v4 as uuidv4 } from 'uuid';
 import { mapCSVRows, MappedRow, parseCSVBuffer } from '../imports/csv-parser.util';
 import {
   generateErrorCSV,
@@ -128,8 +127,9 @@ export class ImportProcessor {
       await job.progress({ phase: 'completed', percent: 100, total: totalRows, processed: totalRows });
       this.logger.log(`Import completed successfully: ${importUuid} (${totalRows} beneficiaries)`);
     } catch (error) {
-      this.logger.error(`Import failed for ${importUuid}: ${error.message}`, error.stack);
-      await this.failImport(importUuid, job, error.message);
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.logger.error(`Import failed for ${importUuid}: ${err.message}`, err.stack);
+      await this.failImport(importUuid, job, err.message);
     }
   }
 
@@ -158,47 +158,103 @@ export class ImportProcessor {
         for (let batchIdx = 0; batchIdx < totalBatches; batchIdx++) {
           const batch = batches[batchIdx];
 
-          // Prepare beneficiary data
-          const beneficiaryData = batch.map((row) => ({
-            uuid: row.beneficiary.uuid || uuidv4(),
-            gender: row.beneficiary.gender || 'UNKNOWN',
-            walletAddress: row.beneficiary.walletAddress,
-            birthDate: row.beneficiary.birthDate || null,
-            age: row.beneficiary.age || null,
-            location: row.beneficiary.location || null,
-            latitude: row.beneficiary.latitude || null,
-            longitude: row.beneficiary.longitude || null,
-            extras: Object.keys(row.extras).length > 0 ? row.extras : undefined,
-            notes: row.beneficiary.notes || null,
-            bankedStatus: row.beneficiary.bankedStatus || 'UNKNOWN',
-            internetStatus: row.beneficiary.internetStatus || 'UNKNOWN',
-            phoneStatus: row.beneficiary.phoneStatus || 'UNKNOWN',
-          }));
+          for (const row of batch) {
+            const beneficiaryUuid = row.beneficiary.uuid || crypto.randomUUID();
+            const incomingBeneficiaryExtras = Object.keys(row.extras).length > 0 ? row.extras : undefined;
+            const incomingPiiExtras = row.pii.extras || undefined;
 
-          // Insert beneficiaries
-          const insertedBeneficiaries = await tx.beneficiary.createManyAndReturn({
-            data: beneficiaryData,
-            select: { id: true, uuid: true },
-          });
+            const existingBeneficiary = await tx.beneficiary.findUnique({
+              where: { uuid: beneficiaryUuid },
+              select: {
+                id: true,
+                uuid: true,
+                extras: true,
+                pii: {
+                  select: {
+                    extras: true,
+                  },
+                },
+              },
+            });
 
-          // Prepare and insert PII data
-          const piiData = batch.map((row, i) => ({
-            beneficiaryId: insertedBeneficiaries[i].id,
-            name: row.pii.name || null,
-            phone: row.pii.phone,
-            email: row.pii.email || null,
-            extras: row.pii.extras || undefined,
-          }));
+            const mergedBeneficiaryExtras = incomingBeneficiaryExtras
+              ? { ...Object(existingBeneficiary?.extras || {}), ...incomingBeneficiaryExtras }
+              : undefined;
+            const mergedPiiExtras = incomingPiiExtras
+              ? { ...Object(existingBeneficiary?.pii?.extras || {}), ...incomingPiiExtras }
+              : undefined;
 
-          await tx.beneficiaryPii.createMany({ data: piiData });
+            const beneficiary = existingBeneficiary
+              ? await tx.beneficiary.update({
+                where: { uuid: beneficiaryUuid },
+                data: {
+                  gender: row.beneficiary.gender || 'UNKNOWN',
+                  walletAddress: row.beneficiary.walletAddress,
+                  birthDate: row.beneficiary.birthDate || null,
+                  age: row.beneficiary.age || null,
+                  location: row.beneficiary.location || null,
+                  latitude: row.beneficiary.latitude || null,
+                  longitude: row.beneficiary.longitude || null,
+                  extras: mergedBeneficiaryExtras,
+                  notes: row.beneficiary.notes || null,
+                  bankedStatus: row.beneficiary.bankedStatus || 'UNKNOWN',
+                  internetStatus: row.beneficiary.internetStatus || 'UNKNOWN',
+                  phoneStatus: row.beneficiary.phoneStatus || 'UNKNOWN',
+                },
+                select: { id: true, uuid: true },
+              })
+              : await tx.beneficiary.create({
+                data: {
+                  uuid: beneficiaryUuid,
+                  gender: row.beneficiary.gender || 'UNKNOWN',
+                  walletAddress: row.beneficiary.walletAddress,
+                  birthDate: row.beneficiary.birthDate || null,
+                  age: row.beneficiary.age || null,
+                  location: row.beneficiary.location || null,
+                  latitude: row.beneficiary.latitude || null,
+                  longitude: row.beneficiary.longitude || null,
+                  extras: incomingBeneficiaryExtras,
+                  notes: row.beneficiary.notes || null,
+                  bankedStatus: row.beneficiary.bankedStatus || 'UNKNOWN',
+                  internetStatus: row.beneficiary.internetStatus || 'UNKNOWN',
+                  phoneStatus: row.beneficiary.phoneStatus || 'UNKNOWN',
+                },
+                select: { id: true, uuid: true },
+              });
 
-          // Prepare and insert GroupedBeneficiaries
-          const groupedData = insertedBeneficiaries.map((b) => ({
-            beneficiaryGroupId: group.uuid,
-            beneficiaryId: b.uuid,
-          }));
+            await tx.beneficiaryPii.upsert({
+              where: { beneficiaryId: beneficiary.id },
+              create: {
+                beneficiaryId: beneficiary.id,
+                name: row.pii.name || null,
+                phone: row.pii.phone,
+                email: row.pii.email || null,
+                extras: incomingPiiExtras,
+              },
+              update: {
+                name: row.pii.name || null,
+                phone: row.pii.phone,
+                email: row.pii.email || null,
+                extras: mergedPiiExtras,
+              },
+            });
 
-          await tx.groupedBeneficiaries.createMany({ data: groupedData });
+            await tx.groupedBeneficiaries.upsert({
+              where: {
+                beneficiaryGroupIdentifier: {
+                  beneficiaryGroupId: group.uuid,
+                  beneficiaryId: beneficiary.uuid,
+                },
+              },
+              create: {
+                beneficiaryGroupId: group.uuid,
+                beneficiaryId: beneficiary.uuid,
+              },
+              update: {
+                deletedAt: null,
+              },
+            });
+          }
 
           processedCount += batch.length;
           const percent = 62 + Math.round((processedCount / totalRows) * 38);
@@ -234,7 +290,8 @@ export class ImportProcessor {
         failureReason: message,
       });
     } catch (e) {
-      this.logger.error(`Failed to update import status: ${e.message}`);
+      const err = e instanceof Error ? e : new Error(String(e));
+      this.logger.error(`Failed to update import status: ${err.message}`);
     }
 
     await job.progress({

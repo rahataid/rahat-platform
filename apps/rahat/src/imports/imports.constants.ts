@@ -29,6 +29,9 @@ export const ALLOWED_SORT_FIELDS: Record<string, string> = {
 export const VALID_GENDERS = ['MALE', 'FEMALE', 'OTHER', 'UNKNOWN'] as const;
 
 export const STANDARD_FIELD_MAP: Record<string, { table: 'beneficiary' | 'pii'; field: string }> = {
+  uuid: { table: 'beneficiary', field: 'uuid' },
+  beneficiaryuuid: { table: 'beneficiary', field: 'uuid' },
+  beneficiary_uuid: { table: 'beneficiary', field: 'uuid' },
   name: { table: 'pii', field: 'name' },
   phone: { table: 'pii', field: 'phone' },
   email: { table: 'pii', field: 'email' },
