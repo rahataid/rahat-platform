@@ -134,6 +134,21 @@ export class BlockchainProviderRegistry {
     return connectedWallet.getWalletKeys();
   }
 
+  async createBulk(count: number, chainType: ChainType): Promise<WalletKeys[]> {
+    const walletManager = this.getWalletManager(chainType);
+
+    if (walletManager.createBulk) {
+      return walletManager.createBulk(count);
+    }
+
+    // Fallback: batch individual creations
+    const wallets = await Promise.all(
+      Array.from({ length: count }, () => this.createWallet(chainType))
+    );
+
+    return wallets;
+  }
+
   async connectWallet(
     address: string,
     chainType: ChainType

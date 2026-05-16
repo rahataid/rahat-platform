@@ -1,4 +1,3 @@
-import { generateRandomWallet } from '@rahataid/sdk/utils';
 import { parse } from 'csv-parse/sync';
 import { STANDARD_FIELD_MAP, VALID_GENDERS } from './imports.constants';
 
@@ -55,11 +54,8 @@ function mapCSVRow(row: Record<string, string>, rowIndex: number): MappedRow {
     pii.name = `${fName || ''} ${lName || ''}`.trim();
   }
 
-  // Generate wallet address if not provided
-  if (!beneficiary.walletAddress) {
-    const { address } = generateRandomWallet();
-    beneficiary.walletAddress = address;
-  }
+  // walletAddress will be generated in bulk after validation if not provided
+  // See ImportProcessor.generateWalletsForRows()
 
   // Normalize phone to string
   if (pii.phone !== undefined) {

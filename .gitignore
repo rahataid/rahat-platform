@@ -90,3 +90,5 @@ ignition/deployments/chain-31337
 .ssh_config
 .data
 
+tools/deployment-scripts/deployments
+
