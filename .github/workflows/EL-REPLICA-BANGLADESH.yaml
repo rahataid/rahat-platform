@@ -1,4 +1,4 @@
-name: EL SMS VOUCHER Release CI/CD
+name: EL BANGLADESH REPLICA CI/CD
 on:
   workflow_dispatch:
 
