@@ -54,9 +54,9 @@ jobs:
           file: Dockerfile.beneficiary
           push: ${{ github.event_name == 'workflow_dispatch' }}
           tags: |
-            esatya/rahat-platform-beneficiary:el-release-smsvoucher
-            esatya/rahat-platform-beneficiary:el-release-smsvoucher-${{ env.VERSION }}
-            esatya/rahat-platform-beneficiary:el-release-smsvoucher-${{ env.VERSION }}-${{ env.timestamp }}
+            esatya/rahat-platform-beneficiary:el-replica-bangladesh
+            esatya/rahat-platform-beneficiary:el-replica-bangladesh-${{ env.VERSION }}
+            esatya/rahat-platform-beneficiary:el-replica-bangladesh-${{ env.VERSION }}-${{ env.timestamp }}
 
       # Rahat Image
       - name: build && push rahat
