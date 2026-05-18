@@ -120,10 +120,7 @@ export const cambodiaActions: ProjectActionFunc = {
     sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.STATS, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.LIST]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.BENEFICIARY.LIST_BY_PROJECT, uuid },
-      payload
-    ),
+    sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.LIST, uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.VALIDATE_CONVERSION]: (
     uuid,
