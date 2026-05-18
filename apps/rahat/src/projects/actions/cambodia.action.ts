@@ -51,15 +51,12 @@ export const CAMBODIA_JOBS = {
   },
   COMMUNICATION: {
     LIST: 'rahat.jobs.communication.list',
-  }
+  },
 };
 
 export const cambodiaActions: ProjectActionFunc = {
-
-
-  ["cambodia.app.test"]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: "rahat.jobs.test", uuid }, payload),
-
+  ['cambodia.app.test']: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: 'rahat.jobs.test', uuid }, payload),
 
   [MS_ACTIONS.CAMBODIA.APP.STATS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.APP.STATS, uuid }, payload),
@@ -122,21 +119,31 @@ export const cambodiaActions: ProjectActionFunc = {
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.STATS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.STATS, uuid }, payload),
 
-  // cmd-only pattern so the Cambodia MS matches reliably; uuid in the pattern required
-  // `process.env.PROJECT_ID` to match the URL project id, which breaks when unset or wrong.
-  // Vendor list uses the same cmd-only style against platform MS.
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.LIST]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.LIST }, payload),
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.BENEFICIARY.LIST_BY_PROJECT, uuid },
+      payload
+    ),
 
-  [MS_ACTIONS.CAMBODIA.BENEFICIARY.VALIDATE_CONVERSION]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.VALIDATE_CONVERSION, uuid }, payload),
+  [MS_ACTIONS.CAMBODIA.BENEFICIARY.VALIDATE_CONVERSION]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.BENEFICIARY.VALIDATE_CONVERSION, uuid },
+      payload
+    ),
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.LIST_DISCARDED]: (
     uuid,
     payload,
     sendCommand
   ) =>
-    sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.LIST_DISCARDED }, payload),
+    sendCommand(
+      { cmd: CAMBODIA_JOBS.BENEFICIARY.LIST_DISCARDED, uuid },
+      payload
+    ),
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.GET]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.GET, uuid }, payload),
@@ -163,33 +170,44 @@ export const cambodiaActions: ProjectActionFunc = {
     sendCommand({ cmd: CAMBODIA_JOBS.COMMUNICATION.LIST, uuid }, payload),
   [MS_ACTIONS.CAMBODIA.APP.LINE_STATS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.APP.LINE_STATS, uuid }, payload),
-  [MS_ACTIONS.CAMBODIA.APP.BROAD_CAST_STATUS_COUNT]: (uuid, payload, sendCommand) => {
+  [MS_ACTIONS.CAMBODIA.APP.BROAD_CAST_STATUS_COUNT]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
     console.log(uuid);
-    return (
-
-      sendCommand({ cmd: CAMBODIA_JOBS.APP.BROADCAST_STATUS_COUNT, uuid }, payload)
-    )
+    return sendCommand(
+      { cmd: CAMBODIA_JOBS.APP.BROADCAST_STATUS_COUNT, uuid },
+      payload
+    );
   },
   [MS_ACTIONS.CAMBODIA.APP.PROJECT_SETTINGS]: (uuid, payload, sendCommand) => {
     console.log(uuid);
-    return (
-
-      sendCommand({ cmd: CAMBODIA_JOBS.APP.PROJECT_SETTINGS, uuid }, payload)
-    )
+    return sendCommand(
+      { cmd: CAMBODIA_JOBS.APP.PROJECT_SETTINGS, uuid },
+      payload
+    );
   },
-  [MS_ACTIONS.CAMBODIA.APP.TRIGGER_COMMUNICATION]: (uuid, payload, sendCommand) => {
+  [MS_ACTIONS.CAMBODIA.APP.TRIGGER_COMMUNICATION]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
     console.log(uuid);
-    return (
-
-      sendCommand({ cmd: CAMBODIA_JOBS.APP.TRIGGER_COMMUNICATION, uuid }, payload)
-    )
+    return sendCommand(
+      { cmd: CAMBODIA_JOBS.APP.TRIGGER_COMMUNICATION, uuid },
+      payload
+    );
   },
-  [MS_ACTIONS.CAMBODIA.CHW.VALIDATE_HEALTH_WORKER]: (uuid, payload, sendCommand) => {
+  [MS_ACTIONS.CAMBODIA.CHW.VALIDATE_HEALTH_WORKER]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
     console.log(uuid);
-    return (
-
-      sendCommand({ cmd: CAMBODIA_JOBS.CHW.VALIDATE_HEALTH_WORKER, uuid }, payload)
-    )
-  }
+    return sendCommand(
+      { cmd: CAMBODIA_JOBS.CHW.VALIDATE_HEALTH_WORKER, uuid },
+      payload
+    );
+  },
 };
-
