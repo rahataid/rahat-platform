@@ -12,6 +12,7 @@ export interface WalletConfig {
 export interface WalletStorage {
   init(): Promise<void>; //initialize the storage connection
   saveKey(key: WalletKeys): Promise<void>;
+  saveBulk?(keys: WalletKeys[]): Promise<void>; // Batch save for bulk operations
   getKey(address: string, blockchain: string): Promise<WalletKeys | null>;
   deleteWallet?(address: string): Promise<void>; // rethink?
 }
@@ -34,6 +35,7 @@ export interface IConnectedWallet {
 export interface IWalletManager {
   init(): Promise<void>;
   createWallet(): Promise<IConnectedWallet>;
+  createBulk?(count: number): Promise<WalletKeys[]>; // Bulk wallet creation
   importWallet(privateKey: string): Promise<IConnectedWallet>;
   connect(
     walletAddress: string,

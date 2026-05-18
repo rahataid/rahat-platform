@@ -3,6 +3,7 @@ import {
   ChainType,
   IConnectedWallet,
   IWalletManager,
+  WalletKeys,
   WalletStorage,
 } from '../types';
 import { ConnectedWallet } from './connectedWallet';
@@ -48,6 +49,32 @@ export class EVMWallet implements IWalletManager {
     };
     await this.storage.saveKey(walletKeys);
     return new ConnectedWallet(walletKeys, this.rpcUrl);
+  }
+
+  async createBulk(count: number): Promise<WalletKeys[]> {
+    const wallets: WalletKeys[] = [];
+
+    // Generate all wallets (CPU-bound, but fast)
+    for (let i = 0; i < count; i++) {
+      const wallet = ethers.Wallet.createRandom();
+      wallets.push({
+        address: wallet.address,
+        privateKey: wallet.privateKey,
+        publicKey: wallet.publicKey,
+        mnemonic: wallet.mnemonic?.phrase,
+        blockchain: EVMWallet.blockchainType,
+      });
+    }
+
+    // Batch save to storage (I/O-bound, optimized)
+    if (this.storage.saveBulk) {
+      await this.storage.saveBulk(wallets);
+    } else {
+      // Fallback to individual saves
+      await Promise.all(wallets.map(w => this.storage.saveKey(w)));
+    }
+
+    return wallets;
   }
 
   async importWallet(privateKey: string): Promise<ConnectedWallet> {
