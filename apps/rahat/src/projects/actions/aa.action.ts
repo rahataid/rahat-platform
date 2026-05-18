@@ -674,6 +674,16 @@ export const aaActions: ProjectActionFunc = {
       { cmd: AAJobs.INKIND.GET_AVAILABLE_INKIND_BENEFICIARY_PHONE, uuid },
       payload
     ),
+  
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_AVAILABLE_INKIND_BY_BENEFICIARY_WALLET]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.GET_AVAILABLE_INKIND_BY_BENEFICIARY_WALLET, uuid },
+      payload
+    ),
 
   [MS_ACTIONS.AAPROJECT.INKIND.BENEFICIARY_INKIND_REDEEM]: (
     uuid,
