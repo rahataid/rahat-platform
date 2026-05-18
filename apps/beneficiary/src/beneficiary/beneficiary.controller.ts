@@ -108,6 +108,13 @@ export class BeneficiaryController {
     return this.service.listBenefByProject(data);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.CAMBODIA_WALLET_FILTER_BY_NAME })
+  async cambodiaWalletFilterByName(payload: {
+    projectId: string;
+    name: string;
+  }) {
+    return this.service.getWalletAddressesForProjectByPiiName(payload);
+  }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_BENEFICIARY })
   async findOneBeneficiary(data: any) {

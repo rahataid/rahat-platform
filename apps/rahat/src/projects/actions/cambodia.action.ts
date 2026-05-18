@@ -28,8 +28,9 @@ export const CAMBODIA_JOBS = {
     CREATE: 'rahat.jobs.beneficiary.create',
     LIST_BY_PROJECT: 'rahat.jobs.beneficiary.list_by_project',
     GET: 'rahat.jobs.beneficiary.get',
-    LIST: 'rahat.jobs.beneficiary.list',
-    LIST_DISCARDED: 'rahat.jobs.beneficiary.list_discarded',
+    /** Must stay in sync with `rahat-project-cambodia` apps/cambodia JOBS.BENEFICIARY. */
+    LIST: 'rahat.jobs.cambodia.beneficiary.list',
+    LIST_DISCARDED: 'rahat.jobs.cambodia.beneficiary.list_discarded',
     LEAD_CONVERSION: 'rahat.jobs.beneficiary.lead_conversion',
   },
   COMMISSION_SCHEME: {
@@ -121,9 +122,11 @@ export const cambodiaActions: ProjectActionFunc = {
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.STATS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.STATS, uuid }, payload),
 
+  // cmd-only pattern so the Cambodia MS matches reliably; uuid in the pattern required
+  // `process.env.PROJECT_ID` to match the URL project id, which breaks when unset or wrong.
+  // Vendor list uses the same cmd-only style against platform MS.
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.LIST]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.LIST, uuid }, payload),
-
+    sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.LIST }, payload),
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.VALIDATE_CONVERSION]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.VALIDATE_CONVERSION, uuid }, payload),
@@ -133,10 +136,7 @@ export const cambodiaActions: ProjectActionFunc = {
     payload,
     sendCommand
   ) =>
-    sendCommand(
-      { cmd: CAMBODIA_JOBS.BENEFICIARY.LIST_DISCARDED, uuid },
-      payload
-    ),
+    sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.LIST_DISCARDED }, payload),
 
   [MS_ACTIONS.CAMBODIA.BENEFICIARY.GET]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: CAMBODIA_JOBS.BENEFICIARY.GET, uuid }, payload),

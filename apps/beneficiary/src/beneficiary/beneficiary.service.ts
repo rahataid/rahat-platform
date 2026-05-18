@@ -135,18 +135,53 @@ export class BeneficiaryService {
   async listBenefByProject(data: any) {
     if (!data?.data?.length) return data;
 
-    const mergedProjectData = await this.mergeProjectData(
-      data.data,
-      data.payload
-    );
+    try {
+      const mergedProjectData = await this.mergeProjectData(
+        data.data,
+        data.payload
+      );
 
-    if (data?.extras) {
-      data.data = { data: mergedProjectData, extras: data.extras };
-    } else {
-      data.data = mergedProjectData || [];
+      if (data?.extras) {
+        data.data = { data: mergedProjectData, extras: data.extras };
+      } else {
+        data.data = mergedProjectData || [];
+      }
+    } catch (error) {
+      this.logger.error(
+        `listBenefByProject: PII merge failed — returning raw project data. Reason: ${error?.message}`
+      );
+      // Return Cambodia data without PII enrichment rather than failing the request
     }
 
     return data;
+  }
+
+  /** Wallet addresses for villagers assigned to a project whose PII name matches (Cambodia list filter). */
+  async getWalletAddressesForProjectByPiiName(payload: {
+    projectId?: string;
+    name?: string;
+  }): Promise<string[]> {
+    const projectId = payload?.projectId?.trim();
+    const fragment = payload?.name?.trim();
+    if (!projectId || !fragment) return [];
+
+    const rows = await this.prisma.beneficiaryProject.findMany({
+      where: {
+        projectId,
+        deletedAt: null,
+        Beneficiary: {
+          deletedAt: null,
+          pii: {
+            name: { contains: fragment, mode: 'insensitive' },
+          },
+        },
+      },
+      select: {
+        Beneficiary: { select: { walletAddress: true } },
+      },
+    });
+
+    return [...new Set(rows.map((r) => r.Beneficiary.walletAddress))];
   }
 
   async findOneBeneficiary(data: any) {
@@ -331,10 +366,35 @@ export class BeneficiaryService {
     //   }
     // })
 
+    if (!Array.isArray(data) || !data.length) {
+      return [];
+    }
+
+    const walletAddresses = [
+      ...new Set(
+        data
+          .map((b) => b?.walletAddress)
+          .filter(
+            (addr): addr is string =>
+              typeof addr === 'string' && addr.trim().length > 0
+          )
+      ),
+    ];
+
+    /** Cambodia EL villagers may exist before a Rahat wallet is assigned; skip invalid Prisma `in` queries. */
+    if (!walletAddresses.length) {
+      return data.map((dat: Record<string, any>) => ({
+        piiData: undefined,
+        projectData: {},
+        ...dat,
+        healthWorker: dat?.healthWorker ?? dat?.health_worker ?? null,
+      }));
+    }
+
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
         walletAddress: {
-          in: data.map((b) => b.walletAddress),
+          in: walletAddresses,
         },
       },
       include: {
