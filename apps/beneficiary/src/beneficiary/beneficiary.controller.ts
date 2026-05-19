@@ -150,6 +150,13 @@ export class BeneficiaryController {
     return this.service.bulkAssignToProject(payload);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.BULK_LINK_TO_PROJECT_LEGACY })
+  async bulkLinkToProjectLegacy(
+    payload: { projectId: string; beneficiaryIds: string[] }
+  ) {
+    return this.service.bulkLinkToProjectLegacy(payload);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
   update(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryDto) {
     const benefUUID = uuid ? uuid : dto.uuid;
