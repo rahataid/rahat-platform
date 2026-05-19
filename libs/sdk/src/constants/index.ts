@@ -324,7 +324,7 @@ export const MS_ACTIONS = {
         'aaProject.groupInkinds.getUnassignedGroupInkind',
       GET_AVAILABLE_INKIND_BENEFICIARY_PHONE:
         'aaProject.groupInkinds.getAvailableInkindByBeneficiaryPhone',
-      GET_AVAILABLE_INKIND_BY_BENEFICIARY_WALLET: 
+      GET_AVAILABLE_INKIND_BY_BENEFICIARY_WALLET:
         'aaProject.groupInkinds.getAvailableInkindByBeneficiaryWallet',
       GET_GROUP_INKIND_LOGS: 'aaProject.groupInkinds.getLogs',
       GET_GROUP_INKIND_LOGS_BY_VENDOR: 'aaProject.groupInkinds.getLogsByVendor',
@@ -336,6 +336,8 @@ export const MS_ACTIONS = {
       SEND_BENEFICIARY_OTP: 'aaProject.inkinds.sendBeneficiaryOtp',
       VALIDATE_BENEFICIARY_OTP: 'aaProject.inkinds.validateBeneficiaryOtp',
       BENEFICIARY_INKIND_DETAILS: 'aaProject.beneficiary.inKindsDetails',
+      GET_OFFLINE_BENEFICIARY_INKIND_BY_VENDOR: 'aaProject.inkinds.getAllOfflineBeneficiaryByVendor',
+      REDEEM_OFFLINE_INKIND_BY_VENDOR: 'aaProject.inkinds.syncOfflineRedemptions'
     },
     VENDOR: {
       // Remove after test

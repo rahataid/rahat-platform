@@ -1,0 +1,25 @@
+meta {
+  name: sync offline redemptions
+  type: http
+  seq: 19
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.inkinds.getAllOfflineBeneficiaryByVendor",
+    "payload": {
+       "vendorId": "e612a38b-a2b3-4b7d-96d2-1bafd4343626"
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
