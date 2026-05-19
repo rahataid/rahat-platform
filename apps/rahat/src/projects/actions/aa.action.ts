@@ -325,6 +325,20 @@ export const aaActions: ProjectActionFunc = {
   ) =>
     sendCommand({ cmd: AAJobs.BENEFICIARY.GET_TOKEN_DETAILS, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GENERATE_QR_PDF]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.BENEFICIARY.GENERATE_QR_PDF, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_QR_PDF]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.BENEFICIARY.GET_QR_PDF, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.FUND_MANAGEMENT.ADD_FUND]: (
     uuid,
     payload,
