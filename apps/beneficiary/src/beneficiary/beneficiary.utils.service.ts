@@ -255,9 +255,11 @@ export class BeneficiaryUtilsService {
   }
 
   private buildProjectPayload(projectData: any, beneficiaryData: any) {
-    const payload: BeneficiaryPayload = {
+    type BeneficiaryPayloadWithPhone = BeneficiaryPayload & { phone?: string };
+    const payload: BeneficiaryPayloadWithPhone = {
       uuid: beneficiaryData.uuid,
       walletAddress: beneficiaryData.walletAddress,
+      phone: beneficiaryData.pii?.phone || null,
       extras: beneficiaryData.extras || null,
       type: BeneficiaryConstants.Types.ENROLLED,
       isVerified: beneficiaryData.isVerified,

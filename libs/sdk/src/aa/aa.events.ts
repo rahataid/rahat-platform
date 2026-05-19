@@ -76,6 +76,8 @@ export const JOBS = {
     CREATE_BENEFICIARY_WITH_DB_TRANSACTION:
       'aa.jobs.beneficiary.create_beneficiary_with_db_transaction',
     GET_TOKEN_DETAILS: 'aa.jobs.beneficiary.getTokenDetails',
+    GENERATE_QR_PDF: 'aa.jobs.beneficiary.generateQrPdf',
+    GET_QR_PDF: 'aa.jobs.beneficiary.getQrPdf',
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget',
