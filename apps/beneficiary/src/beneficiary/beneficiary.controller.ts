@@ -108,6 +108,13 @@ export class BeneficiaryController {
     return this.service.listBenefByProject(data);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.CAMBODIA_WALLET_FILTER_BY_NAME })
+  async cambodiaWalletFilterByName(payload: {
+    projectId: string;
+    name: string;
+  }) {
+    return this.service.getWalletAddressesForProjectByPiiName(payload);
+  }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_BENEFICIARY })
   async findOneBeneficiary(data: any) {
@@ -148,6 +155,13 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT })
   async bulkAssignToProject(payload: any) {
     return this.service.bulkAssignToProject(payload);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.BULK_LINK_TO_PROJECT_LEGACY })
+  async bulkLinkToProjectLegacy(
+    payload: { projectId: string; beneficiaryIds: string[] }
+  ) {
+    return this.service.bulkLinkToProjectLegacy(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
