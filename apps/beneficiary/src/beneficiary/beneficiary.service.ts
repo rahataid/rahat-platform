@@ -827,6 +827,78 @@ export class BeneficiaryService {
     );
   }
 
+  async bulkLinkToProjectLegacy(payload: {
+    projectId: string;
+    beneficiaryIds: string[];
+  }) {
+    this.logger.log(
+      `Received bulk link to project legacy request for projectId=${payload.projectId} with ${payload.beneficiaryIds.length} beneficiaryIds`
+    );
+    const { projectId, beneficiaryIds = [] } = payload || {};
+
+    if (!projectId) {
+      throw new RpcException('projectId is required');
+    }
+
+    const project = await this.prisma.project.findUnique({
+      where: { uuid: projectId },
+      select: { uuid: true },
+    });
+
+    if (!project) {
+      throw new RpcException('Project not found');
+    }
+
+    const uniqueBeneficiaryIds = [...new Set(beneficiaryIds.filter(Boolean))];
+
+    if (!uniqueBeneficiaryIds.length) {
+      return {
+        projectId,
+        requestedCount: beneficiaryIds.length,
+        uniqueCount: 0,
+        insertedCount: 0,
+        missingBeneficiaryIds: [],
+      };
+    }
+
+    const existingBeneficiaries = await this.rsprisma.beneficiary.findMany({
+      where: {
+        uuid: {
+          in: uniqueBeneficiaryIds,
+        },
+      },
+      select: {
+        uuid: true,
+      },
+    });
+
+    const existingIds = existingBeneficiaries.map((b) => b.uuid);
+    const existingIdsSet = new Set(existingIds);
+    const missingBeneficiaryIds = uniqueBeneficiaryIds.filter(
+      (id) => !existingIdsSet.has(id)
+    );
+
+    let insertedCount = 0;
+    if (existingIds.length) {
+      const created = await this.prisma.beneficiaryProject.createMany({
+        data: existingIds.map((beneficiaryId) => ({
+          projectId,
+          beneficiaryId,
+        })),
+        skipDuplicates: true,
+      });
+      insertedCount = created.count;
+    }
+
+    return {
+      projectId,
+      requestedCount: beneficiaryIds.length,
+      uniqueCount: uniqueBeneficiaryIds.length,
+      insertedCount,
+      missingBeneficiaryIds,
+    };
+  }
+
   async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
     const findUuid = await this.prisma.beneficiary.findUnique({
       where: {

@@ -32,6 +32,7 @@ export const JOBS = {
   REMOVE: 'rahat.jobs.beneficiary.remove',
   ADD_TO_PROJECT: 'rahat.jobs.beneficiary.add_to_project',
   BULK_ADD_TO_PROJECT: 'rahat.jobs.beneficiary.bulk_add_to_project',
+  BULK_LINK_TO_PROJECT_LEGACY: 'rahat.jobs.beneficiary.bulk_link_to_project_legacy',
   ASSIGN_TO_PROJECT: 'rahat.jobs.beneficiary.assign_to_project',
   ASSIGN_GROUP_TO_PROJECT: 'rahat.jobs.beneficiary.assign_group_to_project',
   BULK_ASSIGN_TO_PROJECT: 'rahat.jobs.beneficiary.bulk_assign',
