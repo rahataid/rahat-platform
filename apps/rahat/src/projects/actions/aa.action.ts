@@ -665,23 +665,13 @@ export const aaActions: ProjectActionFunc = {
       payload
     ),
 
-  [MS_ACTIONS.AAPROJECT.INKIND.GET_AVAILABLE_INKIND_BENEFICIARY_PHONE]: (
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_AVAILABLE_INKIND_FOR_BENEFICIARY]: (
     uuid,
     payload,
     sendCommand
   ) =>
     sendCommand(
-      { cmd: AAJobs.INKIND.GET_AVAILABLE_INKIND_BENEFICIARY_PHONE, uuid },
-      payload
-    ),
-
-  [MS_ACTIONS.AAPROJECT.INKIND.GET_AVAILABLE_INKIND_BY_BENEFICIARY_WALLET]: (
-    uuid,
-    payload,
-    sendCommand
-  ) =>
-    sendCommand(
-      { cmd: AAJobs.INKIND.GET_AVAILABLE_INKIND_BY_BENEFICIARY_WALLET, uuid },
+      { cmd: AAJobs.INKIND.GET_AVAILABLE_INKIND_FOR_BENEFICIARY, uuid },
       payload
     ),
 
@@ -755,14 +745,14 @@ export const aaActions: ProjectActionFunc = {
 
 
   [MS_ACTIONS.AAPROJECT.INKIND.GET_OFFLINE_BENEFICIARY_INKIND_BY_VENDOR]: (
-    uuid, 
-    payload, 
+    uuid,
+    payload,
     sendCommand
-  ) => 
+  ) =>
     sendCommand(
       { cmd: AAJobs.INKIND.GET_OFFLINE_BENEFICIARY_INKIND_BY_VENDOR, uuid },
-       payload),
-  
+      payload),
+
   [MS_ACTIONS.AAPROJECT.INKIND.REDEEM_OFFLINE_INKIND_BY_VENDOR]: (
     uuid,
     payload,

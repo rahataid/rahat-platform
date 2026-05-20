@@ -147,9 +147,8 @@ export const JOBS = {
     GET_BY_GROUP: 'aa.jobs.groupInkinds.getByGroup',
     GET_UNASSIGNED_GROUP_INKIND:
       'aa.jobs.groupInkinds.getUnassignedGroupInkind',
-    GET_AVAILABLE_INKIND_BENEFICIARY_PHONE:
-      'aa.jobs.groupInkinds.getAvailableInkindByBeneficiaryPhone',
-    GET_AVAILABLE_INKIND_BY_BENEFICIARY_WALLET: 'aa.jobs.groupInkinds.getAvailableInkindByBeneficiaryWallet',
+    GET_AVAILABLE_INKIND_FOR_BENEFICIARY:
+      'aa.jobs.groupInkinds.getAvailableInkindByBeneficiary',
     GET_GROUP_INKIND_LOGS: 'aa.jobs.groupInkinds.getLogs',
     GET_GROUP_INKIND_LOGS_BY_VENDOR: 'aa.jobs.groupInkinds.getLogsByVendor',
     GET_LOGS_DETAILS_BY_VENDOR: 'aa.jobs.groupInkinds.getLogsDetailsByVendor',
