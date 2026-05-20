@@ -87,7 +87,7 @@ export class ListenersService {
       `,
 
       `
-       <div style="font-family: Arial, sans-serif; padding: 20px;">
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
         <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 12px;padding: 24px; text-align: center; border: 1px solid #111111;">
 
           <div style="margin-bottom: 20px;">
@@ -101,10 +101,17 @@ export class ListenersService {
               We're thrilled to have you on board! You've been successfully added to Rahat dashboard.
             </h2>
 
-            <h3 style="color: #374151; font-size: 14px; line-height: 1.6; margin-bottom: 20px; text-align: center;">
+            <p style="color: #374151; font-size: 14px; line-height: 1.6; margin-bottom: 20px; text-align: center;">
 
-           Click the link to access the Rahat dashboard: ${frontendURL["value"]}
-            </h3>
+              Click the link to access the Rahat dashboard:
+             <a
+                href="${frontendURL["value"]}"
+                target="_blank"
+                style="color: #2563eb; text-decoration: underline; font-weight: 600;"
+            >
+              ${frontendURL["value"]}
+             </a>
+            </p>
 
             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
 
