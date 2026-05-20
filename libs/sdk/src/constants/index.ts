@@ -244,6 +244,8 @@ export const MS_ACTIONS = {
       GET_REDEEM_INFO_INKIND: 'aaProject.beneficiary.getRedeemInfoInkind',
       GET_BALANCE: 'aaProject.beneficiary.getBalance',
       GET_TOKEN_DETAILS: 'aaProject.beneficiary.getTokenDetails',
+      GENERATE_QR_PDF: 'aaProject.beneficiary.generateQrPdf',
+      GET_QR_PDF: 'aaProject.beneficiary.getQrPdf',
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
@@ -322,8 +324,8 @@ export const MS_ACTIONS = {
       GET_BY_GROUP: 'aaProject.groupInkinds.getByGroup',
       GET_UNASSIGNED_GROUP_INKIND:
         'aaProject.groupInkinds.getUnassignedGroupInkind',
-      GET_AVAILABLE_INKIND_BENEFICIARY_PHONE:
-        'aaProject.groupInkinds.getAvailableInkindByBeneficiaryPhone',
+      GET_AVAILABLE_INKIND_FOR_BENEFICIARY:
+        'aaProject.groupInkinds.getAvailableInkindByBeneficiary',
       GET_GROUP_INKIND_LOGS: 'aaProject.groupInkinds.getLogs',
       GET_GROUP_INKIND_LOGS_BY_VENDOR: 'aaProject.groupInkinds.getLogsByVendor',
       GET_LOGS_DETAILS_BY_VENDOR:
@@ -334,6 +336,8 @@ export const MS_ACTIONS = {
       SEND_BENEFICIARY_OTP: 'aaProject.inkinds.sendBeneficiaryOtp',
       VALIDATE_BENEFICIARY_OTP: 'aaProject.inkinds.validateBeneficiaryOtp',
       BENEFICIARY_INKIND_DETAILS: 'aaProject.beneficiary.inKindsDetails',
+      GET_OFFLINE_BENEFICIARY_INKIND_BY_VENDOR: 'aaProject.inkinds.getAllOfflineBeneficiaryByVendor',
+      REDEEM_OFFLINE_INKIND_BY_VENDOR: 'aaProject.inkinds.syncOfflineRedemptions'
     },
     VENDOR: {
       // Remove after test
