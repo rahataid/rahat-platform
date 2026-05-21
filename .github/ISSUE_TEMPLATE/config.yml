@@ -1,0 +1,10 @@
+blank_issues_enabled: false
+contact_links:
+  - name: '@rahat2026 project board'
+    url: https://github.com/orgs/rahataid/projects/61
+  - name: Rahat documentation
+    url: https://docs.rahat.io
+choose_template:
+  - bug_report.yml
+  - feature_request.yml
+  - improvement_proposal.yml

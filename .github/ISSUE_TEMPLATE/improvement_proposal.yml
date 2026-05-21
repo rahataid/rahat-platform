@@ -10,6 +10,30 @@ body:
         ### 🌟 Thank you for taking the time to contribute to Rahat! 
         Please complete the sections below to submit your improvement proposal.
 
+  - type: dropdown
+    id: product
+    attributes:
+      label: Product (project board)
+      options:
+        - EL
+        - AA
+        - CVA
+        - CT
+        - Core
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P1 — current sprint
+        - P2 — next sprint
+        - P3 — backlog
+    validations:
+      required: true
+
   - type: textarea
     id: abstract
     attributes:
