@@ -388,7 +388,10 @@ export class ProjectService {
         benef.dataCollectorId ||
         benef.meta?._submitted_by ||
         benef.meta?.username ||
-        'UNKNOWN',
+        benef.meta?.eye_partner ||
+        benef.meta?.chw ||
+        benef.meta?.vd ||
+        undefined,
       dataCollectorId: benef.dataCollectorId || benef.meta?._submitted_by,
       occupation: benef.occupation || 'UNKNOWN',
       province: benef.province || 'UNKNOWN',
@@ -411,7 +414,7 @@ export class ProjectService {
       data: koboPayload,
     });
     const piiExist = await this.checkPiiPhone(benef.phone);
-    console.log({ piiExist });
+    console.log({ piiExist }, 'piiExist');
     if (piiExist) {
       const discardedPayload = {
         ...piiData,

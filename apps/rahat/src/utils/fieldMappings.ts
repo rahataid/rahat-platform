@@ -27,10 +27,10 @@ export const KOBO_FIELD_MAPPINGS = {
   Health_Worker_Name: 'healthWorkerName',
   'Village Doctor Name': 'healthWorkerName',
   kobo_username: 'koboUsername',
-  chw: 'koboUsername', // New form: Eye Partner field (CHW username)
+  vd: 'koboUsername', // New form: Village Doctor field (VD is the CHW in DB)
   data_collector_id: 'dataCollectorId',
   dataCollectorId: 'dataCollectorId',
-  vd: 'villageDoctorUuid', // New form: Village Doctor field
+  chw: 'dataCollectorId', // New form: Eye Partner field (data collector only)
   /** China: village doctor row UUID from Kobo dropdown (stored in payload meta) */
   village_doctor_uuid: 'villageDoctorUuid',
   chwUuid: 'villageDoctorUuid',
