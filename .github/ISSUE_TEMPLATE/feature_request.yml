@@ -1,0 +1,76 @@
+name: Feature request
+description: New feature or enhancement for @rahat2026
+title: '[Feature]: '
+labels:
+  - 'Feature Title 🏷️'
+  - 'Needs Triage'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for net-new capability. Bugs → **Bug Report**. Small tweaks → **Improvement Proposal**.
+
+        Items are auto-added to [@rahat2026](https://github.com/orgs/rahataid/projects/61) with **Backlog** status.
+
+  - type: dropdown
+    id: product
+    attributes:
+      label: Product (project board)
+      description: Maps to the **projects** field on @rahat2026.
+      options:
+        - EL
+        - AA
+        - CVA
+        - CT
+        - Core
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0 — production blocker
+        - P1 — current sprint
+        - P2 — next sprint
+        - P3 — backlog
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - Feature
+        - Chore
+        - Spike
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What should we build and for whom?
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Bullet list of testable outcomes.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional context
+    validations:
+      required: false

@@ -1,0 +1,17 @@
+# Adds PRs to @rahat2026 when ready for review (dev handoff / QA visibility).
+name: Project — track pull request
+
+on:
+  pull_request:
+    types: [ready_for_review, reopened]
+
+jobs:
+  add-pr-to-project:
+    if: github.repository_owner == 'rahataid'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add PR to @rahat2026
+        uses: actions/add-to-project@v2.0.1
+        with:
+          project-url: https://github.com/orgs/rahataid/projects/61
+          github-token: ${{ secrets.RAHAT_PROJECT_TOKEN }}

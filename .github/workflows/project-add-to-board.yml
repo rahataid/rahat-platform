@@ -1,0 +1,17 @@
+# Adds new issues to @rahat2026 (project 61) so nothing is tracked only in the repo.
+name: Project — add issue to board
+
+on:
+  issues:
+    types: [opened, transferred]
+
+jobs:
+  add-to-project:
+    if: github.repository_owner == 'rahataid'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add to @rahat2026
+        uses: actions/add-to-project@v2.0.1
+        with:
+          project-url: https://github.com/orgs/rahataid/projects/61
+          github-token: ${{ secrets.RAHAT_PROJECT_TOKEN }}

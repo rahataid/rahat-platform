@@ -6,6 +6,49 @@ body:
   - type: markdown
     attributes:
       value: |
+        Report is auto-added to [@rahat2026](https://github.com/orgs/rahataid/projects/61) as **Backlog**.
+        Do not put DEV/STAGE/PROD in the title — use **Environment** below.
+
+  - type: dropdown
+    id: product
+    attributes:
+      label: Product (project board)
+      options:
+        - EL
+        - AA
+        - CVA
+        - CT
+        - Core
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0 — production blocker
+        - P1 — current sprint
+        - P2 — next sprint
+        - P3 — backlog
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deploy_environment
+    attributes:
+      label: Environment where bug was found
+      options:
+        - DEV
+        - STAGE
+        - PROD
+        - Not deployed yet
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
         # Please follow these steps first:
   - type: markdown
     attributes:
