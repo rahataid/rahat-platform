@@ -1,0 +1,28 @@
+meta {
+  name: get offline beneficiaries
+  type: http
+  seq: 18
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupInkinds.assign",
+    "payload": {
+       "inkindId":"c991c7f9-5769-44e7-9a9d-17c8a82ca106",
+      "groupId":"f5db2d72-6f17-4914-ab03-f146cb9d0cc2",
+      "mode": "OFFLINE",
+      "payoutProcessorId": "e612a38b-a2b3-4b7d-96d2-1bafd4343626"
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
