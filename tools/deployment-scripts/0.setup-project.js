@@ -1,6 +1,6 @@
 const fs = require('fs/promises');
 const path = require('path');
-const { prompt, DEPLOYMENT_DIR, ensureDeploymentDirectory, askConfirmation } = require('./_common');
+const { prompt, DEPLOYMENT_DIR, ensureDeploymentDirectory, askConfirmation, buildSettingEntry } = require('./_common');
 
 async function askProjectId() {
   const answers = await prompt([
@@ -22,9 +22,24 @@ async function askProjectId() {
   return answers.projectId;
 }
 
+async function askFrontendUrl() {
+  const answers = await prompt([
+    {
+      type: 'input',
+      name: 'frontendUrl',
+      message: 'Enter the FRONTEND_URL:',
+      validate: (input) => (input && input.trim() ? true : 'FRONTEND_URL is required.'),
+      filter: (input) => input.trim(),
+    },
+  ]);
+
+  return answers.frontendUrl;
+}
+
 async function main() {
   await ensureDeploymentDirectory();
   const projectId = await askProjectId();
+  const frontendUrl = await askFrontendUrl();
   const fileName = `${projectId}.json`;
   const filePath = path.join(DEPLOYMENT_DIR, fileName);
 
@@ -48,7 +63,16 @@ async function main() {
   const payload = {
     projectId,
     createdAt: new Date().toISOString(),
-    settings: [],
+    settings: [
+      buildSettingEntry({
+        name: 'FRONTEND_URL',
+        value: frontendUrl,
+        dataType: 'STRING',
+        requiredFields: '[]',
+        isReadOnly: false,
+        isPrivate: false,
+      }),
+    ],
   };
 
   await fs.writeFile(filePath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');

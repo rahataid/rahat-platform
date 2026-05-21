@@ -1,11 +1,51 @@
 const fs = require('fs/promises');
 const path = require('path');
+const readline = require('readline');
 const { PrismaClient } = require('@prisma/client');
-const { prompt, DEPLOYMENT_DIR, getDeploymentFiles, askTargetFile } = require('./_common');
+
+const DEPLOYMENT_DIR = path.resolve(__dirname, 'deployments');
 
 const prisma = new PrismaClient({
   datasourceUrl: process.env.CORE_DATABASE_URL,
 });
+
+function ask(question) {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer.trim());
+    });
+  });
+}
+
+async function getDeploymentFiles() {
+  await fs.mkdir(DEPLOYMENT_DIR, { recursive: true });
+  const entries = await fs.readdir(DEPLOYMENT_DIR, { withFileTypes: true });
+  return entries
+    .filter((e) => e.isFile() && e.name.endsWith('.json'))
+    .map((e) => e.name)
+    .sort((a, b) => a.localeCompare(b));
+}
+
+async function selectFile(files) {
+  console.log('\nAvailable deployment files:');
+  files.forEach((f, i) => console.log(`  ${i + 1}) ${f}`));
+
+  const answer = await ask(`\nEnter number (1-${files.length}): `);
+  const index = parseInt(answer, 10) - 1;
+
+  if (index < 0 || index >= files.length || Number.isNaN(index)) {
+    throw new Error(`Invalid selection: "${answer}"`);
+  }
+
+  return files[index];
+}
+
+async function confirm(message) {
+  const answer = await ask(`${message} [Y/n]: `);
+  return answer === '' || answer.toLowerCase() === 'y';
+}
 
 function normalizeRequiredFields(requiredFields) {
   if (Array.isArray(requiredFields)) {
@@ -64,7 +104,6 @@ async function getSettingsFromFile(fileName) {
   const content = await fs.readFile(filePath, 'utf8');
   const payload = JSON.parse(content);
   const settings = Array.isArray(payload.settings) ? payload.settings : [];
-
   return settings.filter((setting) => setting && setting.name);
 }
 
@@ -91,22 +130,6 @@ async function upsertSetting(setting) {
   });
 }
 
-async function confirmSelection(selectedFile, settings) {
-  console.log(`Selected deployment file: ${selectedFile}`);
-  console.log(`Settings to sync: ${settings.map((setting) => setting.name).join(', ')}`);
-
-  const answers = await prompt([
-    {
-      type: 'confirm',
-      name: 'confirmed',
-      message: `Sync these settings from ${selectedFile} to the database?`,
-      default: true,
-    },
-  ]);
-
-  return answers.confirmed;
-}
-
 async function main() {
   const deploymentFiles = await getDeploymentFiles();
 
@@ -114,14 +137,17 @@ async function main() {
     throw new Error(`No deployment files found in ${DEPLOYMENT_DIR}`);
   }
 
-  const selectedFile = await askTargetFile(deploymentFiles, 'Select one deployment file:');
+  const selectedFile = await selectFile(deploymentFiles);
   const settings = await getSettingsFromFile(selectedFile);
 
   if (!settings.length) {
     throw new Error(`${selectedFile} does not contain any settings.`);
   }
 
-  const confirmed = await confirmSelection(selectedFile, settings);
+  console.log(`\nSelected: ${selectedFile}`);
+  console.log(`Settings to sync: ${settings.map((s) => s.name).join(', ')}`);
+
+  const confirmed = await confirm(`\nSync these settings from ${selectedFile} to the database?`);
 
   if (!confirmed) {
     console.log('Database sync cancelled.');
