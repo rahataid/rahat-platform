@@ -80,6 +80,8 @@ export const JOBS = {
     LIST_SESSION_BROADCASTS: 'rahat.jobs.campaign.list_session_broadcasts',
     RETRY_SESSION: 'rahat.jobs.campaign.retry_session',
     GET_AUTOMATION_DETAIL: 'rahat.jobs.campaign.automation.detail',
+    REFRESH_COMMUNICATION_STATS:
+      'rahat.jobs.campaign.refresh_communication_stats',
   },
   OFFLINE_BENEFICIARIES: {
     SYNC_BENEFICIARIES: 'rahat.jobs.sync_beneficiaries',
@@ -99,6 +101,9 @@ export const JOBS = {
     GET_UNSYNCED_BENEFICIARIES: 'rahat.jobs.beneficiary.get_unsynced',
     CREATE_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin',
     GET_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_walkin',
+    GET_REFERRER_BY_PHONE: 'rahat.jobs.beneficiary.get_walkin_referrer_by_phone',
+    EXPORT_BENEFICIARY_REFERRAL: 'rahat.jobs.beneficiary.export_referral',
+    SYNC_LEGACY_IMPORTED: 'rahat.jobs.beneficiary.sync_legacy_imported',
     GET_ALL_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_all_walkin',
     CREATE_BULK_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin_bulk',
     SYNC_STAGING_WALKIN: 'rahat.jobs.beneficiary.sync_walkin_staging',

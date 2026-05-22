@@ -1,29 +1,23 @@
-name: Stage SMS Voucher CI/CD
+name: CRM DEMO US
 on:
   workflow_dispatch:
 
 env:
   CI: false
-  env_npmrc: ${{ secrets.ENV_NPMRC }}
 
 jobs:
-  deploy:
-    name: build && push image to Docker hub
+  rahat-platform:
+    name: rahat-platform
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, 'action') || contains(github.event.pull_request.title, 'action') || github.event_name == 'workflow_dispatch'
 
     steps:
       - uses: actions/checkout@v4
-
-      # - name: import env file
-      #   run: |
-      #     touch ./.npmrc && echo "$env_npmrc" >> ./.npmrc
 
       - uses: actions/setup-node@v3
         with:
           node-version: 20.10.0
 
-      - name: install dependencies and build apps
+      - name: Install pnpm
         run: |
           npm install -g pnpm@8.14.1
           pnpm install
@@ -40,6 +34,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Extract version from package.json
+        id: extract_version
+        run: echo "VERSION=$(jq -r '.version' package.json)" >> $GITHUB_ENV
+
+      - name: Extract Timestamp
+        id: extract-timestamp
+        run: |
+          TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S")
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_ENV
+
       # Beneficiary Image
       - name: build && push beneficiary
         id: build-push-beneficiary
@@ -47,9 +51,11 @@ jobs:
         with:
           context: .
           file: Dockerfile.beneficiary
-          # push: ${{ github.event_name == 'push' && 'true' || 'false' }}
-          push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-          tags: esatya/rahat-platform-beneficiary:stage-sms-voucher
+          push: ${{ github.event_name == 'workflow_dispatch' }}
+          tags: |
+            esatya/rahat-platform-beneficiary:crm-demo
+            esatya/rahat-platform-beneficiary:crm-demo-${{ env.VERSION }}
+            esatya/rahat-platform-beneficiary:crm-demo-${{ env.VERSION }}-${{ env.timestamp }}
 
       # Rahat Image
       - name: build && push rahat
@@ -58,6 +64,8 @@ jobs:
         with:
           context: .
           file: Dockerfile.rahat
-          # push: ${{ github.event_name == 'push' && 'true' || 'false' }}
-          push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-          tags: esatya/rahat-platform-rahat:stage-sms-voucher
+          push: ${{ github.event_name == 'workflow_dispatch' }}
+          tags: |
+            esatya/rahat-platform-rahat:crm-demo
+            esatya/rahat-platform-rahat:crm-demo-${{ env.VERSION }}
+            esatya/rahat-platform-rahat:crm-demo-${{ env.VERSION }}-${{ env.timestamp }}

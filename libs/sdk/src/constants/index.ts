@@ -188,6 +188,8 @@ export const MS_ACTIONS = {
       GET_ALL_COMMUNICATION_STATS: 'elProject.campaign.communication_stats',
       GET_CAMPAIGN_LOG: 'elProject.campaign.log',
       GET_AUTOMATION_DETAIL: 'elProject.campaign.automation.detail',
+      REFRESH_COMMUNICATION_STATS:
+        'elProject.campaign.refresh_communication_stats',
     },
   },
   SETTINGS: {
@@ -475,6 +477,9 @@ export const MS_ACTIONS = {
     CREATE_WALKIN: 'rpProject.walkin.create',
     GET_WALKIN: 'rpProject.walkin.get',
     GET_ALL_WALKIN: 'rpProject.walkin.getAll',
+    GET_REFERRER_BY_PHONE: 'rpProject.walkin.referrer.getByPhone',
+    EXPORT_BENEFICIARY_REFERRAL: 'rpProject.beneficiary.exportReferral',
+    SYNC_LEGACY_IMPORTED: 'rpProject.walkin.syncLegacyImported',
     CREATE_BULK_WALKIN_BENEFICIARIES: 'rpProject.walkin.createBulk',
     SYNC_STAGING_WALKIN: 'rpProject.walkin.syncStaging',
     LIST_REPORTING: 'rpProject.reporting.list',

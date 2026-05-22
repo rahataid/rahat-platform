@@ -26,9 +26,8 @@ export class ListenersService {
 
     private readonly devService: DevService,
     private emailService: EmailService,
-    private messageSenderService: MessageSenderService,
-
-  ) { }
+    private messageSenderService: MessageSenderService
+  ) {}
 
   @OnEvent(EVENTS.OTP_CREATED)
   async sendOTPEmail(data: any) {
@@ -70,7 +69,14 @@ export class ListenersService {
   @OnEvent(EVENTS.USER_CREATED)
   async sendUserCreatedEmail(data: any) {
     const settings = new SettingsService(this.prisma);
-    const frontendURL: any = await settings.getSettingsByName('FRONTEND_URL');
+    let frontendURLValue: string;
+    try {
+      const frontendURL: any = await settings.getSettingsByName('FRONTEND_URL');
+      frontendURLValue =
+        frontendURL?.['value'] ?? this.configService.get('FRONTEND_URL');
+    } catch {
+      frontendURLValue = this.configService.get('FRONTEND_URL') ?? '';
+    }
 
     this.emailService.sendEmail(
       data.address,
@@ -80,7 +86,7 @@ export class ListenersService {
 
       We're thrilled to have you on board! You've been successfully added to Rahat dashboard.
 
-      Click the link to access the Rahat dashboard: ${frontendURL["value"]}.
+      Click the link to access the Rahat dashboard: ${frontendURLValue}.
 
       Best regards,
       Rahat Team
@@ -103,7 +109,7 @@ export class ListenersService {
 
             <h3 style="color: #374151; font-size: 14px; line-height: 1.6; margin-bottom: 20px; text-align: center;">
 
-           Click the link to access the Rahat dashboard: ${frontendURL["value"]}
+           Click the link to access the Rahat dashboard: ${frontendURLValue}
             </h3>
 
             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
@@ -157,9 +163,8 @@ export class ListenersService {
           1: beneficiary.piiData.name,
         },
       };
-      this.messageSenderService.sendWhatappMessage(payload)
+      this.messageSenderService.sendWhatappMessage(payload);
     }
-
   }
   @OnEvent(ProjectEvents.REQUEST_REDEMPTION)
   async onRequestRedemption() {
@@ -180,56 +185,55 @@ export class ListenersService {
         phone: admin.phone,
         type: 'WHATSAPP',
         contentSid: CONTENT_SID,
-
       };
-      this.messageSenderService.sendWhatappMessage(payload)
-
-    })
-
+      this.messageSenderService.sendWhatappMessage(payload);
+    });
   }
-
 
   @OnEvent(ProjectEvents.UPDATE_REDEMPTION)
   async onUpdateRedemption(data) {
-    const CONTENT_SID = this.configService.get('REDEMPTION_APPROVED_SUCESS_SID');
+    const CONTENT_SID = this.configService.get(
+      'REDEMPTION_APPROVED_SUCESS_SID'
+    );
     const vendors = await this.prisma.user.findMany({
       where: {
         uuid: {
-          in: data
-        }
-      }
-    })
+          in: data,
+        },
+      },
+    });
     vendors.map((vendor) => {
       const payload = {
         phone: vendor.phone,
         type: 'WHATSAPP',
         contentSid: CONTENT_SID,
       };
-      this.messageSenderService.sendWhatappMessage(payload)
-    })
+      this.messageSenderService.sendWhatappMessage(payload);
+    });
   }
 
   @OnEvent(ProjectEvents.REDEEM_VOUCHER)
   async onRedeemVoucher(data) {
     const ben = await this.prisma.beneficiary.findUnique({
       where: {
-        uuid: data
-      }
-
+        uuid: data,
+      },
     });
 
     const benPii = await this.prisma.beneficiaryPii.findUnique({
       where: {
-        beneficiaryId: ben.id
-      }
-    })
+        beneficiaryId: ben.id,
+      },
+    });
 
-    const CONTENT_SID = this.configService.get('VOUCHER_REDEMPTION_SUCCESS_SID')
+    const CONTENT_SID = this.configService.get(
+      'VOUCHER_REDEMPTION_SUCCESS_SID'
+    );
     const payload = {
       phone: benPii.phone,
       type: 'WHATSAPP',
-      contentSid: CONTENT_SID
+      contentSid: CONTENT_SID,
     };
-    this.messageSenderService.sendWhatappMessage(payload)
+    this.messageSenderService.sendWhatappMessage(payload);
   }
 }

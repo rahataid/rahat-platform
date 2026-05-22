@@ -42,29 +42,18 @@ export const elActions: ProjectActionFunc = {
     sendCommand({ cmd: ProjectJobs.GET_ALL_STATS, uuid }, 500000),
 
   [MS_ACTIONS.ELPROJECT.GET_VENDOR_STATS]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: VendorJobs.GET_VENDOR_STATS },
-      { projectId: uuid },
-      500000
-    ),
+    sendCommand({ cmd: VendorJobs.GET_VENDOR_STATS, uuid }, 500000),
 
   [MS_ACTIONS.ELPROJECT.CRM.GET_ALL_VENDOR]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: VendorJobs.LIST },
-      { projectId: uuid, ...payload },
-      500000
-    ),
+    sendCommand({ cmd: VendorJobs.LIST, uuid }, payload, 500000),
   [MS_ACTIONS.ELPROJECT.CRM.EXPORT_VENDOR]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: VendorJobs.EXPORT },
-      { projectId: uuid, ...payload },
-      500000
-    ),
-  [MS_ACTIONS.ELPROJECT.CRM.GET_ALL_BENEFICIARY]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: BeneficiaryJobs.LIST_CONSUMER }, { projectId: uuid, ...payload },
-      500000
-    ),
+    sendCommand({ cmd: VendorJobs.EXPORT, uuid }, payload, 500000),
+  [MS_ACTIONS.ELPROJECT.CRM.GET_ALL_BENEFICIARY]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: BeneficiaryJobs.LIST_CONSUMER, uuid }, payload, 500000),
   [MS_ACTIONS.ELPROJECT.CRM.CREATE_TEMPLATE]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.CAMPAIGN.CREATE_TEMPLATE, uuid },
@@ -120,35 +109,27 @@ export const elActions: ProjectActionFunc = {
       500000
     ),
   [MS_ACTIONS.ELPROJECT.CRM.GET_FAILED_BATCH]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: VendorJobs.LIST_FAILED_BATCH },
-      { projectId: uuid, ...payload },
-      500000
-    ),
+    sendCommand({ cmd: VendorJobs.LIST_FAILED_BATCH, uuid }, payload, 500000),
   [MS_ACTIONS.ELPROJECT.CRM.GET_ONE_FAILED_BATCH]: (
     uuid,
     payload,
     sendCommand
   ) =>
     sendCommand(
-      { cmd: VendorJobs.GET_ONE_FAILED_BATCH },
-      { projectId: uuid, ...payload },
+      { cmd: VendorJobs.GET_ONE_FAILED_BATCH, uuid },
+      payload,
       500000
     ),
 
   [MS_ACTIONS.ELPROJECT.CRM.RETRY_IMPORT]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: VendorJobs.RETRY_IMPORT },
-      { projectId: uuid, ...payload },
-      500000
-    ),
+    sendCommand({ cmd: VendorJobs.RETRY_IMPORT, uuid }, payload, 500000),
 
-  [MS_ACTIONS.ELPROJECT.CRM.DELETE_FAILED_BATCH]: (uuid, payload, sendCommand) =>
-    sendCommand(
-      { cmd: VendorJobs.DELETE_FAILED_BATCH },
-      { projectId: uuid, ...payload },
-      500000
-    ),
+  [MS_ACTIONS.ELPROJECT.CRM.DELETE_FAILED_BATCH]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: VendorJobs.DELETE_FAILED_BATCH, uuid }, payload, 500000),
 
   [MS_ACTIONS.ELPROJECT.CRM.SYNC_TEMPLATES]: (uuid, payload, sendCommand) =>
     sendCommand(
@@ -216,6 +197,17 @@ export const elActions: ProjectActionFunc = {
   ) =>
     sendCommand(
       { cmd: ProjectJobs.CAMPAIGN.GET_AUTOMATION_DETAIL, uuid },
+      { ...payload },
+      500000
+    ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.REFRESH_COMMUNICATION_STATS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.REFRESH_COMMUNICATION_STATS, uuid },
       { ...payload },
       500000
     ),

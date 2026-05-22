@@ -32,6 +32,7 @@ export const JOBS = {
   REMOVE: 'rahat.jobs.beneficiary.remove',
   ADD_TO_PROJECT: 'rahat.jobs.beneficiary.add_to_project',
   BULK_ADD_TO_PROJECT: 'rahat.jobs.beneficiary.bulk_add_to_project',
+  BULK_LINK_TO_PROJECT_LEGACY: 'rahat.jobs.beneficiary.bulk_link_to_project_legacy',
   ASSIGN_TO_PROJECT: 'rahat.jobs.beneficiary.assign_to_project',
   ASSIGN_GROUP_TO_PROJECT: 'rahat.jobs.beneficiary.assign_group_to_project',
   BULK_ASSIGN_TO_PROJECT: 'rahat.jobs.beneficiary.bulk_assign',
@@ -92,5 +93,7 @@ export const JOBS = {
   DISBURSEMENT_BALANCE_CHART: 'rahat.jobs.disbursement.balance.get',
   GET_OFFRAMP_SUMMARY: 'rahat.jobs.beneficiary.get_offramp_summary',
   GET_BENEFICIARYS_PROJECT_DETAILS: 'rahat.jobs.beneficiary.getBeneficiarysProjectDetails',
-  LIST_CONSUMER: 'rahat.jobs.beneficiary.list_consumer'
+  LIST_CONSUMER: 'rahat.jobs.beneficiary.list_consumer',
+  /** Cambodia villager list: resolve wallet addresses by PII name for project-scoped filtering. */
+  CAMBODIA_WALLET_FILTER_BY_NAME: 'rahat.jobs.beneficiary.cambodia_wallet_filter_by_name',
 };

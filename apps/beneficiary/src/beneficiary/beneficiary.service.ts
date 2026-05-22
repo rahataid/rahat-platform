@@ -27,6 +27,7 @@ import {
   BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
+  generateRandomWallet,
   GroupWithValidationAA,
   ProjectContants,
   TPIIData,
@@ -134,18 +135,53 @@ export class BeneficiaryService {
   async listBenefByProject(data: any) {
     if (!data?.data?.length) return data;
 
-    const mergedProjectData = await this.mergeProjectData(
-      data.data,
-      data.payload
-    );
+    try {
+      const mergedProjectData = await this.mergeProjectData(
+        data.data,
+        data.payload
+      );
 
-    if (data?.extras) {
-      data.data = { data: mergedProjectData, extras: data.extras };
-    } else {
-      data.data = mergedProjectData || [];
+      if (data?.extras) {
+        data.data = { data: mergedProjectData, extras: data.extras };
+      } else {
+        data.data = mergedProjectData || [];
+      }
+    } catch (error) {
+      this.logger.error(
+        `listBenefByProject: PII merge failed — returning raw project data. Reason: ${error?.message}`
+      );
+      // Return Cambodia data without PII enrichment rather than failing the request
     }
 
     return data;
+  }
+
+  /** Wallet addresses for villagers assigned to a project whose PII name matches (Cambodia list filter). */
+  async getWalletAddressesForProjectByPiiName(payload: {
+    projectId?: string;
+    name?: string;
+  }): Promise<string[]> {
+    const projectId = payload?.projectId?.trim();
+    const fragment = payload?.name?.trim();
+    if (!projectId || !fragment) return [];
+
+    const rows = await this.prisma.beneficiaryProject.findMany({
+      where: {
+        projectId,
+        deletedAt: null,
+        Beneficiary: {
+          deletedAt: null,
+          pii: {
+            name: { contains: fragment, mode: 'insensitive' },
+          },
+        },
+      },
+      select: {
+        Beneficiary: { select: { walletAddress: true } },
+      },
+    });
+
+    return [...new Set(rows.map((r) => r.Beneficiary.walletAddress))];
   }
 
   async findOneBeneficiary(data: any) {
@@ -330,10 +366,35 @@ export class BeneficiaryService {
     //   }
     // })
 
+    if (!Array.isArray(data) || !data.length) {
+      return [];
+    }
+
+    const walletAddresses = [
+      ...new Set(
+        data
+          .map((b) => b?.walletAddress)
+          .filter(
+            (addr): addr is string =>
+              typeof addr === 'string' && addr.trim().length > 0
+          )
+      ),
+    ];
+
+    /** Cambodia EL villagers may exist before a Rahat wallet is assigned; skip invalid Prisma `in` queries. */
+    if (!walletAddresses.length) {
+      return data.map((dat: Record<string, any>) => ({
+        piiData: undefined,
+        projectData: {},
+        ...dat,
+        healthWorker: dat?.healthWorker ?? dat?.health_worker ?? null,
+      }));
+    }
+
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
         walletAddress: {
-          in: data.map((b) => b.walletAddress),
+          in: walletAddresses,
         },
       },
       include: {
@@ -344,18 +405,33 @@ export class BeneficiaryService {
     // const beneficiaries = []
 
     if (data && beneficiaries.length > 0) {
-      const combinedData = data.map((dat) => {
+      const combinedData = data.map((dat: Record<string, any>) => {
         const benDetails = beneficiaries.find(
           (ben) => ben.walletAddress === dat.walletAddress
         );
         const { pii, ...rest } = benDetails || {};
+        // Normalise Cambodia CHW relation (camelCase vs snake_case on the wire).
+        const cambodiaHealthWorker =
+          dat?.healthWorker ?? dat?.health_worker ?? null;
+
         return {
           piiData: pii,
           projectData: rest,
           ...dat,
+          healthWorker: cambodiaHealthWorker,
         };
       });
       return combinedData || [];
+    }
+
+    /** Cambodia villagers without a matching Rahat wallet keep list rows + VD link. */
+    if (data?.length && beneficiaries.length === 0) {
+      return data.map((dat: Record<string, any>) => ({
+        piiData: undefined,
+        projectData: {},
+        ...dat,
+        healthWorker: dat?.healthWorker ?? dat?.health_worker ?? null,
+      }));
     }
 
     // TODO: remove projectData and piiData that has been added manually, as it will affects the FE. NEEDS to be refactord in FE as well.
@@ -400,7 +476,10 @@ export class BeneficiaryService {
 
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const createdBeneficiary = await this.rsprisma.beneficiary.create({
-      data: { ...data, walletAddress },
+      data: {
+        ...data,
+        walletAddress: walletAddress || generateRandomWallet().address,
+      },
     });
 
     await this.beneficiaryUtilsService.addPIIData(
@@ -512,8 +591,8 @@ export class BeneficiaryService {
         .then((beneficiary) =>
           beneficiary
             ? this.rsprisma.beneficiaryPii.findUnique({
-              where: { beneficiaryId: beneficiary.id },
-            })
+                where: { beneficiaryId: beneficiary.id },
+              })
             : null
         ),
     ]);
@@ -553,7 +632,30 @@ export class BeneficiaryService {
     }));
   }
 
+  private getPhoneSearchVariants(phone?: string): string[] {
+    if (!phone) return [];
+
+    const trimmedPhone = phone.trim();
+    const digitsOnly = trimmedPhone.replace(/\D/g, '');
+    const variants = new Set<string>([trimmedPhone]);
+
+    if (digitsOnly) {
+      variants.add(digitsOnly);
+      variants.add(`+${digitsOnly}`);
+
+      // Common variant: local numbers saved without country code.
+      if (digitsOnly.length > 10) {
+        variants.add(digitsOnly.slice(-10));
+        variants.add(`+${digitsOnly.slice(-10)}`);
+      }
+    }
+
+    return Array.from(variants);
+  }
+
   async findOneByPhone(payload: { phone: string; projectUUID: string }) {
+    const phoneVariants = this.getPhoneSearchVariants(payload.phone);
+
     const beneficiary = await this.prisma.beneficiary.findFirst({
       where: {
         AND: [
@@ -567,7 +669,11 @@ export class BeneficiaryService {
 
           {
             pii: {
-              phone: payload.phone,
+              is: {
+                phone: {
+                  in: phoneVariants,
+                },
+              },
             },
           },
         ],
@@ -719,6 +825,78 @@ export class BeneficiaryService {
       },
       projectPayloads
     );
+  }
+
+  async bulkLinkToProjectLegacy(payload: {
+    projectId: string;
+    beneficiaryIds: string[];
+  }) {
+    this.logger.log(
+      `Received bulk link to project legacy request for projectId=${payload.projectId} with ${payload.beneficiaryIds.length} beneficiaryIds`
+    );
+    const { projectId, beneficiaryIds = [] } = payload || {};
+
+    if (!projectId) {
+      throw new RpcException('projectId is required');
+    }
+
+    const project = await this.prisma.project.findUnique({
+      where: { uuid: projectId },
+      select: { uuid: true },
+    });
+
+    if (!project) {
+      throw new RpcException('Project not found');
+    }
+
+    const uniqueBeneficiaryIds = [...new Set(beneficiaryIds.filter(Boolean))];
+
+    if (!uniqueBeneficiaryIds.length) {
+      return {
+        projectId,
+        requestedCount: beneficiaryIds.length,
+        uniqueCount: 0,
+        insertedCount: 0,
+        missingBeneficiaryIds: [],
+      };
+    }
+
+    const existingBeneficiaries = await this.rsprisma.beneficiary.findMany({
+      where: {
+        uuid: {
+          in: uniqueBeneficiaryIds,
+        },
+      },
+      select: {
+        uuid: true,
+      },
+    });
+
+    const existingIds = existingBeneficiaries.map((b) => b.uuid);
+    const existingIdsSet = new Set(existingIds);
+    const missingBeneficiaryIds = uniqueBeneficiaryIds.filter(
+      (id) => !existingIdsSet.has(id)
+    );
+
+    let insertedCount = 0;
+    if (existingIds.length) {
+      const created = await this.prisma.beneficiaryProject.createMany({
+        data: existingIds.map((beneficiaryId) => ({
+          projectId,
+          beneficiaryId,
+        })),
+        skipDuplicates: true,
+      });
+      insertedCount = created.count;
+    }
+
+    return {
+      projectId,
+      requestedCount: beneficiaryIds.length,
+      uniqueCount: uniqueBeneficiaryIds.length,
+      insertedCount,
+      missingBeneficiaryIds,
+    };
   }
 
   async update(uuid: UUID, dto: UpdateBeneficiaryDto) {
@@ -984,12 +1162,14 @@ export class BeneficiaryService {
           : [];
 
       console.log(`
-        Found ${duplicatePhones.length
+        Found ${
+          duplicatePhones.length
         } existing beneficiaries phone numbers i: ${duplicatePhones.join(', ')}
-        Found ${duplicateWallets.length
+        Found ${
+          duplicateWallets.length
         } existing beneficiaries wallet addresses: ${duplicateWallets.join(
-          ', '
-        )}
+        ', '
+      )}
         `);
 
       if (!ignoreExisting) {
@@ -1048,10 +1228,12 @@ export class BeneficiaryService {
 
     console.log(`Creating ${batches.length} batches of beneficiaries.
     Total beneficiaries: ${filteredBeneficiaries.length}
-    Duplicate phone numbers: ${filteredBeneficiaries.length - batches.flat().length
-      }
-    Duplicate wallet addresses: ${filteredBeneficiaries.length - batches.flat().length
-      }
+    Duplicate phone numbers: ${
+      filteredBeneficiaries.length - batches.flat().length
+    }
+    Duplicate wallet addresses: ${
+      filteredBeneficiaries.length - batches.flat().length
+    }
       `);
 
     const bulkQueueData = batches.map((batch, index) => ({
@@ -1551,21 +1733,21 @@ export class BeneficiaryService {
 
     const where = projectUUID
       ? {
-        deletedAt: null,
-        beneficiaryGroupProject:
-          projectUUID === 'NOT_ASSGNED'
-            ? {
-              none: {},
-            }
-            : {
-              some: {
-                projectId: projectUUID,
-              },
-            },
-      }
+          deletedAt: null,
+          beneficiaryGroupProject:
+            projectUUID === 'NOT_ASSGNED'
+              ? {
+                  none: {},
+                }
+              : {
+                  some: {
+                    projectId: projectUUID,
+                  },
+                },
+        }
       : {
-        deletedAt: null,
-      };
+          deletedAt: null,
+        };
 
     const data = await paginate(
       this.prisma.beneficiaryGroup,
@@ -2152,9 +2334,11 @@ export class BeneficiaryService {
     const { fromDate, toDate } = payload;
     if (!fromDate || !toDate) return [];
 
-    const newTODate = new Date(toDate)
-    newTODate.setUTCHours(23, 59, 59, 999)
-    this.logger.log(`Fetching beneficiary reporting logs from ${fromDate} to ${newTODate} for project ${payload.projectId}`);
+    const newTODate = new Date(toDate);
+    newTODate.setUTCHours(23, 59, 59, 999);
+    this.logger.log(
+      `Fetching beneficiary reporting logs from ${fromDate} to ${newTODate} for project ${payload.projectId}`
+    );
 
     const benDetails = await this.prisma.beneficiaryProject.findMany({
       where: {

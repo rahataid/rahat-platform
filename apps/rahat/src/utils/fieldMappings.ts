@@ -2,7 +2,16 @@
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 export const KOBO_FIELD_MAPPINGS = {
   name: 'name',
+  villager_name: 'name',
+  villagerName: 'name',
+  'Name (姓名)': 'name',
+  '姓名': 'name',
   phone_number: 'phone',
+  mobile_number: 'phone',
+  mobileNumber: 'phone',
+  phone: 'phone',
+  'Mobile Number (手机号码)': 'phone',
+  '手机号码': 'phone',
   age: 'age',
   data: 'type',
   gender: 'gender',
@@ -13,4 +22,15 @@ export const KOBO_FIELD_MAPPINGS = {
   district: 'district',
   commune: 'commune',
   village: 'village',
+  village_doctor_name: 'healthWorkerName',
+  villageDoctorName: 'healthWorkerName',
+  Health_Worker_Name: 'healthWorkerName',
+  'Village Doctor Name': 'healthWorkerName',
+  kobo_username: 'koboUsername',
+  data_collector_id: 'dataCollectorId',
+  dataCollectorId: 'dataCollectorId',
+  /** China: village doctor row UUID from Kobo dropdown (stored in payload meta) */
+  village_doctor_uuid: 'villageDoctorUuid',
+  chwUuid: 'villageDoctorUuid',
+  vd_uuid: 'villageDoctorUuid',
 };
