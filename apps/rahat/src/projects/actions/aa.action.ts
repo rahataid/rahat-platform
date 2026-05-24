@@ -325,6 +325,20 @@ export const aaActions: ProjectActionFunc = {
   ) =>
     sendCommand({ cmd: AAJobs.BENEFICIARY.GET_TOKEN_DETAILS, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GENERATE_QR_PDF]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.BENEFICIARY.GENERATE_QR_PDF, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_QR_PDF]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.BENEFICIARY.GET_QR_PDF, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.FUND_MANAGEMENT.ADD_FUND]: (
     uuid,
     payload,
@@ -665,13 +679,13 @@ export const aaActions: ProjectActionFunc = {
       payload
     ),
 
-  [MS_ACTIONS.AAPROJECT.INKIND.GET_AVAILABLE_INKIND_BENEFICIARY_PHONE]: (
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_AVAILABLE_INKIND_FOR_BENEFICIARY]: (
     uuid,
     payload,
     sendCommand
   ) =>
     sendCommand(
-      { cmd: AAJobs.INKIND.GET_AVAILABLE_INKIND_BENEFICIARY_PHONE, uuid },
+      { cmd: AAJobs.INKIND.GET_AVAILABLE_INKIND_FOR_BENEFICIARY, uuid },
       payload
     ),
 
@@ -740,6 +754,26 @@ export const aaActions: ProjectActionFunc = {
   ) =>
     sendCommand(
       { cmd: AAJobs.INKIND.BENEFICIARY_INKIND_DETAILS, uuid },
+      payload
+    ),
+
+
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_OFFLINE_BENEFICIARY_INKIND_BY_VENDOR]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.GET_OFFLINE_BENEFICIARY_INKIND_BY_VENDOR, uuid },
+      payload),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.REDEEM_OFFLINE_INKIND_BY_VENDOR]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.REDEEM_OFFLINE_INKIND_BY_VENDOR, uuid },
       payload
     ),
 

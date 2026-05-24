@@ -1,7 +1,7 @@
 meta {
-  name: get GroupInkind Redeem Logs
+  name: get groupInlinds getByGroup
   type: http
-  seq: 13
+  seq: 18
 }
 
 post {
@@ -12,9 +12,10 @@ post {
 
 body:json {
   {
-    "action": "aaProject.groupInkinds.getLogs",
+    "action":"aaProject.groupInkinds.getByGroup",
     "payload": {
-      "groupInkindId": "8101c8ac-2d1d-4124-bd21-03e23d731528"
+      "mode":"OFFLINE",
+      "search":"aaaa"
     }
   }
 }

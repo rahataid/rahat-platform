@@ -1,7 +1,7 @@
 meta {
-  name: get GroupInkind Redeem Logs
+  name: sync offline redemptions
   type: http
-  seq: 13
+  seq: 19
 }
 
 post {
@@ -12,9 +12,9 @@ post {
 
 body:json {
   {
-    "action": "aaProject.groupInkinds.getLogs",
+    "action": "aaProject.inkinds.getAllOfflineBeneficiaryByVendor",
     "payload": {
-      "groupInkindId": "8101c8ac-2d1d-4124-bd21-03e23d731528"
+       "vendorId": "e612a38b-a2b3-4b7d-96d2-1bafd4343626"
     }
   }
 }

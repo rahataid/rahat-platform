@@ -25,7 +25,32 @@ export class FileWalletStorage implements WalletStorage {
 
     async saveKey(keys: WalletKeys) {
         const filePath = path.join(this.storageDir, `${keys.blockchain.toLocaleUpperCase()}_${keys.address}.json`);
-        await fs.writeFile(filePath, JSON.stringify(keys, null, 2));
+        await fs.writeFile(filePath, JSON.stringify(keys));
+    }
+
+    async saveBulk(keysArray: WalletKeys[]): Promise<void> {
+        const WRITE_BATCH_SIZE = 50;
+        const batches = this.createBatches(keysArray, WRITE_BATCH_SIZE);
+
+        for (const batch of batches) {
+            await Promise.all(
+                batch.map(keys => {
+                    const filePath = path.join(
+                        this.storageDir,
+                        `${keys.blockchain.toUpperCase()}_${keys.address}.json`
+                    );
+                    return fs.writeFile(filePath, JSON.stringify(keys));
+                })
+            );
+        }
+    }
+
+    private createBatches<T>(items: T[], batchSize: number): T[][] {
+        const batches: T[][] = [];
+        for (let i = 0; i < items.length; i += batchSize) {
+            batches.push(items.slice(i, i + batchSize));
+        }
+        return batches;
     }
     async getKey(address: string, blockchain: ChainType): Promise<WalletKeys | null> {
         this.logger.log(`Getting key for address: ${address.toLocaleUpperCase()} and blockchain: ${blockchain}`);

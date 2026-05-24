@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { Keypair } from 'stellar-sdk';
 import { MemoryWalletStorage } from '../storages/memory.storage';
-import { ChainType, IWalletManager, WalletStorage } from '../types';
+import { ChainType, IWalletManager, WalletKeys, WalletStorage } from '../types';
 import { ConnectedWallet } from './connectedWallet';
 
 export class StellarWallet implements IWalletManager {
@@ -44,6 +44,35 @@ export class StellarWallet implements IWalletManager {
     };
     await this.storage.saveKey(walletKeys);
     return new ConnectedWallet(walletKeys, this.rpcUrl);
+  }
+
+  async createBulk(count: number): Promise<WalletKeys[]> {
+    const wallets: WalletKeys[] = [];
+
+    for (let i = 0; i < count; i++) {
+      const mnemonic = ethers.Mnemonic.fromEntropy(ethers.randomBytes(16));
+      const hdPath = "m/44'/148'/0'/0/0";
+      const wallet = ethers.HDNodeWallet.fromMnemonic(mnemonic, hdPath);
+      const privateKeyHex = wallet.privateKey.slice(2);
+      const privateKeyBuffer = Buffer.from(privateKeyHex, 'hex');
+      const stellarKeypair = Keypair.fromRawEd25519Seed(privateKeyBuffer);
+
+      wallets.push({
+        address: stellarKeypair.publicKey(),
+        privateKey: stellarKeypair.secret(),
+        publicKey: stellarKeypair.publicKey(),
+        mnemonic: wallet.mnemonic?.phrase,
+        blockchain: StellarWallet.blockchainType,
+      });
+    }
+
+    if (this.storage.saveBulk) {
+      await this.storage.saveBulk(wallets);
+    } else {
+      await Promise.all(wallets.map(w => this.storage.saveKey(w)));
+    }
+
+    return wallets;
   }
 
   async importWallet(privateKey: string): Promise<ConnectedWallet> {
