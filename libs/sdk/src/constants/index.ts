@@ -483,6 +483,7 @@ export const MS_ACTIONS = {
     CREATE_BULK_WALKIN_BENEFICIARIES: 'rpProject.walkin.createBulk',
     SYNC_STAGING_WALKIN: 'rpProject.walkin.syncStaging',
     LIST_REPORTING: 'rpProject.reporting.list',
+    LIST_LIVE_STATS: 'rpProject.reporting.live',
     UPDATE_BENEFICIARY: 'rpProject.beneficiary.update',
     LIST_BENEFICIARY_REIMBURSEMENTS: 'rpProject.beneficiary.listReimbursements',
     SYNC_OFFLINE_TRANSACTIONS: 'rpProject.syncOfflineTransactions',
