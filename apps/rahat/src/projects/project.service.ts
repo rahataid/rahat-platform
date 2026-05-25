@@ -374,7 +374,6 @@ export class ProjectService {
       KOBO_COUNTRY_CODE ||
       (NODE_ENV === 'production' ? CAMBODIA_COUNTRY_CODE : '');
     benef.phone = this.normalizeKoboPhone(benef.phone, countryCode);
-    console.log('Beneficiary Phone', benef.phone);
 
     const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
     const extrasPayload = {
@@ -384,14 +383,15 @@ export class ProjectService {
       villageDoctorUuid:
         benef.villageDoctorUuid || benef.meta?.village_doctor_uuid,
       koboUsername:
-        benef.koboUsername ||
-        benef.dataCollectorId ||
+        benef.koboUsername || // from 'vd', 'kobo_username', 'Eye_Partner', or 'eye_partner' mapping
+        benef.meta?.Eye_Partner || // safety net: if Eye_Partner wasn't mapped (shouldn't happen)
+        benef.meta?.eye_partner ||
         benef.meta?._submitted_by ||
         benef.meta?.username ||
-        benef.meta?.eye_partner ||
         benef.meta?.chw ||
         benef.meta?.vd ||
         undefined,
+        // NOTE: dataCollectorId intentionally excluded — data collector ≠ Village Doctor
       dataCollectorId: benef.dataCollectorId || benef.meta?._submitted_by,
       occupation: benef.occupation || 'UNKNOWN',
       province: benef.province || 'UNKNOWN',
@@ -399,7 +399,6 @@ export class ProjectService {
       commune: benef.commune || 'UNKNOWN',
       village: benef.village || 'UNKNOWN',
     };
-
     const koboPayload = {
       name: piiData.name,
       phone: piiData.phone,
@@ -413,8 +412,8 @@ export class ProjectService {
     const row = await this.prisma.koboBeneficiary.create({
       data: koboPayload,
     });
+
     const piiExist = await this.checkPiiPhone(benef.phone);
-    console.log({ piiExist }, 'piiExist');
     if (piiExist) {
       const discardedPayload = {
         ...piiData,

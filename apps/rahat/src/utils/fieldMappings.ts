@@ -28,6 +28,8 @@ export const KOBO_FIELD_MAPPINGS = {
   'Village Doctor Name': 'healthWorkerName',
   kobo_username: 'koboUsername',
   vd: 'koboUsername', // New form: Village Doctor field (VD is the CHW in DB)
+  Eye_Partner: 'koboUsername', // Demo/China form: Village Doctor field (capitalized)
+  eye_partner: 'koboUsername', // lowercase alias
   data_collector_id: 'dataCollectorId',
   dataCollectorId: 'dataCollectorId',
   chw: 'dataCollectorId', // New form: Eye Partner field (data collector only)
