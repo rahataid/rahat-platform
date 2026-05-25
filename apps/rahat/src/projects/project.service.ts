@@ -390,11 +390,8 @@ export class ProjectService {
         benef.meta?.Eye_Partner || // legacy China form: Eye_Partner was the VD selector
         benef.meta?.eye_partner ||
         benef.meta?.kobo_username ||
-        benef.meta?._submitted_by ||
-        benef.meta?.username ||
-        benef.meta?.chw ||
         undefined,
-        // NOTE: dataCollectorId intentionally excluded — data collector ≠ Village Doctor
+        // NOTE: dataCollectorId / _submitted_by / chw intentionally excluded — data collector ≠ Village Doctor
       dataCollectorId:
         benef.dataCollectorId ||
         benef.meta?.chw ||
@@ -420,8 +417,11 @@ export class ProjectService {
       data: koboPayload,
     });
 
-    const piiExist = await this.checkPiiPhone(benef.phone);
-    if (piiExist) {
+    const phoneConflict = await this.resolveKoboPhoneConflict(
+      benef.phone,
+      uuid
+    );
+    if (phoneConflict === 'discard') {
       const discardedPayload = {
         ...piiData,
         age: benef.age,
@@ -433,6 +433,14 @@ export class ProjectService {
         },
       };
       return this.saveToDiscarded(uuid, discardedPayload);
+    }
+    if (phoneConflict === 'link') {
+      return this.linkExistingKoboBeneficiary(
+        uuid,
+        benef,
+        extrasPayload,
+        row.uuid
+      );
     }
     // 2. Save to Beneficiary and PII
     return this.client
@@ -511,6 +519,75 @@ export class ProjectService {
         phone,
       },
     });
+  }
+
+  /**
+   * Kobo import phone policy:
+   * - create: new phone
+   * - discard: phone already registered on this project (duplicate referral)
+   * - link: phone exists on platform but not yet on this project
+   */
+  async resolveKoboPhoneConflict(
+    phone: string,
+    projectId: string
+  ): Promise<'create' | 'discard' | 'link'> {
+    const pii = await this.checkPiiPhone(phone);
+    if (!pii) return 'create';
+
+    const beneficiary = await this.prisma.beneficiary.findFirst({
+      where: { id: pii.beneficiaryId, deletedAt: null },
+      select: { uuid: true },
+    });
+    if (!beneficiary) return 'discard';
+
+    const inProject = await this.prisma.beneficiaryProject.findFirst({
+      where: {
+        projectId,
+        beneficiaryId: beneficiary.uuid,
+        deletedAt: null,
+      },
+    });
+    return inProject ? 'discard' : 'link';
+  }
+
+  async linkExistingKoboBeneficiary(
+    projectId: UUID,
+    benef: any,
+    extrasPayload: Record<string, unknown>,
+    importId: string
+  ) {
+    const pii = await this.checkPiiPhone(benef.phone);
+    if (!pii) throw new Error('Beneficiary not found for existing phone');
+
+    const beneficiary = await this.prisma.beneficiary.findFirst({
+      where: { id: pii.beneficiaryId, deletedAt: null },
+    });
+    if (!beneficiary) throw new Error('Beneficiary not found for existing phone');
+
+    const cambodiaPayload = {
+      uuid: beneficiary.uuid,
+      phone: benef.phone,
+      walletAddress: beneficiary.walletAddress,
+      type: benef?.type || 'UNKNOWN',
+      leadInterests: benef?.leadInterests || [],
+      extras: extrasPayload,
+    };
+
+    return this.client
+      .send(
+        { cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid: projectId },
+        cambodiaPayload
+      )
+      .pipe(
+        timeout(MS_TIMEOUT),
+        switchMap(() =>
+          this.addToProjectAndUpdate({
+            projectId,
+            beneficiaryId: beneficiary.uuid,
+            importId,
+          })
+        )
+      );
   }
 
   mapKoboFields(payload: any) {
