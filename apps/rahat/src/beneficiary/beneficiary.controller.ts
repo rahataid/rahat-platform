@@ -54,7 +54,7 @@ import {
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, firstValueFrom, map, throwError, timeout } from 'rxjs';
-import { CommsClient } from '../comms/comms.service';
+import { CommsService } from '../comms/comms.service';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
 import { removeSpaces } from '../utils';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
@@ -87,7 +87,7 @@ function getDateInfo(dateString) {
 export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
-    @Inject('COMMS_CLIENT') private commsClient: CommsClient,
+    @Inject('COMMS_CLIENT') private commsService: CommsService,
     @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue,
     private readonly walletProcessingService: WalletProcessingService,
     private readonly wallet: WalletService
@@ -139,7 +139,8 @@ export class BeneficiaryController {
   // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('stats')
   async getStats() {
-    const commsStats = await this.commsClient.broadcast.getReport({})
+    const commsClient = await this.commsService.getClient();
+    const commsStats = await commsClient.broadcast.getReport({})
     const benefStats = await firstValueFrom(this.client.send({ cmd: BeneficiaryJobs.STATS }, {}));
     return { data: { commsStats: commsStats.data, benefStats: benefStats } };
   }
