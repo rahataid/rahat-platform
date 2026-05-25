@@ -27,9 +27,13 @@ import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { switchMap, tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
-import { createExtrasAndPIIData } from '../utils';
+import {
+  createExtrasAndPIIData,
+  mapKoboFields,
+  pickVillageDoctorIdentifier,
+  unwrapKoboPayload,
+} from '../utils';
 import { generateIdempotencyKey } from '../utils/idempotency-key';
-import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import {
   aaActions,
   aidLinkActions,
@@ -355,9 +359,22 @@ export class ProjectService {
   }
 
   async importKoboBeneficiary(uuid: UUID, data: any) {
-    this.logger.log(`[kobo-import] raw payload keys: ${JSON.stringify(Object.keys(data))}`);
-    this.logger.log(`[kobo-import] raw payload: ${JSON.stringify(data)}`);
-    const benef: any = this.mapKoboFields(data);
+    const rawPayload = unwrapKoboPayload(data);
+    this.logger.log(
+      `[kobo-import] raw payload keys: ${JSON.stringify(Object.keys(rawPayload))}`
+    );
+    this.logger.log(`[kobo-import] raw payload: ${JSON.stringify(rawPayload)}`);
+    const benef: any = mapKoboFields(rawPayload);
+    const villageDoctorId = pickVillageDoctorIdentifier(benef);
+    this.logger.log(
+      `[kobo-import] mapped koboUsername="${benef.koboUsername ?? ''}" villageDoctorId="${villageDoctorId ?? ''}" meta.Village_Doctor="${benef.meta?.Village_Doctor ?? ''}"`
+    );
+    if (!villageDoctorId) {
+      throw new Error(
+        `Village Doctor is missing from Kobo submission. Expected a field like Village_Doctor / vd with a CHW kobo username (e.g. test_hima). Received keys: ${Object.keys(rawPayload).join(', ')}`
+      );
+    }
+
     if (!benef.type) benef.type = 'LEAD';
     if (benef.type) benef.type = benef.type.toUpperCase();
     if (benef.type !== 'LEAD') benef.phone = genRandomPhone('88');
@@ -381,19 +398,17 @@ export class ProjectService {
 
     const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
     const extrasPayload = {
-      meta: benef.meta,
+      meta: {
+        ...(benef.meta ?? {}),
+        Village_Doctor: villageDoctorId,
+        vd: villageDoctorId,
+      },
       healthWorkerName:
         benef.healthWorkerName || benef.meta?.Health_Worker_Name,
       villageDoctorUuid:
         benef.villageDoctorUuid || benef.meta?.village_doctor_uuid,
-      koboUsername:
-        benef.koboUsername || // from vd, Village_Doctor, kobo_username, etc.
-        benef.meta?.Village_Doctor ||
-        benef.meta?.vd ||
-        benef.meta?.village_doctor ||
-        benef.meta?.kobo_username ||
-        undefined,
-        // NOTE: dataCollectorId / _submitted_by / chw / Eye_Partner intentionally excluded — data collector / vendor ≠ Village Doctor
+      koboUsername: villageDoctorId,
+      // NOTE: dataCollectorId / _submitted_by / chw / Eye_Partner intentionally excluded — data collector / vendor ≠ Village Doctor
       dataCollectorId:
         benef.dataCollectorId ||
         benef.meta?.chw ||
@@ -590,25 +605,6 @@ export class ProjectService {
           })
         )
       );
-  }
-
-  mapKoboFields(payload: any) {
-    const mappedPayload = {};
-    const meta = {};
-
-    for (const key in payload) {
-      // Strip group prefix (e.g. "group_abc123/Village_Doctor" → "Village_Doctor")
-      const bareKey = key.includes('/') ? key.split('/').pop()! : key;
-      if (KOBO_FIELD_MAPPINGS[bareKey]) {
-        mappedPayload[KOBO_FIELD_MAPPINGS[bareKey]] = payload[key];
-      } else if (KOBO_FIELD_MAPPINGS[key]) {
-        mappedPayload[KOBO_FIELD_MAPPINGS[key]] = payload[key];
-      } else {
-        meta[bareKey] = payload[key];
-        if (bareKey !== key) meta[key] = payload[key];
-      }
-    }
-    return { ...mappedPayload, meta };
   }
 
   normalizeKoboPhone(phone: string, countryCode = '') {
