@@ -361,17 +361,25 @@ export class ProjectService {
   async importKoboBeneficiary(uuid: UUID, data: any) {
     const rawPayload = unwrapKoboPayload(data);
     this.logger.log(
-      `[kobo-import] raw payload keys: ${JSON.stringify(Object.keys(rawPayload))}`
+      `[kobo-import] raw payload keys: ${JSON.stringify(
+        Object.keys(rawPayload)
+      )}`
     );
     this.logger.log(`[kobo-import] raw payload: ${JSON.stringify(rawPayload)}`);
     const benef: any = mapKoboFields(rawPayload);
     const villageDoctorId = pickVillageDoctorIdentifier(benef);
     this.logger.log(
-      `[kobo-import] mapped koboUsername="${benef.koboUsername ?? ''}" villageDoctorId="${villageDoctorId ?? ''}" meta.Village_Doctor="${benef.meta?.Village_Doctor ?? ''}"`
+      `[kobo-import] mapped koboUsername="${
+        benef.koboUsername ?? ''
+      }" villageDoctorId="${villageDoctorId ?? ''}" meta.Village_Doctor="${
+        benef.meta?.Village_Doctor ?? ''
+      }"`
     );
     if (!villageDoctorId) {
       throw new Error(
-        `Village Doctor is missing from Kobo submission. Expected a field like Village_Doctor / vd with a CHW kobo username (e.g. test_hima). Received keys: ${Object.keys(rawPayload).join(', ')}`
+        `Village Doctor is missing from Kobo submission. Received keys: ${Object.keys(
+          rawPayload
+        ).join(', ')}`
       );
     }
 
@@ -400,6 +408,7 @@ export class ProjectService {
     const extrasPayload = {
       meta: {
         ...(benef.meta ?? {}),
+        chw: villageDoctorId,
         Village_Doctor: villageDoctorId,
         vd: villageDoctorId,
       },
@@ -408,11 +417,11 @@ export class ProjectService {
       villageDoctorUuid:
         benef.villageDoctorUuid || benef.meta?.village_doctor_uuid,
       koboUsername: villageDoctorId,
-      // NOTE: dataCollectorId / _submitted_by / chw / Eye_Partner intentionally excluded — data collector / vendor ≠ Village Doctor
       dataCollectorId:
         benef.dataCollectorId ||
-        benef.meta?.chw ||
+        benef.meta?.ep ||
         benef.meta?.Eye_Partner ||
+        benef.meta?.eye_partner ||
         benef.meta?._submitted_by,
       occupation: benef.occupation || 'UNKNOWN',
       province: benef.province || 'UNKNOWN',
@@ -579,7 +588,8 @@ export class ProjectService {
     const beneficiary = await this.prisma.beneficiary.findFirst({
       where: { id: pii.beneficiaryId, deletedAt: null },
     });
-    if (!beneficiary) throw new Error('Beneficiary not found for existing phone');
+    if (!beneficiary)
+      throw new Error('Beneficiary not found for existing phone');
 
     const cambodiaPayload = {
       uuid: beneficiary.uuid,

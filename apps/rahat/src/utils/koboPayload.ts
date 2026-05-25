@@ -10,7 +10,7 @@ const NESTED_PAYLOAD_KEYS = [
 ] as const;
 
 const FORM_FIELD_HINT =
-  /^(?:_id|_uuid|Village|Villager|vd|phone|name|Eye|Health|kobo|group_)/i;
+  /^(?:_id|_uuid|Village|Villager|vd|phone|name|Eye|Health|kobo|chw|ep|group_)/i;
 
 /** Kobo REST / webhook payloads may nest the submission under several keys. */
 export function unwrapKoboPayload(data: unknown): Record<string, unknown> {
@@ -95,8 +95,8 @@ export function mapKoboFields(payload: Record<string, unknown>) {
 }
 
 const VD_META_KEY =
-  /^(?:village_?doctor|vd|kobo_?username|community_?health_?worker)$/i;
-const VD_META_EXCLUDE = /(?:name|uuid|partner|eye|collector|submitted)/i;
+  /^(?:village_?doctor|vd|kobo_?username|community_?health_?worker|chw)$/i;
+const VD_META_EXCLUDE = /(?:name|uuid|partner|eye|collector|submitted|^ep$)/i;
 
 /** Resolve Village Doctor identifier from mapped Kobo beneficiary + meta fallbacks. */
 export function pickVillageDoctorIdentifier(benef: {
@@ -107,6 +107,7 @@ export function pickVillageDoctorIdentifier(benef: {
   const meta = benef.meta ?? {};
   const directCandidates = [
     benef.koboUsername,
+    meta.chw,
     meta.Village_Doctor,
     meta.vd,
     meta.village_doctor,
