@@ -4,12 +4,17 @@ export const KOBO_FIELD_MAPPINGS = {
   name: 'name',
   villager_name: 'name',
   villagerName: 'name',
+  Villager_Name: 'name',
+  'Villager Name': 'name',
   'Name (姓名)': 'name',
   '姓名': 'name',
   phone_number: 'phone',
   mobile_number: 'phone',
   mobileNumber: 'phone',
   phone: 'phone',
+  Villager_Phone_Number: 'phone',
+  villager_phone_number: 'phone',
+  'Villager Phone Number': 'phone',
   'Mobile Number (手机号码)': 'phone',
   '手机号码': 'phone',
   age: 'age',
@@ -28,8 +33,11 @@ export const KOBO_FIELD_MAPPINGS = {
   'Village Doctor Name': 'healthWorkerName',
   kobo_username: 'koboUsername',
   vd: 'koboUsername', // New form: Village Doctor field (VD is the CHW in DB)
-  Eye_Partner: 'koboUsername', // Demo/China form: Village Doctor field (capitalized)
-  eye_partner: 'koboUsername', // lowercase alias
+  Village_Doctor: 'koboUsername', // Kobo default column name for "Village Doctor" question
+  village_doctor: 'koboUsername',
+  'Village Doctor': 'koboUsername',
+  // Eye_Partner / eye_partner intentionally unmapped: legacy China forms use them as VD
+  // (resolved via meta fallback); new forms use Village_Doctor for VD and Eye_Partner for data collector.
   data_collector_id: 'dataCollectorId',
   dataCollectorId: 'dataCollectorId',
   chw: 'dataCollectorId', // New form: Eye Partner field (data collector only)

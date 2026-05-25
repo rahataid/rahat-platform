@@ -383,16 +383,23 @@ export class ProjectService {
       villageDoctorUuid:
         benef.villageDoctorUuid || benef.meta?.village_doctor_uuid,
       koboUsername:
-        benef.koboUsername || // from 'vd', 'kobo_username', 'Eye_Partner', or 'eye_partner' mapping
-        benef.meta?.Eye_Partner || // safety net: if Eye_Partner wasn't mapped (shouldn't happen)
+        benef.koboUsername || // from vd, Village_Doctor, kobo_username, etc.
+        benef.meta?.Village_Doctor ||
+        benef.meta?.vd ||
+        benef.meta?.village_doctor ||
+        benef.meta?.Eye_Partner || // legacy China form: Eye_Partner was the VD selector
         benef.meta?.eye_partner ||
+        benef.meta?.kobo_username ||
         benef.meta?._submitted_by ||
         benef.meta?.username ||
         benef.meta?.chw ||
-        benef.meta?.vd ||
         undefined,
         // NOTE: dataCollectorId intentionally excluded — data collector ≠ Village Doctor
-      dataCollectorId: benef.dataCollectorId || benef.meta?._submitted_by,
+      dataCollectorId:
+        benef.dataCollectorId ||
+        benef.meta?.chw ||
+        benef.meta?.Eye_Partner ||
+        benef.meta?._submitted_by,
       occupation: benef.occupation || 'UNKNOWN',
       province: benef.province || 'UNKNOWN',
       district: benef.district || 'UNKNOWN',
