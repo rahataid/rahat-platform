@@ -1,7 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -58,6 +58,8 @@ const KOBO_COUNTRY_CODE =
 
 @Injectable()
 export class ProjectService {
+  private readonly logger = new Logger(ProjectService.name);
+
   constructor(
     private prisma: PrismaService,
     private eventEmitter: EventEmitter2,
@@ -353,6 +355,8 @@ export class ProjectService {
   }
 
   async importKoboBeneficiary(uuid: UUID, data: any) {
+    this.logger.log(`[kobo-import] raw payload keys: ${JSON.stringify(Object.keys(data))}`);
+    this.logger.log(`[kobo-import] raw payload: ${JSON.stringify(data)}`);
     const benef: any = this.mapKoboFields(data);
     if (!benef.type) benef.type = 'LEAD';
     if (benef.type) benef.type = benef.type.toUpperCase();
@@ -593,10 +597,15 @@ export class ProjectService {
     const meta = {};
 
     for (const key in payload) {
-      if (KOBO_FIELD_MAPPINGS[key]) {
+      // Strip group prefix (e.g. "group_abc123/Village_Doctor" → "Village_Doctor")
+      const bareKey = key.includes('/') ? key.split('/').pop()! : key;
+      if (KOBO_FIELD_MAPPINGS[bareKey]) {
+        mappedPayload[KOBO_FIELD_MAPPINGS[bareKey]] = payload[key];
+      } else if (KOBO_FIELD_MAPPINGS[key]) {
         mappedPayload[KOBO_FIELD_MAPPINGS[key]] = payload[key];
       } else {
-        meta[key] = payload[key];
+        meta[bareKey] = payload[key];
+        if (bareKey !== key) meta[key] = payload[key];
       }
     }
     return { ...mappedPayload, meta };
