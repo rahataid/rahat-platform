@@ -337,7 +337,10 @@ export const MS_ACTIONS = {
       VALIDATE_BENEFICIARY_OTP: 'aaProject.inkinds.validateBeneficiaryOtp',
       BENEFICIARY_INKIND_DETAILS: 'aaProject.beneficiary.inKindsDetails',
       GET_OFFLINE_BENEFICIARY_INKIND_BY_VENDOR: 'aaProject.inkinds.getAllOfflineBeneficiaryByVendor',
-      REDEEM_OFFLINE_INKIND_BY_VENDOR: 'aaProject.inkinds.syncOfflineRedemptions'
+      REDEEM_OFFLINE_INKIND_BY_VENDOR: 'aaProject.inkinds.syncOfflineRedemptions',
+      CREATE_VENDOR_REDEMPTION: 'aaProject.inkinds.createVendorRedemption',
+      GET_VENDOR_REDEMPTIONS: 'aaProject.inkinds.getVendorRedemptions',
+      UPDATE_VENDOR_REDEMPTION_STATUS: 'aaProject.inkinds.updateVendorRedemptionStatus',
     },
     VENDOR: {
       // Remove after test

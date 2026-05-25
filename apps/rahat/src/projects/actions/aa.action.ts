@@ -777,6 +777,36 @@ export const aaActions: ProjectActionFunc = {
       payload
     ),
 
+  [MS_ACTIONS.AAPROJECT.INKIND.CREATE_VENDOR_REDEMPTION]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.CREATE_VENDOR_REDEMPTION, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_VENDOR_REDEMPTIONS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.GET_VENDOR_REDEMPTIONS, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.UPDATE_VENDOR_REDEMPTION_STATUS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.UPDATE_VENDOR_REDEMPTION_STATUS, uuid },
+      payload
+    ),
+
   // **** grievance start **** //
   [MS_ACTIONS.AAPROJECT.GRIEVANCES.CREATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GRIEVANCES.CREATE, uuid }, payload),
