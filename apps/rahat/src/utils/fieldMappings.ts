@@ -36,8 +36,8 @@ export const KOBO_FIELD_MAPPINGS = {
   Village_Doctor: 'koboUsername', // Kobo default column name for "Village Doctor" question
   village_doctor: 'koboUsername',
   'Village Doctor': 'koboUsername',
-  // Eye_Partner / eye_partner intentionally unmapped: legacy China forms use them as VD
-  // (resolved via meta fallback); new forms use Village_Doctor for VD and Eye_Partner for data collector.
+  // Eye_Partner / eye_partner intentionally unmapped: this field holds the vendor (eye partner) name
+  // selected in KoboToolbox for UX purposes only — it is not related to Village Doctor resolution.
   data_collector_id: 'dataCollectorId',
   dataCollectorId: 'dataCollectorId',
   chw: 'dataCollectorId', // New form: Eye Partner field (data collector only)

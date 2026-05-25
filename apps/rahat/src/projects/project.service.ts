@@ -387,11 +387,9 @@ export class ProjectService {
         benef.meta?.Village_Doctor ||
         benef.meta?.vd ||
         benef.meta?.village_doctor ||
-        benef.meta?.Eye_Partner || // legacy China form: Eye_Partner was the VD selector
-        benef.meta?.eye_partner ||
         benef.meta?.kobo_username ||
         undefined,
-        // NOTE: dataCollectorId / _submitted_by / chw intentionally excluded — data collector ≠ Village Doctor
+        // NOTE: dataCollectorId / _submitted_by / chw / Eye_Partner intentionally excluded — data collector / vendor ≠ Village Doctor
       dataCollectorId:
         benef.dataCollectorId ||
         benef.meta?.chw ||
