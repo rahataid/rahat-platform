@@ -777,6 +777,16 @@ export const aaActions: ProjectActionFunc = {
       payload
     ),
 
+   [MS_ACTIONS.AAPROJECT.INKIND.GET_VENDOR_AVAILABLE_INKIND_DETAILS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.GET_VENDOR_AVAILABLE_INKIND_DETAILS, uuid },
+      payload
+   ),
+
   [MS_ACTIONS.AAPROJECT.INKIND.CREATE_VENDOR_REDEMPTION]: (
     uuid,
     payload,
@@ -804,6 +814,16 @@ export const aaActions: ProjectActionFunc = {
   ) =>
     sendCommand(
       { cmd: AAJobs.INKIND.UPDATE_VENDOR_REDEMPTION_STATUS, uuid },
+      payload
+    ),
+  
+  [MS_ACTIONS.AAPROJECT.INKIND.UPDATE_VENDOR_REDEMPTION_TX_HASH]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.UPDATE_VENDOR_REDEMPTION_TX_HASH, uuid },
       payload
     ),
 
