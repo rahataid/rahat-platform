@@ -3,13 +3,15 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { APP_JOBS, BQUEUE } from '@rahataid/sdk';
+import { SettingsService } from '@rumsan/extensions/settings';
+import { PrismaService } from '@rumsan/prisma';
 import { Job } from 'bull';
 import { EmailService } from '../listeners/email.service';
 
 @Processor(BQUEUE.RAHAT)
 export class RahatProcessor {
   private readonly logger = new Logger(RahatProcessor.name);
-  constructor(private emailService: EmailService) { }
+  constructor(private emailService: EmailService, private prisma: PrismaService) { }
 
   @Process(APP_JOBS.EMAIL)
   async sendEmail(job: Job<any>) {
@@ -28,6 +30,10 @@ export class RahatProcessor {
   ) {
     const data = job.data;
     const { usersEmail, subject, text } = data;
+
+    const settings = new SettingsService(this.prisma);
+    const frontendURL: any = await settings.getSettingsByName('FRONTEND_URL');
+
     await this.emailService.sendEmail(
       usersEmail,
       subject,
@@ -56,6 +62,16 @@ export class RahatProcessor {
             <p style="font-size: 12px; color: #6b7280; margin: 0;">
               This is an automated notification from Rahat
             </p>
+
+            <p style="font-size: 12px; color: #9ca3af; margin: 0;">
+            <a
+                href="${frontendURL["value"]}"
+                target="_blank"
+                style="color: #2563eb; text-decoration: underline; font-weight: 600;"
+            >
+                ${frontendURL["value"]}
+            </a>
+          </p>
           </div>
 
           <p style="font-size: 12px; color: #9ca3af; margin: 0;">

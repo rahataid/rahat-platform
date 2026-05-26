@@ -76,6 +76,8 @@ export const JOBS = {
     CREATE_BENEFICIARY_WITH_DB_TRANSACTION:
       'aa.jobs.beneficiary.create_beneficiary_with_db_transaction',
     GET_TOKEN_DETAILS: 'aa.jobs.beneficiary.getTokenDetails',
+    GENERATE_QR_PDF: 'aa.jobs.beneficiary.generateQrPdf',
+    GET_QR_PDF: 'aa.jobs.beneficiary.getQrPdf',
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget',
@@ -147,8 +149,8 @@ export const JOBS = {
     GET_BY_GROUP: 'aa.jobs.groupInkinds.getByGroup',
     GET_UNASSIGNED_GROUP_INKIND:
       'aa.jobs.groupInkinds.getUnassignedGroupInkind',
-    GET_AVAILABLE_INKIND_BENEFICIARY_PHONE:
-      'aa.jobs.groupInkinds.getAvailableInkindByBeneficiaryPhone',
+    GET_AVAILABLE_INKIND_FOR_BENEFICIARY:
+      'aa.jobs.groupInkinds.getAvailableInkindByBeneficiary',
     GET_GROUP_INKIND_LOGS: 'aa.jobs.groupInkinds.getLogs',
     GET_GROUP_INKIND_LOGS_BY_VENDOR: 'aa.jobs.groupInkinds.getLogsByVendor',
     GET_LOGS_DETAILS_BY_VENDOR: 'aa.jobs.groupInkinds.getLogsDetailsByVendor',
@@ -157,6 +159,8 @@ export const JOBS = {
     SEND_BENEFICIARY_OTP: 'aa.jobs.inkinds.sendBeneficiaryOtp',
     VALIDATE_BENEFICIARY_OTP: 'aa.jobs.inkinds.validateBeneficiaryOtp',
     BENEFICIARY_INKIND_DETAILS: 'aa.jobs.beneficiary.inKindDetails',
+    GET_OFFLINE_BENEFICIARY_INKIND_BY_VENDOR: 'aa.jobs.inkinds.getAllOfflineBeneficiaryByVendor',
+    REDEEM_OFFLINE_INKIND_BY_VENDOR: 'aa.jobs.inkinds.redeemOfflineInkindByVendor'
   },
   VENDOR: {
     // Remove after test

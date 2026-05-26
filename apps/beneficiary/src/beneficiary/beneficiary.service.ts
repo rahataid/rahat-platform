@@ -172,7 +172,7 @@ export class BeneficiaryService {
       },
       include: {
         beneficiary: true
-    }
+      }
     });
 
     if (!getBeneficiaryByPhone) return null;
@@ -319,7 +319,7 @@ export class BeneficiaryService {
   ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
     let result = null as any;
     const { page, perPage, sort, order } = dto;
-    const orderBy: Record<string, 'asc' | 'desc'> = { [sort]: order };
+    const orderBy = [{ [sort]: order }, { uuid: 'desc' }];
     const where = this.beneficiaryUtilsService.buildWhereClause(dto);
 
     result = await paginate(

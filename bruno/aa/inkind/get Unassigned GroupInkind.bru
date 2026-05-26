@@ -1,7 +1,7 @@
 meta {
-  name: get GroupInkind Redeem Logs
+  name: get Unassigned GroupInkind
   type: http
-  seq: 13
+  seq: 17
 }
 
 post {
@@ -12,10 +12,9 @@ post {
 
 body:json {
   {
-    "action": "aaProject.groupInkinds.getLogs",
+    "action":"aaProject.groupInkinds.getUnassignedGroupInkind",
     "payload": {
-      "groupInkindId": "8101c8ac-2d1d-4124-bd21-03e23d731528"
-    }
+       "inkindId":"10510b55-e0ae-41d8-ad38-56744dc2a212"    }
   }
 }
 

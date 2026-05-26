@@ -7,6 +7,7 @@ import { BQUEUE } from "@rahataid/sdk";
 import { PrismaModule } from "@rumsan/prisma";
 import { ImportsModule } from "../imports/imports.module";
 import { EmailService } from "../listeners/email.service";
+import { WalletModule } from "../wallet/wallet.module";
 import { ImportProcessor } from "./import.processor";
 import { ProjectProcessor } from "./project.processor";
 import { RahatProcessor } from "./rahat.processor";
@@ -27,6 +28,7 @@ import { RahatProcessor } from "./rahat.processor";
         BullModule.registerQueue({ name: BQUEUE.RAHAT_IMPORT }),
         PrismaModule,
         ImportsModule,
+        WalletModule,
     ],
     providers: [RahatProcessor, ProjectProcessor, ImportProcessor, EmailService]
 })
