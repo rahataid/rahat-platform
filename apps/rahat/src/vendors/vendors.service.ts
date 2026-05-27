@@ -42,6 +42,7 @@ export class VendorsService implements OnModuleInit {
 
   private readonly logger = new Logger(VendorsService.name);
   private rpcUrl: string;
+  private deployerPrivateKey: string;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -54,7 +55,9 @@ export class VendorsService implements OnModuleInit {
 
   async onModuleInit() {
     const chainSettings = await this.settings.getByName('CHAIN_SETTINGS');
+    const deployerPrivateKey = await this.settings.getByName('DEPLOYER_PRIVATE_KEY');
     this.rpcUrl = (chainSettings?.value as unknown as ChainConfig)?.rpcUrl;
+    this.deployerPrivateKey = deployerPrivateKey?.value as string;
   }
 
 
@@ -110,7 +113,7 @@ export class VendorsService implements OnModuleInit {
     });
 
     if (vendor.wallet) {
-      fundVendorWallet(vendor.wallet, this.rpcUrl, process.env.DEPLOYER_PRIVATE_KEY ?? '').catch((err) =>
+      fundVendorWallet(vendor.wallet, this.rpcUrl, this.deployerPrivateKey).catch((err) =>
         this.logger.error('Fund vendor wallet failed:', err)
       );
     }
