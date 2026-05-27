@@ -42,9 +42,13 @@ export function isAddress(
   return isEthAddress(address, options)
 }
 
-export const fundVendorWallet = async (walletAddress: string) => {
-  const provider = new JsonRpcProvider(process.env.NETWORK_PROVIDER);
-  const signer = new ethers.Wallet(process.env.DEPLOYER_PRIVATE_KEY!, provider);
+export const fundVendorWallet = async (
+  walletAddress: string,
+  rpcUrl: string,
+  deployerPrivateKey: string,
+) => {
+  const provider = new JsonRpcProvider(rpcUrl);
+  const signer = new ethers.Wallet(deployerPrivateKey, provider);
   const tx = {
     to: walletAddress,
     value: ethers.parseEther('0.01'),
@@ -54,7 +58,7 @@ export const fundVendorWallet = async (walletAddress: string) => {
     const transactionResponse = await signer.sendTransaction(tx);
     console.log('Funding transaction sent:', transactionResponse.hash);
     await transactionResponse.wait();
-    console.log('Funding transaction confirmed');
+    console.log('Funding transaction confirmed:', transactionResponse.hash);
   } catch (error) {
     console.error('Error funding vendor wallet:', error);
   }

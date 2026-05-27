@@ -6,9 +6,11 @@ import {
   Inject,
   Injectable,
   Logger,
-  NotFoundException
+  NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 // import * as jwt from '@nestjs/jwt';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import {
   GetVendorOtp,
@@ -29,23 +31,31 @@ import { Address } from 'viem';
 import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
 import { fundVendorWallet, isAddress } from '../utils/web3';
+import { ChainConfig } from '../wallet/types/chain-config.interface';
 import { GetVendorsDTO } from './dto/get-vendors.dto';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
 @Injectable()
-export class VendorsService {
+export class VendorsService implements OnModuleInit {
 
   private readonly logger = new Logger(VendorsService.name);
+  private rpcUrl: string;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthsService,
     private readonly usersService: UsersService,
     private readonly notificationService: NotificationService,
+    private readonly settings: SettingsService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
+
+  async onModuleInit() {
+    const chainSettings = await this.settings.getByName('CHAIN_SETTINGS');
+    this.rpcUrl = (chainSettings?.value as unknown as ChainConfig)?.rpcUrl;
+  }
 
 
   //TODO: Fix allow duplicate users?
@@ -99,8 +109,10 @@ export class VendorsService {
       return user;
     });
 
-    if(vendor.wallet) {
-      fundVendorWallet(vendor.wallet);
+    if (vendor.wallet) {
+      fundVendorWallet(vendor.wallet, this.rpcUrl, process.env.DEPLOYER_PRIVATE_KEY ?? '').catch((err) =>
+        this.logger.error('Fund vendor wallet failed:', err)
+      );
     }
 
     this.notificationService.createNotification({
