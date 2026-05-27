@@ -20,7 +20,7 @@ jobs:
 
       - name: Install pnpm
         run: |
-          npm install -g pnpm@8.14.1
+          npm install -g pnpm@9.15.2
           pnpm install
           npx nx reset
           pnpm prisma:generate
