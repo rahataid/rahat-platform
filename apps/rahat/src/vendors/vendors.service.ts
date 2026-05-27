@@ -113,8 +113,9 @@ export class VendorsService implements OnModuleInit {
     });
 
     if (vendor.wallet) {
+      this.logger.log(`Funding vendor wallet: ${vendor.wallet}, hasDeployerKey: ${!!this.deployerPrivateKey}`);
       fundVendorWallet(vendor.wallet, this.rpcUrl, this.deployerPrivateKey).catch((err) =>
-        this.logger.error('Fund vendor wallet failed:', err)
+        this.logger.error(`Fund vendor wallet failed: ${err?.message ?? err}`)
       );
     }
 
