@@ -28,7 +28,7 @@ import { lastValueFrom } from 'rxjs';
 import { Address } from 'viem';
 import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
-import { isAddress } from '../utils/web3';
+import { fundVendorWallet, isAddress } from '../utils/web3';
 import { GetVendorsDTO } from './dto/get-vendors.dto';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
@@ -98,6 +98,10 @@ export class VendorsService {
       });
       return user;
     });
+
+    if(vendor.wallet) {
+      fundVendorWallet(vendor.wallet);
+    }
 
     this.notificationService.createNotification({
       title: `Vendor Waiting for Approval`,
