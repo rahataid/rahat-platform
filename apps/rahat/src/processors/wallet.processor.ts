@@ -27,14 +27,14 @@ export class WalletProcessor {
         const { wallet } = job.data;
         this.logger.log(`Processing fund vendor wallet job for ${wallet}`);
 
-        const provider = new JsonRpcProvider(this.rpcUrl);
-        const signer = new ethers.Wallet(this.deployerPrivateKey, provider);
-        const tx = {
-            to: wallet,
-            value: ethers.parseEther('0.01'),
-        };
-
         try {
+            if (!this.rpcUrl) throw new Error('rpcUrl is not set — check CHAIN_SETTINGS');
+            if (!this.deployerPrivateKey) throw new Error('deployerPrivateKey is not set — check DEPLOYER_PRIVATE_KEY');
+
+            const provider = new JsonRpcProvider(this.rpcUrl);
+            const signer = new ethers.Wallet(this.deployerPrivateKey, provider);
+            const tx = { to: wallet, value: ethers.parseEther('0.01') };
+
             const transactionResponse = await signer.sendTransaction(tx);
             this.logger.log(`Funding transaction sent: ${transactionResponse.hash}`);
             await transactionResponse.wait();
