@@ -34,9 +34,14 @@ export class WalletProcessor {
             value: ethers.parseEther('0.01'),
         };
 
-        const transactionResponse = await signer.sendTransaction(tx);
-        this.logger.log(`Funding transaction sent: ${transactionResponse.hash}`);
-        await transactionResponse.wait();
-        this.logger.log(`Funding transaction confirmed: ${transactionResponse.hash}`);
+        try {
+            const transactionResponse = await signer.sendTransaction(tx);
+            this.logger.log(`Funding transaction sent: ${transactionResponse.hash}`);
+            await transactionResponse.wait();
+            this.logger.log(`Funding transaction confirmed: ${transactionResponse.hash}`);
+        } catch (error) {
+            this.logger.error(`Failed to fund vendor wallet ${wallet}: ${(error as Error).message}`);
+            throw error;
+        }
     }
 }
