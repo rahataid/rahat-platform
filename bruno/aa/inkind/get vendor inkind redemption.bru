@@ -1,15 +1,27 @@
 meta {
-  name: get vendor inkind redemption 
+  name: get vendor inkind redemption
   type: http
   seq: 22
 }
 
 post {
-  url: 
-  body: none
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+      "action": "aaProject.inkinds.getVendorRedemptions",
+      "payload": {
+          "page": 1,
+          "perPage": 10,
+          "search": ""
+      }
+  }
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

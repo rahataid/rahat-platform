@@ -5,11 +5,22 @@ meta {
 }
 
 post {
-  url: 
-  body: none
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+      "action": "aaProject.inkinds.updateVendorRedemptionStatus",
+      "payload": {   
+          "uuid": "test",
+          "status": "approved"
+      }
+  }
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

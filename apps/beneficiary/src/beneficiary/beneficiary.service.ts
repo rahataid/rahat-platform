@@ -1464,6 +1464,8 @@ export class BeneficiaryService {
         );
       case GroupPurpose.COMMUNICATION:
         return true; // groups with COMMUNICATION purpose can be valid without specific checks
+      case GroupPurpose.GENERAL:
+        return true; // groups with GENERAL purpose can be valid without specific checks
       default:
         this.logger.error(`Invalid group purpose provided: ${purpose}`);
         return false;
