@@ -1,7 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { BQUEUE, ProjectEvents, ProjectJobs } from '@rahataid/sdk';
@@ -13,22 +13,38 @@ import { Queue } from 'bull';
 import { DevService } from '../utils/develop.service';
 import { EmailService } from './email.service';
 import { MessageSenderService } from './messageSender.service';
+import { ChainConfig } from '../wallet/types/chain-config.interface';
+import { fundVendorWallet } from '../utils/web3';
 @Injectable()
 export class ListenersService {
   private otp: string;
   private dev: DevService;
+  private rpcUrl: string;
+  private deployerPrivateKey: string;
+  private readonly logger = new Logger(ListenersService.name);
+
   constructor(
     @InjectQueue(BQUEUE.RAHAT) private readonly rahatQueue: Queue,
     @InjectQueue(BQUEUE.HOST) private readonly hostQueue: Queue,
     @InjectQueue(BQUEUE.RAHAT_PROJECT) private readonly projectQueue: Queue,
+    @InjectQueue(BQUEUE.FUND_VENDOR_WALLET) private readonly fundVendorWalletQueue: Queue,
     private readonly configService: ConfigService,
     protected prisma: PrismaService,
 
+    private readonly settings: SettingsService,
     private readonly devService: DevService,
     private emailService: EmailService,
     private messageSenderService: MessageSenderService,
 
   ) { }
+
+  async onModuleInit() {
+    const chainSettings = await this.settings.getByName('CHAIN_SETTINGS');
+    const deployerPrivateKey = await this.settings.getByName('DEPLOYER_PRIVATE_KEY');
+    this.rpcUrl = (chainSettings?.value as unknown as ChainConfig)?.rpcUrl;
+    this.deployerPrivateKey = deployerPrivateKey?.value as string;
+  }
+
 
   @OnEvent(EVENTS.OTP_CREATED)
   async sendOTPEmail(data: any) {
@@ -239,4 +255,18 @@ export class ListenersService {
     };
     this.messageSenderService.sendWhatappMessage(payload)
   }
+
+  @OnEvent(ProjectEvents.VENDORS_CREATED)
+  async onVendorCreate(data) {
+    this.logger.log(`Received VENDORS_CREATED event for vendor ${data.wallet}`);
+    this.fundVendorWalletQueue.add(ProjectJobs.FUND_VENDOR_WALLET, data, {
+      attempts: 3,
+      removeOnComplete: true,
+      backoff: {
+        type: 'exponential',
+        delay: 1000,
+      },
+    });
+  }
+
 }

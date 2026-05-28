@@ -47,19 +47,5 @@ export const fundVendorWallet = async (
   rpcUrl: string,
   deployerPrivateKey: string,
 ) => {
-  const provider = new JsonRpcProvider(rpcUrl);
-  const signer = new ethers.Wallet(deployerPrivateKey, provider);
-  const tx = {
-    to: walletAddress,
-    value: ethers.parseEther('0.01'),
-  };
 
-  try {
-    const transactionResponse = await signer.sendTransaction(tx);
-    console.log('Funding transaction sent:', transactionResponse.hash);
-    await transactionResponse.wait();
-    console.log('Funding transaction confirmed:', transactionResponse.hash);
-  } catch (error) {
-    console.error('Error funding vendor wallet:', error);
-  }
 }

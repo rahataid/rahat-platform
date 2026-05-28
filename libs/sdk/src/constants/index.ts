@@ -16,6 +16,7 @@ export const BQUEUE = {
   HOST: 'RAHAT.HOST',
   META_TXN: 'RAHAT.META_TXN',
   RAHAT_IMPORT: 'RAHAT.IMPORT',
+  FUND_VENDOR_WALLET: 'RAHAT.FUND_VENDOR_WALLET',
 };
 
 export const UserRoles = {

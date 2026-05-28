@@ -12,12 +12,13 @@ import {
 // import * as jwt from '@nestjs/jwt';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   GetVendorOtp,
   VendorAddToProjectDto,
   VendorRegisterDto,
 } from '@rahataid/extensions';
-import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
+import { ProjectContants, ProjectEvents, UserRoles, VendorJobs } from '@rahataid/sdk';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
@@ -26,19 +27,18 @@ import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
 import { UUID } from 'crypto';
+import { isAddress } from '../utils/web3';
 import { lastValueFrom } from 'rxjs';
 import { Address } from 'viem';
 import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
-import { fundVendorWallet, isAddress } from '../utils/web3';
-import { ChainConfig } from '../wallet/types/chain-config.interface';
 import { GetVendorsDTO } from './dto/get-vendors.dto';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
 @Injectable()
-export class VendorsService implements OnModuleInit {
+export class VendorsService {
 
   private readonly logger = new Logger(VendorsService.name);
   private rpcUrl: string;
@@ -50,16 +50,9 @@ export class VendorsService implements OnModuleInit {
     private readonly usersService: UsersService,
     private readonly notificationService: NotificationService,
     private readonly settings: SettingsService,
+    private readonly eventEmitter: EventEmitter2,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
-
-  async onModuleInit() {
-    const chainSettings = await this.settings.getByName('CHAIN_SETTINGS');
-    const deployerPrivateKey = await this.settings.getByName('DEPLOYER_PRIVATE_KEY');
-    this.rpcUrl = (chainSettings?.value as unknown as ChainConfig)?.rpcUrl;
-    this.deployerPrivateKey = deployerPrivateKey?.value as string;
-  }
-
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
@@ -112,12 +105,8 @@ export class VendorsService implements OnModuleInit {
       return user;
     });
 
-    if (vendor.wallet) {
-      this.logger.log(`Funding vendor wallet: ${vendor.wallet}, hasDeployerKey: ${!!this.deployerPrivateKey}`);
-      fundVendorWallet(vendor.wallet, this.rpcUrl, this.deployerPrivateKey).catch((err) =>
-        this.logger.error(`Fund vendor wallet failed: ${err?.message ?? err}`)
-      );
-    }
+    // Emit vendor created event to fund vendor wallet
+    this.eventEmitter.emit(ProjectEvents.VENDORS_CREATED, { wallet: vendor.wallet });
 
     this.notificationService.createNotification({
       title: `Vendor Waiting for Approval`,
