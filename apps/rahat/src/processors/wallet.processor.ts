@@ -35,8 +35,8 @@ export class WalletProcessor {
         };
 
         const transactionResponse = await signer.sendTransaction(tx);
-        this.logger.log('Funding transaction sent:', transactionResponse.hash);
+        this.logger.log(`Funding transaction sent: ${transactionResponse.hash}`);
         await transactionResponse.wait();
-        this.logger.log('Funding transaction confirmed:', transactionResponse.hash);
+        this.logger.log(`Funding transaction confirmed: ${transactionResponse.hash}`);
     }
 }
