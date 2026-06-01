@@ -2416,35 +2416,38 @@ export class BeneficiaryService {
 
     const { projectId, piiData, ...benfData } = payload;
 
-    // Check if a beneficiary with this phone exists at all
-    const existingBeneficiary = await this.prisma.beneficiaryPii.findFirst({
-      where: { phone: piiData.phone.toString() },
-      select: { beneficiaryId: true, beneficiary: { select: { uuid: true } } },
-    });
-
-    if (existingBeneficiary) {
-      const beneficiaryUuid = existingBeneficiary.beneficiary.uuid;
-
-      // Check specifically if this beneficiary is already in the target project
-      const alreadyInProject = await this.prisma.beneficiaryProject.findFirst({
-        where: {
-          beneficiaryId: beneficiaryUuid,
-          projectId,
-        },
+    // Skip the check if phone number is not provided
+    if (piiData.phone) {
+      // Check if a beneficiary with this phone exists at all
+      const existingBeneficiary = await this.prisma.beneficiaryPii.findFirst({
+        where: { phone: piiData.phone.toString() },
+        select: { beneficiaryId: true, beneficiary: { select: { uuid: true } } },
       });
 
-      if (alreadyInProject) {
-        this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and is assigned to the same project ${projectId}.`);
-        throw new RpcException(`Beneficiary with phone ${piiData.phone} already exists and is assigned to ${projectId} project.`);
+      if (existingBeneficiary) {
+        const beneficiaryUuid = existingBeneficiary.beneficiary.uuid;
+
+        // Check specifically if this beneficiary is already in the target project
+        const alreadyInProject = await this.prisma.beneficiaryProject.findFirst({
+          where: {
+            beneficiaryId: beneficiaryUuid,
+            projectId,
+          },
+        });
+
+        if (alreadyInProject) {
+          this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and is assigned to the same project ${projectId}.`);
+          throw new RpcException(`Beneficiary with phone ${piiData.phone} already exists and is assigned to ${projectId} project.`);
+        }
+
+        // If beneficiary exists but not in the project, assign to project without creating new beneficiary
+        await this.beneficiaryUtilsService.assignBeneficiaryToProject(
+          { projectId: projectId as string, beneficiaryId: beneficiaryUuid }
+        );
+
+        this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and has been assigned to project ${projectId}.`);
+        return { success: true, message: `Beneficiary with phone ${piiData.phone} already exists and has been assigned to ${projectId} project.`, data: null };
       }
-
-      // If beneficiary exists but not in the project, assign to project without creating new beneficiary
-      await this.beneficiaryUtilsService.assignBeneficiaryToProject(
-        { projectId: projectId as string, beneficiaryId: beneficiaryUuid }
-      );
-
-      this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and has been assigned to project ${projectId}.`);
-      return { success: true, message: `Beneficiary with phone ${piiData.phone} already exists and has been assigned to ${projectId} project.`, data: null };
     }
 
     const dbTxId = `db-tx-${Date.now()}`;
@@ -2472,6 +2475,16 @@ export class BeneficiaryService {
           }
         },
       });
+
+      if (!piiData.phone) {
+        this.logger.log('No phone number provided in PII data, generating a derived phone number.');
+
+        // deterministic 2-digit project number from UUID, no DB call
+        const projectSerial = (parseInt(projectId.replace(/-/g, '').slice(-4), 16) % 100)
+          .toString()
+          .padStart(2, '0');
+        piiData.phone = `+977999${projectSerial}${createdBeneficiary.id.toString().padStart(5, '0')}`;
+      }
 
       await this.prisma.beneficiaryPii.create({
         data: {
