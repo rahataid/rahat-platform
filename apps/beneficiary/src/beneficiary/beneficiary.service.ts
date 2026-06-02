@@ -2478,18 +2478,13 @@ export class BeneficiaryService {
 
       if (!piiData.phone) {
         this.logger.log('No phone number provided in PII data, generating a derived phone number.');
-
-        // deterministic 2-digit project number from UUID, no DB call
-        const projectSerial = (parseInt(projectId.replace(/-/g, '').slice(-4), 16) % 100)
-          .toString()
-          .padStart(2, '0');
-        piiData.phone = `+977999${projectSerial}${createdBeneficiary.id.toString().padStart(5, '0')}`;
+        piiData.phone = generateDerivedPhone(createdBeneficiary.uuid);
       }
 
       await this.prisma.beneficiaryPii.create({
         data: {
           beneficiaryId: createdBeneficiary.id,
-          phone: piiData.phone.toString(),
+          phone: piiData.phone?.toString(),
           ...piiData,
         },
       });
@@ -2602,4 +2597,10 @@ async function checkWalletAddress(
   });
   return duplicates.map((dup) => dup.walletAddress);
 
+}
+
+function generateDerivedPhone(uuid: string): string {
+  const timeHash = Date.now().toString(36).padStart(4, '0').slice(-4);
+  const uuidPart = uuid.replace(/-/g, '').slice(-6);
+  return `${timeHash}${uuidPart}`;
 }
