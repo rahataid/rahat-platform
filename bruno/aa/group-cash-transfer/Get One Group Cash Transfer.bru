@@ -1,0 +1,20 @@
+meta {
+  name: Get One Group Cash Transfer
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupCashTransfer.getOne",
+    "payload": {
+      "uuid": "replace-with-uuid"
+    }
+  }
+}

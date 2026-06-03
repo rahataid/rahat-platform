@@ -1,0 +1,27 @@
+meta {
+  name: Update Group Cash Transfer
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupCashTransfer.update",
+    "payload": {
+      "uuid": "replace-with-uuid",
+      "name": "Updated Group Name",
+      "phone": "9800000002",
+      "bankDetails": {
+        "bankName": "Everest Bank",
+        "accountNumber": "9876543210",
+        "accountName": "Jane Doe"
+      }
+    }
+  }
+}

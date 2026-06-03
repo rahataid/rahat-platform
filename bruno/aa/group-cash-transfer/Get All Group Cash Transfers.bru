@@ -1,0 +1,24 @@
+meta {
+  name: Get All Group Cash Transfers
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupCashTransfer.get",
+    "payload": {
+      "page": 1,
+      "perPage": 10,
+      "sort": "createdAt",
+      "order": "desc",
+      "search": ""
+    }
+  }
+}

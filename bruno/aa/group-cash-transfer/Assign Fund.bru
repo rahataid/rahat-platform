@@ -1,0 +1,21 @@
+meta {
+  name: Assign Fund
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupCashTransfer.assignFund",
+    "payload": {
+      "groupCashTransferId": "replace-with-uuid",
+      "amount": 5000
+    }
+  }
+}

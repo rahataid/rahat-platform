@@ -1,0 +1,20 @@
+meta {
+  name: Delete Group Cash Transfer
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupCashTransfer.delete",
+    "payload": {
+      "uuid": "replace-with-uuid"
+    }
+  }
+}

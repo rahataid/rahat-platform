@@ -1,0 +1,27 @@
+meta {
+  name: Create Group Cash Transfer
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupCashTransfer.create",
+    "payload": {
+      "name": "Group Transfer Alpha",
+      "phone": "9800000001",
+      "bankDetails": {
+        "bankName": "Nabil Bank",
+        "accountNumber": "1234567890",
+        "accountName": "John Doe"
+      },
+      "extras": {}
+    }
+  }
+}

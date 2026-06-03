@@ -383,6 +383,15 @@ export const MS_ACTIONS = {
       EXECUTE_ACTION: 'aa.inkind-tracker.executeAction',
       GET_TRANSACTIONS: 'aa.inkind-tracker.getTransactions',
     },
+    GROUP_CASH_TRANSFER: {
+      CREATE: 'aaProject.groupCashTransfer.create',
+      UPDATE: 'aaProject.groupCashTransfer.update',
+      DELETE: 'aaProject.groupCashTransfer.delete',
+      GET: 'aaProject.groupCashTransfer.get',
+      GET_ONE: 'aaProject.groupCashTransfer.getOne',
+      ASSIGN_FUND: 'aaProject.groupCashTransfer.assignFund',
+      DISBURSE: 'aaProject.groupCashTransfer.disburse',
+    },
     MULTISIG: {
       GET_SAFE_OWNER: 'aa.getSafeOwner',
       CREATE_SAFE_TRANSACTION: 'aa.createSafeTransaction',

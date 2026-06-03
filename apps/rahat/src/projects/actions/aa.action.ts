@@ -902,6 +902,29 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.INKIND_TRACKER.GET_TRANSACTIONS, uuid }, payload),
   // **** inkind tracker end **** //
 
+  // **** group cash transfer start **** //
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.CREATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.UPDATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.UPDATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.DELETE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.DELETE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET_ONE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.ASSIGN_FUND]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.ASSIGN_FUND, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.DISBURSE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.DISBURSE, uuid }, payload),
+  // **** group cash transfer end **** //
+
   // **** Vendor start **** //
   [MS_ACTIONS.AAPROJECT.VENDOR.TEST_OFFLINE_PAYOUT]: (
     uuid,
