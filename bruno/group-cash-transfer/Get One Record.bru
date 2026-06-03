@@ -1,0 +1,20 @@
+meta {
+  name: Get One Record
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupCashTransfer.getOneRecord",
+    "payload": {
+      "uuid": "replace-with-record-uuid"
+    }
+  }
+}

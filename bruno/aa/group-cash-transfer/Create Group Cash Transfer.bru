@@ -5,9 +5,13 @@ meta {
 }
 
 post {
-  url: {{url}}/projects/{{project_id}}/actions
+  url: {{url}}/projects/{{uuid}}/actions
   body: json
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
 }
 
 body:json {

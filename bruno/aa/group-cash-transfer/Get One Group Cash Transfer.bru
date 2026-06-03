@@ -5,16 +5,20 @@ meta {
 }
 
 post {
-  url: {{url}}/projects/{{project_id}}/actions
+  url: {{url}}/projects/{{uuid}}/actions
   body: json
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
 }
 
 body:json {
   {
     "action": "aaProject.groupCashTransfer.getOne",
     "payload": {
-      "uuid": "replace-with-uuid"
+      "uuid": "f856861e-2928-44df-83da-40d73034212f"
     }
   }
 }

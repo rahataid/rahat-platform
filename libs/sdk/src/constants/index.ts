@@ -391,6 +391,8 @@ export const MS_ACTIONS = {
       GET_ONE: 'aaProject.groupCashTransfer.getOne',
       ASSIGN_FUND: 'aaProject.groupCashTransfer.assignFund',
       DISBURSE: 'aaProject.groupCashTransfer.disburse',
+      GET_RECORDS: 'aaProject.groupCashTransfer.getRecords',
+      GET_ONE_RECORD: 'aaProject.groupCashTransfer.getOneRecord',
     },
     MULTISIG: {
       GET_SAFE_OWNER: 'aa.getSafeOwner',

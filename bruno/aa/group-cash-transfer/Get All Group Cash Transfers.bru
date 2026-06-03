@@ -5,15 +5,20 @@ meta {
 }
 
 post {
-  url: {{url}}/projects/{{project_id}}/actions
+  url: {{url}}/projects/{{uuid}}/actions
   body: json
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
 }
 
 body:json {
   {
     "action": "aaProject.groupCashTransfer.get",
     "payload": {
+      "hasFund": false,
       "page": 1,
       "perPage": 10,
       "sort": "createdAt",

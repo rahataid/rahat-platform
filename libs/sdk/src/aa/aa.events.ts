@@ -221,6 +221,8 @@ export const JOBS = {
     GET_ONE: 'aa.jobs.groupCashTransfer.getOne',
     ASSIGN_FUND: 'aa.jobs.groupCashTransfer.assignFund',
     DISBURSE: 'aa.jobs.groupCashTransfer.disburse',
+    GET_RECORDS: 'aa.jobs.groupCashTransfer.getRecords',
+    GET_ONE_RECORD: 'aa.jobs.groupCashTransfer.getOneRecord',
   },
   MULTISIG: {
     GET_SAFE_OWNER: 'aa.jobs.safe-wallet.getOwner',
