@@ -171,8 +171,13 @@ export class BeneficiaryService {
         deletedAt: null,
         Beneficiary: {
           deletedAt: null,
+          // Single search box on the Villagers page: match either the
+          // beneficiary's name or phone number against the same fragment.
           pii: {
-            name: { contains: fragment, mode: 'insensitive' },
+            OR: [
+              { name: { contains: fragment, mode: 'insensitive' } },
+              { phone: { contains: fragment, mode: 'insensitive' } },
+            ],
           },
         },
       },

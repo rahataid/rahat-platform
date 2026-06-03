@@ -34,3 +34,10 @@ export const createExtrasAndPIIData = (beneficiary: any) => {
 export function removeSpaces(phoneNumber: string): string {
   return phoneNumber?.toString()?.replace(/\s+/g, '');
 }
+
+export {
+  mapKoboFields,
+  normalizeKoboFieldValue,
+  pickVillageDoctorIdentifier,
+  unwrapKoboPayload,
+} from './koboPayload';
