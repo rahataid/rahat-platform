@@ -225,6 +225,8 @@ export const JOBS = {
     GET_ONE_RECORD: 'aa.jobs.groupCashTransfer.getOneRecord',
     VALIDATE_BANK_ACCOUNT: 'aa.jobs.groupCashTransfer.validateBankAccount',
     GET_ALL_VALID: 'aa.jobs.groupCashTransfer.getAllValid',
+    GET_GCT_DATA: 'aa.jobs.groupCashTransfer.getGCTData',
+    UPDATE_GROUP_RECORD: 'aa.jobs.groupCashTransfer.updateRecord'
   },
   MULTISIG: {
     GET_SAFE_OWNER: 'aa.jobs.safe-wallet.getOwner',
