@@ -393,6 +393,8 @@ export const MS_ACTIONS = {
       DISBURSE: 'aaProject.groupCashTransfer.disburse',
       GET_RECORDS: 'aaProject.groupCashTransfer.getRecords',
       GET_ONE_RECORD: 'aaProject.groupCashTransfer.getOneRecord',
+      VALIDATE_BANK_ACCOUNT: 'aaProject.groupCashTransfer.validateBankAccount',
+      GET_ALL_VALID: 'aaProject.groupCashTransfer.getAllValid',
     },
     MULTISIG: {
       GET_SAFE_OWNER: 'aa.getSafeOwner',

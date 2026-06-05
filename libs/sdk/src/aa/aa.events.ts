@@ -223,6 +223,8 @@ export const JOBS = {
     DISBURSE: 'aa.jobs.groupCashTransfer.disburse',
     GET_RECORDS: 'aa.jobs.groupCashTransfer.getRecords',
     GET_ONE_RECORD: 'aa.jobs.groupCashTransfer.getOneRecord',
+    VALIDATE_BANK_ACCOUNT: 'aa.jobs.groupCashTransfer.validateBankAccount',
+    GET_ALL_VALID: 'aa.jobs.groupCashTransfer.getAllValid',
   },
   MULTISIG: {
     GET_SAFE_OWNER: 'aa.jobs.safe-wallet.getOwner',

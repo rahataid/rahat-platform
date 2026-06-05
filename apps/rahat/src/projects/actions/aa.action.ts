@@ -929,6 +929,12 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_ONE_RECORD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET_ONE_RECORD, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.VALIDATE_BANK_ACCOUNT]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.VALIDATE_BANK_ACCOUNT, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_ALL_VALID]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET_ALL_VALID, uuid }, payload),
   // **** group cash transfer end **** //
 
   // **** Vendor start **** //
