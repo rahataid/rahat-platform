@@ -71,17 +71,23 @@ export class BeneficiaryService {
     this.rsprisma = this.prisma.rsclient;
   }
 
+  //Add single beneficiary to project
   addToProject(dto: AddToProjectDto) {
     return this.prisma.beneficiaryProject.create({
       data: dto,
     });
   }
+
+
+  // refresh beneficiary stats
   async refreshStats() {
     this.eventEmitter.emit(BeneficiaryEvents.REFRESH_STATS, {
       projectUUID: null,
     });
     return { message: 'Beneficiary stats refresh started' };
   }
+
+  //list pii data with or without project filter
   async listPiiData(dto: any) {
     const repository = dto.projectId
       ? this.rsprisma.beneficiaryProject
@@ -134,6 +140,8 @@ export class BeneficiaryService {
 
     return data;
   }
+
+  // list beneficiary groups with or without project filter
   async listBenefByProject(data: any) {
     if (!data?.data?.length) return data;
 
@@ -151,6 +159,8 @@ export class BeneficiaryService {
     return data;
   }
 
+
+  //find beneficiary by wallet address and attach pii data
   async findOneBeneficiary(data: any) {
     const getBeneficiaryByWallet = await this.prisma.beneficiary.findUnique({
       where: {
@@ -165,6 +175,8 @@ export class BeneficiaryService {
     return { piiData: pii, projectData: rest, ...data };
   }
 
+
+  // find beneficiary via phone
   async getBeneficiaryByPhoneOnly(payload: { phone: string }) {
     const getBeneficiaryByPhone = await this.prisma.beneficiaryPii.findUnique({
       where: {
@@ -181,6 +193,8 @@ export class BeneficiaryService {
 
     return { ...beneficiary, pii: piiData };
   }
+
+
 
   async listBeneficiaryPiiByWalletAddress(data: any) {
     if (!data?.data?.length) return data;
@@ -2104,62 +2118,6 @@ export class BeneficiaryService {
       meta,
     };
   }
-
-  // async listTempBeneficiaries(uuid: string, query: ListTempBeneficiariesDto) {
-  //   const whereFilter: Prisma.TempGroupWhereInput = {
-  //     uuid,
-  //     ...(query.firstName && {
-  //       firstName: {
-  //         contains: query.firstName,
-  //         mode: 'insensitive',
-  //       },
-  //     }),
-  //   };
-
-  //   const total = await this.prisma.tempGroup.count({
-  //     where: {
-  //       ...whereFilter,
-  //       TempGroupedBeneficiaries: {
-  //         some: {
-  //           tempBeneficiary: {
-  //             firstName: {
-  //               contains: query.firstName,
-  //               mode: 'insensitive',
-  //             }
-  //           }
-  //         }
-  //       }
-  //     },
-
-  //   });
-
-  //   const paginatedBeneficiaries = await this.prisma.tempGroup.findMany({
-  //     where: whereFilter,
-  //     include: {
-  //       TempGroupedBeneficiaries: {
-  //         select: {
-  //           tempBeneficiary: true
-  //         }
-  //       }
-  //     },
-  //     skip: query.page && query.perPage ? (query.page - 1) * query.perPage : undefined,
-  //     take: query.page && query.perPage ? query.perPage : undefined,
-  //   });
-
-  //   const lastPage = query.page && query.perPage ? Math.ceil(total / query.perPage) : undefined;
-
-  //   const meta = {
-  //     total,
-  //     lastPage,
-  //     currentPage: query.page,
-  //     perPage: query.perPage,
-  //   };
-
-  //   return {
-  //     TempGroupedBeneficiaries: paginatedBeneficiaries,
-  //     meta,
-  //   };
-  // }
 
   listTempGroups(query: ListTempGroupsDto) {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
