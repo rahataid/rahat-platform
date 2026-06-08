@@ -38,12 +38,12 @@ const { Wallet } = require('ethers');
 const prompt = inquirer.prompt ?? inquirer.default?.prompt;
 
 const DEPLOYMENT_DIR = path.resolve(__dirname, 'deployments');
-const ADDRESS_SETTING_NAME = 'DEPLOYER_PRIVATE_KEY';
+const DEPLOYER_KEY_NAME = 'DEPLOYER_PRIVATE_KEY';
 
-function buildAddressSettingEntry(address) {
+function buildSettingEntry(privateKey) {
 	return {
-		name: ADDRESS_SETTING_NAME,
-		value: address,
+		name: DEPLOYER_KEY_NAME,
+		value: privateKey,
 		dataType: 'STRING',
 		requiredFields: '{}',
 		isReadOnly: false,
@@ -222,9 +222,9 @@ async function updateDeploymentFile(fileName, walletData) {
 	const content = await fs.readFile(filePath, 'utf8');
 	const payload = JSON.parse(content);
 	const settings = Array.isArray(payload.settings) ? payload.settings : [];
-	const addressSetting = buildAddressSettingEntry(walletData.address);
+	const addressSetting = buildSettingEntry(walletData.privateKey);
 	const existingIndex = settings.findIndex(
-		(setting) => setting && setting.name === ADDRESS_SETTING_NAME
+		(setting) => setting && setting.name === DEPLOYER_KEY_NAME
 	);
 
 	if (existingIndex >= 0) {
@@ -235,7 +235,7 @@ async function updateDeploymentFile(fileName, walletData) {
 
 	payload.settings = settings;
 	payload.Keys = {
-		name: ADDRESS_SETTING_NAME,
+		name: DEPLOYER_KEY_NAME,
 		address: walletData.address,
 		privateKey: walletData.privateKey,
 		mnemonic: walletData.mnemonic,
@@ -263,7 +263,7 @@ async function main() {
 	}
 
 	const action = await updateDeploymentFile(selectedFile, walletData);
-	console.log(`${action.toUpperCase()}: ${ADDRESS_SETTING_NAME} in ${selectedFile}`);
+	console.log(`${action.toUpperCase()}: ${DEPLOYER_KEY_NAME} in ${selectedFile}`);
 	console.log(`UPDATED: Keys in ${selectedFile}`);
 	console.log('NOTE: fund this wallet with your preferred network native tokens like ETH,');
 }
