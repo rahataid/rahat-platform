@@ -389,7 +389,7 @@ export const MS_ACTIONS = {
       DELETE: 'aaProject.groupCashTransfer.delete',
       GET: 'aaProject.groupCashTransfer.get',
       GET_ONE: 'aaProject.groupCashTransfer.getOne',
-      ASSIGN_FUND: 'aaProject.groupCashTransfer.assignFund',
+      ALLOCATE_FUND: 'aaProject.groupCashTransfer.assignFund',
       DISBURSE: 'aaProject.groupCashTransfer.disburse',
       GET_RECORDS: 'aaProject.groupCashTransfer.getRecords',
       GET_ONE_RECORD: 'aaProject.groupCashTransfer.getOneRecord',

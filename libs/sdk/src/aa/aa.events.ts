@@ -219,7 +219,7 @@ export const JOBS = {
     DELETE: 'aa.jobs.groupCashTransfer.delete',
     GET: 'aa.jobs.groupCashTransfer.get',
     GET_ONE: 'aa.jobs.groupCashTransfer.getOne',
-    ASSIGN_FUND: 'aa.jobs.groupCashTransfer.assignFund',
+    ALLOCATE_FUND: 'aa.jobs.groupCashTransfer.assignFund',
     DISBURSE: 'aa.jobs.groupCashTransfer.disburse',
     GET_RECORDS: 'aa.jobs.groupCashTransfer.getRecords',
     GET_ONE_RECORD: 'aa.jobs.groupCashTransfer.getOneRecord',
