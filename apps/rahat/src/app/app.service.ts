@@ -1,11 +1,14 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { SettingDataType } from '@rumsan/sdk/enums';
 import { UUID } from 'crypto';
+import { SeedSettingsDto } from './dto/seed-settings.dto';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -29,10 +32,43 @@ function getDataType(
 }
 
 
+const LOCK_SETTING_NAME = 'SETTINGS_DYNAMIC_API_SUPPORT';
+
+function normalizeRequiredFields(requiredFields: string | string[] | undefined): string[] {
+  if (Array.isArray(requiredFields)) return requiredFields.map(String);
+  if (typeof requiredFields !== 'string') return [];
+  const trimmed = requiredFields.trim();
+  if (!trimmed || trimmed === '{}' || trimmed === '[]') return [];
+  try {
+    const parsed = JSON.parse(trimmed);
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+function parseSettingValue(value: unknown, dataType?: string): unknown {
+  if (typeof value !== 'string') return value;
+  if (dataType === 'OBJECT') {
+    try { return JSON.parse(value); } catch { return value; }
+  }
+  if (dataType === 'NUMBER') {
+    const n = Number(value);
+    return Number.isNaN(n) ? value : n;
+  }
+  if (dataType === 'BOOLEAN') {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+  }
+  return value;
+}
+
 @Injectable()
 export class AppService {
   constructor(
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
+    private readonly settingsService: SettingsService,
+    private readonly eventEmitter: EventEmitter2,
   ) { }
 
 
@@ -176,6 +212,44 @@ export class AppService {
     });
 
     return newSetting;
+  }
+
+  async seedSettings(dto: SeedSettingsDto) {
+    const lockRecord = await this.prisma.setting.findUnique({ where: { name: LOCK_SETTING_NAME } });
+
+    if (lockRecord && (lockRecord.value as string) === 'LOCKED') {
+      throw new ForbiddenException('Settings already seeded. API is locked.');
+    }
+
+    let seededCount = 0;
+    for (const item of dto.settings) {
+      const parsedValue = parseSettingValue(item.value, item.dataType);
+      const detectedDataType = item.dataType ?? getDataType(parsedValue as string | number | boolean | object);
+      const requiredFields = normalizeRequiredFields(item.requiredFields);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const dbValue = parsedValue as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const dbDataType = detectedDataType as any;
+      await this.prisma.setting.upsert({
+        where: { name: item.name.toUpperCase() },
+        update: { value: dbValue, dataType: dbDataType, requiredFields, isReadOnly: item.isReadOnly ?? false, isPrivate: item.isPrivate ?? false },
+        create: { name: item.name.toUpperCase(), value: dbValue, dataType: dbDataType, requiredFields, isReadOnly: item.isReadOnly ?? false, isPrivate: item.isPrivate ?? false },
+      });
+      seededCount++;
+    }
+
+    await this.prisma.setting.upsert({
+      where: { name: LOCK_SETTING_NAME },
+      update: { value: 'LOCKED' },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      create: { name: LOCK_SETTING_NAME, value: 'LOCKED', dataType: 'STRING' as any, requiredFields: [], isReadOnly: true, isPrivate: false },
+    });
+
+    await this.settingsService.load();
+    this.eventEmitter.emit('settings.seeded');
+
+    return { seeded: seededCount, status: 'LOCKED' };
   }
 
   async getCommunicationSettings() {
