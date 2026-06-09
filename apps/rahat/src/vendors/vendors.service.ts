@@ -41,8 +41,7 @@ const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 export class VendorsService {
 
   private readonly logger = new Logger(VendorsService.name);
-  private rpcUrl: string;
-  private deployerPrivateKey: string;
+  private shouldFundVendorWallet: string;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -53,6 +52,11 @@ export class VendorsService {
     private readonly eventEmitter: EventEmitter2,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
+
+  async onModuleInit() {
+    const vendorFundSettings = await this.settings.getByName('FUND_VENDOR_WALLET');
+    this.shouldFundVendorWallet = vendorFundSettings?.value as string;
+  }
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
@@ -106,7 +110,9 @@ export class VendorsService {
     });
 
     // Emit vendor created event to fund vendor wallet
-    this.eventEmitter.emit(ProjectEvents.VENDORS_CREATED, { wallet: vendor.wallet });
+    if (this.shouldFundVendorWallet.toLowerCase() == 'true') {
+      this.eventEmitter.emit(ProjectEvents.VENDORS_CREATED, { wallet: vendor.wallet });
+    }
 
     this.notificationService.createNotification({
       title: `Vendor Waiting for Approval`,
