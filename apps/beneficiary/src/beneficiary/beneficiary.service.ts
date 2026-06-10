@@ -2476,16 +2476,11 @@ export class BeneficiaryService {
         },
       });
 
-      if (!piiData.phone) {
-        this.logger.log('No phone number provided in PII data, generating a derived phone number.');
-        piiData.phone = generateDerivedPhone(createdBeneficiary.uuid);
-      }
-
-      await this.prisma.beneficiaryPii.create({
+      const createdPii = await this.prisma.beneficiaryPii.create({
         data: {
           beneficiaryId: createdBeneficiary.id,
-          phone: piiData.phone?.toString(),
           ...piiData,
+          phone: piiData.phone ? piiData.phone.toString() : undefined,
         },
       });
 
@@ -2501,7 +2496,7 @@ export class BeneficiaryService {
         walletAddress: createdBeneficiary.walletAddress,
         extras: {
           ...((createdBeneficiary.extras ?? {}) as Record<string, any>),
-          phone: piiData.phone,
+          phone: createdPii.phone,
         },
         isVerified: createdBeneficiary.isVerified,
         gender: createdBeneficiary.gender,
@@ -2520,7 +2515,7 @@ export class BeneficiaryService {
       await this.prisma.$executeRawUnsafe(`COMMIT PREPARED '${dbTxId}';`);
       this.logger.log('Transaction committed successfully.');
 
-      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: {...createdBeneficiary, phone: piiData.phone} };
+      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: {...createdBeneficiary, phone: createdPii.phone} };
     } catch (error) {
       this.logger.error('Error occurred during beneficiary creation with DB transaction:', error);
       await this.rollback2PC(projectId, dbTxId);
@@ -2597,10 +2592,4 @@ async function checkWalletAddress(
   });
   return duplicates.map((dup) => dup.walletAddress);
 
-}
-
-function generateDerivedPhone(uuid: string): string {
-  const timeHash = Date.now().toString(36).padStart(4, '0').slice(-4);
-  const uuidPart = uuid.replace(/-/g, '').slice(-6);
-  return `${timeHash}${uuidPart}`;
 }
