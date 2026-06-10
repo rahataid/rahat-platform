@@ -18,7 +18,7 @@ try {
   };
 
   packageData.dependencies = {
-//    ...rootPackageData.dependencies,
+    ...rootPackageData.dependencies,
     ...packageData.dependencies,
     prisma: '5.20.0',
     'ts-node': '^10.9.1',
@@ -26,11 +26,6 @@ try {
     dotenv: '16.4.5',
     readline: '1.3.0',
     'body-parser': '1.20.2',
-    '@nestjs/common': '^10.0.0',
-    '@nestjs/core': '^10.0.0',
-    '@nestjs/platform-express': '^10.0.0',
-    'reflect-metadata': '^0.1.13',
-    'rxjs': '^7.8.0',
   };
 
   packageData.prisma = {
