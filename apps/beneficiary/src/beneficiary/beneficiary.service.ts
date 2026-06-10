@@ -2480,7 +2480,9 @@ export class BeneficiaryService {
         data: {
           beneficiaryId: createdBeneficiary.id,
           ...piiData,
-          phone: piiData.phone ? piiData.phone.toString() : undefined,
+          phone: piiData.phone
+            ? piiData.phone.toString()
+            : BeneficiaryConstants.UNPHONED_PLACEHOLDER,
         },
       });
 

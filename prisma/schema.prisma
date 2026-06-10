@@ -400,7 +400,7 @@ enum BeneficiaryTypes {
 model BeneficiaryPii {
   beneficiaryId Int         @unique
   name          String?
-  phone         String?     @unique
+  phone         String      @unique
   email         String?
   extras        Json?       @db.JsonB()
   beneficiary   Beneficiary @relation("BeneficiaryToPii", fields: [beneficiaryId], references: [id])
