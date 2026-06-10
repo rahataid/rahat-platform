@@ -8,6 +8,7 @@ export const EVENTS = {
   IMPORTED_TEMP_BENEFICIARIES_FROM_CT: 'beneficiary.imported_temp_beneficiaries_from_ct',
   IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL: "beneficiary.imported_temp_beneficiaries_from_excel",
   REFRESH_STATS: "beneficiary.refresh_stats",
+  GROUP_IMPORTED: 'beneficiary.group_imported',
 };
 
 export const JOBS = {
@@ -97,4 +98,6 @@ export const JOBS = {
   GET_BENEFICIARYS_PROJECT_DETAILS: 'rahat.jobs.beneficiary.getBeneficiarysProjectDetails',
   IMPORT_V2: 'rahat.jobs.beneficiary.import_v2',
   CREATE_BENEFICIARY_WITH_DB_TRANSACTION: 'rahat.jobs.beneficiary.create_beneficiary_with_db_transaction',
+  SYNC_GROUP_TO_PROJECTS: 'rahat.jobs.beneficiary.sync_group_to_projects',
+  SYNC_IMPORTED_GROUP_BENEFICIARIES: 'rahat.jobs.beneficiary.sync_imported_group_beneficiaries',
 };
