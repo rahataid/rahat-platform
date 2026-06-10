@@ -10,6 +10,7 @@ try {
 
   // Modify package.json as needed
   packageData.scripts = {
+    ...rootPackageData.dependencies,
     ...packageData.scripts,
     start: 'node main.js',
     [`studio:${appName}`]: 'prisma studio --schema prisma/schema.prisma',
