@@ -18,6 +18,7 @@ try {
   };
 
   packageData.dependencies = {
+    ...rootPackageData.dependencies,
     ...packageData.dependencies,
     prisma: '5.20.0',
     'ts-node': '^10.9.1',
