@@ -1,7 +1,13 @@
-FROM node:22-alpine
+FROM node:22-alpine AS deps
+WORKDIR /usr/src/app
+COPY ./dist/apps/rahat/package.json ./
+RUN apk add --no-cache openssl openssl-dev
+RUN npm install -g pnpm@9.15.2 && pnpm install --no-frozen-lockfile
+
+FROM node:22-alpine AS runner
 WORKDIR /usr/src/app
 RUN apk add --no-cache openssl
 COPY ./dist/apps/rahat/ ./
-RUN npm install --legacy-peer-deps
+COPY --from=deps /usr/src/app/node_modules ./node_modules
 RUN npm install -g pnpm@9.15.2 && pnpm prisma generate
 CMD ["node", "main.js"]
