@@ -1,7 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -27,9 +27,13 @@ import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { switchMap, tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
-import { createExtrasAndPIIData } from '../utils';
+import {
+  createExtrasAndPIIData,
+  mapKoboFields,
+  pickVillageDoctorIdentifier,
+  unwrapKoboPayload,
+} from '../utils';
 import { generateIdempotencyKey } from '../utils/idempotency-key';
-import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
 import {
   aaActions,
   aidLinkActions,
@@ -58,6 +62,8 @@ const KOBO_COUNTRY_CODE =
 
 @Injectable()
 export class ProjectService {
+  private readonly logger = new Logger(ProjectService.name);
+
   constructor(
     private prisma: PrismaService,
     private eventEmitter: EventEmitter2,
@@ -353,7 +359,30 @@ export class ProjectService {
   }
 
   async importKoboBeneficiary(uuid: UUID, data: any) {
-    const benef: any = this.mapKoboFields(data);
+    const rawPayload = unwrapKoboPayload(data);
+    this.logger.log(
+      `[kobo-import] raw payload keys: ${JSON.stringify(
+        Object.keys(rawPayload)
+      )}`
+    );
+    this.logger.log(`[kobo-import] raw payload: ${JSON.stringify(rawPayload)}`);
+    const benef: any = mapKoboFields(rawPayload);
+    const villageDoctorId = pickVillageDoctorIdentifier(benef);
+    this.logger.log(
+      `[kobo-import] mapped koboUsername="${
+        benef.koboUsername ?? ''
+      }" villageDoctorId="${villageDoctorId ?? ''}" meta.Village_Doctor="${
+        benef.meta?.Village_Doctor ?? ''
+      }"`
+    );
+    if (!villageDoctorId) {
+      throw new Error(
+        `Village Doctor is missing from Kobo submission. Received keys: ${Object.keys(
+          rawPayload
+        ).join(', ')}`
+      );
+    }
+
     if (!benef.type) benef.type = 'LEAD';
     if (benef.type) benef.type = benef.type.toUpperCase();
     if (benef.type !== 'LEAD') benef.phone = genRandomPhone('88');
@@ -374,29 +403,32 @@ export class ProjectService {
       KOBO_COUNTRY_CODE ||
       (NODE_ENV === 'production' ? CAMBODIA_COUNTRY_CODE : '');
     benef.phone = this.normalizeKoboPhone(benef.phone, countryCode);
-    console.log('Beneficiary Phone', benef.phone);
 
     const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
     const extrasPayload = {
-      meta: benef.meta,
+      meta: {
+        ...(benef.meta ?? {}),
+        chw: villageDoctorId,
+        Village_Doctor: villageDoctorId,
+        vd: villageDoctorId,
+      },
       healthWorkerName:
         benef.healthWorkerName || benef.meta?.Health_Worker_Name,
       villageDoctorUuid:
         benef.villageDoctorUuid || benef.meta?.village_doctor_uuid,
-      koboUsername:
-        benef.koboUsername ||
+      koboUsername: villageDoctorId,
+      dataCollectorId:
         benef.dataCollectorId ||
-        benef.meta?._submitted_by ||
-        benef.meta?.username ||
-        'UNKNOWN',
-      dataCollectorId: benef.dataCollectorId || benef.meta?._submitted_by,
+        benef.meta?.ep ||
+        benef.meta?.Eye_Partner ||
+        benef.meta?.eye_partner ||
+        benef.meta?._submitted_by,
       occupation: benef.occupation || 'UNKNOWN',
       province: benef.province || 'UNKNOWN',
       district: benef.district || 'UNKNOWN',
       commune: benef.commune || 'UNKNOWN',
       village: benef.village || 'UNKNOWN',
     };
-
     const koboPayload = {
       name: piiData.name,
       phone: piiData.phone,
@@ -410,9 +442,12 @@ export class ProjectService {
     const row = await this.prisma.koboBeneficiary.create({
       data: koboPayload,
     });
-    const piiExist = await this.checkPiiPhone(benef.phone);
-    console.log({ piiExist });
-    if (piiExist) {
+
+    const phoneConflict = await this.resolveKoboPhoneConflict(
+      benef.phone,
+      uuid
+    );
+    if (phoneConflict === 'discard') {
       const discardedPayload = {
         ...piiData,
         age: benef.age,
@@ -424,6 +459,14 @@ export class ProjectService {
         },
       };
       return this.saveToDiscarded(uuid, discardedPayload);
+    }
+    if (phoneConflict === 'link') {
+      return this.linkExistingKoboBeneficiary(
+        uuid,
+        benef,
+        extrasPayload,
+        row.uuid
+      );
     }
     // 2. Save to Beneficiary and PII
     return this.client
@@ -504,18 +547,74 @@ export class ProjectService {
     });
   }
 
-  mapKoboFields(payload: any) {
-    const mappedPayload = {};
-    const meta = {};
+  /**
+   * Kobo import phone policy:
+   * - create: new phone
+   * - discard: phone already registered on this project (duplicate referral)
+   * - link: phone exists on platform but not yet on this project
+   */
+  async resolveKoboPhoneConflict(
+    phone: string,
+    projectId: string
+  ): Promise<'create' | 'discard' | 'link'> {
+    const pii = await this.checkPiiPhone(phone);
+    if (!pii) return 'create';
 
-    for (const key in payload) {
-      if (KOBO_FIELD_MAPPINGS[key]) {
-        mappedPayload[KOBO_FIELD_MAPPINGS[key]] = payload[key];
-      } else {
-        meta[key] = payload[key];
-      }
-    }
-    return { ...mappedPayload, meta };
+    const beneficiary = await this.prisma.beneficiary.findFirst({
+      where: { id: pii.beneficiaryId, deletedAt: null },
+      select: { uuid: true },
+    });
+    if (!beneficiary) return 'discard';
+
+    const inProject = await this.prisma.beneficiaryProject.findFirst({
+      where: {
+        projectId,
+        beneficiaryId: beneficiary.uuid,
+        deletedAt: null,
+      },
+    });
+    return inProject ? 'discard' : 'link';
+  }
+
+  async linkExistingKoboBeneficiary(
+    projectId: UUID,
+    benef: any,
+    extrasPayload: Record<string, unknown>,
+    importId: string
+  ) {
+    const pii = await this.checkPiiPhone(benef.phone);
+    if (!pii) throw new Error('Beneficiary not found for existing phone');
+
+    const beneficiary = await this.prisma.beneficiary.findFirst({
+      where: { id: pii.beneficiaryId, deletedAt: null },
+    });
+    if (!beneficiary)
+      throw new Error('Beneficiary not found for existing phone');
+
+    const cambodiaPayload = {
+      uuid: beneficiary.uuid,
+      phone: benef.phone,
+      walletAddress: beneficiary.walletAddress,
+      type: benef?.type || 'UNKNOWN',
+      leadInterests: benef?.leadInterests || [],
+      extras: extrasPayload,
+    };
+
+    return this.client
+      .send(
+        { cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE, uuid: projectId },
+        cambodiaPayload
+      )
+      .pipe(
+        timeout(MS_TIMEOUT),
+        switchMap(() =>
+          this.addToProjectAndUpdate({
+            projectId,
+            beneficiaryId: beneficiary.uuid,
+            importId,
+          })
+        )
+      );
   }
 
   normalizeKoboPhone(phone: string, countryCode = '') {
