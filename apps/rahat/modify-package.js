@@ -24,7 +24,7 @@ try {
     '@prisma/client': '5.20.0',
     dotenv: '16.4.5',
     readline: '1.3.0',
-    'body-parser': '1.20.3',
+    'body-parser': '1.20.2',
   };
 
   packageData.prisma = {
