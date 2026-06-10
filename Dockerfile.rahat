@@ -1,8 +1,8 @@
 FROM node:22-alpine AS deps
 WORKDIR /usr/src/app
 COPY ./dist/apps/rahat/package.json ./
-RUN apk add --no-cache openssl openssl-dev
-RUN npm install -g pnpm@9.15.2 && pnpm install --no-frozen-lockfile
+RUN apk add --no-cache openssl && \
+    npm install --legacy-peer-deps
 
 FROM node:22-alpine AS runner
 WORKDIR /usr/src/app
