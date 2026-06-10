@@ -1,12 +1,14 @@
 # Install dependencies only when needed
 FROM node:22-alpine AS deps
 WORKDIR /usr/src/app
+RUN apk add --no-cache openssl openssl-dev
 # COPY ./dist/apps/rahat/package.json .npmrc ./
 COPY ./dist/apps/rahat/package.json ./
 RUN npm install -g pnpm@9.15.2 && pnpm install
 
 FROM node:22-alpine AS builder
 WORKDIR /usr/src/app
+RUN apk add --no-cache openssl
 COPY ./dist/apps/rahat/ ./
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 RUN npm install -g pnpm@9.15.2 && pnpm prisma generate
