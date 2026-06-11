@@ -386,6 +386,21 @@ export const MS_ACTIONS = {
       EXECUTE_ACTION: 'aa.inkind-tracker.executeAction',
       GET_TRANSACTIONS: 'aa.inkind-tracker.getTransactions',
     },
+    GROUP_CASH_TRANSFER: {
+      CREATE: 'aaProject.groupCashTransfer.create',
+      UPDATE: 'aaProject.groupCashTransfer.update',
+      DELETE: 'aaProject.groupCashTransfer.delete',
+      GET: 'aaProject.groupCashTransfer.get',
+      GET_ONE: 'aaProject.groupCashTransfer.getOne',
+      ALLOCATE_FUND: 'aaProject.groupCashTransfer.assignFund',
+      DISBURSE: 'aaProject.groupCashTransfer.disburse',
+      GET_RECORDS: 'aaProject.groupCashTransfer.getRecords',
+      GET_ONE_RECORD: 'aaProject.groupCashTransfer.getOneRecord',
+      VALIDATE_BANK_ACCOUNT: 'aaProject.groupCashTransfer.validateBankAccount',
+      GET_ALL_VALID: 'aaProject.groupCashTransfer.getAllValid',
+      GET_GCT_DATA: 'aaProject.groupCashTransfer.getGCTData',
+      UPDATE_GROUP_RECORD: 'aaProject.groupCashTransfer.updateRecord'
+    },
     MULTISIG: {
       GET_SAFE_OWNER: 'aa.getSafeOwner',
       CREATE_SAFE_TRANSACTION: 'aa.createSafeTransaction',
