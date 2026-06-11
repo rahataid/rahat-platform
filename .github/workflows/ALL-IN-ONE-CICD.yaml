@@ -41,7 +41,7 @@ env:
 jobs:
   resolve-config:
     name: Resolve Environment Config
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     outputs:
       tag_suffix: ${{ steps.config.outputs.tag_suffix }}
       env_secret_name: ${{ steps.config.outputs.env_secret_name }}
@@ -159,7 +159,7 @@ jobs:
   # -----------------------------
   build:
     name: Build & Push - ${{ matrix.app }}
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     needs: [resolve-config, setup]
     strategy:
       fail-fast: false
