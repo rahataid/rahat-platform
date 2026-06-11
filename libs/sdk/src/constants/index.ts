@@ -16,6 +16,7 @@ export const BQUEUE = {
   HOST: 'RAHAT.HOST',
   META_TXN: 'RAHAT.META_TXN',
   RAHAT_IMPORT: 'RAHAT.IMPORT',
+  FUND_VENDOR_WALLET: 'RAHAT.FUND_VENDOR_WALLET',
 };
 
 export const UserRoles = {
@@ -338,9 +339,11 @@ export const MS_ACTIONS = {
       BENEFICIARY_INKIND_DETAILS: 'aaProject.beneficiary.inKindsDetails',
       GET_OFFLINE_BENEFICIARY_INKIND_BY_VENDOR: 'aaProject.inkinds.getAllOfflineBeneficiaryByVendor',
       REDEEM_OFFLINE_INKIND_BY_VENDOR: 'aaProject.inkinds.syncOfflineRedemptions',
+      GET_VENDOR_AVAILABLE_INKIND_DETAILS: 'aaProject.inkinds.getVendorAvailableInkindsDetails',
       CREATE_VENDOR_REDEMPTION: 'aaProject.inkinds.createVendorRedemption',
       GET_VENDOR_REDEMPTIONS: 'aaProject.inkinds.getVendorRedemptions',
       UPDATE_VENDOR_REDEMPTION_STATUS: 'aaProject.inkinds.updateVendorRedemptionStatus',
+      UPDATE_VENDOR_REDEMPTION_TX_HASH: 'aaProject.inkinds.updateVendorRedemptionTxHash'
     },
     VENDOR: {
       // Remove after test
