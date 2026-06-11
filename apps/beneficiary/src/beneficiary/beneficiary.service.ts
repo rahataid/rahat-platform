@@ -712,6 +712,7 @@ export class BeneficiaryService {
     );
   }
 
+  //CHECK: ASSIGN_TO_PROJECT
   async addBulkBeneficiaryToProject(dto: addBulkBeneficiaryToProject) {
     const {
       dto: {
@@ -762,6 +763,7 @@ export class BeneficiaryService {
     );
   }
 
+  //CHECK: ASSIGN_TO_PROJECT
   async bulkAssignToProject(dto) {
     const { beneficiaryIds, projectId } = dto;
     const projectPayloads = [];
@@ -1933,6 +1935,7 @@ export class BeneficiaryService {
   }
 
   async assignBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
+    this.logger.log(`Assigning beneficiary group ${dto.beneficiaryGroupId} to project ${dto.projectId}`);
     try {
       const { beneficiaryGroupId, projectId } = dto;
 
@@ -1994,44 +1997,7 @@ export class BeneficiaryService {
 
       // Get secret of beneficiaries
       // todoNewChain
-      if (chain === 'stellar') {
-        await handleMicroserviceCall({
-          client: this.walletClient.send(
-            { cmd: WalletJobs.GET_BULK_SECRET_BY_WALLET },
-            { walletAddresses: unassignedBenfs.map((d) => d.walletAddress) }
-          ),
-          onSuccess: async (response) => {
-            const benWallets = response.map((d) => ({
-              address: d.publicKey,
-              secret: d.privateKey,
-            }));
-
-            // Create stellar account and add trustline for beneficiaries
-            await handleMicroserviceCall({
-              client: this.client.send(
-                {
-                  cmd: AAJobs.STELLAR.INTERNAL_FAUCET_TRUSTLINE,
-                  uuid: project.uuid,
-                },
-                { wallets: benWallets }
-              ),
-              onSuccess: async (response) => {
-                return response;
-              },
-              onError(error) {
-                console.log('Error adding trustline to beneficiaries', error);
-                throw new RpcException(error.message);
-              },
-            });
-
-            return response;
-          },
-          onError(error) {
-            console.log('Error getting secrets of beneficiaries', error);
-            throw new RpcException(error.message);
-          },
-        });
-      }
+      this.logger.log(`Chain for project ${project.uuid} is ${chain}. Fetching secrets for beneficiaries: ${unassignedBenfs.map(b => b.uuid).join(', ')}`);
 
       // Bulk assign unassigned beneficiaries to project
       if (unassignedBenfs?.length) {
@@ -2045,11 +2011,6 @@ export class BeneficiaryService {
         );
       }
 
-      // add as required by project specifics
-      const projectPayload = {
-        beneficiaryGroupData,
-      };
-
       //2.Save beneficiary group to project
       await this.saveBeneficiaryGroupToProject(dto);
 
@@ -2057,7 +2018,9 @@ export class BeneficiaryService {
       //3. Sync beneficiary to project
       return this.client.send(
         { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
-        projectPayload
+        {
+          beneficiaryGroupData,
+        }
       );
     } catch (err) {
       console.log(err);

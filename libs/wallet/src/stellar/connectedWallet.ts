@@ -1,4 +1,4 @@
-import { BASE_FEE, Keypair, Networks, TransactionBuilder } from 'stellar-sdk';
+import { BASE_FEE, Keypair, Networks, TransactionBuilder } from '@stellar/stellar-sdk';
 import { IConnectedWallet, WalletKeys } from "../types.js";
 
 
