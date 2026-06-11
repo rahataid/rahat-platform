@@ -161,9 +161,11 @@ export const JOBS = {
     BENEFICIARY_INKIND_DETAILS: 'aa.jobs.beneficiary.inKindDetails',
     GET_OFFLINE_BENEFICIARY_INKIND_BY_VENDOR: 'aa.jobs.inkinds.getAllOfflineBeneficiaryByVendor',
     REDEEM_OFFLINE_INKIND_BY_VENDOR: 'aa.jobs.inkinds.redeemOfflineInkindByVendor',
+    GET_VENDOR_AVAILABLE_INKIND_DETAILS: 'aa.jobs.inkinds.getVendorAvailableInkindsDetails',
     CREATE_VENDOR_REDEMPTION: 'aa.jobs.inkinds.createVendorRedemption',
     GET_VENDOR_REDEMPTIONS: 'aa.jobs.inkinds.getVendorRedemptions',
     UPDATE_VENDOR_REDEMPTION_STATUS: 'aa.jobs.inkinds.updateVendorRedemptionStatus',
+    UPDATE_VENDOR_REDEMPTION_TX_HASH: 'aa.jobs.inkinds.updateVendorRedemptionTxHash'
   },
   VENDOR: {
     // Remove after test

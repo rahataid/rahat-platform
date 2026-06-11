@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 export class CorsConfigService {
   private readonly logger = new Logger(CorsConfigService.name);
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) { }
 
   createCorsOptions(): CorsOptions {
     const allowedOrigins = this.configService.get<string>('ALLOWED_ORIGINS');
@@ -18,20 +18,35 @@ export class CorsConfigService {
       'http://localhost:5173',
     ];
     const rahatDomainRegex = /^https?:\/\/(.+\.)?rahat\.io$/;
+    const allowedDomains = this.configService.get<string>('ALLOWED_DOMAINS');
+    console.log('ALLOWED_ORIGINS:', allowedOrigins);
+    console.log('ALLOWED_DOMAINS:', allowedDomains);
+    const domainRegexes: RegExp[] = [
+      rahatDomainRegex,
+      ...(allowedDomains
+        ? allowedDomains
+          .split(',')
+          .map((d) => d.trim())
+          .filter((d) => d.length > 0)
+          .map((d) => new RegExp(`^https?:\\/\\/(.+\\.)?${d.replace('.', '\\.')}$`))
+        : []),
+    ];
 
     this.logger.log(
-      `CORS config service initialized with allowed origins: ${
-        allowedOrigins || 'none (using defaults)'
-      }`
+      `CORS config service initialized with allowed origins: ${allowedOrigins || 'none (using defaults)'
+      }, allowed domains: ${allowedDomains || 'rahat.io (default)'}`
     );
 
     let corsOrigins: (string | RegExp)[];
 
     if (allowedOrigins) {
-      corsOrigins = allowedOrigins
-        .split(',')
-        .map((origin) => origin.trim())
-        .filter((origin) => origin.length > 0);
+      corsOrigins = [
+        ...allowedOrigins
+          .split(',')
+          .map((origin) => origin.trim())
+          .filter((origin) => origin.length > 0),
+        ...domainRegexes,
+      ];
 
       this.logger.log(
         `CORS configured with allowed origins: ${corsOrigins.join(', ')}`
@@ -40,17 +55,18 @@ export class CorsConfigService {
       const nodeEnv = this.configService.get<string>('NODE_ENV');
       corsOrigins =
         nodeEnv === 'production'
-          ? [rahatDomainRegex] // Only allow rahat.io domains in production
-          : [...defaultStringOrigins, rahatDomainRegex]; // Allow localhost + rahat.io in development
+          ? domainRegexes
+          : [...defaultStringOrigins, ...domainRegexes];
 
+      const domainsDescription = allowedDomains || 'rahat.io (default)';
       const originsDescription =
         nodeEnv === 'production'
-          ? 'rahat.io domains only'
-          : `${defaultStringOrigins.join(', ')} + rahat.io domains`;
+          ? domainsDescription
+          : `${defaultStringOrigins.join(', ')} + ${domainsDescription}`;
 
       this.logger.warn(
         nodeEnv === 'production'
-          ? 'ALLOWED_ORIGINS not set in production - allowing rahat.io domains only'
+          ? `ALLOWED_ORIGINS not set in production - allowing domains: ${domainsDescription}`
           : `ALLOWED_ORIGINS not set - using default development origins: ${originsDescription}`
       );
     }

@@ -29,6 +29,9 @@ import { MetaTxnService } from './metatxn.service';
     BullModule.registerQueue({
       name: BQUEUE.META_TXN
     }),
+    BullModule.registerQueue({
+      name: BQUEUE.FUND_VENDOR_WALLET,
+    }),
     ClientsModule.registerAsync([
       {
         name: 'RAHAT_CLIENT',
