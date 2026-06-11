@@ -437,10 +437,11 @@ export class BeneficiaryService {
   async create(dto: CreateBeneficiaryDto, projectUuid?: string,) {
     const { piiData, projectUUIDs, walletAddress, ...data } = dto;
 
-    if (!piiData.phone) throw new RpcException('Phone number is required');
-    await this.beneficiaryUtilsService.ensureUniquePhone(
-      piiData.phone.toString()
-    );
+    if (piiData.phone) {
+      await this.beneficiaryUtilsService.ensureUniquePhone(
+        piiData.phone.toString()
+      );
+    }
 
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const createdBeneficiary = await this.rsprisma.beneficiary.create({
@@ -802,14 +803,16 @@ export class BeneficiaryService {
     if (!findUuid) throw new Error('Data not Found');
     const { piiData, id, ...rest } = dto;
 
-    const benWithSameNumber = await this.rsprisma.beneficiaryPii.findFirst({
-      where: {
-        phone: piiData.phone,
-        beneficiaryId: { not: id },
-      },
-    });
-    if (benWithSameNumber)
-      throw new RpcException('Phone number should be unique');
+    if (piiData?.phone) {
+      const benWithSameNumber = await this.rsprisma.beneficiaryPii.findFirst({
+        where: {
+          phone: piiData.phone,
+          beneficiaryId: { not: id },
+        },
+      });
+      if (benWithSameNumber)
+        throw new RpcException('Phone number should be unique');
+    }
 
     const rdata = await this.prisma.beneficiary.update({
       where: {
@@ -905,18 +908,19 @@ export class BeneficiaryService {
     conditional?: boolean
   ) {
     try {
-      this.beneficiaryUtilsService.ensurePhoneNumbers(dtos);
       const validDtos: CreateBeneficiaryDto[] = [];
       for (const dto of dtos) {
-        try {
-          await this.beneficiaryUtilsService.ensureUniquePhone(
-            dto.piiData.phone.toString()
-          );
-        } catch (error) {
-          console.log(
-            `Skipping entry due to duplicate phone: ${dto.piiData.phone}`
-          );
-          continue;
+        if (dto.piiData.phone) {
+          try {
+            await this.beneficiaryUtilsService.ensureUniquePhone(
+              dto.piiData.phone.toString()
+            );
+          } catch (error) {
+            console.log(
+              `Skipping entry due to duplicate phone: ${dto.piiData.phone}`
+            );
+            continue;
+          }
         }
 
         try {
@@ -2571,9 +2575,10 @@ async function checkPhoneNumber(
   beneficiaries: CreateBeneficiaryDto[],
   prisma: PrismaService
 ): Promise<string[]> {
-  const phoneNumbers = beneficiaries.map(
-    (beneficiary) => beneficiary.piiData.phone
-  );
+  const phoneNumbers = beneficiaries
+    .map((beneficiary) => beneficiary.piiData.phone)
+    .filter(Boolean);
+  if (!phoneNumbers.length) return [];
   const duplicates = await prisma.beneficiaryPii.findMany({
     where: { phone: { in: phoneNumbers } },
     select: { phone: true },

@@ -9,6 +9,7 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { PhoneStatus } from '@prisma/client';
 import { CreateBeneficiaryDto } from '@rahataid/extensions';
 import {
+  BeneficiaryConstants,
   BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
@@ -260,8 +261,11 @@ export class BeneficiaryProcessor {
             return {
               beneficiaryId: beneficiary.id,
               ...piiData,
-              uuid: undefined,
-            }; // Remove temporary UUID
+              uuid: undefined, // Remove temporary UUID
+              phone: piiData.phone
+                ? piiData.phone.toString()
+                : BeneficiaryConstants.UNPHONED_PLACEHOLDER,
+            };
           });
 
           // Insert PII data in bulk
@@ -734,9 +738,10 @@ async function checkPhoneNumber(
   beneficiaries: CreateBeneficiaryDto[],
   prisma: PrismaService
 ): Promise<string[]> {
-  const phoneNumbers = beneficiaries.map(
-    (beneficiary) => beneficiary.piiData.phone
-  );
+  const phoneNumbers = beneficiaries
+    .map((beneficiary) => beneficiary.piiData.phone)
+    .filter(Boolean);
+  if (!phoneNumbers.length) return [];
   const duplicates = await prisma.beneficiaryPii.findMany({
     where: { phone: { in: phoneNumbers } },
     select: { phone: true },
