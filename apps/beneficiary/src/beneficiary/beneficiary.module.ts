@@ -14,6 +14,7 @@ import { BeneficiaryController } from './beneficiary.controller';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
+import { GroupSyncService } from './group-sync.service';
 import { VerificationService } from './verification.service';
 @Module({
   imports: [
@@ -75,7 +76,9 @@ import { VerificationService } from './verification.service';
     BeneficiaryStatService,
     VerificationService,
     BeneficiaryConsumer,
-    BeneficiaryUtilsService
+    BeneficiaryUtilsService,
+    GroupSyncService,
   ],
+  exports: [GroupSyncService],
 })
 export class BeneficiaryModule { }

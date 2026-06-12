@@ -1,41 +1,42 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
+import { ClientProxy } from '@nestjs/microservices';
 import { BQUEUE, ProjectEvents, ProjectJobs } from '@rahataid/sdk';
+import { BeneficiaryEvents, BeneficiaryJobs } from '@rahataid/sdk/beneficiary';
 import { Project } from '@rahataid/sdk/project/project.types';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { EVENTS } from '@rumsan/user';
 import { Queue } from 'bull';
+import { firstValueFrom } from 'rxjs';
 import { DevService } from '../utils/develop.service';
+import { ChainConfig } from '../wallet/types/chain-config.interface';
 import { EmailService } from './email.service';
 import { MessageSenderService } from './messageSender.service';
-import { ChainConfig } from '../wallet/types/chain-config.interface';
-import { fundVendorWallet } from '../utils/web3';
 @Injectable()
 export class ListenersService {
+  private readonly logger = new Logger(ListenersService.name);
   private otp: string;
   private dev: DevService;
   private rpcUrl: string;
   private deployerPrivateKey: string;
-  private readonly logger = new Logger(ListenersService.name);
 
   constructor(
     @InjectQueue(BQUEUE.RAHAT) private readonly rahatQueue: Queue,
     @InjectQueue(BQUEUE.HOST) private readonly hostQueue: Queue,
     @InjectQueue(BQUEUE.RAHAT_PROJECT) private readonly projectQueue: Queue,
-    @InjectQueue(BQUEUE.FUND_VENDOR_WALLET) private readonly fundVendorWalletQueue: Queue,
+    @Inject('RAHAT_CLIENT') private readonly benClient: ClientProxy,
     private readonly configService: ConfigService,
     protected prisma: PrismaService,
-
+    @InjectQueue(BQUEUE.FUND_VENDOR_WALLET) private readonly fundVendorWalletQueue: Queue,
     private readonly settings: SettingsService,
     private readonly devService: DevService,
     private emailService: EmailService,
     private messageSenderService: MessageSenderService,
-
   ) { }
 
   async onModuleInit() {
@@ -230,6 +231,14 @@ export class ListenersService {
       };
       this.messageSenderService.sendWhatappMessage(payload)
     })
+  }
+
+  @OnEvent(BeneficiaryEvents.GROUP_IMPORTED)
+  async onGroupImported({ groupUuid }: { groupUuid: string }) {
+    this.logger.log(`GROUP_IMPORTED event received for group: ${groupUuid}`);
+    await firstValueFrom(
+      this.benClient.send({ cmd: BeneficiaryJobs.SYNC_GROUP_TO_PROJECTS }, { groupUuid }),
+    );
   }
 
   @OnEvent(ProjectEvents.REDEEM_VOUCHER)
