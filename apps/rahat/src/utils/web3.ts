@@ -41,3 +41,11 @@ export function isAddress(
   if (isStellarAddress(address)) return true
   return isEthAddress(address, options)
 }
+
+export const fundVendorWallet = async (
+  walletAddress: string,
+  rpcUrl: string,
+  deployerPrivateKey: string,
+) => {
+
+}

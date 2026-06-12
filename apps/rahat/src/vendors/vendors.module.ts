@@ -6,6 +6,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { AuthsModule } from '@rumsan/user';
+import { SettingsModule } from '@rumsan/extensions/settings';
 import { NotificationModule } from '../notification/notification.module';
 import { UsersModule } from '../users/users.module';
 import { VendorsController } from './vendors.controller';
@@ -28,6 +29,7 @@ import { VendorsService } from './vendors.service';
     BullModule.registerQueue({
       name: BQUEUE.RAHAT
     }),
+    SettingsModule,
     AuthsModule,
     UsersModule,
     NotificationModule

@@ -24,7 +24,8 @@ export class QueueService {
     @InjectQueue('CONTRACT') private readonly contractQueue: Queue,
     @InjectQueue(BQUEUE.RAHAT) private readonly rahatQueue: Queue,
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY) private readonly rahatBeneficiaryQueue: Queue,
-    @InjectQueue(BQUEUE.META_TXN) private readonly metaTransactionQueue: Queue
+    @InjectQueue(BQUEUE.META_TXN) private readonly metaTransactionQueue: Queue,
+    @InjectQueue(BQUEUE.FUND_VENDOR_WALLET) private readonly fundVendorWalletQueue: Queue
   ) {
     this.rsprisma = prisma.rsclient;
   }
@@ -98,5 +99,13 @@ export class QueueService {
 
   async retryMetaTxnJob(jobId: string | number | UUID) {
     return this.retryJob(this.metaTransactionQueue, jobId);
+  }
+
+  async getPendingFundVendorWalletJobs(filters: JobFilterOptions) {
+    return this.getJobs(this.fundVendorWalletQueue, filters);
+  }
+
+  async retryFundVendorWalletJob(jobId: string | number | UUID) {
+    return this.retryJob(this.fundVendorWalletQueue, jobId);
   }
 }

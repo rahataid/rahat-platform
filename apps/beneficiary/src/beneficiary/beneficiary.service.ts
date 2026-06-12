@@ -451,10 +451,11 @@ export class BeneficiaryService {
   async create(dto: CreateBeneficiaryDto, projectUuid?: string,) {
     const { piiData, projectUUIDs, walletAddress, ...data } = dto;
 
-    if (!piiData.phone) throw new RpcException('Phone number is required');
-    await this.beneficiaryUtilsService.ensureUniquePhone(
-      piiData.phone.toString()
-    );
+    if (piiData.phone) {
+      await this.beneficiaryUtilsService.ensureUniquePhone(
+        piiData.phone.toString()
+      );
+    }
 
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const createdBeneficiary = await this.rsprisma.beneficiary.create({
@@ -818,14 +819,16 @@ export class BeneficiaryService {
     if (!findUuid) throw new Error('Data not Found');
     const { piiData, id, ...rest } = dto;
 
-    const benWithSameNumber = await this.rsprisma.beneficiaryPii.findFirst({
-      where: {
-        phone: piiData.phone,
-        beneficiaryId: { not: id },
-      },
-    });
-    if (benWithSameNumber)
-      throw new RpcException('Phone number should be unique');
+    if (piiData?.phone) {
+      const benWithSameNumber = await this.rsprisma.beneficiaryPii.findFirst({
+        where: {
+          phone: piiData.phone,
+          beneficiaryId: { not: id },
+        },
+      });
+      if (benWithSameNumber)
+        throw new RpcException('Phone number should be unique');
+    }
 
     const rdata = await this.prisma.beneficiary.update({
       where: {
@@ -921,18 +924,19 @@ export class BeneficiaryService {
     conditional?: boolean
   ) {
     try {
-      this.beneficiaryUtilsService.ensurePhoneNumbers(dtos);
       const validDtos: CreateBeneficiaryDto[] = [];
       for (const dto of dtos) {
-        try {
-          await this.beneficiaryUtilsService.ensureUniquePhone(
-            dto.piiData.phone.toString()
-          );
-        } catch (error) {
-          console.log(
-            `Skipping entry due to duplicate phone: ${dto.piiData.phone}`
-          );
-          continue;
+        if (dto.piiData.phone) {
+          try {
+            await this.beneficiaryUtilsService.ensureUniquePhone(
+              dto.piiData.phone.toString()
+            );
+          } catch (error) {
+            console.log(
+              `Skipping entry due to duplicate phone: ${dto.piiData.phone}`
+            );
+            continue;
+          }
         }
 
         try {
@@ -2339,35 +2343,38 @@ export class BeneficiaryService {
 
     const { projectId, piiData, ...benfData } = payload;
 
-    // Check if a beneficiary with this phone exists at all
-    const existingBeneficiary = await this.prisma.beneficiaryPii.findFirst({
-      where: { phone: piiData.phone.toString() },
-      select: { beneficiaryId: true, beneficiary: { select: { uuid: true } } },
-    });
-
-    if (existingBeneficiary) {
-      const beneficiaryUuid = existingBeneficiary.beneficiary.uuid;
-
-      // Check specifically if this beneficiary is already in the target project
-      const alreadyInProject = await this.prisma.beneficiaryProject.findFirst({
-        where: {
-          beneficiaryId: beneficiaryUuid,
-          projectId,
-        },
+    // Skip the check if phone number is not provided
+    if (piiData.phone) {
+      // Check if a beneficiary with this phone exists at all
+      const existingBeneficiary = await this.prisma.beneficiaryPii.findFirst({
+        where: { phone: piiData.phone.toString() },
+        select: { beneficiaryId: true, beneficiary: { select: { uuid: true } } },
       });
 
-      if (alreadyInProject) {
-        this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and is assigned to the same project ${projectId}.`);
-        throw new RpcException(`Beneficiary with phone ${piiData.phone} already exists and is assigned to ${projectId} project.`);
+      if (existingBeneficiary) {
+        const beneficiaryUuid = existingBeneficiary.beneficiary.uuid;
+
+        // Check specifically if this beneficiary is already in the target project
+        const alreadyInProject = await this.prisma.beneficiaryProject.findFirst({
+          where: {
+            beneficiaryId: beneficiaryUuid,
+            projectId,
+          },
+        });
+
+        if (alreadyInProject) {
+          this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and is assigned to the same project ${projectId}.`);
+          throw new RpcException(`Beneficiary with phone ${piiData.phone} already exists and is assigned to ${projectId} project.`);
+        }
+
+        // If beneficiary exists but not in the project, assign to project without creating new beneficiary
+        await this.beneficiaryUtilsService.assignBeneficiaryToProject(
+          { projectId: projectId as string, beneficiaryId: beneficiaryUuid }
+        );
+
+        this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and has been assigned to project ${projectId}.`);
+        return { success: true, message: `Beneficiary with phone ${piiData.phone} already exists and has been assigned to ${projectId} project.`, data: null };
       }
-
-      // If beneficiary exists but not in the project, assign to project without creating new beneficiary
-      await this.beneficiaryUtilsService.assignBeneficiaryToProject(
-        { projectId: projectId as string, beneficiaryId: beneficiaryUuid }
-      );
-
-      this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and has been assigned to project ${projectId}.`);
-      return { success: true, message: `Beneficiary with phone ${piiData.phone} already exists and has been assigned to ${projectId} project.`, data: null };
     }
 
     const dbTxId = `db-tx-${Date.now()}`;
@@ -2396,11 +2403,13 @@ export class BeneficiaryService {
         },
       });
 
-      await this.prisma.beneficiaryPii.create({
+      const createdPii = await this.prisma.beneficiaryPii.create({
         data: {
           beneficiaryId: createdBeneficiary.id,
-          phone: piiData.phone.toString(),
           ...piiData,
+          phone: piiData.phone
+            ? piiData.phone.toString()
+            : BeneficiaryConstants.UNPHONED_PLACEHOLDER,
         },
       });
 
@@ -2416,7 +2425,7 @@ export class BeneficiaryService {
         walletAddress: createdBeneficiary.walletAddress,
         extras: {
           ...((createdBeneficiary.extras ?? {}) as Record<string, any>),
-          phone: piiData.phone,
+          phone: createdPii.phone,
         },
         isVerified: createdBeneficiary.isVerified,
         gender: createdBeneficiary.gender,
@@ -2435,7 +2444,7 @@ export class BeneficiaryService {
       await this.prisma.$executeRawUnsafe(`COMMIT PREPARED '${dbTxId}';`);
       this.logger.log('Transaction committed successfully.');
 
-      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: createdBeneficiary };
+      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: {...createdBeneficiary, phone: createdPii.phone} };
     } catch (error) {
       this.logger.error('Error occurred during beneficiary creation with DB transaction:', error);
       await this.rollback2PC(projectId, dbTxId);
@@ -2489,9 +2498,10 @@ async function checkPhoneNumber(
   beneficiaries: CreateBeneficiaryDto[],
   prisma: PrismaService
 ): Promise<string[]> {
-  const phoneNumbers = beneficiaries.map(
-    (beneficiary) => beneficiary.piiData.phone
-  );
+  const phoneNumbers = beneficiaries
+    .map((beneficiary) => beneficiary.piiData.phone)
+    .filter(Boolean);
+  if (!phoneNumbers.length) return [];
   const duplicates = await prisma.beneficiaryPii.findMany({
     where: { phone: { in: phoneNumbers } },
     select: { phone: true },

@@ -39,6 +39,9 @@ import { QueueService } from './queue.service';
     BullModule.registerQueue({
       name: BQUEUE.RAHAT_IMPORT,
     }),
+      BullModule.registerQueue({
+      name: BQUEUE.FUND_VENDOR_WALLET,
+    }),
   ],
   providers: [PrismaService, QueueService],
   controllers: [QueueController],

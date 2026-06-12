@@ -1,0 +1,29 @@
+meta {
+  name: Get All Group Cash Transfers
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aaProject.groupCashTransfer.get",
+    "payload": {
+      "hasFund": false,
+      "page": 1,
+      "perPage": 10,
+      "sort": "createdAt",
+      "order": "desc",
+      "search": ""
+    }
+  }
+}

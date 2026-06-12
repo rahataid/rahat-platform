@@ -1,5 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import { BeneficiaryConstants } from '@rahataid/sdk';
+
 export const createListQuery = (dto: any) => {
   const AND_CONDITIONS = [];
 
@@ -26,7 +28,7 @@ export const splitBeneficiaryPII = (beneficiary: any) => {
   const { firstName, lastName, phone, email, govtIDNumber, archived, deletedAt, ...rest } = beneficiary;
   const piiData = {
     name: `${beneficiary.firstName} ${beneficiary.lastName}`,
-    phone: phone || '',
+    phone: phone || BeneficiaryConstants.UNPHONED_PLACEHOLDER,
     email: email || '',
     extras: {
       govtIDNumber: govtIDNumber || ''

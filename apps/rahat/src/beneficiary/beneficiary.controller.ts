@@ -513,6 +513,15 @@ export class BeneficiaryController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
+  @Post('groups/:uuid/sync')
+  @ApiParam({ name: 'uuid', required: true })
+  async syncGroupToProjects(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.SYNC_GROUP_TO_PROJECTS }, { groupUuid: uuid });
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post('groups')
   async createGroup(@Body() dto: CreateBeneficiaryGroupsDto) {
