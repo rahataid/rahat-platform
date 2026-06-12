@@ -24,7 +24,6 @@ export class ListenersService {
   private dev: DevService;
   private rpcUrl: string;
   private deployerPrivateKey: string;
-  private readonly logger = new Logger(ListenersService.name);
 
   constructor(
     @InjectQueue(BQUEUE.RAHAT) private readonly rahatQueue: Queue,
