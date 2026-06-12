@@ -36,7 +36,7 @@ env:
   NODE_VERSION: "20.10.0"
   PNPM_VERSION: "8.14.1"
   REGISTRY: docker.io
-  IMAGE_NAMESPACE: ${{ env.DOCKERHUB_USERNAME }}
+  IMAGE_NAMESPACE: esatya
 
 jobs:
   resolve-config:
