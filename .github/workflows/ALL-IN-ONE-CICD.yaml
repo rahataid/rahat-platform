@@ -184,7 +184,7 @@ jobs:
           token: ${{ secrets.VAULT_TOKEN }}
           secrets: |
             github/data/general/docker/esatya username | DOCKERHUB_USERNAME ;
-            github/data/general/docker/esatya pat | DOCKERHUB_TOKEN ;
+            github/data/general/docker/esatya password | DOCKERHUB_TOKEN ;
 
       # -----------------------------
       # Docker Setup
