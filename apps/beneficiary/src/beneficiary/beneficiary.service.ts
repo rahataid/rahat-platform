@@ -71,17 +71,23 @@ export class BeneficiaryService {
     this.rsprisma = this.prisma.rsclient;
   }
 
+  //Add single beneficiary to project
   addToProject(dto: AddToProjectDto) {
     return this.prisma.beneficiaryProject.create({
       data: dto,
     });
   }
+
+
+  // refresh beneficiary stats
   async refreshStats() {
     this.eventEmitter.emit(BeneficiaryEvents.REFRESH_STATS, {
       projectUUID: null,
     });
     return { message: 'Beneficiary stats refresh started' };
   }
+
+  //list pii data with or without project filter
   async listPiiData(dto: any) {
     const repository = dto.projectId
       ? this.rsprisma.beneficiaryProject
@@ -134,6 +140,8 @@ export class BeneficiaryService {
 
     return data;
   }
+
+  // list beneficiary groups with or without project filter
   async listBenefByProject(data: any) {
     if (!data?.data?.length) return data;
 
@@ -151,6 +159,8 @@ export class BeneficiaryService {
     return data;
   }
 
+
+  //find beneficiary by wallet address and attach pii data
   async findOneBeneficiary(data: any) {
     const getBeneficiaryByWallet = await this.prisma.beneficiary.findUnique({
       where: {
@@ -165,6 +175,8 @@ export class BeneficiaryService {
     return { piiData: pii, projectData: rest, ...data };
   }
 
+
+  // find beneficiary via phone
   async getBeneficiaryByPhoneOnly(payload: { phone: string }) {
     const getBeneficiaryByPhone = await this.prisma.beneficiaryPii.findUnique({
       where: {
@@ -181,6 +193,8 @@ export class BeneficiaryService {
 
     return { ...beneficiary, pii: piiData };
   }
+
+
 
   async listBeneficiaryPiiByWalletAddress(data: any) {
     if (!data?.data?.length) return data;
@@ -699,6 +713,7 @@ export class BeneficiaryService {
     );
   }
 
+  //CHECK: ASSIGN_TO_PROJECT
   async addBulkBeneficiaryToProject(dto: addBulkBeneficiaryToProject) {
     const {
       dto: {
@@ -749,6 +764,7 @@ export class BeneficiaryService {
     );
   }
 
+  //CHECK: ASSIGN_TO_PROJECT
   async bulkAssignToProject(dto) {
     const { beneficiaryIds, projectId } = dto;
     const projectPayloads = [];
@@ -1923,6 +1939,7 @@ export class BeneficiaryService {
   }
 
   async assignBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
+    this.logger.log(`Assigning beneficiary group ${dto.beneficiaryGroupId} to project ${dto.projectId}`);
     try {
       const { beneficiaryGroupId, projectId } = dto;
 
@@ -1984,44 +2001,7 @@ export class BeneficiaryService {
 
       // Get secret of beneficiaries
       // todoNewChain
-      if (chain === 'stellar') {
-        await handleMicroserviceCall({
-          client: this.walletClient.send(
-            { cmd: WalletJobs.GET_BULK_SECRET_BY_WALLET },
-            { walletAddresses: unassignedBenfs.map((d) => d.walletAddress) }
-          ),
-          onSuccess: async (response) => {
-            const benWallets = response.map((d) => ({
-              address: d.publicKey,
-              secret: d.privateKey,
-            }));
-
-            // Create stellar account and add trustline for beneficiaries
-            await handleMicroserviceCall({
-              client: this.client.send(
-                {
-                  cmd: AAJobs.STELLAR.INTERNAL_FAUCET_TRUSTLINE,
-                  uuid: project.uuid,
-                },
-                { wallets: benWallets }
-              ),
-              onSuccess: async (response) => {
-                return response;
-              },
-              onError(error) {
-                console.log('Error adding trustline to beneficiaries', error);
-                throw new RpcException(error.message);
-              },
-            });
-
-            return response;
-          },
-          onError(error) {
-            console.log('Error getting secrets of beneficiaries', error);
-            throw new RpcException(error.message);
-          },
-        });
-      }
+      this.logger.log(`Chain for project ${project.uuid} is ${chain}. Fetching secrets for beneficiaries: ${unassignedBenfs.map(b => b.uuid).join(', ')}`);
 
       // Bulk assign unassigned beneficiaries to project
       if (unassignedBenfs?.length) {
@@ -2035,11 +2015,6 @@ export class BeneficiaryService {
         );
       }
 
-      // add as required by project specifics
-      const projectPayload = {
-        beneficiaryGroupData,
-      };
-
       //2.Save beneficiary group to project
       await this.saveBeneficiaryGroupToProject(dto);
 
@@ -2047,7 +2022,9 @@ export class BeneficiaryService {
       //3. Sync beneficiary to project
       return this.client.send(
         { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
-        projectPayload
+        {
+          beneficiaryGroupData,
+        }
       );
     } catch (err) {
       console.log(err);
@@ -2108,62 +2085,6 @@ export class BeneficiaryService {
       meta,
     };
   }
-
-  // async listTempBeneficiaries(uuid: string, query: ListTempBeneficiariesDto) {
-  //   const whereFilter: Prisma.TempGroupWhereInput = {
-  //     uuid,
-  //     ...(query.firstName && {
-  //       firstName: {
-  //         contains: query.firstName,
-  //         mode: 'insensitive',
-  //       },
-  //     }),
-  //   };
-
-  //   const total = await this.prisma.tempGroup.count({
-  //     where: {
-  //       ...whereFilter,
-  //       TempGroupedBeneficiaries: {
-  //         some: {
-  //           tempBeneficiary: {
-  //             firstName: {
-  //               contains: query.firstName,
-  //               mode: 'insensitive',
-  //             }
-  //           }
-  //         }
-  //       }
-  //     },
-
-  //   });
-
-  //   const paginatedBeneficiaries = await this.prisma.tempGroup.findMany({
-  //     where: whereFilter,
-  //     include: {
-  //       TempGroupedBeneficiaries: {
-  //         select: {
-  //           tempBeneficiary: true
-  //         }
-  //       }
-  //     },
-  //     skip: query.page && query.perPage ? (query.page - 1) * query.perPage : undefined,
-  //     take: query.page && query.perPage ? query.perPage : undefined,
-  //   });
-
-  //   const lastPage = query.page && query.perPage ? Math.ceil(total / query.perPage) : undefined;
-
-  //   const meta = {
-  //     total,
-  //     lastPage,
-  //     currentPage: query.page,
-  //     perPage: query.perPage,
-  //   };
-
-  //   return {
-  //     TempGroupedBeneficiaries: paginatedBeneficiaries,
-  //     meta,
-  //   };
-  // }
 
   listTempGroups(query: ListTempGroupsDto) {
     const orderBy: Record<string, 'asc' | 'desc'> = {};

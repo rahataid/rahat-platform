@@ -14,6 +14,7 @@ export class CorsConfigService {
     const allowedOrigins = this.configService.get<string>('ALLOWED_ORIGINS');
     const defaultStringOrigins = [
       'http://localhost:3000',
+      'http://localhost:3300',
       'http://localhost:3001',
       'http://localhost:5173',
     ];
