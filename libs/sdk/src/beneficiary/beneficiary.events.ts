@@ -99,5 +99,6 @@ export const JOBS = {
   IMPORT_V2: 'rahat.jobs.beneficiary.import_v2',
   CREATE_BENEFICIARY_WITH_DB_TRANSACTION: 'rahat.jobs.beneficiary.create_beneficiary_with_db_transaction',
   SYNC_GROUP_TO_PROJECTS: 'rahat.jobs.beneficiary.sync_group_to_projects',
+  SYNC_GROUP_BENEFICIARIES_TO_PROJECT: 'rahat.jobs.beneficiary.sync_group_beneficiaries_to_project',
   SYNC_IMPORTED_GROUP_BENEFICIARIES: 'rahat.jobs.beneficiary.sync_imported_group_beneficiaries',
 };

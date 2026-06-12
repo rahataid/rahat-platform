@@ -1,9 +1,10 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
+import { ClientProxy } from '@nestjs/microservices';
 import { BQUEUE, ProjectEvents, ProjectJobs } from '@rahataid/sdk';
 import { BeneficiaryEvents, BeneficiaryJobs } from '@rahataid/sdk/beneficiary';
 import { Project } from '@rahataid/sdk/project/project.types';
@@ -11,6 +12,7 @@ import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { EVENTS } from '@rumsan/user';
 import { Queue } from 'bull';
+import { firstValueFrom } from 'rxjs';
 import { DevService } from '../utils/develop.service';
 import { EmailService } from './email.service';
 import { MessageSenderService } from './messageSender.service';
@@ -23,7 +25,7 @@ export class ListenersService {
     @InjectQueue(BQUEUE.RAHAT) private readonly rahatQueue: Queue,
     @InjectQueue(BQUEUE.HOST) private readonly hostQueue: Queue,
     @InjectQueue(BQUEUE.RAHAT_PROJECT) private readonly projectQueue: Queue,
-    @InjectQueue(BQUEUE.RAHAT_BENEFICIARY) private readonly beneficiaryQueue: Queue,
+    @Inject('RAHAT_CLIENT') private readonly benClient: ClientProxy,
     private readonly configService: ConfigService,
     protected prisma: PrismaService,
     private readonly devService: DevService,
@@ -219,21 +221,10 @@ export class ListenersService {
 
   @OnEvent(BeneficiaryEvents.GROUP_IMPORTED)
   async onGroupImported({ groupUuid }: { groupUuid: string }) {
-    const projects = await this.prisma.beneficiaryGroupProject.findMany({
-      where: { beneficiaryGroupId: groupUuid, deletedAt: null },
-      select: { projectId: true },
-    });
-
-    if (!projects.length) return;
-
-    for (const { projectId } of projects) {
-      await this.beneficiaryQueue.add(
-        BeneficiaryJobs.SYNC_GROUP_TO_PROJECTS,
-        { groupUuid, projectId },
-        { attempts: 3, removeOnComplete: true, backoff: { type: 'exponential', delay: 2000 } },
-      );
-      this.logger.log(`Queued SYNC_GROUP_TO_PROJECTS for group ${groupUuid} → project ${projectId}`);
-    }
+    this.logger.log(`GROUP_IMPORTED event received for group: ${groupUuid}`);
+    await firstValueFrom(
+      this.benClient.send({ cmd: BeneficiaryJobs.SYNC_GROUP_TO_PROJECTS }, { groupUuid }),
+    );
   }
 
   @OnEvent(ProjectEvents.REDEEM_VOUCHER)

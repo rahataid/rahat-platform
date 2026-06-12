@@ -29,9 +29,6 @@ import { MetaTxnService } from './metatxn.service';
     BullModule.registerQueue({
       name: BQUEUE.META_TXN
     }),
-    BullModule.registerQueue({
-      name: BQUEUE.RAHAT_BENEFICIARY,
-    }),
     ClientsModule.registerAsync([
       {
         name: 'RAHAT_CLIENT',
