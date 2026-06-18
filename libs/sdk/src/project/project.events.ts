@@ -6,6 +6,7 @@ export const EVENTS = {
   REQUEST_REDEMPTION: 'request.redemption',
   UPDATE_REDEMPTION: 'update.redemption',
   REDEEM_VOUCHER: 'beneficiary.redeemVoucher',
+  VENDORS_CREATED: 'vendors.created',
 };
 
 export const JOBS = {
@@ -40,6 +41,7 @@ export const JOBS = {
   REQUEST_CLAIM: 'rahat.jobs.project.request_claim',
   GET_VENDOR_STATS: 'rahat.jobs.project.get_vendor_stats',
   REPORTING_REFRESH: 'rahat.jobs.reporting.refresh',
+  FUND_VENDOR_WALLET: 'rahat.jobs.project.fund_vendor_wallet',
 
   DISBURSEMENT_PLAN: {
     CREATE_DISBURSEMENT: 'rahat.jobs.disbursement.create',

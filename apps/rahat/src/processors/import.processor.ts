@@ -1,7 +1,8 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { BQUEUE } from '@rahataid/sdk';
-import { BeneficiaryJobs } from '@rahataid/sdk/beneficiary';
+import { BeneficiaryEvents, BeneficiaryJobs } from '@rahataid/sdk/beneficiary';
 import { PrismaService } from '@rumsan/prisma';
 import { Job } from 'bull';
 import { mapCSVRows, MappedRow, parseCSVBuffer } from '../imports/csv-parser.util';
@@ -25,6 +26,7 @@ export class ImportProcessor {
     private readonly prisma: PrismaService,
     private readonly importsService: ImportsService,
     private readonly walletService: WalletService,
+    private readonly eventEmitter: EventEmitter2,
   ) { }
 
   @Process({ name: BeneficiaryJobs.IMPORT_V2, concurrency: 1 })
@@ -116,13 +118,19 @@ export class ImportProcessor {
       this.logger.log(`Starting bulk import for: ${importUuid}`);
       await job.progress({ phase: 'importing', percent: 62, total: totalRows, processed: 0 });
 
-      await this.executeBulkImport(importUuid, mappedRows, importRecord.groupName, job, totalRows);
+      const groupUuid = await this.executeBulkImport(importUuid, mappedRows, importRecord.groupName, job, totalRows);
 
       // Success
       await this.importsService.updateExtras(importUuid, {
         importedCount: totalRows,
         completedAt: new Date().toISOString(),
       });
+
+      // Fire event so listener can check if group is assigned to any project and enqueue sync
+      if (groupUuid) {
+        this.eventEmitter.emit(BeneficiaryEvents.GROUP_IMPORTED, { groupUuid });
+        this.logger.log(`Emitted GROUP_IMPORTED event for group: ${groupUuid}`);
+      }
 
       await job.progress({ phase: 'completed', percent: 100, total: totalRows, processed: totalRows });
       this.logger.log(`Import completed successfully: ${importUuid} (${totalRows} beneficiaries)`);
@@ -139,11 +147,11 @@ export class ImportProcessor {
     groupName: string,
     job: Job,
     totalRows: number,
-  ) {
+  ): Promise<string> {
     const batches = createBatches(mappedRows, BATCH_SIZE);
     const totalBatches = batches.length;
 
-    await this.prisma.$transaction(
+    const groupUuid = await this.prisma.$transaction(
       async (tx) => {
         // 1. Upsert BeneficiaryGroup
         const group = await tx.beneficiaryGroup.upsert({
@@ -275,11 +283,15 @@ export class ImportProcessor {
           where: { uuid: importUuid },
           data: { status: 'IMPORTED' },
         });
+
+        return group.uuid;
       },
       {
         timeout: 120000,
       },
     );
+
+    return groupUuid;
   }
 
   private async failImport(uuid: string, job: Job, message: string) {

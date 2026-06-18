@@ -24,6 +24,7 @@ import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
+import { GroupSyncService } from './group-sync.service';
 import { VerificationService } from './verification.service';
 
 @Controller()
@@ -33,7 +34,7 @@ export class BeneficiaryController {
     private readonly utilService: BeneficiaryUtilsService,
     private readonly statsService: BeneficiaryStatService,
     private readonly verificationService: VerificationService,
-
+    private readonly groupSyncService: GroupSyncService,
   ) { }
 
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE })
@@ -344,5 +345,10 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BENEFICIARY_WITH_DB_TRANSACTION })
   async createBeneficiaryWithDbTransaction(data: CreateBeneficiaryTransactionDto) {
     return this.service.createBeneficiaryWithDbTransaction(data);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.SYNC_GROUP_TO_PROJECTS })
+  async syncGroup(@Payload() payload: { groupUuid: string }) {
+    return this.groupSyncService.syncGroup(payload.groupUuid);
   }
 }

@@ -5,7 +5,7 @@ import {
   JsonRpcProvider,
   ethers
 } from 'ethers';
-import { StrKey } from 'stellar-sdk';
+import { StrKey } from '@stellar/stellar-sdk';
 import { Address, IsAddressOptions, isAddress as isEthAddress } from 'viem';
 
 export async function createContractSigner(abi: any, address: string) {
@@ -40,4 +40,12 @@ export function isAddress(
 ): address is Address {
   if (isStellarAddress(address)) return true
   return isEthAddress(address, options)
+}
+
+export const fundVendorWallet = async (
+  walletAddress: string,
+  rpcUrl: string,
+  deployerPrivateKey: string,
+) => {
+
 }

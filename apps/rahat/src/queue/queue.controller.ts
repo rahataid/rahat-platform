@@ -132,4 +132,34 @@ export class QueueController {
   async retryMetaTxnJob(@Param('id', ParseIntPipe) jobId: number) {
     return this.queueService.retryMetaTxnJob(jobId);
   }
+
+  // Fund Vendor Wallet Jobs with Filters
+  @Get('fund-vendor-wallet-jobs')
+  @ApiOperation({ summary: 'Get Pending Fund Vendor Wallet Jobs with Filters' })
+  @ApiResponse({ status: 200, description: 'List of filtered Fund Vendor Wallet jobs' })
+  @ApiQuery({ name: 'status', required: false, enum: ['waiting', 'active', 'completed', 'failed', 'delayed'], description: 'Filter by job status' })
+  @ApiQuery({ name: 'name', required: false, description: 'Filter by job name' })
+  @ApiQuery({ name: 'startDate', required: false, description: 'Filter by job creation start date (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'Filter by job creation end date (YYYY-MM-DD)' })
+  async getPendingFundVendorWalletJobs(
+    @Query('status') status?: string[],
+    @Query('name') name?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string
+  ) {
+    const filters = {
+      status: status as JobStatus[],
+      name,
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+    };
+    return this.queueService.getPendingFundVendorWalletJobs(filters);
+  }
+
+  @Get('fund-vendor-wallet-jobs/retry/:id')
+  @ApiOperation({ summary: 'Retry a Failed Fund Vendor Wallet Job' })
+  @ApiParam({ name: 'id', description: 'Job ID to retry' })
+  async retryFundVendorWalletJob(@Param('id', ParseIntPipe) jobId: number) {
+    return this.queueService.retryFundVendorWalletJob(jobId);
+  }
 }

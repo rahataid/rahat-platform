@@ -180,6 +180,31 @@ jobs:
         uses: actions/checkout@v4
 
       # -----------------------------
+      # Vault Import
+      # -----------------------------
+      - name: Import Secrets from Vault
+        id: vault
+        uses: hashicorp/vault-action@v2.4.0
+        with:
+          url: ${{ secrets.VAULT_URL }}
+          token: ${{ secrets.VAULT_TOKEN }}
+          secrets: |
+            github/data/general/docker/esatya username | DOCKERHUB_USERNAME ;
+            github/data/general/docker/esatya password | DOCKERHUB_TOKEN ;
+
+      # -----------------------------
+      # Docker Setup
+      # -----------------------------
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ steps.vault.outputs.DOCKERHUB_USERNAME }}
+          password: ${{ steps.vault.outputs.DOCKERHUB_TOKEN }}
+          
+      # -----------------------------
       # Node + PNPM Setup
       # -----------------------------
       - name: Setup Node.js
@@ -210,30 +235,6 @@ jobs:
       - name: Build Application
         run: npx nx build ${{ matrix.app }}
 
-      # -----------------------------
-      # Vault Import
-      # -----------------------------
-      - name: Import Secrets from Vault
-        id: vault
-        uses: hashicorp/vault-action@v2.4.0
-        with:
-          url: ${{ secrets.VAULT_URL }}
-          token: ${{ secrets.VAULT_TOKEN }}
-          secrets: |
-            github/data/general/docker/esatya username | DOCKERHUB_USERNAME ;
-            github/data/general/docker/esatya password | DOCKERHUB_TOKEN ;
-
-      # -----------------------------
-      # Docker Setup
-      # -----------------------------
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ steps.vault.outputs.DOCKERHUB_USERNAME }}
-          password: ${{ steps.vault.outputs.DOCKERHUB_TOKEN }}
 
       - name: Extract Git Metadata
         id: meta

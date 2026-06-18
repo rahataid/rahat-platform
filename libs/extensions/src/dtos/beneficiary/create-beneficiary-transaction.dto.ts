@@ -33,7 +33,6 @@ export class CreateBeneficiaryTransactionDto {
         required: false,
         example: {
             name: 'Ram Shrestha',
-            phone: '98670023857',
             extras: {
                 bank: 'Laxmi Bank',
                 account: '9872200001',
@@ -41,5 +40,5 @@ export class CreateBeneficiaryTransactionDto {
         },
     })
     @IsOptional()
-    piiData: TPIIData;
+    piiData: Omit<TPIIData, 'phone'> & { phone?: string };
 }

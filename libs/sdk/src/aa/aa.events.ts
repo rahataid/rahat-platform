@@ -160,7 +160,12 @@ export const JOBS = {
     VALIDATE_BENEFICIARY_OTP: 'aa.jobs.inkinds.validateBeneficiaryOtp',
     BENEFICIARY_INKIND_DETAILS: 'aa.jobs.beneficiary.inKindDetails',
     GET_OFFLINE_BENEFICIARY_INKIND_BY_VENDOR: 'aa.jobs.inkinds.getAllOfflineBeneficiaryByVendor',
-    REDEEM_OFFLINE_INKIND_BY_VENDOR: 'aa.jobs.inkinds.redeemOfflineInkindByVendor'
+    REDEEM_OFFLINE_INKIND_BY_VENDOR: 'aa.jobs.inkinds.redeemOfflineInkindByVendor',
+    GET_VENDOR_AVAILABLE_INKIND_DETAILS: 'aa.jobs.inkinds.getVendorAvailableInkindsDetails',
+    CREATE_VENDOR_REDEMPTION: 'aa.jobs.inkinds.createVendorRedemption',
+    GET_VENDOR_REDEMPTIONS: 'aa.jobs.inkinds.getVendorRedemptions',
+    UPDATE_VENDOR_REDEMPTION_STATUS: 'aa.jobs.inkinds.updateVendorRedemptionStatus',
+    UPDATE_VENDOR_REDEMPTION_TX_HASH: 'aa.jobs.inkinds.updateVendorRedemptionTxHash'
   },
   VENDOR: {
     // Remove after test
@@ -209,6 +214,21 @@ export const JOBS = {
   INKIND_TRACKER: {
     EXECUTE_ACTION: 'aa.jobs.inkind-tracker.executeAction',
     GET_TRANSACTIONS: 'aa.jobs.inkind-tracker.getTransactions',
+  },
+  GROUP_CASH_TRANSFER: {
+    CREATE: 'aa.jobs.groupCashTransfer.create',
+    UPDATE: 'aa.jobs.groupCashTransfer.update',
+    DELETE: 'aa.jobs.groupCashTransfer.delete',
+    GET: 'aa.jobs.groupCashTransfer.get',
+    GET_ONE: 'aa.jobs.groupCashTransfer.getOne',
+    ALLOCATE_FUND: 'aa.jobs.groupCashTransfer.assignFund',
+    DISBURSE: 'aa.jobs.groupCashTransfer.disburse',
+    GET_RECORDS: 'aa.jobs.groupCashTransfer.getRecords',
+    GET_ONE_RECORD: 'aa.jobs.groupCashTransfer.getOneRecord',
+    VALIDATE_BANK_ACCOUNT: 'aa.jobs.groupCashTransfer.validateBankAccount',
+    GET_ALL_VALID: 'aa.jobs.groupCashTransfer.getAllValid',
+    GET_GCT_DATA: 'aa.jobs.groupCashTransfer.getGCTData',
+    UPDATE_GROUP_RECORD: 'aa.jobs.groupCashTransfer.updateRecord'
   },
   MULTISIG: {
     GET_SAFE_OWNER: 'aa.jobs.safe-wallet.getOwner',

@@ -1,0 +1,20 @@
+meta {
+  name: Get GCT Data
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupCashTransfer.getGCTData",
+    "payload": {
+      "uuid": "replace-with-gct-uuid"
+    }
+  }
+}

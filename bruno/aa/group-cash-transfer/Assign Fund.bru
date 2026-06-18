@@ -1,0 +1,25 @@
+meta {
+  name: Assign Fund
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aaProject.groupCashTransfer.assignFund",
+    "payload": {
+      "groupCashTransferId": "f856861e-2928-44df-83da-40d73034212f",
+      "amount": 10000
+    }
+  }
+}

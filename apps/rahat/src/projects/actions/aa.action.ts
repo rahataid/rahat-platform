@@ -777,6 +777,56 @@ export const aaActions: ProjectActionFunc = {
       payload
     ),
 
+   [MS_ACTIONS.AAPROJECT.INKIND.GET_VENDOR_AVAILABLE_INKIND_DETAILS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.GET_VENDOR_AVAILABLE_INKIND_DETAILS, uuid },
+      payload
+   ),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.CREATE_VENDOR_REDEMPTION]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.CREATE_VENDOR_REDEMPTION, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_VENDOR_REDEMPTIONS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.GET_VENDOR_REDEMPTIONS, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.INKIND.UPDATE_VENDOR_REDEMPTION_STATUS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.UPDATE_VENDOR_REDEMPTION_STATUS, uuid },
+      payload
+    ),
+  
+  [MS_ACTIONS.AAPROJECT.INKIND.UPDATE_VENDOR_REDEMPTION_TX_HASH]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.INKIND.UPDATE_VENDOR_REDEMPTION_TX_HASH, uuid },
+      payload
+    ),
+
   // **** grievance start **** //
   [MS_ACTIONS.AAPROJECT.GRIEVANCES.CREATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GRIEVANCES.CREATE, uuid }, payload),
@@ -871,6 +921,61 @@ export const aaActions: ProjectActionFunc = {
   ) =>
     sendCommand({ cmd: AAJobs.INKIND_TRACKER.GET_TRANSACTIONS, uuid }, payload),
   // **** inkind tracker end **** //
+
+  // **** group cash transfer start **** //
+  // Create a group cash transfer group
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.CREATE, uuid }, payload),
+  
+  // Update details for the group cash transfer group
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.UPDATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.UPDATE, uuid }, payload),
+
+  // Delete the GCT
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.DELETE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.DELETE, uuid }, payload),
+
+  // Fetch details for cash transfer group
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET, uuid }, payload),
+
+  // Get details of one specific cash transfer group 
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET_ONE, uuid }, payload),
+
+  // Allocate fund to a single cash transfer group
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.ALLOCATE_FUND]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.ALLOCATE_FUND, uuid }, payload),
+
+  // Disburse funds for the cash transfer group
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.DISBURSE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.DISBURSE, uuid }, payload),
+
+  // Get all the allocated fund records of the cash transfer groups
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_RECORDS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET_RECORDS, uuid }, payload),
+
+  // Get one details of the allocated fund for the cash transfer group
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_ONE_RECORD]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET_ONE_RECORD, uuid }, payload),
+
+  // Validate bank account of the cash transfer group
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.VALIDATE_BANK_ACCOUNT]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.VALIDATE_BANK_ACCOUNT, uuid }, payload),
+
+  // Get all valid groups which are eligible for assigning funds
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_ALL_VALID]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET_ALL_VALID, uuid }, payload),
+
+  // Update the allocation of funds 
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.UPDATE_GROUP_RECORD]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.UPDATE_GROUP_RECORD, uuid }, payload),
+
+  // Get an overview data for GCT related queries
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_GCT_DATA]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET_GCT_DATA, uuid }, payload),
+
+  // **** group cash transfer end **** //
 
   // **** Vendor start **** //
   [MS_ACTIONS.AAPROJECT.VENDOR.TEST_OFFLINE_PAYOUT]: (
