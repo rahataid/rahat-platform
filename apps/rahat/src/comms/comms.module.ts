@@ -1,6 +1,7 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppModule } from '../app/app.module';
+import { CommsController } from './comms.controller';
 import { CommsService } from './comms.service';
 
 @Global()
@@ -10,6 +11,7 @@ export class CommsModule {
     return {
       module: CommsModule,
       global: true,
+      controllers: [CommsController],
       imports: [
         ClientsModule.register([
           {

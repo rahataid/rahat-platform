@@ -1997,12 +1997,6 @@ export class BeneficiaryService {
         },
       });
 
-      const chain = await this.beneficiaryUtilsService.getChainName();
-
-      // Get secret of beneficiaries
-      // todoNewChain
-      this.logger.log(`Chain for project ${project.uuid} is ${chain}. Fetching secrets for beneficiaries: ${unassignedBenfs.map(b => b.uuid).join(', ')}`);
-
       // Bulk assign unassigned beneficiaries to project
       if (unassignedBenfs?.length) {
         const assignDtos = unassignedBenfs.map((beneficiary) => ({
@@ -2010,6 +2004,7 @@ export class BeneficiaryService {
           projectId: project.uuid,
         }));
 
+        //SENDS COMMAND TO  JOBS.BENEFICIARY.ADD_BULK_TO_PROJECT rahat.jobs.beneficiary.create_bulk
         await this.beneficiaryUtilsService.bulkAssignBeneficiaryToProject(
           assignDtos
         );
