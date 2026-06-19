@@ -123,6 +123,11 @@ jobs:
               SECRET="ENV_AA_DEV-QA"
               APPS="beneficiary,rahat"
               ;;
+            aa-stellar)
+              TAG="aa-stellar"
+              SECRET="ENV_AA_DEV-QA"
+              APPS="beneficiary,rahat"
+              ;;
             *)
               echo "Unknown environment: $ENV"
               exit 1
