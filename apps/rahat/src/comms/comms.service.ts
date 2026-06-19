@@ -8,14 +8,13 @@ export type CommsClient = ReturnType<typeof getClient>;
 @Injectable()
 export class CommsService {
   private client: CommsClient | null = null;
+  private appId: string | null = null;
+  private isReady = false;
   private logger = new Logger(CommsService.name);
 
   constructor(
     private readonly appService: AppService,
   ) { }
-
-  // Initialize the communication client on service startup
-  private isReady = false;
 
   async init() {
     const communicationSettings = await this.appService.getCommunicationSettings();
@@ -24,14 +23,17 @@ export class CommsService {
     if (!communicationSettings?.length || !communicationValue) {
       this.isReady = false;
       this.client = null;
+      this.appId = null;
       this.logger.warn('[CommsService] Waiting for settings deployment...');
       return;
     }
 
+    this.appId = String(communicationValue['APP_ID'] ?? '');
     this.client = getClient({
       baseURL: String(communicationValue['URL'] ?? ''),
     });
-    this.client.setAppId(String(communicationValue['APP_ID'] ?? ''));
+    console.log(communicationValue['URL'], communicationValue['APP_ID']);
+    this.client.setAppId(this.appId);
     this.isReady = true;
   }
 
@@ -46,5 +48,43 @@ export class CommsService {
       throw new ServiceUnavailableException('Communication service is not initialized yet. Seed settings and try again.');
     }
     return this.client;
+  }
+
+  private getAppId(): string {
+    if (!this.isReady || !this.appId) {
+      throw new ServiceUnavailableException('Communication service is not initialized yet. Seed settings and try again.');
+    }
+    return this.appId;
+  }
+
+  async listTransports() {
+    const client = await this.getClient();
+    console.log(client.transport);
+    return client.transport.list();
+  }
+
+  async getUsage(params?: { from?: string; to?: string }) {
+    const client = await this.getClient();
+    return client.usage.getUsage(this.getAppId(), params);
+  }
+
+  async getUsageByXref(xref: string, params?: { from?: string; to?: string }) {
+    const client = await this.getClient();
+    return client.usage.getUsageByXref(this.getAppId(), xref, params);
+  }
+
+  async getCredits(params?: { from?: string; to?: string }) {
+    const client = await this.getClient();
+    return client.usage.getCredits(this.getAppId(), params);
+  }
+
+  async getCreditsByXref(xref: string, params?: { from?: string; to?: string }) {
+    const client = await this.getClient();
+    return client.usage.getCreditsByXref(this.getAppId(), xref, params);
+  }
+
+  async getReport(filter: { xref?: string }) {
+    const client = await this.getClient();
+    return client.broadcast.getReport(filter);
   }
 }
