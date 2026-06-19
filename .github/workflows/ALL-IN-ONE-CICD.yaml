@@ -21,6 +21,7 @@ on:
           - "dev"
           - "main"
           - "dev-qa"
+          - "aa-stellar"
 
       apps_to_build:
         description: "Apps to build (leave empty for defaults)"
