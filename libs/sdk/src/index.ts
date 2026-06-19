@@ -1,6 +1,7 @@
 export * from './aa';
 export * from './app';
 export * from './beneficiary';
+export * from './comms';
 export * from './constants';
 export * as Enums from './enums';
 export * from './grievance';
