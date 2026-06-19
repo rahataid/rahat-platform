@@ -200,6 +200,7 @@ export class WalletService implements OnModuleInit {
   }
 
   async getBulkSecretByWallet(accounts: BulkWalletAddressDto) {
+    this.logger.log(`Getting bulk secrets for wallets: ${accounts.walletAddresses.length} addresses on chain ${accounts.chain}`);
     return Promise.all(accounts.walletAddresses.map(async (walletAddress) => {
       return this.getSecretByWallet(walletAddress, accounts.chain);
     }))
