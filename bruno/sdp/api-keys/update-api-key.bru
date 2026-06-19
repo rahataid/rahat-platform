@@ -1,0 +1,25 @@
+meta {
+  name: update-api-key
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{sdp_url}}/api-keys/{{api_key_id}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}
+
+body:json {
+  {
+    "permissions": [
+      "read:all",
+      "write:disbursements"
+    ],
+    "allowed_ips": ["10.0.0.0/8"]
+  }
+}

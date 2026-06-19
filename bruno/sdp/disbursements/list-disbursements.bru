@@ -1,0 +1,26 @@
+meta {
+  name: list-disbursements
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{sdp_url}}/disbursements
+  body: none
+  auth: bearer
+}
+
+params:query {
+  page: 1
+  page_limit: 20
+  ~q:
+  ~status: DRAFT
+  ~sort: created_at
+  ~direction: desc
+  ~created_at_after: 2024-01-01
+  ~created_at_before: 2025-12-31
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}

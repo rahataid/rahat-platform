@@ -1,0 +1,21 @@
+meta {
+  name: cancel-payment
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{sdp_url}}/payments/{{payment_id}}/status
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}
+
+body:json {
+  {
+    "status": "CANCELED"
+  }
+}

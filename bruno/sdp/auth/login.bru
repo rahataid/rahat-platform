@@ -1,0 +1,25 @@
+meta {
+  name: login
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{sdp_url}}/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "user@example.com",
+    "password": "mysecret"
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  if (body.token) {
+    bru.setEnvVar("sdp_access_token", body.token);
+  }
+}

@@ -1,0 +1,17 @@
+meta {
+  name: set-default-tenant
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{sdp_admin_url}}/tenants/default-tenant
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "id": "{{tenant_id}}"
+  }
+}

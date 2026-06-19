@@ -1,0 +1,21 @@
+meta {
+  name: update-receiver-wallet-status
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{sdp_url}}/receivers/wallets/{{receiver_wallet_id}}/status
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}
+
+body:json {
+  {
+    "status": "READY"
+  }
+}

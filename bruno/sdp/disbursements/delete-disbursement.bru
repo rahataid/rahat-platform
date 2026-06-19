@@ -1,0 +1,15 @@
+meta {
+  name: delete-disbursement
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{sdp_url}}/disbursements/{{disbursement_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}

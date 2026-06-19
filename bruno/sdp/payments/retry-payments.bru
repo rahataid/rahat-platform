@@ -1,0 +1,24 @@
+meta {
+  name: retry-payments
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{sdp_url}}/payments/retry
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}
+
+body:json {
+  {
+    "payment_ids": [
+      "payment-uuid-1",
+      "payment-uuid-2"
+    ]
+  }
+}

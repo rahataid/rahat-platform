@@ -1,0 +1,32 @@
+meta {
+  name: create-direct-payment
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{sdp_url}}/payments
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}
+
+body:json {
+  {
+    "amount": "100.00",
+    "asset": {
+      "code": "USDC",
+      "issuer": "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+    },
+    "receiver": {
+      "id": "receiver-uuid"
+    },
+    "wallet": {
+      "id": "wallet-uuid"
+    },
+    "external_payment_id": "payment-001"
+  }
+}

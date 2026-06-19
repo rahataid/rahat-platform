@@ -1,0 +1,15 @@
+meta {
+  name: get-disbursement-statistics
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{sdp_url}}/statistics/{{disbursement_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}

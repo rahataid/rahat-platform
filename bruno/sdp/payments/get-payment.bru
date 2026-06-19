@@ -1,0 +1,15 @@
+meta {
+  name: get-payment
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{sdp_url}}/payments/{{payment_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}

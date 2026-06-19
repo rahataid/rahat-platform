@@ -1,0 +1,20 @@
+meta {
+  name: update-organization
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{sdp_url}}/organization
+  body: multipartForm
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}
+
+body:multipart-form {
+  ~logo: @file(/path/to/logo.png)
+  data: {"organization_name": "Updated Org Name", "timezone_utc_offset": "+05:45", "is_approval_required": true}
+}

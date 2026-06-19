@@ -1,0 +1,24 @@
+meta {
+  name: create-tenant
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{sdp_admin_url}}/tenants
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "my-tenant",
+    "distribution_account_type": "DISTRIBUTION_ACCOUNT.STELLAR.ENV",
+    "owner_email": "owner@example.com",
+    "owner_first_name": "Owner",
+    "owner_last_name": "Name",
+    "organization_name": "My Organization",
+    "base_url": "http://localhost:8000",
+    "sdp_ui_base_url": "http://localhost:3000"
+  }
+}

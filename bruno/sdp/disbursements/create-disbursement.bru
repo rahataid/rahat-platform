@@ -1,0 +1,25 @@
+meta {
+  name: create-disbursement
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{sdp_url}}/disbursements
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}
+
+body:json {
+  {
+    "name": "My New Disbursement",
+    "wallet_id": "wallet-uuid",
+    "asset_id": "asset-uuid",
+    "verification_field": "DATE_OF_BIRTH",
+    "registration_contact_type": "PHONE_NUMBER"
+  }
+}

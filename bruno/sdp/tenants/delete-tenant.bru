@@ -1,0 +1,11 @@
+meta {
+  name: delete-tenant
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{sdp_admin_url}}/tenants/{{tenant_id}}
+  body: none
+  auth: inherit
+}

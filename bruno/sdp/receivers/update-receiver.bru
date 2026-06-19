@@ -1,0 +1,26 @@
+meta {
+  name: update-receiver
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{sdp_url}}/receivers/{{receiver_id}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}
+
+body:json {
+  {
+    "date_of_birth": "1980-01-01",
+    "pin": "1234",
+    "national_id": "123456789",
+    "email": "updated@example.com",
+    "phone_number": "+9876543210",
+    "external_id": "ext-updated"
+  }
+}

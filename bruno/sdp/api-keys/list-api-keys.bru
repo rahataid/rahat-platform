@@ -1,0 +1,15 @@
+meta {
+  name: list-api-keys
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{sdp_url}}/api-keys
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}

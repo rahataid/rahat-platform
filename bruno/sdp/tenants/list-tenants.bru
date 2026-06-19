@@ -1,0 +1,11 @@
+meta {
+  name: list-tenants
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{sdp_admin_url}}/tenants
+  body: none
+  auth: inherit
+}

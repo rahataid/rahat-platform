@@ -1,0 +1,15 @@
+meta {
+  name: list-registration-contact-types
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{sdp_url}}/registration-contact-types
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}

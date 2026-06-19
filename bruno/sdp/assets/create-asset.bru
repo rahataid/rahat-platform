@@ -1,0 +1,22 @@
+meta {
+  name: create-asset
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{sdp_url}}/assets
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}
+
+body:json {
+  {
+    "code": "USDC",
+    "issuer": "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+  }
+}
