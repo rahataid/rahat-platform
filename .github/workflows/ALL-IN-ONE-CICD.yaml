@@ -22,6 +22,7 @@ on:
           - "main"
           - "dev-qa"
           - "aa-stellar"
+          - "demo-gsma"
 
       apps_to_build:
         description: "Apps to build (leave empty for defaults)"
@@ -125,7 +126,12 @@ jobs:
               ;;
             aa-stellar)
               TAG="aa-stellar"
-              SECRET="ENV_AA_DEV-QA"
+              SECRET="ENV_AA_DEV-STELLAR"
+              APPS="beneficiary,rahat"
+              ;;
+            demo-gsma)
+              TAG="demo-gsma"
+              SECRET="ENV_AA_DEMO_GSMA"
               APPS="beneficiary,rahat"
               ;;
             *)
