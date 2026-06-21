@@ -25,20 +25,31 @@ export interface WalletKeys {
   mnemonic?: string; // Optional - Only if you want to support exports to external wallets and recovery
 }
 
-export interface IConnectedWallet {
+/**
+ * Standard transaction contract shared by connected wallet implementations.
+ * Each chain can specialize the request, signed payload, and send result types.
+ */
+export interface IConnectedWallet<
+  TUnsignedTransaction = unknown,
+  TSignedTransaction = unknown,
+  TSendResult = TSignedTransaction,
+> {
   signMessage(message: string): Promise<string>;
-  sendTransaction(rawTransaction: any): Promise<any>;
+  signTransaction(transaction: TUnsignedTransaction): Promise<TSignedTransaction>;
+  sendTransaction(transaction: TUnsignedTransaction): Promise<TSendResult>;
   getWalletKeys(): WalletKeys;
 }
 
-export interface IWalletManager {
+export interface IWalletManager<
+  TConnectedWallet extends IConnectedWallet = IConnectedWallet,
+> {
   init(): Promise<void>;
-  createWallet(): Promise<IConnectedWallet>;
-  importWallet(privateKey: string): Promise<IConnectedWallet>;
+  createWallet(): Promise<TConnectedWallet>;
+  importWallet(privateKey: string): Promise<TConnectedWallet>;
   connect(
     walletAddress: string,
     blockchain: ChainType
-  ): Promise<IConnectedWallet>;
+  ): Promise<TConnectedWallet>;
 }
 
 export type ChainType = 'stellar' | 'evm';

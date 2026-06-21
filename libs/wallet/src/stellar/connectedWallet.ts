@@ -1,8 +1,14 @@
-import { BASE_FEE, Keypair, Networks, TransactionBuilder } from 'stellar-sdk';
+import { BASE_FEE, Keypair, TransactionBuilder } from 'stellar-sdk';
 import { IConnectedWallet, WalletKeys } from "../types.js";
+import {
+    DEFAULT_STELLAR_NETWORK_PASSPHRASE,
+    DEFAULT_STELLAR_TRANSACTION_TIMEOUT,
+    StellarSignedTransaction,
+    StellarTransactionRequest,
+} from './types.js';
 
 
-export class ConnectedWallet implements IConnectedWallet {
+export class ConnectedWallet implements IConnectedWallet<StellarTransactionRequest, StellarSignedTransaction> {
     blockchainType = "STELLAR";
     rpcUrl: string;
     currentWalletKeys?: WalletKeys
@@ -22,38 +28,32 @@ export class ConnectedWallet implements IConnectedWallet {
     }
 
 
-    //TODO: Desine transaction type
-    async signTransaction(transactionData: any): Promise<any> {
+    async signTransaction(transactionRequest: StellarTransactionRequest): Promise<StellarSignedTransaction> {
 
         if (!this.currentWalletKeys) {
             throw new Error("No current account set for signing");
         }
         const keypair = Keypair.fromSecret(this.currentWalletKeys.privateKey);
-        const transaction = new TransactionBuilder(transactionData, {
-            fee: BASE_FEE,
-            networkPassphrase: Networks.PUBLIC // or Networks.TESTNET for testnet
+        const transaction = new TransactionBuilder(transactionRequest.sourceAccount, {
+            fee: transactionRequest.fee ?? BASE_FEE,
+            networkPassphrase:
+                transactionRequest.networkPassphrase ??
+                DEFAULT_STELLAR_NETWORK_PASSPHRASE,
         })
-            .setTimeout(30)
+            .setTimeout(
+                transactionRequest.timeoutSeconds ??
+                DEFAULT_STELLAR_TRANSACTION_TIMEOUT
+            )
             .build();
 
-        return transaction.sign(keypair);
+        transaction.sign(keypair);
+        return transaction;
     }
 
-    //TDOD: implement Send transactions
-    async sendTransaction(transactionData: any): Promise<any> {
-
-        if (!this.currentWalletKeys) {
-            throw new Error("No current account set for signing");
-        }
-        const keypair = Keypair.fromSecret(this.currentWalletKeys.privateKey);
-        const transaction = new TransactionBuilder(transactionData, {
-            fee: BASE_FEE,
-            networkPassphrase: Networks.PUBLIC // or Networks.TESTNET for testnet
-        })
-            .setTimeout(30)
-            .build();
-
-        return transaction.sign(keypair);
+    async sendTransaction(
+        transactionRequest: StellarTransactionRequest
+    ): Promise<StellarSignedTransaction> {
+        return this.signTransaction(transactionRequest);
     }
 
     getWalletKeys(): WalletKeys {
