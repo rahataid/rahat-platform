@@ -260,6 +260,10 @@ export class VendorsService {
     // const vendorIdentifier = projectData[0]?.extras;
     // const projects = projectData.map((project) => project.Project);
     // const userdata = { ...data, projects, vendorIdentifier };
+    if (projectData.length === 0) {
+      return data;
+    }
+    
     return projectData;
   }
 
