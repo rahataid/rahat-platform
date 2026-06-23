@@ -1,6 +1,7 @@
 export * from './addToProject.types';
 export * from './beneficiary.types';
 export * from './client.types';
+export * from './comms.types';
 export * from './exceptionResponse.types';
 export * from './file.types';
 export * from './microservice.options.types';
