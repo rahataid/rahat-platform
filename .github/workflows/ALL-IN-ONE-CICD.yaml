@@ -21,6 +21,7 @@ on:
           - "dev"
           - "main"
           - "dev-qa"
+          - "dry-run-pin"
           - "aa-stellar"
           - "demo-gsma"
 
@@ -124,6 +125,9 @@ jobs:
               SECRET="ENV_AA_DEV-QA"
               APPS="beneficiary,rahat"
               ;;
+            dry-run-pin)
+              TAG="dry-run-pin"
+              SECRET="ENV_AA_DRY_RUN_PIN"
             aa-stellar)
               TAG="aa-stellar"
               SECRET="ENV_AA_DEV-STELLAR"
