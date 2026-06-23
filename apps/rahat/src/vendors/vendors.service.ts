@@ -1028,4 +1028,23 @@ export class VendorsService {
       );
     }
   }
+
+  async getVendorByPhoneNumber(phoneNumber: string) {
+    if (!phoneNumber) throw new BadRequestException('Phone number is required');
+
+    const user = await this.prisma.user.findFirst({
+      where: { phone: phoneNumber },
+    });
+
+    if (!user) throw new NotFoundException(`Vendor not found with phone: ${phoneNumber}`);
+
+    const projectData = await this.prisma.projectVendors.findFirst({
+      where: { vendorId: user.uuid },
+      include: { User: true },
+    });
+
+    if (!projectData) throw new NotFoundException(`Vendor not found with phone: ${phoneNumber}`);
+
+    return projectData;
+  }
 }
