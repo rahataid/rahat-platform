@@ -75,6 +75,11 @@ export class VendorsController {
     return this.vendorService.getVendorCount();
   }
 
+  @Get('/phoneNumber')
+  getVendorByPhoneNumber(@Query('phone') phone: string) {
+    return this.vendorService.getVendorByPhoneNumber(phone);
+  }
+
   @ApiParam({ name: 'id', required: true })
   @Get('/:id')
   getVendor(@Param('id') id: UUID | Address) {
@@ -226,10 +231,5 @@ export class VendorsController {
   @MessagePattern({ cmd: VendorJobs.CREATE })
   create(@Payload() dto) {
     return this.vendorService.create(dto);
-  }
-
-  @Get('/phoneNumber')
-  getVendorByPhoneNumber(@Query('phone') phone: string) {
-    return this.vendorService.getVendorByPhoneNumber(phone);
   }
 }
