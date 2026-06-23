@@ -1,0 +1,19 @@
+meta {
+  name: delete-api-key
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{sdp_url}}/api-keys/{{api_key_id}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  SDP-Tenant-Name: {{sdp_tenant_name}}
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}

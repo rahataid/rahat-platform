@@ -1,0 +1,19 @@
+meta {
+  name: list-assets
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{sdp_url}}/assets
+  body: none
+  auth: bearer
+}
+
+headers {
+  SDP-Tenant-Name: {{sdp_tenant_name}}
+}
+
+auth:bearer {
+  token: {{sdp_access_token}}
+}
