@@ -24,6 +24,6 @@ body:json {
 script:post-response {
   const body = res.getBody();
   if (body.token) {
-    bru.setEnvVar("sdp_access_token", body.token);
+    bru.setEnvVar("sdp_api_key", body.token);
   }
 }

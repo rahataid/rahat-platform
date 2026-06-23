@@ -6,7 +6,7 @@ meta {
 
 post {
   url: {{sdp_url}}/disbursements
-  body: json
+  body: multipartForm
   auth: bearer
 }
 
@@ -15,15 +15,10 @@ headers {
 }
 
 auth:bearer {
-  token: {{sdp_access_token}}
+  token: {{sdp_api_key}}
 }
 
-body:json {
-  {
-    "name": "My New Disbursement",
-    "wallet_id": "wallet-uuid",
-    "asset_id": "asset-uuid",
-    "verification_field": "DATE_OF_BIRTH",
-    "registration_contact_type": "PHONE_NUMBER"
-  }
+body:multipart-form {
+  data: {"name":"My API Disbursement","wallet_id":"","asset_id":"RAHAT","registration_contact_type":"PHONE_NUMBER_AND_WALLET_ADDRESS","verification_field":"","receiver_registration_message_template":""}
+  file: @file(/path/to/disbursement-instructions.csv)
 }
