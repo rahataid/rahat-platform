@@ -22,6 +22,8 @@ on:
           - "main"
           - "dev-qa"
           - "dry-run-pin"
+          - "aa-stellar"
+          - "demo-gsma"
 
       apps_to_build:
         description: "Apps to build (leave empty for defaults)"
@@ -126,6 +128,14 @@ jobs:
             dry-run-pin)
               TAG="dry-run-pin"
               SECRET="ENV_AA_DRY_RUN_PIN"
+            aa-stellar)
+              TAG="aa-stellar"
+              SECRET="ENV_AA_DEV-STELLAR"
+              APPS="beneficiary,rahat"
+              ;;
+            demo-gsma)
+              TAG="demo-gsma"
+              SECRET="ENV_AA_DEMO_GSMA"
               APPS="beneficiary,rahat"
               ;;
             *)

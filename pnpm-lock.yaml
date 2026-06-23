@@ -72,8 +72,8 @@ importers:
         specifier: 5.20.0
         version: 5.20.0(prisma@5.20.0)
       '@rumsan/connect':
-        specifier: 1.0.8
-        version: 1.0.8
+        specifier: 1.0.9
+        version: 1.0.9
       '@rumsan/extensions':
         specifier: 0.0.38
         version: 0.0.38(@nestjs/platform-express@10.4.20)(amqplib@0.10.9)(encoding@0.1.13)(ioredis@5.7.0)(prisma@5.20.0)(reflect-metadata@0.1.14)(typescript@5.3.3)
@@ -2726,8 +2726,8 @@ packages:
   '@rescript/std@9.0.0':
     resolution: {integrity: sha512-zGzFsgtZ44mgL4Xef2gOy1hrRVdrs9mcxCOOKZrIPsmbZW14yTkaF591GXxpQvjXiHtgZ/iA9qLyWH6oSReIxQ==}
 
-  '@rumsan/connect@1.0.8':
-    resolution: {integrity: sha512-Zp4q+Ss/AGeT3gXT/7W97JDKQ56V5rzYLm3uJI1+2NwkdAqZdmi++zpf7Ax03QsBI7ris6vjZjgr8sJupYd94w==}
+  '@rumsan/connect@1.0.9':
+    resolution: {integrity: sha512-ZJ9Zm+uokQe7c4iSgDSJ1jLSwO1wAOhQ1vsyqidxTjol9doZunGwUPT/88+a9S4PzY/0A1YuReIlHtPrH+DhFA==}
 
   '@rumsan/extensions@0.0.38':
     resolution: {integrity: sha512-bPZWNNzy2W8+NMLYTECuIf9FKH0syT+wLeWXgbfMXoZ4IeA620UWTiFaGdMf/Gbi22tGw3cTgjj2JQylu8b6Ng==}
@@ -15499,7 +15499,7 @@ snapshots:
 
   '@rescript/std@9.0.0': {}
 
-  '@rumsan/connect@1.0.8':
+  '@rumsan/connect@1.0.9':
     dependencies:
       tslib: 2.6.2
 
