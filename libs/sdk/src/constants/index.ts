@@ -599,6 +599,7 @@ export const MS_ACTIONS = {
     GET_ALL: 'ms.activities.getAll',
     GET_HAVING_COMMS: 'ms.activities.getHavingComms',
     ADD: 'ms.activities.add',
+    BULK_ADD: 'ms.activities.bulkAdd',
     REMOVE: 'ms.activities.remove',
     UPDATE: 'ms.activities.update',
     UPDATE_STATUS: 'ms.activities.updateStatus',

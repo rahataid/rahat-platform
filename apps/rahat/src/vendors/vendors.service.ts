@@ -265,7 +265,7 @@ export class VendorsService {
     }
     
     return projectData;
-  }
+}
 
   async listVendor(dto: GetVendorsDTO) {
     const { vendorName, projectName, status, page, perPage } = dto;
