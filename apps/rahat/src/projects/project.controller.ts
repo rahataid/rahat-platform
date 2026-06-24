@@ -48,6 +48,7 @@ import { UUID } from 'crypto';
 import { Request } from 'express';
 import { throwError } from 'rxjs';
 import { catchError, timeout } from 'rxjs/operators';
+import { ClosedProjectGuard } from '../decorators';
 import { DocParser } from '../utils/doc-parser';
 import { ProjectService } from './project.service';
 
@@ -95,7 +96,7 @@ export class ProjectController {
   this endpoint  is used to upload file and parsed the file and send it to  project microservice
   */
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard, ClosedProjectGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @Post(':uuid/upload')
   @UseInterceptors(FileInterceptor('file'))
@@ -198,7 +199,7 @@ export class ProjectController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(HybridJwtGuard, AbilitiesGuard)
+  @UseGuards(HybridJwtGuard, AbilitiesGuard, ClosedProjectGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @ApiParam({ name: 'uuid', required: true })
   @Post(':uuid/actions')
