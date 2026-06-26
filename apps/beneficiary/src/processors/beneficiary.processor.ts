@@ -774,10 +774,12 @@ export class BeneficiaryProcessor {
         phone: b.pii?.phone || null,
       }));
 
+      const isLastBatch = batchIdx === totalBatches - 1;
+
       await handleMicroserviceCall({
         client: this.client.send(
           { cmd: BeneficiaryJobs.SYNC_IMPORTED_GROUP_BENEFICIARIES, uuid: projectId },
-          { beneficiariesData, groupUuid },
+          { beneficiariesData, groupUuid, isLastBatch },
         ),
       });
 
