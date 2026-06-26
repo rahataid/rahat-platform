@@ -30,6 +30,15 @@ export class CreateProjectDto {
   type: string;
 
   @ApiProperty({
+    type: 'string',
+    required: false,
+    example: 'el',
+  })
+  @IsOptional()
+  @IsString()
+  countryCode?: string;
+
+  @ApiProperty({
     required: false,
     example: { test: 'test' },
   })
@@ -39,21 +48,18 @@ export class CreateProjectDto {
 
   @ApiProperty({
     required: false,
-    example: '0x123'
+    example: '0x123',
   })
   @IsOptional()
   @IsString()
-  contractAddress?: string
+  contractAddress?: string;
 }
 
 export class UpdateProjectDto extends OmitType(PartialType(CreateProjectDto), [
   'type',
-]) {
-
-}
+]) {}
 
 export class UpdateProjectStatusDto {
-
   @ApiProperty({
     type: 'string',
     required: false,
