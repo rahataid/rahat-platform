@@ -39,11 +39,12 @@ const prompt = inquirer.prompt ?? inquirer.default?.prompt;
 
 const DEPLOYMENT_DIR = path.resolve(__dirname, 'deployments');
 const DEPLOYER_KEY_NAME = 'DEPLOYER_PRIVATE_KEY';
+const DEPLOYER_ADDRESS_NAME = 'DEPLOYER_WALLET_ADDRESS';
 
-function buildSettingEntry(privateKey) {
+function buildSettingEntry(name, value) {
 	return {
-		name: DEPLOYER_KEY_NAME,
-		value: privateKey,
+		name,
+		value,
 		dataType: 'STRING',
 		requiredFields: '{}',
 		isReadOnly: false,
@@ -222,15 +223,21 @@ async function updateDeploymentFile(fileName, walletData) {
 	const content = await fs.readFile(filePath, 'utf8');
 	const payload = JSON.parse(content);
 	const settings = Array.isArray(payload.settings) ? payload.settings : [];
-	const addressSetting = buildSettingEntry(walletData.privateKey);
-	const existingIndex = settings.findIndex(
-		(setting) => setting && setting.name === DEPLOYER_KEY_NAME
-	);
+	const entries = [
+		buildSettingEntry(DEPLOYER_KEY_NAME, walletData.privateKey),
+		buildSettingEntry(DEPLOYER_ADDRESS_NAME, walletData.address),
+	];
 
-	if (existingIndex >= 0) {
-		settings[existingIndex] = addressSetting;
-	} else {
-		settings.push(addressSetting);
+	for (const entry of entries) {
+		const existingIndex = settings.findIndex(
+			(setting) => setting && setting.name === entry.name
+		);
+
+		if (existingIndex >= 0) {
+			settings[existingIndex] = entry;
+		} else {
+			settings.push(entry);
+		}
 	}
 
 	payload.settings = settings;
@@ -242,8 +249,6 @@ async function updateDeploymentFile(fileName, walletData) {
 	};
 
 	await fs.writeFile(filePath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
-
-	return existingIndex >= 0 ? 'updated' : 'added';
 }
 
 async function main() {
@@ -262,8 +267,8 @@ async function main() {
 		return;
 	}
 
-	const action = await updateDeploymentFile(selectedFile, walletData);
-	console.log(`${action.toUpperCase()}: ${DEPLOYER_KEY_NAME} in ${selectedFile}`);
+	await updateDeploymentFile(selectedFile, walletData);
+	console.log(`UPDATED: ${DEPLOYER_KEY_NAME}, ${DEPLOYER_ADDRESS_NAME} in ${selectedFile}`);
 	console.log(`UPDATED: Keys in ${selectedFile}`);
 	console.log('NOTE: fund this wallet with your preferred network native tokens like ETH,');
 }
