@@ -124,8 +124,7 @@ jobs:
               TAG="dev-qa"
               SECRET="ENV_AA_DEV-QA"
               APPS="beneficiary,rahat"
-              ;;
-          
+              ;;          
             aa-stellar)
               TAG="aa-stellar"
               SECRET="ENV_AA_DEV-STELLAR"

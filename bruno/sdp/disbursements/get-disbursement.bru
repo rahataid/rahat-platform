@@ -1,0 +1,19 @@
+meta {
+  name: get-disbursement
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{sdp_url}}/disbursements/{{disbursement_id}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  SDP-Tenant-Name: {{sdp_tenant_name}}
+}
+
+auth:bearer {
+  token: {{sdp_api_key}}
+}

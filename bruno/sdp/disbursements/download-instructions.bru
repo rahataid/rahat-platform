@@ -1,0 +1,19 @@
+meta {
+  name: download-instructions
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{sdp_url}}/disbursements/{{disbursement_id}}/instructions
+  body: none
+  auth: bearer
+}
+
+headers {
+  SDP-Tenant-Name: {{sdp_tenant_name}}
+}
+
+auth:bearer {
+  token: {{sdp_api_key}}
+}

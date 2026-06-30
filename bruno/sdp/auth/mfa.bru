@@ -1,0 +1,33 @@
+meta {
+  name: mfa
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{sdp_url}}/mfa
+  body: json
+  auth: bearer
+}
+
+headers {
+  SDP-Tenant-Name: {{sdp_tenant_name}}
+}
+
+auth:bearer {
+  token: {{sdp_api_key}}
+}
+
+body:json {
+  {
+    "mfa_code": "123456",
+    "remember_me": false
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  if (body.token) {
+    bru.setEnvVar("sdp_api_key", body.token);
+  }
+}

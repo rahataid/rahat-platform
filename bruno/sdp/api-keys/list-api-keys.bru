@@ -1,0 +1,19 @@
+meta {
+  name: list-api-keys
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{sdp_url}}/api-keys
+  body: none
+  auth: bearer
+}
+
+headers {
+  SDP-Tenant-Name: {{sdp_tenant_name}}
+}
+
+auth:bearer {
+  token: {{sdp_api_key}}
+}

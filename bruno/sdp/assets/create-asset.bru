@@ -1,0 +1,26 @@
+meta {
+  name: create-asset
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{sdp_url}}/assets
+  body: json
+  auth: bearer
+}
+
+headers {
+  SDP-Tenant-Name: {{sdp_tenant_name}}
+}
+
+auth:bearer {
+  token: {{sdp_api_key}}
+}
+
+body:json {
+  {
+    "code": "USDC",
+    "issuer": "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+  }
+}

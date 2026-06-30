@@ -1,0 +1,19 @@
+meta {
+  name: get-organization
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{sdp_url}}/organization
+  body: none
+  auth: bearer
+}
+
+headers {
+  SDP-Tenant-Name: {{sdp_tenant_name}}
+}
+
+auth:bearer {
+  token: {{sdp_api_key}}
+}
