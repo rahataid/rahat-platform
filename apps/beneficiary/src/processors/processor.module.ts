@@ -8,6 +8,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
+import { BankAccountCheckProcessor } from './bank-account-check.processor';
 import { BeneficiaryProcessor } from './beneficiary.processor';
 
 
@@ -28,8 +29,11 @@ import { BeneficiaryProcessor } from './beneficiary.processor';
     BullModule.registerQueue({
       name: BQUEUE.RAHAT_BENEFICIARY,
     }),
+    BullModule.registerQueue({
+      name: BQUEUE.RAHAT_BENEFICIARY_BANK_CHECK,
+    }),
     BeneficiaryModule, EventEmitterModule.forRoot()],
-  providers: [PrismaService, BeneficiaryProcessor],
-  exports: [BeneficiaryProcessor],
+  providers: [PrismaService, BeneficiaryProcessor, BankAccountCheckProcessor],
+  exports: [BeneficiaryProcessor, BankAccountCheckProcessor],
 })
 export class ProcessorsModule { }

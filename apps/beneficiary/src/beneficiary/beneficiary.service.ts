@@ -63,6 +63,8 @@ export class BeneficiaryService {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
+    @InjectQueue(BQUEUE.RAHAT_BENEFICIARY_BANK_CHECK)
+    private readonly bankCheckQueue: Queue,
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
     private readonly eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
@@ -1575,7 +1577,7 @@ export class BeneficiaryService {
       },
     }));
 
-    await this.beneficiaryQueue.addBulk(bulkQueueData);
+    await this.bankCheckQueue.addBulk(bulkQueueData);
 
     return {
       success: true,
