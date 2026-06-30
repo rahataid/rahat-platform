@@ -1,0 +1,25 @@
+meta {
+  name: update-disbursement-status
+  type: http
+  seq: 8
+}
+
+patch {
+  url: {{sdp_url}}/disbursements/{{disbursement_id}}/status
+  body: json
+  auth: bearer
+}
+
+headers {
+  SDP-Tenant-Name: {{sdp_tenant_name}}
+}
+
+auth:bearer {
+  token: {{sdp_api_key}}
+}
+
+body:json {
+  {
+    "status": "STARTED"
+  }
+}

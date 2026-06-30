@@ -67,6 +67,8 @@ export const MS_TRIGGERS_JOBS = {
     LIST_PROJECT_SPECIFIC: 'ms.jobs.activities.listProjectSpecific',
     GET_HAVING_COMMS: 'ms.jobs.activities.getHavingComms',
     ADD: 'ms.jobs.activities.add',
+    BULK_ADD: 'ms.jobs.activities.bulkAdd',
+    VALIDATE_BULK_ADD: 'ms.jobs.activities.validateBulkAdd',
     REMOVE: 'ms.jobs.activities.remove',
     UPDATE: 'ms.jobs.activities.update',
     UPDATE_STATUS: 'ms.jobs.activities.updateStatus',
@@ -463,6 +465,18 @@ export const msTriggerActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
 
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.ADD }, payload);
+  },
+
+  [MS_ACTIONS.MS_ACTIVITIES.BULK_ADD]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.BULK_ADD }, payload);
+  },
+
+  [MS_ACTIONS.MS_ACTIVITIES.VALIDATE_BULK_ADD]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.VALIDATE_BULK_ADD }, payload);
   },
 
   [MS_ACTIONS.MS_ACTIVITIES.REMOVE]: (uuid, payload, sendCommand) => {

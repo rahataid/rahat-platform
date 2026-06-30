@@ -9,6 +9,7 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { PhoneStatus } from '@prisma/client';
 import { CreateBeneficiaryDto } from '@rahataid/extensions';
 import {
+  BeneficiaryConstants,
   BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
@@ -260,8 +261,11 @@ export class BeneficiaryProcessor {
             return {
               beneficiaryId: beneficiary.id,
               ...piiData,
-              uuid: undefined,
-            }; // Remove temporary UUID
+              uuid: undefined, // Remove temporary UUID
+              phone: piiData.phone
+                ? piiData.phone.toString()
+                : BeneficiaryConstants.UNPHONED_PLACEHOLDER,
+            };
           });
 
           // Insert PII data in bulk
@@ -726,6 +730,68 @@ export class BeneficiaryProcessor {
       },
     });
   }
+
+  @Process({ name: BeneficiaryJobs.SYNC_GROUP_BENEFICIARIES_TO_PROJECT, concurrency: 2 })
+  async syncGroupToProject(job: Job<{ groupUuid: string; projectId: string }>) {
+    const { groupUuid, projectId } = job.data;
+    this.logger.log(`Starting sync: group ${groupUuid} → project ${projectId}`);
+
+    const grouped = await this.prisma.groupedBeneficiaries.findMany({
+      where: { beneficiaryGroupId: groupUuid, deletedAt: null },
+      select: {
+        Beneficiary: {
+          select: {
+            uuid: true,
+            walletAddress: true,
+            gender: true,
+            extras: true,
+            isVerified: true,
+            pii: { select: { phone: true, name: true, email: true } },
+          },
+        },
+      },
+    });
+
+    if (!grouped.length) {
+      this.logger.log(`No beneficiaries in group ${groupUuid}, skipping`);
+      return;
+    }
+
+    const total = grouped.length;
+    const BATCH_SIZE = 50;
+    const totalBatches = Math.ceil(total / BATCH_SIZE);
+    let processed = 0;
+
+    for (let batchIdx = 0; batchIdx < totalBatches; batchIdx++) {
+      const batch = grouped.slice(batchIdx * BATCH_SIZE, (batchIdx + 1) * BATCH_SIZE);
+
+      const beneficiariesData = batch.map(({ Beneficiary: b }) => ({
+        uuid: b.uuid,
+        walletAddress: b.walletAddress,
+        gender: b.gender,
+        isVerified: b.isVerified,
+        extras: { ...((b.extras as object) || {}), phone: b.pii?.phone || null },
+        phone: b.pii?.phone || null,
+      }));
+
+      const isLastBatch = batchIdx === totalBatches - 1;
+
+      await handleMicroserviceCall({
+        client: this.client.send(
+          { cmd: BeneficiaryJobs.SYNC_IMPORTED_GROUP_BENEFICIARIES, uuid: projectId },
+          { beneficiariesData, groupUuid, isLastBatch },
+        ),
+      });
+
+      processed += batch.length;
+      await job.progress({ processed, total });
+      this.logger.log(
+        `Sync group ${groupUuid} → project ${projectId}: batch ${batchIdx + 1}/${totalBatches} complete (${processed}/${total})`,
+      );
+    }
+
+    this.logger.log(`Sync complete: group ${groupUuid} → project ${projectId} (${total} beneficiaries)`);
+  }
 }
 
 // Helper function to check for duplicates
@@ -734,9 +800,10 @@ async function checkPhoneNumber(
   beneficiaries: CreateBeneficiaryDto[],
   prisma: PrismaService
 ): Promise<string[]> {
-  const phoneNumbers = beneficiaries.map(
-    (beneficiary) => beneficiary.piiData.phone
-  );
+  const phoneNumbers = beneficiaries
+    .map((beneficiary) => beneficiary.piiData.phone)
+    .filter(Boolean);
+  if (!phoneNumbers.length) return [];
   const duplicates = await prisma.beneficiaryPii.findMany({
     where: { phone: { in: phoneNumbers } },
     select: { phone: true },

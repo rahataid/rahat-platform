@@ -1,7 +1,5 @@
-# Install dependencies only when needed
 FROM node:20-alpine3.19 AS deps
 WORKDIR /usr/src/app
-# COPY ./dist/apps/rahat/package.json .npmrc ./
 COPY ./dist/apps/rahat/package.json ./
 RUN npm install -g pnpm@9.15.2 && pnpm install
 

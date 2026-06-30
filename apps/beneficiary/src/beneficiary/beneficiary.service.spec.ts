@@ -114,7 +114,6 @@ describe('BeneficiaryService', () => {
             addPIIData: jest.fn().mockResolvedValue(undefined),
             assignToProjects: jest.fn().mockResolvedValue(undefined),
             saveBeneficiaryToProject: jest.fn().mockResolvedValue(undefined),
-            ensurePhoneNumbers: jest.fn().mockReturnValue(undefined),
             ensureValidWalletAddress: jest.fn().mockResolvedValue(undefined),
             prepareBulkInsertData: jest.fn().mockReturnValue({ beneficiaries: [], piiData: [] }),
             insertBeneficiariesAndPIIData: jest.fn().mockResolvedValue(undefined),
@@ -212,7 +211,7 @@ describe('BeneficiaryService', () => {
       await expect(service.create(dto as CreateBeneficiaryDto, 'project-uuid-1')).rejects.toThrow('Phone number should be unique');
     });
 
-    it('should throw an error if phone number is missing', async () => {
+    it('should create successfully when phone number is empty', async () => {
       const dto = {
         walletAddress: 'wallet',
         piiData: {
@@ -220,7 +219,11 @@ describe('BeneficiaryService', () => {
         },
         projectUUIDs: ['project-uuid-1'],
       };
-      await expect(service.create(dto as CreateBeneficiaryDto, 'project-uuid-1')).rejects.toThrow('Phone number is required');
+      (rsprisma.beneficiary.create as jest.Mock).mockResolvedValue({ id: 'mock-beneficiary-id', uuid: 'uuid' });
+      const beneficiaryUtilsMock = (service as any).beneficiaryUtilsService;
+      const result = await service.create(dto as CreateBeneficiaryDto, 'project-uuid-1');
+      expect(beneficiaryUtilsMock.ensureUniquePhone).not.toHaveBeenCalled();
+      expect(result).toEqual({ id: 'mock-beneficiary-id', uuid: 'uuid' });
     });
 
     it('should throw an error if phone number is not unique', async () => {
@@ -238,7 +241,7 @@ describe('BeneficiaryService', () => {
       await expect(service.create(dto as CreateBeneficiaryDto, 'project-uuid-1')).rejects.toThrow('Phone number should be unique');
     });
 
-    it('should throw an error if phone number is required', async () => {
+    it('should create successfully when piiData has no phone field', async () => {
       const dto = {
         walletAddress: 'wallet',
         piiData: {},
@@ -246,7 +249,11 @@ describe('BeneficiaryService', () => {
       };
       (prisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(null);
       (isAddress as unknown as jest.Mock).mockReturnValue(true);
-      await expect(service.create(dto as CreateBeneficiaryDto, 'project-uuid-1')).rejects.toThrow('Phone number is required')
+      (rsprisma.beneficiary.create as jest.Mock).mockResolvedValue({ id: 'mock-beneficiary-id', uuid: 'uuid' });
+      const beneficiaryUtilsMock = (service as any).beneficiaryUtilsService;
+      const result = await service.create(dto as CreateBeneficiaryDto, 'project-uuid-1');
+      expect(beneficiaryUtilsMock.ensureUniquePhone).not.toHaveBeenCalled();
+      expect(result).toEqual({ id: 'mock-beneficiary-id', uuid: 'uuid' });
     });
   });
 
@@ -668,26 +675,12 @@ describe('BeneficiaryService', () => {
   });
 
   describe('createBulk', () => {
-    it('should return success false if ensurePhoneNumbers throws', async () => {
-      const dtos = [
-        { piiData: { phone: null }, walletAddress: 'wallet1' },
-        { piiData: { phone: '123456789' }, walletAddress: 'wallet2' },
-      ];
-      const beneficiaryUtilsMock = (service as any).beneficiaryUtilsService;
-      (beneficiaryUtilsMock.ensurePhoneNumbers as jest.Mock).mockImplementationOnce(() => {
-        throw new Error('Phone number is required');
-      });
-      const result = await service.createBulk(dtos as any);
-      expect(result).toEqual({ success: false });
-    });
-
     it('should skip entries with duplicate phone numbers and return success', async () => {
       const dtos = [
         { piiData: { phone: '123456789' }, walletAddress: 'wallet_1', uuid: 'uuid1' },
         { piiData: { phone: '987654321' }, walletAddress: 'wallet_2', uuid: 'uuid2' },
       ];
       const beneficiaryUtilsMock = (service as any).beneficiaryUtilsService;
-      (beneficiaryUtilsMock.ensurePhoneNumbers as jest.Mock).mockReturnValue(undefined);
       (beneficiaryUtilsMock.ensureUniquePhone as jest.Mock).mockResolvedValue(undefined);
       (beneficiaryUtilsMock.ensureValidWalletAddress as jest.Mock).mockImplementation((w) => w);
       (beneficiaryUtilsMock.prepareBulkInsertData as jest.Mock).mockReturnValue({ beneficiaries: [], piiData: [] });
@@ -702,7 +695,6 @@ describe('BeneficiaryService', () => {
         { piiData: { phone: '987654321' }, walletAddress: 'wallet_1', uuid: 'uuid2' },
       ];
       const beneficiaryUtilsMock = (service as any).beneficiaryUtilsService;
-      (beneficiaryUtilsMock.ensurePhoneNumbers as jest.Mock).mockReturnValue(undefined);
       (beneficiaryUtilsMock.ensureUniquePhone as jest.Mock).mockResolvedValue(undefined);
       (beneficiaryUtilsMock.ensureValidWalletAddress as jest.Mock)
         .mockResolvedValueOnce('wallet_1')
@@ -723,7 +715,6 @@ describe('BeneficiaryService', () => {
         { uuid: 'uuid1', id: 1, walletAddress: 'wallet_1' },
         { uuid: 'uuid2', id: 2, walletAddress: 'wallet_2' },
       ];
-      (beneficiaryUtilsMock.ensurePhoneNumbers as jest.Mock).mockReturnValue(undefined);
       (beneficiaryUtilsMock.ensureUniquePhone as jest.Mock).mockResolvedValue(undefined);
       (beneficiaryUtilsMock.ensureValidWalletAddress as jest.Mock).mockImplementation((w) => w);
       (beneficiaryUtilsMock.prepareBulkInsertData as jest.Mock).mockReturnValue({ beneficiaries: [], piiData: [] });
@@ -737,7 +728,6 @@ describe('BeneficiaryService', () => {
         { piiData: { phone: '123456789' }, walletAddress: 'wallet_1', uuid: 'uuid1' as `${string}-${string}-${string}-${string}-${string}` },
       ];
       const beneficiaryUtilsMock = (service as any).beneficiaryUtilsService;
-      (beneficiaryUtilsMock.ensurePhoneNumbers as jest.Mock).mockReturnValue(undefined);
       (beneficiaryUtilsMock.ensureUniquePhone as jest.Mock).mockResolvedValue(undefined);
       (beneficiaryUtilsMock.ensureValidWalletAddress as jest.Mock).mockImplementation((w) => w);
       (beneficiaryUtilsMock.prepareBulkInsertData as jest.Mock).mockReturnValue({ beneficiaries: [], piiData: [] });

@@ -1,0 +1,24 @@
+meta {
+  name: Get One Group Cash Transfer
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aaProject.groupCashTransfer.getOne",
+    "payload": {
+      "uuid": "f856861e-2928-44df-83da-40d73034212f"
+    }
+  }
+}

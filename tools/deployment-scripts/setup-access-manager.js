@@ -48,7 +48,7 @@ async function getContractArtifact(contractName) {
   return JSON.parse(content);
 }
 
-async function getRahatAccessManagerAddress(deploymentData) {
+function getAllContracts(deploymentData) {
   // Try to find the contract address from CONTRACT setting
   const contractSettings = deploymentData.settings?.find(
     (s) => s.name === 'CONTRACT'
@@ -71,6 +71,13 @@ async function getRahatAccessManagerAddress(deploymentData) {
       `Failed to parse CONTRACT settings: ${err.message}`
     );
   }
+
+  return contractValue;
+}
+
+async function getRahatAccessManagerAddress(deploymentData) {
+  const contractValue = getAllContracts(deploymentData);
+
   if (!contractValue.RAHATACCESSMANAGER) {
     throw new Error('RahatAccessManager address not found in CONTRACT settings');
   }
@@ -114,6 +121,32 @@ function getChainSettings(payload) {
   return chainSettings;
 }
 
+function getDeployerPrivateKey(payload) {
+  // Try Keys.privateKey first (preferred location from 3.setup-keys.js)
+  if (payload.Keys?.privateKey && typeof payload.Keys.privateKey === 'string') {
+    return payload.Keys.privateKey;
+  }
+
+  // Fallback: try DEPLOYER_PRIVATE_KEY setting
+  const deployerSetting = parseSettingValue(
+    getSetting(payload.settings, 'DEPLOYER_PRIVATE_KEY')
+  );
+
+  if (deployerSetting && typeof deployerSetting === 'string') {
+    return deployerSetting;
+  }
+
+  // Fallback: check if value is directly a string (not parsed as JSON)
+  const rawSetting = getSetting(payload.settings, 'DEPLOYER_PRIVATE_KEY');
+  if (rawSetting?.value && typeof rawSetting.value === 'string') {
+    return rawSetting.value;
+  }
+
+  throw new Error(
+    'Deployer private key is missing. Please run 3.setup-keys.js first to configure the deployer wallet.'
+  );
+}
+
 async function askAdminSetupDetails() {
   const answers = await prompt([
     {
@@ -123,19 +156,6 @@ async function askAdminSetupDetails() {
       validate: (input) => {
         if (!/^0x[a-fA-F0-9]{40}$/.test(input)) {
           return 'Please provide a valid Ethereum address (0x...)';
-        }
-        return true;
-      },
-    },
-    {
-      type: 'password',
-      name: 'deployerPrivateKey',
-      message: 'Enter the deployer private key:',
-      mask: '*',
-      validate: (input) => {
-        if (!input) return 'Private key is required';
-        if (!/^(0x)?[a-fA-F0-9]{64}$/.test(input)) {
-          return 'Invalid private key format';
         }
         return true;
       },
@@ -156,7 +176,6 @@ async function askAdminSetupDetails() {
 
   return {
     newAdminAddress: answers.newAdminAddress,
-    deployerPrivateKey: answers.deployerPrivateKey,
     executionDelay: parseInt(answers.executionDelay),
   };
 }
@@ -226,16 +245,25 @@ async function main() {
 
     // Get chain settings and contract address
     const chainSettings = await getChainSettings(deploymentData);
+    const contracts = getAllContracts(deploymentData);
     const accessManagerAddress = await getRahatAccessManagerAddress(
       deploymentData
     );
+
+    // Get deployer private key from deployment file
+    const deployerPrivateKey = getDeployerPrivateKey(deploymentData);
 
     // Ask for admin setup details
     const setupDetails = await askAdminSetupDetails();
 
     // Show summary
     console.log('\n📋 Setup Summary:');
-    console.log('   AccessManager:', accessManagerAddress);
+    console.log('   Deployed Contracts:');
+    Object.entries(contracts).forEach(([name, contract]) => {
+      if (contract?.address) {
+        console.log(`     ${name}: ${contract.address}`);
+      }
+    });
     console.log('   New Admin:', setupDetails.newAdminAddress);
     console.log('   RPC URL:', chainSettings.rpcUrl.substring(0, 50) + '...');
 
@@ -253,7 +281,7 @@ async function main() {
       accessManagerAddress,
       rpcUrl: chainSettings.rpcUrl,
       newAdminAddress: setupDetails.newAdminAddress,
-      deployerPrivateKey: setupDetails.deployerPrivateKey,
+      deployerPrivateKey,
       executionDelay: setupDetails.executionDelay,
     });
 

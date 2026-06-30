@@ -1,0 +1,20 @@
+meta {
+  name: Validate Bank Account
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "aaProject.groupCashTransfer.validateBankAccount",
+    "payload": {
+      "uuid": "replace-with-record-uuid"
+    }
+  }
+}

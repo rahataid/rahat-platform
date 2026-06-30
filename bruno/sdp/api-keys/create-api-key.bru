@@ -1,0 +1,35 @@
+meta {
+  name: create-api-key
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{sdp_url}}/api-keys
+  body: json
+  auth: bearer
+}
+
+headers {
+  SDP-Tenant-Name: {{sdp_tenant_name}}
+}
+
+auth:bearer {
+  token: {{sdp_api_key}}
+}
+
+body:json {
+  {
+    "name": "My API Key",
+    "permissions": [
+      "read:disbursements",
+      "write:disbursements",
+      "read:receivers",
+      "write:receivers",
+      "read:payments",
+      "write:payments"
+    ],
+    "expiry_date": "2027-12-31T23:59:59Z",
+    "allowed_ips": ["192.168.1.0/24"]
+  }
+}

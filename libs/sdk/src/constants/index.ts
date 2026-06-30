@@ -16,6 +16,7 @@ export const BQUEUE = {
   HOST: 'RAHAT.HOST',
   META_TXN: 'RAHAT.META_TXN',
   RAHAT_IMPORT: 'RAHAT.IMPORT',
+  FUND_VENDOR_WALLET: 'RAHAT.FUND_VENDOR_WALLET',
 };
 
 export const UserRoles = {
@@ -337,7 +338,12 @@ export const MS_ACTIONS = {
       VALIDATE_BENEFICIARY_OTP: 'aaProject.inkinds.validateBeneficiaryOtp',
       BENEFICIARY_INKIND_DETAILS: 'aaProject.beneficiary.inKindsDetails',
       GET_OFFLINE_BENEFICIARY_INKIND_BY_VENDOR: 'aaProject.inkinds.getAllOfflineBeneficiaryByVendor',
-      REDEEM_OFFLINE_INKIND_BY_VENDOR: 'aaProject.inkinds.syncOfflineRedemptions'
+      REDEEM_OFFLINE_INKIND_BY_VENDOR: 'aaProject.inkinds.syncOfflineRedemptions',
+      GET_VENDOR_AVAILABLE_INKIND_DETAILS: 'aaProject.inkinds.getVendorAvailableInkindsDetails',
+      CREATE_VENDOR_REDEMPTION: 'aaProject.inkinds.createVendorRedemption',
+      GET_VENDOR_REDEMPTIONS: 'aaProject.inkinds.getVendorRedemptions',
+      UPDATE_VENDOR_REDEMPTION_STATUS: 'aaProject.inkinds.updateVendorRedemptionStatus',
+      UPDATE_VENDOR_REDEMPTION_TX_HASH: 'aaProject.inkinds.updateVendorRedemptionTxHash'
     },
     VENDOR: {
       // Remove after test
@@ -379,6 +385,21 @@ export const MS_ACTIONS = {
     INKIND_TRACKER: {
       EXECUTE_ACTION: 'aa.inkind-tracker.executeAction',
       GET_TRANSACTIONS: 'aa.inkind-tracker.getTransactions',
+    },
+    GROUP_CASH_TRANSFER: {
+      CREATE: 'aaProject.groupCashTransfer.create',
+      UPDATE: 'aaProject.groupCashTransfer.update',
+      DELETE: 'aaProject.groupCashTransfer.delete',
+      GET: 'aaProject.groupCashTransfer.get',
+      GET_ONE: 'aaProject.groupCashTransfer.getOne',
+      ALLOCATE_FUND: 'aaProject.groupCashTransfer.assignFund',
+      DISBURSE: 'aaProject.groupCashTransfer.disburse',
+      GET_RECORDS: 'aaProject.groupCashTransfer.getRecords',
+      GET_ONE_RECORD: 'aaProject.groupCashTransfer.getOneRecord',
+      VALIDATE_BANK_ACCOUNT: 'aaProject.groupCashTransfer.validateBankAccount',
+      GET_ALL_VALID: 'aaProject.groupCashTransfer.getAllValid',
+      GET_GCT_DATA: 'aaProject.groupCashTransfer.getGCTData',
+      UPDATE_GROUP_RECORD: 'aaProject.groupCashTransfer.updateRecord'
     },
     MULTISIG: {
       GET_SAFE_OWNER: 'aa.getSafeOwner',
@@ -578,6 +599,8 @@ export const MS_ACTIONS = {
     GET_ALL: 'ms.activities.getAll',
     GET_HAVING_COMMS: 'ms.activities.getHavingComms',
     ADD: 'ms.activities.add',
+    BULK_ADD: 'ms.activities.bulkAdd',
+    VALIDATE_BULK_ADD: 'ms.activities.validateBulkAdd',
     REMOVE: 'ms.activities.remove',
     UPDATE: 'ms.activities.update',
     UPDATE_STATUS: 'ms.activities.updateStatus',

@@ -87,6 +87,32 @@ function getRpcUrlFromChainSettings(payload) {
   return chainSettings.rpcUrl;
 }
 
+function getDeployerPrivateKey(payload) {
+  // Try Keys.privateKey first (preferred location from 3.setup-keys.js)
+  if (payload.Keys?.privateKey && typeof payload.Keys.privateKey === 'string') {
+    return payload.Keys.privateKey;
+  }
+
+  // Fallback: try DEPLOYER_PRIVATE_KEY setting
+  const deployerSetting = parseSettingValue(
+    getSetting(payload.settings, 'DEPLOYER_PRIVATE_KEY')
+  );
+
+  if (deployerSetting && typeof deployerSetting === 'string') {
+    return deployerSetting;
+  }
+
+  // Fallback: check if value is directly a string (not parsed as JSON)
+  const rawSetting = getSetting(payload.settings, 'DEPLOYER_PRIVATE_KEY');
+  if (rawSetting?.value && typeof rawSetting.value === 'string') {
+    return rawSetting.value;
+  }
+
+  throw new Error(
+    'Deployer private key is missing. Please run 3.setup-keys.js first to configure the deployer wallet.'
+  );
+}
+
 async function readArtifact(contractName) {
   const filePath = path.join(CONTRACTS_DIR, `${contractName}.json`);
   console.log(filePath)
@@ -96,16 +122,6 @@ async function readArtifact(contractName) {
 
 async function askDeploymentInputs() {
   const answers = await prompt([
-    {
-      type: 'password',
-      name: 'deployerPrivateKey',
-      message: 'Enter deployer private key:',
-      default: process.env.DEPLOYER_PRIVATE_KEY || '',
-      mask: '*',
-      validate: (input) =>
-        input && input.trim() ? true : 'Deployer private key is required.',
-      filter: (input) => input.trim(),
-    },
     {
       type: 'input',
       name: 'tokenName',
@@ -267,10 +283,11 @@ async function main() {
   );
   const payload = await readDeploymentFile(selectedFile);
   const rpcUrl = getRpcUrlFromChainSettings(payload);
+  const deployerPrivateKey = getDeployerPrivateKey(payload);
   const deploymentInputs = await askDeploymentInputs();
 
   const provider = new JsonRpcProvider(rpcUrl);
-  const signer = new Wallet(deploymentInputs.deployerPrivateKey, provider);
+  const signer = new Wallet(deployerPrivateKey, provider);
 
   summarizeDeploymentPlan(selectedFile, rpcUrl, signer.address, deploymentInputs);
 

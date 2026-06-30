@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { Keypair } from 'stellar-sdk';
+import { Keypair } from '@stellar/stellar-sdk';
 import { MemoryWalletStorage } from '../storages/memory.storage';
 import { ChainType, IWalletManager, WalletKeys, WalletStorage } from '../types';
 import { ConnectedWallet } from './connectedWallet';

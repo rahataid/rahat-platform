@@ -382,6 +382,7 @@ enum GroupPurpose {
   BANK_TRANSFER
   MOBILE_MONEY
   COMMUNICATION
+  GENERAL
 }
 
 // ++++++++++++++++++ END: @rahat/beneficiaries +++++++++++++++++++++++++++

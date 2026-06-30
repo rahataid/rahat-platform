@@ -1,0 +1,24 @@
+meta {
+  name: create-disbursement
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{sdp_url}}/disbursements
+  body: multipartForm
+  auth: bearer
+}
+
+headers {
+  SDP-Tenant-Name: {{sdp_tenant_name}}
+}
+
+auth:bearer {
+  token: {{sdp_api_key}}
+}
+
+body:multipart-form {
+  data: {"name":"My API Disbursement","wallet_id":"","asset_id":"RAHAT","registration_contact_type":"PHONE_NUMBER_AND_WALLET_ADDRESS","verification_field":"","receiver_registration_message_template":""}
+  file: @file(/path/to/disbursement-instructions.csv)
+}

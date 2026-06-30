@@ -1,0 +1,19 @@
+meta {
+  name: update-tenant
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{sdp_admin_url}}/tenants/{{tenant_id}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "base_url": "https://updated-backend.sdp.org",
+    "sdp_ui_base_url": "https://updated-ui.sdp.org",
+    "status": "TENANT_ACTIVATED"
+  }
+}

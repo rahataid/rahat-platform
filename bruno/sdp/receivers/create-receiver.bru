@@ -1,0 +1,33 @@
+meta {
+  name: create-receiver
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{sdp_url}}/receivers
+  body: json
+  auth: bearer
+}
+
+headers {
+  SDP-Tenant-Name: {{sdp_tenant_name}}
+}
+
+auth:bearer {
+  token: {{sdp_api_key}}
+}
+
+body:json {
+  {
+    "external_id": "ext-001",
+    "phone_number": "+1234567890",
+    "email": "receiver@example.com",
+    "verifications": [
+      {
+        "type": "date_of_birth",
+        "value": "1990-01-01"
+      }
+    ]
+  }
+}

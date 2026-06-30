@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { BulkUpdateWallet, ChainType, IConnectedWallet, WalletKeys } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
@@ -31,7 +32,21 @@ export class WalletService implements OnModuleInit {
   ) { }
 
   async onModuleInit() {
-    await this.initializeProviders();
+    try {
+      await this.initializeProviders();
+    } catch (e) {
+      this.logger.warn(`[WalletService] Wallet providers not initialized — waiting for settings. (${e.message})`);
+    }
+  }
+
+  @OnEvent('settings.seeded')
+  async handleSettingsSeeded() {
+    this.logger.log('[WalletService] settings.seeded received. Re-initializing wallet providers...');
+    try {
+      await this.initializeProviders();
+    } catch (e) {
+      this.logger.error(`[WalletService] Failed to initialize after seed: ${e.message}`);
+    }
   }
 
   private async initializeProviders() {
@@ -185,6 +200,7 @@ export class WalletService implements OnModuleInit {
   }
 
   async getBulkSecretByWallet(accounts: BulkWalletAddressDto) {
+    this.logger.log(`Getting bulk secrets for wallets: ${accounts.walletAddresses.length} addresses on chain ${accounts.chain}`);
     return Promise.all(accounts.walletAddresses.map(async (walletAddress) => {
       return this.getSecretByWallet(walletAddress, accounts.chain);
     }))

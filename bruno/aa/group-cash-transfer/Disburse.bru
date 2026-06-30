@@ -1,0 +1,24 @@
+meta {
+  name: Disburse
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aaProject.groupCashTransfer.disburse",
+    "payload": {
+      "uuid": "2452066a-1f95-4442-8fe7-f6533fe7bf21"
+    }
+  }
+}

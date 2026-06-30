@@ -104,11 +104,6 @@ export class BeneficiaryUtilsService {
     return walletAddress;
   }
 
-  async ensurePhoneNumbers(dtos: CreateBeneficiaryDto[]) {
-    const hasPhone = dtos.every((dto) => dto.piiData.phone);
-    if (!hasPhone) throw new RpcException('Phone number is required');
-  }
-
   async ensureUniquePhone(phone: string): Promise<void> {
     const existingPiiData = await this.prismaService.beneficiaryPii.findUnique({
       where: { phone },
@@ -124,8 +119,10 @@ export class BeneficiaryUtilsService {
     await this.prismaService.beneficiaryPii.create({
       data: {
         beneficiaryId,
-        phone: piiData.phone.toString(),
         ...piiData,
+        phone: piiData.phone
+          ? piiData.phone.toString()
+          : BeneficiaryConstants.UNPHONED_PLACEHOLDER,
       },
     });
   }
@@ -323,7 +320,9 @@ export class BeneficiaryUtilsService {
         if (piiBulkInsertData.length > 0) {
           const sanitizedPiiBenef = piiBulkInsertData.map((bulkData) => ({
             ...bulkData,
-            phone: bulkData.phone ? bulkData.phone.toString() : null,
+            phone: bulkData.phone
+              ? bulkData.phone.toString()
+              : BeneficiaryConstants.UNPHONED_PLACEHOLDER,
           }));
           await prisma.beneficiaryPii.createMany({
             data: sanitizedPiiBenef,
