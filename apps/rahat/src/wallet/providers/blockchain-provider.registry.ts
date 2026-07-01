@@ -226,6 +226,16 @@ export class BlockchainProviderRegistry {
     );
   }
 
+  chainRequiresFunding(chainType: ChainType): boolean {
+    return this.getWalletManager(chainType).requiresFunding;
+  }
+
+  async fundWallet(address: string, chainType: ChainType, deployerKey: string): Promise<void> {
+    const manager = this.getWalletManager(chainType);
+    if (!manager.fundWallet) throw new Error(`Chain ${chainType} does not support fundWallet`);
+    await manager.fundWallet(address, deployerKey);
+  }
+
   // Get wallet keys from storage
   async getWalletKeys(
     address: string,

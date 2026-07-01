@@ -6,6 +6,7 @@ import { ConnectedWallet } from './connectedWallet';
 
 export class StellarWallet implements IWalletManager {
   static blockchainType = 'STELLAR';
+  readonly requiresFunding = false;
   rpcUrl: string;
   storage: WalletStorage;
 

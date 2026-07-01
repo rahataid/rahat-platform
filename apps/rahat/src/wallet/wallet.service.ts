@@ -363,6 +363,23 @@ export class WalletService implements OnModuleInit {
     return this.providerRegistry.detectChainFromAddress(address);
   }
 
+  async onVendorCreated(uuid: string, existingWallet?: string): Promise<{ chain: ChainType; address: string; requiresFunding: boolean }> {
+    const chain = await this.getDefaultChain();
+    const address = existingWallet || (await this.createWallet(chain)).address;
+
+    if (!existingWallet) {
+      await this.prisma.user.update({ where: { uuid }, data: { wallet: address } });
+      this.logger.log(`[${chain}] Vendor wallet created and assigned: ${address}`);
+    }
+
+    return { chain, address, requiresFunding: this.providerRegistry.chainRequiresFunding(chain) };
+  }
+
+  async fundVendorWallet(address: string, deployerKey: string): Promise<void> {
+    const chain = await this.getDefaultChain();
+    await this.providerRegistry.fundWallet(address, chain, deployerKey);
+  }
+
   // Backward compatibility methods (deprecated)
   /** @deprecated Use createWallet('stellar') instead */
   async createstellarWallets(): Promise<WalletKeys> {

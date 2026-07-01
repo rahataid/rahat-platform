@@ -11,6 +11,7 @@ import { MemoryWalletStorage } from '../storages/memory.storage';
 
 export class EVMWallet implements IWalletManager {
   static blockchainType = 'EVM';
+  readonly requiresFunding = true;
   rpcUrl: string;
   storage: WalletStorage;
   provider?: ethers.Provider;
@@ -75,6 +76,12 @@ export class EVMWallet implements IWalletManager {
     }
 
     return wallets;
+  }
+
+  async fundWallet(address: string, deployerKey: string): Promise<void> {
+    const signer = new ethers.Wallet(deployerKey, this.provider);
+    const tx = await signer.sendTransaction({ to: address, value: ethers.parseEther('0.01') });
+    await tx.wait();
   }
 
   async importWallet(privateKey: string): Promise<ConnectedWallet> {

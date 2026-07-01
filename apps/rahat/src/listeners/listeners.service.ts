@@ -15,6 +15,7 @@ import { Queue } from 'bull';
 import { firstValueFrom } from 'rxjs';
 import { DevService } from '../utils/develop.service';
 import { ChainConfig } from '../wallet/types/chain-config.interface';
+import { WalletService } from '../wallet/wallet.service';
 import { EmailService } from './email.service';
 import { MessageSenderService } from './messageSender.service';
 @Injectable()
@@ -37,6 +38,7 @@ export class ListenersService {
     private readonly devService: DevService,
     private emailService: EmailService,
     private messageSenderService: MessageSenderService,
+    private readonly walletService: WalletService,
   ) { }
 
   async onModuleInit() {
@@ -266,16 +268,16 @@ export class ListenersService {
   }
 
   @OnEvent(ProjectEvents.VENDORS_CREATED)
-  async onVendorCreate(data) {
+  async onVendorCreate(data: { wallet: string; uuid: string }) {
     this.logger.log(`Received VENDORS_CREATED event for vendor ${data.wallet}`);
-    this.fundVendorWalletQueue.add(ProjectJobs.FUND_VENDOR_WALLET, data, {
-      attempts: 3,
-      removeOnComplete: true,
-      backoff: {
-        type: 'exponential',
-        delay: 1000,
-      },
-    });
-  }
+    const { address, requiresFunding } = await this.walletService.onVendorCreated(data.uuid, data.wallet);
 
+    if (requiresFunding) {
+      this.fundVendorWalletQueue.add(ProjectJobs.FUND_VENDOR_WALLET, { wallet: address }, {
+        attempts: 3,
+        removeOnComplete: true,
+        backoff: { type: 'exponential', delay: 1000 },
+      });
+    }
+  }
 }

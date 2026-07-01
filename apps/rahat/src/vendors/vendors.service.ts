@@ -111,7 +111,7 @@ export class VendorsService {
 
     // Emit vendor created event to fund vendor wallet
     if (this.shouldFundVendorWallet?.toLowerCase() == 'true') {
-      this.eventEmitter.emit(ProjectEvents.VENDORS_CREATED, { wallet: vendor.wallet });
+      this.eventEmitter.emit(ProjectEvents.VENDORS_CREATED, { wallet: vendor.wallet, uuid: vendor.uuid });
     }
 
     this.notificationService.createNotification({

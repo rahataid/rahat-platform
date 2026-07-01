@@ -35,12 +35,11 @@ export interface IConnectedWallet {
 export interface IWalletManager {
   init(): Promise<void>;
   createWallet(): Promise<IConnectedWallet>;
-  createBulk?(count: number): Promise<WalletKeys[]>; // Bulk wallet creation
+  createBulk?(count: number): Promise<WalletKeys[]>;
   importWallet(privateKey: string): Promise<IConnectedWallet>;
-  connect(
-    walletAddress: string,
-    blockchain: ChainType
-  ): Promise<IConnectedWallet>;
+  connect(walletAddress: string, blockchain: ChainType): Promise<IConnectedWallet>;
+  readonly requiresFunding: boolean;
+  fundWallet?(address: string, deployerKey: string): Promise<void>;
 }
 
 export type ChainType = 'stellar' | 'evm';
