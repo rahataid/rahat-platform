@@ -1560,6 +1560,25 @@ export class BeneficiaryService {
       `Group account check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`
     );
 
+    const errorBenfs = benfsInGroup.filter(
+      (benf) => (benf.extras as Record<string, unknown>)?.bankedStatus === 'ERROR'
+    );
+
+    if (errorBenfs.length) {
+      await this.prisma.$transaction(
+        errorBenfs.map((benf) => {
+          const cleanExtras = { ...(benf.extras as Record<string, unknown>) };
+          delete cleanExtras.bankedStatus;
+          delete cleanExtras.error;
+          delete cleanExtras.validBankAccount;
+          return this.prisma.beneficiary.update({
+            where: { uuid: benf.uuid },
+            data: { bankedStatus: 'UNBANKED', extras: cleanExtras as any },
+          });
+        })
+      );
+    }
+
     const bulkQueueData = benfsInGroup.map((benf) => ({
       name: BeneficiaryJobs.CHECK_BENEFICIARY_BANK_ACCOUNT,
       data: {
@@ -1583,6 +1602,27 @@ export class BeneficiaryService {
       success: true,
       message: 'Account check in progress. Data will be listed soon.',
     };
+  }
+
+  async getGroupBankCheckStatus(uuid: string) {
+    const benfs = await this.prisma.groupedBeneficiaries.findMany({
+      where: { beneficiaryGroupId: uuid },
+      select: { Beneficiary: { select: { extras: true, bankedStatus: true } } },
+    });
+
+    const total = benfs.length;
+    const { success, failed } = benfs.reduce(
+      (acc, b) => {
+        const e = b.Beneficiary.extras as Record<string, unknown>;
+        if (e?.validBankAccount === true) acc.success++;
+        else if (e?.bankedStatus === 'ERROR') acc.failed++;
+        return acc;
+      },
+      { success: 0, failed: 0 }
+    );
+    const pending = total - success - failed;
+
+    return { total, success, failed, pending };
   }
 
   async getGroupBeneficiariesFailedAccount(uuid: string) {

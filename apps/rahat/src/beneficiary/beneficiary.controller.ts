@@ -565,6 +565,15 @@ export class BeneficiaryController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get('groups/:uuid/bank-check-status')
+  @ApiParam({ name: 'uuid', required: true })
+  async getGroupBankCheckStatus(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GET_GROUP_BANK_CHECK_STATUS }, uuid);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('groups/:uuid/fail-account/export')
   @ApiParam({ name: 'uuid', required: true })
   async getGroupBeneficiariesFailedAccount(@Param('uuid') uuid: UUID) {
