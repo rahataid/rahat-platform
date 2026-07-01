@@ -245,6 +245,11 @@ export class BeneficiaryController {
     return this.service.groupAttributesCheck(uuid);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_GROUP_BANK_CHECK_STATUS })
+  getGroupBankCheckStatus(uuid: string) {
+    return this.service.getGroupBankCheckStatus(uuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_GROUPS })
   getAllGroups(dto: ListBeneficiaryGroupDto) {
     return this.service.getAllGroups(dto);
