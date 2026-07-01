@@ -36,6 +36,9 @@ import { AppService } from './app.service';
     BullModule.registerQueue({
       name: BQUEUE.RAHAT_BENEFICIARY,
     }),
+    BullModule.registerQueue({
+      name: BQUEUE.RAHAT_BENEFICIARY_BANK_CHECK,
+    }),
     RabbitMQModule.register({
       workerModuleProvider: WorkerModule.register({
         globalDataProvider: {
