@@ -17,6 +17,7 @@ import {
   BeneficiaryPayload,
   MicroserviceOptions,
   ProjectContants,
+  UserRoles,
   WalletJobs,
 } from '@rahataid/sdk';
 import { SettingsService } from '@rumsan/extensions/settings';
@@ -31,7 +32,7 @@ export class BeneficiaryUtilsService {
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly settings: SettingsService
-  ) { }
+  ) {}
 
   buildWhereClause(dto: ListBeneficiaryDto): Record<string, any> {
     const { projectId, startDate, endDate } = dto;
@@ -145,11 +146,9 @@ export class BeneficiaryUtilsService {
   }
 
   async assignBeneficiaryToProject(assignBeneficiaryDto: AddToProjectDto) {
-
     const { beneficiaryId, projectId } = assignBeneficiaryDto;
 
     try {
-
       //fetch project and beneficiary detail in parallel
       const [projectData, beneficiaryData] = await Promise.all([
         this.prismaService.project.findUnique({ where: { uuid: projectId } }),
@@ -161,6 +160,50 @@ export class BeneficiaryUtilsService {
 
       if (!projectData) return;
       if (!beneficiaryData) throw new RpcException('Beneficiary not Found.');
+
+      // Route to discrded list, if the beneficiary's phone number matches a vendor's phone number,
+      const beneficiaryPhone = beneficiaryData.pii?.phone;
+      if (beneficiaryPhone) {
+        const digits = beneficiaryPhone.toString().replace(/\D/g, '');
+        const fullNumber = Array.from(
+          new Set(
+            [
+              beneficiaryPhone.toString(),
+              digits,
+              `+${digits}`,
+              `+${digits.replace(/^0+/, '')}`,
+            ].filter(Boolean)
+          )
+        );
+        const vendorUserWithPhone = await this.prismaService.user.findFirst({
+          where: {
+            phone: { in: fullNumber },
+            UserRole: {
+              some: {
+                Role: { name: UserRoles.VENDOR },
+              },
+            },
+          },
+          select: { uuid: true },
+        });
+        if (vendorUserWithPhone) {
+          const discardedPayload = {
+            name: beneficiaryData.pii?.name || 'Unknown',
+            phone: beneficiaryPhone,
+            gender: beneficiaryData.gender,
+            extras: beneficiaryData.extras || null,
+          };
+          return this.handleMicroserviceCall({
+            client: this.client.send(
+              {
+                cmd: 'rahat.jobs.beneficiary.create_discarded',
+                uuid: projectId,
+              },
+              discardedPayload
+            ),
+          });
+        }
+      }
 
       //Build Project Payload
       const projectPayload = this.buildProjectPayload(
@@ -174,9 +217,12 @@ export class BeneficiaryUtilsService {
         projectId,
       });
 
-      this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
-        projectUuid: projectId,
-      });
+      this.eventEmitter.emit(
+        BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
+        {
+          projectUuid: projectId,
+        }
+      );
 
       //3. Sync beneficiary to project
       return this.handleMicroserviceCall({
@@ -197,7 +243,9 @@ export class BeneficiaryUtilsService {
     }
   }
 
-  async bulkAssignBeneficiaryToProject(assignBeneficiaryDtos: AddToProjectDto[]) {
+  async bulkAssignBeneficiaryToProject(
+    assignBeneficiaryDtos: AddToProjectDto[]
+  ) {
     if (!assignBeneficiaryDtos?.length) return;
 
     const allProjectPayloads = [];
@@ -217,12 +265,17 @@ export class BeneficiaryUtilsService {
 
       if (!projectData) continue;
       if (!beneficiaryData) {
-        console.warn(`Beneficiary ${beneficiaryId} not found, skipping assignment`);
+        console.warn(
+          `Beneficiary ${beneficiaryId} not found, skipping assignment`
+        );
         continue;
       }
 
       //Build Project Payload and add to array
-      const projectPayload = this.buildProjectPayload(projectData, beneficiaryData);
+      const projectPayload = this.buildProjectPayload(
+        projectData,
+        beneficiaryData
+      );
       allProjectPayloads.push(projectPayload);
 
       //Save beneficiary to Project
@@ -236,7 +289,10 @@ export class BeneficiaryUtilsService {
     if (allProjectPayloads.length > 0) {
       await this.handleMicroserviceCall({
         client: this.client.send(
-          { cmd: 'rahat.jobs.beneficiary.create_bulk', uuid: assignBeneficiaryDtos[0].projectId },
+          {
+            cmd: 'rahat.jobs.beneficiary.create_bulk',
+            uuid: assignBeneficiaryDtos[0].projectId,
+          },
           { beneficiaries: allProjectPayloads }
         ),
         onSuccess(response) {

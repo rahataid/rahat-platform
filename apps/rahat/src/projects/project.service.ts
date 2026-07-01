@@ -19,6 +19,7 @@ import {
   MS_TIMEOUT,
   ProjectEvents,
   ProjectJobs,
+  UserRoles,
 } from '@rahataid/sdk';
 import { BeneficiaryType, KoboBeneficiaryStatus } from '@rahataid/sdk/enums';
 import { JOBS } from '@rahataid/sdk/project/project.events';
@@ -249,6 +250,36 @@ export class ProjectService {
   }
 
   async handleProjectActions({ uuid, action, payload, trigger, user }) {
+    // If a villager is being created with a phone that belongs to a vendor,
+    // route it to the discarded list instead of creating it as a villager.
+    if (
+      action === MS_ACTIONS.CAMBODIA.BENEFICIARY.CREATE &&
+      (await this.isVendorPhone(payload?.phone))
+    ) {
+      this.logger.log(
+        `Routing villager to discarded list: phone ${payload?.phone} belongs to a vendor.`
+      );
+      const discardedPayload = {
+        name:
+          payload?.name ||
+          payload?.piiData?.name ||
+          payload?.extras?.name ||
+          'Unknown',
+        phone: payload?.phone,
+        gender: payload?.gender || payload?.extras?.gender,
+        walletAddress: payload?.walletAddress,
+        extras: payload?.extras || null,
+      };
+      return this.sendCommand(
+        { cmd: CAMBODIA_JOBS.BENEFICIARY.CREATE_DISCARDED, uuid },
+        discardedPayload,
+        MS_TIMEOUT,
+        this.client,
+        action,
+        user
+      );
+    }
+
     //Note: This is a temporary solution to handle metaTx actions
     const metaTxActions = {
       [MS_ACTIONS.ELPROJECT.REDEEM_VOUCHER]: async () =>
@@ -311,6 +342,22 @@ export class ProjectService {
     };
     const piiExist = await this.checkPiiPhone(dto.phone);
     if (piiExist) throw new Error('Phone number already exists!');
+
+    // If the phone belongs to a vendor, route to the discarded list instead.
+    if (await this.isVendorPhone(dto.phone)) {
+      return this.saveToDiscarded(uuid, {
+        name: piiData.name || 'Unknown',
+        phone: dto.phone,
+        gender: dto.gender,
+        age: dto.age,
+        extras: {
+          ...extrasPayload,
+          type: dto.type,
+          leadInterests: dto.leadInterests,
+        },
+      });
+    }
+
     const koboPayload = {
       name: piiData.name,
       phone: piiData.phone,
@@ -547,6 +594,31 @@ export class ProjectService {
     });
   }
 
+  async isVendorPhone(phone?: string | null): Promise<boolean> {
+    const raw = (phone ?? '').toString().trim();
+    if (!raw) return false;
+
+    const digits = raw.replace(/\D/g, '');
+    const villagerNumber = new Set<string>([raw]);
+    if (digits) {
+      villagerNumber.add(digits);
+      villagerNumber.add(`+${digits}`);
+    }
+
+    const vendorUser = await this.prisma.user.findFirst({
+      where: {
+        phone: { in: Array.from(villagerNumber) },
+        UserRole: {
+          some: {
+            Role: { name: UserRoles.VENDOR },
+          },
+        },
+      },
+      select: { uuid: true },
+    });
+    return !!vendorUser;
+  }
+
   /**
    * Kobo import phone policy:
    * - create: new phone
@@ -557,6 +629,8 @@ export class ProjectService {
     phone: string,
     projectId: string
   ): Promise<'create' | 'discard' | 'link'> {
+    if (await this.isVendorPhone(phone)) return 'discard';
+
     const pii = await this.checkPiiPhone(phone);
     if (!pii) return 'create';
 
