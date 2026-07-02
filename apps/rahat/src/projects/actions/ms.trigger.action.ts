@@ -45,6 +45,8 @@ export const MS_TRIGGERS_JOBS = {
     // GET_GLOFAS: 'ms.jobs.waterLevels.getGlofas',
     GET_GFH: 'ms.jobs.waterLevels.getGfh',
   },
+  SYNC_FORECAST_DATA: 'ms.jobs.sources-data.syncForecastData',
+
   RAINFALL_LEVELS: {
     GET_DHM: 'ms.jobs.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.jobs.rainfallLevels.getGlofas',
@@ -376,6 +378,15 @@ export const msTriggerActions: ProjectActionFunc = {
     );
   },
 
+  [MS_ACTIONS.MS_SYNC_FORECAST_DATA]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.SYNC_FORECAST_DATA },
+      payload
+    );
+  },
+
   [MS_ACTIONS.MS_RAINFALL_LEVELS.GET_GLOFAS]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
 
@@ -469,7 +480,7 @@ export const msTriggerActions: ProjectActionFunc = {
 
   [MS_ACTIONS.MS_ACTIVITIES.BULK_ADD]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
-    
+
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.ACTIVITIES.BULK_ADD }, payload);
   },
 
