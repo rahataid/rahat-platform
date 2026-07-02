@@ -31,6 +31,11 @@ export class ListBeneficiaryDto {
   @IsOptional()
   projectId?: string;
 
+  @ApiPropertyOptional({ example: 'John Doe' })
+  @IsString()
+  @IsOptional()
+  name?: string;
+
   @ApiPropertyOptional({ example: 'MALE' })
   @IsString()
   @IsOptional()
