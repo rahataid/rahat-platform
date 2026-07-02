@@ -34,12 +34,16 @@ export class BeneficiaryUtilsService {
   ) { }
 
   buildWhereClause(dto: ListBeneficiaryDto): Record<string, any> {
-    const { projectId, startDate, endDate } = dto;
+    const { projectId, startDate, endDate, name } = dto;
     const where: any = { deletedAt: null };
 
     if (projectId) {
       where.BeneficiaryProject =
         projectId === 'NOT_ASSGNED' ? { none: {} } : { some: { projectId } };
+    }
+
+    if (name) {
+      where.pii = { name: { contains: name, mode: 'insensitive' } };
     }
 
     if (startDate && endDate) {
