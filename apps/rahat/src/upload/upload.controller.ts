@@ -24,7 +24,7 @@ export class UploadController {
   async uploadFile(@UploadedFile() file: any) {
     const buffer = file.buffer;
     const mimeType = file.mimetype;
-    const fileName = file.originalname.replace(/\s/g, "-");
+    const fileName = Buffer.from(file.originalname, "latin1").toString("utf8").replace(/\s/g, "-");
 
     const folderName = "dev"
     const rootFolderName = "aa"
