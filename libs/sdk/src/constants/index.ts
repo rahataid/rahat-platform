@@ -583,6 +583,9 @@ export const MS_ACTIONS = {
     GET_DHM: 'ms.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.rainfallLevels.getGlofas',
   },
+
+  MS_SYNC_FORECAST_DATA: 'ms.jobs.sources-data.syncForecastData',
+
   MS_HUMIDITY: {
     GET_DHM: 'ms.humidity.getDhm',
     GET_DHM_SINGLE_SERIES: 'ms.humidity.getDhmSingleSeries',
@@ -595,6 +598,7 @@ export const MS_ACTIONS = {
     GET_ALL_GLOFAS: 'ms.probFlood.getAllGlofas',
     GET_ONE_GLOFAS: 'ms.probFlood.getOneGlofas',
   },
+
   MS_ACTIVITIES: {
     GET_ONE: 'ms.activities.getOne',
     GET_ALL: 'ms.activities.getAll',
