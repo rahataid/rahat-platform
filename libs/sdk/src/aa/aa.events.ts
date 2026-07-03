@@ -7,7 +7,8 @@ export const JOBS = {
     GET_GLOFAS: 'aa.jobs.waterLevels.getGlofas',
   },
 
-  SYNC_FORECAST_DATA: 'ms.jobs.sources-data.syncForecastData',
+  // SYNC_FORECAST_DATA: 'ms.jobs.sources-data.syncForecastData',
+
   TRIGGERS: {
     DEV_ONLY: 'aa.jobs.triggers.devOnly',
     GET_ALL: 'aa.jobs.triggers.getAll',

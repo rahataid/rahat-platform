@@ -584,7 +584,7 @@ export const MS_ACTIONS = {
     GET_GLOFAS: 'ms.rainfallLevels.getGlofas',
   },
 
-  MS_SYNC_FORECAST_DATA: 'ms.jobs.sources-data.syncForecastData',
+  MS_SYNC_FORECAST_DATA: 'ms.sources-data.syncForecastData',
 
   MS_HUMIDITY: {
     GET_DHM: 'ms.humidity.getDhm',
