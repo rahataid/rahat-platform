@@ -29,13 +29,12 @@ const path = require('path');
 const inquirer = require('inquirer');
 const { Wallet, JsonRpcProvider, ContractFactory } = require('ethers');
 const {
-  getDeploymentFiles,
-  askTargetFile,
   readDeploymentFile,
   writeDeploymentFile,
   buildSettingEntry,
   askConfirmation,
 } = require('./_common');
+const { selectDeploymentFile } = require('./lib/select-deployment-file');
 
 const prompt = inquirer.prompt ?? inquirer.default?.prompt;
 const CONTRACTS_DIR = path.resolve(__dirname, './contracts');
@@ -271,16 +270,7 @@ async function writeUpdatedDeploymentFile(fileName, payload, contractsValue) {
 }
 
 async function main() {
-  const deploymentFiles = await getDeploymentFiles();
-
-  if (!deploymentFiles.length) {
-    throw new Error('No deployment files found. Run 0.setup-project.js first.');
-  }
-
-  const selectedFile = await askTargetFile(
-    deploymentFiles,
-    'Select one deployment file to update:'
-  );
+  const selectedFile = await selectDeploymentFile();
   const payload = await readDeploymentFile(selectedFile);
   const rpcUrl = getRpcUrlFromChainSettings(payload);
   const deployerPrivateKey = getDeployerPrivateKey(payload);

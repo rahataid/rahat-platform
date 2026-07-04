@@ -1,11 +1,10 @@
 const {
   prompt,
-  getDeploymentFiles,
-  askTargetFile,
   buildSettingEntry,
   upsertSettingInDeploymentFile,
   askConfirmation,
 } = require('./_common');
+const { selectDeploymentFile } = require('./lib/select-deployment-file');
 
 const SETTING_NAME = 'SMTP';
 
@@ -63,13 +62,7 @@ async function askSmtpDetails() {
 }
 
 async function main() {
-  const deploymentFiles = await getDeploymentFiles();
-
-  if (!deploymentFiles.length) {
-    throw new Error('No deployment files found. Run 0.setup-project.js first.');
-  }
-
-  const selectedFile = await askTargetFile(deploymentFiles, 'Select one deployment file to update:');
+  const selectedFile = await selectDeploymentFile();
   const smtpConfig = await askSmtpDetails();
 
   console.log('\nSelected SMTP configuration:');
