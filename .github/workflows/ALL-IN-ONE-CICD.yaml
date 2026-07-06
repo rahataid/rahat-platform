@@ -22,6 +22,7 @@ on:
           - "main"
           - "dev-qa"
           - "crm-dev-demo"
+          - "el-vd-dry"
 
       apps_to_build:
         description: "Apps to build (leave empty for defaults)"
@@ -126,6 +127,11 @@ jobs:
             crm-dev-demo)
               TAG="crm-dev-demo"
               SECRET="ENV_AA_CRM_DEV_DEMO"
+              APPS="beneficiary,rahat"
+              ;;
+            el-vd-dry)
+              TAG="el-vd-dry-run"
+              SECRET="ENV_EL_VD-DRY_RUN"
               APPS="beneficiary,rahat"
               ;;
             *)

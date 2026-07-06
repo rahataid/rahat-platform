@@ -128,6 +128,7 @@ export const JOBS = {
     LIST_EYE_CHECKEUP_LINE: 'rahat.jobs.reporting.list_eye_checkup_line',
     LIST_PURCHASE_OF_GLASSESS_LINE:
       'rahat.jobs.reporting.list_purchase_of_glassess',
+    LIVE: 'rahat.jobs.reporting.live',
   },
 
   NOTIFICATION: {

@@ -14,7 +14,12 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ClientProxy, MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import {
+  ClientProxy,
+  MessagePattern,
+  Payload,
+  RpcException,
+} from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
@@ -22,13 +27,19 @@ import {
   VendorPasswordRegisterDto,
   VendorRegisterDto,
   VendorUpdateDto,
-  VerifyVendorOtp
+  VerifyVendorOtp,
 } from '@rahataid/extensions';
 import { APP, Enums, ProjectContants, TFile, VendorJobs } from '@rahataid/sdk';
 import { RequestDetails } from '@rumsan/extensions/decorators';
 import { OtpDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
 import { Request } from '@rumsan/sdk/types';
-import { AbilitiesGuard, ACTIONS, CheckAbilities, JwtGuard, SUBJECTS } from '@rumsan/user';
+import {
+  AbilitiesGuard,
+  ACTIONS,
+  CheckAbilities,
+  JwtGuard,
+  SUBJECTS,
+} from '@rumsan/user';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
 import { DocParser } from '../utils/doc-parser';
@@ -42,7 +53,7 @@ export class VendorsController {
   constructor(
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly vendorService: VendorsService
-  ) { }
+  ) {}
 
   @Post('')
   registerVendor(@Body() dto: VendorRegisterDto) {
@@ -62,6 +73,11 @@ export class VendorsController {
   @Get('/stats')
   getVendorCount(@Query() dto) {
     return this.vendorService.getVendorCount();
+  }
+
+  @Get('/phoneNumber')
+  getVendorByPhoneNumber(@Query('phone') phone: string) {
+    return this.vendorService.getVendorByPhoneNumber(phone);
   }
 
   @ApiParam({ name: 'id', required: true })
@@ -101,7 +117,9 @@ export class VendorsController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } })
+  )
   async upload(@UploadedFile() file: TFile, @Req() req: any) {
     if (!file?.buffer) {
       throw new RpcException('No file provided');
@@ -136,10 +154,12 @@ export class VendorsController {
       'Last purchase',
     ];
 
-    const missingHeaders = expectedHeaders.filter(h => !headers.includes(h));
+    const missingHeaders = expectedHeaders.filter((h) => !headers.includes(h));
 
     if (missingHeaders.length > 0) {
-      throw new RpcException(`Invalid template. Missing headers: ${missingHeaders.join(', ')}`);
+      throw new RpcException(
+        `Invalid template. Missing headers: ${missingHeaders.join(', ')}`
+      );
     }
 
     const mappedVendors = vendors.map((v) => ({
@@ -158,22 +178,17 @@ export class VendorsController {
     const cmd = { cmd: VendorJobs.IMPORT, uuid: projectId };
 
     return handleMicroserviceCall({
-      client: this.client.send(
-        cmd,
-        {
-          vendors: mappedVendors,
-          idempotencyKey: generateIdempotencyKey(cmd, mappedVendors),
-        }
-      ),
+      client: this.client.send(cmd, {
+        vendors: mappedVendors,
+        idempotencyKey: generateIdempotencyKey(cmd, mappedVendors),
+      }),
       onSuccess(res) {
         console.log('Vendors imported successfully:', res);
       },
       onError(err) {
         console.error('Error importing vendors:', err);
-      }
-    })
-
-
+      },
+    });
   }
 
   ///microservice
