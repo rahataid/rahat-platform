@@ -62,4 +62,10 @@ export const cvaActions: ProjectActionFunc = {
     ),
   //campaign end
 
+  [MS_ACTIONS.ELPROJECT.CRM.GET_COMMS_USAGE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.CAMPAIGN.GET_COMMS_USAGE, uuid }, payload),
+
+  [MS_ACTIONS.ELPROJECT.CRM.GET_COMMS_CREDITS]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.CAMPAIGN.GET_COMMS_CREDITS, uuid }, payload),
+
 }

@@ -183,6 +183,13 @@ export const elActions: ProjectActionFunc = {
       500000
     ),
 
+  [MS_ACTIONS.ELPROJECT.CRM.LOGS_FOR_SESSIONS]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.LIST_LOGS_FOR_SESSIONS, uuid },
+      { ...payload },
+      500000
+    ),
+
   [MS_ACTIONS.ELPROJECT.CRM.RETRY_SESSION]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.CAMPAIGN.RETRY_SESSION, uuid },
