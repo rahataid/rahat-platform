@@ -493,6 +493,7 @@ export class BeneficiaryService {
               Project: true,
             },
           },
+          bankAccount: true,
         },
       }),
 
