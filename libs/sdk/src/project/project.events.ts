@@ -82,6 +82,7 @@ export const JOBS = {
     GET_AUTOMATION_DETAIL: 'rahat.jobs.campaign.automation.detail',
     REFRESH_COMMUNICATION_STATS:
       'rahat.jobs.campaign.refresh_communication_stats',
+    LIST_LOGS_FOR_SESSIONS: 'rahat.jobs.campaign.list_logs_for_sessions',
   },
   OFFLINE_BENEFICIARIES: {
     SYNC_BENEFICIARIES: 'rahat.jobs.sync_beneficiaries',
