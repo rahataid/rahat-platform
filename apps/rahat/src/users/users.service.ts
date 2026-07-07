@@ -34,7 +34,7 @@ export class UsersService extends RSUserService {
 
       userData.wallet = randomWallet.address;
 
-      const res = super.create(userData);
+      const res = await super.create(userData);
       await this.notificationService.createNotification({
         title: "User has been added",
         description: `A new user has been added Name: ${userData.name}`,
