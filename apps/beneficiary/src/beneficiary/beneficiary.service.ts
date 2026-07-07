@@ -1625,6 +1625,37 @@ export class BeneficiaryService {
     return { total, success, failed, pending };
   }
 
+  async getBeneficiaryBankAccount(payload: {
+    uuid?: string;
+    walletAddress?: string;
+  }) {
+    const { uuid, walletAddress } = payload || {};
+
+    if (!uuid && !walletAddress) {
+      throw new RpcException(
+        'Either beneficiary uuid or walletAddress is required'
+      );
+    }
+
+    let beneficiaryUuid = uuid;
+    if (!beneficiaryUuid) {
+      const benf = await this.rsprisma.beneficiary.findUnique({
+        where: { walletAddress },
+        select: { uuid: true },
+      });
+
+      if (!benf) {
+        throw new RpcException('Beneficiary not found');
+      }
+
+      beneficiaryUuid = benf.uuid;
+    }
+
+    return this.prisma.beneficiaryBankAccount.findUnique({
+      where: { beneficiaryId: beneficiaryUuid },
+    });
+  }
+
   async getGroupBeneficiariesFailedAccount(uuid: string) {
     return this.prisma.groupedBeneficiaries.findMany({
       where: {
