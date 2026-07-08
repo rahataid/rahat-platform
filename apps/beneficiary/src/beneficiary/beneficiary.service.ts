@@ -1555,7 +1555,7 @@ export class BeneficiaryService {
   async groupAccountCheck(uuid: string, benfGroup: GroupWithValidationAA) {
     const benfsInGroup = benfGroup.groupedBeneficiaries
       ?.map((d) => d.Beneficiary)
-      .filter((benf) => !(benf.extras as any)?.validBankAccount);
+      .filter((benf) => (benf.extras as any)?.bank_ac_number);
 
     this.logger.log(
       `Group account check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`
@@ -2513,7 +2513,7 @@ export class BeneficiaryService {
       await this.prisma.$executeRawUnsafe(`COMMIT PREPARED '${dbTxId}';`);
       this.logger.log('Transaction committed successfully.');
 
-      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: {...createdBeneficiary, phone: createdPii.phone} };
+      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: { ...createdBeneficiary, phone: createdPii.phone } };
     } catch (error) {
       this.logger.error('Error occurred during beneficiary creation with DB transaction:', error);
       await this.rollback2PC(projectId, dbTxId);
