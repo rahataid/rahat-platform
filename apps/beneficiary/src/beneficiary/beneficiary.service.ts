@@ -16,12 +16,13 @@ import {
   CreateBeneficiaryGroupsDto,
   CreateBeneficiaryTransactionDto,
   ImportTempBenefDto,
+  ListBeneficiariesByGroupDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto,
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
   AAJobs,
@@ -1369,7 +1370,10 @@ export class BeneficiaryService {
     };
   }
 
-  async getOneGroup(uuid: string): Promise<GroupWithValidationAA> {
+  async getOneGroup(
+    uuid: string,
+    dto?: ListBeneficiariesByGroupDto
+  ): Promise<GroupWithValidationAA> {
     const group = await this.prisma.beneficiaryGroup.findUnique({
       where: {
         uuid: uuid,
@@ -1406,11 +1410,12 @@ export class BeneficiaryService {
 
     // If groupPurpose is not found and groupedBeneficiaries is empty, return group with isGroupValidForAA as false
     if (!group.groupPurpose || !group.groupedBeneficiaries?.length) {
-      return {
+      const emptyResult: GroupWithValidationAA = {
         ...group,
         isGroupValidForAA: false,
         isAnyBeneficiaryInvalid: false,
       };
+      return this.applyGroupBeneficiaryPagination(uuid, emptyResult, dto);
     }
 
     // If group is found, check if it is valid for AA
@@ -1436,10 +1441,53 @@ export class BeneficiaryService {
       }
     }
 
-    return {
+    const result: GroupWithValidationAA = {
       ...finalData,
       isAnyBeneficiaryInvalid,
     };
+    return this.applyGroupBeneficiaryPagination(uuid, result, dto);
+  }
+
+  // Overrides groupedBeneficiaries with a paginated/searched page when dto requests it, leaving the default (unpaginated) response untouched otherwise.
+  private async applyGroupBeneficiaryPagination(
+    uuid: string,
+    result: GroupWithValidationAA,
+    dto?: ListBeneficiariesByGroupDto
+  ): Promise<GroupWithValidationAA> {
+    if (!dto || !(dto.page || dto.perPage || dto.name)) {
+      return result;
+    }
+
+    const { page, perPage, name, sort = 'createdAt', order = 'desc' } = dto;
+    const where: any = { beneficiaryGroupId: uuid, deletedAt: null };
+    if (name) {
+      where.Beneficiary = {
+        pii: { name: { contains: name, mode: 'insensitive' } },
+      };
+    }
+
+    const paginatedGroupedBeneficiaries = await paginate(
+      this.rsprisma.groupedBeneficiaries,
+      {
+        where,
+        include: {
+          Beneficiary: {
+            include: {
+              pii: true,
+            },
+          },
+        },
+        orderBy: [{ [sort]: order }, { uuid: 'desc' }],
+      },
+      { page, perPage }
+    );
+
+    const response = {
+      ...result,
+      groupedBeneficiaries: paginatedGroupedBeneficiaries.data,
+      meta: paginatedGroupedBeneficiaries.meta,
+    };
+    return response as GroupWithValidationAA;
   }
 
   async isGroupValidForAA(uuid: string) {
@@ -2481,7 +2529,7 @@ export class BeneficiaryService {
       await this.prisma.$executeRawUnsafe(`COMMIT PREPARED '${dbTxId}';`);
       this.logger.log('Transaction committed successfully.');
 
-      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: {...createdBeneficiary, phone: createdPii.phone} };
+      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: { ...createdBeneficiary, phone: createdPii.phone } };
     } catch (error) {
       this.logger.error('Error occurred during beneficiary creation with DB transaction:', error);
       await this.rollback2PC(projectId, dbTxId);
