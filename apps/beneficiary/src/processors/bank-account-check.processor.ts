@@ -89,6 +89,13 @@ export class BankAccountCheckProcessor {
           bankedStatus: 'ERROR',
           error: 'Invalid bank name',
         });
+        await this.upsertBankAccountRecord(uuid, {
+          bank_name,
+          bank_ac_name,
+          bank_ac_number,
+          isValid: false,
+          info: 'Invalid bank name',
+        });
         return;
       }
 
@@ -105,6 +112,19 @@ export class BankAccountCheckProcessor {
           error: bankAccount?.message || 'Invalid bank account',
           validBankAccount: false,
         });
+        await this.upsertBankAccountRecord(uuid, {
+          bank_name,
+          bank_ac_name,
+          bank_ac_number,
+          isValid: false,
+          info:
+            bankAccount?.cipsData?.responseMessage ||
+            bankAccount?.message ||
+            'Invalid bank account',
+          bankId: bankAccount?.cipsData?.bankId,
+          branchId: bankAccount?.cipsData?.branchId,
+          extras: bankAccount?.raw,
+        });
         return;
       }
 
@@ -115,6 +135,13 @@ export class BankAccountCheckProcessor {
           bankedStatus: 'ERROR',
           error: 'Error checking bank account',
           validBankAccount: false,
+        });
+        await this.upsertBankAccountRecord(uuid, {
+          bank_name,
+          bank_ac_name,
+          bank_ac_number,
+          isValid: false,
+          info: 'Error checking bank account',
         });
         return;
       }
@@ -127,6 +154,16 @@ export class BankAccountCheckProcessor {
         ...benfExtras,
         validBankAccount: true,
         bankedStatus: 'BANKED',
+      });
+      await this.upsertBankAccountRecord(uuid, {
+        bank_name,
+        bank_ac_name,
+        bank_ac_number,
+        isValid: true,
+        info: bankAccount?.cipsData?.responseMessage,
+        bankId: bankAccount?.cipsData?.bankId,
+        branchId: bankAccount?.cipsData?.branchId,
+        extras: bankAccount?.raw,
       });
 
       return;
@@ -168,12 +205,25 @@ export class BankAccountCheckProcessor {
           accountId: bank_ac_number,
         },
       };
-      const {
-        data: { data },
-      } = await this.httpService.axiosRef.post<{
+      const { data: responseBody } = await this.httpService.axiosRef.post<{
+        success: boolean;
         data: {
           isValid: boolean;
-        }
+          cipsData: {
+            bankId: string;
+            branchId: string;
+            accountId: string;
+            accountName: string | null;
+            currency: string;
+            responseCode: string;
+            responseMessage: string;
+            matchPercentate: number;
+            baseUrl: string | null;
+            userName: string | null;
+            password: string | null;
+            transactionType: string | null;
+          };
+        };
       }>(
         `${baseUrl}/payment-provider/json-rpc`,
         payload,
@@ -186,7 +236,9 @@ export class BankAccountCheckProcessor {
 
       return {
         success: true,
-        isValid: data.isValid,
+        isValid: responseBody.data.isValid,
+        cipsData: responseBody.data.cipsData,
+        raw: responseBody,
       };
     } catch (error) {
       const errorMessage = error?.response?.data?.message || error?.message;
@@ -198,6 +250,46 @@ export class BankAccountCheckProcessor {
         message: `Invalid bank account: '${errorMessage}'`,
       };
     }
+  }
+
+  async upsertBankAccountRecord(
+    uuid: string,
+    data: {
+      bank_name: string;
+      bank_ac_name: string;
+      bank_ac_number: string;
+      isValid: boolean;
+      info?: string;
+      bankId?: string;
+      branchId?: string;
+      extras?: any;
+    }
+  ) {
+    const { bank_name, bank_ac_name, bank_ac_number, isValid, info, bankId, branchId, extras } = data;
+    return this.prisma.beneficiaryBankAccount.upsert({
+      where: { beneficiaryId: uuid },
+      create: {
+        beneficiaryId: uuid,
+        bankName: bank_name,
+        accountName: bank_ac_name,
+        accountNumber: bank_ac_number,
+        isValid,
+        info: info || null,
+        bankId: bankId || null,
+        branchId: branchId || null,
+        extras: extras || null,
+      },
+      update: {
+        bankName: bank_name,
+        accountName: bank_ac_name,
+        accountNumber: bank_ac_number,
+        isValid,
+        info: info || null,
+        bankId: bankId || null,
+        branchId: branchId || null,
+        extras: extras || null,
+      },
+    });
   }
 
   async updateBenfExtras(uuid: string, extras: any) {
