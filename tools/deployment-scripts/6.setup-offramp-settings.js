@@ -1,11 +1,10 @@
 const {
   prompt,
-  getDeploymentFiles,
-  askTargetFile,
   buildSettingEntry,
   upsertSettingInDeploymentFile,
   askConfirmation,
 } = require('./_common');
+const { selectDeploymentFile } = require('./lib/select-deployment-file');
 
 const SETTING_NAME = 'OFFRAMP_SETTINGS';
 
@@ -41,13 +40,7 @@ async function askOfframpSettings() {
 }
 
 async function main() {
-  const deploymentFiles = await getDeploymentFiles();
-
-  if (!deploymentFiles.length) {
-    throw new Error('No deployment files found. Run 0.setup-project.js first.');
-  }
-
-  const selectedFile = await askTargetFile(deploymentFiles, 'Select one deployment file to update:');
+  const selectedFile = await selectDeploymentFile();
   const settingValue = await askOfframpSettings();
 
   console.log('Selected OFFRAMP_SETTINGS value:');

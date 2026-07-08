@@ -1,35 +1,32 @@
 const {
   prompt,
-  getDeploymentFiles,
-  askTargetFile,
   buildSettingEntry,
   upsertSettingInDeploymentFile,
   askConfirmation,
 } = require('./_common');
+const { selectDeploymentFile } = require('./lib/select-deployment-file');
 
 const SETTING_NAME = 'FUND_VENDOR_WALLET';
 
 async function askFundVendorWalletDetails() {
   const answers = await prompt([
     {
-      type: 'confirm',
+      type: 'list',
       name: 'fundVendorWallet',
       message: 'Should vendor wallet be funded on creation?',
-      default: false,
+      choices: [
+        { name: 'true', value: 'true' },
+        { name: 'false', value: 'false' },
+      ],
+      default: 'false',
     },
   ]);
 
-  return answers.fundVendorWallet ? 'true' : 'false';
+  return answers.fundVendorWallet;
 }
 
 async function main() {
-  const deploymentFiles = await getDeploymentFiles();
-
-  if (!deploymentFiles.length) {
-    throw new Error('No deployment files found. Run 0.setup-project.js first.');
-  }
-
-  const selectedFile = await askTargetFile(deploymentFiles, 'Select one deployment file to update:');
+  const selectedFile = await selectDeploymentFile();
   const fundVendorWallet = await askFundVendorWalletDetails();
 
   console.log('\nSelected configuration:');
