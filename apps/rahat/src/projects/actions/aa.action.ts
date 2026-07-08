@@ -951,6 +951,10 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.DISBURSE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.DISBURSE, uuid }, payload),
 
+  // Confirm the disbursement of funds for the cash transfer group
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.CONFIRM_DISBURSE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.CONFIRM_DISBURSE, uuid }, payload),
+
   // Get all the allocated fund records of the cash transfer groups
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_RECORDS]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET_RECORDS, uuid }, payload),
