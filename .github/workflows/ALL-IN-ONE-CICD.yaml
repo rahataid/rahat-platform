@@ -24,6 +24,7 @@ on:
           - "dry-run-pin"
           - "aa-stellar"
           - "demo-gsma"
+          - "mcn-demo-2026"
 
       apps_to_build:
         description: "Apps to build (leave empty for defaults)"
