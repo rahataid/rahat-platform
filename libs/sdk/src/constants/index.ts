@@ -395,6 +395,7 @@ export const MS_ACTIONS = {
       GET_ONE: 'aaProject.groupCashTransfer.getOne',
       ALLOCATE_FUND: 'aaProject.groupCashTransfer.assignFund',
       DISBURSE: 'aaProject.groupCashTransfer.disburse',
+      CONFIRM_DISBURSE: 'aaProject.groupCashTransfer.confirmDisburse',
       GET_RECORDS: 'aaProject.groupCashTransfer.getRecords',
       GET_ONE_RECORD: 'aaProject.groupCashTransfer.getOneRecord',
       VALIDATE_BANK_ACCOUNT: 'aaProject.groupCashTransfer.validateBankAccount',

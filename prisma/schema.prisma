@@ -289,12 +289,39 @@ model Beneficiary {
   deletedAt      DateTime?
   isVerified     Boolean        @default(false)
 
-  pii                  BeneficiaryPii?        @relation("BeneficiaryToPii")
+  pii                  BeneficiaryPii?         @relation("BeneficiaryToPii")
   BeneficiaryProject   BeneficiaryProject[]
   groupedBeneficiaries GroupedBeneficiaries[]
+  bankAccount          BeneficiaryBankAccount?
 
   @@index([deletedAt])
   @@map("tbl_beneficiaries")
+}
+
+model BeneficiaryBankAccount {
+  id   Int    @id @default(autoincrement()) @db.Integer()
+  uuid String @unique @default(uuid()) @db.Uuid()
+
+  beneficiaryId String      @unique @db.Uuid()
+  Beneficiary   Beneficiary @relation(fields: [beneficiaryId], references: [uuid])
+
+  bankName      String
+  accountName   String
+  accountNumber String
+
+  bankId   String?
+  branchId String?
+
+  isValid Boolean @default(false)
+  info    String?
+  extras  Json?   @db.JsonB()
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+  @@map("tbl_beneficiary_bank_accounts")
 }
 
 model GroupedBeneficiaries {

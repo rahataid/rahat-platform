@@ -7,7 +7,11 @@ meta {
 post {
   url: {{url}}/beneficiaries
   body: json
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
 }
 
 body:json {
@@ -21,14 +25,17 @@ body:json {
     "extras": {
       "email": "test@example.com",
       "hasCitizenship": true,
-      "passportNumber": 12345
+      "passportNumber": 12345,
+      "bank_ac_name": "Manisha Dhaubanzar",
+      "bank_ac_number": "08110017501021",
+      "bank_name": "Nabil Bank Ltd."
     },
     "notes": "1234567",
     "bankedStatus": "BANKED",
     "internetStatus": "NO_INTERNET",
     "phoneStatus": "FEATURE_PHONE",
     "piiData": {
-      "name": "Test User",
+      "name": "Stellar bank user 40",
       "extras": {
         "bank": "Test Bank",
         "account": "1234567890"
@@ -46,7 +53,7 @@ assert {
 script:post-response {
   const createFile = require('./createFile');
   const resData = res.getBody().data;
-
+  
   const data = { "benefUUIDs": [resData.uuid] }
   createFile(data, 'beneficiary-data.json');
 }

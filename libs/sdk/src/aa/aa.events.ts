@@ -223,6 +223,7 @@ export const JOBS = {
     GET_ONE: 'aa.jobs.groupCashTransfer.getOne',
     ALLOCATE_FUND: 'aa.jobs.groupCashTransfer.assignFund',
     DISBURSE: 'aa.jobs.groupCashTransfer.disburse',
+    CONFIRM_DISBURSE: 'aa.jobs.groupCashTransfer.confirmDisburse',
     GET_RECORDS: 'aa.jobs.groupCashTransfer.getRecords',
     GET_ONE_RECORD: 'aa.jobs.groupCashTransfer.getOneRecord',
     VALIDATE_BANK_ACCOUNT: 'aa.jobs.groupCashTransfer.validateBankAccount',
