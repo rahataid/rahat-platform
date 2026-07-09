@@ -136,6 +136,11 @@ jobs:
               SECRET="ENV_AA_DEMO_GSMA"
               APPS="beneficiary,rahat"
               ;;
+            mcn-demo-2026)
+              TAG="mcn-demo-2026"
+              SECRET="ENV_AA_DEMO_STELLAR"
+              APPS="beneficiary,rahat"
+              ;;
             *)
               echo "Unknown environment: $ENV"
               exit 1
