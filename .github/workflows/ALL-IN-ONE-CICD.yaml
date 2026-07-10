@@ -25,6 +25,8 @@ on:
           - "aa-stellar"
           - "demo-gsma"
           - "mcn-demo-2026"
+          - "mcn-training"
+          - "nrcs-training"
 
       apps_to_build:
         description: "Apps to build (leave empty for defaults)"
@@ -139,6 +141,16 @@ jobs:
             mcn-demo-2026)
               TAG="mcn-demo-2026"
               SECRET="ENV_AA_DEMO_STELLAR"
+              APPS="beneficiary,rahat"
+              ;;
+            mcn-training)
+              TAG="mcn-training"
+              SECRET="ENV_AA_MCN_TRAINING"
+              APPS="beneficiary,rahat"
+              ;;
+            nrcs-training)
+              TAG="nrcs-training"
+              SECRET="ENV_AA_NRCS_TRAINING"
               APPS="beneficiary,rahat"
               ;;
             *)
