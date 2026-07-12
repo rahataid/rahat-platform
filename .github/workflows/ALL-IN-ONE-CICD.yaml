@@ -25,6 +25,7 @@ on:
           - "aa-stellar"
           - "demo-gsma"
           - "release-v4.0.0-nrcs"
+          - "nrcs-training"
 
       apps_to_build:
         description: "Apps to build (leave empty for defaults)"
@@ -139,6 +140,11 @@ jobs:
             release-v4.0.0-nrcs)
               TAG="release-v4.0.0-nrcs"
               SECRET="ENV_AA_HEATWAVE"
+              APPS="beneficiary,rahat"
+              ;;
+            nrcs-training)
+              TAG="nrcs-training"
+              SECRET="ENV_AA_NRCS_TRAINING"
               APPS="beneficiary,rahat"
               ;;
             *)
