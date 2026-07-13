@@ -61,6 +61,7 @@ export const JOBS = {
     GET_ALL_TRANSPORT: 'rahat.jobs.campaign.get_transport',
     GET_ALL_AUDIENCE: 'rahat.jobs.campaign.get_audience',
     TRIGGER_CAMPAIGN: 'rahat.jobs.campaign.trigger',
+    TRIGGER_CAMPAIGN_EXCEL: 'rahat.jobs.campaign.trigger_excel',
     GET_ALL_COMMUNICATION_LOGS: 'rahat.jobs.campaign.communication_logs',
     GET_ALL_COMMUNICATION_STATS: 'rahat.jobs.campaign.communication_stats',
     CREATE_AUDIENCE: 'rahat.jobs.campaign.create_audience',
