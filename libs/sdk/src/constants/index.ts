@@ -185,6 +185,7 @@ export const MS_ACTIONS = {
       GET_ALL_TRANSPORT: 'elProject.campaign.get_transport',
       GET_ALL_AUDIENCE: 'elProject.campaign.get_audience',
       TRIGGER_CAMPAIGN: 'elProject.campaign.trigger',
+      SEND_CAMPAIGN_EXCEL: 'elProject.campaign.trigger_excel',
       GET_ALL_COMMUNICATION_LOGS: 'elProject.campaign.communication_logs',
       GET_ALL_COMMUNICATION_STATS: 'elProject.campaign.communication_stats',
       GET_CAMPAIGN_LOG: 'elProject.campaign.log',
