@@ -162,6 +162,12 @@ export const elActions: ProjectActionFunc = {
       500000
     ),
 
+  [MS_ACTIONS.ELPROJECT.CRM.SEND_CAMPAIGN_EXCEL]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.TRIGGER_CAMPAIGN_EXCEL, uuid },
+      { ...payload },
+      500000
+    ),
   [MS_ACTIONS.ELPROJECT.CRM.TRIGGER_CAMPAIGN]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.CAMPAIGN.TRIGGER_CAMPAIGN, uuid },
@@ -179,6 +185,13 @@ export const elActions: ProjectActionFunc = {
   [MS_ACTIONS.ELPROJECT.CRM.SESSION_BROADCASTS]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.CAMPAIGN.LIST_SESSION_BROADCASTS, uuid },
+      { ...payload },
+      500000
+    ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.LOGS_FOR_SESSIONS]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.LIST_LOGS_FOR_SESSIONS, uuid },
       { ...payload },
       500000
     ),

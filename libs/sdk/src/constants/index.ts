@@ -173,6 +173,7 @@ export const MS_ACTIONS = {
       SYNC_TEMPLATES: 'elProject.campaign.sync_templates',
       BROADCAST_COUNT: 'elProject.campaign.broadcast_count',
       SESSION_BROADCASTS: 'elProject.campaign.list_session_broadcasts',
+      LOGS_FOR_SESSIONS: 'elProject.campaign.list_logs_for_sessions',
       RETRY_SESSION: 'elProject.campaign.retry_session',
 
       CREATE_CAMPAIGN: 'elProject.campaign.create',
@@ -184,12 +185,15 @@ export const MS_ACTIONS = {
       GET_ALL_TRANSPORT: 'elProject.campaign.get_transport',
       GET_ALL_AUDIENCE: 'elProject.campaign.get_audience',
       TRIGGER_CAMPAIGN: 'elProject.campaign.trigger',
+      SEND_CAMPAIGN_EXCEL: 'elProject.campaign.trigger_excel',
       GET_ALL_COMMUNICATION_LOGS: 'elProject.campaign.communication_logs',
       GET_ALL_COMMUNICATION_STATS: 'elProject.campaign.communication_stats',
       GET_CAMPAIGN_LOG: 'elProject.campaign.log',
       GET_AUTOMATION_DETAIL: 'elProject.campaign.automation.detail',
       REFRESH_COMMUNICATION_STATS:
         'elProject.campaign.refresh_communication_stats',
+      GET_COMMS_USAGE: 'elProject.campaign.comms_usage',
+      GET_COMMS_CREDITS: 'elProject.campaign.comms_credits',
     },
   },
   SETTINGS: {
