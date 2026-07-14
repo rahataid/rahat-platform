@@ -143,6 +143,8 @@ export class BeneficiaryService {
 
   // list beneficiary groups with or without project filter
   async listBenefByProject(data: any) {
+    this.logger.debug(`Listing beneficiaries for project: ${data}`);
+    console.log(data);
     if (!data?.data?.length) return data;
     this.logger.debug(`Fetching beneficiary data for project: ${data?.payload?.projectId}`);
 

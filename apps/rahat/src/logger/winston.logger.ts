@@ -33,16 +33,18 @@ const devLogger = {
 
 // for production environment
 const prodLogger = {
+  level: 'silly',
   format: format.combine(
     format.timestamp(),
     format.errors({ stack: true }),
     format.json()
   ),
   transports: [
+    new transports.Console(options.console),
     new transports.File(options.file),
     new transports.File({
       filename: 'combine.log',
-      level: 'info',
+      level: 'silly',
     }),
   ],
 };
