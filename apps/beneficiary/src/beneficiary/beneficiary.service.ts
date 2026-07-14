@@ -395,8 +395,8 @@ export class BeneficiaryService {
 
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
-        walletAddress: {
-          in: data.map((b) => b.walletAddress),
+        uuid: {
+          in: data.map((b) => b.uuid),
         },
       },
       include: {
@@ -410,7 +410,7 @@ export class BeneficiaryService {
     if (data && beneficiaries.length > 0) {
       const combinedData = data.map((dat) => {
         const benDetails = beneficiaries.find(
-          (ben) => ben.walletAddress === dat.walletAddress
+          (ben) => ben.uuid === dat.uuid
         );
         const { pii, ...rest } = benDetails || {};
         return {
@@ -423,6 +423,8 @@ export class BeneficiaryService {
     }
 
     this.logger.debug(`Returning merged data for project: ${data?.payload?.projectId}`);
+    console.log(data);
+    console.log(beneficiaries);
     // TODO: remove projectData and piiData that has been added manually, as it will affects the FE. NEEDS to be refactord in FE as well.
     return beneficiaries.map((b) => ({
       ...b,
