@@ -144,18 +144,20 @@ export class BeneficiaryService {
   // list beneficiary groups with or without project filter
   async listBenefByProject(data: any) {
     if (!data?.data?.length) return data;
+    this.logger.debug(`Fetching beneficiary data for project: ${data?.payload?.projectId}`);
 
     const mergedProjectData = await this.mergeProjectData(
       data.data,
       data.payload
     );
+    this.logger.debug(`Merged project data for project: ${data?.payload?.projectId} `);
 
     if (data?.extras) {
       data.data = { data: mergedProjectData, extras: data.extras };
     } else {
       data.data = mergedProjectData || [];
     }
-
+    this.logger.debug(`Returning beneficiary data for project: ${data?.payload?.projectId} `);
     return data;
   }
 
@@ -363,6 +365,7 @@ export class BeneficiaryService {
   }
 
   async mergeProjectData(data: any, payload?: any) {
+    this.logger.debug(`Merging project data for project: ${payload?.projectId}`);
     // const where: Prisma.BeneficiaryWhereInput = {
     //   uuid: {
     //     in: data.map(b => b.uuid)
@@ -398,6 +401,7 @@ export class BeneficiaryService {
         pii: true,
       },
     });
+    this.logger.debug(`Fetched ${beneficiaries.length} beneficiaries for project: ${payload?.projectId}`);
 
     // const beneficiaries = []
 
@@ -416,6 +420,7 @@ export class BeneficiaryService {
       return combinedData || [];
     }
 
+    this.logger.debug(`Returning merged data for project: ${data?.payload?.projectId}`);
     // TODO: remove projectData and piiData that has been added manually, as it will affects the FE. NEEDS to be refactord in FE as well.
     return beneficiaries.map((b) => ({
       ...b,
@@ -2439,7 +2444,7 @@ export class BeneficiaryService {
       await this.prisma.$executeRawUnsafe(`COMMIT PREPARED '${dbTxId}';`);
       this.logger.log('Transaction committed successfully.');
 
-      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: {...createdBeneficiary, phone: createdPii.phone} };
+      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: { ...createdBeneficiary, phone: createdPii.phone } };
     } catch (error) {
       this.logger.error('Error occurred during beneficiary creation with DB transaction:', error);
       await this.rollback2PC(projectId, dbTxId);
