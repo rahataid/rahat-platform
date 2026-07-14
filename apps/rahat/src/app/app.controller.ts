@@ -68,6 +68,12 @@ export class AppController {
     return this.appService.getByAddress(address);
   }
 
+  @Get('chain-type')
+  @ApiOperation({ summary: 'Get active chain type (public)' })
+  async getChainType() {
+    return this.appService.getChainType();
+  }
+
   @Post('settings/seed')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
