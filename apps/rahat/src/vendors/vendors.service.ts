@@ -31,6 +31,7 @@ import { UsersService } from '../users/users.service';
 import { isAddress } from 'viem';
 import { WalletService } from '../wallet/wallet.service';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
+import { generateIdempotencyKey } from '../utils/idempotency-key';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -488,7 +489,13 @@ export class VendorsService {
       },
     });
 
-    return this.client.send({ cmd: VendorJobs.UPDATE }, result);
+    return this.client.send(
+      { cmd: VendorJobs.UPDATE },
+      {
+        ...result,
+        idempotencyKey: generateIdempotencyKey(VendorJobs.UPDATE, result),
+      }
+    );
   }
 
   async removeVendor(uuid: UUID, projectId?: UUID) {
