@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { VendorCreateInput } from '@rahataid/sdk';
 import { Service } from '@rumsan/sdk/enums';
-import { IsObject, IsOptional, IsString } from 'class-validator';
+import { IsObject, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class VendorRegisterDto {
   id?: number | undefined;
@@ -48,6 +48,7 @@ export class VendorRegisterDto {
 export class VendorPasswordRegisterDto extends VendorRegisterDto {
   @ApiProperty({ example: 'john_vendor_1234' })
   @IsString()
+  @MinLength(2, { message: 'Username must be at least 2 characters long' })
   username: string;
 
   @ApiProperty({ example: 'password' })

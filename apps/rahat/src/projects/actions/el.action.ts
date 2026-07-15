@@ -162,6 +162,12 @@ export const elActions: ProjectActionFunc = {
       500000
     ),
 
+  [MS_ACTIONS.ELPROJECT.CRM.SEND_CAMPAIGN_EXCEL]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.TRIGGER_CAMPAIGN_EXCEL, uuid },
+      { ...payload },
+      500000
+    ),
   [MS_ACTIONS.ELPROJECT.CRM.TRIGGER_CAMPAIGN]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.CAMPAIGN.TRIGGER_CAMPAIGN, uuid },
