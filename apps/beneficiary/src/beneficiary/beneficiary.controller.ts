@@ -52,8 +52,6 @@ export class BeneficiaryController {
     return this.service.refreshStats();
   }
 
-
-
   @MessagePattern({ cmd: BeneficiaryJobs.FIND_PHONE_BY_UUID })
   async findPhoneByUUID(uuid: UUID[]) {
     return this.service.findPhoneByUUID(uuid);
@@ -243,6 +241,16 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK })
   groupAttributesCheck(uuid: string) {
     return this.service.groupAttributesCheck(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_GROUP_BANK_CHECK_STATUS })
+  getGroupBankCheckStatus(uuid: string) {
+    return this.service.getGroupBankCheckStatus(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BENEFICIARY_BANK_ACCOUNT })
+  getBeneficiaryBankAccount(payload: { uuid?: string; walletAddress?: string }) {
+    return this.service.getBeneficiaryBankAccount(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_GROUPS })

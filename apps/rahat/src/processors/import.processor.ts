@@ -321,12 +321,48 @@ export class ImportProcessor {
     totalRows: number
   ): Promise<void> {
     // 1. Identify rows without wallet addresses
-    const rowsNeedingWallets = mappedRows
+    const rowsMissingWallets = mappedRows
       .map((row, index) => ({ row, index }))
       .filter(({ row }) => !row.beneficiary.walletAddress);
 
-    if (rowsNeedingWallets.length === 0) {
+    if (rowsMissingWallets.length === 0) {
       this.logger.log('All rows have wallet addresses, skipping generation');
+      return;
+    }
+
+    // 2. Reuse wallets for beneficiaries that already exist (by uuid), regardless of group
+    const uuidsToCheck = rowsMissingWallets
+      .map(({ row }) => row.beneficiary.uuid)
+      .filter(Boolean);
+
+    const existingWalletByUuid = new Map<string, string>();
+    if (uuidsToCheck.length > 0) {
+      const existingBeneficiaries = await this.prisma.beneficiary.findMany({
+        where: { uuid: { in: uuidsToCheck } },
+        select: { uuid: true, walletAddress: true },
+      });
+      for (const b of existingBeneficiaries) {
+        existingWalletByUuid.set(b.uuid, b.walletAddress);
+      }
+    }
+
+    let walletsReused = 0;
+    const rowsNeedingWallets = rowsMissingWallets.filter(({ row, index }) => {
+      const existingWallet = row.beneficiary.uuid && existingWalletByUuid.get(row.beneficiary.uuid);
+      if (existingWallet) {
+        mappedRows[index].beneficiary.walletAddress = existingWallet;
+        walletsReused++;
+        return false;
+      }
+      return true;
+    });
+
+    if (walletsReused > 0) {
+      this.logger.log(`Reused ${walletsReused} existing wallet(s) for previously imported beneficiaries`);
+    }
+
+    if (rowsNeedingWallets.length === 0) {
+      this.logger.log('No new wallets to generate after reuse check');
       return;
     }
 
@@ -339,11 +375,11 @@ export class ImportProcessor {
       walletsGenerated: 0,
     });
 
-    // 2. Create batches for progress tracking
+    // 3. Create batches for progress tracking
     const batches = createBatches(rowsNeedingWallets, WALLET_GENERATION_BATCH_SIZE);
     let walletsGenerated = 0;
 
-    // 3. Process batches sequentially
+    // 4. Process batches sequentially
     for (let batchIdx = 0; batchIdx < batches.length; batchIdx++) {
       const batch = batches[batchIdx];
 
@@ -380,7 +416,7 @@ export class ImportProcessor {
       }
     }
 
-    this.logger.log(`Wallet generation complete: ${walletsGenerated} wallets created`);
+    this.logger.log(`Wallet generation complete: ${walletsGenerated} wallets created, ${walletsReused} reused`);
   }
 }
 

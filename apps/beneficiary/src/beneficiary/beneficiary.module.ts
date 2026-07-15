@@ -48,6 +48,9 @@ import { VerificationService } from './verification.service';
     BullModule.registerQueue({
       name: BQUEUE.RAHAT_BENEFICIARY,
     }),
+    BullModule.registerQueue({
+      name: BQUEUE.RAHAT_BENEFICIARY_BANK_CHECK,
+    }),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

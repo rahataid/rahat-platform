@@ -63,6 +63,8 @@ export class BeneficiaryService {
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
+    @InjectQueue(BQUEUE.RAHAT_BENEFICIARY_BANK_CHECK)
+    private readonly bankCheckQueue: Queue,
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
     private readonly eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
@@ -491,6 +493,7 @@ export class BeneficiaryService {
               Project: true,
             },
           },
+          bankAccount: true,
         },
       }),
 
@@ -1552,11 +1555,30 @@ export class BeneficiaryService {
   async groupAccountCheck(uuid: string, benfGroup: GroupWithValidationAA) {
     const benfsInGroup = benfGroup.groupedBeneficiaries
       ?.map((d) => d.Beneficiary)
-      .filter((benf) => !(benf.extras as any)?.validBankAccount);
+      .filter((benf) => (benf.extras as any)?.bank_ac_number);
 
     this.logger.log(
       `Group account check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`
     );
+
+    const errorBenfs = benfsInGroup.filter(
+      (benf) => (benf.extras as Record<string, unknown>)?.bankedStatus === 'ERROR'
+    );
+
+    if (errorBenfs.length) {
+      await this.prisma.$transaction(
+        errorBenfs.map((benf) => {
+          const cleanExtras = { ...(benf.extras as Record<string, unknown>) };
+          delete cleanExtras.bankedStatus;
+          delete cleanExtras.error;
+          delete cleanExtras.validBankAccount;
+          return this.prisma.beneficiary.update({
+            where: { uuid: benf.uuid },
+            data: { bankedStatus: 'UNBANKED', extras: cleanExtras as any },
+          });
+        })
+      );
+    }
 
     const bulkQueueData = benfsInGroup.map((benf) => ({
       name: BeneficiaryJobs.CHECK_BENEFICIARY_BANK_ACCOUNT,
@@ -1575,12 +1597,64 @@ export class BeneficiaryService {
       },
     }));
 
-    await this.beneficiaryQueue.addBulk(bulkQueueData);
+    await this.bankCheckQueue.addBulk(bulkQueueData);
 
     return {
       success: true,
       message: 'Account check in progress. Data will be listed soon.',
     };
+  }
+
+  async getGroupBankCheckStatus(uuid: string) {
+    const benfs = await this.prisma.groupedBeneficiaries.findMany({
+      where: { beneficiaryGroupId: uuid },
+      select: { Beneficiary: { select: { extras: true, bankedStatus: true } } },
+    });
+
+    const total = benfs.length;
+    const { success, failed } = benfs.reduce(
+      (acc, b) => {
+        const e = b.Beneficiary.extras as Record<string, unknown>;
+        if (e?.validBankAccount === true) acc.success++;
+        else if (e?.bankedStatus === 'ERROR') acc.failed++;
+        return acc;
+      },
+      { success: 0, failed: 0 }
+    );
+    const pending = total - success - failed;
+
+    return { total, success, failed, pending };
+  }
+
+  async getBeneficiaryBankAccount(payload: {
+    uuid?: string;
+    walletAddress?: string;
+  }) {
+    const { uuid, walletAddress } = payload || {};
+
+    if (!uuid && !walletAddress) {
+      throw new RpcException(
+        'Either beneficiary uuid or walletAddress is required'
+      );
+    }
+
+    let beneficiaryUuid = uuid;
+    if (!beneficiaryUuid) {
+      const benf = await this.rsprisma.beneficiary.findUnique({
+        where: { walletAddress },
+        select: { uuid: true },
+      });
+
+      if (!benf) {
+        throw new RpcException('Beneficiary not found');
+      }
+
+      beneficiaryUuid = benf.uuid;
+    }
+
+    return this.prisma.beneficiaryBankAccount.findUnique({
+      where: { beneficiaryId: beneficiaryUuid },
+    });
   }
 
   async getGroupBeneficiariesFailedAccount(uuid: string) {
@@ -2439,7 +2513,7 @@ export class BeneficiaryService {
       await this.prisma.$executeRawUnsafe(`COMMIT PREPARED '${dbTxId}';`);
       this.logger.log('Transaction committed successfully.');
 
-      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: {...createdBeneficiary, phone: createdPii.phone} };
+      return { success: true, message: 'Beneficiary created successfully with DB transaction.', data: { ...createdBeneficiary, phone: createdPii.phone } };
     } catch (error) {
       this.logger.error('Error occurred during beneficiary creation with DB transaction:', error);
       await this.rollback2PC(projectId, dbTxId);
