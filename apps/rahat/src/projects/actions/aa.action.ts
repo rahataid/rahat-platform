@@ -368,6 +368,9 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.STATS.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STATS.GET_ALL, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.STATS.BACK_FILL]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STATS.BACK_FILL, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.STATS.GET_ONE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STATS.GET_ONE, uuid }, payload),
   // **** stats end ****//
@@ -777,7 +780,7 @@ export const aaActions: ProjectActionFunc = {
       payload
     ),
 
-   [MS_ACTIONS.AAPROJECT.INKIND.GET_VENDOR_AVAILABLE_INKIND_DETAILS]: (
+  [MS_ACTIONS.AAPROJECT.INKIND.GET_VENDOR_AVAILABLE_INKIND_DETAILS]: (
     uuid,
     payload,
     sendCommand
@@ -785,7 +788,7 @@ export const aaActions: ProjectActionFunc = {
     sendCommand(
       { cmd: AAJobs.INKIND.GET_VENDOR_AVAILABLE_INKIND_DETAILS, uuid },
       payload
-   ),
+    ),
 
   [MS_ACTIONS.AAPROJECT.INKIND.CREATE_VENDOR_REDEMPTION]: (
     uuid,
@@ -816,7 +819,7 @@ export const aaActions: ProjectActionFunc = {
       { cmd: AAJobs.INKIND.UPDATE_VENDOR_REDEMPTION_STATUS, uuid },
       payload
     ),
-  
+
   [MS_ACTIONS.AAPROJECT.INKIND.UPDATE_VENDOR_REDEMPTION_TX_HASH]: (
     uuid,
     payload,
@@ -926,7 +929,7 @@ export const aaActions: ProjectActionFunc = {
   // Create a group cash transfer group
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.CREATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.CREATE, uuid }, payload),
-  
+
   // Update details for the group cash transfer group
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.UPDATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.UPDATE, uuid }, payload),
