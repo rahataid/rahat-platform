@@ -1553,12 +1553,41 @@ export class BeneficiaryService {
   }
 
   async groupAccountCheck(uuid: string, benfGroup: GroupWithValidationAA) {
-    const benfsInGroup = benfGroup.groupedBeneficiaries
+    const benfsWithBankInfo = benfGroup.groupedBeneficiaries
       ?.map((d) => d.Beneficiary)
-      .filter((benf) => (benf.extras as any)?.bank_ac_number);
+      .filter((benf) => (benf.extras as any)?.bank_ac_number) ?? [];
+
+    if (benfsWithBankInfo.length === 0) {
+      this.logger.log(`No beneficiaries with bank account info for group: ${uuid}`);
+      return;
+    }
+
+    // Single DB query: fetch only beneficiaries in this group that still need
+    // validation (no bank account record OR existing record has isValid=false).
+    // Avoids loading benfGroup data into a large IN list — uses a correlated
+    // subquery/join in Prisma via the relation filter on GroupedBeneficiaries.
+    const benfsNeedingCheck = await this.prisma.groupedBeneficiaries.findMany({
+      where: {
+        beneficiaryGroupId: uuid,
+        Beneficiary: {
+          NOT: {
+            bankAccount: { isValid: true },
+          },
+        },
+      },
+      select: {
+        Beneficiary: {
+          select: { uuid: true },
+        },
+      },
+    });
+    const needsCheckIds = new Set(benfsNeedingCheck.map((g) => g.Beneficiary.uuid));
+
+    // Intersect with benfsWithBankInfo so only those that have bank details are queued
+    const benfsInGroup = benfsWithBankInfo.filter((benf) => needsCheckIds.has(benf.uuid));
 
     this.logger.log(
-      `Group account check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`
+      `Group account check for group: ${uuid} — queuing ${benfsInGroup.length} (skipping ${benfsWithBankInfo.length - benfsInGroup.length} already validated)`
     );
 
     const errorBenfs = benfsInGroup.filter(
