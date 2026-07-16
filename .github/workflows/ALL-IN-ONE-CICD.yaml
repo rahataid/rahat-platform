@@ -147,9 +147,6 @@ jobs:
             mcn-training)
               TAG="mcn-training"
               SECRET="ENV_AA_MCN_TRAINING"
-            release-v4.0.0-nrcs)
-              TAG="release-v4.0.0-nrcs"
-              SECRET="ENV_AA_HEATWAVE"
               APPS="beneficiary,rahat"
               ;;
             nrcs-training)
