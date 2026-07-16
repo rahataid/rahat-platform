@@ -141,6 +141,7 @@ export class BeneficiaryController {
   async getStats() {
     const commsClient = await this.commsService.getClient();
     const commsStats = await commsClient.broadcast.getReport({})
+    console.log("commsStats")
     const benefStats = await firstValueFrom(this.client.send({ cmd: BeneficiaryJobs.STATS }, {}));
     return { data: { commsStats: commsStats.data, benefStats: benefStats } };
   }
