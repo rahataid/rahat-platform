@@ -951,13 +951,19 @@ export class VendorsService {
       throw new ForbiddenException('User is not a vendor');
     }
 
-    return this.authService.updatePassword(
+    const result = await this.authService.updatePassword(
       user.id,
       dto.oldPassword,
       dto.newPassword,
       dto.confirmPassword,
       dto.service
     );
+
+    await this.prisma.authSession.deleteMany({
+      where: { Auth: { userId: user.id } },
+    });
+
+    return result;
   }
 
   async create(payload: any) {
