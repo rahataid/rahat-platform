@@ -1,15 +1,24 @@
-import { JsonRpcProvider, Provider, Wallet } from "ethers";
+import { JsonRpcProvider, Wallet } from "ethers";
 import { IConnectedWallet, WalletKeys } from "../types";
-import { EVM_CreateTransactionWithPk } from "./types";
+import {
+    EVM_BroadcastedTransaction,
+    EVM_CreateTransactionWithPk,
+    EVM_SignedTransaction,
+    EVM_UnsignedTransaction,
+} from "./types";
 import { getEVMTransaction } from "./utils";
 
 
-export class ConnectedWallet implements IConnectedWallet {
+export class ConnectedWallet implements IConnectedWallet<
+    EVM_UnsignedTransaction,
+    EVM_SignedTransaction,
+    EVM_BroadcastedTransaction
+> {
 
     blockchainType = "EVM";
     rpcUrl: string;
     currentWalletKeys: WalletKeys
-    provider?: Provider;
+    provider?: JsonRpcProvider;
     chainId?: bigint;
 
     constructor(walletKeys: WalletKeys, rpcUrl: string) {
@@ -26,8 +35,9 @@ export class ConnectedWallet implements IConnectedWallet {
         return wallet.signMessage(message);
     }
 
-    //TODO define transaction type
-    async signTransaction(transactionData: any): Promise<any> {
+    async signTransaction(
+        transactionData: EVM_UnsignedTransaction
+    ): Promise<EVM_SignedTransaction> {
         if (!this.currentWalletKeys || !this.provider) {
             throw new Error("No current account or provider set for signing transaction");
         }
@@ -35,15 +45,14 @@ export class ConnectedWallet implements IConnectedWallet {
         return wallet.signTransaction(transactionData);
     }
 
-    async sendTransaction(rawTransaction: any): Promise<any> {
+    async sendTransaction(
+        rawTransaction: EVM_UnsignedTransaction
+    ): Promise<EVM_BroadcastedTransaction> {
         if (!this.provider) {
             throw new Error("Provider is not initialized");
         }
         const signedTransaction = await this.signTransaction(rawTransaction);
-        if (!this.provider.sendTransaction) {
-            throw new Error("Provider's sendTransaction method is not available");
-        }
-        return await this.provider.sendTransaction(signedTransaction);
+        return this.provider.broadcastTransaction(signedTransaction);
     }
 
     getWalletKeys(): WalletKeys {
@@ -51,7 +60,9 @@ export class ConnectedWallet implements IConnectedWallet {
     }
 
     //TODO : cleanup this 
-    async writeContract(transactionParams: EVM_CreateTransactionWithPk) {
+    async writeContract(
+        transactionParams: EVM_CreateTransactionWithPk
+    ): Promise<EVM_BroadcastedTransaction> {
         if (!this.provider) {
             throw new Error("Provider is not initialized");
         }
@@ -60,9 +71,7 @@ export class ConnectedWallet implements IConnectedWallet {
             networkProvider: this.rpcUrl,
         });
 
-        const signedTxn = await this.signTransaction(txn)
-
-        this.sendTransaction(signedTxn);
+        return this.sendTransaction(txn);
     }
 
 }
