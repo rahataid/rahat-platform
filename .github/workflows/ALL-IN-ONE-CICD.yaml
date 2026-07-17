@@ -26,7 +26,7 @@ on:
           - "demo-gsma"
           - "mcn-demo-2026"
           - "mcn-training"
-          - "release-v4.0.0-nrcs"
+          - "release-v5.0.0-nrcs"
           - "nrcs-training"
 
       apps_to_build:
