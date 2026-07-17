@@ -34,6 +34,7 @@
     "deploy:prodcontracts": "ts-node ./tools/scripts/production-setup/_setup-deployment.ts",
     "update:prodsettings": "ts-node ./tools/scripts/production-setup/update-deployment.ts",
     "geteth": "ts-node tools/scripts/misc/getEth.ts",
+    "reset:vendor-password": "ts-node tools/scripts/misc/reset-vendor-password.ts",
     "graph:codegen": "cd ./apps/graph && graph codegen",
     "graph:build": "cd ./apps/graph && graph build",
     "graph:create-local": "cd ./apps/graph && graph create --node http://localhost:8020/ rahat/core",
