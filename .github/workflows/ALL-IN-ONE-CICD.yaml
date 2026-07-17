@@ -158,7 +158,7 @@ jobs:
               APPS="beneficiary,rahat"
               ;;
             release-v5.0.0-nrcs)
-              TAG="release-v5.0.0-nrcs
+              TAG="release-v5.0.0-nrcs"
               SECRET="ENV_AA_RELEASE_v5.0.0"
               APPS="beneficiary,rahat"
               ;;
