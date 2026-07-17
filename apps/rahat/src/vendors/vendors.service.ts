@@ -618,6 +618,7 @@ export class VendorsService {
           password: dto.password,
           confirmPassword: dto.password,
           service: Service.USERNAME,
+          bypassPasswordValidation: dto.bypassPasswordValidation,
           wallet: randomWallet.address,
           extras: {
             ...dto.extras,
@@ -951,13 +952,7 @@ export class VendorsService {
       throw new ForbiddenException('User is not a vendor');
     }
 
-    const result = await this.authService.updatePassword(
-      user.id,
-      dto.oldPassword,
-      dto.newPassword,
-      dto.confirmPassword,
-      dto.service
-    );
+    const result = await this.authService.updatePassword(user.id, dto);
 
     await this.prisma.authSession.deleteMany({
       where: { Auth: { userId: user.id } },
