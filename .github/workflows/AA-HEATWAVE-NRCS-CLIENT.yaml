@@ -44,8 +44,8 @@ jobs:
           fi
 
           case "$ENV" in
-            release-v4.0.0-nrcs-client)
-              TAG="release-v4.0.0-nrcs-client"
+            release-v5.0.0-nrcs-client)
+              TAG="release-v5.0.0-nrcs-client"
               SECRET="ENV_AA_HEATWAVE"
               APPS="beneficiary,rahat"
               ;;
