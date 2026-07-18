@@ -10,6 +10,7 @@ import {
   CreateBeneficiaryGroupsDto,
   CreateBeneficiaryTransactionDto,
   ImportTempBenefDto,
+  ListBeneficiariesByGroupDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   ListTempGroupsDto,
@@ -218,8 +219,12 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP })
-  getGroup(uuid: string) {
-    return this.service.getOneGroup(uuid);
+  getGroup(payload: string | ({ uuid: string } & ListBeneficiariesByGroupDto)) {
+    if (typeof payload === 'string') {
+      return this.service.getOneGroup(payload);
+    }
+    const { uuid, ...dto } = payload;
+    return this.service.getOneGroup(uuid, dto);
   }
 
   // Handles the event for exporting a group beneficiary bank account fails.

@@ -28,13 +28,14 @@ import {
   CreateBeneficiaryGroupsDto,
   CreateBeneficiaryTransactionDto,
   ImportTempBenefDto,
+  ListBeneficiariesByGroupDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto,
-  ValidateWalletDto,
+  ValidateWalletDto
 } from '@rahataid/extensions';
 import {
   APP,
@@ -565,8 +566,14 @@ export class BeneficiaryController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
-  async getOneGroup(@Param('uuid') uuid: UUID) {
-    return this.client.send({ cmd: BeneficiaryJobs.GET_ONE_GROUP }, uuid);
+  async getOneGroup(
+    @Param('uuid') uuid: UUID,
+    @Query() dto: ListBeneficiariesByGroupDto
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.GET_ONE_GROUP },
+      { uuid, ...dto }
+    );
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
