@@ -1,7 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { VendorCreateInput } from '@rahataid/sdk';
 import { Service } from '@rumsan/sdk/enums';
-import { IsObject, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsObject,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 
 export class VendorRegisterDto {
   id?: number | undefined;
@@ -54,6 +60,17 @@ export class VendorPasswordRegisterDto extends VendorRegisterDto {
   @ApiProperty({ example: 'password' })
   @IsString()
   password: string;
+
+  @ApiProperty({
+    example: false,
+    description:
+      'If true, skips password strength validation (min length, uppercase, lowercase, digit, special character checks). Defaults to false.',
+    required: false,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  bypassPasswordValidation?: boolean;
 }
 
 export class VendorPasswordLoginDto {
