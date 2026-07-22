@@ -31,15 +31,17 @@ import {
 } from '@rahataid/extensions';
 import { APP, Enums, ProjectContants, TFile, VendorJobs } from '@rahataid/sdk';
 import { RequestDetails } from '@rumsan/extensions/decorators';
-import { OtpDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
+import { ChangePasswordDto, OtpDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
 import { Request } from '@rumsan/sdk/types';
 import {
   AbilitiesGuard,
   ACTIONS,
   CheckAbilities,
+  CurrentUserInterface,
   JwtGuard,
   SUBJECTS,
 } from '@rumsan/user';
+import { CurrentUser } from '@rumsan/user/lib/auths/decorator/current-user.decorator';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
 import { DocParser } from '../utils/doc-parser';
@@ -226,6 +228,16 @@ export class VendorsController {
     @RequestDetails() rdetails: Request
   ) {
     return this.vendorService.loginByPassword(dto, rdetails);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard)
+  @Post('password-change')
+  passwordChange(
+    @CurrentUser() user: CurrentUserInterface,
+    @Body() dto: ChangePasswordDto
+  ) {
+    return this.vendorService.changeVendorPassword(user, dto);
   }
 
   @MessagePattern({ cmd: VendorJobs.CREATE })

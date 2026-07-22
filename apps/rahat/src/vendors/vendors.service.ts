@@ -15,12 +15,17 @@ import {
   VendorRegisterDto,
 } from '@rahataid/extensions';
 import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
-import { OtpDto, OtpLoginDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
+import {
+  ChangePasswordDto,
+  OtpDto,
+  OtpLoginDto,
+  PasswordLoginDto,
+} from '@rumsan/extensions/dtos';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
 import { Request } from '@rumsan/sdk/types';
-import { AuthsService, SignupsService } from '@rumsan/user';
+import { AuthsService, CurrentUserInterface, SignupsService } from '@rumsan/user';
 import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
@@ -620,6 +625,7 @@ export class VendorsService {
           password: dto.password,
           confirmPassword: dto.password,
           service: Service.USERNAME,
+          bypassPasswordValidation: dto.bypassPasswordValidation,
           wallet: randomWallet.address,
           extras: {
             ...dto.extras,
@@ -939,6 +945,7 @@ export class VendorsService {
         id: user.id,
         uuid: user.uuid,
         name: user.name,
+        username: user.username,
         email: user.email,
         phone: user.phone,
         wallet: user.wallet,
@@ -946,6 +953,21 @@ export class VendorsService {
       wallet,
     };
   }
+  async changeVendorPassword(user: CurrentUserInterface, dto: ChangePasswordDto) {
+    const isVendor = user.roles?.includes(UserRoles.VENDOR);
+    if (!isVendor) {
+      throw new ForbiddenException('User is not a vendor');
+    }
+
+    const result = await this.authService.updatePassword(user.id, dto);
+
+    await this.prisma.authSession.deleteMany({
+      where: { Auth: { userId: user.id } },
+    });
+
+    return result;
+  }
+
   async create(payload: any) {
     const { projectId, vendors: vendorsList } = payload;
 
