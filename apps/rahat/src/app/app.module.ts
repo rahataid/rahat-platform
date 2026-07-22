@@ -19,6 +19,7 @@ import { CommsModule } from '../comms/comms.module';
 import { ExternalAppGuard } from '../decorators';
 import { GrievanceModule } from '../grievance/grievance.module';
 import { ImportsModule } from '../imports/imports.module';
+import { IvrTemplatesModule } from '../ivr-templates/ivr-templates.module';
 import { ListenersModule } from '../listeners/listeners.module';
 import { NotificationModule } from '../notification/notification.module';
 import { OfframpModule } from '../offramp/offramp.module';
@@ -72,6 +73,7 @@ import { AppService } from './app.service';
     RequestContextModule,
     QueueModule,
     WalletModule,
+    IvrTemplatesModule,
     NotificationModule,
     CommsModule.forRoot(),
 
