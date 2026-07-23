@@ -1,7 +1,6 @@
 export * from './dtos/app';
 export * from './dtos/beneficiary';
 export * from './dtos/grievance';
-export * from './dtos/ivr-templates';
 export * from './dtos/notification';
 export * from './dtos/offramp';
 export * from './dtos/otp';
