@@ -29,9 +29,6 @@ export class IvrTemplatesService {
     async findAll(): Promise<IvrTemplate[]> {
         try {
             return this.prisma.ivrTemplate.findMany({
-                where: {
-                    status: { not: IvrStatus.ARCHIVED },
-                },
                 orderBy: { createdAt: 'desc' },
             });
         } catch (error) {
