@@ -1,9 +1,10 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { ProjectStatus } from '@prisma/client';
 import {
   CreateProjectDto,
   TestKoboImportDto,
@@ -24,7 +25,8 @@ import { JOBS } from '@rahataid/sdk/project/project.events';
 import { PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { switchMap, tap, timeout } from 'rxjs';
+import { firstValueFrom, switchMap, tap, timeout } from 'rxjs';
+import { SeedSettingsDto } from '../app/dto/seed-settings.dto';
 import { RequestContextService } from '../request-context/request-context.service';
 import { createExtrasAndPIIData } from '../utils';
 import { KOBO_FIELD_MAPPINGS } from '../utils/fieldMappings';
@@ -54,6 +56,8 @@ const CAMBODIA_COUNTRY_CODE = '+855';
 
 @Injectable()
 export class ProjectService {
+  private readonly logger = new Logger(PrismaService.name)
+
   constructor(
     private prisma: PrismaService,
     private eventEmitter: EventEmitter2,
@@ -97,6 +101,7 @@ export class ProjectService {
   }
 
   async findOne(uuid: UUID) {
+    this.logger.log(`fetching one group with uuid:${uuid}`)
     return this.prisma.project.findUnique({
       where: {
         uuid,
@@ -332,6 +337,49 @@ export class ProjectService {
             );
         })
       );
+  }
+
+  async setupAAProject(uuid: UUID, dto: SeedSettingsDto) {
+    this.logger.log(`start project setup step of project with uuid: ${uuid}`)
+    const project = await this.prisma.project.findUnique({
+      where: {
+        uuid
+      }
+    })
+    if (!project) {
+      throw new RpcException(`Project with uuid: ${uuid} not found`);
+    }
+
+    if (project.status !== ProjectStatus.NOT_READY) {
+      throw new RpcException(
+        `Settings cannot be updated once the project status is '${project.status}'. Only projects with status 'NOT_READY' can have their settings updated.`
+      );
+    }
+
+    let response;
+    try {
+      response = await firstValueFrom(
+        this.client
+          .send({ cmd: 'rahat.jobs.settings.update', uuid }, { settings: dto.settings, projectId: uuid })
+          .pipe(timeout(MS_TIMEOUT))
+      );
+    } catch (err: any) {
+      this.logger.error(
+        `AA settings update failed for project uuid: ${uuid} - ${err?.message || err}`
+      );
+      throw new RpcException(
+        `Failed to update AA settings for project uuid: ${uuid}. ${err?.message || ''}`
+      );
+    }
+
+    if (response) {
+      return this.prisma.project.update({
+        where: { uuid },
+        data: { status: ProjectStatus.ACTIVE },
+      });
+    }
+
+    return response;
   }
 
   // TODO: fix cambodia specific country code
