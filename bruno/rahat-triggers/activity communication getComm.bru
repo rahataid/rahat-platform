@@ -1,0 +1,28 @@
+meta {
+  name: activity communication getComm
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/projects/228e1da2-d1e8-4f63-8323-9e22917523d2/actions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "action": "ms.activities.getComms",
+    "payload": {
+      "filters":{
+         "title":"",
+         "transportName": "SMS", //EMAIL,VOICE
+         "groupName":"",
+         "sessionStatus": "",
+         "groupType":""
+        },
+        "page":"2",
+        "perPage":"1"
+    }
+  }
+}

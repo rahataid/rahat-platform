@@ -1,0 +1,33 @@
+meta {
+  name: trigger update
+  type: http
+  seq: 19
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.triggers.update",
+    "payload": {
+      "uuid": "0765715b-e098-4263-b916-daedb42bd7d7",
+      "title": "This title are updated",
+      "triggerStatement": {
+        "isManualTrigger": true,
+        "maxLeadTimeDays": "10",
+        "minLeadTimeDays": "10",
+        "type": "DHM"
+      },
+      "notes": "Some notes about the trigger",
+      "isMandatory": true
+    }
+  }
+}

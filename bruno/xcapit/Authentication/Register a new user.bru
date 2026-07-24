@@ -1,0 +1,23 @@
+meta {
+  name: Register a new user
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{xcapitURL}}/api/users/register
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "email": "",
+    "password": "",
+    "role": ""
+  }
+}

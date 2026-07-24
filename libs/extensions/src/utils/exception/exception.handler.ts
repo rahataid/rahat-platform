@@ -4,7 +4,9 @@ import { ExceptionResponse } from '@rumsan/sdk/types';
 
 export class ExceptionHandler {
   static logger = new Logger(ExceptionHandler?.name);
-  private static isObjectWithErrors(value: string | object): value is { errors: any[] } {
+  private static isObjectWithErrors(
+    value: string | object
+  ): value is { errors: any[] } {
     return typeof value === 'object' && value !== null && 'errors' in value;
   }
 
@@ -13,9 +15,6 @@ export class ExceptionHandler {
     responseData: ExceptionResponse,
     response: any
   ): ExceptionResponse {
-    console.log(
-      exception.getResponse()
-    )
     const exceptionResponse = exception?.getResponse();
     if (exceptionResponse !== null) {
       responseData.meta = exceptionResponse;
@@ -25,9 +24,20 @@ export class ExceptionHandler {
 
     responseData.name = exception?.name;
     responseData.statusCode = exception?.getStatus();
-    responseData.message = exception?.message;
+
+    let message: any = exception?.message;
+    if (typeof exceptionResponse === 'string') {
+      message = exceptionResponse;
+    } else if (exceptionResponse && typeof exceptionResponse === 'object') {
+      const responseMessage = (exceptionResponse as any).message;
+      if (Array.isArray(responseMessage)) {
+        message = responseMessage.join(', ');
+      } else if (typeof responseMessage === 'string') {
+        message = responseMessage;
+      }
+    }
+    responseData.message = message;
     responseData.group = 'HTTP';
-    console.log(responseData.message)
     this.logger.error(responseData?.message);
 
     return responseData;
@@ -60,7 +70,7 @@ export class ExceptionHandler {
     exception: Error,
     responseData: ExceptionResponse
   ): ExceptionResponse {
-    console.log({ stack: exception?.stack }, exception.message)
+    console.log({ stack: exception?.stack }, exception.message);
     responseData.name = exception?.name;
     responseData.message = exception?.message;
     responseData.group = 'General Error';

@@ -1,0 +1,32 @@
+meta {
+  name: upload stakeholders
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/projects/upload
+  body: multipartForm
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "action": "aaProject.beneficiary.getAllGroups",
+      "payload": {
+          "perPage": "100"
+  //         "tokenAssigned": true
+      }
+  }
+}
+
+body:multipart-form {
+  file: @file(/home/rs21/Downloads/Stakeholder Sample.xlsx)
+  doctype: EXCEL
+  projectId: fce687ec-c89e-4063-bf5f-9b965d7e22ac
+  action: aaProject.stakeholders.bulkAdd
+}

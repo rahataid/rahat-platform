@@ -1,0 +1,26 @@
+meta {
+  name: "Get Cash Balance"
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.cash-tracker.executeAction",
+    "payload": {
+      "from": "0xE17Fa0F009d2A3EaC3C2994D7933eD759CbCe257",
+      "alias": "UNICEF Nepal CO",
+      "action": "get_cash_balance"
+    }
+  }
+}

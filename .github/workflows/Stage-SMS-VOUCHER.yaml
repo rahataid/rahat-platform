@@ -1,11 +1,5 @@
 name: Stage SMS Voucher CI/CD
 on:
-  push:
-    branches:
-      - 'sms-voucher-stage'
-  pull_request:
-    branches:
-      - 'sms-voucher-stage'
   workflow_dispatch:
 
 env:

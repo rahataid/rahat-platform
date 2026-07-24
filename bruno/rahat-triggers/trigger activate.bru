@@ -1,0 +1,39 @@
+meta {
+  name: trigger activate
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.triggers.activate",
+    "payload": {
+    "repeatKey": "5c061ab5-08d6-44e3-a0e7-6fd768d32caf",
+    "title": "Trigger Title",
+    "repeatEvery": "Every day",
+    "triggerStatement": {
+      "isManualTrigger": true,
+       "maxLeadTimeDays": "10",
+        "minLeadTimeDays": "10"
+    },
+    "triggerDocuments": {
+      "documentKey": "documentValue",
+      "documentUrl": "https://example.com/document.pdf"
+    },
+    "notes": "Some notes about the trigger",
+    "phaseId": "dc719ccd-276e-4862-8aff-5dd2aa72fc0a",
+    "isMandatory": true,
+    "isTriggered": false
+    }
+  }
+}

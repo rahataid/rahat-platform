@@ -1,0 +1,31 @@
+meta {
+  name: create notification
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:5500/v1/projects/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "notification.create",
+    "payload": {
+      "title": "Trigger 3",
+      "description": "Trigger 3 has been triggered by rumsan admin",
+      "group": "Trigger Statement",
+      "notify": true  //optional, set true if you want to auto notify users after notification creation
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+}

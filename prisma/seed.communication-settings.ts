@@ -12,24 +12,22 @@ const main = async () => {
         dataType: "OBJECT",
         "value": {
           "URL": "https://connect.rumsan.net/api/v1",
-          "APP_ID": "cm8r48qkh00bjibnwiriobrvx"
+          "APP_ID": "THIS_IS_FAKE"
           // Pilot
           // APP_ID: "cm1t9iuny001bsahfkjy7quia"
         },
-        requiredFields: ["URL", "APP_ID"]
-      }
-    })
+        requiredFields: ['URL', 'APP_ID'],
+      },
+    });
     console.log('comms settings created successfully');
   } catch (error) {
     console.error('Error creating setting:', error);
   } finally {
-
     await prisma.$disconnect();
   }
-}
+};
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

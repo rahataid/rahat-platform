@@ -1,0 +1,24 @@
+meta {
+  name: get all source health
+  type: http
+  seq: 45
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.sources.getHealth",
+    "payload": {
+    }
+  }
+  
+}

@@ -51,6 +51,7 @@ export const JOBS = {
     FINDONE_DISBURSEMENT_PLAN: 'rahat.jobs.disbursement_plan.listone',
     UPDATE_DISBURSEMENT_PLAN: 'rahat.jobs.disbursement_plan.update',
     BULK_CREATE_DISBURSEMENT: 'rahat.jobs.disbursement.bulk_create',
+    SEND_EMAIL_NOTIFICATION: 'rahat.jobs.disbursement.send_email_notification',
   },
   CAMPAIGN: {
     CREATE_CAMPAIGN: 'rahat.jobs.campaign.create',
@@ -60,11 +61,29 @@ export const JOBS = {
     GET_ALL_TRANSPORT: 'rahat.jobs.campaign.get_transport',
     GET_ALL_AUDIENCE: 'rahat.jobs.campaign.get_audience',
     TRIGGER_CAMPAIGN: 'rahat.jobs.campaign.trigger',
+    TRIGGER_CAMPAIGN_EXCEL: 'rahat.jobs.campaign.trigger_excel',
     GET_ALL_COMMUNICATION_LOGS: 'rahat.jobs.campaign.communication_logs',
     GET_ALL_COMMUNICATION_STATS: 'rahat.jobs.campaign.communication_stats',
     CREATE_AUDIENCE: 'rahat.jobs.campaign.create_audience',
     CREATE_BULK_AUDIENCE: 'rahat.jobs.campaign.create_bulk_audience',
     GET_CAMPAIGN_LOG: 'rahat.jobs.campaign.log',
+    CREATE_TEMPLATE: 'rahat.jobs.campaign.create_template',
+    DELETE_TEMPLATE: 'rahat.jobs.campaign.delete_template',
+    LIST_TEMPLATES: 'rahat.jobs.campaign.list_templates',
+    LIST_AUTOMATION: 'rahat.jobs.campaign.automation.list',
+    TOGGLE_AUTOMATION: 'rahat.jobs.campaign.automation.toggle',
+    CREATE_AUTOMATION: 'rahat.jobs.campaign.automation.create',
+    UPDATE_AUTOMATION: 'rahat.jobs.campaign.automation.update',
+    GET_AUTOMATION: 'rahat.jobs.campaign.automation.get',
+    DELETE_AUTOMATION: 'rahat.jobs.campaign.automation.delete',
+    SYNC_TEMPLATES: 'rahat.jobs.campaign.sync_templates',
+    BROADCAST_COUNT: 'rahat.jobs.campaign.broadcast_count',
+    LIST_SESSION_BROADCASTS: 'rahat.jobs.campaign.list_session_broadcasts',
+    RETRY_SESSION: 'rahat.jobs.campaign.retry_session',
+    GET_AUTOMATION_DETAIL: 'rahat.jobs.campaign.automation.detail',
+    REFRESH_COMMUNICATION_STATS:
+      'rahat.jobs.campaign.refresh_communication_stats',
+    LIST_LOGS_FOR_SESSIONS: 'rahat.jobs.campaign.list_logs_for_sessions',
   },
   OFFLINE_BENEFICIARIES: {
     SYNC_BENEFICIARIES: 'rahat.jobs.sync_beneficiaries',
@@ -84,13 +103,19 @@ export const JOBS = {
     GET_UNSYNCED_BENEFICIARIES: 'rahat.jobs.beneficiary.get_unsynced',
     CREATE_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin',
     GET_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_walkin',
+    GET_REFERRER_BY_PHONE:
+      'rahat.jobs.beneficiary.get_walkin_referrer_by_phone',
+    EXPORT_BENEFICIARY_REFERRAL: 'rahat.jobs.beneficiary.export_referral',
+    SYNC_LEGACY_IMPORTED: 'rahat.jobs.beneficiary.sync_legacy_imported',
     GET_ALL_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.get_all_walkin',
     CREATE_BULK_WALKIN_BENEFICIARY: 'rahat.jobs.beneficiary.create_walkin_bulk',
+    SYNC_STAGING_WALKIN: 'rahat.jobs.beneficiary.sync_walkin_staging',
     GET_UNSYNCED_BENEFICIARY_GROUP: 'rahat.jobs.beneficiary.group.get_unsynced',
     UPDATE_BENEFICIARY_REDEMPTION: 'rahat.jobs.beneficiary.update_redemption',
     LIST_BENEFICIARY_REIMBURSEMENTS:
       'rahat.jobs.beneficiary.list_reimbursements',
-    SYNC_OFFLINE_TRANSACTIONS: 'rahat.jobs.beneficiary.sync_offline_transactions',
+    SYNC_OFFLINE_TRANSACTIONS:
+      'rahat.jobs.beneficiary.sync_offline_transactions',
   },
 
   META_TRANSACTION: {
@@ -102,6 +127,14 @@ export const JOBS = {
     LIST: 'rahat.jobs.reporting.list',
     GET: 'rahat.jobs.reporting.get',
     LIST_EYE_CHECKEUP_LINE: 'rahat.jobs.reporting.list_eye_checkup_line',
-    LIST_PURCHASE_OF_GLASSESS_LINE: 'rahat.jobs.reporting.list_purchase_of_glassess',
+    LIST_PURCHASE_OF_GLASSESS_LINE:
+      'rahat.jobs.reporting.list_purchase_of_glassess',
+    LIVE: 'rahat.jobs.reporting.live',
+  },
+
+  NOTIFICATION: {
+    CREATE: 'rahat.jobs.notification.create',
+    LIST: 'rahat.jobs.notification.list',
+    GET: 'rahat.jobs.notification.get',
   },
 };

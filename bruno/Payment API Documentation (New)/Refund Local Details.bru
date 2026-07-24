@@ -1,0 +1,15 @@
+meta {
+  name: Refund Local Details
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{base_url}}/api/v1/payout/refund/{{l2c_rfnd_pyt_ref_num}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{new_access_token}}
+}

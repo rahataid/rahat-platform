@@ -1,0 +1,30 @@
+meta {
+  name: trigger getAll
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.triggers.getAll",
+    "payload": {
+     // "appId": "{{appId}}"
+  //     "name": "PREPAREDNESS"
+  //     "source": "GLOFAS"
+  //     "phaseId": "dc719ccd-276e-4862-8aff-5dd2aa72fc0a"
+  //     "river_basin": "kar"
+        "activeYear": "2024",
+      "riverBasin": "Karnali"
+    }
+  }
+}

@@ -10,7 +10,8 @@ on:
 
 env:
   CI: false
-  env_npmrc: ${{ secrets.ENV_NPMRC }}
+  PLATFORM_MANIFEST_FILE: 'K8s-Manifest/Rahat/AA-Stage/Argo-Rollout/platform.yaml'
+  BENEFICIARY_MANIFEST_FILE: 'K8s-Manifest/Rahat/AA-Stage/Argo-Rollout/beneficiary.yaml'
 
 jobs:
   deploy:
@@ -21,9 +22,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # - name: import env file
-      #   run: |
-      #     touch ./.npmrc && echo "$env_npmrc" >> ./.npmrc
+      - name: Get short SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Import Secrets
+        uses: hashicorp/vault-action@v2.4.0
+        with:
+          url: ${{ secrets.VAULT_URL }}
+          token: ${{ secrets.VAULT_TOKEN }}
+          secrets: |
+            github/data/general/docker/esatya username | DOCKERHUB_USERNAME ;
+            github/data/general/docker/esatya password | DOCKERHUB_TOKEN ;
 
       - uses: actions/setup-node@v3
         with:
@@ -43,8 +53,8 @@ jobs:
       - name: docker login
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
 
       # Beneficiary Image
       - name: build && push beneficiary
@@ -53,7 +63,6 @@ jobs:
         with:
           context: .
           file: Dockerfile.beneficiary
-          # push: ${{ github.event_name == 'push' && 'true' || 'false' }}
           push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
           tags: esatya/rahat-platform-beneficiary:cam-ken
 
@@ -64,6 +73,5 @@ jobs:
         with:
           context: .
           file: Dockerfile.rahat
-          # push: ${{ github.event_name == 'push' && 'true' || 'false' }}
           push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
           tags: esatya/rahat-platform-rahat:cam-ken

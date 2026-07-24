@@ -1,0 +1,35 @@
+meta {
+  name: Create Direct Withdraw -Local-Crypto-
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{base_url}}/api/v2/payout/withdraw/local/crypto/direct
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "merchant_key": "{{merchant_key}}",
+      "email": "steven.chan@triple-a.io",
+      "withdraw_currency": "USD",
+      "withdraw_amount": 12,
+      "crypto_currency": "testBTC",
+      "remarks": "some remarks here!",
+      "notify_url": "https://webhook.site/bbd02a54-5524-4620-aa88-bb8214271d2f",
+      "notify_secret": "hello123!",
+      "address": "mtzozhx2H1AX8K1gfGPyHDxZ18Ggcvvhbf"
+  }
+}
+
+tests {
+  let res = res.getBody();
+  
+  bru.setVar('drct_l2c_wdrw_prn', res.payout_reference);
+}

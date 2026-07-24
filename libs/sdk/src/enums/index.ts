@@ -8,7 +8,7 @@ export enum Gender {
 export enum KoboBeneficiaryStatus {
   PENDING = 'PENDING',
   FAILED = 'FAILED',
-  SUCCESS = 'SUCCESS'
+  SUCCESS = 'SUCCESS',
 }
 
 export enum BeneficiaryType {
@@ -42,8 +42,8 @@ export enum ProjectTypes {
   EL = 'EL',
   ANTICIPATORY_ACTION = 'ANTICIPATORY_ACTION',
   C2C = 'C2C',
-  PI = "PARAMETRIC_INSURANCE",
-  RP = 'RAHAT_PAYROLL'
+  PI = 'PARAMETRIC_INSURANCE',
+  RP = 'RAHAT_PAYROLL',
 }
 
 export enum UploadFileType {
@@ -56,13 +56,21 @@ export enum UploadFileType {
 export enum ProjectStatus {
   NOT_READY = 'NOT_READY',
   ACTIVE = 'ACTIVE',
-  CLOSED = 'CLOSED'
+  CLOSED = 'CLOSED',
 }
-
-
 
 export enum DisbursementConditionType {
   BALANCE_CHECK = 'BALANCE_CHECK',
   APPROVER_SIGNATURE = 'APPROVER_SIGNATURE',
   SCHEDULED_TIME = 'SCHEDULED_TIME',
+}
+
+export enum BeneficiaryGroupAttribute {
+  PHONE = 'PHONE',
+  ACCOUNT = 'ACCOUNT',
+}
+
+export enum WalletServiceType {
+  INTERNAL = 'INTERNAL',
+  XCAPIT = 'XCAPIT',
 }

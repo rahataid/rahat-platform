@@ -1,0 +1,27 @@
+meta {
+  name: Create user
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/users
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+}
+
+body:json {
+  {
+    "name": "Jane",
+    "gender": "FEMALE",
+    "email": "jan212112@rumsan.com",
+    "phone": "9822521352",
+    "roles": [
+      "admin"
+    ]
+  }
+}

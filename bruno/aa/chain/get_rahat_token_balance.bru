@@ -1,0 +1,26 @@
+meta {
+  name: "Get Rahat Token Balance"
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.chain.getRahatTokenBalance",
+    "payload": {
+      "walletAddress": "0x1234567890123456789012345678901234567890",
+      "tokenAddress": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+      "chainId": 1
+    }
+  }
+}

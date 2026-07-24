@@ -1,0 +1,20 @@
+meta {
+  name: Get beneficiary token balance
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{xcapitURL}}/api/beneficiaries/:phoneNumber/:token/balance
+  body: none
+  auth: bearer
+}
+
+params:path {
+  token: LINK
+  phoneNumber: +9779865430408
+}
+
+auth:bearer {
+  token: {{xcapit_token}}
+}

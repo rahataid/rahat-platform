@@ -1,0 +1,31 @@
+meta {
+  name: "Create Budget (Approve Allowance)"
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.cash-tracker.executeAction",
+    "payload": {
+      "from": "0xE17Fa0F009d2A3EaC3C2994D7933eD759CbCe257", // UNICEF Nepal HQ
+      "to": "0xB4b85A39C44667eDEc9F0eB5c328954e328E980B",   // Field Office
+      "alias": "UNICEF Nepal HQ",
+      "action": "create_budget",
+      "amount": "1000",
+      "description": "Budget for Field Office"
+    }
+  }
+}
+
+

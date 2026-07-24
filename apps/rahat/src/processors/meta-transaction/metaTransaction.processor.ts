@@ -47,7 +47,11 @@ export class MetaTransationProcessor {
 
             }
         } catch (error) {
-            console.log(error)
+            this.logger.error(
+                `Post-meta-tx trigger failed cmd=${trigger?.event_name} uuid=${trigger?.projectUuid}: ${error?.message || error}`,
+                error?.stack,
+            );
+            throw error;
         }
 
 

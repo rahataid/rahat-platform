@@ -19,9 +19,10 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   AddBenToProjectDto,
+  AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   ImportTempBenefDto,
@@ -50,12 +51,15 @@ import {
 } from '@rumsan/user';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { catchError, throwError, timeout } from 'rxjs';
+import { catchError, firstValueFrom, map, throwError, timeout } from 'rxjs';
+import { CommsClient } from '../comms/comms.service';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
 import { removeSpaces } from '../utils';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
+import { WalletInterceptor } from './interceptor/wallet.interceptor';
 import { DocParser } from './parser';
+import { WalletProcessingService } from './services/wallet-processing.service';
 
 function getDateInfo(dateString) {
   try {
@@ -80,8 +84,10 @@ function getDateInfo(dateString) {
 export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
-    @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue
-  ) { }
+    @Inject('COMMS_CLIENT') private commsClient: CommsClient,
+    @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue,
+    private readonly walletProcessingService: WalletProcessingService
+  ) {}
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -127,7 +133,17 @@ export class BeneficiaryController {
   // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('stats')
   async getStats() {
-    return this.client.send({ cmd: BeneficiaryJobs.STATS }, {});
+    const commsStats = await this.commsClient.broadcast.getReport({});
+    const benefStats = await firstValueFrom(
+      this.client.send({ cmd: BeneficiaryJobs.STATS }, {})
+    );
+    return { data: { commsStats: commsStats.data, benefStats: benefStats } };
+  }
+
+  @Get('stats/refresh')
+  async refreshStats() {
+    console.log('first');
+    return this.client.send({ cmd: BeneficiaryJobs.REFRESH_STATS }, {});
   }
 
   // @ApiBearerAuth(APP.JWT_BEARER)
@@ -149,6 +165,7 @@ export class BeneficiaryController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post()
+  @UseInterceptors(WalletInterceptor)
   async create(@Body() dto: CreateBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
@@ -171,6 +188,7 @@ export class BeneficiaryController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseInterceptors(WalletInterceptor)
   @Post('bulk')
   async createBulk(@Body() dto: CreateBeneficiaryDto[]) {
     const data = dto.map((b) => ({
@@ -208,8 +226,8 @@ export class BeneficiaryController {
       age: b['Age'] || null,
       walletAddress: b['Wallet Address'],
       piiData: {
-        name: b['Name*'] || 'Unknown',
-        phone: b['Whatsapp Number*'] || b['Phone Number*'],
+        name: b['Name*'] || b['Name'] || 'Unknown',
+        phone: b['Whatsapp Number*'] || b['Phone Number*'] || b['Phone Number'],
         extras: {
           isAdult:
             getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age*']) > 18,
@@ -218,12 +236,48 @@ export class BeneficiaryController {
       },
     }));
 
+    // Process wallet addresses using the wallet processing service
+    const walletProcessingResult =
+      await this.walletProcessingService.processBeneficiariesWithWallets(
+        beneficiariesMapped
+      );
     return this.client
       .send(
         { cmd: BeneficiaryJobs.CREATE_BULK },
-        { data: beneficiariesMapped, projectUUID: projectId }
+        {
+          payload: walletProcessingResult.validBeneficiaries,
+          projectUUID: projectId,
+        }
       )
       .pipe(
+        map((response) => {
+          if (walletProcessingResult.discardedBeneficiaries.length > 0) {
+            console.warn(
+              `WARNING: ${walletProcessingResult.totalDiscarded} out of ${walletProcessingResult.totalProcessed} beneficiaries were discarded due to Xcapit wallet creation failures:`
+            );
+            walletProcessingResult.discardedBeneficiaries.forEach(
+              (discarded) => {
+                console.warn(
+                  `   - Phone: ${discarded.phoneNumber}, Reason: ${discarded.status}`
+                );
+              }
+            );
+            console.warn(
+              `Successfully processed ${walletProcessingResult.validBeneficiaries.length} beneficiaries with valid wallets.`
+            );
+          }
+
+          return {
+            ...response,
+            discardedBeneficiaries:
+              walletProcessingResult.discardedBeneficiaries,
+            walletProcessingSummary: {
+              totalProcessed: walletProcessingResult.totalProcessed,
+              totalDiscarded: walletProcessingResult.totalDiscarded,
+              totalValid: walletProcessingResult.validBeneficiaries.length,
+            },
+          };
+        }),
         catchError((error) => {
           console.log('error', error);
           return throwError(() => new BadRequestException(error.message));
@@ -248,7 +302,6 @@ export class BeneficiaryController {
     console.log(automatedGroupOption);
     const beneficiaries = await DocParser(docType, file.buffer);
 
-
     // Utility function to sanitize input keys by trimming whitespace
     function sanitizeKey(key: string): string {
       return key.trim();
@@ -260,12 +313,9 @@ export class BeneficiaryController {
         sanitizedBeneficiary[sanitizeKey(key)] = b[key];
       }
       return sanitizedBeneficiary;
-    }
-    );
-
+    });
 
     // Map the beneficiaries to the format expected by the microservice
-
 
     const beneficiariesMapped = beneficiariesWithSanitizedKeys.map((b) => ({
       birthDate: b[sanitizeKey('Birth Date')]
@@ -282,22 +332,26 @@ export class BeneficiaryController {
       age: b[sanitizeKey('Age')] || null,
       walletAddress: b[sanitizeKey('Wallet Address')],
       piiData: {
-        name: b[sanitizeKey('Name*')] || b[sanitizeKey('Beneficiary Name')] || 'Unknown',
+        name:
+          b[sanitizeKey('Name*')] ||
+          b[sanitizeKey('Beneficiary Name')] ||
+          'Unknown',
         phone: removeSpaces(
           b[sanitizeKey('Whatsapp Number*')] ||
-          b[sanitizeKey('Phone Number*')] ||
-          b[sanitizeKey('Phone Number')] ||
-          b[sanitizeKey('Beneficiary Phone Number')] ||
-          b[sanitizeKey('Phone number')]
+            b[sanitizeKey('Phone Number*')] ||
+            b[sanitizeKey('Phone Number')] ||
+            b[sanitizeKey('Beneficiary Phone Number')] ||
+            b[sanitizeKey('Phone number')]
         ),
       },
       extras: {
-        healthWorker: b[sanitizeKey('Health Worker Username')] || "Unknown",
+        healthWorker: b[sanitizeKey('Health Worker Username')] || 'Unknown',
         type: b[sanitizeKey('Type')] || null,
         phone: removeSpaces(
           b[sanitizeKey('Phone Number*')] ||
-          b[sanitizeKey('Beneficiary Phone Number')] ||
-          b[sanitizeKey('Phone number')] || null
+            b[sanitizeKey('Beneficiary Phone Number')] ||
+            b[sanitizeKey('Phone number')] ||
+            null
         ),
         visionCenter: b[sanitizeKey('Vision Center Name')] || null,
         reasonForLead: b[sanitizeKey('Reason For Lead')] || null,
@@ -309,13 +363,9 @@ export class BeneficiaryController {
       },
     }));
 
-
     const uniquePhoneNumberedBeneficiaries = beneficiariesMapped.filter(
       (b, index, self) =>
-        index ===
-        self.findIndex(
-          (t) => t.piiData.phone === b.piiData.phone
-        )
+        index === self.findIndex((t) => t.piiData.phone === b.piiData.phone)
     );
 
     // uniquePhoneNumberedBeneficiaries.forEach((beneficiary) => {
@@ -323,14 +373,27 @@ export class BeneficiaryController {
     // });
     // return "sda"
 
+    console.log(
+      `Trying to upload ${
+        beneficiariesMapped.length
+      } beneficiaries through queue. Unique phone numbers: ${
+        uniquePhoneNumberedBeneficiaries.length
+      }, Duplicate phone numbers: ${
+        beneficiariesMapped.length - uniquePhoneNumberedBeneficiaries.length
+      }`
+    );
 
-    console.log(`Trying to upload ${beneficiariesMapped.length} beneficiaries through queue. Unique phone numbers: ${uniquePhoneNumberedBeneficiaries.length}, Duplicate phone numbers: ${beneficiariesMapped.length - uniquePhoneNumberedBeneficiaries.length}`);
+    // Process wallet addresses using the wallet processing service
+    const beneficiariesWithWallets =
+      await this.walletProcessingService.processBeneficiariesWithWallets(
+        uniquePhoneNumberedBeneficiaries
+      );
 
     return handleMicroserviceCall({
       client: this.client.send(
         { cmd: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE },
         {
-          data: uniquePhoneNumberedBeneficiaries,
+          data: beneficiariesWithWallets,
           projectUUID: projectId,
           ignoreExisting: true,
           automatedGroupOption,
@@ -476,10 +539,45 @@ export class BeneficiaryController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get('groups/:uuid/account-check')
+  @ApiParam({ name: 'uuid', required: true })
+  async groupAccountCheck(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK }, uuid);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get('groups/:uuid/fail-account/export')
+  @ApiParam({ name: 'uuid', required: true })
+  async getGroupBeneficiariesFailedAccount(@Param('uuid') uuid: UUID) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.GET_GROUP_BENEF_FAIL_ACCOUNT },
+      uuid
+    );
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Delete('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
-  async removeGroup(@Param('uuid') uuid: UUID) {
-    return this.client.send({ cmd: BeneficiaryJobs.REMOVE_ONE_GROUP }, uuid);
+  @ApiQuery({
+    name: 'hardDelete',
+    required: false,
+    type: Boolean,
+    description:
+      'If true, permanently deletes the group and beneficiaries. If false or not provided, performs soft delete.',
+  })
+  async removeGroup(
+    @Param('uuid') uuid: UUID,
+    @Query('hardDelete') hardDelete?: boolean
+  ) {
+    const deleteType = hardDelete === true;
+    const command = deleteType
+      ? BeneficiaryJobs.DELETE_ONE_GROUP
+      : BeneficiaryJobs.REMOVE_ONE_GROUP;
+    return this.client.send({ cmd: command }, uuid);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -493,6 +591,21 @@ export class BeneficiaryController {
   ) {
     return this.client.send(
       { cmd: BeneficiaryJobs.UPDATE_GROUP },
+      { uuid, ...dto }
+    );
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Patch('groups/:uuid/addGroupPurpose')
+  @ApiParam({ name: 'uuid', required: true })
+  async addGroupPurpose(
+    @Param('uuid') uuid: UUID,
+    @Body() dto: AddGroupsPurposeDto
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.ADD_GROUP_PURPOSE },
       { uuid, ...dto }
     );
   }

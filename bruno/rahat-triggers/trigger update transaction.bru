@@ -1,0 +1,25 @@
+meta {
+  name: trigger update transaction
+  type: http
+  seq: 18
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.triggers.updateTransaction",
+    "payload": {
+      "uuid": "f9ed92e8-9cbb-4676-8091-b15f9108914b",
+      "transactionHash": "This title are updated"
+    }
+  }
+}

@@ -4,56 +4,52 @@ import 'dotenv/config';
 const prisma = new PrismaClient();
 
 const chainSettings: Setting = {
-  name: "CHAIN_SETTINGS",
+  name: 'CHAIN_SETTINGS',
   value: {
-    id: process.env.CHAIN_ID,
+    chainId: process.env.CHAIN_ID,
     name: process.env.CHAIN_NAME,
-    nativeCurrency: { name: process.env.CURRENCY_NAME, symbol: process.env.CURRENCY_SYMBOL, decimals: 18 },
-    rpcUrls: {
-      default: {
-        http: [
-          process.env.NETWORK_PROVIDER as string
-        ]
-      }
+    type: process.env.CHAIN_TYPE || 'evm', // Default to EVM if not specified
+    rpcUrl: process.env.NETWORK_PROVIDER as string,
+    explorerUrl: process.env.BLOCK_EXPLORER_URL || 'https://etherscan.io',
+    currency: {
+      name: process.env.CURRENCY_NAME,
+      symbol: process.env.CURRENCY_SYMBOL,
     },
-    blockExplorers: {
-      default: { name: "Etherscan", url: "https://etherscan.io" }
-    }
   },
   isReadOnly: false,
   isPrivate: false,
   dataType: 'OBJECT',
-  requiredFields: ['id', 'name', 'nativeCurrency', 'rpcUrls', 'blockExplorers']
-}
+  requiredFields: ['chainId', 'name', 'type', 'rpcUrl', 'currency'],
+};
 
 const subgraphSettings: Setting = {
-  name: "SUBGRAPH_URL",
+  name: 'SUBGRAPH_URL',
   value: process.env.SUBGRAPH_URL || '',
   isReadOnly: false,
   isPrivate: false,
   dataType: 'STRING',
-  requiredFields: []
-}
+  requiredFields: [],
+};
 
 async function main() {
   await prisma.setting.upsert({
     where: {
-      name: 'CHAIN_SETTINGS'
+      name: 'CHAIN_SETTINGS',
     },
     // @ts-ignore
     create: chainSettings,
     // @ts-ignore
-    update: chainSettings
+    update: chainSettings,
   });
 
   await prisma.setting.upsert({
     where: {
-      name: 'SUBGRAPH_URL'
+      name: 'SUBGRAPH_URL',
     },
     // @ts-ignore
     create: subgraphSettings,
     // @ts-ignore
-    update: subgraphSettings
+    update: subgraphSettings,
   });
 }
 
@@ -65,4 +61,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-

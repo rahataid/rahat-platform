@@ -12,7 +12,6 @@ import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { ExportTargerBeneficiary } from '../consumers/target.export.rabbitmq.worker';
 import { ListenersModule } from '../listeners/listener.module';
 import { ProcessorsModule } from '../processors/processor.module';
-import { VendorsModule } from '../vendors/vendors.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -55,7 +54,6 @@ import { AppService } from './app.service';
     }),
 
     BeneficiaryModule,
-    VendorsModule,
     ListenersModule,
     SettingsModule,
     ProcessorsModule,

@@ -1,0 +1,26 @@
+meta {
+  name: "Test Municipality Balance"
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aa.cash-tracker.executeAction",
+    "payload": {
+      "from": "0xe5159f997F32D04F9276567bb2ED4CC0CdC9D8E4",
+     "alias":"UNICEF Donor",
+      "action": "get_cash_balance"
+    }
+  }
+}

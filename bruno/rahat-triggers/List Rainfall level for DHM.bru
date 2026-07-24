@@ -1,0 +1,29 @@
+meta {
+  name: List Rainfall level for DHM
+  type: http
+  seq: 28
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.rainfallLevels.getDhm",
+    "payload": {
+      "page": 1 ,
+      "perPage": 11,
+       "riverBasin": "Mahakali",
+      "type": "HOURLY",
+      "from": "2025/04/24",
+      "to": "2025/04/24"
+    }
+  }
+}

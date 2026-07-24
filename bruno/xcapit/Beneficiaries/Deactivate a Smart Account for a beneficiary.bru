@@ -1,0 +1,21 @@
+meta {
+  name: Deactivate a Smart Account for a beneficiary
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{xcapitURL}}/api/beneficiaries/deactivate-account
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "phoneNumber": ""
+  }
+}

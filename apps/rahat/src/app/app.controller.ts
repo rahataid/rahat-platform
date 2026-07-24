@@ -14,7 +14,9 @@ import { AppService } from './app.service';
 @ApiTags('App')
 @ApiBearerAuth(APP.JWT_BEARER)
 export class AppController {
-  constructor(private readonly appService: AppService) { }
+  constructor(private readonly appService: AppService,
+
+  ) { }
 
   @MessagePattern({ cmd: AppJobs.COMMUNICATION.GET_SETTINGS })
   getSettings() {

@@ -1,0 +1,24 @@
+meta {
+  name: List forecast data sources based on the river station
+  type: http
+  seq: 26
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.riverStations.getDhm",
+    "payload": {
+  
+    }
+  }
+}

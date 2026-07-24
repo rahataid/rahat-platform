@@ -1,0 +1,28 @@
+{
+  "contracts": {
+    "RahatAccessManager": {
+      "address": "0xB964DBE1b609F0C49711578E4281A70C92Ab7723",
+      "startBlock": 36005355
+    },
+    "RahatTreasury": {
+      "address": "0xa333fDc893587Ee94f381B7652C5267beE0EED7e",
+      "startBlock": 36005362
+    },
+    "RahatToken": {
+      "address": "0x3816C1F6EF1EE4b4374D1ff58b75D5706E5CC095",
+      "startBlock": 36005364
+    },
+    "ERC2771Forwarder": {
+      "address": "0xF4A0ECEF2Ea4c375C6e9fa4BC9669247211D47d9",
+      "startBlock": 36005359
+    }
+  },
+  "chainSettings": {
+    "rpcUrl": "https://base-sepolia.infura.io/v3/f2c3f7ea4b574bb1aad38b18439012c7",
+    "chainName": "BASE_SEPOLIA",
+    "nativeCurrency": {
+      "name": "ETH",
+      "symbol": "ETH"
+    }
+  }
+}

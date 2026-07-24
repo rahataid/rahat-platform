@@ -1,0 +1,36 @@
+meta {
+  name: assign-group-to-project
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "beneficiary.assign_group_to_project",
+    "payload": {
+      "beneficiaryGroupId": "24a712e1-7a0f-4326-abc4-2e93b51afd1b"
+    }
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.success: eq true
+}
+
+tests {
+  test('should add the beneficiaries in a group', async () => {
+    const result = res.getBody();
+    expect(res.body.data).to.equal(result.data);
+  });
+}
