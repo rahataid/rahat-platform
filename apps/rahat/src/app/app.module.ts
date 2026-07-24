@@ -17,6 +17,7 @@ import {
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { CommsModule } from '../comms/comms.module';
 import { ExternalAppGuard } from '../decorators';
+import { EventsModule } from '../events/events.module';
 import { GrievanceModule } from '../grievance/grievance.module';
 import { ImportsModule } from '../imports/imports.module';
 import { ListenersModule } from '../listeners/listeners.module';
@@ -73,6 +74,7 @@ import { AppService } from './app.service';
     QueueModule,
     WalletModule,
     NotificationModule,
+    EventsModule,
     CommsModule.forRoot(),
 
   ],
