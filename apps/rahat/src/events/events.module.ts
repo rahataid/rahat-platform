@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
+import { SSE_EVENTS } from '../constants';
 import { EventsController } from './events.controller';
 
 @Module({
@@ -8,7 +9,7 @@ import { EventsController } from './events.controller';
     controllers: [EventsController],
     providers: [
         {
-            provide: 'REDIS_SUBSCRIBER',
+            provide: SSE_EVENTS.SUBSCIBER,
             useFactory: (config: ConfigService) =>
                 new Redis({
                     host: config.get('REDIS_HOST'),

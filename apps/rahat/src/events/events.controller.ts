@@ -2,6 +2,7 @@ import { Controller, Inject, Logger, Sse } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import Redis from 'ioredis';
 import { Observable } from 'rxjs';
+import { SSE_EVENTS } from '../constants';
 
 @Controller('events')
 @ApiTags('Events')
@@ -10,7 +11,7 @@ export class EventsController {
     private readonly logger = new Logger(EventsController.name);
 
     constructor(
-        @Inject('REDIS_SUBSCRIBER') private readonly redis: Redis,
+        @Inject(SSE_EVENTS.SUBSCIBER) private readonly redis: Redis,
     ) { }
 
     @Sse('phases')
