@@ -10,6 +10,7 @@ import {
   CreateBeneficiaryGroupsDto,
   CreateBeneficiaryTransactionDto,
   ImportTempBenefDto,
+  ListBeneficiariesByGroupDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   ListTempGroupsDto,
@@ -51,8 +52,6 @@ export class BeneficiaryController {
   async refreshStats() {
     return this.service.refreshStats();
   }
-
-
 
   @MessagePattern({ cmd: BeneficiaryJobs.FIND_PHONE_BY_UUID })
   async findPhoneByUUID(uuid: UUID[]) {
@@ -220,8 +219,12 @@ export class BeneficiaryController {
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP })
-  getGroup(uuid: string) {
-    return this.service.getOneGroup(uuid);
+  getGroup(payload: string | ({ uuid: string } & ListBeneficiariesByGroupDto)) {
+    if (typeof payload === 'string') {
+      return this.service.getOneGroup(payload);
+    }
+    const { uuid, ...dto } = payload;
+    return this.service.getOneGroup(uuid, dto);
   }
 
   // Handles the event for exporting a group beneficiary bank account fails.
@@ -243,6 +246,16 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK })
   groupAttributesCheck(uuid: string) {
     return this.service.groupAttributesCheck(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_GROUP_BANK_CHECK_STATUS })
+  getGroupBankCheckStatus(uuid: string) {
+    return this.service.getGroupBankCheckStatus(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_BENEFICIARY_BANK_ACCOUNT })
+  getBeneficiaryBankAccount(payload: { uuid?: string; walletAddress?: string }) {
+    return this.service.getBeneficiaryBankAccount(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_GROUPS })

@@ -13,6 +13,7 @@ export const BQUEUE = {
   RAHAT: 'RAHAT',
   RAHAT_PROJECT: 'RAHAT.PROJECT',
   RAHAT_BENEFICIARY: 'RAHAT.BENEFICIARY',
+  RAHAT_BENEFICIARY_BANK_CHECK: 'RAHAT.BENEFICIARY.BANK_CHECK',
   HOST: 'RAHAT.HOST',
   META_TXN: 'RAHAT.META_TXN',
   RAHAT_IMPORT: 'RAHAT.IMPORT',
@@ -394,6 +395,7 @@ export const MS_ACTIONS = {
       GET_ONE: 'aaProject.groupCashTransfer.getOne',
       ALLOCATE_FUND: 'aaProject.groupCashTransfer.assignFund',
       DISBURSE: 'aaProject.groupCashTransfer.disburse',
+      CONFIRM_DISBURSE: 'aaProject.groupCashTransfer.confirmDisburse',
       GET_RECORDS: 'aaProject.groupCashTransfer.getRecords',
       GET_ONE_RECORD: 'aaProject.groupCashTransfer.getOneRecord',
       VALIDATE_BANK_ACCOUNT: 'aaProject.groupCashTransfer.validateBankAccount',
@@ -582,6 +584,9 @@ export const MS_ACTIONS = {
     GET_DHM: 'ms.rainfallLevels.getDhm',
     GET_GLOFAS: 'ms.rainfallLevels.getGlofas',
   },
+
+  MS_SYNC_FORECAST_DATA: 'ms.sources-data.syncForecastData',
+
   MS_HUMIDITY: {
     GET_DHM: 'ms.humidity.getDhm',
     GET_DHM_SINGLE_SERIES: 'ms.humidity.getDhmSingleSeries',
@@ -594,6 +599,7 @@ export const MS_ACTIONS = {
     GET_ALL_GLOFAS: 'ms.probFlood.getAllGlofas',
     GET_ONE_GLOFAS: 'ms.probFlood.getOneGlofas',
   },
+
   MS_ACTIVITIES: {
     GET_ONE: 'ms.activities.getOne',
     GET_ALL: 'ms.activities.getAll',

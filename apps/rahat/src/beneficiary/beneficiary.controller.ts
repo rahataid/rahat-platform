@@ -28,13 +28,14 @@ import {
   CreateBeneficiaryGroupsDto,
   CreateBeneficiaryTransactionDto,
   ImportTempBenefDto,
+  ListBeneficiariesByGroupDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto,
-  ValidateWalletDto,
+  ValidateWalletDto
 } from '@rahataid/extensions';
 import {
   APP,
@@ -446,6 +447,22 @@ export class BeneficiaryController {
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get('bank-account')
+  @ApiQuery({ name: 'uuid', required: false })
+  @ApiQuery({ name: 'walletAddress', required: false })
+  async getBeneficiaryBankAccount(
+    @Query('uuid') uuid?: string,
+    @Query('walletAddress') walletAddress?: string
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.GET_BENEFICIARY_BANK_ACCOUNT },
+      { uuid, walletAddress }
+    );
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   async getBeneficiary(@Param('uuid') uuid: UUID) {
@@ -549,8 +566,14 @@ export class BeneficiaryController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Get('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
-  async getOneGroup(@Param('uuid') uuid: UUID) {
-    return this.client.send({ cmd: BeneficiaryJobs.GET_ONE_GROUP }, uuid);
+  async getOneGroup(
+    @Param('uuid') uuid: UUID,
+    @Query() dto: ListBeneficiariesByGroupDto
+  ) {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.GET_ONE_GROUP },
+      { uuid, ...dto }
+    );
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -560,6 +583,15 @@ export class BeneficiaryController {
   @ApiParam({ name: 'uuid', required: true })
   async groupAccountCheck(@Param('uuid') uuid: UUID) {
     return this.client.send({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK }, uuid);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Get('groups/:uuid/bank-check-status')
+  @ApiParam({ name: 'uuid', required: true })
+  async getGroupBankCheckStatus(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GET_GROUP_BANK_CHECK_STATUS }, uuid);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)

@@ -6,6 +6,9 @@ export const JOBS = {
     GET_DHM: 'aa.jobs.waterLevels.getDhm',
     GET_GLOFAS: 'aa.jobs.waterLevels.getGlofas',
   },
+
+  // SYNC_FORECAST_DATA: 'ms.jobs.sources-data.syncForecastData',
+
   TRIGGERS: {
     DEV_ONLY: 'aa.jobs.triggers.devOnly',
     GET_ALL: 'aa.jobs.triggers.getAll',
@@ -223,6 +226,7 @@ export const JOBS = {
     GET_ONE: 'aa.jobs.groupCashTransfer.getOne',
     ALLOCATE_FUND: 'aa.jobs.groupCashTransfer.assignFund',
     DISBURSE: 'aa.jobs.groupCashTransfer.disburse',
+    CONFIRM_DISBURSE: 'aa.jobs.groupCashTransfer.confirmDisburse',
     GET_RECORDS: 'aa.jobs.groupCashTransfer.getRecords',
     GET_ONE_RECORD: 'aa.jobs.groupCashTransfer.getOneRecord',
     VALIDATE_BANK_ACCOUNT: 'aa.jobs.groupCashTransfer.validateBankAccount',

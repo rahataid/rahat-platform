@@ -259,4 +259,10 @@ export class AppService {
       }
     })
   }
+
+  async getChainType() {
+    const setting = await this.settingsService.getByName('CHAIN_SETTINGS');
+    const chain = setting?.value as { type?: string } | null;
+    return { type: chain?.type ?? null };
+  }
 }
