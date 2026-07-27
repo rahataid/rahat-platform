@@ -14,25 +14,44 @@ export class EventsController {
         @Inject(SSE_EVENTS.SUBSCIBER) private readonly redis: Redis,
     ) { }
 
-    @Sse('phases')
-    phases(): Observable<MessageEvent> {
+    @Sse()
+    events(): Observable<MessageEvent> {
         return new Observable((subscriber) => {
             this.logger.log('SSE client connected');
 
             const onMessage = (channel: string, message: string) => {
-                if (channel === 'phase:events') {
-                    subscriber.next({ data: message } as MessageEvent);
-                }
+                subscriber.next({ data: message } as MessageEvent);
             };
 
-            this.redis.subscribe('phase:events');
+            this.redis.subscribe('phase:events', 'beneficiary:events');
             this.redis.on('message', onMessage);
 
             return () => {
                 this.logger.log('SSE client disconnected');
-                this.redis.unsubscribe('phase:events');
+                this.redis.unsubscribe('phase:events', 'beneficiary:events');
                 this.redis.off('message', onMessage);
             };
         });
     }
+    // @Sse('phases')
+    // phases(): Observable<MessageEvent> {
+    //     return new Observable((subscriber) => {
+    //         this.logger.log('SSE client connected');
+
+    //         const onMessage = (channel: string, message: string) => {
+    //             if (channel === 'phase:events') {
+    //                 subscriber.next({ data: message } as MessageEvent);
+    //             }
+    //         };
+
+    //         this.redis.subscribe('phase:events');
+    //         this.redis.on('message', onMessage);
+
+    //         return () => {
+    //             this.logger.log('SSE client disconnected');
+    //             this.redis.unsubscribe('phase:events');
+    //             this.redis.off('message', onMessage);
+    //         };
+    //     });
+    // }
 }
