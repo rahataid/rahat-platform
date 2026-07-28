@@ -24,11 +24,6 @@ export class AppController {
     return this.appService.getCommunicationSettings()
   }
 
-  @MessagePattern({ cmd: AppJobs.SMTP.GET_SETTINGS })
-  getStats() {
-    return this.appService.getSMTPSettings()
-  }
-
   @MessagePattern({ cmd: AppJobs.FRONTEND_URL.GET })
   getFrontendUrl() {
     return this.appService.getFrontendUrl()

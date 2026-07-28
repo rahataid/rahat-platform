@@ -260,14 +260,6 @@ export class AppService {
     })
   }
 
-  async getSMTPSettings() {
-    return this.prisma.setting.findMany({
-      where: {
-        name: "SMTP"
-      }
-    })
-  }
-
   async getFrontendUrl () {
     return this.prisma.setting.findMany({
       where: {
