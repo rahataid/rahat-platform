@@ -260,6 +260,22 @@ export class AppService {
     })
   }
 
+  async getSMTPSettings() {
+    return this.prisma.setting.findMany({
+      where: {
+        name: "SMTP"
+      }
+    })
+  }
+
+  async getFrontendUrl () {
+    return this.prisma.setting.findMany({
+      where: {
+        name: "FRONTEND_URL"
+      }
+    })
+  }
+
   async getChainType() {
     const setting = await this.settingsService.getByName('CHAIN_SETTINGS');
     const chain = setting?.value as { type?: string } | null;

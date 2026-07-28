@@ -128,6 +128,7 @@ export const JOBS = {
     GET: 'aa.jobs.payout.get',
     UPDATE: 'aa.jobs.payout.update',
     GET_PAYMENT_PROVIDERS: 'aa.jobs.payout.getPaymentProviders',
+    SEND_OTP: 'aa.jobs.payout.sendOtp',
     TRIGGER_PAYOUT: 'aa.jobs.payout.triggerPayout',
     TRIGGER_FAILED_PAYOUT_REQUEST: 'aa.jobs.payout.triggerFailedPayoutRequest',
     TRIGGER_ONE_FAILED_PAYOUT_REQUEST:
@@ -232,7 +233,8 @@ export const JOBS = {
     VALIDATE_BANK_ACCOUNT: 'aa.jobs.groupCashTransfer.validateBankAccount',
     GET_ALL_VALID: 'aa.jobs.groupCashTransfer.getAllValid',
     GET_GCT_DATA: 'aa.jobs.groupCashTransfer.getGCTData',
-    UPDATE_GROUP_RECORD: 'aa.jobs.groupCashTransfer.updateRecord'
+    UPDATE_GROUP_RECORD: 'aa.jobs.groupCashTransfer.updateRecord', 
+    SEND_OTP: 'aa.jobs.groupCashTransfer.sendOtp',
   },
   MULTISIG: {
     GET_SAFE_OWNER: 'aa.jobs.safe-wallet.getOwner',

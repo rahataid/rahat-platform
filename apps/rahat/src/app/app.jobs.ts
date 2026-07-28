@@ -4,5 +4,11 @@ export const AppJobs = {
   COMMUNICATION: {
     GET_SETTINGS: "appJobs.communication.getSettings",
     STATS: "appJobs.communication.stats"
+  },
+  SMTP: {
+    GET_SETTINGS: "appJobs.smtp.getSettings",
+  },
+  FRONTEND_URL: {
+    GET: "appJobs.frontendUrl.get",
   }
 }

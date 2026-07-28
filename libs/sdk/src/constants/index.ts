@@ -300,6 +300,7 @@ export const MS_ACTIONS = {
       LIST: 'aa.payout.list',
       GET: 'aa.payout.get',
       UPDATE: 'aa.payout.update',
+      SEND_OTP: 'aa.payout.sendOtp',
       GET_PAYMENT_PROVIDERS: 'aa.payout.getPaymentProviders',
       TRIGGER_PAYOUT: 'aa.payout.triggerPayout',
       TRIGGER_FAILED_PAYOUT_REQUEST: 'aa.payout.triggerFailedPayoutRequest',
@@ -401,7 +402,8 @@ export const MS_ACTIONS = {
       VALIDATE_BANK_ACCOUNT: 'aaProject.groupCashTransfer.validateBankAccount',
       GET_ALL_VALID: 'aaProject.groupCashTransfer.getAllValid',
       GET_GCT_DATA: 'aaProject.groupCashTransfer.getGCTData',
-      UPDATE_GROUP_RECORD: 'aaProject.groupCashTransfer.updateRecord'
+      UPDATE_GROUP_RECORD: 'aaProject.groupCashTransfer.updateRecord',
+      SEND_OTP: 'aaProject.groupCashTransfer.sendOtp'
     },
     MULTISIG: {
       GET_SAFE_OWNER: 'aa.getSafeOwner',
