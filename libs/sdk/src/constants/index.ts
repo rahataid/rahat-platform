@@ -378,6 +378,7 @@ export const MS_ACTIONS = {
       GET: 'aaProject.ivrTemplates.get',
       UPDATE: 'aaProject.ivrTemplates.update',
       DELETE: 'aaProject.ivrTemplates.delete',
+      SEND_TEST_CALL: 'aaProject.ivrTemplates.sendTestCall',
     },
     BANK_SCRAPE: {
       HBL_ACCOUNTS: 'aa.bank-scrape.hbl.accounts',

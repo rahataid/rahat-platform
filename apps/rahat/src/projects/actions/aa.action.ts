@@ -872,6 +872,13 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.DELETE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.IVR_TEMPLATES.DELETE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.SEND_TEST_CALL]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.IVR_TEMPLATES.SEND_TEST_CALL, uuid }, payload),
   // **** ivr templates end **** //
 
   // **** bank scrape start **** //
