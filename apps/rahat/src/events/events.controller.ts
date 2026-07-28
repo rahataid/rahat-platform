@@ -2,7 +2,7 @@ import { Controller, Inject, Logger, Sse } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import Redis from 'ioredis';
 import { Observable } from 'rxjs';
-import { SSE_EVENTS } from '../constants';
+import { REDIS_CHANNELS, SSE_EVENTS } from '../constants';
 
 @Controller('events')
 @ApiTags('Events')
@@ -23,12 +23,12 @@ export class EventsController {
                 subscriber.next({ data: message } as MessageEvent);
             };
 
-            this.redis.subscribe('phase:events', 'beneficiary:events');
+            this.redis.subscribe(REDIS_CHANNELS.EVENT_TO_PLATFORM);
             this.redis.on('message', onMessage);
 
             return () => {
                 this.logger.log('SSE client disconnected');
-                this.redis.unsubscribe('phase:events', 'beneficiary:events');
+                this.redis.unsubscribe(REDIS_CHANNELS.EVENT_TO_PLATFORM);
                 this.redis.off('message', onMessage);
             };
         });
