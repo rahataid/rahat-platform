@@ -23,12 +23,12 @@ export class EventsController {
                 subscriber.next({ data: message } as MessageEvent);
             };
 
-            this.redis.subscribe(REDIS_CHANNELS.EVENT_TO_PLATFORM);
+            this.redis.subscribe(REDIS_CHANNELS.SSE_LISTENER);
             this.redis.on('message', onMessage);
 
             return () => {
                 this.logger.log('SSE client disconnected');
-                this.redis.unsubscribe(REDIS_CHANNELS.EVENT_TO_PLATFORM);
+                this.redis.unsubscribe(REDIS_CHANNELS.SSE_LISTENER);
                 this.redis.off('message', onMessage);
             };
         });

@@ -3,6 +3,6 @@ export const SSE_EVENTS = {
 };
 
 export const REDIS_CHANNELS = {
-    EVENT_TO_PLATFORM: 'event.platform',
+    SSE_LISTENER: 'sse:listener',
 };
 
