@@ -9,8 +9,8 @@ export * from './offramp';
 export * from './otp';
 export * from './project';
 export * from './settings/settings.types';
+export * from './shared-auth';
 export * from './types';
 export * from './utils';
 export * from './vendor';
 export * from './wallet';
-
