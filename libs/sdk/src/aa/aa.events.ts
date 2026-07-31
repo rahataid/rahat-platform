@@ -204,6 +204,14 @@ export const JOBS = {
     UPDATE_STATUS: 'aa.jobs.grievances.updateStatus',
     GET_OVERVIEW_STATS: 'aa.jobs.grievances.getOverviewStats',
   },
+  IVR_TEMPLATES: {
+    CREATE: 'aa.jobs.ivrTemplates.create',
+    LIST: 'aa.jobs.ivrTemplates.list',
+    GET: 'aa.jobs.ivrTemplates.get',
+    UPDATE: 'aa.jobs.ivrTemplates.update',
+    DELETE: 'aa.jobs.ivrTemplates.delete',
+    SEND_TEST_CALL: 'aa.jobs.ivrTemplates.sendTestCall',
+  },
   BANK_SCRAPE: {
     HBL_ACCOUNTS: 'aa.jobs.bank-scrape.hbl.accounts',
     HBL_TRANSACTIONS: 'aa.jobs.bank-scrape.hbl.transactions',

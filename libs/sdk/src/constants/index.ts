@@ -373,6 +373,14 @@ export const MS_ACTIONS = {
       UPDATE_STATUS: 'aa.grievances.updateStatus',
       GET_OVERVIEW_STATS: 'aa.grievances.getOverviewStats',
     },
+    IVR_TEMPLATES: {
+      CREATE: 'aaProject.ivrTemplates.create',
+      LIST: 'aaProject.ivrTemplates.list',
+      GET: 'aaProject.ivrTemplates.get',
+      UPDATE: 'aaProject.ivrTemplates.update',
+      DELETE: 'aaProject.ivrTemplates.delete',
+      SEND_TEST_CALL: 'aaProject.ivrTemplates.sendTestCall',
+    },
     BANK_SCRAPE: {
       HBL_ACCOUNTS: 'aa.bank-scrape.hbl.accounts',
       HBL_TRANSACTIONS: 'aa.bank-scrape.hbl.transactions',

@@ -863,6 +863,30 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.GRIEVANCES.GET_OVERVIEW_STATS, uuid }, payload),
   // **** grievance end **** //
 
+  // **** ivr templates start **** //
+  [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.IVR_TEMPLATES.CREATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.IVR_TEMPLATES.LIST, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.IVR_TEMPLATES.GET, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.UPDATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.IVR_TEMPLATES.UPDATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.DELETE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.IVR_TEMPLATES.DELETE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.SEND_TEST_CALL]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.IVR_TEMPLATES.SEND_TEST_CALL, uuid }, payload),
+  // **** ivr templates end **** //
+
   // **** bank scrape start **** //
   [MS_ACTIONS.AAPROJECT.BANK_SCRAPE.HBL_ACCOUNTS]: (
     uuid,
