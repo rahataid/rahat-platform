@@ -1,6 +1,33 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
+export class ListBeneficiariesByGroupDto {
+  @ApiPropertyOptional({ example: 'createdAt' })
+  @IsString()
+  @IsOptional()
+  sort?: string;
+
+  @ApiPropertyOptional({ example: 'desc' })
+  @IsString()
+  @IsOptional()
+  order?: 'asc' | 'desc';
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsNumber()
+  @IsOptional()
+  page?: number;
+
+  @ApiPropertyOptional({ example: '10' })
+  @IsNumber()
+  @IsOptional()
+  perPage?: number;
+
+  @ApiPropertyOptional({ example: 'John Doe' })
+  @IsString()
+  @IsOptional()
+  name?: string;
+}
+
 export class ListBeneficiaryGroupDto {
   @ApiProperty({ example: 'createdAt' })
   @IsString()

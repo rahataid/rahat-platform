@@ -307,8 +307,17 @@ export const CIPS_BANK = [
     }
 ]
 
+const normalizeBankName = (name: string): string =>
+    name
+        .toLocaleLowerCase()
+        .replace(/\./g, '')
+        .replace(/\bltd\b/g, 'limited')
+        .replace(/\s+/g, ' ')
+        .trim();
+
 const getBankId = (bankName: string): string | null => {
-    const bankId = CIPS_BANK.find((bank) => bank.bankName.toLocaleLowerCase() === bankName.toLocaleLowerCase())?.bankId;
+    const normalized = normalizeBankName(bankName);
+    const bankId = CIPS_BANK.find((bank) => normalizeBankName(bank.bankName) === normalized)?.bankId;
     return bankId || null;
 }
 

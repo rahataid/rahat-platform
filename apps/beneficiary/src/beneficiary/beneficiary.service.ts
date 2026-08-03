@@ -16,12 +16,13 @@ import {
   CreateBeneficiaryGroupsDto,
   CreateBeneficiaryTransactionDto,
   ImportTempBenefDto,
+  ListBeneficiariesByGroupDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto,
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
   AAJobs,
@@ -1370,7 +1371,10 @@ export class BeneficiaryService {
     };
   }
 
-  async getOneGroup(uuid: string): Promise<GroupWithValidationAA> {
+  async getOneGroup(
+    uuid: string,
+    dto?: ListBeneficiariesByGroupDto
+  ): Promise<GroupWithValidationAA> {
     const group = await this.prisma.beneficiaryGroup.findUnique({
       where: {
         uuid: uuid,
@@ -1407,11 +1411,12 @@ export class BeneficiaryService {
 
     // If groupPurpose is not found and groupedBeneficiaries is empty, return group with isGroupValidForAA as false
     if (!group.groupPurpose || !group.groupedBeneficiaries?.length) {
-      return {
+      const emptyResult: GroupWithValidationAA = {
         ...group,
         isGroupValidForAA: false,
         isAnyBeneficiaryInvalid: false,
       };
+      return this.applyGroupBeneficiaryPagination(uuid, emptyResult, dto);
     }
 
     // If group is found, check if it is valid for AA
@@ -1437,10 +1442,53 @@ export class BeneficiaryService {
       }
     }
 
-    return {
+    const result: GroupWithValidationAA = {
       ...finalData,
       isAnyBeneficiaryInvalid,
     };
+    return this.applyGroupBeneficiaryPagination(uuid, result, dto);
+  }
+
+  // Overrides groupedBeneficiaries with a paginated/searched page when dto requests it, leaving the default (unpaginated) response untouched otherwise.
+  private async applyGroupBeneficiaryPagination(
+    uuid: string,
+    result: GroupWithValidationAA,
+    dto?: ListBeneficiariesByGroupDto
+  ): Promise<GroupWithValidationAA> {
+    if (!dto || !(dto.page || dto.perPage || dto.name)) {
+      return result;
+    }
+
+    const { page, perPage, name, sort = 'createdAt', order = 'desc' } = dto;
+    const where: any = { beneficiaryGroupId: uuid, deletedAt: null };
+    if (name) {
+      where.Beneficiary = {
+        pii: { name: { contains: name, mode: 'insensitive' } },
+      };
+    }
+
+    const paginatedGroupedBeneficiaries = await paginate(
+      this.rsprisma.groupedBeneficiaries,
+      {
+        where,
+        include: {
+          Beneficiary: {
+            include: {
+              pii: true,
+            },
+          },
+        },
+        orderBy: [{ [sort]: order }, { uuid: 'desc' }],
+      },
+      { page, perPage }
+    );
+
+    const response = {
+      ...result,
+      groupedBeneficiaries: paginatedGroupedBeneficiaries.data,
+      meta: paginatedGroupedBeneficiaries.meta,
+    };
+    return response as GroupWithValidationAA;
   }
 
   async isGroupValidForAA(uuid: string) {
@@ -1553,12 +1601,41 @@ export class BeneficiaryService {
   }
 
   async groupAccountCheck(uuid: string, benfGroup: GroupWithValidationAA) {
-    const benfsInGroup = benfGroup.groupedBeneficiaries
+    const benfsWithBankInfo = benfGroup.groupedBeneficiaries
       ?.map((d) => d.Beneficiary)
-      .filter((benf) => (benf.extras as any)?.bank_ac_number);
+      .filter((benf) => (benf.extras as any)?.bank_ac_number) ?? [];
+
+    if (benfsWithBankInfo.length === 0) {
+      this.logger.log(`No beneficiaries with bank account info for group: ${uuid}`);
+      return;
+    }
+
+    // Single DB query: fetch only beneficiaries in this group that still need
+    // validation (no bank account record OR existing record has isValid=false).
+    // Avoids loading benfGroup data into a large IN list — uses a correlated
+    // subquery/join in Prisma via the relation filter on GroupedBeneficiaries.
+    const benfsNeedingCheck = await this.prisma.groupedBeneficiaries.findMany({
+      where: {
+        beneficiaryGroupId: uuid,
+        Beneficiary: {
+          NOT: {
+            bankAccount: { isValid: true },
+          },
+        },
+      },
+      select: {
+        Beneficiary: {
+          select: { uuid: true },
+        },
+      },
+    });
+    const needsCheckIds = new Set(benfsNeedingCheck.map((g) => g.Beneficiary.uuid));
+
+    // Intersect with benfsWithBankInfo so only those that have bank details are queued
+    const benfsInGroup = benfsWithBankInfo.filter((benf) => needsCheckIds.has(benf.uuid));
 
     this.logger.log(
-      `Group account check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`
+      `Group account check for group: ${uuid} — queuing ${benfsInGroup.length} (skipping ${benfsWithBankInfo.length - benfsInGroup.length} already validated)`
     );
 
     const errorBenfs = benfsInGroup.filter(
