@@ -84,6 +84,7 @@ export const JOBS = {
     REFRESH_COMMUNICATION_STATS:
       'rahat.jobs.campaign.refresh_communication_stats',
     LIST_LOGS_FOR_SESSIONS: 'rahat.jobs.campaign.list_logs_for_sessions',
+    BACKFILL_DELIVERIES: 'rahat.jobs.campaign.backfill_deliveries',
   },
   OFFLINE_BENEFICIARIES: {
     SYNC_BENEFICIARIES: 'rahat.jobs.sync_beneficiaries',

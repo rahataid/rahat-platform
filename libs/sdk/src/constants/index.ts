@@ -192,6 +192,7 @@ export const MS_ACTIONS = {
       GET_AUTOMATION_DETAIL: 'elProject.campaign.automation.detail',
       REFRESH_COMMUNICATION_STATS:
         'elProject.campaign.refresh_communication_stats',
+      BACKFILL_DELIVERIES: 'elProject.campaign.backfill_deliveries',
       GET_COMMS_USAGE: 'elProject.campaign.comms_usage',
       GET_COMMS_CREDITS: 'elProject.campaign.comms_credits',
     },
