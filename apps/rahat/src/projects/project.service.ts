@@ -56,8 +56,8 @@ import { commsActions } from './actions/comms.action';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
 
-const NODE_ENV = process.env.NODE_ENV || 'development';
-const CAMBODIA_COUNTRY_CODE = '+855';
+const NODE_ENV = process.env.NODE_ENV || 'production';
+const COUNTRY_CODE_SETTING_NAME = 'COUNTRY_CODE_SETTINGS';
 const KOBO_COUNTRY_CODE =
   process.env.KOBO_COUNTRY_CODE || process.env.DEFAULT_KOBO_COUNTRY_CODE;
 
@@ -448,7 +448,9 @@ export class ProjectService {
     }
     const countryCode =
       KOBO_COUNTRY_CODE ||
-      (NODE_ENV === 'production' ? CAMBODIA_COUNTRY_CODE : '');
+      (NODE_ENV === 'production'
+        ? await this.getKoboCountryCodeFromSettings()
+        : '');
     benef.phone = this.normalizeKoboPhone(benef.phone, countryCode);
 
     const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
@@ -689,6 +691,28 @@ export class ProjectService {
           })
         )
       );
+  }
+
+  async getKoboCountryCodeFromSettings(): Promise<string> {
+    try {
+      const setting = await this.prisma.setting.findUnique({
+        where: { name: COUNTRY_CODE_SETTING_NAME },
+      });
+      const value = setting?.value as Record<string, unknown> | null;
+      if (!value || typeof value !== 'object') return '';
+
+      const code = Object.values(value).find(
+        (v) => typeof v === 'string' && v.trim().length > 0
+      );
+      return typeof code === 'string' ? code.trim() : '';
+    } catch (err) {
+      this.logger.error(
+        `[kobo-import] Failed to read ${COUNTRY_CODE_SETTING_NAME}: ${
+          (err as Error)?.message
+        }`
+      );
+      return '';
+    }
   }
 
   normalizeKoboPhone(phone: string, countryCode = '') {
