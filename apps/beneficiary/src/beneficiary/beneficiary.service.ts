@@ -1276,7 +1276,7 @@ export class BeneficiaryService {
         beneficiaryGroupId: group.uuid,
         projectId: dto.projectId,
       };
-      await (await this.assignBeneficiaryGroupToProject(payload)).toPromise();
+      await (await this.assignBeneficiaryGroupToProject(payload));
     }
 
     return {
@@ -2116,7 +2116,7 @@ export class BeneficiaryService {
         updatedAt: true,
         groupedBeneficiaries: {
           where: { deletedAt: null },
-          select: { beneficiaryId: true },
+          select: { id: true, uuid: true, beneficiaryGroupId: true, beneficiaryId: true },
         },
       },
     });
@@ -2157,8 +2157,10 @@ export class BeneficiaryService {
       // Handle AA project type
       if (project.type.toLowerCase() === 'aa') {
         payload.gender = beneficiary.gender;
-        payload.extras = { ...beneficiary.extras, phone: beneficiary.pii?.phone };
+        payload.extras = { ...(beneficiary.extras as Record<string, unknown>), phone: beneficiary.pii?.phone };
       }
+
+      this.logger.log(`The beneficiary payload is: `, payload);
 
       return payload;
     });
@@ -2186,7 +2188,7 @@ export class BeneficiaryService {
     if (allProjectPayloads.length > 0) {
       this.client.send(
         { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
-        { beneficiaries: allProjectPayloads }
+        { beneficiaryGroupData }
       ).subscribe({
         next: (res) => this.logger.log('Group assignment sync completed', res),
         error: (err) => this.logger.error('Group assignment sync failed', err),
