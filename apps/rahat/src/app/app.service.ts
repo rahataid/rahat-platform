@@ -259,4 +259,18 @@ export class AppService {
       }
     })
   }
+
+  async getFrontendUrl () {
+    return this.prisma.setting.findMany({
+      where: {
+        name: "FRONTEND_URL"
+      }
+    })
+  }
+
+  async getChainType() {
+    const setting = await this.settingsService.getByName('CHAIN_SETTINGS');
+    const chain = setting?.value as { type?: string } | null;
+    return { type: chain?.type ?? null };
+  }
 }

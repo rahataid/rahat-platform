@@ -1,0 +1,11 @@
+meta {
+  name: bank account check
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{url}}/v1/beneficiaries/groups/{{group_id}}/account-check
+  body: none
+  auth: none
+}

@@ -1,13 +1,17 @@
 meta {
-  name: get-beneficiary-uuid
+  name: get-beneficiary-bank
   type: http
-  seq: 13
+  seq: 5
 }
 
 get {
-  url: {{url}}/beneficiaries/fc4cf027-a401-4561-85b1-be58d92dc0e1
+  url: {{url}}/beneficiaries/bank-account?uuid=fc4cf027-a401-4561-85b1-be58d92dc0e1
   body: none
   auth: bearer
+}
+
+params:query {
+  uuid: fc4cf027-a401-4561-85b1-be58d92dc0e1
 }
 
 auth:bearer {

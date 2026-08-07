@@ -24,6 +24,11 @@ export class AppController {
     return this.appService.getCommunicationSettings()
   }
 
+  @MessagePattern({ cmd: AppJobs.FRONTEND_URL.GET })
+  getFrontendUrl() {
+    return this.appService.getFrontendUrl()
+  }
+
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @Get('auth-apps')
@@ -66,6 +71,12 @@ export class AppController {
   @ApiParam({ name: 'address', type: 'string' })
   async getByAddress(@Param('address') address: string) {
     return this.appService.getByAddress(address);
+  }
+
+  @Get('chain-type')
+  @ApiOperation({ summary: 'Get active chain type (public)' })
+  async getChainType() {
+    return this.appService.getChainType();
   }
 
   @Post('settings/seed')

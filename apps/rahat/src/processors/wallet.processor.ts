@@ -33,7 +33,7 @@ export class WalletProcessor {
 
             const provider = new JsonRpcProvider(this.rpcUrl);
             const signer = new ethers.Wallet(this.deployerPrivateKey, provider);
-            const tx = { to: wallet, value: ethers.parseEther('0.01') };
+            const tx = { to: wallet, value: ethers.parseEther('0.0001') };
 
             const transactionResponse = await signer.sendTransaction(tx);
             this.logger.log(`Funding transaction sent: ${transactionResponse.hash}`);
