@@ -406,6 +406,7 @@ export class ProjectService {
   }
 
   async importKoboBeneficiary(uuid: UUID, data: any) {
+    console.log(uuid, 'uuid in import kobo beneficiary');
     const rawPayload = unwrapKoboPayload(data);
     this.logger.log(
       `[kobo-import] raw payload keys: ${JSON.stringify(
@@ -446,9 +447,18 @@ export class ProjectService {
         .split(' ')
         .map((item: string) => item.trim().toUpperCase());
     }
-    const countryCode =
-      KOBO_COUNTRY_CODE ||
-      (NODE_ENV === 'production' ? CAMBODIA_COUNTRY_CODE : '');
+    // const countryCode =
+    //   KOBO_COUNTRY_CODE ||
+    //   (NODE_ENV === 'production' ? CAMBODIA_COUNTRY_CODE : '');
+
+    const projectDetails = await this.prisma.project.findUnique({
+      where: {
+        uuid,
+      },
+    });
+    console.log(projectDetails, 'projectDetails');
+    const countryCode = projectDetails?.countryCode;
+    console.log(countryCode, 'countryCode');
     benef.phone = this.normalizeKoboPhone(benef.phone, countryCode);
 
     const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
