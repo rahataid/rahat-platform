@@ -1,0 +1,5 @@
+export const COUNTRY_CODE_SETTING_NAME = 'COUNTRY_CODE_SETTINGS';
+export const AUTO_APPLY_KOBO_COUNTRY_CODE =
+  process.env.AUTO_APPLY_KOBO_COUNTRY_CODE === 'true';
+export const COUNTRY_CODE_CACHE_TTL_MS =
+  Number(process.env.COUNTRY_CODE_CACHE_TTL_MS) || 60_000;
