@@ -38,9 +38,49 @@ export class AbilityService {
     }
 
     async invalidateCache(userId: number, xrefId?: string): Promise<void> {
+        this.logger.debug(`Removing cache of user : ${userId} with project :${xrefId}`)
         const cacheKey = `ability:${userId}${xrefId ? `:${xrefId}` : ''}`;
         await this.redis.del(cacheKey).catch(() => null);
         this.logger.debug(`Cache invalidated for ${cacheKey}`);
+    }
+
+    async invalidateCacheByRole(roleName: string): Promise<void> {
+        this.logger.debug(`Invalidating cache for role: ${roleName}`);
+
+        const userRoles = await this.prisma.userRole.findMany({
+            where: { Role: { name: roleName } },
+            select: { userId: true },
+            distinct: ['userId'],
+        });
+
+        if (!userRoles.length) {
+            this.logger.debug(`No users found for role: ${roleName}`);
+            return;
+        }
+
+        await Promise.all(
+            userRoles.map((ur) => this.invalidateAllCacheForUser(ur.userId))
+        );
+
+        this.logger.debug(
+            `Invalidated ability cache for ${userRoles.length} user(s) with role: ${roleName}`
+        );
+    }
+
+    private async invalidateAllCacheForUser(userId: number): Promise<void> {
+        const pattern = `ability:${userId}*`;
+        const keys: string[] = [];
+
+        await new Promise<void>((resolve, reject) => {
+            const stream = this.redis.scanStream({ match: pattern, count: 100 });
+            stream.on('data', (resultKeys: string[]) => keys.push(...resultKeys));
+            stream.on('end', resolve);
+            stream.on('error', reject);
+        });
+
+        if (keys.length) {
+            await this.redis.del(...keys).catch(() => null);
+        }
     }
 
     private async getUserPermissions(
