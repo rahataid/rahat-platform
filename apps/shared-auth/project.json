@@ -8,7 +8,11 @@
       "dependsOn": ["mainBuild"],
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["echo built"]
+        "commands": [
+          {
+            "command": "cp -r prisma/ dist/apps/shared-auth/prisma && node apps/shared-auth/modify-package.js"
+          }
+        ]
       }
     },
     "mainBuild": {
