@@ -24,6 +24,11 @@ export class AppController {
     return this.appService.getCommunicationSettings()
   }
 
+  @MessagePattern({ cmd: AppJobs.FRONTEND_URL.GET })
+  getFrontendUrl() {
+    return this.appService.getFrontendUrl()
+  }
+
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @Get('auth-apps')

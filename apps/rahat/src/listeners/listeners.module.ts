@@ -8,6 +8,7 @@ import { BQUEUE } from '@rahataid/sdk';
 import { SettingsModule } from '@rumsan/extensions/settings';
 import { UsersModule } from '../users/users.module';
 import { DevService } from '../utils/develop.service';
+import { EmailController } from './email.controller';
 import { EmailService } from './email.service';
 import { ListenersService } from './listeners.service';
 import { MessageSenderService } from './messageSender.service';
@@ -47,6 +48,7 @@ import { MetaTxnService } from './metatxn.service';
       },
     ])
   ],
+  controllers: [EmailController],
   providers: [ListenersService, DevService, EmailService, MessageSenderService, MetaTxnService],
 })
 export class ListenersModule { }

@@ -3,6 +3,7 @@ export * from './app';
 export * from './beneficiary';
 export * from './comms';
 export * from './constants';
+export * from './email';
 export * as Enums from './enums';
 export * from './grievance';
 export * from './offramp';
