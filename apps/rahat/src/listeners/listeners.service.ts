@@ -50,6 +50,10 @@ export class ListenersService {
   @OnEvent(EVENTS.OTP_CREATED)
   async sendOTPEmail(data: any) {
     this.otp = data.otp;
+
+    // Get the frontend URL from settings
+    const frontendUrl = await this.settings.getSettingsByName('FRONTEND_URL');
+
     this.emailService.sendEmail(
       data.address,
       'Login OTP',
@@ -78,6 +82,7 @@ export class ListenersService {
                 Regards,<br />
                 Team Rahat
               </p>
+              ${frontendUrl ? `<p><a href="${frontendUrl["value"]}" style="color:#fff;">${frontendUrl["value"]}</a></p>` : ''}
             </div>
           </div>
         </div>

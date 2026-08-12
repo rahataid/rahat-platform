@@ -7,12 +7,17 @@ meta {
 post {
   url: {{sdp_admin_url}}/tenants
   body: json
-  auth: inherit
+  auth: basic
+}
+
+auth:basic {
+  username: {{sdp_admin_user}}
+  password: {{sdp_admin_pass}}
 }
 
 body:json {
   {
-    "name": "rumsan-one",
+    "name": "rumsan-three",
     "distribution_account_type": "DISTRIBUTION_ACCOUNT.STELLAR.ENV",
     "owner_email": "manjik.shrestha@rumsan.com",
     "owner_first_name": "rumsan",
