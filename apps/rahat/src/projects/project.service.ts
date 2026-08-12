@@ -14,7 +14,6 @@ import {
   BeneficiaryJobs,
   BQUEUE,
   genRandomPhone,
-  generateRandomWallet,
   MS_ACTIONS,
   MS_TIMEOUT,
   ProjectEvents,
@@ -727,6 +726,8 @@ export class ProjectService {
     }
   }
 
+  // Normalises a Kobo phone to "+<digits>": an international number is kept as
+  // written, a local one gets the configured calling code minus its trunk zero.
   async normalizeKoboPhone(phone: string) {
     const rawPhone = String(phone || '').trim();
     if (!rawPhone) throw new Error('Phone number is required!');
@@ -737,10 +738,9 @@ export class ProjectService {
       return `+${digits.replace(/^00/, '')}`;
     const countryCode = await this.getKoboCountryCodeFromSettings();
     if (!countryCode) {
-      this.logger.error(
-        `[kobo-import] No country code configured in "${COUNTRY_CODE_SETTING_NAME}" setting; returning phone without a calling code.`
+      throw new Error(
+        `[kobo-import] AUTO_APPLY_KOBO_COUNTRY_CODE is enabled but "${COUNTRY_CODE_SETTING_NAME}" could not be resolved; refusing to import a phone without a calling code.`
       );
-      return `+${digits}`;
     }
     const callingCode = String(countryCode).replace(/\D/g, '');
 
