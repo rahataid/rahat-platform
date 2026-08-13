@@ -2,6 +2,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { BeneficiaryJobs, BQUEUE } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
+import { ProjectStatus } from '@prisma/client';
 import { Queue } from 'bull';
 
 @Injectable()
@@ -15,7 +16,11 @@ export class GroupSyncService {
 
   async syncGroup(groupUuid: string): Promise<{ queued: number }> {
     const projects = await this.prisma.beneficiaryGroupProject.findMany({
-      where: { beneficiaryGroupId: groupUuid, deletedAt: null },
+      where: {
+        beneficiaryGroupId: groupUuid,
+        deletedAt: null,
+        Project: { status: { not: ProjectStatus.CLOSED } },
+      },
       select: { projectId: true },
     });
 
