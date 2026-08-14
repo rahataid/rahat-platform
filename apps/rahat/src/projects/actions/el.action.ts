@@ -224,4 +224,11 @@ export const elActions: ProjectActionFunc = {
       { ...payload },
       500000
     ),
+
+  [MS_ACTIONS.ELPROJECT.CRM.BACKFILL_DELIVERIES]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.BACKFILL_DELIVERIES, uuid },
+      { ...payload },
+      500000
+    ),
 };
