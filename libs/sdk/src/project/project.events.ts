@@ -113,4 +113,7 @@ export const JOBS = {
     LIST: 'rahat.jobs.notification.list',
     GET: 'rahat.jobs.notification.get',
   },
+  HEALTH: {
+    CHECK: 'rahat.jobs.health.getcheck'
+  }
 };
