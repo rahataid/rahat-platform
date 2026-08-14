@@ -516,7 +516,7 @@ export class ProjectService {
   }
 
   async checkPiiPhone(phone: string) {
-    return this.prisma.beneficiaryPii.findUnique({
+    return this.prisma.beneficiaryPii.findFirst({
       where: {
         phone,
       },
