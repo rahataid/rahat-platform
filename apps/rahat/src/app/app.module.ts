@@ -16,9 +16,11 @@ import {
 } from '@rumsan/user';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { CommsModule } from '../comms/comms.module';
+import { CronModule } from '../cron/cron.module';
 import { ExternalAppGuard } from '../decorators';
 import { EventsModule } from '../events/events.module';
 import { GrievanceModule } from '../grievance/grievance.module';
+import { HealthModule } from '../health/health.module';
 import { ImportsModule } from '../imports/imports.module';
 import { ListenersModule } from '../listeners/listeners.module';
 import { NotificationModule } from '../notification/notification.module';
@@ -76,6 +78,8 @@ import { AppService } from './app.service';
     NotificationModule,
     EventsModule,
     CommsModule.forRoot(),
+    HealthModule,
+    CronModule
 
   ],
   controllers: [AppController],

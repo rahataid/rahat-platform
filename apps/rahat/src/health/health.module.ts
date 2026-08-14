@@ -13,5 +13,6 @@ import { HealthService } from "./health.service";
     ],
     controllers: [HealthController],
     providers: [HealthService, PrismaService],
+    exports: [HealthService],
 })
 export class HealthModule { }
