@@ -8,26 +8,26 @@ on:
         required: true
         type: choice
         options:
-          - 'test-load'
-          - 'dev-unicef'
-          - 'demo-redcross'
-          - 'aidlink-demo'
-          - 'aidlink-dev'
-          - 'stage-el'
-          - 'main-aa'
-          - 'aa-mcn-main'
-          - 'aa-demo-v2'
-          - 'dev-crm'
-          - 'dev'
-          - 'main'
-          - 'dev-qa'
-          - 'dry-run-pin'
-          - 'aa-stellar'
-          - 'demo-gsma'
-          - 'mcn-demo-2026'
-          - 'mcn-training'
-          - 'release-v4.0.0-nrcs'
-          - 'nrcs-training'
+          - "test-load"
+          - "dev-unicef"
+          - "demo-redcross"
+          - "aidlink-demo"
+          - "aidlink-dev"
+          - "stage-el"
+          - "main-aa"
+          - "aa-mcn-main"
+          - "aa-demo-v2"
+          - "dev-crm"
+          - "dev"
+          - "main"
+          - "dev-qa"
+          - "dry-run-pin"
+          - "aa-stellar"
+          - "demo-gsma"
+          - "mcn-demo-2026"
+          - "mcn-training"
+          - "release-v5.0.0-nrcs"
+          - "nrcs-training"
 
       apps_to_build:
         description: 'Apps to build (leave empty for defaults)'
@@ -128,7 +128,12 @@ jobs:
               TAG="dev-qa"
               SECRET="ENV_AA_DEV-QA"
               APPS="beneficiary,rahat,shared-auth"
-              ;;         
+              ;;
+            dry-run-pin)
+              TAG="dry-run-pin"
+              SECRET="ENV_AA_DRY_RUN_PIN"
+              APPS="beneficiary,rahat"
+              ;;
             aa-stellar)
               TAG="aa-stellar"
               SECRET="ENV_AA_DEV-STELLAR"
@@ -153,6 +158,11 @@ jobs:
               TAG="nrcs-training"
               SECRET="ENV_AA_NRCS_TRAINING"
               APPS="beneficiary,rahat,shared-auth"
+              ;;
+            release-v5.0.0-nrcs)
+              TAG="release-v5.0.0-nrcs"
+              SECRET="ENV_AA_RELEASE_v5.0.0"
+              APPS="beneficiary,rahat"
               ;;
             *)
               echo "Unknown environment: $ENV"
