@@ -471,7 +471,27 @@ export class VendorsService {
 
       dto.extras = { ...extras, ...userExtras };
     }
-    const result = await this.usersService.update(uuid, dto);
+
+    if (dto?.projectVendorUpdates?.length) {
+      for (const projectVendor of dto.projectVendorUpdates) {
+        const { projectId, canSyncWalkin } = projectVendor || {};
+        if (!projectId || typeof canSyncWalkin === 'undefined') continue;
+
+        await this.prisma.projectVendors.updateMany({
+          where: {
+            vendorId: uuid,
+            projectId,
+          },
+          data: {
+            canSyncWalkin,
+            updatedAt: new Date(),
+          },
+        });
+      }
+    }
+
+    const { projectVendorUpdates, ...vendorDto } = dto;
+    const result = await this.usersService.update(uuid, vendorDto);
     const isAssigned = await this.prisma.projectVendors.findFirst({
       where: {
         vendorId: uuid,
