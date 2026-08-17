@@ -501,6 +501,7 @@ model ProjectVendors {
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt()
   deletedAt DateTime?
+  canSyncWalkin Boolean  @default(true)
   extras    Json?     @db.JsonB()
 
   @@unique([projectId, vendorId], name: "projectVendorIdentifier")
