@@ -81,7 +81,7 @@ export async function validateAgainstDB(
     .map((r) => r.beneficiary.uuid)
     .filter(Boolean);
 
-  const beneficiariesByUuid = new Map<string, { uuid: string; walletAddress: string; }>();
+  const beneficiariesByUuid = new Map<string, { uuid: string; walletAddress: string; phone: string | null }>();
 
   if (rowUuids.length > 0) {
     const existingByUuid = await prisma.beneficiary.findMany({
@@ -99,55 +99,55 @@ export async function validateAgainstDB(
       beneficiariesByUuid.set(b.uuid, {
         uuid: b.uuid,
         walletAddress: b.walletAddress,
-        // phone: b.pii?.phone || null,
+        phone: b.pii?.phone || null,
       });
     }
   }
 
   // Collect all phones and wallet addresses
-  // const phones = mappedRows
-  //   .map((r) => r.pii.phone)
-  //   .filter(Boolean);
+  const phones = mappedRows
+    .map((r) => r.pii.phone)
+    .filter(Boolean);
   const walletAddresses = mappedRows
     .map((r) => r.beneficiary.walletAddress)
     .filter(Boolean);
 
   // Batch check phones against DB
-  // if (phones.length > 0) {
-  //   const existingPii = await prisma.beneficiaryPii.findMany({
-  //     where: { phone: { in: phones } },
-  //     select: {
-  //       phone: true,
-  //       beneficiary: {
-  //         select: {
-  //           uuid: true,
-  //         },
-  //       },
-  //     },
-  //   });
+  if (phones.length > 0) {
+    const existingPii = await prisma.beneficiaryPii.findMany({
+      where: { phone: { in: phones } },
+      select: {
+        phone: true,
+        beneficiary: {
+          select: {
+            uuid: true,
+          },
+        },
+      },
+    });
 
-  //   const phoneToBeneficiaryUuid = new Map(existingPii.map((p) => [p.phone, p.beneficiary.uuid]));
+    const phoneToBeneficiaryUuid = new Map(existingPii.map((p) => [p.phone, p.beneficiary.uuid]));
 
-  //   for (const row of mappedRows) {
-  //     if (!row.pii.phone) continue;
+    for (const row of mappedRows) {
+      if (!row.pii.phone) continue;
 
-  //     const ownerUuid = phoneToBeneficiaryUuid.get(row.pii.phone);
-  //     if (!ownerUuid) continue;
+      const ownerUuid = phoneToBeneficiaryUuid.get(row.pii.phone);
+      if (!ownerUuid) continue;
 
-  //     const rowUuid = row.beneficiary.uuid;
-  //     const existingRowBeneficiary = rowUuid ? beneficiariesByUuid.get(rowUuid) : undefined;
-  //     const isSameBeneficiary = !!existingRowBeneficiary && existingRowBeneficiary.uuid === ownerUuid;
+      const rowUuid = row.beneficiary.uuid;
+      const existingRowBeneficiary = rowUuid ? beneficiariesByUuid.get(rowUuid) : undefined;
+      const isSameBeneficiary = !!existingRowBeneficiary && existingRowBeneficiary.uuid === ownerUuid;
 
-  //     if (!isSameBeneficiary) {
-  //       errors.push({
-  //         row: row.rowIndex,
-  //         field: 'phone',
-  //         message: `Phone number "${row.pii.phone}" already exists in the system`,
-  //         rowData: originalRows[row.rowIndex - 1],
-  //       });
-  //     }
-  //   }
-  // }
+      if (!isSameBeneficiary) {
+        errors.push({
+          row: row.rowIndex,
+          field: 'phone',
+          message: `Phone number "${row.pii.phone}" already exists in the system`,
+          rowData: originalRows[row.rowIndex - 1],
+        });
+      }
+    }
+  }
 
   // Batch check wallet addresses against DB
   if (walletAddresses.length > 0) {

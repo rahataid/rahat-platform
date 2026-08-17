@@ -244,16 +244,6 @@ export const aaActions: ProjectActionFunc = {
     payload,
     sendCommand
   ) => sendCommand({ cmd: AAJobs.BENEFICIARY.GET_ONE_GROUP, uuid }, payload),
-
-  [MS_ACTIONS.AAPROJECT.BENEFICIARY.SPONSOR_BENEFICIARY_GROUP]: (
-    uuid,
-    payload,
-    sendCommand
-  ) =>
-    sendCommand(
-      { cmd: AAJobs.BENEFICIARY.SPONSOR_BENEFICIARY_GROUP, uuid },
-      payload
-    ),
   // **** Beneficiary Groups end **** //
 
   // **** fund mgmt ****//
