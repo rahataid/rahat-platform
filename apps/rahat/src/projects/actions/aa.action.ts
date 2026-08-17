@@ -244,6 +244,16 @@ export const aaActions: ProjectActionFunc = {
     payload,
     sendCommand
   ) => sendCommand({ cmd: AAJobs.BENEFICIARY.GET_ONE_GROUP, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.SPONSOR_BENEFICIARY_GROUP]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.BENEFICIARY.SPONSOR_BENEFICIARY_GROUP, uuid },
+      payload
+    ),
   // **** Beneficiary Groups end **** //
 
   // **** fund mgmt ****//
@@ -564,6 +574,12 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.PAYOUT.GET_PAYMENT_PROVIDERS, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.PAYOUT.SEND_OTP]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.PAYOUT.SEND_OTP, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.PAYOUT.TRIGGER_PAYOUT]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PAYOUT.TRIGGER_PAYOUT, uuid }, payload),
 
@@ -857,6 +873,30 @@ export const aaActions: ProjectActionFunc = {
     sendCommand({ cmd: AAJobs.GRIEVANCES.GET_OVERVIEW_STATS, uuid }, payload),
   // **** grievance end **** //
 
+  // **** ivr templates start **** //
+  [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.IVR_TEMPLATES.CREATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.LIST]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.IVR_TEMPLATES.LIST, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.IVR_TEMPLATES.GET, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.UPDATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.IVR_TEMPLATES.UPDATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.DELETE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.IVR_TEMPLATES.DELETE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.IVR_TEMPLATES.SEND_TEST_CALL]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand({ cmd: AAJobs.IVR_TEMPLATES.SEND_TEST_CALL, uuid }, payload),
+  // **** ivr templates end **** //
+
   // **** bank scrape start **** //
   [MS_ACTIONS.AAPROJECT.BANK_SCRAPE.HBL_ACCOUNTS]: (
     uuid,
@@ -974,6 +1014,9 @@ export const aaActions: ProjectActionFunc = {
   // Update the allocation of funds 
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.UPDATE_GROUP_RECORD]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.UPDATE_GROUP_RECORD, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.SEND_OTP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.SEND_OTP, uuid }, payload),
 
   // Get an overview data for GCT related queries
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_GCT_DATA]: (uuid, payload, sendCommand) =>

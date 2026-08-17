@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ClientProxy } from '@nestjs/microservices';
 import { CreateUserDto, ListUserDto } from '@rumsan/extensions/dtos';
 import { PrismaService } from '@rumsan/prisma';
 import { UsersService as RSUserService } from '@rumsan/user';
+import { AUTH_SERVICE_CLIENT } from '@rumsan/user/ability/ms-rpc-auth';
 import { NotificationService } from '../notification/notification.service';
 import { WalletService } from '../wallet/wallet.service';
 
@@ -11,10 +13,11 @@ export class UsersService extends RSUserService {
   constructor(
     protected readonly prisma: PrismaService,
     protected readonly eventEmitter: EventEmitter2,
+    @Inject(AUTH_SERVICE_CLIENT) authClient: ClientProxy,
     protected readonly walletService: WalletService,
     protected readonly notificationService: NotificationService
   ) {
-    super(prisma, eventEmitter);
+    super(prisma, eventEmitter, authClient);
   }
 
   // TODO: Multi-chain support - Currently uses instance's configured chain

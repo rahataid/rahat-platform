@@ -1,0 +1,19 @@
+meta {
+  name: tenant
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:8003/tenants
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  { "name": "rumsan-one", "organization_name": "Rumsan Org", "base_url": "http://localhost:8000", "sdp_ui_base_url": "http://localhost:3000", "owner_email": "manjik.shrestha@rumsan.net", "owner_first_name": "manjik", "owner_last_name": "shrestha", "distribution_account_type": "DISTRIBUTION_ACCOUNT.STELLAR.ENV" }
+}

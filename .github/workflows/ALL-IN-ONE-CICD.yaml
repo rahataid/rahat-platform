@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to deploy"
+        description: 'Environment to deploy'
         required: true
         type: choice
         options:
@@ -30,7 +30,7 @@ on:
           - "nrcs-training"
 
       apps_to_build:
-        description: "Apps to build (leave empty for defaults)"
+        description: 'Apps to build (leave empty for defaults)'
         required: false
         type: string
 
@@ -40,8 +40,8 @@ concurrency:
 
 env:
   CI: false
-  NODE_VERSION: "20.10.0"
-  PNPM_VERSION: "8.14.1"
+  NODE_VERSION: '20.10.0'
+  PNPM_VERSION: '8.14.1'
   REGISTRY: docker.io
   IMAGE_NAMESPACE: esatya
 
@@ -77,7 +77,7 @@ jobs:
             demo-redcross)
               TAG="demo-redcross"
               SECRET="ENV_AA_REDCROSS"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             aidlink-demo)
               TAG="aidlink-demo"
@@ -117,7 +117,7 @@ jobs:
             dev)
               TAG="dev"
               SECRET="ENV_AA_DEV"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             main)
               TAG="latest"
@@ -127,7 +127,7 @@ jobs:
             dev-qa)
               TAG="dev-qa"
               SECRET="ENV_AA_DEV-QA"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             dry-run-pin)
               TAG="dry-run-pin"
@@ -137,27 +137,27 @@ jobs:
             aa-stellar)
               TAG="aa-stellar"
               SECRET="ENV_AA_DEV-STELLAR"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             demo-gsma)
               TAG="demo-gsma"
               SECRET="ENV_AA_DEMO_GSMA"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             mcn-demo-2026)
               TAG="mcn-demo-2026"
               SECRET="ENV_AA_DEMO_STELLAR"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             mcn-training)
               TAG="mcn-training"
               SECRET="ENV_AA_MCN_TRAINING"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             nrcs-training)
               TAG="nrcs-training"
               SECRET="ENV_AA_NRCS_TRAINING"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             release-v5.0.0-nrcs)
               TAG="release-v5.0.0-nrcs"
@@ -239,7 +239,7 @@ jobs:
         with:
           username: ${{ steps.vault.outputs.DOCKERHUB_USERNAME }}
           password: ${{ steps.vault.outputs.DOCKERHUB_TOKEN }}
-          
+
       # -----------------------------
       # Node + PNPM Setup
       # -----------------------------
@@ -270,7 +270,6 @@ jobs:
 
       - name: Build Application
         run: npx nx build ${{ matrix.app }}
-
 
       - name: Extract Git Metadata
         id: meta

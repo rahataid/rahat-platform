@@ -3,14 +3,15 @@ export * from './app';
 export * from './beneficiary';
 export * from './comms';
 export * from './constants';
+export * from './email';
 export * as Enums from './enums';
 export * from './grievance';
 export * from './offramp';
 export * from './otp';
 export * from './project';
 export * from './settings/settings.types';
+export * from './shared-auth';
 export * from './types';
 export * from './utils';
 export * from './vendor';
 export * from './wallet';
-
