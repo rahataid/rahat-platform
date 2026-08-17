@@ -4,5 +4,8 @@ export const AppJobs = {
   COMMUNICATION: {
     GET_SETTINGS: "appJobs.communication.getSettings",
     STATS: "appJobs.communication.stats"
+  },
+  FRONTEND_URL: {
+    GET: "appJobs.frontendUrl.get",
   }
 }

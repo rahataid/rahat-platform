@@ -1,0 +1,30 @@
+meta {
+  name: sync-with-projects
+  type: http
+  seq: 14
+}
+
+post {
+  url: {{url}}/beneficiaries/groups/{{ben_group_uuid}}/sync
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcklkIjoxLCJ1dWlkIjoiZTcwZTBjNDEtMWU1ZS00OTg5LTlhZjYtOGQ3ZTczNWVmZGU0IiwibmFtZSI6Ik1hbmppayIsImVtYWlsIjoibWFuamlrLnNocmVzdGhhQHJ1bXNhbi5jb20iLCJwaG9uZSI6bnVsbCwid2FsbGV0IjoiMHg5YmQzMzk3RTY5MzkyZkU2OThBMDk0QjE3Q2RBQmYyZjZDYTY0OTBCIiwicm9sZXMiOlsiQWRtaW4iXSwicGVybWlzc2lvbnMiOlt7ImFjdGlvbiI6Im1hbmFnZSIsInN1YmplY3QiOiJhbGwiLCJpbnZlcnRlZCI6ZmFsc2UsImNvbmRpdGlvbnMiOm51bGx9XSwic2Vzc2lvbklkIjoiYjM2ZjZlODQtMGRkOC00MGExLThmZGItNmZlOTQ1ZWE5NzFmIiwiaWF0IjoxNzg0MTY4NTQ5LCJleHAiOjE3ODQyNTQ5NDl9.RhBlBDHd5113XpJ6HSiOxBdOppRFrSWjyOObazKj0S8
+}
+
+assert {
+  res.status: eq 201
+  res.body.success: eq true
+  res.body.data: isJson
+}
+
+tests {
+  test('should create new beneficiary if wallet is provided', async () => {
+    const data = res.getBody();
+    expect(res.getStatus()).to.equal(201);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.equal(data.data);
+  });
+}

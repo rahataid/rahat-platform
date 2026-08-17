@@ -1,0 +1,34 @@
+meta {
+  name: get-beneficiary-bank
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{url}}/beneficiaries/bank-account?uuid=fc4cf027-a401-4561-85b1-be58d92dc0e1
+  body: none
+  auth: bearer
+}
+
+params:query {
+  uuid: fc4cf027-a401-4561-85b1-be58d92dc0e1
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcklkIjoxLCJ1dWlkIjoiMTFkOWQwYWItNGM3ZC00MGQ0LTlhYzUtYTVhZTRmMmQ1OGI4IiwibmFtZSI6IlJ1bXNhbiIsImVtYWlsIjoicnVtc2FuQG1haWxpbmF0b3IuY29tIiwicGhvbmUiOm51bGwsIndhbGxldCI6IjB4OWJkMzM5N0U2OTM5MmZFNjk4QTA5NEIxN0NkQUJmMmY2Q2E2NDkwQiIsInJvbGVzIjpbIkFkbWluIl0sInBlcm1pc3Npb25zIjpbeyJhY3Rpb24iOiJtYW5hZ2UiLCJzdWJqZWN0IjoiYWxsIiwiaW52ZXJ0ZWQiOmZhbHNlLCJjb25kaXRpb25zIjpudWxsfV0sInNlc3Npb25JZCI6IjA3Yjk2OTE1LTNkYTgtNGRiYS04MDZkLTcyNzhmYWFmY2MxYyIsImlhdCI6MTc4MzQ2OTI5NCwiZXhwIjoxNzgzNTU1Njk0fQ.zl0xXTXVH60sbTQ0g0xL1YqnjR0SUNTSRG_-9hGF3BQ
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+  res.body.data: isJson object
+}
+
+tests {
+  test('should return detail of beneficiary using uuid', async () => {
+    const resData = res.getBody();
+    expect(res.body.data.uuid).to.equal(resData.data.uuid);
+    expect(res.body.data).to.equal(resData.data);
+    expect(res.body.data).to.have.property('uuid');
+  });
+}
