@@ -1,0 +1,24 @@
+meta {
+  name: sponsor-group
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/v1/projects/{{group_id}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "aaProject.beneficiary.sponsorBeneficiaryGroup",
+    "payload": {
+      "groupUuid":"b3f7ba85-d7da-4a18-bd9e-550e5f90cecd"
+    }
+  }
+}
