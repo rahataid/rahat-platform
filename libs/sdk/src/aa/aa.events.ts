@@ -81,6 +81,7 @@ export const JOBS = {
     GET_TOKEN_DETAILS: 'aa.jobs.beneficiary.getTokenDetails',
     GENERATE_QR_PDF: 'aa.jobs.beneficiary.generateQrPdf',
     GET_QR_PDF: 'aa.jobs.beneficiary.getQrPdf',
+    SPONSOR_BENEFICIARY_GROUP: 'aa.jobs.beneficiary.sponsorBeneficiaryGroup',
     REVOKE_SPONSORSHIP_FOR_GROUP: 'aa.jobs.beneficiary.revokeSponsorshipForGroup',
   },
   CONTRACT: {
