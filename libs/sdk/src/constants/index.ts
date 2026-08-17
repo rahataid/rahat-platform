@@ -248,6 +248,7 @@ export const MS_ACTIONS = {
       GET_TOKEN_DETAILS: 'aaProject.beneficiary.getTokenDetails',
       GENERATE_QR_PDF: 'aaProject.beneficiary.generateQrPdf',
       GET_QR_PDF: 'aaProject.beneficiary.getQrPdf',
+      REVOKE_SPONSORSHIP_FOR_GROUP: 'aaProject.beneficiary.revokeSponsorshipForGroup',
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
