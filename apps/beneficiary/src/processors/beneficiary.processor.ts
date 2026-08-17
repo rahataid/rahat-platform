@@ -170,15 +170,19 @@ export class BeneficiaryProcessor {
 
       if (!ignoreExisting) {
         if (duplicatePhones.length > 0) {
-          throw new RpcException(
-            `Duplicate phone numbers: ${duplicatePhones.join(', ')}`
-          );
+          throw new RpcException({
+            message: `[DUPLICATE_PHONE_NUMBERS_IN_BATCH] Duplicate phone numbers: ${duplicatePhones.join(', ')}`,
+            code: 'DUPLICATE_PHONE_NUMBERS_IN_BATCH',
+            params: { phones: duplicatePhones.join(', ') },
+          });
         }
 
         if (duplicateWallets.length > 0) {
-          throw new RpcException(
-            `Duplicate wallet addresses: ${duplicateWallets.join(', ')}`
-          );
+          throw new RpcException({
+            message: `[DUPLICATE_WALLET_ADDRESSES_IN_BATCH] Duplicate wallet addresses: ${duplicateWallets.join(', ')}`,
+            code: 'DUPLICATE_WALLET_ADDRESSES_IN_BATCH',
+            params: { wallets: duplicateWallets.join(', ') },
+          });
         }
       } else {
         // Filter out duplicates if `ignoreExisting` is true

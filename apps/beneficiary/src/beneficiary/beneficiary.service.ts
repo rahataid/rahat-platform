@@ -823,7 +823,11 @@ export class BeneficiaryService {
       },
     });
 
-    if (!findUuid) throw new Error('Data not Found');
+    if (!findUuid)
+      throw new RpcException({
+        message: '[BENEFICIARY_DATA_NOT_FOUND] Data not Found',
+        code: 'BENEFICIARY_DATA_NOT_FOUND',
+      });
     const { piiData, id, ...rest } = dto;
 
     if (piiData?.phone) {
@@ -834,7 +838,10 @@ export class BeneficiaryService {
         },
       });
       if (benWithSameNumber)
-        throw new RpcException('Phone number should be unique');
+        throw new RpcException({
+          message: '[PHONE_NUMBER_SHOULD_BE_UNIQUE] Phone number should be unique',
+          code: 'PHONE_NUMBER_SHOULD_BE_UNIQUE',
+        });
     }
 
     const rdata = await this.prisma.beneficiary.update({
@@ -865,7 +872,11 @@ export class BeneficiaryService {
       },
     });
 
-    if (!findUuid) throw new Error('Data not Found');
+    if (!findUuid)
+      throw new RpcException({
+        message: '[BENEFICIARY_DATA_NOT_FOUND] Data not Found',
+        code: 'BENEFICIARY_DATA_NOT_FOUND',
+      });
 
     await this.deletePIIByBenefUUID(uuid);
 
@@ -899,7 +910,11 @@ export class BeneficiaryService {
       },
     });
 
-    if (!findUuid) throw new Error('Data not Found');
+    if (!findUuid)
+      throw new RpcException({
+        message: '[BENEFICIARY_DATA_NOT_FOUND] Data not Found',
+        code: 'BENEFICIARY_DATA_NOT_FOUND',
+      });
 
     const rdata = await this.prisma.beneficiary.update({
       where: {
@@ -1092,15 +1107,19 @@ export class BeneficiaryService {
 
       if (!ignoreExisting) {
         if (duplicatePhones.length > 0) {
-          throw new RpcException(
-            `Duplicate phone numbers: ${duplicatePhones.join(', ')}`
-          );
+          throw new RpcException({
+            message: `[DUPLICATE_PHONE_NUMBERS_IN_BATCH] Duplicate phone numbers: ${duplicatePhones.join(', ')}`,
+            code: 'DUPLICATE_PHONE_NUMBERS_IN_BATCH',
+            params: { phones: duplicatePhones.join(', ') },
+          });
         }
 
         if (duplicateWallets.length > 0) {
-          throw new RpcException(
-            `Duplicate wallet addresses: ${duplicateWallets.join(', ')}`
-          );
+          throw new RpcException({
+            message: `[DUPLICATE_WALLET_ADDRESSES_IN_BATCH] Duplicate wallet addresses: ${duplicateWallets.join(', ')}`,
+            code: 'DUPLICATE_WALLET_ADDRESSES_IN_BATCH',
+            params: { wallets: duplicateWallets.join(', ') },
+          });
         }
       } else {
         // Filter out duplicates if `ignoreExisting` is true
@@ -1262,7 +1281,10 @@ export class BeneficiaryService {
     });
 
     if (benGroup) {
-      throw new RpcException('Beneficiary group already exist.');
+      throw new RpcException({
+        message: '[BENEFICIARY_GROUP_ALREADY_EXISTS] Beneficiary group already exist.',
+        code: 'BENEFICIARY_GROUP_ALREADY_EXISTS',
+      });
     }
 
     const group = await this.prisma.beneficiaryGroup.create({
@@ -1307,7 +1329,10 @@ export class BeneficiaryService {
     });
 
     if (!group) {
-      throw new RpcException('Beneficiary group not found.');
+      throw new RpcException({
+        message: '[BENEFICIARY_GROUP_NOT_FOUND] Beneficiary group not found.',
+        code: 'BENEFICIARY_GROUP_NOT_FOUND',
+      });
     }
 
     // Get existing beneficiary UUIDs in the group to avoid duplicates
@@ -1351,9 +1376,11 @@ export class BeneficiaryService {
     const notFoundUuids = beneficiaryUuids.filter((uuid) => !foundUuids.has(uuid));
 
     if (notFoundUuids.length > 0) {
-      throw new RpcException(
-        `Beneficiaries not found: ${notFoundUuids.join(', ')}`
-      );
+      throw new RpcException({
+        message: `[BENEFICIARIES_NOT_FOUND] Beneficiaries not found: ${notFoundUuids.join(', ')}`,
+        code: 'BENEFICIARIES_NOT_FOUND',
+        params: { uuids: notFoundUuids.join(', ') },
+      });
     }
 
     // Create the grouped beneficiaries
@@ -1409,7 +1436,10 @@ export class BeneficiaryService {
     });
 
     if (!group) {
-      throw new RpcException('Group not found');
+      throw new RpcException({
+        message: '[BENEFICIARY_GROUP_NOT_FOUND] Group not found',
+        code: 'BENEFICIARY_GROUP_NOT_FOUND',
+      });
     }
 
     // If groupPurpose is not found and groupedBeneficiaries is empty, return group with isGroupValidForAA as false
@@ -1713,9 +1743,10 @@ export class BeneficiaryService {
     const { uuid, walletAddress } = payload || {};
 
     if (!uuid && !walletAddress) {
-      throw new RpcException(
-        'Either beneficiary uuid or walletAddress is required'
-      );
+      throw new RpcException({
+        message: '[BENEFICIARY_UUID_OR_WALLET_REQUIRED] Either beneficiary uuid or walletAddress is required',
+        code: 'BENEFICIARY_UUID_OR_WALLET_REQUIRED',
+      });
     }
 
     let beneficiaryUuid = uuid;
@@ -1726,7 +1757,10 @@ export class BeneficiaryService {
       });
 
       if (!benf) {
-        throw new RpcException('Beneficiary not found');
+        throw new RpcException({
+          message: '[BENEFICIARY_NOT_FOUND] Beneficiary not found',
+          code: 'BENEFICIARY_NOT_FOUND',
+        });
       }
 
       beneficiaryUuid = benf.uuid;
@@ -1776,7 +1810,10 @@ export class BeneficiaryService {
       },
     });
     if (!benfGroup)
-      throw new RpcException('Beneficiary group not found or already deleted.');
+      throw new RpcException({
+        message: '[BENEFICIARY_GROUP_NOT_FOUND_OR_DELETED] Beneficiary group not found or already deleted.',
+        code: 'BENEFICIARY_GROUP_NOT_FOUND_OR_DELETED',
+      });
 
     return this.prisma.beneficiaryGroup.update({
       where: {
@@ -1797,9 +1834,11 @@ export class BeneficiaryService {
 
     if (!benefGroup) {
       this.logger.warn(`Group not found or already deleted: ${uuid}`);
-      throw new RpcException(
-        'Beneficiary group not found or has already been deleted.'
-      );
+      throw new RpcException({
+        message:
+          '[BENEFICIARY_GROUP_NOT_FOUND_OR_DELETED] Beneficiary group not found or has already been deleted.',
+        code: 'BENEFICIARY_GROUP_NOT_FOUND_OR_DELETED',
+      });
     }
 
     const groupProjects = await this.prisma.beneficiaryGroupProject.findMany({
@@ -1808,9 +1847,11 @@ export class BeneficiaryService {
 
     if (groupProjects.length > 0) {
       this.logger.warn(`Group ${uuid} is linked to projects.`);
-      throw new RpcException(
-        'Cannot delete group: it is currently assigned to one or more projects. Please remove the group from all projects first.'
-      );
+      throw new RpcException({
+        message:
+          '[CANNOT_DELETE_GROUP_ASSIGNED_TO_PROJECT] Cannot delete group: it is currently assigned to one or more projects. Please remove the group from all projects first.',
+        code: 'CANNOT_DELETE_GROUP_ASSIGNED_TO_PROJECT',
+      });
     }
 
     const groupedBeneficiaries =
@@ -1959,10 +2000,17 @@ export class BeneficiaryService {
       include: { groupedBeneficiaries: true },
     });
 
-    if (!existingGroup) throw new Error('Group not found.');
+    if (!existingGroup)
+      throw new RpcException({
+        message: '[BENEFICIARY_GROUP_NOT_FOUND] Group not found.',
+        code: 'BENEFICIARY_GROUP_NOT_FOUND',
+      });
 
     if (!dto.name && !dto.beneficiaries?.length) {
-      throw new RpcException('Nothing to update. Provide a name or beneficiaries.');
+      throw new RpcException({
+        message: '[NOTHING_TO_UPDATE] Nothing to update. Provide a name or beneficiaries.',
+        code: 'NOTHING_TO_UPDATE',
+      });
     }
 
     if (dto.name) {
@@ -1973,7 +2021,10 @@ export class BeneficiaryService {
       });
 
       if (benGroup) {
-        throw new RpcException('Beneficiary group already exist.');
+        throw new RpcException({
+          message: '[BENEFICIARY_GROUP_ALREADY_EXISTS] Beneficiary group already exist.',
+          code: 'BENEFICIARY_GROUP_ALREADY_EXISTS',
+        });
       }
     }
 
@@ -2067,7 +2118,11 @@ export class BeneficiaryService {
       },
     });
 
-    if (!group) throw new RpcException('Group not found');
+    if (!group)
+      throw new RpcException({
+        message: '[BENEFICIARY_GROUP_NOT_FOUND] Group not found',
+        code: 'BENEFICIARY_GROUP_NOT_FOUND',
+      });
     await this.prisma.beneficiaryGroup.update({
       where: {
         uuid: dto.uuid,
@@ -2111,7 +2166,10 @@ export class BeneficiaryService {
         );
 
         if (!isGroupValidForAA) {
-          throw new RpcException('Group is not valid for AA.');
+          throw new RpcException({
+            message: '[GROUP_NOT_VALID_FOR_AA] Group is not valid for AA.',
+            code: 'GROUP_NOT_VALID_FOR_AA',
+          });
         }
       }
 
@@ -2513,7 +2571,11 @@ export class BeneficiaryService {
 
         if (alreadyInProject) {
           this.logger.warn(`Beneficiary with phone ${piiData.phone} already exists and is assigned to the same project ${projectId}.`);
-          throw new RpcException(`Beneficiary with phone ${piiData.phone} already exists and is assigned to ${projectId} project.`);
+          throw new RpcException({
+            message: `[BENEFICIARY_PHONE_ALREADY_ASSIGNED_TO_PROJECT] Beneficiary with phone ${piiData.phone} already exists and is assigned to ${projectId} project.`,
+            code: 'BENEFICIARY_PHONE_ALREADY_ASSIGNED_TO_PROJECT',
+            params: { phone: piiData.phone, projectId },
+          });
         }
 
         // If beneficiary exists but not in the project, assign to project without creating new beneficiary
@@ -2532,7 +2594,10 @@ export class BeneficiaryService {
 
     if (!walletAddress) {
       this.logger.error('Failed to obtain a valid wallet address for the beneficiary.');
-      throw new RpcException('Failed to obtain a valid wallet address for the beneficiary. Please try again.');
+      throw new RpcException({
+        message: '[FAILED_TO_OBTAIN_WALLET_ADDRESS] Failed to obtain a valid wallet address for the beneficiary. Please try again.',
+        code: 'FAILED_TO_OBTAIN_WALLET_ADDRESS',
+      });
     }
 
     try {

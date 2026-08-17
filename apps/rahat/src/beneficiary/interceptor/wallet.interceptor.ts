@@ -81,7 +81,10 @@ export class WalletInterceptor implements NestInterceptor {
 
       throw error instanceof RpcException
         ? error
-        : new RpcException('Wallet processing failed');
+        : new RpcException({
+            message: 'Wallet processing failed',
+            code: 'WALLET_PROCESSING_FAILED',
+          });
     }
   }
 
@@ -149,12 +152,19 @@ export class WalletInterceptor implements NestInterceptor {
     try {
       const isValid = await this.walletService.validateAddress(walletAddress);
       if (!isValid) {
-        throw new RpcException(
-          `Invalid wallet address format: ${walletAddress}`
-        );
+        throw new RpcException({
+          message: `Invalid wallet address format: ${walletAddress}`,
+          code: 'INVALID_WALLET_ADDRESS_FORMAT',
+          params: { addr: walletAddress },
+        });
       }
     } catch (error) {
-      throw new RpcException(`Invalid wallet address: ${error.message}`);
+      if (error instanceof RpcException) throw error;
+      throw new RpcException({
+        message: `Invalid wallet address: ${error.message}`,
+        code: 'INVALID_WALLET_ADDRESS',
+        params: { message: error.message },
+      });
     }
 
     const existingBeneficiary = await this.prismaService.beneficiary.findUnique(
@@ -165,7 +175,10 @@ export class WalletInterceptor implements NestInterceptor {
 
     if (existingBeneficiary) {
       console.log('Wallet address already exists');
-      throw new RpcException('Wallet address already exists');
+      throw new RpcException({
+        message: 'Wallet address already exists',
+        code: 'WALLET_ADDRESS_ALREADY_EXISTS',
+      });
     }
 
     return walletAddress;

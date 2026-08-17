@@ -1,6 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
@@ -198,7 +198,10 @@ export class AppService {
     });
 
     if (existingSetting) {
-      throw new Error('Setting with this name already exists'); // 400 Bad Request
+      throw new BadRequestException({
+        message: 'Setting with this name already exists',
+        code: 'SETTING_NAME_ALREADY_EXISTS',
+      }); // 400 Bad Request
     }
     const newSetting = await this.prisma.setting.create({
       data: {
