@@ -106,6 +106,7 @@ model UserRole {
   userId Int
   roleId Int
   expiry DateTime?
+  xrefId String?
 
   User User @relation(fields: [userId], references: [id])
   Role Role @relation(fields: [roleId], references: [id])
@@ -113,7 +114,7 @@ model UserRole {
   createdAt DateTime @default(now())
   createdBy Int?
 
-  @@unique([userId, roleId], name: "userRoleIdentifier")
+  @@unique([userId, roleId, xrefId], name: "userRoleIdentifier")
   @@map("tbl_users_roles")
 }
 
@@ -428,7 +429,7 @@ enum BeneficiaryTypes {
 model BeneficiaryPii {
   beneficiaryId Int         @unique
   name          String?
-  phone         String      @unique
+  phone         String      
   email         String?
   extras        Json?       @db.JsonB()
   beneficiary   Beneficiary @relation("BeneficiaryToPii", fields: [beneficiaryId], references: [id])

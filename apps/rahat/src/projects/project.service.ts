@@ -49,7 +49,6 @@ import { CAMBODIA_JOBS } from './actions/cambodia.action';
 import { notificationActions } from './actions/common.action';
 import { commsActions } from './actions/comms.action';
 import { rpActions } from './actions/rp.action';
-import { userRequiredActions } from './actions/user-required.action';
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const CAMBODIA_COUNTRY_CODE = '+855';
@@ -172,15 +171,15 @@ export class ProjectService {
   ) {
     try {
       console.log('CMD', cmd);
-      const requiresUser = userRequiredActions.has(action);
-      console.log({ requiresUser });
+      // const requiresUser = userRequiredActions.has(action);
+      // console.log({ requiresUser });
       console.log('Payload', payload);
       console.log('User', user);
 
       return client
         .send(cmd, {
           ...payload,
-          ...(requiresUser && { user }),
+          ...({ user }),
         })
         .pipe(
           timeout(timeoutValue),
@@ -516,7 +515,7 @@ export class ProjectService {
   }
 
   async checkPiiPhone(phone: string) {
-    return this.prisma.beneficiaryPii.findUnique({
+    return this.prisma.beneficiaryPii.findFirst({
       where: {
         phone,
       },

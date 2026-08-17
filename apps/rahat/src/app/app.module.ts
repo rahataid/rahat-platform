@@ -9,10 +9,11 @@ import { StatsModule } from '@rahat/stats';
 import { SettingsModule } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import {
+  AbilityModule,
   AuthsModule,
   RSUserModule,
   RolesModule,
-  UsersModule,
+  UsersModule
 } from '@rumsan/user';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { CommsModule } from '../comms/comms.module';
@@ -35,12 +36,15 @@ import { TokenModule } from '../token/token.module';
 import { UploadModule } from '../upload/upload.module';
 import { AppUsersModule } from '../vendors/vendors.module';
 import { WalletModule } from '../wallet/wallet.module';
+import { ABILITY_ACTIONS, ABILITY_SUBJECTS } from './app.constants';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthClientModule } from './auth-client.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    AuthClientModule,
     BeneficiaryModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
@@ -80,7 +84,7 @@ import { AppService } from './app.service';
     CommsModule.forRoot(),
     HealthModule,
     CronModule
-
+    AbilityModule.forRoot({ subjects: ABILITY_SUBJECTS, actions: ABILITY_ACTIONS }),
   ],
   controllers: [AppController],
   providers: [
