@@ -77,7 +77,7 @@ jobs:
             demo-redcross)
               TAG="demo-redcross"
               SECRET="ENV_AA_REDCROSS"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             aidlink-demo)
               TAG="aidlink-demo"
@@ -127,32 +127,32 @@ jobs:
             dev-qa)
               TAG="dev-qa"
               SECRET="ENV_AA_DEV-QA"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;         
             aa-stellar)
               TAG="aa-stellar"
               SECRET="ENV_AA_DEV-STELLAR"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             demo-gsma)
               TAG="demo-gsma"
               SECRET="ENV_AA_DEMO_GSMA"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             mcn-demo-2026)
               TAG="mcn-demo-2026"
               SECRET="ENV_AA_DEMO_STELLAR"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             mcn-training)
               TAG="mcn-training"
               SECRET="ENV_AA_MCN_TRAINING"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             nrcs-training)
               TAG="nrcs-training"
               SECRET="ENV_AA_NRCS_TRAINING"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             *)
               echo "Unknown environment: $ENV"
