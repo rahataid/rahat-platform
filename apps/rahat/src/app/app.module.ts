@@ -83,7 +83,7 @@ import { AuthClientModule } from './auth-client.module';
     EventsModule,
     CommsModule.forRoot(),
     HealthModule,
-    CronModule
+    CronModule,
     AbilityModule.forRoot({ subjects: ABILITY_SUBJECTS, actions: ABILITY_ACTIONS }),
   ],
   controllers: [AppController],
