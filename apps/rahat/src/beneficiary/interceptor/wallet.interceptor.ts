@@ -203,9 +203,11 @@ export class WalletInterceptor implements NestInterceptor {
     };
 
     if (!contractValue?.type) {
-      throw new Error(
-        'Chain configuration must include a "type" field (evm or stellar)'
-      );
+      throw new RpcException({
+        message:
+          'Chain configuration must include a "type" field (evm or stellar)',
+        code: 'CHAIN_CONFIG_MISSING_TYPE',
+      });
     }
 
     return contractValue.type as ChainType;

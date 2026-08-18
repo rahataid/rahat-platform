@@ -2253,7 +2253,11 @@ export class BeneficiaryService {
       },
     });
 
-    if (!tempGroupWithBeneficiaries) throw new Error('Temp Group not Found.');
+    if (!tempGroupWithBeneficiaries)
+      throw new RpcException({
+        message: '[TEMP_GROUP_NOT_FOUND] Temp Group not Found.',
+        code: 'TEMP_GROUP_NOT_FOUND',
+      });
 
     const { page = 1, perPage = 10, firstName } = query;
 
@@ -2426,9 +2430,17 @@ export class BeneficiaryService {
 
   async importTempBeneficiaries(dto: ImportTempBenefDto) {
     const groups = await findTempBenefGroups(this.prisma as any, dto.groupUUID);
-    if (!groups.length) throw new Error('No groups found!');
+    if (!groups.length)
+      throw new RpcException({
+        message: '[NO_GROUPS_FOUND] No groups found!',
+        code: 'NO_GROUPS_FOUND',
+      });
     const beneficiaries = groups.map((f) => f.tempBeneficiary);
-    if (!beneficiaries.length) throw new Error('No benficiaries found!');
+    if (!beneficiaries.length)
+      throw new RpcException({
+        message: '[NO_BENEFICIARIES_FOUND] No benficiaries found!',
+        code: 'NO_BENEFICIARIES_FOUND',
+      });
 
     // const dupliPhones = await validateDupicatePhone(this.prisma, beneficiaries);
     // if (dupliPhones.length)
@@ -2438,9 +2450,11 @@ export class BeneficiaryService {
       beneficiaries
     );
     if (dupliWallets.length)
-      throw new Error(
-        `Duplicate walletAddress found: ${dupliWallets.toString()}`
-      );
+      throw new RpcException({
+        message: `[DUPLICATE_WALLET_ADDRESS_FOUND] Duplicate walletAddress found: ${dupliWallets.toString()}`,
+        code: 'DUPLICATE_WALLET_ADDRESS_FOUND',
+        params: { wallets: dupliWallets.toString() },
+      });
 
     this.beneficiaryQueue.add(BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES, dto);
     return { message: 'Beneficiaries added to the import queue!' };
