@@ -109,7 +109,7 @@ export class BeneficiaryUtilsService {
   }
 
   async ensureUniquePhone(phone: string): Promise<void> {
-    const existingPiiData = await this.prismaService.beneficiaryPii.findFirst({
+    const existingPiiData = await this.prismaService.beneficiaryPii.findUnique({
       where: { phone },
     });
     if (existingPiiData) {
