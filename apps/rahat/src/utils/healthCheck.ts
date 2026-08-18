@@ -3,79 +3,112 @@ import { PrismaService } from '@rumsan/prisma';
 import axios from 'axios';
 import { Queue } from 'bull';
 
-export async function checkDatabase(prisma: PrismaService): Promise<{
+export interface ServiceStatus {
     status: 'up' | 'down';
     message?: string;
-}> {
+    latency?: string;
+    last_checked?: string;
+    notes?: string;
+    link?: string;
+}
+
+export interface HealthStatus {
+    status: 'up' | 'degraded';
+    services: {
+        database: ServiceStatus;
+        redis: ServiceStatus;
+        rpcUrl: ServiceStatus;
+        cloudflare: ServiceStatus;
+    };
+}
+
+export async function checkDatabase(prisma: PrismaService): Promise<ServiceStatus> {
+    const start = performance.now();
+    const last_checked = new Date().toISOString();
     try {
         await prisma.$queryRaw`SELECT 1`;
-        return { status: 'up' };
+        return {
+            status: 'up',
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+        };
     } catch (err) {
-        return { status: 'down', message: (err as Error).message };
+        return {
+            status: 'down',
+            message: (err as Error).message,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+        };
     }
 }
 
-export async function checkRedis(queue: Queue): Promise<{
-    status: 'up' | 'down';
-    message?: string;
-}> {
+export async function checkRedis(queue: Queue): Promise<ServiceStatus> {
+    const start = performance.now();
+    const last_checked = new Date().toISOString();
     try {
         const pong = await queue.client.ping();
-        if (pong !== 'PONG') throw new Error(`Unexpected ping response:${pong}`);
-        return { status: 'up' };
+        if (pong !== 'PONG') throw new Error(`Unexpected ping response: ${pong}`);
+        return {
+            status: 'up',
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+        };
     } catch (err) {
-        return { status: 'down', message: (err as Error).message };
+        return {
+            status: 'down',
+            message: (err as Error).message,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+        };
     }
 }
 
-export async function checkRPCUrl(prisma: PrismaService): Promise<{
-    status: 'up' | 'down';
-    message?: string;
-}> {
+export async function checkRPCUrl(prisma: PrismaService): Promise<ServiceStatus> {
+    const start = performance.now();
+    let res;
+    const last_checked = new Date().toISOString();
     try {
         const settings = await prisma.setting.findUnique({
-            where: {
-                name: 'CHAIN_SETTINGS',
-            },
+            where: { name: 'CHAIN_SETTINGS' },
         });
         const settingsValue = settings?.value as any;
         const rpcUrl = settingsValue?.rpcUrl;
-        if (settingsValue.name?.toLowerCase() == 'evm') {
-            const res = await axios.post(
+
+        if (settingsValue?.name?.toLowerCase() === 'evm') {
+            res = await axios.post(
                 rpcUrl,
-                {
-                    jsonrpc: '2.0',
-                    method: 'eth_blockNumber',
-                    params: [],
-                    id: 1,
-                },
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                    timeout: 5000, // 5 second timeout
-                }
+                { jsonrpc: '2.0', method: 'eth_blockNumber', params: [], id: 1 },
+                { headers: { 'Content-Type': 'application/json' }, timeout: 5000 }
             );
-            if (res.data && res.data.error)
-                throw new Error(`Unexpected error during RPCCall`);
-            return { status: 'up' };
+            if (res.data?.error) throw new Error(`Unexpected error during RPCCall`);
         }
-        return { status: 'up' };
+
+        return {
+            status: 'up',
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            notes: res?.data,
+        };
     } catch (err) {
-        return { status: 'down', message: (err as Error).message };
+        return {
+            status: 'down',
+            message: (err as Error).message,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+        };
     }
 }
 
-export async function checkCloudflare(prisma: PrismaService): Promise<{
-    status: 'up' | 'down';
-    message?: string;
-}> {
-    let settingsValue;
+export async function checkCloudflare(prisma: PrismaService): Promise<ServiceStatus> {
+    const start = performance.now();
+    const last_checked = new Date().toISOString();
+    let settingsValue: any;
     try {
         const settings = await prisma.setting.findUnique({
-            where: {
-                name: 'CLOUDFLARE_R2',
-            },
+            where: { name: 'CLOUDFLARE_R2' },
         });
         settingsValue = settings?.value as any;
+
         const s3 = new S3Client({
             region: 'auto',
             endpoint: `https://${settingsValue.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -86,27 +119,26 @@ export async function checkCloudflare(prisma: PrismaService): Promise<{
         });
 
         await s3.send(new HeadBucketCommand({ Bucket: settingsValue?.R2_BUCKET }));
-        return { status: 'up' };
-    } catch (error) {
-        let errorMessage = 'Unknown R2 error';
-
+        return {
+            status: 'up',
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            notes: `Bucket: ${settingsValue?.R2_BUCKET}`,
+        };
+    } catch (error: any) {
+        let message = 'Unknown R2 error';
         if (error.$metadata?.httpStatusCode === 403) {
-            errorMessage = 'Access Denied: Invalid credentials or scope permissions';
+            message = 'Access Denied: Invalid credentials or scope permissions';
         } else if (error.$metadata?.httpStatusCode === 404) {
-            errorMessage = `Bucket '${settingsValue?.R2_BUCKET}' does not exist`;
+            message = `Bucket '${settingsValue?.R2_BUCKET}' does not exist`;
         } else if (error.message) {
-            errorMessage = error.message;
+            message = error.message;
         }
-        return { status: 'down', message: (error as Error).message };
+        return {
+            status: 'down',
+            message,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+        };
     }
-}
-
-export interface HealthStatus {
-    status: 'up' | 'degraded';
-    services: {
-        database: { status: 'up' | 'down'; message?: string };
-        redis: { status: 'up' | 'down'; message?: string };
-        rpcUrl: { status: 'up' | 'down'; message?: string };
-        cloudflare: { status: 'up' | 'down'; message?: string };
-    };
 }
