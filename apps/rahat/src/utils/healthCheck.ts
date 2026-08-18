@@ -19,6 +19,7 @@ export interface HealthStatus {
         redis: ServiceStatus;
         rpcUrl: ServiceStatus;
         cloudflare: ServiceStatus;
+        communication: ServiceStatus
     };
 }
 
@@ -65,6 +66,7 @@ export async function checkRedis(queue: Queue): Promise<ServiceStatus> {
 
 export async function checkRPCUrl(prisma: PrismaService): Promise<ServiceStatus> {
     const start = performance.now();
+    let rpcUrl;
     let res;
     const last_checked = new Date().toISOString();
     try {
@@ -72,7 +74,7 @@ export async function checkRPCUrl(prisma: PrismaService): Promise<ServiceStatus>
             where: { name: 'CHAIN_SETTINGS' },
         });
         const settingsValue = settings?.value as any;
-        const rpcUrl = settingsValue?.rpcUrl;
+        rpcUrl = settingsValue?.rpcUrl;
 
         if (settingsValue?.name?.toLowerCase() === 'evm') {
             res = await axios.post(
@@ -88,6 +90,7 @@ export async function checkRPCUrl(prisma: PrismaService): Promise<ServiceStatus>
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
             notes: res?.data,
+            link: rpcUrl
         };
     } catch (err) {
         return {
@@ -95,6 +98,8 @@ export async function checkRPCUrl(prisma: PrismaService): Promise<ServiceStatus>
             message: (err as Error).message,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
+            link: rpcUrl
+
         };
     }
 }
@@ -102,12 +107,14 @@ export async function checkRPCUrl(prisma: PrismaService): Promise<ServiceStatus>
 export async function checkCloudflare(prisma: PrismaService): Promise<ServiceStatus> {
     const start = performance.now();
     const last_checked = new Date().toISOString();
+    let endpoint: any;
     let settingsValue: any;
     try {
         const settings = await prisma.setting.findUnique({
             where: { name: 'CLOUDFLARE_R2' },
         });
         settingsValue = settings?.value as any;
+        endpoint = `https://${settingsValue.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
 
         const s3 = new S3Client({
             region: 'auto',
@@ -124,6 +131,7 @@ export async function checkCloudflare(prisma: PrismaService): Promise<ServiceSta
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
             notes: `Bucket: ${settingsValue?.R2_BUCKET}`,
+            link: endpoint
         };
     } catch (error: any) {
         let message = 'Unknown R2 error';
@@ -139,6 +147,39 @@ export async function checkCloudflare(prisma: PrismaService): Promise<ServiceSta
             message,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
+            link: endpoint
+        };
+    }
+}
+
+export async function checkCommunication(prisma: PrismaService): Promise<ServiceStatus> {
+    const start = performance.now();
+    const last_checked = new Date().toISOString();
+    let endpoint: any;
+    let settingsValue: any;
+    try {
+        const settings = await prisma.setting.findUnique({
+            where: { name: 'COMMUNICATION' },
+        });
+        settingsValue = settings?.value as any;
+        endpoint = settingsValue?.URL
+
+        const res = await axios.get(endpoint);
+        return {
+            status: 'up',
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            notes: res.data,
+            link: endpoint
+        };
+    } catch (error: any) {
+
+        return {
+            status: 'down',
+            message: error,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            link: endpoint
         };
     }
 }
