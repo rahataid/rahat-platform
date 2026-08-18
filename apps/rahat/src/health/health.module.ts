@@ -4,12 +4,14 @@ import { BullModule } from "@nestjs/bull";
 import { Logger, Module } from "@nestjs/common";
 import { BQUEUE } from "@rahataid/sdk";
 import { PrismaService } from "@rumsan/prisma";
+import { AuthsModule } from "@rumsan/user";
 import { HealthController } from "./health.controller";
 import { HealthService } from "./health.service";
 
 @Module({
     imports: [
         BullModule.registerQueue({ name: BQUEUE.RAHAT }),
+        AuthsModule,
     ],
     controllers: [HealthController],
     providers: [HealthService, PrismaService, Logger],
