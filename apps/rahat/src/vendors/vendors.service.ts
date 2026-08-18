@@ -2,6 +2,7 @@
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -13,6 +14,7 @@ import {
   VendorAddToProjectDto,
   VendorPasswordRegisterDto,
   VendorRegisterDto,
+  VendorUpdateDto,
 } from '@rahataid/extensions';
 import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
 import { OtpDto, OtpLoginDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
@@ -31,6 +33,7 @@ import { UsersService } from '../users/users.service';
 import { isAddress } from '../utils/web3';
 import { WalletService } from '../wallet/wallet.service';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
+import { Prisma } from '@prisma/client';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -453,62 +456,133 @@ export class VendorsService {
     return user;
   }
 
-  async updateVendor(dto, uuid) {
-    if (dto?.email) {
-      const userData = await this.prisma.user.findFirst({
-        where: { email: dto.email, NOT: { uuid } },
+  async updateVendor(dto: VendorUpdateDto, uuid: string) {
+    const now = new Date();
+    const { projectVendorUpdates, ...vendorDto } = dto;
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      // Fetch only what is required
+      const user = await tx.user.findUnique({
+        where: { uuid },
+        select: {
+          id: true,
+          uuid: true,
+          email: true,
+          extras: true,
+        },
       });
-      if (userData) throw new Error('Email must be unique');
-    }
-    if (dto.extras) {
-      const user = await this.prisma.user.findUnique({
+
+      if (!user) {
+        throw new NotFoundException('Vendor not found');
+      }
+
+      // Merge extras
+      if (vendorDto.extras) {
+        const existingExtras =
+          user.extras &&
+          typeof user.extras === 'object' &&
+          !Array.isArray(user.extras)
+            ? (user.extras as Record<string, any>)
+            : {};
+
+        const incomingExtras =
+          vendorDto.extras &&
+          typeof vendorDto.extras === 'object' &&
+          !Array.isArray(vendorDto.extras)
+            ? (vendorDto.extras as Record<string, any>)
+            : {};
+
+        vendorDto.extras = {
+          ...existingExtras,
+          ...incomingExtras,
+        };
+      }
+
+      //Email & Phone is not unique in user table, so we need to check in auth table for uniqueness.
+      // If email or phone is already registered with another user, throw conflict exception.
+
+      // Check email & phone uniqueness (via Auth table)
+      const [existingEmail, existingPhone] = await Promise.all([
+        vendorDto.email
+          ? tx.auth.findFirst({
+              where: {
+                service: Service.EMAIL,
+                serviceId: vendorDto.email,
+                userId: { not: user.id },
+              },
+            })
+          : Promise.resolve(null),
+        vendorDto.phone
+          ? tx.auth.findFirst({
+              where: {
+                service: Service.PHONE,
+                serviceId: vendorDto.phone,
+                userId: { not: user.id },
+              },
+            })
+          : Promise.resolve(null),
+      ]);
+
+      if (existingEmail)
+        throw new ConflictException('Email already registered');
+      if (existingPhone)
+        throw new ConflictException('Phone already registered');
+
+      // Update vendor
+      let updatedVendor;
+
+      updatedVendor = await tx.user.update({
         where: {
           uuid,
         },
+        data: vendorDto,
       });
-      const extras = dto?.extras;
-      const userExtras = Object(user?.extras || {});
 
-      dto.extras = { ...extras, ...userExtras };
-    }
+      // Update project/vendor permissions
+      if (projectVendorUpdates?.length) {
+        const updates = projectVendorUpdates.filter(
+          ({ projectId, canSyncWalkin }) =>
+            projectId && canSyncWalkin !== undefined
+        );
 
-    if (dto?.projectVendorUpdates?.length) {
-      for (const projectVendor of dto.projectVendorUpdates) {
-        const { projectId, canSyncWalkin } = projectVendor || {};
-        if (!projectId || typeof canSyncWalkin === 'undefined') continue;
-
-        await this.prisma.projectVendors.updateMany({
-          where: {
-            vendorId: uuid,
-            projectId,
-          },
-          data: {
-            canSyncWalkin,
-            updatedAt: new Date(),
-          },
-        });
+        await Promise.all(
+          updates.map(({ projectId, canSyncWalkin }) =>
+            tx.projectVendors.updateMany({
+              where: {
+                vendorId: uuid,
+                projectId,
+              },
+              data: {
+                canSyncWalkin,
+                updatedAt: now,
+              },
+            })
+          )
+        );
       }
+
+      // Check whether vendor is assigned to any project
+      const assignment = await tx.projectVendors.findFirst({
+        where: {
+          vendorId: uuid,
+        },
+        select: {
+          vendorId: true,
+        },
+      });
+
+      return {
+        vendor: updatedVendor,
+        isAssigned: !!assignment,
+      };
+    });
+
+    // Publish only after successful DB transaction
+    if (!result.isAssigned) {
+      return result.vendor;
     }
 
-    const { projectVendorUpdates, ...vendorDto } = dto;
-    const result = await this.usersService.update(uuid, vendorDto);
-    const isAssigned = await this.prisma.projectVendors.findFirst({
-      where: {
-        vendorId: uuid,
-      },
-    });
-    if (!isAssigned) return result;
-
-    await this.prisma.projectVendors.updateMany({
-      where: {
-        vendorId: uuid,
-      },
-      data: {
-        updatedAt: new Date(),
-      },
-    });
-
-    return this.client.send({ cmd: VendorJobs.UPDATE }, result);
+    return this.client.send({ cmd: VendorJobs.UPDATE }, result.vendor);
   }
 
   async removeVendor(uuid: UUID, projectId?: UUID) {
