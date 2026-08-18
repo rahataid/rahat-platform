@@ -1,7 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender } from '@rahataid/sdk/enums';
-import { IsObject, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsObject, IsOptional, IsString } from 'class-validator';
 import { UUID } from 'crypto';
+
+export class ProjectVendorUpdateDto {
+  @ApiProperty({ example: 'project-uuid', required: false })
+  @IsString()
+  @IsOptional()
+  projectId?: string;
+
+  @ApiProperty({ example: true, required: false })
+  @IsBoolean()
+  @IsOptional()
+  canSyncWalkin?: boolean;
+}
 
 export class VendorUpdateDto {
   @ApiProperty({ example: 'John Doe' })
@@ -33,4 +45,9 @@ export class VendorUpdateDto {
   @IsObject()
   @IsOptional()
   extras?: object;
+
+  @ApiProperty({ type: [ProjectVendorUpdateDto], required: false })
+  @IsArray()
+  @IsOptional()
+  projectVendorUpdates?: ProjectVendorUpdateDto[];
 }
