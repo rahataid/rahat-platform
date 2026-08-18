@@ -4,12 +4,8 @@ import { BQUEUE } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import {
-    checkCloudflare,
-    checkCommunication,
-    checkDatabase,
-    checkRedis,
-    checkRPCUrl,
     HealthStatus,
+    updateHealthStatus
 } from '../utils/healthCheck';
 
 @Injectable()
@@ -36,24 +32,7 @@ export class HealthService {
 
     async checkHealthStatus(): Promise<HealthStatus> {
         this._logger.log('Check the health status of all  used services');
-        const [database, redis, rpcUrl, cloudflare, communication] = await Promise.all([
-            checkDatabase(this.prisma),
-            checkRedis(this.rahatQueue),
-            checkRPCUrl(this.prisma),
-            checkCloudflare(this.prisma),
-            checkCommunication(this.prisma)
-        ]);
-        const allUp = database.status === 'up' && redis.status === 'up';
-        const result: HealthStatus = {
-            status: allUp ? 'up' : 'degraded',
-            services: {
-                database,
-                redis,
-                rpcUrl,
-                cloudflare,
-                communication
-            },
-        };
+        const result = await updateHealthStatus(this.prisma, this.rahatQueue)
         await this.setCache(result);
         return result;
     }

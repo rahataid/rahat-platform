@@ -19,11 +19,14 @@ export interface HealthStatus {
         redis: ServiceStatus;
         rpcUrl: ServiceStatus;
         cloudflare: ServiceStatus;
-        communication: ServiceStatus
+        communication: ServiceStatus;
+        offRamp: ServiceStatus;
     };
 }
 
-export async function checkDatabase(prisma: PrismaService): Promise<ServiceStatus> {
+export async function checkDatabase(
+    prisma: PrismaService
+): Promise<ServiceStatus> {
     const start = performance.now();
     const last_checked = new Date().toISOString();
     try {
@@ -64,7 +67,9 @@ export async function checkRedis(queue: Queue): Promise<ServiceStatus> {
     }
 }
 
-export async function checkRPCUrl(prisma: PrismaService): Promise<ServiceStatus> {
+export async function checkRPCUrl(
+    prisma: PrismaService
+): Promise<ServiceStatus> {
     const start = performance.now();
     let rpcUrl;
     let res;
@@ -90,7 +95,7 @@ export async function checkRPCUrl(prisma: PrismaService): Promise<ServiceStatus>
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
             notes: res?.data,
-            link: rpcUrl
+            link: rpcUrl,
         };
     } catch (err) {
         return {
@@ -98,13 +103,14 @@ export async function checkRPCUrl(prisma: PrismaService): Promise<ServiceStatus>
             message: (err as Error).message,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
-            link: rpcUrl
-
+            link: rpcUrl,
         };
     }
 }
 
-export async function checkCloudflare(prisma: PrismaService): Promise<ServiceStatus> {
+export async function checkCloudflare(
+    prisma: PrismaService
+): Promise<ServiceStatus> {
     const start = performance.now();
     const last_checked = new Date().toISOString();
     let endpoint: any;
@@ -114,7 +120,7 @@ export async function checkCloudflare(prisma: PrismaService): Promise<ServiceSta
             where: { name: 'CLOUDFLARE_R2' },
         });
         settingsValue = settings?.value as any;
-        endpoint = `https://${settingsValue.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
+        endpoint = `https://${settingsValue.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
 
         const s3 = new S3Client({
             region: 'auto',
@@ -131,7 +137,7 @@ export async function checkCloudflare(prisma: PrismaService): Promise<ServiceSta
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
             notes: `Bucket: ${settingsValue?.R2_BUCKET}`,
-            link: endpoint
+            link: endpoint,
         };
     } catch (error: any) {
         let message = 'Unknown R2 error';
@@ -147,12 +153,14 @@ export async function checkCloudflare(prisma: PrismaService): Promise<ServiceSta
             message,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
-            link: endpoint
+            link: endpoint,
         };
     }
 }
 
-export async function checkCommunication(prisma: PrismaService): Promise<ServiceStatus> {
+export async function checkCommunication(
+    prisma: PrismaService
+): Promise<ServiceStatus> {
     const start = performance.now();
     const last_checked = new Date().toISOString();
     let endpoint: any;
@@ -162,7 +170,7 @@ export async function checkCommunication(prisma: PrismaService): Promise<Service
             where: { name: 'COMMUNICATION' },
         });
         settingsValue = settings?.value as any;
-        endpoint = settingsValue?.URL
+        endpoint = settingsValue?.URL;
 
         const res = await axios.get(endpoint);
         return {
@@ -170,16 +178,79 @@ export async function checkCommunication(prisma: PrismaService): Promise<Service
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
             notes: res.data,
-            link: endpoint
+            link: endpoint,
         };
     } catch (error: any) {
-
         return {
             status: 'down',
             message: error,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
-            link: endpoint
+            link: endpoint,
         };
     }
+}
+
+export async function checkOffRampService(
+    prisma: PrismaService
+): Promise<ServiceStatus> {
+    let settingsValue;
+    const start = performance.now();
+    const last_checked = new Date().toISOString();
+    let endpoint;
+    try {
+        const settings = await prisma.setting.findUnique({
+            where: {
+                name: 'OFFRAMP_SETTINGS',
+            },
+        });
+        settingsValue = settings?.value as any;
+        endpoint = `${settingsValue?.URL}/app/${settingsValue.appId}`;
+        const res = await axios.get(endpoint, {
+            headers: {
+                APP_ID: `${settingsValue.appId}`,
+            },
+        });
+        // if (res.status == 200) return { status: 'up',message:res?.statusText };
+        return {
+            status: 'up',
+            message: res?.statusText,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            link: endpoint,
+        };
+    } catch (err) {
+        return {
+            status: 'down',
+            message: err,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            link: endpoint,
+        };
+    }
+}
+
+
+export async function updateHealthStatus(prisma: PrismaService, rahatQueue: Queue): Promise<HealthStatus> {
+    const [database, redis, rpcUrl, cloudflare, communication, offRamp] = await Promise.all([
+        checkDatabase(prisma),
+        checkRedis(rahatQueue),
+        checkRPCUrl(prisma),
+        checkCloudflare(prisma),
+        checkCommunication(prisma),
+        checkOffRampService(prisma)
+    ]);
+    const allUp = database.status === 'up' && redis.status === 'up';
+    const result: HealthStatus = {
+        status: allUp ? 'up' : 'degraded',
+        services: {
+            database,
+            redis,
+            rpcUrl,
+            cloudflare,
+            communication,
+            offRamp
+        },
+    };
+    return result;
 }
