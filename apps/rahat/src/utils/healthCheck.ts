@@ -8,7 +8,7 @@ export interface ServiceStatus {
     message?: string;
     latency?: string;
     last_checked?: string;
-    notes?: string;
+    notes?: string | Record<string, any>;
     link?: string;
 }
 
@@ -30,11 +30,24 @@ export async function checkDatabase(
     const start = performance.now();
     const last_checked = new Date().toISOString();
     try {
-        await prisma.$queryRaw`SELECT 1`;
+        const [connRows] = await Promise.all([
+            prisma.$queryRaw<Array<{ active: bigint; max: bigint }>>`
+                SELECT
+                    (SELECT COUNT(*) FROM pg_stat_activity WHERE datname = current_database()) AS active,
+                    (SELECT setting::bigint FROM pg_settings WHERE name = 'max_connections') AS max
+            `,
+        ]);
+        const { active, max } = connRows[0];
         return {
             status: 'up',
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
+            link: process.env.DATABASE_URL,
+            notes: {
+                active_connections: Number(active),
+                max_connections: Number(max),
+                connections: Number(active),
+            },
         };
     } catch (err) {
         return {
@@ -42,6 +55,8 @@ export async function checkDatabase(
             message: (err as Error).message,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
+            link: process.env.DATABASE_URL,
+            notes: {}
         };
     }
 }
@@ -50,12 +65,42 @@ export async function checkRedis(queue: Queue): Promise<ServiceStatus> {
     const start = performance.now();
     const last_checked = new Date().toISOString();
     try {
-        const pong = await queue.client.ping();
+        const [pong, infoRaw] = await Promise.all([
+            queue.client.ping(),
+            queue.client.info('all'),
+        ]);
         if (pong !== 'PONG') throw new Error(`Unexpected ping response: ${pong}`);
+
+        // Parse INFO sections into a flat key-value map
+        const infoMap: Record<string, string> = {};
+        for (const line of infoRaw.split('\r\n')) {
+            if (!line || line.startsWith('#')) continue;
+            const colonIdx = line.indexOf(':');
+            if (colonIdx === -1) continue;
+            infoMap[line.slice(0, colonIdx).trim()] = line.slice(colonIdx + 1).trim();
+        }
+
+        const connections = parseInt(infoMap['connected_clients'] ?? '0', 10);
+        const memory: Record<string, string> = {
+            used_memory_human: infoMap['used_memory_human'] ?? '',
+            used_memory_peak_human: infoMap['used_memory_peak_human'] ?? '',
+            used_memory_rss_human: infoMap['used_memory_rss_human'] ?? '',
+            maxmemory_human: infoMap['maxmemory_human'] ?? '',
+            mem_fragmentation_ratio: infoMap['mem_fragmentation_ratio'] ?? '',
+        };
+
         return {
             status: 'up',
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
+            link: process.env.REDIS_URL,
+            notes: {
+                connections,
+                memory,
+                redis_version: infoMap['redis_version'] ?? '',
+                uptime_in_days: infoMap['uptime_in_days'] ?? '',
+                role: infoMap['role'] ?? '',
+            },
         };
     } catch (err) {
         return {
@@ -63,6 +108,9 @@ export async function checkRedis(queue: Queue): Promise<ServiceStatus> {
             message: (err as Error).message,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
+            link: process.env.REDIS_URL,
+            notes: {}
+
         };
     }
 }
@@ -94,7 +142,9 @@ export async function checkRPCUrl(
             status: 'up',
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
-            notes: res?.data,
+            notes: {
+                "method": 'eth_blockNumber'
+            },
             link: rpcUrl,
         };
     } catch (err) {
@@ -153,7 +203,7 @@ export async function checkCloudflare(
             message,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
-            link: endpoint,
+            link: endpoint || '',
         };
     }
 }
@@ -177,7 +227,6 @@ export async function checkCommunication(
             status: 'up',
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
-            notes: res.data,
             link: endpoint,
         };
     } catch (error: any) {
