@@ -2,17 +2,14 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { BQUEUE } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
-import axios from 'axios';
 import { Queue } from 'bull';
-
-interface HealthStatus {
-    status: 'up' | 'degraded';
-    services: {
-        database: { status: 'up' | 'down'; message?: string };
-        redis: { status: 'up' | 'down'; message?: string };
-        rpcUrl: { status: 'up' | 'down'; message?: string };
-    };
-}
+import {
+    checkCloudflare,
+    checkDatabase,
+    checkRedis,
+    checkRPCUrl,
+    HealthStatus,
+} from '../utils/healthCheck';
 
 @Injectable()
 export class HealthService {
@@ -38,10 +35,11 @@ export class HealthService {
 
     async checkHealthStatus(): Promise<HealthStatus> {
         this._logger.log('Check the health status of all  used services');
-        const [database, redis, rpcUrl] = await Promise.all([
-            this.checkDatabase(),
-            this.checkRedis(),
-            this.checkRPCUrl()
+        const [database, redis, rpcUrl, cloudflare] = await Promise.all([
+            checkDatabase(this.prisma),
+            checkRedis(this.rahatQueue),
+            checkRPCUrl(this.prisma),
+            checkCloudflare(this.prisma),
         ]);
 
         const allUp = database.status === 'up' && redis.status === 'up';
@@ -50,7 +48,8 @@ export class HealthService {
             services: {
                 database,
                 redis,
-                rpcUrl
+                rpcUrl,
+                cloudflare,
             },
         };
         await this.setCache(result);
@@ -80,67 +79,4 @@ export class HealthService {
             JSON.stringify(data)
         );
     }
-
-    private async checkDatabase(): Promise<{
-        status: 'up' | 'down';
-        message?: string;
-    }> {
-        this._logger.log('Checking the database status');
-        try {
-            await this.prisma.$queryRaw`SELECT 1`;
-            return { status: 'up' };
-        } catch (error) {
-            return { status: 'down', message: (error as Error).message };
-        }
-    }
-
-    private async checkRedis(): Promise<{
-        status: 'up' | 'down';
-        message?: string;
-    }> {
-        this._logger.log('Checking the redis status');
-        try {
-            const pong = await this.rahatQueue.client.ping();
-            if (pong !== 'PONG') throw new Error(`Unexpected ping response: ${pong}`);
-            return { status: 'up' };
-        } catch (error) {
-            return { status: 'down', message: (error as Error).message };
-        }
-    }
-
-    private async checkRPCUrl(): Promise<{
-        status: 'up' | 'down';
-        message?: string;
-    }> {
-        this._logger.log('Checking the rpcurl status');
-        try {
-            const settings = await this.prisma.setting.findUnique({
-                where: {
-                    name: 'CHAIN_SETTINGS'
-                }
-            });
-            const settingsValue = settings?.value as any;
-            const rpcUrl = settingsValue?.rpcUrl;
-
-            const res = await axios.post(
-                rpcUrl,
-                {
-                    jsonrpc: '2.0',
-                    method: 'eth_blockNumber',
-                    params: [],
-                    id: 1,
-                },
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                    timeout: 5000, // 5 second timeout
-                }
-            );
-            if (res.data && res.data.error) throw new Error(`Unexpected error during RPCCall`);
-            return { status: 'up' };
-        } catch (error) {
-            return { status: 'down', message: (error as Error).message };
-        }
-    }
-
-
 }
