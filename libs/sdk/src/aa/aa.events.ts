@@ -242,7 +242,7 @@ export const JOBS = {
     VALIDATE_BANK_ACCOUNT: 'aa.jobs.groupCashTransfer.validateBankAccount',
     GET_ALL_VALID: 'aa.jobs.groupCashTransfer.getAllValid',
     GET_GCT_DATA: 'aa.jobs.groupCashTransfer.getGCTData',
-    UPDATE_GROUP_RECORD: 'aa.jobs.groupCashTransfer.updateRecord', 
+    UPDATE_GROUP_RECORD: 'aa.jobs.groupCashTransfer.updateRecord',
     SEND_OTP: 'aa.jobs.groupCashTransfer.sendOtp',
   },
   MULTISIG: {
@@ -254,4 +254,7 @@ export const JOBS = {
     TOKEN_DETAILS: 'aa.jobs.fundManagement.tokenDetails',
     TRANSFER_LIST: 'aa.jobs.fundManagement.transferList',
   },
+  SETTINGS: {
+    UPDATE_VALUES: 'aa.jobs.settings.updateValues',
+  }
 };
