@@ -34,6 +34,7 @@ import { isAddress } from '../utils/web3';
 import { WalletService } from '../wallet/wallet.service';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 import { Prisma } from '@prisma/client';
+import { generateIdempotencyKey } from '../utils/idempotency-key';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -582,7 +583,16 @@ export class VendorsService {
       return result.vendor;
     }
 
-    return this.client.send({ cmd: VendorJobs.UPDATE }, result.vendor);
+    return this.client.send(
+      { cmd: VendorJobs.UPDATE },
+      {
+        ...result.vendor,
+        idempotencyKey: generateIdempotencyKey(
+          VendorJobs.UPDATE,
+          result.vendor
+        ),
+      }
+    );
   }
 
   async removeVendor(uuid: UUID, projectId?: UUID) {
