@@ -390,7 +390,10 @@ export class BeneficiaryUtilsService {
         : contractSettings.value;
 
     if (!value.currency?.symbol) {
-      throw new Error('Chain configuration must include currency.symbol');
+      throw new RpcException({
+        message: '[CHAIN_CONFIG_MISSING_CURRENCY_SYMBOL] Chain configuration must include currency.symbol',
+        code: 'CHAIN_CONFIG_MISSING_CURRENCY_SYMBOL',
+      });
     }
 
     return value.currency.symbol;

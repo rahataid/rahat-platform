@@ -2,7 +2,7 @@ import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { HttpService } from '@nestjs/axios';
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { BQUEUE } from '@rahataid/sdk';
 import { BeneficiaryJobs } from '@rahataid/sdk/beneficiary';
 import { SettingsService } from '@rumsan/extensions/settings';
@@ -204,7 +204,11 @@ export class ImportsService {
     });
 
     if (record.status !== 'NEW') {
-      throw new Error(`Import ${uuid} is not in NEW status (current: ${record.status})`);
+      throw new BadRequestException({
+        message: `Import ${uuid} is not in NEW status (current: ${record.status})`,
+        code: 'IMPORT_NOT_IN_NEW_STATUS',
+        params: { uuid, status: record.status },
+      });
     }
 
     // Update status to PROCESSING
@@ -284,7 +288,11 @@ export class ImportsService {
     const errorFileR2Key = extras.errorFileR2Key;
 
     if (!errorFileR2Key) {
-      throw new NotFoundException(`No error file found for import ${uuid}`);
+      throw new NotFoundException({
+        message: `No error file found for import ${uuid}`,
+        code: 'IMPORT_ERROR_FILE_NOT_FOUND',
+        params: { uuid },
+      });
     }
 
     const [s3Client, { bucket }] = await Promise.all([this.getS3Client(), this.getR2Config()]);

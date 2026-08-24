@@ -47,7 +47,12 @@ export async function DocParser(
 
   // If any validation errors, throw exception
   if (validationErrors.length > 0) {
-    throw new Error('Validation errors: ' + JSON.stringify(validationErrors));
+    throw new BadRequestException({
+      message: `Validation errors found in ${validationErrors.length} row(s)`,
+      code: 'BENEFICIARY_IMPORT_VALIDATION_ERRORS',
+      params: { count: validationErrors.length },
+      errors: validationErrors,
+    });
   }
   return beneficiaries;
 }
