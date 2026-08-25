@@ -353,7 +353,11 @@ export const aaActions: ProjectActionFunc = {
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.FUND_MANAGEMENT.ADD_FUND, uuid }, payload),
+
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.FUND_MANAGEMENT.ADD_FUND, uuid }, payload)
+  },
 
   [MS_ACTIONS.AAPROJECT.FUND_MANAGEMENT.TOKEN_DETAILS]: (
     uuid,
