@@ -301,7 +301,7 @@ export class VendorsService {
   }
 
   async listVendor(dto) {
-    const { projectName, status, page, perPage } = dto;
+    const { name, projectName, status, page, perPage } = dto;
     const where: any = {
       Role: {
         name: UserRoles.VENDOR,
@@ -310,6 +310,26 @@ export class VendorsService {
         deletedAt: null,
       },
     };
+
+    if (name) {
+      where.User = {
+        ...where.User,
+        OR: [
+          {
+            name: {
+              contains: name,
+              mode: 'insensitive',
+            },
+          },
+          {
+            email: {
+              contains: name,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      };
+    }
 
     if (projectName) {
       where.User = {

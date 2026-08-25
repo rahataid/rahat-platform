@@ -47,7 +47,7 @@ export async function createContractSigner(abi: any, address: string) {
 }
 
 export async function getBlocktimeStamp(txHash: string) {
-  const provider = new JsonRpcProvider(process.env.NETWORK_PROVIDER);
+  const provider = getNetworkProvider();
   const receipt = await provider.waitForTransaction(txHash);
   if (!receipt) {
     console.error('Transaction is not mined or does not exist.');
