@@ -14,7 +14,6 @@ import {
   BeneficiaryJobs,
   BQUEUE,
   genRandomPhone,
-  generateRandomWallet,
   MS_ACTIONS,
   MS_TIMEOUT,
   ProjectEvents,
@@ -55,15 +54,20 @@ import { notificationActions } from './actions/common.action';
 import { commsActions } from './actions/comms.action';
 import { rpActions } from './actions/rp.action';
 import { userRequiredActions } from './actions/user-required.action';
-
-const NODE_ENV = process.env.NODE_ENV || 'development';
-const CAMBODIA_COUNTRY_CODE = '+855';
-const KOBO_COUNTRY_CODE =
-  process.env.KOBO_COUNTRY_CODE || process.env.DEFAULT_KOBO_COUNTRY_CODE;
+import {
+  AUTO_APPLY_KOBO_COUNTRY_CODE,
+  COUNTRY_CODE_CACHE_TTL_MS,
+  COUNTRY_CODE_SETTING_NAME,
+} from '../utils/envConfig';
+import {
+  hasCallingCode,
+  hasInternationalPrefix,
+} from '../utils/validateCountryCode';
 
 @Injectable()
 export class ProjectService {
   private readonly logger = new Logger(ProjectService.name);
+  private countryCodeCache: { value: string; expiresAt: number } | null = null;
 
   constructor(
     private prisma: PrismaService,
@@ -446,10 +450,7 @@ export class ProjectService {
         .split(' ')
         .map((item: string) => item.trim().toUpperCase());
     }
-    const countryCode =
-      KOBO_COUNTRY_CODE ||
-      (NODE_ENV === 'production' ? CAMBODIA_COUNTRY_CODE : '');
-    benef.phone = this.normalizeKoboPhone(benef.phone, countryCode);
+    benef.phone = await this.normalizeKoboPhone(benef.phone);
 
     const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
     const extrasPayload = {
@@ -691,25 +692,61 @@ export class ProjectService {
       );
   }
 
-  normalizeKoboPhone(phone: string, countryCode = '') {
+  // Reads the calling code from COUNTRY_CODE_SETTINGS ({ CHINA: '+86' } ->
+  // '+86'), cached for the TTL. Returns '' when unset or unreadable.
+  async getKoboCountryCodeFromSettings(): Promise<string> {
+    if (this.countryCodeCache && this.countryCodeCache.expiresAt > Date.now()) {
+      return this.countryCodeCache.value;
+    }
+    try {
+      const setting = await this.prisma.setting.findUnique({
+        where: { name: COUNTRY_CODE_SETTING_NAME },
+      });
+      const value = setting?.value as unknown;
+      const candidates =
+        value && typeof value === 'object' ? Object.values(value) : [value];
+      const code = candidates.find((v) => {
+        if (typeof v !== 'string') return false;
+        const codeDigits = v.replace(/\D/g, '');
+        return codeDigits.length > 0 && codeDigits.length <= 4;
+      });
+      const result = typeof code === 'string' ? code.trim() : '';
+      this.countryCodeCache = {
+        value: result,
+        expiresAt: Date.now() + COUNTRY_CODE_CACHE_TTL_MS,
+      };
+      return result;
+    } catch (err) {
+      this.logger.error(
+        `[kobo-import] Failed to read ${COUNTRY_CODE_SETTING_NAME}: ${
+          (err as Error)?.message
+        }`
+      );
+      return '';
+    }
+  }
+
+  // Normalises a Kobo phone to "+<digits>": an international number is kept as
+  // written, a local one gets the configured calling code minus its trunk zero.
+  async normalizeKoboPhone(phone: string) {
     const rawPhone = String(phone || '').trim();
     if (!rawPhone) throw new Error('Phone number is required!');
-
-    const normalizedCountryCode = countryCode
-      ? `+${String(countryCode).replace(/\D/g, '')}`
-      : '';
     const digits = rawPhone.replace(/\D/g, '');
+    if (!AUTO_APPLY_KOBO_COUNTRY_CODE) return `+${digits}`;
 
-    if (rawPhone.startsWith('+')) return `+${digits}`;
-
-    if (normalizedCountryCode) {
-      const countryDigits = normalizedCountryCode.replace(/\D/g, '');
-      if (digits.startsWith(countryDigits)) return `+${digits}`;
-
-      return `${normalizedCountryCode}${digits.replace(/^0+/, '')}`;
+    if (hasInternationalPrefix(rawPhone))
+      return `+${digits.replace(/^00/, '')}`;
+    const countryCode = await this.getKoboCountryCodeFromSettings();
+    if (!countryCode) {
+      throw new Error(
+        `[kobo-import] AUTO_APPLY_KOBO_COUNTRY_CODE is enabled but "${COUNTRY_CODE_SETTING_NAME}" could not be resolved; refusing to import a phone without a calling code.`
+      );
     }
+    const callingCode = String(countryCode).replace(/\D/g, '');
 
-    return `+${digits}`;
+    if (hasCallingCode(digits, callingCode)) return `+${digits}`;
+
+    return `+${callingCode}${digits.replace(/^0+/, '')}`;
   }
 
   async sendTestMsg(uuid: UUID) {
