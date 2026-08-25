@@ -553,9 +553,10 @@ export const aaActions: ProjectActionFunc = {
   // **** Stellar end **** //
 
   // **** Payout start **** //
-  [MS_ACTIONS.AAPROJECT.PAYOUT.CREATE]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.PAYOUT.CREATE, uuid }, payload),
-
+  [MS_ACTIONS.AAPROJECT.PAYOUT.CREATE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.PAYOUT.CREATE, uuid }, payload);
+  },
   [MS_ACTIONS.AAPROJECT.PAYOUT.LIST]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PAYOUT.LIST, uuid }, payload),
 
