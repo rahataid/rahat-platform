@@ -6,39 +6,39 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary, BeneficiaryPii, GroupPurpose } from '@prisma/client';
 import {
-  AddBenfGroupToProjectDto,
-  AddGroupsPurposeDto,
-  CreateBeneficiaryDto,
-  CreateBeneficiaryGroupsDto,
-  CreateBeneficiaryTransactionDto,
-  ImportTempBenefDto,
-  ListBeneficiariesByGroupDto,
-  ListBeneficiaryDto,
-  ListBeneficiaryGroupDto,
-  ListTempBeneficiariesDto,
-  ListTempGroupsDto,
-  UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto
+    AddBenfGroupToProjectDto,
+    AddGroupsPurposeDto,
+    CreateBeneficiaryDto,
+    CreateBeneficiaryGroupsDto,
+    CreateBeneficiaryTransactionDto,
+    ImportTempBenefDto,
+    ListBeneficiariesByGroupDto,
+    ListBeneficiaryDto,
+    ListBeneficiaryGroupDto,
+    ListTempBeneficiariesDto,
+    ListTempGroupsDto,
+    UpdateBeneficiaryDto,
+    UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
-  AAJobs,
-  BeneficiaryConstants,
-  BeneficiaryEvents,
-  BeneficiaryJobs,
-  BQUEUE,
-  GroupWithValidationAA,
-  ProjectContants,
-  TPIIData,
-  WalletJobs
+    AAJobs,
+    BeneficiaryConstants,
+    BeneficiaryEvents,
+    BeneficiaryJobs,
+    BQUEUE,
+    GroupWithValidationAA,
+    ProjectContants,
+    TPIIData,
+    WalletJobs
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { lastValueFrom, timeout } from 'rxjs';
+import { lastValueFrom, timeout, TimeoutError } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  findTempBenefGroups,
-  validateDupicateWallet,
+    findTempBenefGroups,
+    validateDupicateWallet,
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
@@ -2213,10 +2213,16 @@ export class BeneficiaryService {
         this.client.send(
           { cmd: BeneficiaryJobs.CREATE_BENF_ADD_GROUP_TO_PROJECT, uuid: project.uuid },
           benfCreateAndGroupAssignPayload
-        ).pipe(timeout(20000)) // To prevent hanging of the server and not reverting in UI
+        ).pipe(timeout(30000)) // Stop waiting after 30s; local assignment already committed above regardless
           .subscribe({
             next: (res) => this.logger.log('Group assignment sync completed', res),
             error: (err) => {
+              if (err instanceof TimeoutError) {
+                // No response within 30s — remote job may still be running. Local
+                // assignment is already committed and correct, so don't revert it.
+                this.logger.warn('Group assignment sync ack timed out; leaving assignment as-is', err);
+                return;
+              }
               this.logger.error('Group assignment sync failed', err);
               void this.revertGroupAssignOnError(
                 beneficiaryGroupId,
