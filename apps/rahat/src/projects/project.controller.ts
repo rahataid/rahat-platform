@@ -25,6 +25,7 @@ import {
   ProjectCommunicationDto,
   TestKoboImportDto,
   UpdateProjectDto,
+  UpdateProjectImageDto,
   UpdateProjectStatusDto,
 } from '@rahataid/extensions';
 import {
@@ -167,6 +168,15 @@ export class ProjectController {
     @Param('uuid') uuid: UUID
   ) {
     return this.projectService.updateStatus(uuid, data);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
+  @ApiParam({ name: 'uuid', required: true })
+  @Patch(':uuid/image')
+  updateImage(@Param('uuid') uuid: UUID, @Body() data: UpdateProjectImageDto) {
+    return this.projectService.updateImage(uuid, data.url);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)

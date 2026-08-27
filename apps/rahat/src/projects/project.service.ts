@@ -117,6 +117,22 @@ export class ProjectService {
     });
   }
 
+  async updateImage(uuid: UUID, url: string) {
+    const project = await this.prisma.project.findUnique({ where: { uuid } });
+    if (!project) {
+      throw new RpcException(`Project with uuid: ${uuid} not found`);
+    }
+    return this.prisma.project.update({
+      where: { uuid },
+      data: {
+        extras: {
+          ...(project.extras as object || {}),
+          project_image: url,
+        },
+      },
+    });
+  }
+
   async updateStatus(uuid: UUID, data: UpdateProjectStatusDto) {
     return this.prisma.project.update({
       where: {
