@@ -165,6 +165,7 @@ export class BeneficiaryService {
       },
       include: {
         pii: true,
+        bankAccount: true,
       },
     });
 
@@ -340,6 +341,7 @@ export class BeneficiaryService {
               Project: true,
             },
           },
+          bankAccount: true,
         },
         orderBy,
       },
@@ -390,6 +392,7 @@ export class BeneficiaryService {
       },
       include: {
         pii: true,
+        bankAccount: true,
       },
     });
 
