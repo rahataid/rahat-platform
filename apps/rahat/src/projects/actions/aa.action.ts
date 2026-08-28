@@ -666,8 +666,10 @@ export const aaActions: ProjectActionFunc = {
   },
   // **** Payout end **** //
   // **** Inkind start **** //
-  [MS_ACTIONS.AAPROJECT.INKIND.CREATE]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.INKIND.CREATE, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.INKIND.CREATE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.INKIND.CREATE, uuid }, payload)
+  },
 
   [MS_ACTIONS.AAPROJECT.INKIND.GET_ONE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_ONE, uuid }, payload),
@@ -678,17 +680,24 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.INKIND.GET_SUMMARY]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_SUMMARY, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.INKIND.UPDATE]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.INKIND.UPDATE, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.INKIND.UPDATE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.INKIND.UPDATE, uuid }, payload)
+  },
 
-  [MS_ACTIONS.AAPROJECT.INKIND.DELETE]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.INKIND.DELETE, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.INKIND.DELETE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.INKIND.DELETE, uuid }, payload)
+  },
 
   [MS_ACTIONS.AAPROJECT.INKIND.ADD_INKIND_STOCK]: (
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.INKIND.ADD_INKIND_STOCK, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.INKIND.ADD_INKIND_STOCK, uuid }, payload)
+  },
 
   [MS_ACTIONS.AAPROJECT.INKIND.GET_ALL_STOCK_MOVEMENTS]: (
     uuid,
@@ -701,7 +710,10 @@ export const aaActions: ProjectActionFunc = {
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.INKIND.REMOVE_INKIND_STOCK, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.INKIND.REMOVE_INKIND_STOCK, uuid }, payload)
+  },
 
   [MS_ACTIONS.AAPROJECT.INKIND.ASSIGN_GROUP_INKIND]: (
     uuid,
