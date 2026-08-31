@@ -44,7 +44,6 @@ export async function DocParser(
       beneficiaries.push(row);
     }
   }
-  //
   // If any validation errors, throw exception
   if (validationErrors.length > 0) {
     throw new BadRequestException({
