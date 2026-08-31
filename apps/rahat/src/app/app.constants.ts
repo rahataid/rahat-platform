@@ -15,5 +15,4 @@ export const ABILITY_ACTIONS = {
   DOWNLOAD: 'download',
   ACTIVATE: 'activate',
   REVERT: 'revert',
-  TRIGGER: 'trigger',
 };
