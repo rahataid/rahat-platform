@@ -245,6 +245,8 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.BENEFICIARY.GET_ONE_GROUP, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_SPONSORSHIP_STATUS_FOR_GROUP]: (uuid, payload, sendCommand) =>  sendCommand({ cmd: AAJobs.BENEFICIARY.GET_SPONSORSHIP_STATUS_FOR_GROUP, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.BENEFICIARY.SPONSOR_BENEFICIARY_GROUP]: (
     uuid,
     payload,
@@ -252,6 +254,26 @@ export const aaActions: ProjectActionFunc = {
   ) =>
     sendCommand(
       { cmd: AAJobs.BENEFICIARY.SPONSOR_BENEFICIARY_GROUP, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.REVOKE_SPONSORSHIP_FOR_GROUP]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.BENEFICIARY.REVOKE_SPONSORSHIP_FOR_GROUP, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.RETRY_SPONSORSHIP_FOR_GROUP]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.BENEFICIARY.RETRY_SPONSORSHIP_FOR_GROUP, uuid },
       payload
     ),
   // **** Beneficiary Groups end **** //
