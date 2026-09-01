@@ -91,6 +91,7 @@ export const JOBS = {
   },
   STATS: {
     GET_ALL: 'aa.jobs.stats.getAll',
+    BACK_FILL: 'aa.jobs.stats.backFill',
     GET_MAP_LOCATION: 'aa.jobs.stats.getMapLocation',
     GET_ONE: 'aa.jobs.stats.getOne',
   },
