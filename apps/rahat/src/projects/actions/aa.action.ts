@@ -245,7 +245,7 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.BENEFICIARY.GET_ONE_GROUP, uuid }, payload),
 
-  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_SPONSORSHIP_STATUS_FOR_GROUP]: (uuid, payload, sendCommand) =>  sendCommand({ cmd: AAJobs.BENEFICIARY.GET_SPONSORSHIP_STATUS_FOR_GROUP, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_SPONSORSHIP_STATUS_FOR_GROUP]: (uuid, payload, sendCommand) => sendCommand({ cmd: AAJobs.BENEFICIARY.GET_SPONSORSHIP_STATUS_FOR_GROUP, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.BENEFICIARY.SPONSOR_BENEFICIARY_GROUP]: (
     uuid,
@@ -741,7 +741,10 @@ export const aaActions: ProjectActionFunc = {
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.INKIND.ASSIGN_GROUP_INKIND, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.INKIND.ASSIGN_GROUP_INKIND, uuid }, payload)
+  },
 
   [MS_ACTIONS.AAPROJECT.INKIND.GET_BY_GROUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_BY_GROUP, uuid }, payload),
