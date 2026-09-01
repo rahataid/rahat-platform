@@ -35,6 +35,7 @@ import { WalletService } from '../wallet/wallet.service';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 import { Prisma } from '@prisma/client';
 import { generateIdempotencyKey } from '../utils/idempotency-key';
+import { lastValueFrom } from 'rxjs';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -721,19 +722,21 @@ export class VendorsService {
       return result.vendor;
     }
 
-    const idempotencyKey = generateIdempotencyKey(
-      VendorJobs.UPDATE,
-      result.vendor
-    );
-
     // Fan out: send update to each project microservice individually
     for (const projectUUID of result.projectIds) {
-      this.client.send(
+      const idempotencyKey = generateIdempotencyKey(
         { cmd: VendorJobs.UPDATE, uuid: projectUUID },
-        {
-          ...result.vendor,
-          idempotencyKey,
-        }
+        result.vendor
+      );
+
+      await lastValueFrom(
+        this.client.send(
+          { cmd: VendorJobs.UPDATE, uuid: projectUUID },
+          {
+            ...result.vendor,
+            idempotencyKey,
+          }
+        )
       );
     }
 
