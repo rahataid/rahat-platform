@@ -5,19 +5,19 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
-  AddToProjectDto,
-  CreateBeneficiaryDto,
-  ListBeneficiaryDto,
+    AddToProjectDto,
+    CreateBeneficiaryDto,
+    ListBeneficiaryDto,
 } from '@rahataid/extensions';
 import {
-  AAPayload,
-  BeneficiaryConstants,
-  BeneficiaryEvents,
-  BeneficiaryJobs,
-  BeneficiaryPayload,
-  MicroserviceOptions,
-  ProjectContants,
-  WalletJobs,
+    AAPayload,
+    BeneficiaryConstants,
+    BeneficiaryEvents,
+    BeneficiaryJobs,
+    BeneficiaryPayload,
+    MicroserviceOptions,
+    ProjectContants,
+    WalletJobs,
 } from '@rahataid/sdk';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService } from '@rumsan/prisma';
@@ -267,7 +267,7 @@ export class BeneficiaryUtilsService {
     };
 
     //Handle aa project type
-    if (projectData.type.toLowerCase() === 'aa') {
+    if (projectData.type.toLowerCase() === 'aa' || projectData.type.toLowerCase() === 'cva') {
       delete payload.type;
       (payload as AAPayload).gender = beneficiaryData.gender;
       payload.extras = { ...payload.extras, phone: beneficiaryData.pii.phone };
