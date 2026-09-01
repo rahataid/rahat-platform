@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to deploy"
+        description: 'Environment to deploy'
         required: true
         type: choice
         options:
-          - "release-v4.0.0-nrcs-client"
+          - 'release-v4.0.0-nrcs-client'
       apps_to_build:
-        description: "Apps to build (leave empty for defaults)"
+        description: 'Apps to build (leave empty for defaults)'
         required: false
         type: string
 
@@ -20,8 +20,8 @@ concurrency:
 
 env:
   CI: false
-  NODE_VERSION: "20.10.0"
-  PNPM_VERSION: "8.14.1"
+  NODE_VERSION: '20.10.0'
+  PNPM_VERSION: '8.14.1'
   REGISTRY: docker.io
   IMAGE_NAMESPACE: esatya
 
@@ -47,7 +47,7 @@ jobs:
             release-v4.0.0-nrcs-client)
               TAG="release-v4.0.0-nrcs-client"
               SECRET="ENV_AA_HEATWAVE"
-              APPS="beneficiary,rahat"
+              APPS="beneficiary,rahat,shared-auth"
               ;;
             *)
               echo "Unknown environment: $ENV"

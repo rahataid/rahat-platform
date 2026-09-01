@@ -18,7 +18,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   CreateProjectDto,
   ListProjectBeneficiaryDto,
@@ -48,6 +48,7 @@ import { UUID } from 'crypto';
 import { Request } from 'express';
 import { throwError } from 'rxjs';
 import { catchError, timeout } from 'rxjs/operators';
+import { SeedSettingsDto } from '../app/dto/seed-settings.dto';
 import { ClosedProjectGuard } from '../decorators';
 import { DocParser } from '../utils/doc-parser';
 import { ProjectService } from './project.service';
@@ -121,7 +122,7 @@ export class ProjectController {
           ...rawData,
         }
       } : rawData,
-      user: null,
+      user: (req as any)?.user,
       trigger: null,
     });
     return response
@@ -266,5 +267,12 @@ export class ProjectController {
   @ApiParam({ name: 'uuid', required: true })
   koboImportSimulate(@Param('uuid') uuid: UUID, @Body() dto: TestKoboImportDto) {
     return this.projectService.importTestBeneficiary(uuid, dto);
+  }
+
+  @Post('/:uuid/setup-aa')
+  @ApiParam({ name: 'uuid', required: true })
+  @ApiBody({ type: SeedSettingsDto })
+  setupAAProject(@Param('uuid') uuid: UUID, @Body() dto: SeedSettingsDto) {
+    return this.projectService.setupAAProject(uuid, dto)
   }
 }

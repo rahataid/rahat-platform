@@ -1,33 +1,23 @@
 meta {
   name: get-beneficiary-uuid
   type: http
-  seq: 5
+  seq: 13
 }
 
 get {
-  url: {{url}}/beneficiaries/{{beneficiaryData.uuid}}
+  url: {{url}}/beneficiaries/fc4cf027-a401-4561-85b1-be58d92dc0e1
   body: none
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcklkIjoxLCJ1dWlkIjoiMTFkOWQwYWItNGM3ZC00MGQ0LTlhYzUtYTVhZTRmMmQ1OGI4IiwibmFtZSI6IlJ1bXNhbiIsImVtYWlsIjoicnVtc2FuQG1haWxpbmF0b3IuY29tIiwicGhvbmUiOm51bGwsIndhbGxldCI6IjB4OWJkMzM5N0U2OTM5MmZFNjk4QTA5NEIxN0NkQUJmMmY2Q2E2NDkwQiIsInJvbGVzIjpbIkFkbWluIl0sInBlcm1pc3Npb25zIjpbeyJhY3Rpb24iOiJtYW5hZ2UiLCJzdWJqZWN0IjoiYWxsIiwiaW52ZXJ0ZWQiOmZhbHNlLCJjb25kaXRpb25zIjpudWxsfV0sInNlc3Npb25JZCI6IjA3Yjk2OTE1LTNkYTgtNGRiYS04MDZkLTcyNzhmYWFmY2MxYyIsImlhdCI6MTc4MzQ2OTI5NCwiZXhwIjoxNzgzNTU1Njk0fQ.zl0xXTXVH60sbTQ0g0xL1YqnjR0SUNTSRG_-9hGF3BQ
 }
 
 assert {
   res.status: eq 200
   res.body.success: eq true
   res.body.data: isJson object
-}
-
-script:pre-request {
-  const { access_token } = require('./temp/auth-data.json');
-  const { beneficiaryData } = require('./temp/beneficiary-data.json');
-  req.setHeader("Authorization", `Bearer ${access_token}`);
-  
-  const url = bru.getEnvVar('url');
-  req.setUrl(`${url}/beneficiaries/${beneficiaryData.uuid}`);
-}
-
-script:post-response {
-  var resData = res.getBody().data;
-  bru.setVar('benef-phone', resData.piiData.phone);
 }
 
 tests {

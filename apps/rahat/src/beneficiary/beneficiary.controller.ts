@@ -220,6 +220,27 @@ export class BeneficiaryController {
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const projectId = req.body['projectId'];
+    const groupName = req.body['groupName']?.trim();
+
+    if (groupName) {
+      const existingGroupsResponse = await firstValueFrom(
+        this.client.send({ cmd: BeneficiaryJobs.GET_ALL_GROUPS }, {
+          page: 1,
+          perPage: 1000,
+          sort: 'createdAt',
+          order: 'desc',
+        })
+      );
+
+      const groupExists = (existingGroupsResponse?.data || []).some(
+        (group: { name?: string }) => group.name?.trim() === groupName
+      );
+
+      if (groupExists) {
+        throw new BadRequestException(`Beneficiary group "${groupName}" already exists.`);
+      }
+    }
+
     const beneficiaries = await DocParser(docType, file.buffer);
     const beneficiariesMapped = beneficiaries.map((b) => ({
       birthDate: b['Birth Date']
@@ -248,37 +269,63 @@ export class BeneficiaryController {
 
     // Process wallet addresses using the wallet processing service
     const walletProcessingResult = await this.walletProcessingService.processBeneficiariesWithWallets(beneficiariesMapped);
-    return this.client
-      .send(
-        { cmd: BeneficiaryJobs.CREATE_BULK },
-        { payload: walletProcessingResult.validBeneficiaries, projectUUID: projectId }
-      )
-      .pipe(
-        map((response) => {
-          if (walletProcessingResult.discardedBeneficiaries.length > 0) {
-            console.warn(`WARNING: ${walletProcessingResult.totalDiscarded} out of ${walletProcessingResult.totalProcessed} beneficiaries were discarded due to Xcapit wallet creation failures:`);
-            walletProcessingResult.discardedBeneficiaries.forEach((discarded) => {
-              console.warn(`   - Phone: ${discarded.phoneNumber}, Reason: ${discarded.status}`);
-            });
-            console.warn(`Successfully processed ${walletProcessingResult.validBeneficiaries.length} beneficiaries with valid wallets.`);
-          }
-
-          return {
-            ...response,
-            discardedBeneficiaries: walletProcessingResult.discardedBeneficiaries,
-            walletProcessingSummary: {
-              totalProcessed: walletProcessingResult.totalProcessed,
-              totalDiscarded: walletProcessingResult.totalDiscarded,
-              totalValid: walletProcessingResult.validBeneficiaries.length
+    const createBulkResponse = await firstValueFrom(
+      this.client
+        .send(
+          { cmd: BeneficiaryJobs.CREATE_BULK },
+          { payload: walletProcessingResult.validBeneficiaries, projectUUID: projectId }
+        )
+        .pipe(
+          map((response) => {
+            if (walletProcessingResult.discardedBeneficiaries.length > 0) {
+              console.warn(`WARNING: ${walletProcessingResult.totalDiscarded} out of ${walletProcessingResult.totalProcessed} beneficiaries were discarded due to Xcapit wallet creation failures:`);
+              walletProcessingResult.discardedBeneficiaries.forEach((discarded) => {
+                console.warn(`   - Phone: ${discarded.phoneNumber}, Reason: ${discarded.status}`);
+              });
+              console.warn(`Successfully processed ${walletProcessingResult.validBeneficiaries.length} beneficiaries with valid wallets.`);
             }
-          };
-        }),
-        catchError((error) => {
-          console.log('error', error);
-          return throwError(() => new BadRequestException(error.message));
-        })
-      )
-      .pipe(timeout(MS_TIMEOUT));
+
+            return {
+              ...response,
+              discardedBeneficiaries: walletProcessingResult.discardedBeneficiaries,
+              walletProcessingSummary: {
+                totalProcessed: walletProcessingResult.totalProcessed,
+                totalDiscarded: walletProcessingResult.totalDiscarded,
+                totalValid: walletProcessingResult.validBeneficiaries.length
+              }
+            };
+          }),
+          catchError((error) => {
+            console.log('error', error);
+            return throwError(() => new BadRequestException(error.message));
+          }),
+          timeout(MS_TIMEOUT)
+        )
+    );
+
+    console.debug(createBulkResponse)
+
+    if (groupName && createBulkResponse?.beneficiariesData?.length) {
+      const groupResponse = await firstValueFrom(
+        this.client.send(
+          { cmd: BeneficiaryJobs.ADD_GROUP },
+          {
+            name: groupName,
+            projectId,
+            beneficiaries: createBulkResponse.beneficiariesData.map((beneficiary) => ({
+              uuid: beneficiary.uuid,
+            })),
+          }
+        )
+      );
+
+      return {
+        ...createBulkResponse,
+        group: groupResponse?.group || groupResponse,
+      };
+    }
+
+    return createBulkResponse;
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)

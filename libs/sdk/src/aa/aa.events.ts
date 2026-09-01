@@ -81,6 +81,10 @@ export const JOBS = {
     GET_TOKEN_DETAILS: 'aa.jobs.beneficiary.getTokenDetails',
     GENERATE_QR_PDF: 'aa.jobs.beneficiary.generateQrPdf',
     GET_QR_PDF: 'aa.jobs.beneficiary.getQrPdf',
+    SPONSOR_BENEFICIARY_GROUP: 'aa.jobs.beneficiary.sponsorBeneficiaryGroup',
+    REVOKE_SPONSORSHIP_FOR_GROUP: 'aa.jobs.beneficiary.revokeSponsorshipForGroup',
+    RETRY_SPONSORSHIP_FOR_GROUP: 'aa.jobs.beneficiary.retrySponsorshipForGroup',
+    GET_SPONSORSHIP_STATUS_FOR_GROUP: 'aa.jobs.beneficiary.getSponsorshipStatusForGroup',
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget',
@@ -129,6 +133,7 @@ export const JOBS = {
     GET: 'aa.jobs.payout.get',
     UPDATE: 'aa.jobs.payout.update',
     GET_PAYMENT_PROVIDERS: 'aa.jobs.payout.getPaymentProviders',
+    SEND_OTP: 'aa.jobs.payout.sendOtp',
     TRIGGER_PAYOUT: 'aa.jobs.payout.triggerPayout',
     TRIGGER_FAILED_PAYOUT_REQUEST: 'aa.jobs.payout.triggerFailedPayoutRequest',
     TRIGGER_ONE_FAILED_PAYOUT_REQUEST:
@@ -204,6 +209,14 @@ export const JOBS = {
     UPDATE_STATUS: 'aa.jobs.grievances.updateStatus',
     GET_OVERVIEW_STATS: 'aa.jobs.grievances.getOverviewStats',
   },
+  IVR_TEMPLATES: {
+    CREATE: 'aa.jobs.ivrTemplates.create',
+    LIST: 'aa.jobs.ivrTemplates.list',
+    GET: 'aa.jobs.ivrTemplates.get',
+    UPDATE: 'aa.jobs.ivrTemplates.update',
+    DELETE: 'aa.jobs.ivrTemplates.delete',
+    SEND_TEST_CALL: 'aa.jobs.ivrTemplates.sendTestCall',
+  },
   BANK_SCRAPE: {
     HBL_ACCOUNTS: 'aa.jobs.bank-scrape.hbl.accounts',
     HBL_TRANSACTIONS: 'aa.jobs.bank-scrape.hbl.transactions',
@@ -233,7 +246,8 @@ export const JOBS = {
     VALIDATE_BANK_ACCOUNT: 'aa.jobs.groupCashTransfer.validateBankAccount',
     GET_ALL_VALID: 'aa.jobs.groupCashTransfer.getAllValid',
     GET_GCT_DATA: 'aa.jobs.groupCashTransfer.getGCTData',
-    UPDATE_GROUP_RECORD: 'aa.jobs.groupCashTransfer.updateRecord'
+    UPDATE_GROUP_RECORD: 'aa.jobs.groupCashTransfer.updateRecord',
+    SEND_OTP: 'aa.jobs.groupCashTransfer.sendOtp',
   },
   MULTISIG: {
     GET_SAFE_OWNER: 'aa.jobs.safe-wallet.getOwner',
@@ -244,4 +258,7 @@ export const JOBS = {
     TOKEN_DETAILS: 'aa.jobs.fundManagement.tokenDetails',
     TRANSFER_LIST: 'aa.jobs.fundManagement.transferList',
   },
+  SETTINGS: {
+    UPDATE_VALUES: 'aa.jobs.settings.updateValues',
+  }
 };
