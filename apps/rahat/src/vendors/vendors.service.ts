@@ -457,6 +457,144 @@ export class VendorsService {
     return user;
   }
 
+  // async updateVendor(dto: VendorUpdateDto, uuid: string) {
+  //   const now = new Date();
+  //   const { projectVendorUpdates, ...vendorDto } = dto;
+
+  //   const result = await this.prisma.$transaction(async (tx) => {
+  //     // Fetch only what is required
+  //     const user = await tx.user.findUnique({
+  //       where: { uuid },
+  //       select: {
+  //         id: true,
+  //         uuid: true,
+  //         email: true,
+  //         extras: true,
+  //       },
+  //     });
+
+  //     if (!user) {
+  //       throw new NotFoundException('Vendor not found');
+  //     }
+
+  //     // Merge extras
+  //     if (vendorDto.extras) {
+  //       const existingExtras =
+  //         user.extras &&
+  //         typeof user.extras === 'object' &&
+  //         !Array.isArray(user.extras)
+  //           ? (user.extras as Record<string, any>)
+  //           : {};
+
+  //       const incomingExtras =
+  //         vendorDto.extras &&
+  //         typeof vendorDto.extras === 'object' &&
+  //         !Array.isArray(vendorDto.extras)
+  //           ? (vendorDto.extras as Record<string, any>)
+  //           : {};
+
+  //       vendorDto.extras = {
+  //         ...existingExtras,
+  //         ...incomingExtras,
+  //       };
+  //     }
+
+  //     //Email & Phone is not unique in user table, so we need to check in auth table for uniqueness.
+  //     // If email or phone is already registered with another user, throw conflict exception.
+
+  //     // Check email & phone uniqueness (via Auth table)
+  //     const [existingEmail, existingPhone] = await Promise.all([
+  //       vendorDto.email
+  //         ? tx.auth.findFirst({
+  //             where: {
+  //               service: Service.EMAIL,
+  //               serviceId: vendorDto.email,
+  //               userId: { not: user.id },
+  //             },
+  //           })
+  //         : Promise.resolve(null),
+  //       vendorDto.phone
+  //         ? tx.auth.findFirst({
+  //             where: {
+  //               service: Service.PHONE,
+  //               serviceId: vendorDto.phone,
+  //               userId: { not: user.id },
+  //             },
+  //           })
+  //         : Promise.resolve(null),
+  //     ]);
+
+  //     if (existingEmail)
+  //       throw new ConflictException('Email already registered');
+  //     if (existingPhone)
+  //       throw new ConflictException('Phone already registered');
+
+  //     // Update vendor
+  //     let updatedVendor;
+
+  //     updatedVendor = await tx.user.update({
+  //       where: {
+  //         uuid,
+  //       },
+  //       data: vendorDto,
+  //     });
+
+  //     // Update project/vendor permissions
+  //     if (projectVendorUpdates?.length) {
+  //       const updates = projectVendorUpdates.filter(
+  //         ({ projectId, canSyncWalkin }) =>
+  //           projectId && canSyncWalkin !== undefined
+  //       );
+
+  //       await Promise.all(
+  //         updates.map(({ projectId, canSyncWalkin }) =>
+  //           tx.projectVendors.updateMany({
+  //             where: {
+  //               vendorId: uuid,
+  //               projectId,
+  //             },
+  //             data: {
+  //               canSyncWalkin,
+  //               updatedAt: now,
+  //             },
+  //           })
+  //         )
+  //       );
+  //     }
+
+  //     // Check whether vendor is assigned to any project
+  //     const assignment = await tx.projectVendors.findFirst({
+  //       where: {
+  //         vendorId: uuid,
+  //       },
+  //       select: {
+  //         vendorId: true,
+  //       },
+  //     });
+
+  //     return {
+  //       vendor: updatedVendor,
+  //       isAssigned: !!assignment,
+  //     };
+  //   });
+
+  //   // Publish only after successful DB transaction
+  //   if (!result.isAssigned) {
+  //     return result.vendor;
+  //   }
+
+  //   return this.client.send(
+  //     { cmd: VendorJobs.UPDATE },
+  //     {
+  //       ...result.vendor,
+  //       idempotencyKey: generateIdempotencyKey(
+  //         VendorJobs.UPDATE,
+  //         result.vendor
+  //       ),
+  //     }
+  //   );
+  // }
+
   async updateVendor(dto: VendorUpdateDto, uuid: string) {
     const now = new Date();
     const { projectVendorUpdates, ...vendorDto } = dto;
@@ -563,36 +701,43 @@ export class VendorsService {
       }
 
       // Check whether vendor is assigned to any project
-      const assignment = await tx.projectVendors.findFirst({
+      const assignments = await tx.projectVendors.findMany({
         where: {
           vendorId: uuid,
         },
         select: {
-          vendorId: true,
+          projectId: true,
         },
       });
 
       return {
         vendor: updatedVendor,
-        isAssigned: !!assignment,
+        projectIds: assignments.map((a) => a.projectId),
       };
     });
 
     // Publish only after successful DB transaction
-    if (!result.isAssigned) {
+    if (!result.projectIds.length) {
       return result.vendor;
     }
 
-    return this.client.send(
-      { cmd: VendorJobs.UPDATE },
-      {
-        ...result.vendor,
-        idempotencyKey: generateIdempotencyKey(
-          VendorJobs.UPDATE,
-          result.vendor
-        ),
-      }
+    const idempotencyKey = generateIdempotencyKey(
+      VendorJobs.UPDATE,
+      result.vendor
     );
+
+    // Fan out: send update to each project microservice individually
+    for (const projectUUID of result.projectIds) {
+      this.client.send(
+        { cmd: VendorJobs.UPDATE, uuid: projectUUID },
+        {
+          ...result.vendor,
+          idempotencyKey,
+        }
+      );
+    }
+
+    return result.vendor;
   }
 
   async removeVendor(uuid: UUID, projectId?: UUID) {
