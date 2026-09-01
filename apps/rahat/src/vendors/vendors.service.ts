@@ -586,19 +586,18 @@ export class VendorsService {
 
     // Fan out: send update to each project microservice individually
     for (const projectUUID of result.projectIds) {
-      const idempotencyKey = generateIdempotencyKey(
-        { cmd: VendorJobs.UPDATE, uuid: projectUUID },
-        result.vendor
-      );
+      const pattern = {
+        cmd: VendorJobs.UPDATE,
+        uuid: projectUUID,
+      };
+
+      const idempotencyKey = generateIdempotencyKey(pattern, result.vendor);
 
       await lastValueFrom(
-        this.client.send(
-          { cmd: VendorJobs.UPDATE, uuid: projectUUID },
-          {
-            ...result.vendor,
-            idempotencyKey,
-          }
-        )
+        this.client.send(pattern, {
+          ...result.vendor,
+          idempotencyKey,
+        })
       );
     }
 
