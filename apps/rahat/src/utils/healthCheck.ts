@@ -1,0 +1,305 @@
+import { HeadBucketCommand, S3Client } from '@aws-sdk/client-s3';
+import { PrismaService } from '@rumsan/prisma';
+import axios from 'axios';
+import { Queue } from 'bull';
+
+export interface ServiceStatus {
+    status: 'up' | 'down';
+    message?: string;
+    latency?: string;
+    last_checked?: string;
+    notes?: string | Record<string, any>;
+    link?: string;
+}
+
+export interface HealthStatus {
+    status: 'up' | 'degraded';
+    services: {
+        database: ServiceStatus;
+        redis: ServiceStatus;
+        rpcUrl: ServiceStatus;
+        cloudflare: ServiceStatus;
+        communication: ServiceStatus;
+        offRamp: ServiceStatus;
+    };
+}
+
+export async function checkDatabase(
+    prisma: PrismaService
+): Promise<ServiceStatus> {
+    const start = performance.now();
+    const last_checked = new Date().toISOString();
+    try {
+        const [connRows] = await Promise.all([
+            prisma.$queryRaw<Array<{ active: bigint; max: bigint }>>`
+                SELECT
+                    (SELECT COUNT(*) FROM pg_stat_activity WHERE datname = current_database()) AS active,
+                    (SELECT setting::bigint FROM pg_settings WHERE name = 'max_connections') AS max
+            `,
+        ]);
+        const { active, max } = connRows[0];
+        return {
+            status: 'up',
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            link: process.env.DATABASE_URL,
+            notes: {
+                active_connections: Number(active),
+                max_connections: Number(max),
+                connections: Number(active),
+            },
+        };
+    } catch (err) {
+        return {
+            status: 'down',
+            message: (err as Error).message,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            link: process.env.DATABASE_URL,
+            notes: {}
+        };
+    }
+}
+
+export async function checkRedis(queue: Queue): Promise<ServiceStatus> {
+    const start = performance.now();
+    const last_checked = new Date().toISOString();
+    try {
+        const [pong, infoRaw] = await Promise.all([
+            queue.client.ping(),
+            queue.client.info('all'),
+        ]);
+        if (pong !== 'PONG') throw new Error(`Unexpected ping response: ${pong}`);
+
+        // Parse INFO sections into a flat key-value map
+        const infoMap: Record<string, string> = {};
+        for (const line of infoRaw.split('\r\n')) {
+            if (!line || line.startsWith('#')) continue;
+            const colonIdx = line.indexOf(':');
+            if (colonIdx === -1) continue;
+            infoMap[line.slice(0, colonIdx).trim()] = line.slice(colonIdx + 1).trim();
+        }
+
+        const connections = parseInt(infoMap['connected_clients'] ?? '0', 10);
+        const memory: Record<string, string> = {
+            used_memory_human: infoMap['used_memory_human'] ?? '',
+            used_memory_peak_human: infoMap['used_memory_peak_human'] ?? '',
+            used_memory_rss_human: infoMap['used_memory_rss_human'] ?? '',
+            maxmemory_human: infoMap['maxmemory_human'] ?? '',
+            mem_fragmentation_ratio: infoMap['mem_fragmentation_ratio'] ?? '',
+        };
+
+        return {
+            status: 'up',
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            link: process.env.REDIS_URL,
+            notes: {
+                connections,
+                memory,
+                redis_version: infoMap['redis_version'] ?? '',
+                uptime_in_days: infoMap['uptime_in_days'] ?? '',
+                role: infoMap['role'] ?? '',
+            },
+        };
+    } catch (err) {
+        return {
+            status: 'down',
+            message: (err as Error).message,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            link: process.env.REDIS_URL,
+            notes: {}
+
+        };
+    }
+}
+
+export async function checkRPCUrl(
+    prisma: PrismaService
+): Promise<ServiceStatus> {
+    const start = performance.now();
+    let rpcUrl;
+    let res;
+    const last_checked = new Date().toISOString();
+    try {
+        const settings = await prisma.setting.findUnique({
+            where: { name: 'CHAIN_SETTINGS' },
+        });
+        const settingsValue = settings?.value as any;
+        rpcUrl = settingsValue?.rpcUrl;
+
+        if (settingsValue?.name?.toLowerCase() === 'evm') {
+            res = await axios.post(
+                rpcUrl,
+                { jsonrpc: '2.0', method: 'eth_blockNumber', params: [], id: 1 },
+                { headers: { 'Content-Type': 'application/json' }, timeout: 5000 }
+            );
+            if (res.data?.error) throw new Error(`Unexpected error during RPCCall`);
+        }
+
+        return {
+            status: 'up',
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            notes: {
+                "method": 'eth_blockNumber'
+            },
+            link: rpcUrl,
+        };
+    } catch (err) {
+        return {
+            status: 'down',
+            message: (err as Error).message,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            link: rpcUrl,
+        };
+    }
+}
+
+export async function checkCloudflare(
+    prisma: PrismaService
+): Promise<ServiceStatus> {
+    const start = performance.now();
+    const last_checked = new Date().toISOString();
+    let endpoint: any;
+    let settingsValue: any;
+    try {
+        const settings = await prisma.setting.findUnique({
+            where: { name: 'CLOUDFLARE_R2' },
+        });
+        settingsValue = settings?.value as any;
+        endpoint = `https://${settingsValue.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
+
+        const s3 = new S3Client({
+            region: 'auto',
+            endpoint: `https://${settingsValue.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+            credentials: {
+                accessKeyId: settingsValue.R2_ACCESS_KEY_ID,
+                secretAccessKey: settingsValue.R2_SECRET_ACCESS_KEY,
+            },
+        });
+
+        await s3.send(new HeadBucketCommand({ Bucket: settingsValue?.R2_BUCKET }));
+        return {
+            status: 'up',
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            notes: `Bucket: ${settingsValue?.R2_BUCKET}`,
+            link: endpoint,
+        };
+    } catch (error: any) {
+        let message = 'Unknown R2 error';
+        if (error.$metadata?.httpStatusCode === 403) {
+            message = 'Access Denied: Invalid credentials or scope permissions';
+        } else if (error.$metadata?.httpStatusCode === 404) {
+            message = `Bucket '${settingsValue?.R2_BUCKET}' does not exist`;
+        } else if (error.message) {
+            message = error.message;
+        }
+        return {
+            status: 'down',
+            message,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            link: endpoint || '',
+        };
+    }
+}
+
+export async function checkCommunication(
+    prisma: PrismaService
+): Promise<ServiceStatus> {
+    const start = performance.now();
+    const last_checked = new Date().toISOString();
+    let endpoint: any;
+    let settingsValue: any;
+    try {
+        const settings = await prisma.setting.findUnique({
+            where: { name: 'COMMUNICATION' },
+        });
+        settingsValue = settings?.value as any;
+        endpoint = settingsValue?.URL;
+
+        const res = await axios.get(endpoint);
+        return {
+            status: 'up',
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            link: endpoint,
+        };
+    } catch (error: any) {
+        return {
+            status: 'down',
+            message: error,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            link: endpoint,
+        };
+    }
+}
+
+export async function checkOffRampService(
+    prisma: PrismaService
+): Promise<ServiceStatus> {
+    let settingsValue;
+    const start = performance.now();
+    const last_checked = new Date().toISOString();
+    let endpoint;
+    try {
+        const settings = await prisma.setting.findUnique({
+            where: {
+                name: 'OFFRAMP_SETTINGS',
+            },
+        });
+        settingsValue = settings?.value as any;
+        endpoint = `${settingsValue?.URL}/app/${settingsValue.appId}`;
+        const res = await axios.get(endpoint, {
+            headers: {
+                APP_ID: `${settingsValue.appId}`,
+            },
+        });
+        // if (res.status == 200) return { status: 'up',message:res?.statusText };
+        return {
+            status: 'up',
+            message: res?.statusText,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            link: endpoint,
+        };
+    } catch (err) {
+        return {
+            status: 'down',
+            message: err,
+            latency: `${(performance.now() - start).toFixed(2)}ms`,
+            last_checked,
+            link: endpoint,
+        };
+    }
+}
+
+
+export async function updateHealthStatus(prisma: PrismaService, rahatQueue: Queue): Promise<HealthStatus> {
+    const [database, redis, rpcUrl, cloudflare, communication, offRamp] = await Promise.all([
+        checkDatabase(prisma),
+        checkRedis(rahatQueue),
+        checkRPCUrl(prisma),
+        checkCloudflare(prisma),
+        checkCommunication(prisma),
+        checkOffRampService(prisma)
+    ]);
+    const allUp = database.status === 'up' && redis.status === 'up';
+    const result: HealthStatus = {
+        status: allUp ? 'up' : 'degraded',
+        services: {
+            database,
+            redis,
+            rpcUrl,
+            cloudflare,
+            communication,
+            offRamp
+        },
+    };
+    return result;
+}

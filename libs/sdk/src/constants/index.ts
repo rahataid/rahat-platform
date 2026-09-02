@@ -684,6 +684,9 @@ export const MS_ACTIONS = {
     SEND_OTP: 'otp.sendOtp',
     SEND_BULK_OTP: 'otp.sendBulkOtp',
   },
+  HEALTH: {
+    CHECK: 'health.getcheck'
+  }
 };
 
 export const RABBIT_MQ = {
