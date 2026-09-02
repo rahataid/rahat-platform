@@ -34,6 +34,8 @@ import { isAddress } from '../utils/web3';
 import { WalletService } from '../wallet/wallet.service';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 import { Prisma } from '@prisma/client';
+import { generateIdempotencyKey } from '../utils/idempotency-key';
+import { lastValueFrom } from 'rxjs';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -562,27 +564,44 @@ export class VendorsService {
       }
 
       // Check whether vendor is assigned to any project
-      const assignment = await tx.projectVendors.findFirst({
+      const assignments = await tx.projectVendors.findMany({
         where: {
           vendorId: uuid,
         },
         select: {
-          vendorId: true,
+          projectId: true,
         },
       });
 
       return {
         vendor: updatedVendor,
-        isAssigned: !!assignment,
+        projectIds: assignments.map((a) => a.projectId),
       };
     });
 
     // Publish only after successful DB transaction
-    if (!result.isAssigned) {
+    if (!result.projectIds.length) {
       return result.vendor;
     }
 
-    return this.client.send({ cmd: VendorJobs.UPDATE }, result.vendor);
+    // Fan out: send update to each project microservice individually
+    for (const projectUUID of result.projectIds) {
+      const pattern = {
+        cmd: VendorJobs.UPDATE,
+        uuid: projectUUID,
+      };
+
+      const idempotencyKey = generateIdempotencyKey(pattern, result.vendor);
+
+      await lastValueFrom(
+        this.client.send(pattern, {
+          ...result.vendor,
+          idempotencyKey,
+        })
+      );
+    }
+
+    return result.vendor;
   }
 
   async removeVendor(uuid: UUID, projectId?: UUID) {
