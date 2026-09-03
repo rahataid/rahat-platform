@@ -263,6 +263,11 @@ export class BeneficiaryController {
     return this.service.getAllGroups(dto);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.GET_ALL_GROUP_NAMES })
+  getAllGroupNames() {
+    return this.service.getAllGroupNames();
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE_GROUP })
   updateGroup(
     @Param('uuid') uuid: UUID,

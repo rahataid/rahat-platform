@@ -1873,6 +1873,18 @@ export class BeneficiaryService {
     };
   }
 
+  async getAllGroupNames() {
+    return this.prisma.beneficiaryGroup.findMany({
+      where: {
+        deletedAt: null,
+      },
+      select: {
+        uuid: true,
+        name: true,
+      },
+    });
+  }
+
   async getAllGroups(dto: ListBeneficiaryGroupDto) {
     const orderBy: Record<string, 'asc' | 'desc'> = {};
     orderBy[dto.sort] = dto.order;

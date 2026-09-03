@@ -222,17 +222,17 @@ export class BeneficiaryController {
     const projectId = req.body['projectId'];
     const groupName = req.body['groupName']?.trim();
 
-    if (groupName) {
-      const existingGroupsResponse = await firstValueFrom(
-        this.client.send({ cmd: BeneficiaryJobs.GET_ALL_GROUPS }, {
-          page: 1,
-          perPage: 1000,
-          sort: 'createdAt',
-          order: 'desc',
-        })
-      );
+    const [existingGroups, beneficiaries] = await Promise.all([
+      groupName
+        ? firstValueFrom(
+          this.client.send({ cmd: BeneficiaryJobs.GET_ALL_GROUP_NAMES }, {})
+        )
+        : Promise.resolve(null),
+      DocParser(docType, file.buffer),
+    ]);
 
-      const groupExists = (existingGroupsResponse?.data || []).some(
+    if (groupName) {
+      const groupExists = (existingGroups || []).some(
         (group: { name?: string }) => group.name?.trim() === groupName
       );
 
@@ -241,7 +241,6 @@ export class BeneficiaryController {
       }
     }
 
-    const beneficiaries = await DocParser(docType, file.buffer);
     const beneficiariesMapped = beneficiaries.map((b) => ({
       birthDate: b['Birth Date']
         ? new Date(b['Birth Date']).toISOString()
