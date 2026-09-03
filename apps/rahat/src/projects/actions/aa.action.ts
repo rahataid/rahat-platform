@@ -245,6 +245,8 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) => sendCommand({ cmd: AAJobs.BENEFICIARY.GET_ONE_GROUP, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_SPONSORSHIP_STATUS_FOR_GROUP]: (uuid, payload, sendCommand) => sendCommand({ cmd: AAJobs.BENEFICIARY.GET_SPONSORSHIP_STATUS_FOR_GROUP, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.BENEFICIARY.SPONSOR_BENEFICIARY_GROUP]: (
     uuid,
     payload,
@@ -252,6 +254,26 @@ export const aaActions: ProjectActionFunc = {
   ) =>
     sendCommand(
       { cmd: AAJobs.BENEFICIARY.SPONSOR_BENEFICIARY_GROUP, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.REVOKE_SPONSORSHIP_FOR_GROUP]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.BENEFICIARY.REVOKE_SPONSORSHIP_FOR_GROUP, uuid },
+      payload
+    ),
+
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.RETRY_SPONSORSHIP_FOR_GROUP]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.BENEFICIARY.RETRY_SPONSORSHIP_FOR_GROUP, uuid },
       payload
     ),
   // **** Beneficiary Groups end **** //
@@ -381,6 +403,9 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.STATS.GET_ALL]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STATS.GET_ALL, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.STATS.BACK_FILL]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.STATS.BACK_FILL, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.STATS.GET_ONE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STATS.GET_ONE, uuid }, payload),
@@ -719,7 +744,10 @@ export const aaActions: ProjectActionFunc = {
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.INKIND.ASSIGN_GROUP_INKIND, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.INKIND.ASSIGN_GROUP_INKIND, uuid }, payload)
+  },
 
   [MS_ACTIONS.AAPROJECT.INKIND.GET_BY_GROUP]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.INKIND.GET_BY_GROUP, uuid }, payload),

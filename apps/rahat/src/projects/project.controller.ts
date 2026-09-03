@@ -125,7 +125,7 @@ export class ProjectController {
           ...rawData,
         }
       } : rawData,
-      user: null,
+      user: (req as any)?.user,
       trigger: null,
     });
     return response
