@@ -228,7 +228,10 @@ export class ProjectService {
 
     const actionFunc = actions[action];
     if (!actionFunc) {
-      throw new Error('Please provide a valid action!');
+      throw new RpcException({
+        message: 'Please provide a valid action!',
+        code: 'INVALID_ACTION',
+      });
     }
     return await actionFunc(null, payload, (...args) =>
       this.sendCommand(args[0], args[1], args[2], this.client, action, user)
@@ -272,7 +275,10 @@ export class ProjectService {
 
     const actionFunc = actions[action];
     if (!actionFunc) {
-      throw new Error('Please provide a valid action!');
+      throw new RpcException({
+        message: 'Please provide a valid action!',
+        code: 'INVALID_ACTION',
+      });
     }
     return await actionFunc(uuid, payload, (...args) =>
       this.sendCommand(args[0], args[1], args[2], this.client, action, user)
@@ -346,13 +352,19 @@ export class ProjectService {
       }
     })
     if (!project) {
-      throw new RpcException(`Project with uuid: ${uuid} not found`);
+      throw new RpcException({
+        message: `Project with uuid: ${uuid} not found`,
+        code: 'PROJECT_NOT_FOUND',
+        params: { uuid },
+      });
     }
 
     if (project.status !== ProjectStatus.NOT_READY) {
-      throw new RpcException(
-        `Settings cannot be updated once the project status is '${project.status}'. Only projects with status 'NOT_READY' can have their settings updated.`
-      );
+      throw new RpcException({
+        message: `Settings cannot be updated once the project status is '${project.status}'. Only projects with status 'NOT_READY' can have their settings updated.`,
+        code: 'PROJECT_STATUS_CANNOT_UPDATE_SETTINGS',
+        params: { status: project.status },
+      });
     }
 
     let response;
@@ -366,9 +378,11 @@ export class ProjectService {
       this.logger.error(
         `AA settings update failed for project uuid: ${uuid} - ${err?.message || err}`
       );
-      throw new RpcException(
-        `Failed to update AA settings for project uuid: ${uuid}. ${err?.message || ''}`
-      );
+      throw new RpcException({
+        message: `Failed to update AA settings for project uuid: ${uuid}. ${err?.message || ''}`,
+        code: 'AA_SETTINGS_UPDATE_FAILED',
+        params: { uuid, err: err?.message || '' },
+      });
     }
 
     if (response) {

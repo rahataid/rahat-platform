@@ -100,7 +100,10 @@ export class BeneficiaryUtilsService {
 
     if (existingBeneficiary) {
       console.log('Wallet address already exists');
-      throw new RpcException('Wallet address already exists');
+      throw new RpcException({
+        message: '[WALLET_ADDRESS_ALREADY_EXISTS] Wallet address already exists',
+        code: 'WALLET_ADDRESS_ALREADY_EXISTS',
+      });
     }
     // if (!isAddress(walletAddress)) {
     //   throw new RpcException('Wallet should be valid Ethereum Address');
@@ -115,7 +118,10 @@ export class BeneficiaryUtilsService {
     if (existingPiiData) {
       console.log('Phone number should be unique');
 
-      throw new RpcException('Phone number should be unique');
+      throw new RpcException({
+        message: '[PHONE_NUMBER_SHOULD_BE_UNIQUE] Phone number should be unique',
+        code: 'PHONE_NUMBER_SHOULD_BE_UNIQUE',
+      });
     }
   }
 
@@ -161,7 +167,11 @@ export class BeneficiaryUtilsService {
       ]);
 
       if (!projectData) return;
-      if (!beneficiaryData) throw new RpcException('Beneficiary not Found.');
+      if (!beneficiaryData)
+        throw new RpcException({
+          message: '[BENEFICIARY_NOT_FOUND] Beneficiary not Found.',
+          code: 'BENEFICIARY_NOT_FOUND',
+        });
 
       //Build Project Payload
       const projectPayload = this.buildProjectPayload(
@@ -190,6 +200,7 @@ export class BeneficiaryUtilsService {
         },
         onError(error) {
           console.log('error', error);
+          if (error instanceof RpcException) throw error;
           throw new RpcException(error.message);
         },
       });
@@ -245,6 +256,7 @@ export class BeneficiaryUtilsService {
         },
         onError(error) {
           console.log('Bulk assignment error', error);
+          if (error instanceof RpcException) throw error;
           throw new RpcException(error.message);
         },
       });
@@ -378,7 +390,10 @@ export class BeneficiaryUtilsService {
         : contractSettings.value;
 
     if (!value.currency?.symbol) {
-      throw new Error('Chain configuration must include currency.symbol');
+      throw new RpcException({
+        message: '[CHAIN_CONFIG_MISSING_CURRENCY_SYMBOL] Chain configuration must include currency.symbol',
+        code: 'CHAIN_CONFIG_MISSING_CURRENCY_SYMBOL',
+      });
     }
 
     return value.currency.symbol;

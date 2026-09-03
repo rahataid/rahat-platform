@@ -1,6 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
@@ -28,7 +28,11 @@ function getDataType(
   ) {
     return SettingDataType.OBJECT;
   }
-  throw new Error(`Invalid data type for 'value': ${typeof value}`);
+  throw new BadRequestException({
+    message: `Invalid data type for 'value': ${typeof value}`,
+    code: 'SETTING_INVALID_VALUE_DATA_TYPE',
+    params: { dataType: typeof value },
+  });
 }
 
 
@@ -180,11 +184,13 @@ export class AppService {
         });
 
         if (missingFields.length > 0) {
-          throw new Error(
-            `Required fields missing in 'value' object: ${missingFields.join(
+          throw new BadRequestException({
+            message: `Required fields missing in 'value' object: ${missingFields.join(
               ', ',
             )}`,
-          ); // 400 Bad Request
+            code: 'SETTING_REQUIRED_FIELDS_MISSING',
+            params: { fields: missingFields.join(', ') },
+          }); // 400 Bad Request
         }
       }
     } else {
@@ -198,7 +204,10 @@ export class AppService {
     });
 
     if (existingSetting) {
-      throw new Error('Setting with this name already exists'); // 400 Bad Request
+      throw new BadRequestException({
+        message: 'Setting with this name already exists',
+        code: 'SETTING_NAME_ALREADY_EXISTS',
+      }); // 400 Bad Request
     }
     const newSetting = await this.prisma.setting.create({
       data: {
@@ -218,7 +227,10 @@ export class AppService {
     const lockRecord = await this.prisma.setting.findUnique({ where: { name: LOCK_SETTING_NAME } });
 
     if (lockRecord && (lockRecord.value as string) === 'LOCKED') {
-      throw new ForbiddenException('Settings already seeded. API is locked.');
+      throw new ForbiddenException({
+        message: 'Settings already seeded. API is locked.',
+        code: 'SETTINGS_ALREADY_SEEDED_API_LOCKED',
+      });
     }
 
     let seededCount = 0;
