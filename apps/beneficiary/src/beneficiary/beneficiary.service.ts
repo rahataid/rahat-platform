@@ -931,7 +931,7 @@ export class BeneficiaryService {
     conditional?: boolean
   ) {
     try {
-      this.logger.debug(`Creating bulk beneficiaries, time: ${new Date()}`);
+      this.logger.log(`Creating bulk beneficiaries with group: ${projectUuid}`);
       const validDtos: CreateBeneficiaryDto[] = [];
       for (const dto of dtos) {
         if (dto.piiData.phone) {
@@ -963,8 +963,6 @@ export class BeneficiaryService {
         validDtos.push(dto);
       }
 
-      this.logger.debug(`Validated ${validDtos.length} out of ${dtos.length} beneficiaries for bulk creation, time: ${new Date()}`
-      );
       const { beneficiariesData, piiDataList } =
         this.beneficiaryUtilsService.prepareBulkInsertData(validDtos);
 
@@ -979,7 +977,6 @@ export class BeneficiaryService {
       // Assign beneficiaries to the project if a projectUuid is provided
       // && conditional
       if (projectUuid) {
-        this.logger.debug(`Assigning beneficiaries to project: ${projectUuid}, time: ${new Date()}`);
         await this.prisma.beneficiaryProject.createMany({
           data: insertedBeneficiariesWithPii.map(({ uuid }) => ({
             beneficiaryId: uuid,
@@ -988,10 +985,32 @@ export class BeneficiaryService {
         });
 
         // TEMP-DISABLED (perf blocker): this emit triggers saveAllStats(), a ~27-query
-        // full-table stats recompute (incl. an unindexed JSONB scan in calculateCountByBank)
-        // that saturates the Prisma connection pool and stalls subsequent queries
-        // (e.g. beneficiaryGroup.create in createBulkWithGroup) for several seconds.
-        // Re-enable once stats recompute is queued/debounced instead of firing inline.
+        // full-table stats recompute (incl. an unindexed JSONB scan in calculateCountByBank,
+        // plus several unfiltered prisma.beneficiary.findMany({}) calls in calculateAgeGroups /
+        // calculateTypeOfSSA / calculateTotalFamilyMembers) that runs synchronously off this
+        // emit. At prod data volume it saturates the Prisma connection pool and stalls
+        // subsequent queries on the same pool (e.g. beneficiaryGroup.create in
+        // createBulkWithGroup) for several seconds. Confirmed by disabling this emit and
+        // the BENEFICIARY_CREATED emit below, which removed the stall entirely.
+        //
+        // Recommended fix (do this before re-enabling):
+        // 1. Move saveAllStats() off the request path entirely: dispatch it as a queued job
+        //    on BQUEUE.RAHAT_BENEFICIARY (see the already-registered but unused
+        //    BeneficiaryJobs.UPDATE_STATS handler in beneficiary.processor.ts) instead of
+        //    emitting an in-process event that runs inline.
+        // 2. Debounce/coalesce bursts: add the job with a fixed jobId (e.g. 'stats-recompute')
+        //    and a short delay (e.g. 5-10s), so repeated uploads in quick succession only
+        //    trigger one recompute instead of one per call.
+        // 3. Cap concurrency on the processor (e.g. { concurrency: 1 } or a Bull limiter) so
+        //    at most one stats recompute runs at a time even under heavy queueing.
+        // 4. Fix the underlying expensive queries regardless of 1-3: add a Postgres
+        //    expression index on extras->>'bank_name' for calculateCountByBank, and rewrite
+        //    calculateAgeGroups/calculateTypeOfSSA/calculateTotalFamilyMembers to use
+        //    groupBy/aggregate queries instead of pulling the full table into JS.
+        // 5. Consider dropping the reactive/event-driven model altogether in favor of a
+        //    periodic scheduled recompute (e.g. every 5-10 min via @nestjs/schedule or a
+        //    Bull repeatable job) so stats cost is decoupled from upload traffic entirely.
+        //
         // this.eventEmitter.emit(
         //   BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
         //   {
@@ -1052,7 +1071,7 @@ export class BeneficiaryService {
     projectUuid?: string,
     groupName?: string
   ) {
-    this.logger.debug(`Creating bulk beneficiaries with group: ${groupName},time: ${new Date()}`);
+    this.logger.log(`Creating bulk beneficiaries with group: ${groupName}`);
     const trimmedGroupName = groupName?.trim();
 
     if (trimmedGroupName) {
@@ -1073,12 +1092,10 @@ export class BeneficiaryService {
       return createBulkResponse;
     }
 
-    this.logger.debug(`Creating beneficiary group: ${trimmedGroupName}, time: ${new Date()}`);
     const group = await this.prisma.beneficiaryGroup.create({
       data: { name: trimmedGroupName },
     });
 
-    this.logger.debug(`Associating beneficiaries with group: ${group.uuid}, time: ${new Date()}`);
     await this.prisma.groupedBeneficiaries.createMany({
       data: createBulkResponse.beneficiariesData.map(({ uuid }) => ({
         beneficiaryGroupId: group.uuid,
