@@ -6,34 +6,34 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary, BeneficiaryPii, GroupPurpose } from '@prisma/client';
 import {
-    AddBeneficiariesToGroupDto,
-    AddBenfGroupToProjectDto,
-    AddBenToProjectDto,
-    addBulkBeneficiaryToProject,
-    AddGroupsPurposeDto,
-    AddToProjectDto,
-    CreateBeneficiaryDto,
-    CreateBeneficiaryGroupsDto,
-    CreateBeneficiaryTransactionDto,
-    ImportTempBenefDto,
-    ListBeneficiariesByGroupDto,
-    ListBeneficiaryDto,
-    ListBeneficiaryGroupDto,
-    ListTempBeneficiariesDto,
-    ListTempGroupsDto,
-    UpdateBeneficiaryDto,
-    UpdateBeneficiaryGroupDto
+  AddBeneficiariesToGroupDto,
+  AddBenfGroupToProjectDto,
+  AddBenToProjectDto,
+  addBulkBeneficiaryToProject,
+  AddGroupsPurposeDto,
+  AddToProjectDto,
+  CreateBeneficiaryDto,
+  CreateBeneficiaryGroupsDto,
+  CreateBeneficiaryTransactionDto,
+  ImportTempBenefDto,
+  ListBeneficiariesByGroupDto,
+  ListBeneficiaryDto,
+  ListBeneficiaryGroupDto,
+  ListTempBeneficiariesDto,
+  ListTempGroupsDto,
+  UpdateBeneficiaryDto,
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
-    AAJobs,
-    BeneficiaryConstants,
-    BeneficiaryEvents,
-    BeneficiaryJobs,
-    BQUEUE,
-    GroupWithValidationAA,
-    ProjectContants,
-    TPIIData,
-    WalletJobs
+  AAJobs,
+  BeneficiaryConstants,
+  BeneficiaryEvents,
+  BeneficiaryJobs,
+  BQUEUE,
+  GroupWithValidationAA,
+  ProjectContants,
+  TPIIData,
+  WalletJobs
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
@@ -41,8 +41,8 @@ import { UUID } from 'crypto';
 import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
-    findTempBenefGroups,
-    validateDupicateWallet,
+  findTempBenefGroups,
+  validateDupicateWallet,
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
@@ -931,6 +931,7 @@ export class BeneficiaryService {
     conditional?: boolean
   ) {
     try {
+      this.logger.debug(`Creating bulk beneficiaries, time: ${new Date()}`);
       const validDtos: CreateBeneficiaryDto[] = [];
       for (const dto of dtos) {
         if (dto.piiData.phone) {
@@ -962,6 +963,8 @@ export class BeneficiaryService {
         validDtos.push(dto);
       }
 
+      this.logger.debug(`Validated ${validDtos.length} out of ${dtos.length} beneficiaries for bulk creation, time: ${new Date()}`
+      );
       const { beneficiariesData, piiDataList } =
         this.beneficiaryUtilsService.prepareBulkInsertData(validDtos);
 
@@ -976,6 +979,7 @@ export class BeneficiaryService {
       // Assign beneficiaries to the project if a projectUuid is provided
       // && conditional
       if (projectUuid) {
+        this.logger.debug(`Assigning beneficiaries to project: ${projectUuid}, time: ${new Date()}`);
         await this.prisma.beneficiaryProject.createMany({
           data: insertedBeneficiariesWithPii.map(({ uuid }) => ({
             beneficiaryId: uuid,
@@ -1041,6 +1045,7 @@ export class BeneficiaryService {
     projectUuid?: string,
     groupName?: string
   ) {
+    this.logger.debug(`Creating bulk beneficiaries with group: ${groupName},time: ${new Date()}`);
     const trimmedGroupName = groupName?.trim();
 
     if (trimmedGroupName) {
@@ -1061,10 +1066,12 @@ export class BeneficiaryService {
       return createBulkResponse;
     }
 
+    this.logger.debug(`Creating beneficiary group: ${trimmedGroupName}, time: ${new Date()}`);
     const group = await this.prisma.beneficiaryGroup.create({
       data: { name: trimmedGroupName },
     });
 
+    this.logger.debug(`Associating beneficiaries with group: ${group.uuid}, time: ${new Date()}`);
     await this.prisma.groupedBeneficiaries.createMany({
       data: createBulkResponse.beneficiariesData.map(({ uuid }) => ({
         beneficiaryGroupId: group.uuid,
