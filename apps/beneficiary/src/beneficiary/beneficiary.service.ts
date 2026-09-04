@@ -987,12 +987,17 @@ export class BeneficiaryService {
           })),
         });
 
-        this.eventEmitter.emit(
-          BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-          {
-            projectUuid: projectUuid,
-          }
-        );
+        // TEMP-DISABLED (perf blocker): this emit triggers saveAllStats(), a ~27-query
+        // full-table stats recompute (incl. an unindexed JSONB scan in calculateCountByBank)
+        // that saturates the Prisma connection pool and stalls subsequent queries
+        // (e.g. beneficiaryGroup.create in createBulkWithGroup) for several seconds.
+        // Re-enable once stats recompute is queued/debounced instead of firing inline.
+        // this.eventEmitter.emit(
+        //   BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
+        //   {
+        //     projectUuid: projectUuid,
+        //   }
+        // );
         //COMMENTING THIS BECAUSE ALREADY ADDED TO PROJECT
 
         const assignPromises = insertedBeneficiariesWithPii.map(
@@ -1023,9 +1028,11 @@ export class BeneficiaryService {
         await Promise.all(assignPromises);
       }
 
-      this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
-        projectUuid,
-      });
+      // TEMP-DISABLED (perf blocker): same saveAllStats() cost as above, see comment
+      // near BENEFICIARY_ASSIGNED_TO_PROJECT emit in this function.
+      // this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
+      //   projectUuid,
+      // });
 
       // Return some form of success indicator, as createMany does not return the records themselves
       return {
