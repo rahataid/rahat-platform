@@ -1036,6 +1036,48 @@ export class BeneficiaryService {
       // throw new RpcException(e)
     }
   }
+  async createBulkWithGroup(
+    dtos: CreateBeneficiaryDto[],
+    projectUuid?: string,
+    groupName?: string
+  ) {
+    const trimmedGroupName = groupName?.trim();
+
+    if (trimmedGroupName) {
+      const existingGroup = await this.prisma.beneficiaryGroup.findFirst({
+        where: { name: trimmedGroupName },
+      });
+
+      if (existingGroup) {
+        throw new RpcException(
+          `Beneficiary group "${trimmedGroupName}" already exists.`
+        );
+      }
+    }
+
+    const createBulkResponse = await this.createBulk(dtos, projectUuid);
+
+    if (!trimmedGroupName || !createBulkResponse?.beneficiariesData?.length) {
+      return createBulkResponse;
+    }
+
+    const group = await this.prisma.beneficiaryGroup.create({
+      data: { name: trimmedGroupName },
+    });
+
+    await this.prisma.groupedBeneficiaries.createMany({
+      data: createBulkResponse.beneficiariesData.map(({ uuid }) => ({
+        beneficiaryGroupId: group.uuid,
+        beneficiaryId: uuid,
+      })),
+    });
+
+    return {
+      ...createBulkResponse,
+      group,
+    };
+  }
+
   async createBulkBeneficiaries(
     dtos: CreateBeneficiaryDto[],
     projectUuid?: string,
@@ -1871,18 +1913,6 @@ export class BeneficiaryService {
     return {
       message: 'Group and all associated beneficiaries successfully deleted.',
     };
-  }
-
-  async getAllGroupNames() {
-    return this.prisma.beneficiaryGroup.findMany({
-      where: {
-        deletedAt: null,
-      },
-      select: {
-        uuid: true,
-        name: true,
-      },
-    });
   }
 
   async getAllGroups(dto: ListBeneficiaryGroupDto) {

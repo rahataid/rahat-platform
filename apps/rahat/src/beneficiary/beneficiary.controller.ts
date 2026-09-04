@@ -222,24 +222,7 @@ export class BeneficiaryController {
     const projectId = req.body['projectId'];
     const groupName = req.body['groupName']?.trim();
 
-    const [existingGroups, beneficiaries] = await Promise.all([
-      groupName
-        ? firstValueFrom(
-          this.client.send({ cmd: BeneficiaryJobs.GET_ALL_GROUP_NAMES }, {})
-        )
-        : Promise.resolve(null),
-      DocParser(docType, file.buffer),
-    ]);
-
-    if (groupName) {
-      const groupExists = (existingGroups || []).some(
-        (group: { name?: string }) => group.name?.trim() === groupName
-      );
-
-      if (groupExists) {
-        throw new BadRequestException(`Beneficiary group "${groupName}" already exists.`);
-      }
-    }
+    const beneficiaries = await DocParser(docType, file.buffer);
 
     const beneficiariesMapped = beneficiaries.map((b) => ({
       birthDate: b['Birth Date']
@@ -271,8 +254,12 @@ export class BeneficiaryController {
     const createBulkResponse = await firstValueFrom(
       this.client
         .send(
-          { cmd: BeneficiaryJobs.CREATE_BULK },
-          { payload: walletProcessingResult.validBeneficiaries, projectUUID: projectId }
+          { cmd: BeneficiaryJobs.CREATE_BULK_WITH_GROUP },
+          {
+            payload: walletProcessingResult.validBeneficiaries,
+            projectUUID: projectId,
+            groupName,
+          }
         )
         .pipe(
           map((response) => {
@@ -303,26 +290,6 @@ export class BeneficiaryController {
     );
 
     console.debug(createBulkResponse)
-
-    if (groupName && createBulkResponse?.beneficiariesData?.length) {
-      const groupResponse = await firstValueFrom(
-        this.client.send(
-          { cmd: BeneficiaryJobs.ADD_GROUP },
-          {
-            name: groupName,
-            projectId,
-            beneficiaries: createBulkResponse.beneficiariesData.map((beneficiary) => ({
-              uuid: beneficiary.uuid,
-            })),
-          }
-        )
-      );
-
-      return {
-        ...createBulkResponse,
-        group: groupResponse?.group || groupResponse,
-      };
-    }
 
     return createBulkResponse;
   }
