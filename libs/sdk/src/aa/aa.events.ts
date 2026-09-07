@@ -82,12 +82,16 @@ export const JOBS = {
     GENERATE_QR_PDF: 'aa.jobs.beneficiary.generateQrPdf',
     GET_QR_PDF: 'aa.jobs.beneficiary.getQrPdf',
     SPONSOR_BENEFICIARY_GROUP: 'aa.jobs.beneficiary.sponsorBeneficiaryGroup',
+    REVOKE_SPONSORSHIP_FOR_GROUP: 'aa.jobs.beneficiary.revokeSponsorshipForGroup',
+    RETRY_SPONSORSHIP_FOR_GROUP: 'aa.jobs.beneficiary.retrySponsorshipForGroup',
+    GET_SPONSORSHIP_STATUS_FOR_GROUP: 'aa.jobs.beneficiary.getSponsorshipStatusForGroup',
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget',
   },
   STATS: {
     GET_ALL: 'aa.jobs.stats.getAll',
+    BACK_FILL: 'aa.jobs.stats.backFill',
     GET_MAP_LOCATION: 'aa.jobs.stats.getMapLocation',
     GET_ONE: 'aa.jobs.stats.getOne',
   },
@@ -242,7 +246,7 @@ export const JOBS = {
     VALIDATE_BANK_ACCOUNT: 'aa.jobs.groupCashTransfer.validateBankAccount',
     GET_ALL_VALID: 'aa.jobs.groupCashTransfer.getAllValid',
     GET_GCT_DATA: 'aa.jobs.groupCashTransfer.getGCTData',
-    UPDATE_GROUP_RECORD: 'aa.jobs.groupCashTransfer.updateRecord', 
+    UPDATE_GROUP_RECORD: 'aa.jobs.groupCashTransfer.updateRecord',
     SEND_OTP: 'aa.jobs.groupCashTransfer.sendOtp',
   },
   MULTISIG: {
@@ -254,4 +258,7 @@ export const JOBS = {
     TOKEN_DETAILS: 'aa.jobs.fundManagement.tokenDetails',
     TRANSFER_LIST: 'aa.jobs.fundManagement.transferList',
   },
+  SETTINGS: {
+    UPDATE_VALUES: 'aa.jobs.settings.updateValues',
+  }
 };

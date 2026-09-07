@@ -826,16 +826,16 @@ export class BeneficiaryService {
     if (!findUuid) throw new Error('Data not Found');
     const { piiData, id, ...rest } = dto;
 
-    // if (piiData?.phone) {
-    //   const benWithSameNumber = await this.rsprisma.beneficiaryPii.findFirst({
-    //     where: {
-    //       phone: piiData.phone,
-    //       beneficiaryId: { not: id },
-    //     },
-    //   });
-    //   if (benWithSameNumber)
-    //     throw new RpcException('Phone number should be unique');
-    // }
+    if (piiData?.phone && (await this.beneficiaryUtilsService.isUniquePhoneRequired())) {
+      const benWithSameNumber = await this.rsprisma.beneficiaryPii.findFirst({
+        where: {
+          phone: piiData.phone,
+          beneficiaryId: { not: id },
+        },
+      });
+      if (benWithSameNumber)
+        throw new RpcException('Phone number should be unique');
+    }
 
     const rdata = await this.prisma.beneficiary.update({
       where: {
@@ -2104,7 +2104,7 @@ export class BeneficiaryService {
         },
       });
 
-      if (project && project.type.toLocaleLowerCase() === 'aa') {
+      if (project && (project.type.toLocaleLowerCase() === 'aa' || project.type.toLocaleLowerCase() === 'cva')) {
         // check if groups has any benf that doesn't have valid bank account
         const isGroupValidForAA = await this.isGroupValidForAA(
           beneficiaryGroupId
@@ -2575,6 +2575,7 @@ export class BeneficiaryService {
         extras: {
           ...((createdBeneficiary.extras ?? {}) as Record<string, any>),
           phone: createdPii.phone,
+          name: createdPii.name,
         },
         isVerified: createdBeneficiary.isVerified,
         gender: createdBeneficiary.gender,
