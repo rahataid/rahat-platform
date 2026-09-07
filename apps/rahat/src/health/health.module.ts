@@ -5,6 +5,7 @@ import { Logger, Module } from "@nestjs/common";
 import { BQUEUE } from "@rahataid/sdk";
 import { PrismaService } from "@rumsan/prisma";
 import { AuthsModule } from "@rumsan/user";
+import { EmailService } from "../listeners/email.service";
 import { HealthController } from "./health.controller";
 import { HealthService } from "./health.service";
 
@@ -14,7 +15,7 @@ import { HealthService } from "./health.service";
         AuthsModule,
     ],
     controllers: [HealthController],
-    providers: [HealthService, PrismaService, Logger],
+    providers: [HealthService, PrismaService, Logger, EmailService],
     exports: [HealthService],
 })
 export class HealthModule { }
