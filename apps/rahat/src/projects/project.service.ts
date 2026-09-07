@@ -177,10 +177,10 @@ export class ProjectService {
       console.log('User', user);
 
       return client
-        .send(cmd, {
-          ...payload,
-          ...({ user }),
-        })
+        .send(cmd, Array.isArray(payload)
+          ? { data: payload, ...({ user }) }
+          : { ...payload, ...({ user }) }
+        )
         .pipe(
           timeout(timeoutValue),
           tap((response) => {
