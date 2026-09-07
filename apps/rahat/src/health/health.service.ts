@@ -11,7 +11,7 @@ import {
     updateHealthStatus,
 } from '../utils/healthCheck';
 
-const ALERT_STATE_KEY = 'health_alert_state';
+const ALERT_STATE_KEY = 'core_health_alert_state';
 
 @Injectable()
 export class HealthService {
@@ -61,7 +61,8 @@ export class HealthService {
     }
 
     async sendHealthAlertEmail(
-        downServices: Array<{ name: string; message?: string }>
+        downServices: Array<{ name: string; message?: string }>,
+        frontendUrl?: string
     ): Promise<void> {
         try {
             this._logger.log('Health status alert email sending..');
@@ -81,7 +82,7 @@ export class HealthService {
                 `The following service(s) are currently unavailable: ${downServices
                     .map((s) => s.name)
                     .join(', ')}`,
-                this.buildHealthEmailHtml('down', downServices)
+                this.buildHealthEmailHtml('down', downServices, frontendUrl)
             );
 
             this._logger.log(`Health down-alert sent to: ${recipients.join(', ')}`);
@@ -90,7 +91,10 @@ export class HealthService {
         }
     }
 
-    async sendHealthRestoredEmail(restoredServices: string[]): Promise<void> {
+    async sendHealthRestoredEmail(
+        restoredServices: Array<{ name: string; restored: boolean }>,
+        frontendURL?: string
+    ): Promise<void> {
         try {
             const recipients = (process.env.HEALTH_ALERT_EMAILS ?? '')
                 .split(',')
@@ -107,7 +111,8 @@ export class HealthService {
                 )}`,
                 this.buildHealthEmailHtml(
                     'up',
-                    restoredServices.map((name) => ({ name }))
+                    restoredServices.map(({ name }) => ({ name })),
+                    frontendURL
                 )
             );
 
@@ -129,6 +134,13 @@ export class HealthService {
             const newlyDown = downNow.filter((s) => !downBefore.includes(s));
             const restored = downBefore.filter((s) => !downNow.includes(s));
 
+            const frontendSettings = await this.prisma.setting.findUnique({
+                where: {
+                    name: 'FRONTEND_URL',
+                },
+            });
+            const frontendUrl = frontendSettings?.value ?? ('' as string);
+
             // No emails on first run/baseline — just record current state.
             if (downBefore.length || newlyDown.length) {
                 if (newlyDown.length) {
@@ -141,13 +153,21 @@ export class HealthService {
                                 name: SERVICE_LABELS[name] ?? name,
                                 message: svc?.message,
                             };
-                        })
+                        }),
+                        frontendUrl as string
                     );
                 }
                 if (restored.length) {
                     this._logger.log('health status up ');
+                    const upServices = Object.entries(result.services)
+                        .filter(([, status]) => status.status === 'up')
+                        .map(([name]) => ({
+                            name: SERVICE_LABELS[name] ?? name,
+                            restored: restored.includes(name),
+                        }));
                     await this.sendHealthRestoredEmail(
-                        restored.map((name) => SERVICE_LABELS[name] ?? name)
+                        upServices,
+                        frontendUrl as string
                     );
                 }
             }
@@ -179,7 +199,8 @@ export class HealthService {
 
     private buildHealthEmailHtml(
         type: 'down' | 'up',
-        services: Array<{ name: string; message?: string }>
+        services: Array<{ name: string; message?: string }>,
+        frontendURL?: string
     ): string {
         const isDown = type === 'down';
         const accent = isDown ? '#d9534f' : '#5cb85c';
@@ -237,7 +258,7 @@ export class HealthService {
       </table>
       </div>
       <div class="foot">
-      <p>Automated alert from Rahat Health Check · ${new Date().toISOString()}</p>
+      <p>Automated alert from Rahat Core Health Check · ${new Date().toLocaleString()} for  <a href= "${frontendURL}"> Dashboard</a></p>
       </div>
       </div>
     </body>
