@@ -6,34 +6,34 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary, BeneficiaryPii, GroupPurpose } from '@prisma/client';
 import {
-    AddBeneficiariesToGroupDto,
-    AddBenfGroupToProjectDto,
-    AddBenToProjectDto,
-    addBulkBeneficiaryToProject,
-    AddGroupsPurposeDto,
-    AddToProjectDto,
-    CreateBeneficiaryDto,
-    CreateBeneficiaryGroupsDto,
-    CreateBeneficiaryTransactionDto,
-    ImportTempBenefDto,
-    ListBeneficiariesByGroupDto,
-    ListBeneficiaryDto,
-    ListBeneficiaryGroupDto,
-    ListTempBeneficiariesDto,
-    ListTempGroupsDto,
-    UpdateBeneficiaryDto,
-    UpdateBeneficiaryGroupDto
+  AddBeneficiariesToGroupDto,
+  AddBenfGroupToProjectDto,
+  AddBenToProjectDto,
+  addBulkBeneficiaryToProject,
+  AddGroupsPurposeDto,
+  AddToProjectDto,
+  CreateBeneficiaryDto,
+  CreateBeneficiaryGroupsDto,
+  CreateBeneficiaryTransactionDto,
+  ImportTempBenefDto,
+  ListBeneficiariesByGroupDto,
+  ListBeneficiaryDto,
+  ListBeneficiaryGroupDto,
+  ListTempBeneficiariesDto,
+  ListTempGroupsDto,
+  UpdateBeneficiaryDto,
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
-    AAJobs,
-    BeneficiaryConstants,
-    BeneficiaryEvents,
-    BeneficiaryJobs,
-    BQUEUE,
-    GroupWithValidationAA,
-    ProjectContants,
-    TPIIData,
-    WalletJobs
+  AAJobs,
+  BeneficiaryConstants,
+  BeneficiaryEvents,
+  BeneficiaryJobs,
+  BQUEUE,
+  GroupWithValidationAA,
+  ProjectContants,
+  TPIIData,
+  WalletJobs
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
@@ -41,8 +41,8 @@ import { UUID } from 'crypto';
 import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
-    findTempBenefGroups,
-    validateDupicateWallet,
+  findTempBenefGroups,
+  validateDupicateWallet,
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
@@ -2575,6 +2575,7 @@ export class BeneficiaryService {
         extras: {
           ...((createdBeneficiary.extras ?? {}) as Record<string, any>),
           phone: createdPii.phone,
+          name: createdPii.name,
         },
         isVerified: createdBeneficiary.isVerified,
         gender: createdBeneficiary.gender,
