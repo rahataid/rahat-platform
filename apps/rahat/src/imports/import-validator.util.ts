@@ -18,9 +18,9 @@ const UUID_REGEX =
 
 /**
  * Validates rows within the CSV dataset (no DB calls).
- * Checks: phone required, no duplicate phones within CSV.
+ * Checks: phone required, no duplicate phones within CSV (when requireUniquePhone is true).
  */
-export function validateRows(mappedRows: MappedRow[], originalRows: Record<string, string>[]): ValidationResult {
+export function validateRows(mappedRows: MappedRow[], originalRows: Record<string, string>[], requireUniquePhone: boolean): ValidationResult {
   const errors: ValidationError[] = [];
   const phonesSeen = new Map<string, number>(); // phone -> first row index
 
@@ -39,16 +39,18 @@ export function validateRows(mappedRows: MappedRow[], originalRows: Record<strin
     }
 
     // Check duplicate phone within CSV
-    const existingRow = phonesSeen.get(phone);
-    if (existingRow !== undefined) {
-      errors.push({
-        row: row.rowIndex,
-        field: 'phone',
-        message: `Duplicate phone number "${phone}" (also in row ${existingRow})`,
-        rowData: originalRows[row.rowIndex - 1],
-      });
-    } else {
-      phonesSeen.set(phone, row.rowIndex);
+    if (requireUniquePhone) {
+      const existingRow = phonesSeen.get(phone);
+      if (existingRow !== undefined) {
+        errors.push({
+          row: row.rowIndex,
+          field: 'phone',
+          message: `Duplicate phone number "${phone}" (also in row ${existingRow})`,
+          rowData: originalRows[row.rowIndex - 1],
+        });
+      } else {
+        phonesSeen.set(phone, row.rowIndex);
+      }
     }
 
     // Validate UUID format if provided in CSV

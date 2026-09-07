@@ -71,12 +71,12 @@ export class ImportProcessor {
       await job.progress({ phase: 'validating', percent: 35, total: totalRows, processed: 0 });
 
       // 2a. Validate within CSV (required fields, duplicate phones)
-      const csvValidation = validateRows(mappedRows, originalRows);
+      const uniquePhoneSetting = await this.settingsService.getByName('REQUIRED_UNIQUE_BENF_NUMBER');
+      const requireUniquePhone = uniquePhoneSetting?.value !== false;
+      const csvValidation = validateRows(mappedRows, originalRows, requireUniquePhone);
       await job.progress({ phase: 'validating', percent: 45, total: totalRows, processed: 0 });
 
       // 2b. Validate against DB (phone + walletAddress uniqueness)
-      const uniquePhoneSetting = await this.settingsService.getByName('REQUIRED_UNIQUE_BENF_NUMBER');
-      const requireUniquePhone = uniquePhoneSetting?.value !== false;
       const dbValidation = await validateAgainstDB(mappedRows, originalRows, this.prisma, requireUniquePhone);
 
       const allErrors: ValidationError[] = [
