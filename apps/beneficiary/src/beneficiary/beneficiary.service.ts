@@ -931,7 +931,7 @@ export class BeneficiaryService {
     conditional?: boolean
   ) {
     try {
-      this.logger.log(`Creating bulk beneficiaries with group: ${projectUuid}`);
+      this.logger.log(`Creating bulk beneficiaries with projectId: ${projectUuid}`);
       const validDtos: CreateBeneficiaryDto[] = [];
       for (const dto of dtos) {
         if (dto.piiData.phone) {
