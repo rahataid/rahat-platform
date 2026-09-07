@@ -182,7 +182,7 @@ export class BeneficiaryService {
 
   // find beneficiary via phone
   async getBeneficiaryByPhoneOnly(payload: { phone: string }) {
-    const getBeneficiaryByPhone = await this.prisma.beneficiaryPii.findUnique({
+    const getBeneficiaryByPhone = await this.prisma.beneficiaryPii.findFirst({
       where: {
         phone: payload.phone,
       },
@@ -826,7 +826,7 @@ export class BeneficiaryService {
     if (!findUuid) throw new Error('Data not Found');
     const { piiData, id, ...rest } = dto;
 
-    if (piiData?.phone) {
+    if (piiData?.phone && (await this.beneficiaryUtilsService.isUniquePhoneRequired())) {
       const benWithSameNumber = await this.rsprisma.beneficiaryPii.findFirst({
         where: {
           phone: piiData.phone,

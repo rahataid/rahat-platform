@@ -18,9 +18,9 @@ const UUID_REGEX =
 
 /**
  * Validates rows within the CSV dataset (no DB calls).
- * Checks: phone required, no duplicate phones within CSV.
+ * Checks: phone required, no duplicate phones within CSV (when requireUniquePhone is true).
  */
-export function validateRows(mappedRows: MappedRow[], originalRows: Record<string, string>[]): ValidationResult {
+export function validateRows(mappedRows: MappedRow[], originalRows: Record<string, string>[], requireUniquePhone: boolean): ValidationResult {
   const errors: ValidationError[] = [];
   const phonesSeen = new Map<string, number>(); // phone -> first row index
 
@@ -39,16 +39,18 @@ export function validateRows(mappedRows: MappedRow[], originalRows: Record<strin
     }
 
     // Check duplicate phone within CSV
-    const existingRow = phonesSeen.get(phone);
-    if (existingRow !== undefined) {
-      errors.push({
-        row: row.rowIndex,
-        field: 'phone',
-        message: `Duplicate phone number "${phone}" (also in row ${existingRow})`,
-        rowData: originalRows[row.rowIndex - 1],
-      });
-    } else {
-      phonesSeen.set(phone, row.rowIndex);
+    if (requireUniquePhone) {
+      const existingRow = phonesSeen.get(phone);
+      if (existingRow !== undefined) {
+        errors.push({
+          row: row.rowIndex,
+          field: 'phone',
+          message: `Duplicate phone number "${phone}" (also in row ${existingRow})`,
+          rowData: originalRows[row.rowIndex - 1],
+        });
+      } else {
+        phonesSeen.set(phone, row.rowIndex);
+      }
     }
 
     // Validate UUID format if provided in CSV
@@ -74,6 +76,7 @@ export async function validateAgainstDB(
   mappedRows: MappedRow[],
   originalRows: Record<string, string>[],
   prisma: PrismaService,
+  requireUniquePhone: boolean,
 ): Promise<ValidationResult> {
   const errors: ValidationError[] = [];
 
@@ -81,7 +84,7 @@ export async function validateAgainstDB(
     .map((r) => r.beneficiary.uuid)
     .filter(Boolean);
 
-  const beneficiariesByUuid = new Map<string, { uuid: string; walletAddress: string; phone: string | null }>();
+  const beneficiariesByUuid = new Map<string, { uuid: string; walletAddress: string; }>();
 
   if (rowUuids.length > 0) {
     const existingByUuid = await prisma.beneficiary.findMany({
@@ -99,7 +102,6 @@ export async function validateAgainstDB(
       beneficiariesByUuid.set(b.uuid, {
         uuid: b.uuid,
         walletAddress: b.walletAddress,
-        phone: b.pii?.phone || null,
       });
     }
   }
@@ -113,7 +115,7 @@ export async function validateAgainstDB(
     .filter(Boolean);
 
   // Batch check phones against DB
-  if (phones.length > 0) {
+  if (requireUniquePhone && phones.length > 0) {
     const existingPii = await prisma.beneficiaryPii.findMany({
       where: { phone: { in: phones } },
       select: {
