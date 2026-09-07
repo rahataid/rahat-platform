@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { BQUEUE } from '@rahataid/sdk';
 import { BeneficiaryEvents, BeneficiaryJobs } from '@rahataid/sdk/beneficiary';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { Job } from 'bull';
 import { mapCSVRows, MappedRow, parseCSVBuffer } from '../imports/csv-parser.util';
@@ -27,6 +28,7 @@ export class ImportProcessor {
     private readonly importsService: ImportsService,
     private readonly walletService: WalletService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly settingsService: SettingsService,
   ) { }
 
   @Process({ name: BeneficiaryJobs.IMPORT_V2, concurrency: 1 })
@@ -73,7 +75,9 @@ export class ImportProcessor {
       await job.progress({ phase: 'validating', percent: 45, total: totalRows, processed: 0 });
 
       // 2b. Validate against DB (phone + walletAddress uniqueness)
-      const dbValidation = await validateAgainstDB(mappedRows, originalRows, this.prisma);
+      const uniquePhoneSetting = await this.settingsService.getByName('REQUIRED_UNIQUE_BENF_NUMBER');
+      const requireUniquePhone = uniquePhoneSetting?.value !== false;
+      const dbValidation = await validateAgainstDB(mappedRows, originalRows, this.prisma, requireUniquePhone);
 
       const allErrors: ValidationError[] = [
         ...csvValidation.errors,

@@ -108,7 +108,14 @@ export class BeneficiaryUtilsService {
     return walletAddress;
   }
 
+  async isUniquePhoneRequired(): Promise<boolean> {
+    const setting = await this.settings.getByName('REQUIRED_UNIQUE_BENF_NUMBER');
+    return setting?.value !== false;
+  }
+
   async ensureUniquePhone(phone: string): Promise<void> {
+    if (!(await this.isUniquePhoneRequired())) return;
+
     const existingPiiData = await this.prismaService.beneficiaryPii.findFirst({
       where: { phone },
     });
