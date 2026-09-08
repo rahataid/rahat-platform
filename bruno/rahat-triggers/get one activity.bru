@@ -1,0 +1,30 @@
+meta {
+  name: get one activity
+  type: http
+  seq: 50
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.activities.getAll",
+    "payload": {
+      "page" : 1,
+      "perPage": 999,
+      "activeYear": "2026",
+       "isAutomated": "",
+      "phaseId": "6df6bbe1-e5c3-4d98-a5e8-1164661705d9",
+      "riverBasin": "Doda river at East-West Highway"
+  //     "manager": "4d918fd3-8602-480e-bdbb-66a2102019f"
+    }
+  }
+}

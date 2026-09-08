@@ -26,8 +26,8 @@ export class UploadController {
     const mimeType = file.mimetype;
     const fileName = Buffer.from(file.originalname, "latin1").toString("utf8").replace(/\s/g, "-");
 
-    const folderName = "dev"
-    const rootFolderName = "aa"
+    const folderName = process.env.AWS_BUCKET_FOLDER_NAME || "dev";
+    const rootFolderName = process.env.AWS_BUCKET_ROOT_FOLDER_NAME || "aa";
 
     return await this.uploadService.uploadFile(buffer, mimeType, fileName, folderName, rootFolderName);
   }
