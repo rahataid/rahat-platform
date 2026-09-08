@@ -6,11 +6,13 @@ export const ABILITY_SUBJECTS = {
   TRIGGER: 'Trigger',
   PHASE: 'Phase',
   FUND_MANAGEMENT: 'Fund Management',
+  MULTI_SIG: 'Multi Sig',
   PAYOUT: 'Payout',
   INKIND: 'Inkind'
 } as const;
 
 export const ABILITY_ACTIONS = {
   DOWNLOAD: 'download',
-  ACTIVATE: 'activate'
+  ACTIVATE: 'activate',
+  REVERT: 'revert',
 };
