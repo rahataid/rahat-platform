@@ -5,19 +5,19 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary } from '@prisma/client';
 import {
-    AddToProjectDto,
-    CreateBeneficiaryDto,
-    ListBeneficiaryDto,
+  AddToProjectDto,
+  CreateBeneficiaryDto,
+  ListBeneficiaryDto,
 } from '@rahataid/extensions';
 import {
-    AAPayload,
-    BeneficiaryConstants,
-    BeneficiaryEvents,
-    BeneficiaryJobs,
-    BeneficiaryPayload,
-    MicroserviceOptions,
-    ProjectContants,
-    WalletJobs,
+  AAPayload,
+  BeneficiaryConstants,
+  BeneficiaryEvents,
+  BeneficiaryJobs,
+  BeneficiaryPayload,
+  MicroserviceOptions,
+  ProjectContants,
+  WalletJobs,
 } from '@rahataid/sdk';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService } from '@rumsan/prisma';
@@ -111,8 +111,15 @@ export class BeneficiaryUtilsService {
     return walletAddress;
   }
 
+  async isUniquePhoneRequired(): Promise<boolean> {
+    const setting = await this.settings.getByName('REQUIRED_UNIQUE_BENF_NUMBER');
+    return setting?.value !== false;
+  }
+
   async ensureUniquePhone(phone: string): Promise<void> {
-    const existingPiiData = await this.prismaService.beneficiaryPii.findUnique({
+    if (!(await this.isUniquePhoneRequired())) return;
+
+    const existingPiiData = await this.prismaService.beneficiaryPii.findFirst({
       where: { phone },
     });
     if (existingPiiData) {
@@ -282,7 +289,7 @@ export class BeneficiaryUtilsService {
     if (projectData.type.toLowerCase() === 'aa' || projectData.type.toLowerCase() === 'cva') {
       delete payload.type;
       (payload as AAPayload).gender = beneficiaryData.gender;
-      payload.extras = { ...payload.extras, phone: beneficiaryData.pii.phone };
+      payload.extras = { ...payload.extras, phone: beneficiaryData.pii.phone, name: beneficiaryData.pii.name };
     }
 
     if (projectData.type.toLowerCase() === 'rp') {
