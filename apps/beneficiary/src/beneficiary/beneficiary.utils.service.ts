@@ -314,57 +314,63 @@ export class BeneficiaryUtilsService {
     piiDataList: any[],
     dtos: CreateBeneficiaryDto[]
   ) {
-    const insertedBeneficiaries = await this.prismaService.$transaction(
-      async (prisma) => {
-        await prisma.beneficiary.createMany({ data: beneficiariesData });
-        // Retrieve inserted beneficiaries for linking PII data
+    try {
+      const insertedBeneficiaries = await this.prismaService.$transaction(
+        async (prisma) => {
+          await prisma.beneficiary.createMany({ data: beneficiariesData });
+          // Retrieve inserted beneficiaries for linking PII data
 
-        const insertedBeneficiaries = await prisma.beneficiary.findMany({
-          where: {
-            uuid: {
-              in: dtos.map((dto) => dto.uuid),
+          const insertedBeneficiaries = await prisma.beneficiary.findMany({
+            where: {
+              uuid: {
+                in: dtos.map((dto) => dto.uuid),
+              },
             },
-          },
-        });
+          });
 
-        // Map PII data with correct beneficiary IDs
-        const piiBulkInsertData = piiDataList.map((piiData) => {
-          const beneficiary = insertedBeneficiaries.find(
-            (b) => b.uuid === piiData.uuid
-          );
-          return {
-            beneficiaryId: beneficiary.id,
-            ...piiData,
-            uuid: undefined, // Remove the temporary UUID field
-          };
-        });
+          // Map PII data with correct beneficiary IDs
+          const piiBulkInsertData = piiDataList.map((piiData) => {
+            const beneficiary = insertedBeneficiaries.find(
+              (b) => b.uuid === piiData.uuid
+            );
+            return {
+              beneficiaryId: beneficiary.id,
+              ...piiData,
+              uuid: undefined, // Remove the temporary UUID field
+            };
+          });
 
-        // Insert PII data in bulk
-        if (piiBulkInsertData.length > 0) {
-          const sanitizedPiiBenef = piiBulkInsertData.map((bulkData) => ({
-            ...bulkData,
-            phone: bulkData.phone
-              ? bulkData.phone.toString()
-              : BeneficiaryConstants.UNPHONED_PLACEHOLDER,
-          }));
-          await prisma.beneficiaryPii.createMany({
-            data: sanitizedPiiBenef,
+          // Insert PII data in bulk
+          if (piiBulkInsertData.length > 0) {
+            const sanitizedPiiBenef = piiBulkInsertData.map((bulkData) => ({
+              ...bulkData,
+              phone: bulkData.phone
+                ? bulkData.phone.toString()
+                : BeneficiaryConstants.UNPHONED_PLACEHOLDER,
+            }));
+            await prisma.beneficiaryPii.createMany({
+              data: sanitizedPiiBenef,
+            });
+          }
+
+          return prisma.beneficiary.findMany({
+            where: {
+              uuid: {
+                in: dtos.map((dto) => dto.uuid),
+              },
+            },
+            include: {
+              pii: true, // Include the related PII data
+            },
           });
         }
+      );
+      return insertedBeneficiaries;
+    } catch (error) {
+      console.error('Error inserting beneficiaries and PII data:', error);
+      throw new RpcException('Failed to insert beneficiaries and PII data');
+    }
 
-        return prisma.beneficiary.findMany({
-          where: {
-            uuid: {
-              in: dtos.map((dto) => dto.uuid),
-            },
-          },
-          include: {
-            pii: true, // Include the related PII data
-          },
-        });
-      }
-    );
-    return insertedBeneficiaries;
   }
 
   async handleMicroserviceCall<TRequest, TResponse>(
