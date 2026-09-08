@@ -37,7 +37,10 @@ export class NotificationService {
       return notification;
     } catch (error) {
       this.logger.error(error);
-      throw new RpcException(error?.message || 'Failed to create notification');
+      throw new RpcException({
+        message: error?.message || 'Failed to create notification',
+        code: 'NOTIFICATION_CREATE_FAILED',
+      });
     }
   }
 
@@ -106,7 +109,10 @@ export class NotificationService {
       });
     } catch (error) {
       this.logger.error(error);
-      throw new RpcException(error?.message || 'Failed to list notifications');
+      throw new RpcException({
+        message: error?.message || 'Failed to list notifications',
+        code: 'NOTIFICATION_LIST_FAILED',
+      });
     }
   }
 
@@ -123,7 +129,10 @@ export class NotificationService {
       });
     } catch (error) {
       this.logger.error(error);
-      throw new RpcException(error?.message || 'Failed to fetch notification');
+      throw new RpcException({
+        message: error?.message || 'Failed to fetch notification',
+        code: 'NOTIFICATION_FETCH_FAILED',
+      });
     }
   }
 
