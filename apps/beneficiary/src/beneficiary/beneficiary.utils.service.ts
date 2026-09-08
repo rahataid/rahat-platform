@@ -108,8 +108,15 @@ export class BeneficiaryUtilsService {
     return walletAddress;
   }
 
+  async isUniquePhoneRequired(): Promise<boolean> {
+    const setting = await this.settings.getByName('REQUIRED_UNIQUE_BENF_NUMBER');
+    return setting?.value !== false;
+  }
+
   async ensureUniquePhone(phone: string): Promise<void> {
-    const existingPiiData = await this.prismaService.beneficiaryPii.findUnique({
+    if (!(await this.isUniquePhoneRequired())) return;
+
+    const existingPiiData = await this.prismaService.beneficiaryPii.findFirst({
       where: { phone },
     });
     if (existingPiiData) {
@@ -267,10 +274,10 @@ export class BeneficiaryUtilsService {
     };
 
     //Handle aa project type
-    if (projectData.type.toLowerCase() === 'aa') {
+    if (projectData.type.toLowerCase() === 'aa' || projectData.type.toLowerCase() === 'cva') {
       delete payload.type;
       (payload as AAPayload).gender = beneficiaryData.gender;
-      payload.extras = { ...payload.extras, phone: beneficiaryData.pii.phone };
+      payload.extras = { ...payload.extras, phone: beneficiaryData.pii.phone, name: beneficiaryData.pii.name };
     }
 
     if (projectData.type.toLowerCase() === 'rp') {

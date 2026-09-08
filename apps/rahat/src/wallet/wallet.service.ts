@@ -217,7 +217,7 @@ export class WalletService implements OnModuleInit {
   }
 
   async getWalletByPhone(phoneNumber: string): Promise<string> {
-    const result = await this.prisma.beneficiaryPii.findUnique({
+    const result = await this.prisma.beneficiaryPii.findFirst({
       where: { phone: phoneNumber },
       select: {
         beneficiary: {
