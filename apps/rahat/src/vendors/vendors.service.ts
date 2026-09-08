@@ -37,6 +37,14 @@ import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
+// Closed set of app/module types a vendor can be registered under.
+// Kept local to this module rather than the shared @rahataid/sdk enums
+// package, since it's only used to validate `extras.registeredApps` here.
+export enum VendorRegisteredApp {
+  CASH = 'CASH',
+  INKIND = 'INKIND',
+}
+
 @Injectable()
 export class VendorsService {
 
@@ -64,7 +72,11 @@ export class VendorsService {
       const role = await prisma.role.findFirst({
         where: { name: UserRoles.VENDOR },
       });
-      if (!role) throw new Error('Role not found');
+      if (!role)
+        throw new BadRequestException({
+          message: 'Role not found',
+          code: 'VENDOR_ROLE_NOT_FOUND',
+        });
       // Add to User table
       const { service, wallet, authWallet, ...rest } = dto;
       if (dto?.email || dto?.phone) {
@@ -76,9 +88,15 @@ export class VendorsService {
 
         if (userData) {
           if (userData?.email === dto.email)
-            throw new Error('Email must be unique');
+            throw new BadRequestException({
+              message: 'Email must be unique',
+              code: 'VENDOR_EMAIL_MUST_BE_UNIQUE',
+            });
           if (userData?.phone === dto.phone)
-            throw new Error('Phone Number must be unique');
+            throw new BadRequestException({
+              message: 'Phone Number must be unique',
+              code: 'VENDOR_PHONE_NUMBER_MUST_BE_UNIQUE',
+            });
         }
       }
 
@@ -139,7 +157,11 @@ export class VendorsService {
     const isVendor = userRoles.some(
       (userRole) => userRole.Role.name === UserRoles.VENDOR
     );
-    if (!isVendor) throw new Error('Not a vendor');
+    if (!isVendor)
+      throw new BadRequestException({
+        message: 'Not a vendor',
+        code: 'USER_IS_NOT_A_VENDOR',
+      });
     const projectPayload = {
       uuid: vendorId,
       walletAddress: vendorUser.wallet,
@@ -148,9 +170,10 @@ export class VendorsService {
     const assigned = await this.getVendorAssignedToProject(vendorId, projectId);
 
     if (assigned)
-      throw new RpcException(
-        new BadRequestException('Vendor already assigned to the project!')
-      );
+      throw new RpcException({
+        message: 'Vendor already assigned to the project!',
+        code: 'VENDOR_ALREADY_ASSIGNED_TO_PROJECT',
+      });
     // //2. Save vendor to project
     // await this.prisma.projectVendors.create({
     //   data: {
@@ -199,7 +222,11 @@ export class VendorsService {
         return response;
       },
       onError(error) {
-        throw new RpcException('Microservice call failed: ' + error.message);
+        throw new RpcException({
+          message: 'Microservice call failed: ' + error.message,
+          code: 'MICROSERVICE_CALL_FAILED',
+          params: { message: error.message },
+        });
       },
     });
 
@@ -247,7 +274,11 @@ export class VendorsService {
       : await this.prisma.user.findUnique({ where: { uuid: id } });
 
     if (!data) {
-      throw new NotFoundException(`Vendor not found with id: ${id}`);
+      throw new NotFoundException({
+        message: `Vendor not found with id: ${id}`,
+        code: 'VENDOR_NOT_FOUND_WITH_ID',
+        params: { id: String(id) },
+      });
     }
 
     const projectData = await this.prisma.projectVendors.findMany({
@@ -416,7 +447,10 @@ export class VendorsService {
       CONSTANTS.CLIENT_TOKEN_LIFETIME
     );
     if (!challengeData.address)
-      throw new ForbiddenException('Invalid credentials in challenge!');
+      throw new ForbiddenException({
+        message: 'Invalid credentials in challenge!',
+        code: 'INVALID_CREDENTIALS_IN_CHALLENGE',
+      });
     if (!dto.service) {
       dto.service = getServiceTypeByAddress(challengeData.address) as Service;
     }
@@ -433,18 +467,47 @@ export class VendorsService {
     // STEP 1: Load current vendor state and validate it exists
     this.logger.log(`Starting vendor update for UUID: ${uuid} with data: ${JSON.stringify(dto)}`);
     const originalVendor = await this.prisma.user.findUnique({ where: { uuid } });
-    if (!originalVendor) throw new NotFoundException('Vendor not found');
+    if (!originalVendor)
+      throw new NotFoundException({
+        message: 'Vendor not found',
+        code: 'VENDOR_DATA_NOT_FOUND',
+      });
 
     // STEP 1.1: Validate email uniqueness if email is being updated
     if (dto?.email) {
       const duplicate = await this.prisma.user.findFirst({
         where: { email: dto.email, NOT: { uuid } },
       });
-      if (duplicate) throw new BadRequestException('Email must be unique');
+      if (duplicate)
+        throw new BadRequestException({
+          message: 'Email must be unique',
+          code: 'VENDOR_EMAIL_MUST_BE_UNIQUE',
+        });
     }
 
     // STEP 1.2: Merge extras with existing data to preserve unmodified fields
     if (dto.extras) {
+      // registeredApps must stay a closed set so the frontend can safely
+      // translate each value against a known enum instead of rendering
+      // arbitrary caller-supplied strings verbatim.
+      const registeredApps = (dto.extras as { registeredApps?: unknown })?.registeredApps;
+      if (registeredApps !== undefined) {
+        if (!Array.isArray(registeredApps)) {
+          throw new BadRequestException({
+            message: 'registeredApps must be an array',
+            code: 'INVALID_REGISTERED_APPS',
+          });
+        }
+        const allowed = Object.values(VendorRegisteredApp) as string[];
+        const invalid = registeredApps.filter((app) => !allowed.includes(app));
+        if (invalid.length > 0) {
+          throw new BadRequestException({
+            message: `Invalid registered app(s): ${invalid.join(', ')}. Allowed values: ${allowed.join(', ')}`,
+            code: 'INVALID_REGISTERED_APPS',
+            params: { invalid: invalid.join(', '), allowed: allowed.join(', ') },
+          });
+        }
+      }
       dto.extras = { ...Object(originalVendor.extras || {}), ...dto.extras };
     }
 
@@ -493,7 +556,11 @@ export class VendorsService {
           )
         );
 
-        throw new Error(`Vendor update saga failed at project ${project.projectId}: ${err.message}`);
+        throw new BadRequestException({
+          message: `Vendor update saga failed at project ${project.projectId}: ${err.message}`,
+          code: 'VENDOR_UPDATE_SAGA_FAILED',
+          params: { projectId: project.projectId, message: err.message },
+        });
       }
     }
 
@@ -510,7 +577,11 @@ export class VendorsService {
         uuid,
       },
     });
-    if (!isVendor) throw new Error('Data not Found');
+    if (!isVendor)
+      throw new NotFoundException({
+        message: 'Data not Found',
+        code: 'VENDOR_DATA_NOT_FOUND',
+      });
 
     if (!projectId) {
       const result = await this.usersService.delete(uuid);
@@ -524,7 +595,11 @@ export class VendorsService {
       },
     });
 
-    if (!isProjectVendor) throw new Error('Project vendor not found');
+    if (!isProjectVendor)
+      throw new NotFoundException({
+        message: 'Project vendor not found',
+        code: 'PROJECT_VENDOR_NOT_FOUND',
+      });
 
     await this.prisma.projectVendors.deleteMany({
       where: {

@@ -23,7 +23,10 @@ export class OtpService {
         const url = await this.getFromSettings('URL')
 
         if (!transportId || !appId || !url) {
-            throw new RpcException('SMS_TRANSPORT_ID, APP_ID, URL are required')
+            throw new RpcException({
+                message: 'SMS_TRANSPORT_ID, APP_ID, URL are required',
+                code: 'OTP_SMS_SETTINGS_REQUIRED',
+            })
         }
 
         if (useStaticOtp && staticOtp)

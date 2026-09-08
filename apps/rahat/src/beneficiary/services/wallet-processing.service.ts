@@ -73,7 +73,10 @@ export class WalletProcessingService {
 
             throw error instanceof RpcException
                 ? error
-                : new RpcException('Wallet processing failed');
+                : new RpcException({
+                    message: 'Wallet processing failed',
+                    code: 'WALLET_PROCESSING_FAILED',
+                });
         }
     }
 
@@ -153,12 +156,19 @@ export class WalletProcessingService {
         try {
             const isValid = await this.walletService.validateAddress(walletAddress);
             if (!isValid) {
-                throw new RpcException(
-                    `Invalid wallet address format: ${walletAddress}`
-                );
+                throw new RpcException({
+                    message: `Invalid wallet address format: ${walletAddress}`,
+                    code: 'INVALID_WALLET_ADDRESS_FORMAT',
+                    params: { addr: walletAddress },
+                });
             }
         } catch (error) {
-            throw new RpcException(`Invalid wallet address: ${error.message}`);
+            if (error instanceof RpcException) throw error;
+            throw new RpcException({
+                message: `Invalid wallet address: ${error.message}`,
+                code: 'INVALID_WALLET_ADDRESS',
+                params: { message: error.message },
+            });
         }
 
         // Check if wallet address already exists
@@ -170,7 +180,10 @@ export class WalletProcessingService {
 
         if (existingBeneficiary) {
             this.logger.log('Wallet address already exists');
-            throw new RpcException('Wallet address already exists');
+            throw new RpcException({
+                message: 'Wallet address already exists',
+                code: 'WALLET_ADDRESS_ALREADY_EXISTS',
+            });
         }
 
         return walletAddress;
@@ -195,9 +208,11 @@ export class WalletProcessingService {
         };
 
         if (!contractValue?.type) {
-            throw new Error(
-                'Chain configuration must include a "type" field (evm or stellar)'
-            );
+            throw new RpcException({
+                message:
+                    'Chain configuration must include a "type" field (evm or stellar)',
+                code: 'CHAIN_CONFIG_MISSING_TYPE',
+            });
         }
 
         return contractValue.type as ChainType;
