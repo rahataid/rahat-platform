@@ -100,7 +100,10 @@ export class BeneficiaryUtilsService {
 
     if (existingBeneficiary) {
       console.log('Wallet address already exists');
-      throw new RpcException('Wallet address already exists');
+      throw new RpcException({
+        message: '[WALLET_ADDRESS_ALREADY_EXISTS] Wallet address already exists',
+        code: 'WALLET_ADDRESS_ALREADY_EXISTS',
+      });
     }
     // if (!isAddress(walletAddress)) {
     //   throw new RpcException('Wallet should be valid Ethereum Address');
@@ -122,7 +125,10 @@ export class BeneficiaryUtilsService {
     if (existingPiiData) {
       console.log('Phone number should be unique');
 
-      throw new RpcException('Phone number should be unique');
+      throw new RpcException({
+        message: '[PHONE_NUMBER_SHOULD_BE_UNIQUE] Phone number should be unique',
+        code: 'PHONE_NUMBER_SHOULD_BE_UNIQUE',
+      });
     }
   }
 
@@ -168,7 +174,11 @@ export class BeneficiaryUtilsService {
       ]);
 
       if (!projectData) return;
-      if (!beneficiaryData) throw new RpcException('Beneficiary not Found.');
+      if (!beneficiaryData)
+        throw new RpcException({
+          message: '[BENEFICIARY_NOT_FOUND] Beneficiary not Found.',
+          code: 'BENEFICIARY_NOT_FOUND',
+        });
 
       //Build Project Payload
       const projectPayload = this.buildProjectPayload(
@@ -197,6 +207,7 @@ export class BeneficiaryUtilsService {
         },
         onError(error) {
           console.log('error', error);
+          if (error instanceof RpcException) throw error;
           throw new RpcException(error.message);
         },
       });
@@ -252,6 +263,7 @@ export class BeneficiaryUtilsService {
         },
         onError(error) {
           console.log('Bulk assignment error', error);
+          if (error instanceof RpcException) throw error;
           throw new RpcException(error.message);
         },
       });
@@ -302,57 +314,63 @@ export class BeneficiaryUtilsService {
     piiDataList: any[],
     dtos: CreateBeneficiaryDto[]
   ) {
-    const insertedBeneficiaries = await this.prismaService.$transaction(
-      async (prisma) => {
-        await prisma.beneficiary.createMany({ data: beneficiariesData });
-        // Retrieve inserted beneficiaries for linking PII data
+    try {
+      const insertedBeneficiaries = await this.prismaService.$transaction(
+        async (prisma) => {
+          await prisma.beneficiary.createMany({ data: beneficiariesData });
+          // Retrieve inserted beneficiaries for linking PII data
 
-        const insertedBeneficiaries = await prisma.beneficiary.findMany({
-          where: {
-            uuid: {
-              in: dtos.map((dto) => dto.uuid),
+          const insertedBeneficiaries = await prisma.beneficiary.findMany({
+            where: {
+              uuid: {
+                in: dtos.map((dto) => dto.uuid),
+              },
             },
-          },
-        });
+          });
 
-        // Map PII data with correct beneficiary IDs
-        const piiBulkInsertData = piiDataList.map((piiData) => {
-          const beneficiary = insertedBeneficiaries.find(
-            (b) => b.uuid === piiData.uuid
-          );
-          return {
-            beneficiaryId: beneficiary.id,
-            ...piiData,
-            uuid: undefined, // Remove the temporary UUID field
-          };
-        });
+          // Map PII data with correct beneficiary IDs
+          const piiBulkInsertData = piiDataList.map((piiData) => {
+            const beneficiary = insertedBeneficiaries.find(
+              (b) => b.uuid === piiData.uuid
+            );
+            return {
+              beneficiaryId: beneficiary.id,
+              ...piiData,
+              uuid: undefined, // Remove the temporary UUID field
+            };
+          });
 
-        // Insert PII data in bulk
-        if (piiBulkInsertData.length > 0) {
-          const sanitizedPiiBenef = piiBulkInsertData.map((bulkData) => ({
-            ...bulkData,
-            phone: bulkData.phone
-              ? bulkData.phone.toString()
-              : BeneficiaryConstants.UNPHONED_PLACEHOLDER,
-          }));
-          await prisma.beneficiaryPii.createMany({
-            data: sanitizedPiiBenef,
+          // Insert PII data in bulk
+          if (piiBulkInsertData.length > 0) {
+            const sanitizedPiiBenef = piiBulkInsertData.map((bulkData) => ({
+              ...bulkData,
+              phone: bulkData.phone
+                ? bulkData.phone.toString()
+                : BeneficiaryConstants.UNPHONED_PLACEHOLDER,
+            }));
+            await prisma.beneficiaryPii.createMany({
+              data: sanitizedPiiBenef,
+            });
+          }
+
+          return prisma.beneficiary.findMany({
+            where: {
+              uuid: {
+                in: dtos.map((dto) => dto.uuid),
+              },
+            },
+            include: {
+              pii: true, // Include the related PII data
+            },
           });
         }
+      );
+      return insertedBeneficiaries;
+    } catch (error) {
+      console.error('Error inserting beneficiaries and PII data:', error);
+      throw new RpcException('Failed to insert beneficiaries and PII data');
+    }
 
-        return prisma.beneficiary.findMany({
-          where: {
-            uuid: {
-              in: dtos.map((dto) => dto.uuid),
-            },
-          },
-          include: {
-            pii: true, // Include the related PII data
-          },
-        });
-      }
-    );
-    return insertedBeneficiaries;
   }
 
   async handleMicroserviceCall<TRequest, TResponse>(
@@ -385,7 +403,10 @@ export class BeneficiaryUtilsService {
         : contractSettings.value;
 
     if (!value.currency?.symbol) {
-      throw new Error('Chain configuration must include currency.symbol');
+      throw new RpcException({
+        message: '[CHAIN_CONFIG_MISSING_CURRENCY_SYMBOL] Chain configuration must include currency.symbol',
+        code: 'CHAIN_CONFIG_MISSING_CURRENCY_SYMBOL',
+      });
     }
 
     return value.currency.symbol;

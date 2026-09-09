@@ -1,6 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Request } from "@nestjs/common";
 import { MessagePattern } from "@nestjs/microservices";
 import { ApiTags } from "@nestjs/swagger";
 import { ChangeGrievanceStatusDTO, CreateGrievanceDTO, ListGrievanceDTO } from "@rahataid/extensions";
@@ -35,7 +35,10 @@ export class GrievanceController {
     const userId = req?.user?.id;
 
     if (!userId) {
-      throw new Error('User ID is required');
+      throw new BadRequestException({
+        message: 'User ID is required',
+        code: 'USER_ID_REQUIRED',
+      });
     }
 
     return this.grievanceService.createGrievance(createGrievanceDto, userId);

@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { OnEvent } from '@nestjs/event-emitter';
 import { BulkUpdateWallet, ChainType, IConnectedWallet, WalletKeys } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
@@ -68,17 +69,21 @@ export class WalletService implements OnModuleInit {
         .getRegisteredChainTypes()
         .includes(chainSettings.detectedChain)
     ) {
-      throw new Error(
-        `Chain type ${chainSettings.detectedChain} is not registered in the module`
-      );
+      throw new RpcException({
+        message: `Chain type ${chainSettings.detectedChain} is not registered in the module`,
+        code: 'CHAIN_TYPE_NOT_REGISTERED',
+        params: { chainType: chainSettings.detectedChain },
+      });
     }
 
     // Initialize the detected chain using IWalletManager
     const chainConfig = chainSettings[chainSettings.detectedChain];
     if (!chainConfig) {
-      throw new Error(
-        `Configuration missing for chain type: ${chainSettings.detectedChain}`
-      );
+      throw new RpcException({
+        message: `Configuration missing for chain type: ${chainSettings.detectedChain}`,
+        code: 'CHAIN_CONFIG_MISSING_FOR_TYPE',
+        params: { chainType: chainSettings.detectedChain },
+      });
     }
 
     await this.providerRegistry.initializeChain(
@@ -150,9 +155,11 @@ export class WalletService implements OnModuleInit {
         .getSupportedChains()
         .includes(chainSettings.detectedChain)
     ) {
-      throw new Error(
-        `Chain ${chainSettings.detectedChain} is not supported in this instance`
-      );
+      throw new RpcException({
+        message: `Chain ${chainSettings.detectedChain} is not supported in this instance`,
+        code: 'CHAIN_NOT_SUPPORTED_IN_INSTANCE',
+        params: { chainType: chainSettings.detectedChain },
+      });
     }
 
     // Use SDK bulk creation
@@ -174,7 +181,10 @@ export class WalletService implements OnModuleInit {
     chain?: ChainType
   ): Promise<WalletKeys | null> {
     if (!walletAddress) {
-      throw new Error('Wallet address not found');
+      throw new RpcException({
+        message: 'Wallet address not found',
+        code: 'WALLET_ADDRESS_NOT_FOUND',
+      });
     }
 
     // TODO: Multi-chain support - Currently limited to instance's supported chains
@@ -227,7 +237,10 @@ export class WalletService implements OnModuleInit {
     });
 
     if (!result) {
-      throw new Error('Beneficiary not found');
+      throw new RpcException({
+        message: 'Beneficiary not found',
+        code: 'BENEFICIARY_NOT_FOUND',
+      });
     }
 
     return result.beneficiary.walletAddress;
@@ -252,7 +265,11 @@ export class WalletService implements OnModuleInit {
     const chainType = chain || (await this.detectChainFromAddress(address));
 
     if (!this.providerRegistry.getSupportedChains().includes(chainType)) {
-      throw new Error(`Chain ${chainType} not supported in this instance`);
+      throw new RpcException({
+        message: `Chain ${chainType} not supported in this instance`,
+        code: 'CHAIN_NOT_SUPPORTED_IN_INSTANCE',
+        params: { chainType },
+      });
     }
 
     return this.providerRegistry.connectWallet(address, chainType);
@@ -267,7 +284,11 @@ export class WalletService implements OnModuleInit {
       chain || (await this.getCurrentChainSettings()).detectedChain;
 
     if (!this.providerRegistry.getSupportedChains().includes(chainType)) {
-      throw new Error(`Chain ${chainType} not supported in this instance`);
+      throw new RpcException({
+        message: `Chain ${chainType} not supported in this instance`,
+        code: 'CHAIN_NOT_SUPPORTED_IN_INSTANCE',
+        params: { chainType },
+      });
     }
 
     return this.providerRegistry.importWallet(privateKey, chainType);
@@ -302,26 +323,31 @@ export class WalletService implements OnModuleInit {
     console.log('CHAIN_SETTINGS', settings);
 
     if (!settings || !settings.value) {
-      throw new Error(
-        'CHAIN_SETTINGS configuration not found. Please configure chain settings in the application settings.'
-      );
+      throw new RpcException({
+        message:
+          'CHAIN_SETTINGS configuration not found. Please configure chain settings in the application settings.',
+        code: 'CHAIN_SETTINGS_CONFIG_NOT_FOUND',
+      });
     }
 
     const rawValue = settings.value as unknown as ChainConfig;
 
     if (!rawValue?.type) {
-      throw new Error(
-        'Chain configuration must include a "type" field (evm or stellar)'
-      );
+      throw new RpcException({
+        message: 'Chain configuration must include a "type" field (evm or stellar)',
+        code: 'CHAIN_CONFIG_MISSING_TYPE',
+      });
     }
 
     // Validate that the type is a valid ChainType
     const validChainTypes: ChainType[] = ['evm', 'stellar'];
     if (!validChainTypes.includes(rawValue.type as ChainType)) {
-      throw new Error(
-        `Invalid chain type "${rawValue.type
-        }". Must be one of: ${validChainTypes.join(', ')}`
-      );
+      throw new RpcException({
+        message: `Invalid chain type "${rawValue.type
+        }". Must be one of: ${validChainTypes.join(', ')}`,
+        code: 'INVALID_CHAIN_TYPE',
+        params: { type: rawValue.type, validTypes: validChainTypes.join(', ') },
+      });
     }
 
     const detectedChain: ChainType = rawValue.type as ChainType;

@@ -107,7 +107,10 @@ export class ProjectController {
     const payload = req.body['payload']
 
     if (!action || !projectId) {
-      throw new BadRequestException('Missing action or project id');
+      throw new BadRequestException({
+        message: 'Missing action or project id',
+        code: 'MISSING_ACTION_OR_PROJECT_ID',
+      });
     }
     const docType: Enums.UploadFileType =
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.EXCEL;
