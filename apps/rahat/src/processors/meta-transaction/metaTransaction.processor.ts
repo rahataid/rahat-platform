@@ -19,21 +19,29 @@ export class MetaTransationProcessor {
     async processMetaTxn(job: any) {
         this.logger.log(`Added job ${job.id} to queue`)
         await sleep(3000);
+        this.logger.log(`Job ${job.id}: sleep done, reading job data`)
         const { params, trigger } = job.data;
 
         const { metaTxRequest } = params;
+        this.logger.log(`Job ${job.id}: metaTxRequest ${JSON.stringify(metaTxRequest)}`)
 
+        this.logger.log(`Job ${job.id}: creating forwarder contract signer for ${process.env.ERC2771_FORWARDER_ADDRESS}`)
         const forwarderContract = await createContractSigner(
             ERC2771FORWARDER,
             process.env.ERC2771_FORWARDER_ADDRESS
         );
+        this.logger.log(`Job ${job.id}: forwarder contract signer ready`)
 
         metaTxRequest.gas = BigInt(metaTxRequest.gas);
         metaTxRequest.nonce = BigInt(metaTxRequest.nonce);
         metaTxRequest.value = BigInt(metaTxRequest.value);
+        this.logger.log(`Job ${job.id}: casted gas/nonce/value to BigInt`)
 
+        this.logger.log(`Job ${job.id}: sending execute() tx`)
         const tx = await forwarderContract.execute(metaTxRequest);
+        this.logger.log(`Job ${job.id}: tx sent, hash ${tx.hash}, waiting for confirmation`)
         const res = await tx.wait();
+        this.logger.log(`Job ${job.id}: tx confirmed, status ${res.status}`)
 
         let triggerData = {
             payload: trigger?.payload
@@ -42,12 +50,13 @@ export class MetaTransationProcessor {
 
         try {
             if (trigger) {
+                this.logger.log(`Job ${job.id}: sending trigger event ${trigger.event_name} for project ${trigger.projectUuid}`)
                 await this.client.send({ cmd: trigger.event_name, uuid: trigger.projectUuid }, triggerData)
                     .pipe(timeout(MS_TIMEOUT)).toPromise();
-
+                this.logger.log(`Job ${job.id}: trigger event sent`)
             }
         } catch (error) {
-            console.log(error)
+            this.logger.error(`Job ${job.id}: trigger event failed`, error)
         }
 
 
