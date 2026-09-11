@@ -58,6 +58,16 @@ export class UpdateProjectDto extends OmitType(PartialType(CreateProjectDto), [
 
 }
 
+export class UpdateProjectImageDto {
+  @ApiProperty({
+    type: 'string',
+    required: true,
+    example: 'https://bucket.s3.amazonaws.com/project/image.png',
+  })
+  @IsString()
+  url: string;
+}
+
 export class UpdateProjectStatusDto {
 
   @ApiProperty({
