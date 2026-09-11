@@ -4,6 +4,7 @@ import { BullModule } from "@nestjs/bull";
 import { Module } from "@nestjs/common";
 import { ClientsModule, Transport } from "@nestjs/microservices";
 import { BQUEUE, ProjectContants } from "@rahataid/sdk";
+import { SettingsModule } from "@rumsan/extensions/settings";
 import { MetaTransationProcessor } from "./metaTransaction.processor";
 
 @Module({
@@ -22,6 +23,7 @@ import { MetaTransationProcessor } from "./metaTransaction.processor";
         BullModule.registerQueue({
             name: BQUEUE.META_TXN
         }),
+        SettingsModule,
     ],
     providers: [MetaTransationProcessor]
 })

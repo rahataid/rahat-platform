@@ -1,19 +1,36 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Process, Processor } from "@nestjs/bull";
-import { Inject, Logger } from "@nestjs/common";
+import { Inject, Logger, OnModuleInit } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { BQUEUE, MS_TIMEOUT, ProjectContants } from "@rahataid/sdk";
 import { JOBS } from "@rahataid/sdk/project/project.events";
+import { SettingsService } from "@rumsan/extensions/settings";
 import { timeout } from "rxjs";
 import { ERC2771FORWARDER } from "../../utils/contracts";
 import { createContractSigner } from "../../utils/web3";
 
 @Processor(BQUEUE.META_TXN)
-export class MetaTransationProcessor {
+export class MetaTransationProcessor implements OnModuleInit {
     private readonly logger = new Logger(MetaTransationProcessor.name);
+    private rpcUrl: string;
+    private deployerPrivateKey: string;
+    private forwarderAddress: string;
+
     constructor(
-        @Inject(ProjectContants.ELClient) private readonly client: ClientProxy) { }
+        @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
+        private readonly settings: SettingsService,
+    ) { }
+
+    async onModuleInit() {
+        const chainSettings = await this.settings.getByName('CHAIN_SETTINGS');
+        const deployerPrivateKey = await this.settings.getByName('DEPLOYER_PRIVATE_KEY');
+        const contracts = await this.settings.getByName('CONTRACTS');
+
+        this.rpcUrl = (chainSettings?.value as any)?.rpcUrl;
+        this.deployerPrivateKey = deployerPrivateKey?.value as string;
+        this.forwarderAddress = (contracts?.value as any)?.ERC2771FORWARDER?.ADDRESS;
+    }
 
     @Process(JOBS.META_TRANSACTION.ADD_QUEUE)
     async processMetaTxn(job: any) {
@@ -25,10 +42,12 @@ export class MetaTransationProcessor {
         const { metaTxRequest } = params;
         this.logger.log(`Job ${job.id}: metaTxRequest ${JSON.stringify(metaTxRequest)}`)
 
-        this.logger.log(`Job ${job.id}: creating forwarder contract signer for ${process.env.ERC2771_FORWARDER_ADDRESS}`)
+        this.logger.log(`Job ${job.id}: creating forwarder contract signer for ${this.forwarderAddress}`)
         const forwarderContract = await createContractSigner(
             ERC2771FORWARDER,
-            process.env.ERC2771_FORWARDER_ADDRESS
+            this.forwarderAddress,
+            this.rpcUrl,
+            this.deployerPrivateKey
         );
         this.logger.log(`Job ${job.id}: forwarder contract signer ready`)
 
