@@ -293,14 +293,14 @@ export class AppService {
     return getVersionFromPackageJson();
   }
 
-  // AA version via Redis — needs uuid (multi-tenant), timeout 1500 ms, fallback 'unreachable'.
+  // AA version via Redis — package.json version only, not scoped to a specific project's uuid
+  // (matches triggers' pattern below, which never required a uuid either). Timeout 1500 ms, fallback 'unreachable'.
   private async getAaVersion(): Promise<string> {
     const start = Date.now();
-    const projectId = this.configService.get<string>('AA_PROJECT_ID') ?? '';
     const result: any = await firstValueFrom(
       this.rahatClient
         // cspell:disable-next-line
-        .send({ cmd: 'aa.jobs.version.get', uuid: projectId }, {})
+        .send({ cmd: 'aa.jobs.version.get' }, {})
         .pipe(
           timeout(1500),
           catchError((err: Error) => {
