@@ -1,4 +1,7 @@
 export const JOBS = {
+  VERSION: {
+    GET: 'aa.jobs.version.get'
+  },
   RIVER_STATIONS: {
     GET_DHM: 'aa.jobs.riverStations.getDhm',
   },

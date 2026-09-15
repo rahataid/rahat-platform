@@ -3,6 +3,7 @@
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { APP_GUARD } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { StatsModule } from '@rahat/stats';
@@ -64,6 +65,20 @@ import { AuthClientModule } from './auth-client.module';
     AppUsersModule,
     OtpModule,
     RSUserModule.forRoot([AuthsModule, UsersModule, RolesModule]),
+    ClientsModule.registerAsync([
+      {
+        name: 'RAHAT_CLIENT',
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.REDIS,
+          options: {
+            host: configService.get('REDIS_HOST'),
+            port: configService.get('REDIS_PORT'),
+            password: configService.get('REDIS_PASSWORD'),
+          },
+        }),
+        inject: [ConfigService],
+      },
+    ]),
     ProjectModule,
     StatsModule,
     ProcessorsModule,

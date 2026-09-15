@@ -208,6 +208,9 @@ export const MS_ACTIONS = {
       ADD_TRIGGERS: 'aaProject.phases.addTriggers',
       REVERT_PHASE: 'aaProject.phases.revertPhase',
     },
+    VERSION: {                 // ← add (generic, not domain)
+      GET: 'aaProject.version.get',
+    },
     STAKEHOLDERS: {
       GET_ALL: 'aaProject.stakeholders.getAll',
       GET_ONE: 'aaProject.stakeholders.getOne',
@@ -669,6 +672,9 @@ export const MS_ACTIONS = {
   MS_SETTINGS: {
     GET: 'ms.settings.get',
     UPDATE_VALUES: 'ms.settings.updateValues',
+  },
+  MS_VERSION: {
+    GET: 'ms.version.get',     //    action: 'ms.version.get'
   },
   MS_SOURCES_DATA: {
     GET_SERIES_BY_DATA_SOURCE: 'ms.sourcesData.getSeriesByDataSource',

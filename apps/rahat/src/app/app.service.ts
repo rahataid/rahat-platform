@@ -1,6 +1,10 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ClientProxy } from '@nestjs/microservices';
+import { catchError, timeout } from 'rxjs/operators';
+import { firstValueFrom, of } from 'rxjs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
@@ -9,7 +13,7 @@ import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { SettingDataType } from '@rumsan/sdk/enums';
 import { UUID } from 'crypto';
 import { SeedSettingsDto } from './dto/seed-settings.dto';
-
+import { getVersionFromPackageJson } from '../utils/version.helper';
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
 function getDataType(
@@ -69,10 +73,14 @@ function parseSettingValue(value: unknown, dataType?: string): unknown {
 
 @Injectable()
 export class AppService {
+  private readonly logger = new Logger(AppService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly settingsService: SettingsService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly configService: ConfigService,
+    @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy,
   ) { }
 
 
@@ -272,13 +280,84 @@ export class AppService {
     })
   }
 
-  async getFrontendUrl () {
+  async getFrontendUrl() {
     return this.prisma.setting.findMany({
       where: {
         name: "FRONTEND_URL"
       }
     })
   }
+
+  // Platform version — local cached readFile, no network.
+  private async getRahatVersion(): Promise<string> {
+    return getVersionFromPackageJson();
+  }
+
+  // AA version via Redis — needs uuid (multi-tenant), timeout 1500 ms, fallback 'unreachable'.
+  private async getAaVersion(): Promise<string> {
+    const start = Date.now();
+    const projectId = this.configService.get<string>('AA_PROJECT_ID') ?? '';
+    const result: any = await firstValueFrom(
+      this.rahatClient
+        // cspell:disable-next-line
+        .send({ cmd: 'aa.jobs.version.get', uuid: projectId }, {})
+        .pipe(
+          timeout(1500),
+          catchError((err: Error) => {
+            this.logger.warn(`AA version fetch failed (${err.message}) — fallback unreachable`);
+            return of(null);
+          }),
+        ),
+    );
+    if (result?.version) this.logger.log(`AA version ${result.version} in ${Date.now() - start}ms`);
+    return result?.version || 'unreachable';
+  }
+
+  // Triggers version via Redis — no uuid, payload.appId only, timeout 1500 ms, fallback 'unreachable'.
+  private async getTriggersVersion(): Promise<string> {
+    const result: any = await firstValueFrom(
+      this.rahatClient
+        // cspell:disable-next-line
+        .send({ cmd: 'ms.jobs.version.get' }, { appId: process.env.AA_PROJECT_ID } as any)
+        .pipe(
+          timeout(1500),
+          catchError((err: Error) => {
+            this.logger.warn(`Triggers version fetch failed (${err.message}) — fallback unreachable`);
+            return of(null);
+          }),
+        ),
+    );
+    return result?.version || 'unreachable';
+  }
+
+  // Aggregate all backend versions in parallel — never 500 if one micro down.
+  async getAppVersions(): Promise<any> {
+    const [platform, aa, triggers] = await Promise.allSettled([
+      this.getRahatVersion(),
+      this.getAaVersion(),
+      this.getTriggersVersion(),
+    ]);
+    const pick = (r: PromiseSettledResult<string>, fallback: string): string =>
+      r.status === 'fulfilled' ? r.value : fallback;
+    return {
+      platform: pick(platform, 'unreachable'),
+      rahatAa: pick(aa, 'unreachable'),
+      triggers: pick(triggers, 'unreachable'),
+      env: this.configService.get<string>('NODE_ENV') ?? 'local',
+      fetchedAt: new Date().toISOString(),
+    };
+  }
+
+  // Web Version URL for env — Issue #1283.
+  async getWebVersion(): Promise<any> {
+    const frontendUrl =
+      (await this.prisma.setting.findUnique({ where: { name: 'FRONTEND_URL' } }).catch(() => null))?.value ??
+      this.configService.get<string>('FRONTEND_URL') ??
+      'http://localhost:5500';
+    const url = typeof frontendUrl === 'string' ? frontendUrl : String(frontendUrl);
+    return { url, env: this.configService.get<string>('NODE_ENV') ?? 'local' };
+  }
+
 
   async getChainType() {
     const setting = await this.settingsService.getByName('CHAIN_SETTINGS');
