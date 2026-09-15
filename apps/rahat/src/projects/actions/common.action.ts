@@ -111,7 +111,11 @@ export const settingActions: ProjectActionFunc = {
       { cmd: ProjectJobs.PROJECT_SETTINGS_GET, uuid },
       { projectId: uuid, ...payload }
     ),
-
+  [MS_ACTIONS.HEALTH.CHECK]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.HEALTH.CHECK, uuid },
+      { projectId: uuid, }
+    )
 }
 
 export const projectActions: ProjectActionFunc = {
