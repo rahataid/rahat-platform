@@ -181,7 +181,7 @@ export class BeneficiaryUtilsService {
         });
 
       //Build Project Payload
-      const projectPayload = this.buildProjectPayload(
+      const projectPayload = await this.buildProjectPayload(
         projectData,
         beneficiaryData
       );
@@ -241,7 +241,7 @@ export class BeneficiaryUtilsService {
       }
 
       //Build Project Payload and add to array
-      const projectPayload = this.buildProjectPayload(projectData, beneficiaryData);
+      const projectPayload = await this.buildProjectPayload(projectData, beneficiaryData);
       allProjectPayloads.push(projectPayload);
 
       //Save beneficiary to Project
@@ -274,11 +274,18 @@ export class BeneficiaryUtilsService {
     });
   }
 
-  private buildProjectPayload(projectData: any, beneficiaryData: any) {
+  private async buildProjectPayload(projectData: any, beneficiaryData: any) {
     type BeneficiaryPayloadWithPhone = BeneficiaryPayload & { phone?: string };
+
+    const walletAddress = await this.getWalletAddressForChain(
+      beneficiaryData.uuid,
+      projectData.chainType,
+      beneficiaryData.walletAddress
+    );
+
     const payload: BeneficiaryPayloadWithPhone = {
       uuid: beneficiaryData.uuid,
-      walletAddress: beneficiaryData.walletAddress,
+      walletAddress,
       phone: beneficiaryData.pii?.phone || null,
       extras: beneficiaryData.extras || null,
       type: BeneficiaryConstants.Types.ENROLLED,
@@ -297,6 +304,25 @@ export class BeneficiaryUtilsService {
     }
 
     return payload;
+  }
+
+  /**
+   * Returns the wallet address matching the project's chainType from tbl_wallet_addresses.
+   * Falls back to primaryWallet if no chainType set on project or no matching wallet found.
+   */
+  private async getWalletAddressForChain(
+    beneficiaryUuid: string,
+    chainType: string | null | undefined,
+    primaryWallet: string
+  ): Promise<string> {
+    if (!chainType?.trim()) return primaryWallet;
+
+    const chainWallet = await this.prismaService.walletAddress.findFirst({
+      where: { entityId: beneficiaryUuid, chainType, deletedAt: null },
+      select: { address: true },
+    });
+
+    return chainWallet?.address ?? primaryWallet;
   }
 
   async saveBeneficiaryToProject(dto: AddToProjectDto) {

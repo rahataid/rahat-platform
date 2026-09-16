@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Beneficiary, Enums, TPIIData } from '@rahataid/sdk';
 import {
   ArrayNotEmpty,
-  IsArray,
   IsDate,
   IsEnum,
   IsNumber,
