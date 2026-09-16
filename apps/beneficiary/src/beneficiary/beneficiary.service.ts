@@ -455,23 +455,47 @@ export class BeneficiaryService {
   }
 
   async create(dto: CreateBeneficiaryDto, projectUuid?: string,) {
-    const { piiData, projectUUIDs, walletAddress, ...data } = dto;
+    const { piiData, projectUUIDs, walletAddress, multiChainWallets, ...data } = dto;
 
     if (piiData.phone) {
       await this.beneficiaryUtilsService.ensureUniquePhone(
         piiData.phone.toString()
       );
+      this.logger.log('[CREATE] Phone validation passed');
     }
 
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
     const createdBeneficiary = await this.rsprisma.beneficiary.create({
       data: { ...data, walletAddress },
     });
+    this.logger.log(`[CREATE] Beneficiary record created with UUID: ${createdBeneficiary.uuid}`);
+    if (multiChainWallets && Array.isArray(multiChainWallets) && multiChainWallets.length > 0) {
+      this.logger.log(`[CREATE] Persisting ${multiChainWallets.length} multi-chain wallet(s)`);
+      for (const wallet of multiChainWallets) {
+        this.logger.log(`[CREATE] Wallet item:`, JSON.stringify(wallet, null, 2));
+        await this.prisma.walletAddress.upsert({
+          where: { address: wallet.address },
+          create: {
+            entityId: createdBeneficiary.uuid,
+            address: wallet.address,
+            isPrimary: wallet.address === walletAddress,
+            isVerified: true,
+            chainType: wallet.chain,
+            config: { privateKey: wallet.privateKey, address: wallet.address, chain: wallet.chain },
+          },
+          update: {},
+        });
+        this.logger.log(`[CREATE] Wallet persisted for chain ${wallet.chain}: ${wallet.address}`);
+      }
+    } else {
+      this.logger.log('[CREATE] No multi-chain wallets to persist');
+    }
 
     await this.beneficiaryUtilsService.addPIIData(
       createdBeneficiary.id,
       piiData
     );
+    this.logger.log('[CREATE] PII data added');
 
     // Assign beneficiary to project while creating. Useful when a beneficiary is created from inside a project
     if (projectUUIDs && projectUUIDs.length) {
@@ -946,18 +970,23 @@ export class BeneficiaryService {
     conditional?: boolean
   ) {
     try {
-      this.logger.log(`Creating bulk beneficiaries with projectId: ${projectUuid}`);
+      this.logger.log(`[CREATE_BULK] Starting bulk creation for ${dtos.length} beneficiaries, projectId: ${projectUuid}`);
       const validDtos: CreateBeneficiaryDto[] = [];
-      for (const dto of dtos) {
+      for (let i = 0; i < dtos.length; i++) {
+        const dto = dtos[i];
+        this.logger.log(`[CREATE_BULK] Processing entry ${i + 1}/${dtos.length}, phone: ${dto.piiData?.phone}`);
+
         if (dto.piiData.phone) {
           try {
             await this.beneficiaryUtilsService.ensureUniquePhone(
               dto.piiData.phone.toString()
             );
+            this.logger.log(`[CREATE_BULK] Phone validation passed for ${dto.piiData.phone}`);
           } catch (error) {
             console.log(
               `Skipping entry due to duplicate phone: ${dto.piiData.phone}`
             );
+            this.logger.warn(`[CREATE_BULK] Skipping entry ${i + 1}: duplicate phone ${dto.piiData.phone}`);
             continue;
           }
         }
@@ -967,19 +996,23 @@ export class BeneficiaryService {
             await this.beneficiaryUtilsService.ensureValidWalletAddress(
               dto.walletAddress
             );
+          this.logger.log(`[CREATE_BULK] Wallet address validated/set: ${dto.walletAddress}`);
         } catch (error) {
           console.log(
             `Skipping entry due to duplicate/invalid wallet address: ${dto.walletAddress}`
           );
+          this.logger.warn(`[CREATE_BULK] Skipping entry ${i + 1}: invalid wallet ${dto.walletAddress}`);
           continue;
         }
 
         dto.uuid = dto.uuid || uuidv4();
         validDtos.push(dto);
       }
+      this.logger.log(`[CREATE_BULK] Validated ${validDtos.length}/${dtos.length} beneficiaries`);
 
       const { beneficiariesData, piiDataList } =
         this.beneficiaryUtilsService.prepareBulkInsertData(validDtos);
+      this.logger.log(`[CREATE_BULK] Preparing bulk insert data for ${validDtos.length} beneficiaries`);
 
       // Insert beneficiaries in bulk
       const insertedBeneficiariesWithPii =
@@ -988,6 +1021,35 @@ export class BeneficiaryService {
           piiDataList,
           validDtos
         );
+      this.logger.log(`[CREATE_BULK] Successfully inserted ${insertedBeneficiariesWithPii.length} beneficiaries`);
+
+      // Persist multi-chain wallets to tbl_wallet_addresses for all beneficiaries
+      this.logger.log('[CREATE_BULK] Starting multi-chain wallet persistence');
+      let walletCount = 0;
+      for (let i = 0; i < validDtos.length; i++) {
+        const dto = validDtos[i];
+        if (dto.multiChainWallets && Array.isArray(dto.multiChainWallets) && dto.multiChainWallets.length > 0) {
+          const beneficiary = insertedBeneficiariesWithPii[i];
+          this.logger.log(`[CREATE_BULK] Persisting ${dto.multiChainWallets.length} wallet(s) for beneficiary ${beneficiary.uuid}`);
+          for (const wallet of dto.multiChainWallets) {
+            await this.prisma.walletAddress.upsert({
+              where: { address: wallet.address },
+              create: {
+                entityId: beneficiary.uuid,
+                address: wallet.address,
+                isPrimary: wallet.address === dto.walletAddress,
+                isVerified: true,
+                chainType: wallet.chain,
+                config: { privateKey: wallet.privateKey, address: wallet.address, chain: wallet.chain },
+              },
+              update: {},
+            });
+            this.logger.log(`[CREATE_BULK] Wallet persisted for chain ${wallet.chain}: ${wallet.address}`);
+            walletCount++;
+          }
+        }
+      }
+      this.logger.log(`[CREATE_BULK] Multi-chain wallet persistence complete: ${walletCount} wallet(s) saved`);
 
       // Assign beneficiaries to the project if a projectUuid is provided
       // && conditional

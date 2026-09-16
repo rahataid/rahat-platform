@@ -15,6 +15,14 @@ export interface WalletCreateResult {
   privateKey: string;
 }
 
+export interface MultiChainWalletResult {
+  /** Address from the default/primary chain — goes into beneficiary.walletAddress */
+  defaultAddress: string;
+  defaultChain: ChainType;
+  /** One entry per active chain */
+  wallets: WalletCreateResult[];
+}
+
 // TODO: Multi-chain support - Future enhancement to support multiple chains per instance
 // Currently: One instance = One chain type
 // Future: One instance = Multiple chain types with dynamic selection
@@ -209,6 +217,78 @@ export class WalletService implements OnModuleInit {
       address: wallet.address,
       privateKey: wallet.privateKey,
     }));
+  }
+
+  /**
+   * Creates wallets for all active/supported chains using one shared mnemonic per
+   * beneficiary. The same mnemonic is used to derive addresses for every chain,
+   * so the beneficiary has a single recovery phrase.
+   *
+   * Returns one MultiChainWalletResult per requested slot; each result contains
+   * the default-chain address (for beneficiary.walletAddress) and the full set of
+   * per-chain wallets (for tbl_wallet_addresses).
+   */
+  async createBulkForAllChains(count: number): Promise<MultiChainWalletResult[]> {
+    // Dynamic imports keep the heavy crypto libs out of the module-init path
+    const { ethers } = await import('ethers');
+    const { Keypair } = await import('@stellar/stellar-sdk');
+
+    const defaultChain = await this.getDefaultChainFromDb();
+    const supportedChains = this.providerRegistry.getSupportedChains();
+
+    const results: MultiChainWalletResult[] = [];
+
+    for (let i = 0; i < count; i++) {
+      // One mnemonic shared across all chains for this beneficiary
+      const mnemonic = ethers.Mnemonic.fromEntropy(ethers.randomBytes(16));
+      const wallets: WalletCreateResult[] = [];
+
+      for (const chainType of supportedChains) {
+        try {
+          let address: string;
+          let privateKey: string;
+
+          if (chainType === 'evm') {
+            const hdWallet = ethers.HDNodeWallet.fromMnemonic(mnemonic);
+            address = hdWallet.address;
+            privateKey = hdWallet.privateKey;
+          } else if (chainType === 'stellar') {
+            const hdPath = "m/44'/148'/0'/0/0";
+            const hdWallet = ethers.HDNodeWallet.fromMnemonic(mnemonic, hdPath);
+            const keypair = Keypair.fromRawEd25519Seed(
+              Buffer.from(hdWallet.privateKey.slice(2), 'hex')
+            );
+            address = keypair.publicKey();
+            privateKey = keypair.secret();
+          } else {
+            this.logger.warn(`No mnemonic derivation path for chain "${chainType}", skipping`);
+            continue;
+          }
+
+          // Persist derived key into the chain's wallet storage
+          await this.providerRegistry.importWallet(privateKey, chainType);
+          wallets.push({ chain: chainType, address, privateKey });
+        } catch (error) {
+          this.logger.error(`Failed to derive wallet for chain ${chainType}: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+
+      if (wallets.length === 0) {
+        throw new RpcException({
+          message: 'No wallets could be derived for any supported chain',
+          code: 'MULTICHAIN_WALLET_CREATION_FAILED',
+        });
+      }
+
+      const defaultWallet = wallets.find(w => w.chain === defaultChain) ?? wallets[0];
+      results.push({
+        defaultAddress: defaultWallet.address,
+        defaultChain,
+        wallets,
+      });
+    }
+
+    return results;
   }
 
   // Get wallet secret by address and chain
