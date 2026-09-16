@@ -481,7 +481,7 @@ export class BeneficiaryService {
             isPrimary: wallet.address === walletAddress,
             isVerified: true,
             chainType: wallet.chain,
-            config: { privateKey: wallet.privateKey, address: wallet.address, chain: wallet.chain },
+            // config: { privateKey: wallet.privateKey, address: wallet.address, chain: wallet.chain },
           },
           update: {},
         });
@@ -1010,7 +1010,7 @@ export class BeneficiaryService {
       }
       this.logger.log(`[CREATE_BULK] Validated ${validDtos.length}/${dtos.length} beneficiaries`);
 
-      const { beneficiariesData, piiDataList } =
+      const { beneficiariesData, piiDataList, multiChainWalletsList } =
         this.beneficiaryUtilsService.prepareBulkInsertData(validDtos);
       this.logger.log(`[CREATE_BULK] Preparing bulk insert data for ${validDtos.length} beneficiaries`);
 
@@ -1019,37 +1019,33 @@ export class BeneficiaryService {
         await this.beneficiaryUtilsService.insertBeneficiariesAndPIIData(
           beneficiariesData,
           piiDataList,
-          validDtos
+          validDtos,
+          multiChainWalletsList
         );
       this.logger.log(`[CREATE_BULK] Successfully inserted ${insertedBeneficiariesWithPii.length} beneficiaries`);
 
       // Persist multi-chain wallets to tbl_wallet_addresses for all beneficiaries
       this.logger.log('[CREATE_BULK] Starting multi-chain wallet persistence');
-      let walletCount = 0;
-      for (let i = 0; i < validDtos.length; i++) {
-        const dto = validDtos[i];
-        if (dto.multiChainWallets && Array.isArray(dto.multiChainWallets) && dto.multiChainWallets.length > 0) {
-          const beneficiary = insertedBeneficiariesWithPii[i];
-          this.logger.log(`[CREATE_BULK] Persisting ${dto.multiChainWallets.length} wallet(s) for beneficiary ${beneficiary.uuid}`);
-          for (const wallet of dto.multiChainWallets) {
-            await this.prisma.walletAddress.upsert({
-              where: { address: wallet.address },
-              create: {
-                entityId: beneficiary.uuid,
-                address: wallet.address,
-                isPrimary: wallet.address === dto.walletAddress,
-                isVerified: true,
-                chainType: wallet.chain,
-                config: { privateKey: wallet.privateKey, address: wallet.address, chain: wallet.chain },
-              },
-              update: {},
-            });
-            this.logger.log(`[CREATE_BULK] Wallet persisted for chain ${wallet.chain}: ${wallet.address}`);
-            walletCount++;
-          }
-        }
+      const beneficiaryByUuid = new Map(insertedBeneficiariesWithPii.map((b) => [b.uuid, b]));
+      for (const wallet of multiChainWalletsList) {
+        if (!wallet.uuid) continue;
+        const beneficiary = beneficiaryByUuid.get(wallet.uuid);
+        if (!beneficiary) continue;
+        await this.prisma.walletAddress.upsert({
+          where: { address: wallet.address },
+          create: {
+            entityId: beneficiary.uuid,
+            address: wallet.address,
+            isPrimary: wallet.address === beneficiary.walletAddress,
+            isVerified: true,
+            chainType: wallet.chain,
+            config: { privateKey: wallet.privateKey, address: wallet.address, chain: wallet.chain },
+          },
+          update: {},
+        });
+        this.logger.log(`[CREATE_BULK] Wallet persisted for chain ${wallet.chain}: ${wallet.address}`);
       }
-      this.logger.log(`[CREATE_BULK] Multi-chain wallet persistence complete: ${walletCount} wallet(s) saved`);
+      this.logger.log(`[CREATE_BULK] Multi-chain wallet persistence complete: ${multiChainWalletsList.length} wallet(s) saved`);
 
       // Assign beneficiaries to the project if a projectUuid is provided
       // && conditional
@@ -1148,6 +1144,7 @@ export class BeneficiaryService {
     projectUuid?: string,
     groupName?: string
   ) {
+
     this.logger.log(`Creating bulk beneficiaries with group: ${groupName}`);
     const trimmedGroupName = groupName?.trim();
 

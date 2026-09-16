@@ -330,15 +330,19 @@ export class BeneficiaryUtilsService {
   }
 
   prepareBulkInsertData(dtos: CreateBeneficiaryDto[]) {
-    const beneficiariesData = dtos.map(({ piiData, ...data }) => data);
+    const beneficiariesData = dtos.map(({ piiData, multiChainWallets, ...data }) => data);
     const piiDataList = dtos.map(({ uuid, piiData }) => ({ ...piiData, uuid }));
-    return { beneficiariesData, piiDataList };
+    const multiChainWalletsList = dtos.flatMap(({ uuid, multiChainWallets }) =>
+      (Array.isArray(multiChainWallets) ? multiChainWallets : []).map((wallet) => ({ uuid, ...wallet }))
+    );
+    return { beneficiariesData, piiDataList, multiChainWalletsList };
   }
 
   async insertBeneficiariesAndPIIData(
     beneficiariesData: any[],
     piiDataList: any[],
-    dtos: CreateBeneficiaryDto[]
+    dtos: CreateBeneficiaryDto[],
+    multiChainWalletsList?: any[]
   ) {
     try {
       const insertedBeneficiaries = await this.prismaService.$transaction(
@@ -377,6 +381,22 @@ export class BeneficiaryUtilsService {
             await prisma.beneficiaryPii.createMany({
               data: sanitizedPiiBenef,
             });
+          }
+
+          if (multiChainWalletsList) {
+            const sanitizedWalletdata = multiChainWalletsList.map((walletData) => ({
+              entityId: walletData?.uuid,
+              address: walletData?.address,
+              isVerified: true,
+              chainType: walletData?.chain
+
+
+            }));
+            await prisma.walletAddress.createMany({
+              data: sanitizedWalletdata
+
+            })
+
           }
 
           return prisma.beneficiary.findMany({
