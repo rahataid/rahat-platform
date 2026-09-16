@@ -25,7 +25,11 @@ export class XcapitService {
       where: { name: WalletServiceType.XCAPIT },
     });
 
-    if (!xcapit) throw new RpcException('XCAPIT setting not found');
+    if (!xcapit)
+      throw new RpcException({
+        message: 'XCAPIT setting not found',
+        code: 'WALLET_XCAPIT_SETTING_NOT_FOUND',
+      });
 
     const { BASEURL, EMAIL, PASSWORD } = xcapit.value as {
       BASEURL: string;
@@ -34,9 +38,10 @@ export class XcapitService {
     };
 
     if (!BASEURL || !EMAIL || !PASSWORD) {
-      throw new RpcException(
-        'Missing XCAPIT_BASEURL, XCAPIT_EMAIL or XCAPIT_PASSWORD'
-      );
+      throw new RpcException({
+        message: 'Missing XCAPIT_BASEURL, XCAPIT_EMAIL or XCAPIT_PASSWORD',
+        code: 'WALLET_XCAPIT_CONFIG_MISSING',
+      });
     }
 
     this.baseURL = BASEURL;

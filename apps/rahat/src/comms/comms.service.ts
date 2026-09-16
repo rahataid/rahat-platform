@@ -45,14 +45,20 @@ export class CommsService {
 
   async getClient(): Promise<CommsClient> {
     if (!this.isReady || !this.client) {
-      throw new ServiceUnavailableException('Communication service is not initialized yet. Seed settings and try again.');
+      throw new ServiceUnavailableException({
+        message: 'Communication service is not initialized yet. Seed settings and try again.',
+        code: 'COMMS_SERVICE_NOT_INITIALIZED',
+      });
     }
     return this.client;
   }
 
   private getAppId(): string {
     if (!this.isReady || !this.appId) {
-      throw new ServiceUnavailableException('Communication service is not initialized yet. Seed settings and try again.');
+      throw new ServiceUnavailableException({
+        message: 'Communication service is not initialized yet. Seed settings and try again.',
+        code: 'COMMS_SERVICE_NOT_INITIALIZED',
+      });
     }
     return this.appId;
   }

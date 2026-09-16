@@ -1,5 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import { BadRequestException } from '@nestjs/common';
 import { CreateBeneficiaryDto } from '@rahataid/extensions';
 import { Enums } from '@rahataid/sdk';
 import { plainToClass } from 'class-transformer';
@@ -15,7 +16,10 @@ export async function DocParser(
     docType !== Enums.UploadFileType.JSON &&
     docType !== Enums.UploadFileType.EXCEL
   )
-    throw new Error('Only allowed JSON and EXCEL docType');
+    throw new BadRequestException({
+      message: 'Only allowed JSON and EXCEL docType',
+      code: 'ONLY_JSON_OR_EXCEL_DOC',
+    });
   const parsedData =
     docType === Enums.UploadFileType.JSON
       ? JsonParser(buffer)
@@ -40,10 +44,14 @@ export async function DocParser(
       beneficiaries.push(row);
     }
   }
-
   // If any validation errors, throw exception
   if (validationErrors.length > 0) {
-    throw new Error('Validation errors: ' + JSON.stringify(validationErrors));
+    throw new BadRequestException({
+      message: `Validation errors found in ${validationErrors.length} row(s)`,
+      code: 'BENEFICIARY_IMPORT_VALIDATION_ERRORS',
+      params: { count: validationErrors.length },
+      errors: validationErrors,
+    });
   }
   return beneficiaries;
 }
