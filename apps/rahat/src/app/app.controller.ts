@@ -1,15 +1,17 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiParam, ApiTags } from '@nestjs/swagger';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
 import { ACTIONS, APP, SUBJECTS } from '@rahataid/sdk';
 import { AbilitiesGuard, CheckAbilities, JwtGuard } from '@rumsan/user';
 import { UUID } from 'crypto';
+// import type { File as MulterFile } from 'multer';
 import { AppJobs } from './app.jobs';
 import { AppService } from './app.service';
-import { SeedSettingsDto } from './dto/seed-settings.dto';
+import { CreateSiteSettingDto, SeedSettingsDto } from './dto/seed-settings.dto';
 
 @Controller('app')
 @ApiTags('App')
@@ -92,4 +94,71 @@ export class AppController {
   async seedSettings(@Body() dto: SeedSettingsDto) {
     return this.appService.seedSettings(dto);
   }
+
+  @Post('settings/site-info')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      {
+        name: 'siteImage',
+        maxCount: 1,
+      },
+      {
+        name: 'brandImage',
+        maxCount: 1,
+      },
+    ]),
+  )
+  @ApiOperation({ summary: 'Add site info (brand name, description, images)' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Add site info',
+    schema: {
+      type: 'object',
+      properties: {
+        brandName: {
+          type: 'string',
+          description: 'Brand name',
+        },
+        brandDescription: {
+          type: 'string',
+          description: 'Brand description',
+        },
+        siteImage: {
+          type: 'string',
+          format: 'binary',
+        },
+        brandImage: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+      required: ['brandName', 'brandDescription'],
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Site info added successfully.' })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiResponse({ status: 500, description: 'Internal server error.' })
+  async create(
+    @Body() dto: CreateSiteSettingDto,
+    @UploadedFiles()
+    files: {
+      siteImage?: any;
+      brandImage?: any;
+    },
+  ) {
+    return this.appService.addSiteInfo(
+      dto,
+      files,
+    );
+  }
+  @Get('settings/site-info')
+  @ApiOperation({ summary: 'Get site info (brand name, description, images)' })
+  @ApiResponse({ status: 200, description: 'Site info retrieved successfully.' })
+  @ApiResponse({ status: 404, description: 'Site info not found.' })
+  async getSiteInfo() {
+    return this.appService.getSiteInfo();
+  }
+
+
+
 }
