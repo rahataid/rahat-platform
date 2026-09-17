@@ -9,7 +9,7 @@ import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { SettingDataType } from '@rumsan/sdk/enums';
 import { UUID } from 'crypto';
 import { UploadService } from '../upload/upload.service';
-import { CreateSiteSettingDto, SeedSettingsDto } from './dto/seed-settings.dto';
+import { SeedSettingsDto } from './dto/seed-settings.dto';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -148,6 +148,7 @@ export class AppService {
   async createRahatAppSettings(
     createSettingDto: CreateSettingDto,
   ) {
+    console.log('createRahatAppSettings called', createSettingDto); // Debugging line
     let {
       name,
       value: dtoValue,
@@ -288,95 +289,100 @@ export class AppService {
     return { type: chain?.type ?? null };
   }
 
-  async addSiteInfo(dto: CreateSiteSettingDto,
-    files: {
-      siteImage?: any;
-      brandImage?: any;
-    }) {
+  // async addSiteInfo(dto: CreateSiteSettingDto,
+  //   files: {
+  //     siteImage?: any;
+  //     brandImage?: any;
+  //   }) {
 
-    const siteImageFile = files ? files.siteImage?.[0] : ''
-    const brandImageFile = files ? files.brandImage?.[0] : ''
+  //   const siteImageFile = files ? files.siteImage?.[0] : ''
+  //   const brandImageFile = files ? files.brandImage?.[0] : ''
 
-    if (!siteImageFile) {
-      throw new BadRequestException('Site image is required');
-    }
+  //   if (!siteImageFile) {
+  //     throw new BadRequestException('Site image is required');
+  //   }
 
-    if (!brandImageFile) {
-      throw new BadRequestException('Brand image is required');
-    }
-    const existingSetting = await this.prisma.setting.findUnique({
-      where: { name: 'SITE_SETTINGS' },
-    });
+  //   if (!brandImageFile) {
+  //     throw new BadRequestException('Brand image is required');
+  //   }
+  //   const existingSetting = await this.prisma.setting.findUnique({
+  //     where: { name: 'SITE_SETTINGS' },
+  //   });
 
-    if (existingSetting) {
-      throw new BadRequestException({
-        message: 'SITE_SETTINGS setting already exists',
-        code: 'SITE_SETTINGS_ALREADY_EXISTS',
-      });
-    }
+  //   if (existingSetting) {
+  //     throw new BadRequestException({
+  //       message: 'SITE_SETTINGS setting already exists',
+  //       code: 'SITE_SETTINGS_ALREADY_EXISTS',
+  //     });
+  //   }
 
-    // Upload SITE_IMAGE
-    const siteImage = await this.uploadService.uploadFile(
-      siteImageFile.buffer,
-      siteImageFile.mimetype,
-      siteImageFile.originalname,
-      'site-settings',
-      'site',
-    );
+  //   // Upload SITE_IMAGE
+  //   const siteImage = await this.uploadService.uploadFile(
+  //     siteImageFile.buffer,
+  //     siteImageFile.mimetype,
+  //     siteImageFile.originalname,
+  //     'site-settings',
+  //     'site',
+  //   );
 
-    // Upload BRAND_IMAGE
-    const brandImage = await this.uploadService.uploadFile(
-      brandImageFile.buffer,
-      brandImageFile.mimetype,
-      brandImageFile.originalname,
-      'site-settings',
-      'brand',
-    );
+  //   // Upload BRAND_IMAGE
+  //   const brandImage = await this.uploadService.uploadFile(
+  //     brandImageFile.buffer,
+  //     brandImageFile.mimetype,
+  //     brandImageFile.originalname,
+  //     'site-settings',
+  //     'brand',
+  //   );
 
-    // Store settings
-    const setting = await this.prisma.setting.upsert({
-      where: { name: 'SITE_SETTINGS' },
-      update: { value: { siteImage: siteImage.mediaURL, brandDescription: dto.brandDescription, brandLogo: brandImage.mediaURL, brandName: dto.brandName }, dataType: SettingDataType.OBJECT },
-      create: { name: 'SITE_SETTINGS', value: { SITE_BACKGROUND_IMAGE: siteImage.mediaURL, BRAND_DESCRIPTION: dto.brandDescription, BRAND_LOGO: brandImage.mediaURL, BRAND_NAME: dto.brandName }, dataType: SettingDataType.OBJECT, requiredFields: ['siteImage', 'brandDescription'], isReadOnly: false, isPrivate: false },
-    });
+  //   // Store settings
+  //   const setting = await this.prisma.setting.upsert({
+  //     where: { name: 'SITE_SETTINGS' },
+  //     update: { value: { siteImage: siteImage.mediaURL, brandDescription: dto.brandDescription, brandLogo: brandImage.mediaURL, brandName: dto.brandName }, dataType: SettingDataType.OBJECT },
+  //     create: { name: 'SITE_SETTINGS', value: { SITE_BACKGROUND_IMAGE: siteImage.mediaURL, BRAND_DESCRIPTION: dto.brandDescription, BRAND_LOGO: brandImage.mediaURL, BRAND_NAME: dto.brandName }, dataType: SettingDataType.OBJECT, requiredFields: ['siteImage', 'brandDescription'], isReadOnly: false, isPrivate: false },
+  //   });
 
-    return {
-      setting,
-      message: 'Site settings created successfully',
-    };
-  }
+  //   return {
+  //     setting,
+  //     message: 'Site settings created successfully',
+  //   };
+  // }
 
-  async updateSiteInfo(dto: { siteImage?: string, brandDescription?: string, brandLogo?: string, brandName?: string }) {
-    const existingSetting = await this.prisma.setting.findUnique({
-      where: { name: 'SITE_SETTINGS' },
-    });
+  // async updateSiteInfo(dto: { siteImage?: string, brandDescription?: string, brandLogo?: string, brandName?: string }) {
+  //   const existingSetting = await this.prisma.setting.findUnique({
+  //     where: { name: 'SITE_SETTINGS' },
+  //   });
 
-    if (!existingSetting) {
+  //   if (!existingSetting) {
+  //     throw new BadRequestException({
+  //       message: 'SITE_SETTINGS setting does not exist',
+  //       code: 'SITE_SETTINGS_NOT_FOUND',
+  //     });
+  //   }
+
+  //   const currentValue = existingSetting.value as { siteImage?: string, brandDescription?: string, brandLogo?: string, brandName?: string };
+  //   const updatedValue = {
+  //     siteImage: dto.siteImage ?? currentValue.siteImage,
+  //     brandDescription: dto.brandDescription ?? currentValue.brandDescription,
+  //     brandLogo: dto.brandLogo ?? currentValue.brandLogo,
+  //     brandName: dto.brandName ?? currentValue.brandName,
+  //   };
+
+  //   const updatedSetting = await this.prisma.setting.update({
+  //     where: { name: 'SITE_SETTINGS' },
+  //     data: { value: updatedValue },
+  //   });
+
+  //   return updatedSetting;
+  // }
+
+  async getSiteInfo() {
+    const siteSetting = await this.settingsService.getByName('SITE_SETTINGS');
+    if (!siteSetting) {
       throw new BadRequestException({
         message: 'SITE_SETTINGS setting does not exist',
         code: 'SITE_SETTINGS_NOT_FOUND',
       });
     }
-
-    const currentValue = existingSetting.value as { siteImage?: string, brandDescription?: string, brandLogo?: string, brandName?: string };
-    const updatedValue = {
-      siteImage: dto.siteImage ?? currentValue.siteImage,
-      brandDescription: dto.brandDescription ?? currentValue.brandDescription,
-      brandLogo: dto.brandLogo ?? currentValue.brandLogo,
-      brandName: dto.brandName ?? currentValue.brandName,
-    };
-
-    const updatedSetting = await this.prisma.setting.update({
-      where: { name: 'SITE_SETTINGS' },
-      data: { value: updatedValue },
-    });
-
-    return updatedSetting;
-  }
-
-  getSiteInfo() {
-    return this.prisma.setting.findUnique({
-      where: { name: 'SITE_SETTINGS' },
-    });
+    return siteSetting;
   }
 }
