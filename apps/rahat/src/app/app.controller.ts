@@ -94,63 +94,6 @@ export class AppController {
     return this.appService.seedSettings(dto);
   }
 
-  // @Post('settings/site-info')
-  // @UseInterceptors(
-  //   FileFieldsInterceptor([
-  //     {
-  //       name: 'siteImage',
-  //       maxCount: 1,
-  //     },
-  //     {
-  //       name: 'brandImage',
-  //       maxCount: 1,
-  //     },
-  //   ]),
-  // )
-  // @ApiOperation({ summary: 'Add site info (brand name, description, images)' })
-  // @ApiConsumes('multipart/form-data')
-  // @ApiBody({
-  //   description: 'Add site info',
-  //   schema: {
-  //     type: 'object',
-  //     properties: {
-  //       brandName: {
-  //         type: 'string',
-  //         description: 'Brand name',
-  //       },
-  //       brandDescription: {
-  //         type: 'string',
-  //         description: 'Brand description',
-  //       },
-  //       siteImage: {
-  //         type: 'string',
-  //         format: 'binary',
-  //       },
-  //       brandImage: {
-  //         type: 'string',
-  //         format: 'binary',
-  //       },
-  //     },
-  //     required: ['brandName', 'brandDescription'],
-  //   },
-  // })
-  // @ApiResponse({ status: 200, description: 'Site info added successfully.' })
-  // @ApiResponse({ status: 400, description: 'Bad request.' })
-  // @ApiResponse({ status: 500, description: 'Internal server error.' })
-  // async create(
-  //   @Body() dto: CreateSiteSettingDto,
-  //   @UploadedFiles()
-  //   files: {
-  //     siteImage?: any;
-  //     brandImage?: any;
-  //   },
-  // ) {
-  //   return this.appService.addSiteInfo(
-  //     dto,
-  //     files,
-  //   );
-  // }
-
   @Get('settings/site-info')
   @ApiOperation({ summary: 'Get site info (brand name, description, images)' })
   @ApiResponse({ status: 200, description: 'Site info retrieved successfully.' })
@@ -158,7 +101,4 @@ export class AppController {
   async getSiteInfo() {
     return this.appService.getSiteInfo();
   }
-
-
-
 }
