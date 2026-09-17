@@ -46,5 +46,7 @@ import { ProjectService } from './project.service';
   ],
   controllers: [ProjectController],
   providers: [ProjectService],
+  // Re-exports RAHAT_CLIENT so other modules that import ProjectModule
+  exports: [ClientsModule],
 })
 export class ProjectModule { }

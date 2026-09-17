@@ -103,6 +103,7 @@ export class AppController {
   @ApiOperation({ summary: 'Get platform, AA, triggers, and frontend versions (public)' })
   @ApiOkResponse({ type: AppVersionsDto })
   async getVersions(): Promise<AppVersionsDto> { return this.appService.getAppVersions(); }
+
   @Get('web-version')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get Web Version URL' })

@@ -2,10 +2,9 @@ import { Logger } from '@nestjs/common';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 
-// Version is immutable for the life of the process (only changes via redeploy/restart,
-// which clears this module-level cache anyway) — so cache indefinitely, no TTL needed.
 let cached: string | null = null;
 
+// Returns the app version from package.json, cached for the process lifetime.
 export async function getVersionFromPackageJson(): Promise<string> {
     if (cached) return cached;
     const candidates = [
@@ -22,7 +21,9 @@ export async function getVersionFromPackageJson(): Promise<string> {
                 Logger.log(`Version loaded ${cached} from ${p}`, 'VersionHelper');
                 return cached;
             }
-        } catch { }
+        } catch {
+            // candidate path not found, try next
+        }
     }
     cached = 'v0.0.0';
     Logger.warn('Version fallback v0.0.0 — package.json not found in any candidate', 'VersionHelper');

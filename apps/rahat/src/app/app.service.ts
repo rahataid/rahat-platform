@@ -13,6 +13,7 @@ import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { SettingDataType } from '@rumsan/sdk/enums';
 import { UUID } from 'crypto';
 import { SeedSettingsDto } from './dto/seed-settings.dto';
+import { AppVersionsDto, ServiceVersionDto } from './dto/app-versions.dto';
 import { getVersionFromPackageJson } from '../utils/version.helper';
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -288,14 +289,18 @@ export class AppService {
     })
   }
 
-  // Platform version — local cached readFile, no network.
+  // Returns the platform version from package.json.
   private async getRahatVersion(): Promise<string> {
     return getVersionFromPackageJson();
   }
 
-  // AA version via Redis — package.json version only, not scoped to a specific project's uuid
-  // (matches triggers' pattern below, which never required a uuid either). Timeout 1500 ms, fallback 'unreachable'.
-  private async getAaVersion(): Promise<string> {
+  // Returns the current runtime environment.
+  private resolveEnv(): string | null {
+    return this.configService.get<string>('NODE_ENV') || null;
+  }
+
+  // Fetches the AA service version via Redis.
+  private async getAaVersion(): Promise<ServiceVersionDto> {
     const start = Date.now();
     const result: any = await firstValueFrom(
       this.rahatClient
@@ -310,11 +315,11 @@ export class AppService {
         ),
     );
     if (result?.version) this.logger.log(`AA version ${result.version} in ${Date.now() - start}ms`);
-    return result?.version || 'unreachable';
+    return { version: result?.version || 'unreachable', env: result?.env ?? null };
   }
 
-  // Triggers version via Redis — no uuid, payload.appId only, timeout 1500 ms, fallback 'unreachable'.
-  private async getTriggersVersion(): Promise<string> {
+  // Fetches the Triggers service version via Redis.
+  private async getTriggersVersion(): Promise<ServiceVersionDto> {
     const result: any = await firstValueFrom(
       this.rahatClient
         // cspell:disable-next-line
@@ -327,36 +332,40 @@ export class AppService {
           }),
         ),
     );
-    return result?.version || 'unreachable';
+    return { version: result?.version || 'unreachable', env: result?.env ?? null };
   }
 
-  // Aggregate all backend versions in parallel — never 500 if one micro down.
-  async getAppVersions(): Promise<any> {
-    const [platform, aa, triggers] = await Promise.allSettled([
-      this.getRahatVersion(),
-      this.getAaVersion(),
-      this.getTriggersVersion(),
-    ]);
-    const pick = (r: PromiseSettledResult<string>, fallback: string): string =>
-      r.status === 'fulfilled' ? r.value : fallback;
-    return {
-      platform: pick(platform, 'unreachable'),
-      rahatAa: pick(aa, 'unreachable'),
-      triggers: pick(triggers, 'unreachable'),
-      env: this.configService.get<string>('NODE_ENV') ?? 'local',
-      fetchedAt: new Date().toISOString(),
-    };
-  }
-
-  // Web Version URL for env — Issue #1283.
+  // Returns the frontend URL and runtime environment.
   async getWebVersion(): Promise<any> {
     const frontendUrl =
       (await this.prisma.setting.findUnique({ where: { name: 'FRONTEND_URL' } }).catch(() => null))?.value ??
       this.configService.get<string>('FRONTEND_URL') ??
       'http://localhost:5500';
     const url = typeof frontendUrl === 'string' ? frontendUrl : String(frontendUrl);
-    return { url, env: this.configService.get<string>('NODE_ENV') ?? 'local' };
+    return { url, env: this.resolveEnv() };
   }
+
+  // Aggregates all service versions in parallel.
+  async getAppVersions(): Promise<AppVersionsDto> {
+    const [platform, aa, triggers] = await Promise.allSettled([
+      this.getRahatVersion(),
+      this.getAaVersion(),
+      this.getTriggersVersion(),
+    ]);
+    const unreachable: ServiceVersionDto = { version: 'unreachable', env: null };
+    const pick = (r: PromiseSettledResult<ServiceVersionDto>): ServiceVersionDto =>
+      r.status === 'fulfilled' ? r.value : unreachable;
+    return {
+      platform: {
+        version: platform.status === 'fulfilled' ? platform.value : 'unreachable',
+        env: this.resolveEnv(),
+      },
+      rahatAa: pick(aa),
+      triggers: pick(triggers),
+      fetchedAt: new Date().toISOString(),
+    };
+  }
+
 
 
   async getChainType() {
