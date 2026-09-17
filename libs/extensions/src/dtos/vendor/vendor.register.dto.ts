@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { VendorCreateInput } from '@rahataid/sdk';
 import { Service } from '@rumsan/sdk/enums';
-import { IsObject, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsObject, IsOptional, IsString } from 'class-validator';
 import { WalletDto } from '../beneficiary/wallet.dto';
 
 export class VendorRegisterDto implements VendorCreateInput {
@@ -41,7 +41,7 @@ export class VendorRegisterDto implements VendorCreateInput {
       { chain: 'stellar', address: 'GB...', privateKey: '...' }
     ], required: false
   })
-  @IsString()
+  @IsArray()
   // @IsEthereumAddress()
   wallets: WalletDto[];
 
