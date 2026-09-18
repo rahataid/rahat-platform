@@ -8,6 +8,7 @@ import { SettingsService } from '@rumsan/extensions/settings';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { SettingDataType } from '@rumsan/sdk/enums';
 import { UUID } from 'crypto';
+import { UploadService } from '../upload/upload.service';
 import { SeedSettingsDto } from './dto/seed-settings.dto';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -73,6 +74,7 @@ export class AppService {
     private readonly prisma: PrismaService,
     private readonly settingsService: SettingsService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly uploadService: UploadService
   ) { }
 
 
@@ -146,6 +148,7 @@ export class AppService {
   async createRahatAppSettings(
     createSettingDto: CreateSettingDto,
   ) {
+    console.log('createRahatAppSettings called', createSettingDto); // Debugging line
     let {
       name,
       value: dtoValue,
@@ -272,7 +275,7 @@ export class AppService {
     })
   }
 
-  async getFrontendUrl () {
+  async getFrontendUrl() {
     return this.prisma.setting.findMany({
       where: {
         name: "FRONTEND_URL"
@@ -284,5 +287,16 @@ export class AppService {
     const setting = await this.settingsService.getByName('CHAIN_SETTINGS');
     const chain = setting?.value as { type?: string } | null;
     return { type: chain?.type ?? null };
+  }
+
+  async getSiteInfo() {
+    const siteSetting = await this.settingsService.getByName('SITE_SETTINGS');
+    if (!siteSetting) {
+      throw new BadRequestException({
+        message: 'SITE_SETTINGS setting does not exist',
+        code: 'SITE_SETTINGS_NOT_FOUND',
+      });
+    }
+    return siteSetting;
   }
 }

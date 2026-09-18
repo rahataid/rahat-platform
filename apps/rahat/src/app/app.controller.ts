@@ -2,11 +2,12 @@
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
 import { ACTIONS, APP, SUBJECTS } from '@rahataid/sdk';
 import { AbilitiesGuard, CheckAbilities, JwtGuard } from '@rumsan/user';
 import { UUID } from 'crypto';
+// import type { File as MulterFile } from 'multer';
 import { AppJobs } from './app.jobs';
 import { AppService } from './app.service';
 import { SeedSettingsDto } from './dto/seed-settings.dto';
@@ -91,5 +92,13 @@ export class AppController {
   @ApiResponse({ status: 403, description: 'Settings already seeded — API is locked.' })
   async seedSettings(@Body() dto: SeedSettingsDto) {
     return this.appService.seedSettings(dto);
+  }
+
+  @Get('settings/site-info')
+  @ApiOperation({ summary: 'Get site info (brand name, description, images)' })
+  @ApiResponse({ status: 200, description: 'Site info retrieved successfully.' })
+  @ApiResponse({ status: 404, description: 'Site info not found.' })
+  async getSiteInfo() {
+    return this.appService.getSiteInfo();
   }
 }
