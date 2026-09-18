@@ -1201,4 +1201,8 @@ export const aaActions: ProjectActionFunc = {
   // *** Settings **** //
   [MS_ACTIONS.MS_SETTINGS.UPDATE_VALUES]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.SETTINGS.UPDATE_VALUES, uuid }, payload),
+
+  // *** Version — from package.json via readFile (platform aggregates) **** //
+  [MS_ACTIONS.AAPROJECT.VERSION.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.VERSION.GET, uuid }, payload),
 };
