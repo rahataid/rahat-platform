@@ -563,6 +563,15 @@ export const MS_ACTIONS = {
     UPDATE: 'ms.triggers.update',
     GET_BY_LOCATION: 'ms.triggers.getByLocation',
   },
+  MS_CALLBACKS: {
+    ADD: 'ms.triggers.callbacks.add',
+    GET_ALL: 'ms.triggers.callbacks.getAll',
+    GET_ONE: 'ms.triggers.callbacks.getOne',
+    UPDATE: 'ms.triggers.callbacks.update',
+    REMOVE: 'ms.triggers.callbacks.remove',
+    GET_LOGS: 'ms.triggers.callbacks.getLogs',
+    REPLAY: 'ms.triggers.callbacks.replay',
+  },
   MS_REVERT_PHASE: {
     CREATE: 'ms.revertPhase.create',
     GET_ALL: 'ms.revertPhase.getAll',

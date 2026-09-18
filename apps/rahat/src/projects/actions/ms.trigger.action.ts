@@ -14,6 +14,16 @@ export const MS_TRIGGERS_JOBS = {
     GET_BY_LOCATION: 'ms.jobs.triggers.getByLocation',
   },
 
+  CALLBACKS: {
+    ADD: 'ms.jobs.triggers.callbacks.add',
+    GET_ALL: 'ms.jobs.triggers.callbacks.getAll',
+    GET_ONE: 'ms.jobs.triggers.callbacks.getOne',
+    UPDATE: 'ms.jobs.triggers.callbacks.update',
+    REMOVE: 'ms.jobs.triggers.callbacks.remove',
+    GET_LOGS: 'ms.jobs.triggers.callbacks.getLogs',
+    REPLAY: 'ms.jobs.triggers.callbacks.replay',
+  },
+
   PHASES: {
     CREATE: 'ms.jobs.phases.create',
     GET_ONE: 'ms.jobs.phases.getOne',
@@ -184,6 +194,50 @@ export const msTriggerActions: ProjectActionFunc = {
   },
 
   // **** triggers end ******//
+
+  // **** trigger callbacks start ******//
+  [MS_ACTIONS.MS_CALLBACKS.ADD]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.CALLBACKS.ADD }, payload);
+  },
+
+  [MS_ACTIONS.MS_CALLBACKS.GET_ALL]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.CALLBACKS.GET_ALL }, payload);
+  },
+
+  [MS_ACTIONS.MS_CALLBACKS.GET_ONE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.CALLBACKS.GET_ONE }, payload);
+  },
+
+  [MS_ACTIONS.MS_CALLBACKS.UPDATE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.CALLBACKS.UPDATE }, payload);
+  },
+
+  [MS_ACTIONS.MS_CALLBACKS.REMOVE]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.CALLBACKS.REMOVE }, payload);
+  },
+
+  [MS_ACTIONS.MS_CALLBACKS.GET_LOGS]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.CALLBACKS.GET_LOGS }, payload);
+  },
+
+  [MS_ACTIONS.MS_CALLBACKS.REPLAY]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.CALLBACKS.REPLAY }, payload);
+  },
+  // **** trigger callbacks end ******//
 
   // // **** phases start ******//
   [MS_ACTIONS.MS_PHASES.CREATE]: (uuid, payload, sendCommand) => {
