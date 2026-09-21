@@ -553,6 +553,7 @@ export class BeneficiaryProcessor {
             walletAddress: true,
             gender: true,
             extras: true,
+            location: true,
             isVerified: true,
             pii: { select: { phone: true, name: true, email: true } },
           },
@@ -578,7 +579,11 @@ export class BeneficiaryProcessor {
         walletAddress: b.walletAddress,
         gender: b.gender,
         isVerified: b.isVerified,
-        extras: { ...((b.extras as object) || {}), phone: b.pii?.phone || null },
+        extras: {
+          ...((b.extras as object) || {}),
+          phone: b.pii?.phone || null,
+          ...(b.location != null ? { location: b.location } : {}),
+        },
         phone: b.pii?.phone || null,
       }));
 
