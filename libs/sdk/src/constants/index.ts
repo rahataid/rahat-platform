@@ -248,10 +248,12 @@ export const MS_ACTIONS = {
       GET_TOKEN_DETAILS: 'aaProject.beneficiary.getTokenDetails',
       GENERATE_QR_PDF: 'aaProject.beneficiary.generateQrPdf',
       GET_QR_PDF: 'aaProject.beneficiary.getQrPdf',
+      EXPORT_GROUP_EXCEL: 'aaProject.beneficiary.exportGroupExcel',
       REVOKE_SPONSORSHIP_FOR_GROUP: 'aaProject.beneficiary.revokeSponsorshipForGroup',
       RETRY_SPONSORSHIP_FOR_GROUP: 'aaProject.beneficiary.retrySponsorshipForGroup',
       SPONSOR_BENEFICIARY_GROUP: 'aaProject.beneficiary.sponsorBeneficiaryGroup',
       GET_SPONSORSHIP_STATUS_FOR_GROUP: 'aaProject.beneficiary.getSponsorshipStatusForGroup',
+      GET_PAYOUT_MODE: 'aaProject.beneficiary.getPayoutMode',
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
