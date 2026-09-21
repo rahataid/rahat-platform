@@ -12,6 +12,7 @@ import { SettingDataType } from '@rumsan/sdk/enums';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { UploadService } from '../upload/upload.service';
+import { SITE_INFO } from './app.constants';
 import { SeedSettingsDto } from './dto/seed-settings.dto';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -76,8 +77,8 @@ export class AppService {
   private readonly _logger = new Logger(AppService.name);
 
   // Cache key and TTL (5 minutes) for site settings
-  private readonly SITE_CACHE_KEY = 'site_settings';
-  private readonly SITE_CACHE_TTL = 300;
+  private readonly SITE_CACHE_KEY = SITE_INFO.SITE_CACHE_KEY;
+  private readonly SITE_CACHE_TTL = SITE_INFO.SITE_CACHE_TTL;
 
   constructor(
     private readonly prisma: PrismaService,

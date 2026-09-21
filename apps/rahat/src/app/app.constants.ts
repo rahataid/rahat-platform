@@ -16,3 +16,9 @@ export const ABILITY_ACTIONS = {
   ACTIVATE: 'activate',
   REVERT: 'revert',
 };
+
+export const SITE_INFO = {
+  SITE_CACHE_KEY: 'site_settings',
+  SITE_CACHE_TTL: 300
+
+}
