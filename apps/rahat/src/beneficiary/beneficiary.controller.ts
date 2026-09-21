@@ -59,7 +59,13 @@ import { CommsService } from '../comms/comms.service';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
 import { removeSpaces } from '../utils';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
-import { normalizeGender, trimNonAlphaNumericValue } from '../utils/sanitize-data';
+import {
+  normalizeBankedStatus,
+  normalizeGender,
+  normalizeInternetStatus,
+  normalizePhoneStatus,
+  trimNonAlphaNumericValue,
+} from '../utils/sanitize-data';
 import { WalletService } from '../wallet/wallet.service';
 import { WalletInterceptor } from './interceptor/wallet.interceptor';
 import { DocParser } from './parser';
@@ -257,10 +263,10 @@ export class BeneficiaryController {
         birthDate: b['Birth Date']
           ? new Date(b['Birth Date']).toISOString()
           : null,
-        internetStatus: b['Internet Status'] || 'Unknown',
-        bankedStatus: b['Bank Status'] || 'Unknown',
+        internetStatus: normalizeInternetStatus(b['Internet Status']),
+        bankedStatus: normalizeBankedStatus(b['Bank Status']),
         location: b['Location'],
-        phoneStatus: b['Phone Status'] || 'Unknown',
+        phoneStatus: normalizePhoneStatus(b['Phone Status']),
         notes: b['Notes'],
         gender: normalizeGender(b['Gender*']) || normalizeGender(b['Gender']),
         latitude: b['Latitude'] !== undefined && b['Latitude'] !== '' ? Number(b['Latitude']) : undefined,
