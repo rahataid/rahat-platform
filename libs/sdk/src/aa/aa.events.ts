@@ -86,6 +86,8 @@ export const JOBS = {
     REVOKE_SPONSORSHIP_FOR_GROUP: 'aa.jobs.beneficiary.revokeSponsorshipForGroup',
     RETRY_SPONSORSHIP_FOR_GROUP: 'aa.jobs.beneficiary.retrySponsorshipForGroup',
     GET_SPONSORSHIP_STATUS_FOR_GROUP: 'aa.jobs.beneficiary.getSponsorshipStatusForGroup',
+    GET_PAYOUT_MODE: 'aa.jobs.beneficiary.getPayoutMode',
+
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget',

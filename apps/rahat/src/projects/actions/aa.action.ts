@@ -405,6 +405,12 @@ export const aaActions: ProjectActionFunc = {
   ) =>
     sendCommand({ cmd: AAJobs.FUND_MANAGEMENT.TRANSFER_LIST, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_PAYOUT_MODE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.BENEFICIARY.GET_PAYOUT_MODE, uuid }, payload),
+
   // **** fund mgmt end ****//
 
   // **** stats ****//
