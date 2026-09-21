@@ -197,12 +197,14 @@ export class ProjectService {
 
     if (trigger) payload.trigger = trigger;
 
-    const res = await this.metaTransactionQueue.add(
+    const job = await this.metaTransactionQueue.add(
       JOBS.META_TRANSACTION.ADD_QUEUE,
       payload
     );
 
-    return { txHash: res.data.hash, status: res.data.status };
+    const res = await job.finished();
+
+    return { txHash: res.hash, status: res.status };
   }
 
   async sendSucessMessage(uuid, payload) {

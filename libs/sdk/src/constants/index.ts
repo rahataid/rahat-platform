@@ -248,6 +248,7 @@ export const MS_ACTIONS = {
       GET_TOKEN_DETAILS: 'aaProject.beneficiary.getTokenDetails',
       GENERATE_QR_PDF: 'aaProject.beneficiary.generateQrPdf',
       GET_QR_PDF: 'aaProject.beneficiary.getQrPdf',
+      EXPORT_GROUP_EXCEL: 'aaProject.beneficiary.exportGroupExcel',
       REVOKE_SPONSORSHIP_FOR_GROUP: 'aaProject.beneficiary.revokeSponsorshipForGroup',
       RETRY_SPONSORSHIP_FOR_GROUP: 'aaProject.beneficiary.retrySponsorshipForGroup',
       SPONSOR_BENEFICIARY_GROUP: 'aaProject.beneficiary.sponsorBeneficiaryGroup',
@@ -685,6 +686,9 @@ export const MS_ACTIONS = {
     SEND_OTP: 'otp.sendOtp',
     SEND_BULK_OTP: 'otp.sendBulkOtp',
   },
+  HEALTH: {
+    CHECK: 'health.getcheck'
+  }
 };
 
 export const RABBIT_MQ = {
