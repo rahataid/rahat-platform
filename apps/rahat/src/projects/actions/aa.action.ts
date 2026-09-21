@@ -697,13 +697,18 @@ export const aaActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
     return sendCommand({ cmd: AAJobs.PAYOUT.VERIFY_MANUAL_PAYOUT, uuid }, payload)
   },
-  [MS_ACTIONS.AAPROJECT.PAYOUT.EXPORT_PAYOUT_LOGS]: (
+  // Server-side PDF generation: the AA service renders the payout logs PDF
+  // (with photo evidence) and returns it as base64.
+  [MS_ACTIONS.AAPROJECT.PAYOUT.EXPORT_PAYOUT_LOGS_PDF_FILE]: (
     uuid,
     payload,
     sendCommand
   ) => {
     payload.appId = uuid || payload.appId;
-    return sendCommand({ cmd: AAJobs.PAYOUT.EXPORT_PAYOUT_LOGS, uuid }, payload)
+    return sendCommand(
+      { cmd: AAJobs.PAYOUT.EXPORT_PAYOUT_LOGS_PDF_FILE, uuid },
+      payload
+    );
   },
   // **** Payout end **** //
   // **** Inkind start **** //
