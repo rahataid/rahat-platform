@@ -32,3 +32,11 @@ export const sanitizeTrimValue = (input: string): string => {
 export const trimNonAlphaNumericValue = (input: string): string => {
   return input ? input.replace(/[^\w\s]/g, '').trim() : ''; // Remove all non-alphanumeric characters except spaces and trim the string
 }
+
+const VALID_GENDERS = ['MALE', 'FEMALE', 'OTHER', 'UNKNOWN'];
+
+// Normalizes uploaded gender values to match the Gender enum (MALE | FEMALE | OTHER | UNKNOWN)
+export const normalizeGender = (input?: string): string => {
+  const normalized = input?.trim().toUpperCase();
+  return VALID_GENDERS.includes(normalized) ? normalized : 'UNKNOWN';
+}

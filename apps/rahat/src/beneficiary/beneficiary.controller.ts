@@ -59,7 +59,7 @@ import { CommsService } from '../comms/comms.service';
 import { CheckHeaders, ExternalAppGuard } from '../decorators';
 import { removeSpaces } from '../utils';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
-import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
+import { normalizeGender, trimNonAlphaNumericValue } from '../utils/sanitize-data';
 import { WalletService } from '../wallet/wallet.service';
 import { WalletInterceptor } from './interceptor/wallet.interceptor';
 import { DocParser } from './parser';
@@ -224,30 +224,61 @@ export class BeneficiaryController {
 
     const beneficiaries = await DocParser(docType, file.buffer);
 
-    const beneficiariesMapped = beneficiaries.map((b) => ({
-      birthDate: b['Birth Date']
-        ? new Date(b['Birth Date']).toISOString()
-        : null,
-      internetStatus: b['Internet Status*'],
-      bankedStatus: b['Bank Status*'],
-      location: b['Location'],
-      phoneStatus: b['Phone Status*'],
-      notes: b['Notes'],
-      gender: b['Gender*'],
-      latitude: b['Latitude'],
-      longitude: b['Longitude'],
-      age: b['Age'] || null,
-      walletAddress: b['Wallet Address'],
-      piiData: {
-        name: b['Name*'] || b['Name'] || 'Unknown',
-        phone: b['Whatsapp Number*'] || b['Phone Number*'] || b['Phone Number'],
-        extras: {
-          isAdult:
-            getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age*']) > 18,
-          governmentId: b['Government ID'],
+    const CLAIMED_UPLOAD_COLUMNS = [
+      'Birth Date',
+      'Internet Status*',
+      'Bank Status*',
+      'Location',
+      'Phone Status*',
+      'Notes',
+      'Gender*',
+      'Latitude',
+      'Longitude',
+      'Age',
+      'Age*',
+      'Wallet Address',
+      'Name*',
+      'Name',
+      'Whatsapp Number*',
+      'Phone Number*',
+      'Phone Number',
+      'Government ID',
+    ];
+
+    const beneficiariesMapped = beneficiaries.map((b) => {
+      const remainingColumns = Object.keys(b).reduce((acc, key) => {
+        if (!CLAIMED_UPLOAD_COLUMNS.includes(key)) {
+          acc[key] = b[key];
+        }
+        return acc;
+      }, {} as Record<string, unknown>);
+
+      return {
+        birthDate: b['Birth Date']
+          ? new Date(b['Birth Date']).toISOString()
+          : null,
+        internetStatus: b['Internet Status*'],
+        bankedStatus: b['Bank Status*'],
+        location: b['Location'],
+        phoneStatus: b['Phone Status*'],
+        notes: b['Notes'],
+        gender: normalizeGender(b['Gender*']),
+        latitude: b['Latitude'],
+        longitude: b['Longitude'],
+        age: b['Age'] || null,
+        walletAddress: b['Wallet Address'],
+        extras: remainingColumns,
+        piiData: {
+          name: b['Name*'] || b['Name'] || 'Unknown',
+          phone: b['Whatsapp Number*'] || b['Phone Number*'] || b['Phone Number'],
+          extras: {
+            isAdult:
+              getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age*']) > 18,
+            governmentId: b['Government ID'],
+          },
         },
-      },
-    }));
+      };
+    });
 
     // Process wallet addresses using the wallet processing service
     const walletProcessingResult = await this.walletProcessingService.processBeneficiariesWithWallets(beneficiariesMapped);
