@@ -230,26 +230,35 @@ export class BeneficiaryController {
 
     const beneficiaries = await DocParser(docType, file.buffer);
 
-    const CLAIMED_UPLOAD_COLUMNS = [
-      'Birth Date',
-      'Internet Status*',
-      'Bank Status*',
-      'Location',
-      'Phone Status*',
-      'Notes',
-      'Gender*',
-      'Latitude',
-      'Longitude',
-      'Age',
-      'Age*',
-      'Wallet Address',
-      'Name*',
-      'Name',
-      'Whatsapp Number*',
-      'Phone Number*',
-      'Phone Number',
-      'Government ID',
-    ];
+    // Each entry lists every header alias a column may appear under; the first
+    // alias with a value wins. Keeping aliases together also drives extras capture.
+    const UPLOAD_COLUMN_ALIASES: Record<string, string[]> = {
+      birthDate: ['Birth Date'],
+      internetStatus: ['Internet Status', 'Internet Status*'],
+      bankedStatus: ['Bank Status', 'Bank Status*'],
+      location: ['Location'],
+      phoneStatus: ['Phone Status', 'Phone Status*'],
+      notes: ['Notes'],
+      gender: ['Gender*', 'Gender'],
+      latitude: ['Latitude'],
+      longitude: ['Longitude'],
+      age: ['Age', 'Age*'],
+      walletAddress: ['Wallet Address'],
+      name: ['Name*', 'Name'],
+      phone: ['Whatsapp Number*', 'Phone Number*', 'Phone Number'],
+      governmentId: ['Government ID'],
+    };
+    const CLAIMED_UPLOAD_COLUMNS = Object.values(UPLOAD_COLUMN_ALIASES).flat();
+
+    const pick = (row: any, field: keyof typeof UPLOAD_COLUMN_ALIASES) => {
+      const alias = UPLOAD_COLUMN_ALIASES[field].find(
+        (key) => row[key] !== undefined && row[key] !== ''
+      );
+      return alias ? row[alias] : undefined;
+    };
+
+    const toNumberOrUndefined = (value: unknown) =>
+      value !== undefined && value !== '' ? Number(value) : undefined;
 
     const beneficiariesMapped = beneficiaries.map((b) => {
       const remainingColumns = Object.keys(b).reduce((acc, key) => {
@@ -259,28 +268,27 @@ export class BeneficiaryController {
         return acc;
       }, {} as Record<string, unknown>);
 
+      const birthDate = pick(b, 'birthDate');
+
       return {
-        birthDate: b['Birth Date']
-          ? new Date(b['Birth Date']).toISOString()
-          : null,
-        internetStatus: normalizeInternetStatus(b['Internet Status']),
-        bankedStatus: normalizeBankedStatus(b['Bank Status']),
-        location: b['Location'],
-        phoneStatus: normalizePhoneStatus(b['Phone Status']),
-        notes: b['Notes'],
-        gender: normalizeGender(b['Gender*']) || normalizeGender(b['Gender']),
-        latitude: b['Latitude'] !== undefined && b['Latitude'] !== '' ? Number(b['Latitude']) : undefined,
-        longitude: b['Longitude'] !== undefined && b['Longitude'] !== '' ? Number(b['Longitude']) : undefined,
-        age: b['Age'] || null,
-        walletAddress: b['Wallet Address'],
+        birthDate: birthDate ? new Date(birthDate as string).toISOString() : null,
+        internetStatus: normalizeInternetStatus(pick(b, 'internetStatus') as string),
+        bankedStatus: normalizeBankedStatus(pick(b, 'bankedStatus') as string),
+        location: pick(b, 'location'),
+        phoneStatus: normalizePhoneStatus(pick(b, 'phoneStatus') as string),
+        notes: pick(b, 'notes'),
+        gender: normalizeGender(pick(b, 'gender') as string),
+        latitude: toNumberOrUndefined(pick(b, 'latitude')),
+        longitude: toNumberOrUndefined(pick(b, 'longitude')),
+        age: pick(b, 'age') || null,
+        walletAddress: pick(b, 'walletAddress'),
         extras: remainingColumns,
         piiData: {
-          name: b['Name*'] || b['Name'] || 'Unknown',
-          phone: b['Whatsapp Number*'] || b['Phone Number*'] || b['Phone Number'],
+          name: pick(b, 'name') || 'Unknown',
+          phone: pick(b, 'phone'),
           extras: {
-            isAdult:
-              getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age*']) > 18,
-            governmentId: b['Government ID'],
+            isAdult: getDateInfo(birthDate as string)?.isAdult || Number(pick(b, 'age')) > 18,
+            governmentId: pick(b, 'governmentId'),
           },
         },
       };
