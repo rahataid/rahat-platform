@@ -697,8 +697,7 @@ export const aaActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
     return sendCommand({ cmd: AAJobs.PAYOUT.VERIFY_MANUAL_PAYOUT, uuid }, payload)
   },
-  // Server-side PDF generation: the AA service renders the payout logs PDF
-  // (with photo evidence) and returns it as base64.
+
   [MS_ACTIONS.AAPROJECT.PAYOUT.EXPORT_PAYOUT_LOGS_PDF_FILE]: (
     uuid,
     payload,
