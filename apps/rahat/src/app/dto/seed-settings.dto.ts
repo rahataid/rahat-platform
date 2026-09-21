@@ -56,3 +56,25 @@ export class CreateSiteSettingDto {
   @IsNotEmpty()
   brandDescription: string;
 }
+
+export class UpdateSiteSettingDto {
+  @ApiPropertyOptional({ description: 'Brand name' })
+  @IsString()
+  @IsOptional()
+  BRAND_NAME?: string;
+
+  @ApiPropertyOptional({ description: 'Brand description' })
+  @IsString()
+  @IsOptional()
+  BRAND_DESCRIPRTION?: string;
+
+  @ApiPropertyOptional({ description: 'Brand logo URL' })
+  @IsString()
+  @IsOptional()
+  BRRAND_LOGO?: string;
+
+  @ApiPropertyOptional({ description: 'Site background image URL' })
+  @IsString()
+  @IsOptional()
+  SITE_BACKGROUND_IMAGE?: string;
+}

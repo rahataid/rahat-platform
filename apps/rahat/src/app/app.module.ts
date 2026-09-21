@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { StatsModule } from '@rahat/stats';
+import { BQUEUE } from '@rahataid/sdk';
 import { SettingsModule } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import {
@@ -87,6 +88,9 @@ import { AuthClientModule } from './auth-client.module';
     CronModule,
     AbilityModule.forRoot({ subjects: ABILITY_SUBJECTS, actions: ABILITY_ACTIONS }),
     UploadModule,
+    BullModule.registerQueue({
+      name: BQUEUE.RAHAT,
+    }),
   ],
   controllers: [AppController],
   providers: [

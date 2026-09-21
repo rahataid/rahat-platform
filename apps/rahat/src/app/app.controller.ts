@@ -1,16 +1,15 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
 import { ACTIONS, APP, SUBJECTS } from '@rahataid/sdk';
 import { AbilitiesGuard, CheckAbilities, JwtGuard } from '@rumsan/user';
 import { UUID } from 'crypto';
-// import type { File as MulterFile } from 'multer';
 import { AppJobs } from './app.jobs';
 import { AppService } from './app.service';
-import { SeedSettingsDto } from './dto/seed-settings.dto';
+import { SeedSettingsDto, UpdateSiteSettingDto } from './dto/seed-settings.dto';
 
 @Controller('app')
 @ApiTags('App')
@@ -101,4 +100,15 @@ export class AppController {
   async getSiteInfo() {
     return this.appService.getSiteInfo();
   }
+
+  @Patch('settings/site-info')
+  @ApiOperation({ summary: 'Update site info (brand name, description, images)' })
+  @ApiBody({ type: UpdateSiteSettingDto })
+  @ApiResponse({ status: 200, description: 'Site info updated successfully.' })
+  @ApiResponse({ status: 404, description: 'Site info not found.' })
+  async updateSiteInfo(@Body() dto: { value: UpdateSiteSettingDto }) {
+    const { value: payload } = dto
+    return this.appService.updateSiteInfo(payload);
+  }
+
 }
