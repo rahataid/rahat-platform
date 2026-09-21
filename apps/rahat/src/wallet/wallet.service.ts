@@ -229,9 +229,7 @@ export class WalletService implements OnModuleInit {
    * per-chain wallets (for tbl_wallet_addresses).
    */
   async createBulkForAllChains(count: number): Promise<MultiChainWalletResult[]> {
-    // Dynamic imports keep the heavy crypto libs out of the module-init path
     const { ethers } = await import('ethers');
-    const { Keypair } = await import('@stellar/stellar-sdk');
 
     const defaultChain = await this.getDefaultChainFromDb();
     const supportedChains = this.providerRegistry.getSupportedChains();
@@ -239,35 +237,21 @@ export class WalletService implements OnModuleInit {
     const results: MultiChainWalletResult[] = [];
 
     for (let i = 0; i < count; i++) {
-      // One mnemonic shared across all chains for this beneficiary
-      const mnemonic = ethers.Mnemonic.fromEntropy(ethers.randomBytes(16));
+      // Generate one mnemonic shared across all chains for this user
+      const mnemonicPhrase = ethers.Mnemonic.fromEntropy(ethers.randomBytes(16)).phrase;
       const wallets: WalletCreateResult[] = [];
 
       for (const chainType of supportedChains) {
         try {
-          let address: string;
-          let privateKey: string;
-
-          if (chainType === 'evm') {
-            const hdWallet = ethers.HDNodeWallet.fromMnemonic(mnemonic);
-            address = hdWallet.address;
-            privateKey = hdWallet.privateKey;
-          } else if (chainType === 'stellar') {
-            const hdPath = "m/44'/148'/0'/0/0";
-            const hdWallet = ethers.HDNodeWallet.fromMnemonic(mnemonic, hdPath);
-            const keypair = Keypair.fromRawEd25519Seed(
-              Buffer.from(hdWallet.privateKey.slice(2), 'hex')
-            );
-            address = keypair.publicKey();
-            privateKey = keypair.secret();
-          } else {
-            this.logger.warn(`No mnemonic derivation path for chain "${chainType}", skipping`);
-            continue;
-          }
-
-          // Persist derived key into the chain's wallet storage
-          await this.providerRegistry.importWallet(privateKey, chainType);
-          wallets.push({ chain: chainType, address, privateKey });
+          const walletKeys = await this.providerRegistry.createWalletFromMnemonic(
+            mnemonicPhrase,
+            chainType
+          );
+          wallets.push({
+            chain: chainType,
+            address: walletKeys.address,
+            privateKey: walletKeys.privateKey,
+          });
         } catch (error) {
           this.logger.error(`Failed to derive wallet for chain ${chainType}: ${error instanceof Error ? error.message : String(error)}`);
         }

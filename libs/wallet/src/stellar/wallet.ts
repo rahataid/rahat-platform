@@ -1,5 +1,5 @@
-import { ethers } from 'ethers';
 import { Keypair } from '@stellar/stellar-sdk';
+import { ethers } from 'ethers';
 import { MemoryWalletStorage } from '../storages/memory.storage';
 import { ChainType, IWalletManager, WalletKeys, WalletStorage } from '../types';
 import { ConnectedWallet } from './connectedWallet';
@@ -82,6 +82,24 @@ export class StellarWallet implements IWalletManager {
       privateKey: keypair.secret(),
       blockchain: StellarWallet.blockchainType,
     };
+    await this.storage.saveKey(walletKeys);
+    return new ConnectedWallet(walletKeys, this.rpcUrl);
+  }
+
+  async createWalletFromMnemonic(mnemonic: string): Promise<ConnectedWallet> {
+    const hdPath = "m/44'/148'/0'/0/0";
+    const hdWallet = ethers.HDNodeWallet.fromPhrase(mnemonic, hdPath);
+    const privateKeyHex = hdWallet.privateKey.slice(2);
+    const privateKeyBuffer = Buffer.from(privateKeyHex, 'hex');
+    const stellarKeypair = Keypair.fromRawEd25519Seed(privateKeyBuffer);
+    const walletKeys = {
+      address: stellarKeypair.publicKey(),
+      privateKey: stellarKeypair.secret(),
+      publicKey: stellarKeypair.publicKey(),
+      mnemonic,
+      blockchain: StellarWallet.blockchainType,
+    };
+    await this.storage.saveKey(walletKeys);
     return new ConnectedWallet(walletKeys, this.rpcUrl);
   }
 }

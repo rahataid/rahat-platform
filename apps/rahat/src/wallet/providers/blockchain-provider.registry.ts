@@ -169,6 +169,18 @@ export class BlockchainProviderRegistry {
     return connectedWallet.getWalletKeys();
   }
 
+  async createWalletFromMnemonic(
+    mnemonic: string,
+    chainType: ChainType
+  ): Promise<WalletKeys> {
+    const walletManager = this.getWalletManager(chainType);
+    if (!walletManager.createWalletFromMnemonic) {
+      throw new Error(`Chain ${chainType} does not support mnemonic-based wallet creation`);
+    }
+    const connectedWallet = await walletManager.createWalletFromMnemonic(mnemonic);
+    return connectedWallet.getWalletKeys();
+  }
+
   // Generic address validation with fallback patterns
   validateAddress(address: string, chainType: ChainType): boolean {
     const walletManager = this.walletManagers.get(chainType);
