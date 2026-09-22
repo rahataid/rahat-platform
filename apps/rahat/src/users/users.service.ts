@@ -6,6 +6,7 @@ import { PrismaService } from '@rumsan/prisma';
 import { UsersService as RSUserService } from '@rumsan/user';
 import { AUTH_SERVICE_CLIENT } from '@rumsan/user/ability/ms-rpc-auth';
 import { NotificationService } from '../notification/notification.service';
+import { DatabaseWalletStorage } from '../wallet/storages/database.storage';
 import { WalletService } from '../wallet/wallet.service';
 
 @Injectable()
@@ -29,17 +30,13 @@ export class UsersService extends RSUserService {
 
       const res = await super.create(userData, async (err, tx, user) => {
         if (err || !user) return;
-        await tx.walletAddress.createMany({
-          data: multiChainResult.wallets.map((w) => ({
-            entityId: user.uuid,
-            address: w.address,
-            isPrimary: w.address === multiChainResult.defaultAddress,
-            isVerified: true,
-            chainType: w.chain,
-            config: { privateKey: w.privateKey ?? null, address: w.address, chain: w.chain },
-          })),
-          skipDuplicates: true,
-        });
+        // Assign the entity ID to pre-generated wallets using database storage helper
+        await DatabaseWalletStorage.assignEntity(
+          tx,
+          multiChainResult.wallets,
+          user.uuid,
+          multiChainResult.defaultAddress
+        );
       });
 
       await this.notificationService.createNotification({
@@ -56,7 +53,6 @@ export class UsersService extends RSUserService {
   }
 
   async getWallets(dto: ListUserDto) {
-    console.log('Listing users');
     const userListData = await super.list(dto);
     const wallets = userListData.data.map((user) => {
       return {

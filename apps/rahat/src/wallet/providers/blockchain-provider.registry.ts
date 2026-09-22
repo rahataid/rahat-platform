@@ -20,7 +20,16 @@ type WalletClass = new (
 // Configuration interface for registration
 interface RegistryConfig {
   wallets: WalletClass[];
-  storage: new (...args: any[]) => WalletStorage;
+  /** Simple no-arg storage class (e.g. FileWalletStorage, MemoryWalletStorage). */
+  storage?: new () => WalletStorage;
+  /**
+   * Factory that receives injected NestJS providers and returns a WalletStorage.
+   * Use this when storage needs DI (e.g. DatabaseWalletStorage needs PrismaService).
+   * Pair with `inject` listing the provider tokens in the same order.
+   */
+  storageFactory?: (...injected: any[]) => WalletStorage | Promise<WalletStorage>;
+  /** Tokens passed to `storageFactory` in order; mirrors NestJS useFactory `inject`. */
+  inject?: any[];
   defaultConfigs?: Record<string, { rpcUrl: string; [key: string]: any }>;
 }
 
@@ -46,20 +55,19 @@ export class BlockchainProviderRegistry {
 
   // Static method for NestJS module registration with object config
   static register(config: RegistryConfig): Provider {
+    if (!config.storage && !config.storageFactory) {
+      throw new Error('BlockchainProviderRegistry.register requires either `storage` or `storageFactory`');
+    }
     return {
       provide: BLOCKCHAIN_REGISTRY_TOKEN,
-      useFactory: async () => {
-        // Create storage instance
-        const storage = new config.storage();
+      useFactory: async (...injected: any[]) => {
+        const storage = config.storageFactory
+          ? await config.storageFactory(...injected)
+          : new config.storage!();
         await storage.init();
-
-        // Create registry with wallet classes and optional default configs
-        return new BlockchainProviderRegistry(
-          storage,
-          config.wallets,
-          config.defaultConfigs || {}
-        );
+        return new BlockchainProviderRegistry(storage, config.wallets, config.defaultConfigs || {});
       },
+      inject: config.inject || [],
     };
   }
 
