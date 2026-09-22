@@ -32,8 +32,7 @@ import {
   BQUEUE,
   GroupWithValidationAA,
   ProjectContants,
-  TPIIData,
-  WalletJobs
+  TPIIData
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
@@ -472,10 +471,8 @@ export class BeneficiaryService {
       for (const wallet of multiChainWallets) {
         await this.rsprisma.walletAddress.update({
           where: {
-            address_chainType: {
-              address: wallet.address,
-              chainType: wallet.chain.toUpperCase()
-            },
+            address: wallet.address,
+
           },
           data: { entityId: createdBeneficiary.uuid }
         })
@@ -2459,30 +2456,30 @@ export class BeneficiaryService {
     const { groupName, beneficiaries } = jsonData;
 
     // Use multi-chain wallet creation to get wallets for all supported chains
-    const multiChainWallets = await handleMicroserviceCall({
-      client: this.walletClient.send(
-        { cmd: WalletJobs.CREATE_BULK_FOR_ALL_CHAINS },
-        beneficiaries.length
-      ),
-      onSuccess: (response) => {
-        console.log(`Multi-chain wallet response`, response);
-        return response;
-      },
-      onError(error) {
-        console.log('Error creating multi-chain wallets for beneficiaries.', error);
-        throw new RpcException(error.message);
-      },
-    });
+    // const multiChainWallets = await handleMicroserviceCall({
+    //   client: this.walletClient.send(
+    //     { cmd: WalletJobs.CREATE_BULK_FOR_ALL_CHAINS },
+    //     beneficiaries.length
+    //   ),
+    //   onSuccess: (response) => {
+    //     console.log(`Multi-chain wallet response`, response);
+    //     return response;
+    //   },
+    //   onError(error) {
+    //     console.log('Error creating multi-chain wallets for beneficiaries.', error);
+    //     throw new RpcException(error.message);
+    //   },
+    // });
 
     const beneficiaryData = await Promise.all(
       beneficiaries.map(async (d: any, index: number) => {
         // Use default address from multi-chain wallet result
-        const defaultAddress = multiChainWallets[index]?.defaultAddress;
+        // const defaultAddress = multiChainWallets[index]?.defaultAddress;
 
         return {
           firstName: d.firstName,
           lastName: d.lastName,
-          walletAddress: defaultAddress,
+          walletAddress: 'defaultAddress',
           govtIDNumber: d.govtIDNumber,
           gender: d.gender,
           bankedStatus: d.bankedStatus,
