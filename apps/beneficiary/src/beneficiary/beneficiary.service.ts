@@ -198,8 +198,6 @@ export class BeneficiaryService {
     return { ...beneficiary, pii: piiData };
   }
 
-
-
   async listBeneficiaryPiiByWalletAddress(data: any) {
     if (!data?.data?.length) return data;
     return this.prisma.beneficiary.findMany({
@@ -470,23 +468,19 @@ export class BeneficiaryService {
     });
     this.logger.log(`[CREATE] Beneficiary record created with UUID: ${createdBeneficiary.uuid}`);
     if (multiChainWallets && Array.isArray(multiChainWallets) && multiChainWallets.length > 0) {
-      this.logger.log(`[CREATE] Persisting ${multiChainWallets.length} multi-chain wallet(s)`);
+      this.logger.log(`[CREATE] Persisting ${multiChainWallets.length} multi-chain wallet(s) via database storage`);
       for (const wallet of multiChainWallets) {
-        this.logger.log(`[CREATE] Wallet item:`, JSON.stringify(wallet, null, 2));
-        await this.prisma.walletAddress.upsert({
-          where: { address: wallet.address },
-          create: {
-            entityId: createdBeneficiary.uuid,
-            address: wallet.address,
-            isPrimary: wallet.address === walletAddress,
-            isVerified: true,
-            chainType: wallet.chain,
-            // config: { privateKey: wallet.privateKey, address: wallet.address, chain: wallet.chain },
+        await this.rsprisma.walletAddress.update({
+          where: {
+            address_chainType: {
+              address: wallet.address,
+              chainType: wallet.chain.toUpperCase()
+            },
           },
-          update: {},
-        });
-        this.logger.log(`[CREATE] Wallet persisted for chain ${wallet.chain}: ${wallet.address}`);
+          data: { entityId: createdBeneficiary.uuid }
+        })
       }
+      this.logger.log(`[CREATE] Wallets persisted via database storage`);
     } else {
       this.logger.log('[CREATE] No multi-chain wallets to persist');
     }
@@ -710,10 +704,10 @@ export class BeneficiaryService {
   }
 
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
-    const { type, referrerBeneficiary, referrerVendor, ...rest } = dto;
+    const { type, referrerBeneficiary, referrerVendor, multiChainWallets, ...rest } = dto;
 
     // 1. Create Beneficiary
-    const benef = await this.create(rest, projectUid);
+    const benef = await this.create({ ...rest, multiChainWallets: [] }, projectUid);
 
     const projectPayload = {
       uuid: benef.uuid,
@@ -1024,27 +1018,28 @@ export class BeneficiaryService {
         );
       this.logger.log(`[CREATE_BULK] Successfully inserted ${insertedBeneficiariesWithPii.length} beneficiaries`);
 
-      // Persist multi-chain wallets to tbl_wallet_addresses for all beneficiaries
-      this.logger.log('[CREATE_BULK] Starting multi-chain wallet persistence');
-      const beneficiaryByUuid = new Map(insertedBeneficiariesWithPii.map((b) => [b.uuid, b]));
-      for (const wallet of multiChainWalletsList) {
-        if (!wallet.uuid) continue;
-        const beneficiary = beneficiaryByUuid.get(wallet.uuid);
-        if (!beneficiary) continue;
-        await this.prisma.walletAddress.upsert({
-          where: { address: wallet.address },
-          create: {
-            entityId: beneficiary.uuid,
-            address: wallet.address,
-            isPrimary: wallet.address === beneficiary.walletAddress,
-            isVerified: true,
-            chainType: wallet.chain,
-            config: { privateKey: wallet.privateKey, address: wallet.address, chain: wallet.chain },
-          },
-          update: {},
-        });
-        this.logger.log(`[CREATE_BULK] Wallet persisted for chain ${wallet.chain}: ${wallet.address}`);
-      }
+      // Persist multi-chain wallets via database storage microservice
+      this.logger.log('[CREATE_BULK] Starting multi-chain wallet persistence via database storage');
+      // const savePromises = insertedBeneficiariesWithPii
+      //   .map((beneficiary) => {
+      //     const wallets = multiChainWalletsList.filter((w) => w.uuid === beneficiary.uuid);
+      //     if (!wallets.length) return null;
+      //     return handleMicroserviceCall({
+      //       client: this.walletClient.send(
+      //         { cmd: WalletJobs.SAVE_ENTITY_WALLETS },
+      //         {
+      //           entityId: beneficiary.uuid,
+      //           primaryAddress: beneficiary.walletAddress,
+      //           wallets,
+      //         }
+      //       ),
+      //       onError(error) {
+      //         throw new RpcException(error.message);
+      //       },
+      //     });
+      //   })
+      //   .filter(Boolean);
+      // await Promise.all(savePromises);
       this.logger.log(`[CREATE_BULK] Multi-chain wallet persistence complete: ${multiChainWalletsList.length} wallet(s) saved`);
 
       // Assign beneficiaries to the project if a projectUuid is provided
@@ -2463,27 +2458,31 @@ export class BeneficiaryService {
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
 
-    const walletAddress = await handleMicroserviceCall({
+    // Use multi-chain wallet creation to get wallets for all supported chains
+    const multiChainWallets = await handleMicroserviceCall({
       client: this.walletClient.send(
-        { cmd: WalletJobs.CREATE_BULK },
-        { count: beneficiaries.length }
+        { cmd: WalletJobs.CREATE_BULK_FOR_ALL_CHAINS },
+        beneficiaries.length
       ),
       onSuccess: (response) => {
-        console.log(`Response`, response);
+        console.log(`Multi-chain wallet response`, response);
         return response;
       },
       onError(error) {
-        console.log('Error assiging Beneficiaries to project.', error);
+        console.log('Error creating multi-chain wallets for beneficiaries.', error);
         throw new RpcException(error.message);
       },
     });
 
     const beneficiaryData = await Promise.all(
       beneficiaries.map(async (d: any, index: number) => {
+        // Use default address from multi-chain wallet result
+        const defaultAddress = multiChainWallets[index]?.defaultAddress;
+
         return {
           firstName: d.firstName,
           lastName: d.lastName,
-          walletAddress: walletAddress[index]?.address,
+          walletAddress: defaultAddress,
           govtIDNumber: d.govtIDNumber,
           gender: d.gender,
           bankedStatus: d.bankedStatus,

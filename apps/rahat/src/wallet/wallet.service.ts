@@ -8,6 +8,7 @@ import {
   BLOCKCHAIN_REGISTRY_TOKEN,
   BlockchainProviderRegistry,
 } from './providers/blockchain-provider.registry';
+import { DatabaseWalletStorage } from './storages/database.storage';
 
 export interface WalletCreateResult {
   chain: ChainType;
@@ -21,6 +22,11 @@ export interface MultiChainWalletResult {
   defaultChain: ChainType;
   /** One entry per active chain */
   wallets: WalletCreateResult[];
+}
+
+export interface SaveEntityWalletsDto {
+  entityId: string;
+  wallets: { address: string; chain: string }[];
 }
 
 // TODO: Multi-chain support - Future enhancement to support multiple chains per instance
@@ -40,8 +46,8 @@ export class WalletService implements OnModuleInit {
   async onModuleInit() {
     try {
       await this.initializeProviders();
-    } catch (e) {
-      this.logger.warn(`[WalletService] Wallet providers not initialized — waiting for settings. (${e.message})`);
+    } catch (e: unknown) {
+      this.logger.warn(`[WalletService] Wallet providers not initialized — waiting for settings. (${e instanceof Error ? e.message : String(e)})`);
     }
   }
 
@@ -50,8 +56,8 @@ export class WalletService implements OnModuleInit {
     this.logger.log('[WalletService] settings.seeded received. Re-initializing wallet providers...');
     try {
       await this.initializeProviders();
-    } catch (e) {
-      this.logger.error(`[WalletService] Failed to initialize after seed: ${e.message}`);
+    } catch (e: unknown) {
+      this.logger.error(`[WalletService] Failed to initialize after seed: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
@@ -299,9 +305,9 @@ export class WalletService implements OnModuleInit {
         if (walletKeys) {
           return walletKeys;
         }
-      } catch (error) {
+      } catch (error: unknown) {
         this.logger.warn(
-          `Failed to get wallet keys for ${chainType}: ${error.message}`
+          `Failed to get wallet keys for ${chainType}: ${error instanceof Error ? error.message : String(error)}`
         );
       }
     }
@@ -411,6 +417,14 @@ export class WalletService implements OnModuleInit {
 
   private async detectChainFromAddress(address: string): Promise<ChainType> {
     return this.providerRegistry.detectChainFromAddress(address);
+  }
+
+  /**
+   * Persists pre-generated wallets to tbl_wallet_addresses, linked to an entity.
+   * Called via microservice so beneficiary service doesn't write to wallet table directly.
+   */
+  async saveEntityWallets(dto: SaveEntityWalletsDto): Promise<void> {
+    await DatabaseWalletStorage.assignEntity(this.prisma, dto.wallets, dto.entityId);
   }
 
   // Backward compatibility methods (deprecated)

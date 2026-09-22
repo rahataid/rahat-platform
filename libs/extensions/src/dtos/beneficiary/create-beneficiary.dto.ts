@@ -100,7 +100,7 @@ export class CreateBeneficiaryDto implements Beneficiary {
     description: 'Multi-chain wallet addresses with private keys (JSON string from interceptor)',
   })
   @IsOptional()
-  multiChainWallets: string | WalletDto[] = '';
+  multiChainWallets: WalletDto[] = [];
 
   @ApiProperty({
     format: 'json',

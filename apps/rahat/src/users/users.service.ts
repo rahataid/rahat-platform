@@ -35,7 +35,6 @@ export class UsersService extends RSUserService {
           tx,
           multiChainResult.wallets,
           user.uuid,
-          multiChainResult.defaultAddress
         );
       });
 
