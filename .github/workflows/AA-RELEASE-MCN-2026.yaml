@@ -8,7 +8,7 @@ on:
         required: true
         type: choice
         options:
-          - 'release-v5.1.0-mcn'
+          - 'release-v5.0.0-mcn'
       apps_to_build:
         description: 'Apps to build (leave empty for defaults)'
         required: false
