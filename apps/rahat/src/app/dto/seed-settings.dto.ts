@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { Allow, IsArray, IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Allow, IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 export class SeedSettingItemDto {
   @ApiProperty({ example: 'COMMUNICATION' })
@@ -43,4 +43,38 @@ export class SeedSettingsDto {
   @ValidateNested({ each: true })
   @Type(() => SeedSettingItemDto)
   settings: SeedSettingItemDto[];
+}
+
+export class CreateSiteSettingDto {
+  @ApiProperty({ description: 'Brand name' })
+  @IsString()
+  @IsNotEmpty()
+  brandName: string;
+
+  @ApiProperty({ description: 'Brand description' })
+  @IsString()
+  @IsNotEmpty()
+  brandDescription: string;
+}
+
+export class UpdateSiteSettingDto {
+  @ApiPropertyOptional({ description: 'Brand name' })
+  @IsString()
+  @IsOptional()
+  BRAND_NAME?: string;
+
+  @ApiPropertyOptional({ description: 'Brand description' })
+  @IsString()
+  @IsOptional()
+  BRAND_DESCRIPRTION?: string;
+
+  @ApiPropertyOptional({ description: 'Brand logo URL' })
+  @IsString()
+  @IsOptional()
+  BRRAND_LOGO?: string;
+
+  @ApiPropertyOptional({ description: 'Site background image URL' })
+  @IsString()
+  @IsOptional()
+  SITE_BACKGROUND_IMAGE?: string;
 }
