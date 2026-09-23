@@ -15,6 +15,7 @@ import { UUID } from 'crypto';
 import { SeedSettingsDto } from './dto/seed-settings.dto';
 import { AppVersionsDto, ServiceVersionDto } from './dto/app-versions.dto';
 import { getVersionFromPackageJson } from '../utils/version.helper';
+import { MS_ACTIONS } from '@rahataid/sdk';
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
 function getDataType(
@@ -303,9 +304,7 @@ export class AppService {
   private async getAaVersion(): Promise<ServiceVersionDto> {
     const start = Date.now();
     const result: any = await firstValueFrom(
-      this.rahatClient
-        // cspell:disable-next-line
-        .send({ cmd: 'aa.jobs.version.get' }, {})
+      this.rahatClient.send({ cmd: MS_ACTIONS.AA_JOBS_VERSION.GET }, {})
         .pipe(
           timeout(1500),
           catchError((err: Error) => {
@@ -321,9 +320,7 @@ export class AppService {
   // Fetches the Triggers service version via Redis.
   private async getTriggersVersion(): Promise<ServiceVersionDto> {
     const result: any = await firstValueFrom(
-      this.rahatClient
-        // cspell:disable-next-line
-        .send({ cmd: 'ms.jobs.version.get' }, { appId: process.env.AA_PROJECT_ID } as any)
+      this.rahatClient.send({ cmd: MS_ACTIONS.MS_VERSION.GET }, { appId: process.env.AA_PROJECT_ID } as any)
         .pipe(
           timeout(1500),
           catchError((err: Error) => {
@@ -333,16 +330,6 @@ export class AppService {
         ),
     );
     return { version: result?.version || 'unreachable', env: result?.env ?? null };
-  }
-
-  // Returns the frontend URL and runtime environment.
-  async getWebVersion(): Promise<any> {
-    const frontendUrl =
-      (await this.prisma.setting.findUnique({ where: { name: 'FRONTEND_URL' } }).catch(() => null))?.value ??
-      this.configService.get<string>('FRONTEND_URL') ??
-      'http://localhost:5500';
-    const url = typeof frontendUrl === 'string' ? frontendUrl : String(frontendUrl);
-    return { url, env: this.resolveEnv() };
   }
 
   // Aggregates all service versions in parallel.

@@ -64,8 +64,6 @@ import { AuthClientModule } from './auth-client.module';
     AppUsersModule,
     OtpModule,
     RSUserModule.forRoot([AuthsModule, UsersModule, RolesModule]),
-    // RAHAT_CLIENT is provided by ProjectModule (which exports ClientsModule),
-    // imported below — no separate registration needed here.
     ProjectModule,
     StatsModule,
     ProcessorsModule,

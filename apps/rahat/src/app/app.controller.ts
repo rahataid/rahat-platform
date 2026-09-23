@@ -10,7 +10,7 @@ import { UUID } from 'crypto';
 import { AppJobs } from './app.jobs';
 import { AppService } from './app.service';
 import { SeedSettingsDto } from './dto/seed-settings.dto';
-import { AppVersionsDto, WebVersionDto } from './dto/app-versions.dto';
+import { AppVersionsDto } from './dto/app-versions.dto';
 
 @Controller('app')
 @ApiTags('App')
@@ -103,12 +103,6 @@ export class AppController {
   @ApiOperation({ summary: 'Get platform, AA, triggers, and frontend versions (public)' })
   @ApiOkResponse({ type: AppVersionsDto })
   async getVersions(): Promise<AppVersionsDto> { return this.appService.getAppVersions(); }
-
-  @Get('web-version')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get Web Version URL' })
-  @ApiOkResponse({ type: WebVersionDto })
-  async getWebVersion(): Promise<WebVersionDto> { return this.appService.getWebVersion(); }
 
 }
 

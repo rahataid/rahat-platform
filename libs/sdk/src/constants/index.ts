@@ -208,7 +208,7 @@ export const MS_ACTIONS = {
       ADD_TRIGGERS: 'aaProject.phases.addTriggers',
       REVERT_PHASE: 'aaProject.phases.revertPhase',
     },
-    VERSION: {                 // ← add (generic, not domain)
+    VERSION: {
       GET: 'aaProject.version.get',
     },
     STAKEHOLDERS: {
@@ -674,7 +674,10 @@ export const MS_ACTIONS = {
     UPDATE_VALUES: 'ms.settings.updateValues',
   },
   MS_VERSION: {
-    GET: 'ms.version.get',     //    action: 'ms.version.get'
+    GET: 'ms.jobs.version.get',
+  },
+  AA_JOBS_VERSION: {
+    GET: 'aa.jobs.version.get',
   },
   MS_SOURCES_DATA: {
     GET_SERIES_BY_DATA_SOURCE: 'ms.sourcesData.getSeriesByDataSource',
