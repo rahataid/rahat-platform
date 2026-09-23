@@ -94,6 +94,13 @@ export const MS_TRIGGERS_JOBS = {
     ADD: 'ms.jobs.categories.add',
     REMOVE: 'ms.jobs.categories.remove',
   },
+  COMMUNICATIONS: {
+    CREATE: 'ms.jobs.communications.create',
+    GET_ALL: 'ms.jobs.communications.getAll',
+    GET_ONE: 'ms.jobs.communications.getOne',
+    UPDATE: 'ms.jobs.communications.update',
+    REMOVE: 'ms.jobs.communications.remove',
+  },
   DAILY_MONITORING: {
     ADD: 'ms.jobs.dailyMonitoring.add',
     GET_ALL: 'ms.jobs.dailyMonitoring.getAll',
@@ -629,6 +636,23 @@ export const msTriggerActions: ProjectActionFunc = {
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.CATEGORIES.REMOVE }, payload);
   },
   // **** activity categories end ******//
+
+  // **** communications start ******//
+  [MS_ACTIONS.MS_COMMUNICATIONS.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.COMMUNICATIONS.CREATE }, payload),
+
+  [MS_ACTIONS.MS_COMMUNICATIONS.GET_ALL]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.COMMUNICATIONS.GET_ALL }, payload),
+
+  [MS_ACTIONS.MS_COMMUNICATIONS.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.COMMUNICATIONS.GET_ONE }, payload),
+
+  [MS_ACTIONS.MS_COMMUNICATIONS.UPDATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.COMMUNICATIONS.UPDATE }, payload),
+
+  [MS_ACTIONS.MS_COMMUNICATIONS.REMOVE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.COMMUNICATIONS.REMOVE }, payload),
+  // **** communications end ******//
 
   // **** daily monitoring start ****//
   [MS_ACTIONS.MS_DAILY_MONITORING.ADD]: (uuid, payload, sendCommand) => {

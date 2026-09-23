@@ -649,6 +649,14 @@ export const MS_ACTIONS = {
     REMOVE: 'ms.activityCategories.remove',
   },
 
+  MS_COMMUNICATIONS: {
+    CREATE: 'ms.communications.create',
+    GET_ALL: 'ms.communications.getAll',
+    GET_ONE: 'ms.communications.getOne',
+    UPDATE: 'ms.communications.update',
+    REMOVE: 'ms.communications.remove',
+  },
+
   MS_DAILY_MONITORING: {
     ADD: 'ms.dailyMonitoring.add',
     GET_ALL: 'ms.dailyMonitoring.getAll',
