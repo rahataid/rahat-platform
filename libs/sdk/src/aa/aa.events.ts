@@ -145,6 +145,7 @@ export const JOBS = {
     GET_PAYOUT_LOG: 'aa.jobs.payout.getPayoutLog',
     GET_PAYOUT_DETAILS: 'aa.jobs.payout.getPayoutDetails',
     EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+    EXPORT_PAYOUT_LOGS_PDF_FILE: 'aa.jobs.payout.exportPayoutLogsPdfFile',
     VERIFY_MANUAL_PAYOUT: 'aa.jobs.payout.verifyManualPayout',
   },
   INKIND: {
