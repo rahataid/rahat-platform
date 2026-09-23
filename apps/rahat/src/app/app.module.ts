@@ -34,13 +34,11 @@ import { UploadModule } from '../upload/upload.module';
 import { AppUsersModule } from '../vendors/vendors.module';
 import { WalletModule } from '../wallet/wallet.module';
 import { WebhooksModule } from '../webhooks/webhooks.module';
-import { NewRelicModule } from '../newrelic/newrelic.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 @Module({
   imports: [
-    NewRelicModule,
     ConfigModule.forRoot({ isGlobal: true }),
     BeneficiaryModule,
     DashboardModule,
