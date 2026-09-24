@@ -1,4 +1,7 @@
 export const JOBS = {
+  VERSION: {
+    GET: 'aa.jobs.version.get'
+  },
   RIVER_STATIONS: {
     GET_DHM: 'aa.jobs.riverStations.getDhm',
   },
@@ -81,10 +84,13 @@ export const JOBS = {
     GET_TOKEN_DETAILS: 'aa.jobs.beneficiary.getTokenDetails',
     GENERATE_QR_PDF: 'aa.jobs.beneficiary.generateQrPdf',
     GET_QR_PDF: 'aa.jobs.beneficiary.getQrPdf',
+    EXPORT_GROUP_EXCEL: 'aa.jobs.beneficiary.exportGroupExcel',
     SPONSOR_BENEFICIARY_GROUP: 'aa.jobs.beneficiary.sponsorBeneficiaryGroup',
     REVOKE_SPONSORSHIP_FOR_GROUP: 'aa.jobs.beneficiary.revokeSponsorshipForGroup',
     RETRY_SPONSORSHIP_FOR_GROUP: 'aa.jobs.beneficiary.retrySponsorshipForGroup',
     GET_SPONSORSHIP_STATUS_FOR_GROUP: 'aa.jobs.beneficiary.getSponsorshipStatusForGroup',
+    GET_PAYOUT_MODE: 'aa.jobs.beneficiary.getPayoutMode',
+
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget',
@@ -142,6 +148,7 @@ export const JOBS = {
     GET_PAYOUT_LOG: 'aa.jobs.payout.getPayoutLog',
     GET_PAYOUT_DETAILS: 'aa.jobs.payout.getPayoutDetails',
     EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+    EXPORT_PAYOUT_LOGS_PDF_FILE: 'aa.jobs.payout.exportPayoutLogsPdfFile',
     VERIFY_MANUAL_PAYOUT: 'aa.jobs.payout.verifyManualPayout',
   },
   INKIND: {

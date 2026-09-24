@@ -371,6 +371,16 @@ export const aaActions: ProjectActionFunc = {
   ) =>
     sendCommand({ cmd: AAJobs.BENEFICIARY.GET_QR_PDF, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.EXPORT_GROUP_EXCEL]: (
+    uuid,
+    payload,
+    sendCommand
+  ) =>
+    sendCommand(
+      { cmd: AAJobs.BENEFICIARY.EXPORT_GROUP_EXCEL, uuid },
+      payload
+    ),
+
   [MS_ACTIONS.AAPROJECT.FUND_MANAGEMENT.ADD_FUND]: (
     uuid,
     payload,
@@ -394,6 +404,12 @@ export const aaActions: ProjectActionFunc = {
     sendCommand
   ) =>
     sendCommand({ cmd: AAJobs.FUND_MANAGEMENT.TRANSFER_LIST, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.BENEFICIARY.GET_PAYOUT_MODE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.BENEFICIARY.GET_PAYOUT_MODE, uuid }, payload),
 
   // **** fund mgmt end ****//
 
@@ -681,13 +697,17 @@ export const aaActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
     return sendCommand({ cmd: AAJobs.PAYOUT.VERIFY_MANUAL_PAYOUT, uuid }, payload)
   },
-  [MS_ACTIONS.AAPROJECT.PAYOUT.EXPORT_PAYOUT_LOGS]: (
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.EXPORT_PAYOUT_LOGS_PDF_FILE]: (
     uuid,
     payload,
     sendCommand
   ) => {
     payload.appId = uuid || payload.appId;
-    return sendCommand({ cmd: AAJobs.PAYOUT.EXPORT_PAYOUT_LOGS, uuid }, payload)
+    return sendCommand(
+      { cmd: AAJobs.PAYOUT.EXPORT_PAYOUT_LOGS_PDF_FILE, uuid },
+      payload
+    );
   },
   // **** Payout end **** //
   // **** Inkind start **** //
@@ -1191,4 +1211,8 @@ export const aaActions: ProjectActionFunc = {
   // *** Settings **** //
   [MS_ACTIONS.MS_SETTINGS.UPDATE_VALUES]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.SETTINGS.UPDATE_VALUES, uuid }, payload),
+
+  // *** Version — from package.json via readFile (platform aggregates) **** //
+  [MS_ACTIONS.AAPROJECT.VERSION.GET]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.VERSION.GET, uuid }, payload),
 };
