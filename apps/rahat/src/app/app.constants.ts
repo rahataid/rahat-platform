@@ -1,4 +1,8 @@
 export const ABILITY_SUBJECTS = {
+  BENEFICIARY: 'beneficiary',
+  SETTINGS: 'settings',
+  PROJECT: 'project',
+  VENDOR: 'vendor',
   BENEFICIARY_GROUP: 'Beneficiary Group',
   STAKEHOLDER: 'Stakeholder',
   STAKEHOLDER_GROUP: 'Stakeholder Group',
