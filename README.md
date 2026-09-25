@@ -41,9 +41,21 @@ Follow the steps below to set up and run the project in a development environmen
 
 Before you begin, ensure your system has the following dependencies installed:
 
-- Docker: Version 20.10.7 or higher
+- Docker: Version 20.10.7 or higher, with the Docker daemon running
 - Node.js: Version 20.10.0 or higher
-- pnpm (Package Manager): Version 6.16.1 or higher
+- pnpm (Package Manager): Version 8.14.1 or higher
+
+You can validate the local toolchain before bootstrapping the project:
+
+```bash
+node scripts/validate-env.mjs
+```
+
+If `pnpm` is already available, you can also run:
+
+```bash
+pnpm dev:check
+```
 
 #### Setup
 
@@ -55,7 +67,21 @@ Before you begin, ensure your system has the following dependencies installed:
    git clone git@github.com:rahataid/rahat-platform.git
    ```
 
-2. **Bootstrap Rahat Core Services**
+2. **Validate the Development Environment**
+
+   Run the validator before bootstrapping services:
+
+   ```bash
+   pnpm dev:check
+   ```
+
+   If `pnpm` is not installed yet, use:
+
+   ```bash
+   node scripts/validate-env.mjs
+   ```
+
+3. **Bootstrap Rahat Core Services**
 
    This step installs the dependencies and runs all necessary services in Docker, as well as scripts to set up the project:
 
@@ -63,7 +89,7 @@ Before you begin, ensure your system has the following dependencies installed:
    pnpm bootstrap
    ```
 
-3. **Clone the Desired Project**
+4. **Clone the Desired Project**
 
    Rahat currently supports the following projects:
 
@@ -73,7 +99,7 @@ Before you begin, ensure your system has the following dependencies installed:
 
    Clone the project you want to run and follow the instructions in its README.md file.
 
-4. **Run the Rahat UI**
+5. **Run the Rahat UI**
 
    Follow these steps to run the Rahat web UI locally:
 
@@ -99,9 +125,9 @@ Before you begin, ensure your system has the following dependencies installed:
 
     - Open the UI in your browser at the address shown by the dev server (`http://localhost:3000`).
 
-5. **Access API Documentation**
+6. **Access API Documentation**
 
-   You can explore the API documentation at: [http://localhost:5501/swagger](http://localhost:5501/swagger)
+   You can explore the API documentation at: [http://localhost:5500/swagger](http://localhost:5500/swagger)
 
 Explore the functionalities provided by the Rahat Platform locally. If you encounter any issues, refer to the troubleshooting section within the documentation or contact the project maintainers for assistance.
 
