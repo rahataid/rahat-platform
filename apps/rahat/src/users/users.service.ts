@@ -24,7 +24,8 @@ export class UsersService extends RSUserService {
   async create(userData: CreateUserDto) {
     try {
       // Create wallets for all active chains from a shared mnemonic
-      const [multiChainResult] = await this.walletService.createBulkForAllChains(1);
+      const [multiChainResult] =
+        await this.walletService.createBulkForAllChains(1);
 
       userData.wallet = multiChainResult.defaultAddress;
 
@@ -34,7 +35,7 @@ export class UsersService extends RSUserService {
         await DatabaseWalletStorage.assignEntity(
           tx,
           multiChainResult.wallets,
-          user.uuid,
+          user.uuid
         );
       });
 
@@ -62,6 +63,34 @@ export class UsersService extends RSUserService {
       };
     });
     return wallets;
+  }
+
+  async list(dto: ListUserDto) {
+    const users = await super.list(dto);
+    const userIds = users.data.map((user) => user.uuid);
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: {
+        entityId: { in: userIds },
+      },
+    });
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+    const data = users.data.map((user) => ({
+      ...user,
+      walletDetails: walletMap.get(user.uuid) || null,
+    }));
+    let result = {} as any;
+    result.data = data;
+    result.meta = users.meta;
+
+    return result;
   }
 
   // TODO: Multi-chain support - Helper method for future use
