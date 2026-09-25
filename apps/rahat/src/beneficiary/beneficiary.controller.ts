@@ -485,7 +485,7 @@ export class BeneficiaryController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.BENEFICIARY })
+  @CheckAbilities({ actions: ACTIONS.DELETE, subject: SUBJECTS.BENEFICIARY })
   @Patch('remove/:uuid')
   @ApiParam({ name: 'uuid', required: true })
   async remove(@Param('uuid') uuid: UUID) {
