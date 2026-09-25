@@ -8,9 +8,10 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   GetVendorOtp,
   VendorAddToProjectDto,
@@ -18,23 +19,35 @@ import {
   VendorUpdateDto,
   VerifyVendorOtp,
 } from '@rahataid/extensions';
-import { VendorJobs } from '@rahataid/sdk';
+import { APP, SUBJECTS, VendorJobs } from '@rahataid/sdk';
 import { RequestDetails } from '@rumsan/extensions/decorators';
+import {
+  ACTIONS,
+  CheckAbilities,
+  JwtGuard,
+} from '@rumsan/user';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
-import { VendorsService } from './vendors.service';
+import { DbAbilitiesGuard } from '../decorators';
 import { GetVendorsDTO } from './dto/get-vendors.dto';
+import { VendorsService } from './vendors.service';
 
 @ApiTags('Vendors')
 @Controller('vendors')
 export class VendorsController {
   constructor(private readonly vendorService: VendorsService) { }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.VENDOR })
   @Post('')
   registerVendor(@Body() dto: VendorRegisterDto) {
     return this.vendorService.registerVendor(dto);
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.VENDOR })
   @Get('')
   listVendor(@Query() dto: GetVendorsDTO) {
     return this.vendorService.listVendor(dto);
@@ -45,11 +58,17 @@ export class VendorsController {
     return this.vendorService.listProjectVendor(dto);
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.VENDOR })
   @Get('/stats')
   getVendorCount(@Query() dto) {
     return this.vendorService.getVendorCount();
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.VENDOR })
   @ApiParam({ name: 'id', required: true })
   @Get('/:id')
   getVendor(@Param('id') id: UUID | Address,
@@ -67,14 +86,18 @@ export class VendorsController {
     return this.vendorService.verifyOtp(dto, rdetails);
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.VENDOR })
   @ApiParam({ name: 'uuid', required: true })
   @Patch('/update/:uuid')
   updateVendor(@Param('uuid') uuid: UUID, @Body() dto: VendorUpdateDto) {
     return this.vendorService.updateVendor(dto, uuid);
   }
 
-  // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.DELETE, subject: SUBJECTS.VENDOR })
   @Patch('remove/:vendorId')
   @ApiParam({ name: 'vendorId', required: true })
   async removeVendor(
