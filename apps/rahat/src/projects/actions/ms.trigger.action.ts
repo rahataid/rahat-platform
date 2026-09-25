@@ -100,6 +100,7 @@ export const MS_TRIGGERS_JOBS = {
     GET_ONE: 'ms.jobs.communications.getOne',
     UPDATE: 'ms.jobs.communications.update',
     REMOVE: 'ms.jobs.communications.remove',
+    TRIGGER: 'ms.jobs.communications.trigger',
   },
   DAILY_MONITORING: {
     ADD: 'ms.jobs.dailyMonitoring.add',
@@ -652,6 +653,15 @@ export const msTriggerActions: ProjectActionFunc = {
 
   [MS_ACTIONS.MS_COMMUNICATIONS.REMOVE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: MS_TRIGGERS_JOBS.COMMUNICATIONS.REMOVE }, payload),
+
+  [MS_ACTIONS.MS_COMMUNICATIONS.TRIGGER]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.COMMUNICATIONS.TRIGGER },
+      payload
+    );
+  },
   // **** communications end ******//
 
   // **** daily monitoring start ****//

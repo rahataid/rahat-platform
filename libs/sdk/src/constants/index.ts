@@ -655,6 +655,7 @@ export const MS_ACTIONS = {
     GET_ONE: 'ms.communications.getOne',
     UPDATE: 'ms.communications.update',
     REMOVE: 'ms.communications.remove',
+    TRIGGER: 'ms.communications.trigger',
   },
 
   MS_DAILY_MONITORING: {
