@@ -1,5 +1,4 @@
-// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import { createMongoAbility } from '@casl/ability';
 import {
   CanActivate,
   ExecutionContext,
@@ -8,7 +7,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { createMongoAbility } from '@casl/ability';
 import { PrismaService } from '@rumsan/prisma';
 
 /** Metadata key set by the `@rumsan/user` CheckAbilities decorator. */
@@ -26,7 +24,7 @@ export class DbAbilitiesGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly prisma: PrismaService
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const rules =
