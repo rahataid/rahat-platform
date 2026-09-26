@@ -1,20 +1,26 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
 import { OnEvent } from '@nestjs/event-emitter';
+import { RpcException } from '@nestjs/microservices';
 import { BulkUpdateWallet, ChainType, IConnectedWallet, WalletKeys } from '@rahataid/wallet';
-import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { BulkWalletAddressDto } from './dto/getBy.dto';
 import {
   BLOCKCHAIN_REGISTRY_TOKEN,
   BlockchainProviderRegistry,
 } from './providers/blockchain-provider.registry';
-import { ChainConfig } from './types/chain-config.interface';
 
 export interface WalletCreateResult {
   chain: ChainType;
   address: string;
   privateKey: string;
+}
+
+export interface MultiChainWalletResult {
+  /** Address from the default/primary chain — goes into beneficiary.walletAddress */
+  defaultAddress: string;
+  defaultChain: ChainType;
+  /** One entry per active chain */
+  wallets: WalletCreateResult[];
 }
 
 // TODO: Multi-chain support - Future enhancement to support multiple chains per instance
@@ -26,7 +32,6 @@ export class WalletService implements OnModuleInit {
   private readonly logger = new Logger(WalletService.name);
 
   constructor(
-    private readonly settings: SettingsService,
     private readonly prisma: PrismaService,
     @Inject(BLOCKCHAIN_REGISTRY_TOKEN)
     private readonly providerRegistry: BlockchainProviderRegistry
@@ -53,9 +58,7 @@ export class WalletService implements OnModuleInit {
   private async initializeProviders() {
     this.logger.log('Initializing blockchain wallet managers...');
 
-    // TODO: Multi-chain support - Currently detecting single chain from settings
-    // Future: Support multiple chains simultaneously
-    const chainSettings = await this.getCurrentChainSettings();
+    const chainConfigs = await this.getChainSettingsFrom();
 
     this.logger.log(
       `Registered wallet classes: ${this.providerRegistry
@@ -63,38 +66,37 @@ export class WalletService implements OnModuleInit {
         .join(', ')}`
     );
 
-    // Validate that the detected chain is supported
-    if (
-      !this.providerRegistry
-        .getRegisteredChainTypes()
-        .includes(chainSettings.detectedChain)
-    ) {
-      throw new RpcException({
-        message: `Chain type ${chainSettings.detectedChain} is not registered in the module`,
-        code: 'CHAIN_TYPE_NOT_REGISTERED',
-        params: { chainType: chainSettings.detectedChain },
-      });
+    // Initialize all active chains from the database
+    const initializedChains: ChainType[] = [];
+    const errors: { chain: string; error: string }[] = [];
+
+    for (const chain of chainConfigs) {
+      try {
+        const chainType = this.mapChainToChainType(chain);
+
+        if (!this.providerRegistry.getRegisteredChainTypes().includes(chainType)) {
+          this.logger.warn(`Chain type ${chainType} is not registered, skipping.`);
+          continue;
+        }
+
+        const chainConfig = this.buildChainConfig(chain, chainType);
+
+        await this.providerRegistry.initializeChain(chainType, chainConfig);
+        initializedChains.push(chainType);
+        this.logger.log(`Initialized wallet manager for chain: ${chain.name} (${chainType})`);
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        errors.push({ chain: chain.name, error: errorMsg });
+        this.logger.error(`Failed to initialize chain ${chain.name}: ${errorMsg}`);
+      }
     }
 
-    // Initialize the detected chain using IWalletManager
-    const chainConfig = chainSettings[chainSettings.detectedChain];
-    if (!chainConfig) {
+    if (initializedChains.length === 0 && errors.length > 0) {
       throw new RpcException({
-        message: `Configuration missing for chain type: ${chainSettings.detectedChain}`,
-        code: 'CHAIN_CONFIG_MISSING_FOR_TYPE',
-        params: { chainType: chainSettings.detectedChain },
+        message: `Failed to initialize all chains: ${errors.map(e => `${e.chain} (${e.error})`).join(', ')}`,
+        code: 'CHAIN_INITIALIZATION_FAILED',
       });
     }
-
-    await this.providerRegistry.initializeChain(
-      chainSettings.detectedChain,
-      chainConfig
-    );
-
-    // TODO: Multi-chain support - Initialize all chains instead of just one
-    // for (const chainType of this.providerRegistry.getRegisteredChainTypes()) {
-    //   await this.providerRegistry.initializeChain(chainType, chainSettings[chainType]);
-    // }
 
     this.logger.log(
       `Initialized wallet managers: ${this.providerRegistry
@@ -103,10 +105,65 @@ export class WalletService implements OnModuleInit {
     );
   }
 
+  private getChainSettingsFrom(): Promise<any[]> {
+    return this.prisma.chainConfig.findMany({
+      where: {
+        isActive: true,
+      },
+    });
+  }
+
+  private mapChainToChainType(chain: any): ChainType {
+    const chainLower = chain.chain?.toLowerCase();
+    if (chainLower === 'evm' || chainLower === 'ethereum' || chainLower === 'base') {
+      return 'evm';
+    }
+    if (chainLower === 'stellar' || chainLower === 'soroban') {
+      return 'stellar';
+    }
+
+    // Default to evm for unknown chains
+    this.logger.warn(`Unknown chain "${chain.chain}", defaulting to 'evm'`);
+    return 'evm';
+  }
+
+  private buildChainConfig(chain: any, chainType: ChainType): any {
+    const config: any = {
+      rpcUrl: Array.isArray(chain.rpcUrl) ? chain.rpcUrl[0] : chain.rpcUrl,
+    };
+
+    if (chainType === 'evm') {
+      config.chainId = chain.chainId ? parseInt(chain.chainId, 10) : 84532;
+    } else if (chainType === 'stellar') {
+      config.networkPassphrase = 'Test SDF Network ; September 2015';
+    }
+
+    return config;
+  }
+
+  async getDefaultChainFromDb(): Promise<ChainType> {
+    const chains = await this.getChainSettingsFrom();
+
+    // Find default chain (isDefault = true)
+    const defaultChain = chains.find(c => c.isDefault);
+    if (defaultChain) {
+      return this.mapChainToChainType(defaultChain);
+    }
+
+    // Fallback to first active chain
+    if (chains.length > 0) {
+      return this.mapChainToChainType(chains[0]);
+    }
+
+    throw new RpcException({
+      message: 'No active chains found in database',
+      code: 'NO_ACTIVE_CHAINS',
+    });
+  }
+
   // Dynamic wallet creation based on chain type
   async createWallet(chainType?: ChainType): Promise<WalletKeys> {
-    const chain =
-      chainType || (await this.getCurrentChainSettings()).detectedChain;
+    const chain = chainType || await this.getDefaultChainFromDb();
 
     this.logger.log(`Creating ${chain} wallet`);
     return this.providerRegistry.createWallet(chain);
@@ -116,8 +173,6 @@ export class WalletService implements OnModuleInit {
   async create(chains: ChainType[]): Promise<WalletCreateResult[]> {
     this.logger.log(`Creating wallets for chains: ${chains.join(', ')}`);
 
-    // TODO: Multi-chain support - Currently limited to single chain per instance
-    // For now, filter to only supported chains
     const supportedChains = chains.filter((chain) =>
       this.providerRegistry.getSupportedChains().includes(chain)
     );
@@ -126,9 +181,7 @@ export class WalletService implements OnModuleInit {
       this.logger.warn(
         `No supported chains found in request: ${chains.join(', ')}`
       );
-      supportedChains.push(
-        (await this.getCurrentChainSettings()).detectedChain
-      );
+      supportedChains.push(await this.getDefaultChainFromDb());
     }
 
     const chainWallets = await Promise.all(
@@ -147,32 +200,95 @@ export class WalletService implements OnModuleInit {
 
   // Bulk wallet creation for a specific chain
   async createBulk(count: number): Promise<WalletCreateResult[]> {
-    const chainSettings = await this.getCurrentChainSettings();
+    const chainType = await this.getDefaultChainFromDb();
 
-    // TODO: Multi-chain support - Validate chain is supported
-    if (
-      !this.providerRegistry
-        .getSupportedChains()
-        .includes(chainSettings.detectedChain)
-    ) {
+    if (!this.providerRegistry.getSupportedChains().includes(chainType)) {
       throw new RpcException({
-        message: `Chain ${chainSettings.detectedChain} is not supported in this instance`,
+        message: `Chain ${chainType} is not supported in this instance`,
         code: 'CHAIN_NOT_SUPPORTED_IN_INSTANCE',
-        params: { chainType: chainSettings.detectedChain },
+        params: { chainType },
       });
     }
 
-    // Use SDK bulk creation
-    const wallets = await this.providerRegistry.createBulk(
-      count,
-      chainSettings.detectedChain
-    );
+    const wallets = await this.providerRegistry.createBulk(count, chainType);
 
     return wallets.map((wallet) => ({
-      chain: chainSettings.detectedChain,
+      chain: chainType,
       address: wallet.address,
       privateKey: wallet.privateKey,
     }));
+  }
+
+  /**
+   * Creates wallets for all active/supported chains using one shared mnemonic per
+   * beneficiary. The same mnemonic is used to derive addresses for every chain,
+   * so the beneficiary has a single recovery phrase.
+   *
+   * Returns one MultiChainWalletResult per requested slot; each result contains
+   * the default-chain address (for beneficiary.walletAddress) and the full set of
+   * per-chain wallets (for tbl_wallet_addresses).
+   */
+  async createBulkForAllChains(count: number): Promise<MultiChainWalletResult[]> {
+    // Dynamic imports keep the heavy crypto libs out of the module-init path
+    const { ethers } = await import('ethers');
+    const { Keypair } = await import('@stellar/stellar-sdk');
+
+    const defaultChain = await this.getDefaultChainFromDb();
+    const supportedChains = this.providerRegistry.getSupportedChains();
+
+    const results: MultiChainWalletResult[] = [];
+
+    for (let i = 0; i < count; i++) {
+      // One mnemonic shared across all chains for this beneficiary
+      const mnemonic = ethers.Mnemonic.fromEntropy(ethers.randomBytes(16));
+      const wallets: WalletCreateResult[] = [];
+
+      for (const chainType of supportedChains) {
+        try {
+          let address: string;
+          let privateKey: string;
+
+          if (chainType === 'evm') {
+            const hdWallet = ethers.HDNodeWallet.fromMnemonic(mnemonic);
+            address = hdWallet.address;
+            privateKey = hdWallet.privateKey;
+          } else if (chainType === 'stellar') {
+            const hdPath = "m/44'/148'/0'/0/0";
+            const hdWallet = ethers.HDNodeWallet.fromMnemonic(mnemonic, hdPath);
+            const keypair = Keypair.fromRawEd25519Seed(
+              Buffer.from(hdWallet.privateKey.slice(2), 'hex')
+            );
+            address = keypair.publicKey();
+            privateKey = keypair.secret();
+          } else {
+            this.logger.warn(`No mnemonic derivation path for chain "${chainType}", skipping`);
+            continue;
+          }
+
+          // Persist derived key into the chain's wallet storage
+          await this.providerRegistry.importWallet(privateKey, chainType);
+          wallets.push({ chain: chainType, address, privateKey });
+        } catch (error) {
+          this.logger.error(`Failed to derive wallet for chain ${chainType}: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+
+      if (wallets.length === 0) {
+        throw new RpcException({
+          message: 'No wallets could be derived for any supported chain',
+          code: 'MULTICHAIN_WALLET_CREATION_FAILED',
+        });
+      }
+
+      const defaultWallet = wallets.find(w => w.chain === defaultChain) ?? wallets[0];
+      results.push({
+        defaultAddress: defaultWallet.address,
+        defaultChain,
+        wallets,
+      });
+    }
+
+    return results;
   }
 
   // Get wallet secret by address and chain
@@ -280,8 +396,7 @@ export class WalletService implements OnModuleInit {
     privateKey: string,
     chain?: ChainType
   ): Promise<WalletKeys> {
-    const chainType =
-      chain || (await this.getCurrentChainSettings()).detectedChain;
+    const chainType = chain || await this.getDefaultChainFromDb();
 
     if (!this.providerRegistry.getSupportedChains().includes(chainType)) {
       throw new RpcException({
@@ -298,7 +413,6 @@ export class WalletService implements OnModuleInit {
   async validateAddress(address: string, chain?: ChainType): Promise<boolean> {
     const chainType = chain || (await this.detectChainFromAddress(address));
 
-    // TODO: Multi-chain support - Remove this check when all chains are supported
     if (!this.providerRegistry.getSupportedChains().includes(chainType)) {
       this.logger.warn(`Chain ${chainType} not supported in this instance`);
       return false;
@@ -307,82 +421,8 @@ export class WalletService implements OnModuleInit {
     return this.providerRegistry.validateAddress(address, chainType);
   }
 
-  // Utility methods
   async getDefaultChain(): Promise<ChainType> {
-    // TODO: Multi-chain support - Return configured default instead of instance chain
-    return (await this.getCurrentChainSettings()).detectedChain;
-  }
-
-  // Chain configuration using new flat structure
-  private async getCurrentChainSettings(): Promise<{
-    detectedChain: ChainType;
-    stellar: any;
-    evm: any;
-  }> {
-    const settings = await this.settings.getByName('CHAIN_SETTINGS');
-    console.log('CHAIN_SETTINGS', settings);
-
-    if (!settings || !settings.value) {
-      throw new RpcException({
-        message:
-          'CHAIN_SETTINGS configuration not found. Please configure chain settings in the application settings.',
-        code: 'CHAIN_SETTINGS_CONFIG_NOT_FOUND',
-      });
-    }
-
-    const rawValue = settings.value as unknown as ChainConfig;
-
-    if (!rawValue?.type) {
-      throw new RpcException({
-        message: 'Chain configuration must include a "type" field (evm or stellar)',
-        code: 'CHAIN_CONFIG_MISSING_TYPE',
-      });
-    }
-
-    // Validate that the type is a valid ChainType
-    const validChainTypes: ChainType[] = ['evm', 'stellar'];
-    if (!validChainTypes.includes(rawValue.type as ChainType)) {
-      throw new RpcException({
-        message: `Invalid chain type "${rawValue.type
-        }". Must be one of: ${validChainTypes.join(', ')}`,
-        code: 'INVALID_CHAIN_TYPE',
-        params: { type: rawValue.type, validTypes: validChainTypes.join(', ') },
-      });
-    }
-
-    const detectedChain: ChainType = rawValue.type as ChainType;
-
-    // Build chain-specific configuration based on the detected chain type
-    const chainSpecificConfig = {
-      rpcUrl: rawValue.rpcUrl,
-      ...(detectedChain === 'evm' && {
-        chainId: parseInt(rawValue.chainId || '84532'),
-      }),
-      ...(detectedChain === 'stellar' && {
-        networkPassphrase: 'Test SDF Network ; September 2015', // Use testnet passphrase for Soroban
-      }),
-    };
-
-    // Return configuration with both the detected chain config and fallback defaults
-    return {
-      detectedChain,
-      [detectedChain]: chainSpecificConfig,
-      // Keep defaults for backward compatibility
-      stellar:
-        detectedChain === 'stellar'
-          ? chainSpecificConfig
-          : {
-            rpcUrl: 'https://stellar-soroban-public.nodies.app',
-            networkPassphrase: 'Test SDF Network ; September 2015',
-          },
-      evm:
-        detectedChain === 'evm'
-          ? chainSpecificConfig
-          : {
-            rpcUrl: 'https://base-sepolia-rpc.publicnode.com',
-            chainId: 84532,
-          },
-    };
+    return this.getDefaultChainFromDb();
   }
 
   private async detectChainFromAddress(address: string): Promise<ChainType> {

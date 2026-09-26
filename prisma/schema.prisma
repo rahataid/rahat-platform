@@ -43,6 +43,7 @@ model User {
   @@map("tbl_users")
 }
 
+
 // model UserWallets {
 //   id         Int       @id @default(autoincrement())
 //   userId     Int
@@ -470,6 +471,7 @@ model Project {
   type            String
   contractAddress String?
   extras          Json?         @db.JsonB()
+  chainType       String        
 
   createdAt               DateTime                  @default(now())
   updatedAt               DateTime?                 @updatedAt()
@@ -843,3 +845,53 @@ model Notification {
 }
 
 // ++++++++++++++++++ END: Notification ++++++++++++++++++++
+
+// ++++++++++++++++++ START: CHAIN CONFIG ++++++++++++++++++++
+
+model ChainConfig {
+id Int @id @default(autoincrement())
+uuid String @unique @default(uuid()) @db.Uuid()
+name String @unique
+chain String 
+chainId String? 
+rpcUrl String[]
+explorerUrl String?
+currencyName String?
+currencySymbol String? 
+isActive Boolean @default(true)
+isDefault Boolean @default(false)
+contractDetails Json?
+extras Json? @db.JsonB()
+
+createdAt DateTime @default(now())
+updatedAt DateTime? @updatedAt()
+deletedAt DateTime?
+
+@@map("tbl_chain_configs")
+}
+
+// ++++++++++++++++++ END: CHAIN CONFIG ++++++++++++++++++++
+
+
+//+++++++++++++++++++++++START: WALLET ADDRESS +++++++++++++++++++
+model WalletAddress {
+  id         Int              @id @default(autoincrement())
+  entityId   String           @db.Uuid()
+  address    String           @unique()
+  isPrimary  Boolean          @default(false)
+  isVerified Boolean          @default(false)
+  chainType  String
+  config     Json?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt()
+  deletedAt DateTime?
+ 
+  @@map("tbl_wallet_addresses")
+}
+//+++++++++++++++++++++++END: WALLET ADDRESS +++++++++++++++++++
+
+
+
+
+

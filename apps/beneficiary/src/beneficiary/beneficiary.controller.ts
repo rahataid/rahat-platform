@@ -6,7 +6,6 @@ import {
   AddBeneficiariesToGroupDto,
   addBulkBeneficiaryToProject,
   AddGroupsPurposeDto,
-  CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
   CreateBeneficiaryTransactionDto,
   ImportTempBenefDto,
@@ -38,9 +37,23 @@ export class BeneficiaryController {
     private readonly groupSyncService: GroupSyncService,
   ) { }
 
+
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE })
-  async create(@Payload() createBeneficiaryDto: CreateBeneficiaryDto) {
-    return this.service.create(createBeneficiaryDto);
+  async create(@Payload() payload: any) {
+    if (payload && payload.multiChainWallets) {
+      if (typeof payload.multiChainWallets === 'string') {
+        try {
+          payload.multiChainWallets = JSON.parse(payload.multiChainWallets);
+        } catch (e) {
+          console.error('[BENEFICIARY CONTROLLER] Failed to parse multiChainWallets:', e);
+          payload.multiChainWallets = [];
+        }
+      } else if (!Array.isArray(payload.multiChainWallets)) {
+        payload.multiChainWallets = [];
+      }
+    }
+
+    return this.service.create(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET })
