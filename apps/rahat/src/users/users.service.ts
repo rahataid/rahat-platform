@@ -20,32 +20,37 @@ export class UsersService extends RSUserService {
     super(prisma, eventEmitter, authClient);
   }
 
-  // TODO: Multi-chain support - Currently uses instance's configured chain
-  // Future: Allow chain selection per user
   async create(userData: CreateUserDto) {
-    console.log('Creating a new user with a random wallet address');
-
     try {
-      // Use wallet service's configured chain (single-chain per instance)
-      // No need to specify chain - wallet service will use its detected chain type
-      const randomWallet = await this.walletService.createWallet();
+      // Create wallets for all active chains from a shared mnemonic
+      const [multiChainResult] = await this.walletService.createBulkForAllChains(1);
 
-      console.log('Random wallet created:', {
-        address: randomWallet.address,
-        blockchain: randomWallet.blockchain || 'detected',
+      userData.wallet = multiChainResult.defaultAddress;
+
+      const res = await super.create(userData, async (err, tx, user) => {
+        if (err || !user) return;
+        await tx.walletAddress.createMany({
+          data: multiChainResult.wallets.map((w) => ({
+            entityId: user.uuid,
+            address: w.address,
+            isPrimary: w.address === multiChainResult.defaultAddress,
+            isVerified: true,
+            chainType: w.chain,
+            config: { privateKey: w.privateKey ?? null, address: w.address, chain: w.chain },
+          })),
+          skipDuplicates: true,
+        });
       });
 
-      userData.wallet = randomWallet.address;
-
-      const res = super.create(userData);
       await this.notificationService.createNotification({
-        title: "User has been added",
+        title: 'User has been added',
         description: `A new user has been added Name: ${userData.name}`,
-        group: "User Management"
-      })
-      return res
+        group: 'User Management',
+      });
+
+      return res;
     } catch (error) {
-      console.error('Error creating user wallet:', error);
+      console.error('Error creating user:', error);
       throw error;
     }
   }
