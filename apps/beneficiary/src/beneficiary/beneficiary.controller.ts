@@ -90,7 +90,8 @@ export class BeneficiaryController {
     return this.service.createBulkWithGroup(
       data?.payload,
       data?.projectUUID,
-      data?.groupName
+      data?.groupName,
+      data?.groupPurpose
     );
   }
 

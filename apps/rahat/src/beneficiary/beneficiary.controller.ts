@@ -227,6 +227,7 @@ export class BeneficiaryController {
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const projectId = req.body['projectId'];
     const groupName = req.body['groupName']?.trim();
+    const groupPurpose = req.body['groupPurpose']?.trim();
 
     const beneficiaries = await DocParser(docType, file.buffer);
 
@@ -304,6 +305,7 @@ export class BeneficiaryController {
             payload: walletProcessingResult.validBeneficiaries,
             projectUUID: projectId,
             groupName,
+            groupPurpose
           }
         )
         .pipe(
