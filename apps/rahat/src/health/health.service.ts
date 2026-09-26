@@ -252,7 +252,7 @@ export class HealthService {
             ? `<span style="margin-left:12px">Server IP: <strong>${serverIp}</strong></span>`
             : '';
         const dashboardHtml = frontendURL
-            ? `<a href="${frontendURL}" style="color:#666">Dashboard</a>`
+            ? `<a href="${frontendURL}" style="color:#666">Dashboard(${frontendURL})</a>`
             : '';
         const footerLinks = [dashboardHtml, serverIpHtml].filter(Boolean).join(' · ');
 
