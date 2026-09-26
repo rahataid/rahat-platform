@@ -1,12 +1,16 @@
 const fs = require('fs');
-// Load the existing package.json
+const path = require('path');
+
 const appName = 'rahat';
 
 const packagePath = `dist/apps/${appName}/package.json`;
 
 try {
-  // Read the package.json file as a JSON object
   const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+  const rootPackageData = JSON.parse(
+    fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf8')
+  );
+  packageData.version = rootPackageData.version;
 
   // Modify package.json as needed
   packageData.scripts = {

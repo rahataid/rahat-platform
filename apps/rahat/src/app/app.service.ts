@@ -1,6 +1,10 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ClientProxy } from '@nestjs/microservices';
+import { catchError, timeout } from 'rxjs/operators';
+import { firstValueFrom, of } from 'rxjs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
 import { CreateSettingDto } from '@rumsan/extensions/dtos';
@@ -9,7 +13,9 @@ import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { SettingDataType } from '@rumsan/sdk/enums';
 import { UUID } from 'crypto';
 import { SeedSettingsDto } from './dto/seed-settings.dto';
-
+import { AppVersionsDto, ServiceVersionDto } from './dto/app-versions.dto';
+import { getVersionFromPackageJson } from '../utils/version.helper';
+import { MS_ACTIONS } from '@rahataid/sdk';
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
 function getDataType(
@@ -69,10 +75,14 @@ function parseSettingValue(value: unknown, dataType?: string): unknown {
 
 @Injectable()
 export class AppService {
+  private readonly logger = new Logger(AppService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly settingsService: SettingsService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly configService: ConfigService,
+    @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy,
   ) { }
 
 
@@ -272,13 +282,78 @@ export class AppService {
     })
   }
 
-  async getFrontendUrl () {
+  async getFrontendUrl() {
     return this.prisma.setting.findMany({
       where: {
         name: "FRONTEND_URL"
       }
     })
   }
+
+  // Returns the platform version from package.json.
+  private async getRahatVersion(): Promise<string> {
+    return getVersionFromPackageJson();
+  }
+
+  // Returns the current runtime environment.
+  private resolveEnv(): string | null {
+    return this.configService.get<string>('NODE_ENV') || null;
+  }
+
+  // Fetches the AA service version via Redis.
+  private async getAaVersion(): Promise<ServiceVersionDto> {
+    const start = Date.now();
+    const result: any = await firstValueFrom(
+      this.rahatClient.send({ cmd: MS_ACTIONS.AA_JOBS_VERSION.GET }, {})
+        .pipe(
+          timeout(1500),
+          catchError((err: Error) => {
+            this.logger.warn(`AA version fetch failed (${err.message}) — fallback unreachable`);
+            return of(null);
+          }),
+        ),
+    );
+    if (result?.version) this.logger.log(`AA version ${result.version} in ${Date.now() - start}ms`);
+    return { version: result?.version || 'unreachable', env: result?.env ?? null };
+  }
+
+  // Fetches the Triggers service version via Redis.
+  private async getTriggersVersion(): Promise<ServiceVersionDto> {
+    const result: any = await firstValueFrom(
+      this.rahatClient.send({ cmd: MS_ACTIONS.MS_VERSION.GET }, { appId: process.env.AA_PROJECT_ID } as any)
+        .pipe(
+          timeout(1500),
+          catchError((err: Error) => {
+            this.logger.warn(`Triggers version fetch failed (${err.message}) — fallback unreachable`);
+            return of(null);
+          }),
+        ),
+    );
+    return { version: result?.version || 'unreachable', env: result?.env ?? null };
+  }
+
+  // Aggregates all service versions in parallel.
+  async getAppVersions(): Promise<AppVersionsDto> {
+    const [platform, aa, triggers] = await Promise.allSettled([
+      this.getRahatVersion(),
+      this.getAaVersion(),
+      this.getTriggersVersion(),
+    ]);
+    const unreachable: ServiceVersionDto = { version: 'unreachable', env: null };
+    const pick = (r: PromiseSettledResult<ServiceVersionDto>): ServiceVersionDto =>
+      r.status === 'fulfilled' ? r.value : unreachable;
+    return {
+      platform: {
+        version: platform.status === 'fulfilled' ? platform.value : 'unreachable',
+        env: this.resolveEnv(),
+      },
+      rahatAa: pick(aa),
+      triggers: pick(triggers),
+      fetchedAt: new Date().toISOString(),
+    };
+  }
+
+
 
   async getChainType() {
     const setting = await this.settingsService.getByName('CHAIN_SETTINGS');
