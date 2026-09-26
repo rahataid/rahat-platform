@@ -625,18 +625,17 @@ export class BeneficiaryService {
         AND: [
           {
             BeneficiaryProject: {
-              every: {
+              some: {
                 projectId: payload.projectUUID,
               },
             },
-
           },
           {
             groupedBeneficiaries: {
-              every: {
+              some: {
                 beneficiaryGroup: {
                   beneficiaryGroupProject: {
-                    every: {
+                    some: {
                       projectId: payload.projectUUID,
                     }
                   }
