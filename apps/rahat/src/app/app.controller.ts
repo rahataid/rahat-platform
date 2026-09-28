@@ -2,13 +2,14 @@
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
 import { ACTIONS, APP, SUBJECTS } from '@rahataid/sdk';
 import { AbilitiesGuard, CheckAbilities, JwtGuard } from '@rumsan/user';
 import { UUID } from 'crypto';
 import { AppJobs } from './app.jobs';
 import { AppService } from './app.service';
+import { AppVersionsDto } from './dto/app-versions.dto';
 import { SeedSettingsDto, UpdateSiteSettingDto } from './dto/seed-settings.dto';
 
 @Controller('app')
@@ -73,11 +74,14 @@ export class AppController {
     return this.appService.getByAddress(address);
   }
 
+
   @Get('chain-type')
   @ApiOperation({ summary: 'Get active chain type (public)' })
   async getChainType() {
     return this.appService.getChainType();
   }
+
+
 
   @Post('settings/seed')
   @HttpCode(HttpStatus.OK)
@@ -86,6 +90,7 @@ export class AppController {
     description:
       'Upserts all settings from the deployment JSON. Automatically locks itself after the first successful call. Returns 403 if already locked.',
   })
+
   @ApiBody({ type: SeedSettingsDto })
   @ApiResponse({ status: 200, description: 'Settings seeded and API locked.' })
   @ApiResponse({ status: 403, description: 'Settings already seeded — API is locked.' })
@@ -111,4 +116,12 @@ export class AppController {
     return this.appService.updateSiteInfo(payload);
   }
 
+
+  @Get('versions')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get platform, AA, triggers, and frontend versions (public)' })
+  @ApiOkResponse({ type: AppVersionsDto })
+  async getVersions(): Promise<AppVersionsDto> { return this.appService.getAppVersions(); }
+
 }
+

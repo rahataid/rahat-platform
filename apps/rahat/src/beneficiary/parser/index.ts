@@ -5,6 +5,12 @@ import { CreateBeneficiaryDto } from '@rahataid/extensions';
 import { Enums } from '@rahataid/sdk';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
+import {
+  normalizeBankedStatus,
+  normalizeGender,
+  normalizeInternetStatus,
+  normalizePhoneStatus,
+} from '../../utils/sanitize-data';
 import { ExcelParser } from './excel.parser';
 import { JsonParser } from './json.parser';
 
@@ -30,8 +36,22 @@ export async function DocParser(
 
   // Validate each row
   for (const row of parsedData) {
+    if (row['internetStatus'] !== undefined) {
+      row['internetStatus'] = normalizeInternetStatus(row['internetStatus']);
+    }
+    if (row['bankedStatus'] !== undefined) {
+      row['bankedStatus'] = normalizeBankedStatus(row['bankedStatus']);
+    }
+    if (row['phoneStatus'] !== undefined) {
+      row['phoneStatus'] = normalizePhoneStatus(row['phoneStatus']);
+    }
+    if (row['gender'] !== undefined) {
+      row['gender'] = normalizeGender(row['gender']);
+    }
 
-    const beneficiaryDto = plainToClass(CreateBeneficiaryDto, row);
+    const beneficiaryDto = plainToClass(CreateBeneficiaryDto, row, {
+      enableImplicitConversion: true,
+    });
 
     const errors = await validate(beneficiaryDto);
 
