@@ -1,15 +1,15 @@
-allowBuilds:
-  '@compodoc/compodoc': set this to true or false
-  '@nestjs/core': set this to true or false
-  '@parcel/watcher': set this to true or false
-  '@prisma/client': set this to true or false
-  '@prisma/engines': set this to true or false
-  '@swc/core': set this to true or false
-  aws-sdk: set this to true or false
-  core-js: set this to true or false
-  keccak: set this to true or false
-  msgpackr-extract: set this to true or false
-  nx: set this to true or false
-  prisma: set this to true or false
-  protobufjs: set this to true or false
-  secp256k1: set this to true or false
+# allowBuilds:
+#   '@compodoc/compodoc': set this to true or false
+#   '@nestjs/core': set this to true or false
+#   '@parcel/watcher': set this to true or false
+#   '@prisma/client': set this to true or false
+#   '@prisma/engines': set this to true or false
+#   '@swc/core': set this to true or false
+#   aws-sdk: set this to true or false
+#   core-js: set this to true or false
+#   keccak: set this to true or false
+#   msgpackr-extract: set this to true or false
+#   nx: set this to true or false
+#   prisma: set this to true or false
+#   protobufjs: set this to true or false
+#   secp256k1: set this to true or false
