@@ -1,5 +1,6 @@
+// rahat-project/libs/extensions/src/dtos/notification/create-notification.dto.ts
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
 
 export class CreateNotificationDto {
     @ApiProperty({
@@ -40,4 +41,16 @@ export class CreateNotificationDto {
     })
     @IsOptional()
     notify?: boolean;
+
+    @ApiPropertyOptional({
+        description: 'Optional push options (mobile only): { enabled?, roles?, userIds?, data? }',
+    })
+    @IsOptional()
+    @IsObject()
+    push?: {
+        enabled?: boolean;
+        roles?: string[];
+        userIds?: string[];
+        data?: Record<string, any>;
+    };
 }
