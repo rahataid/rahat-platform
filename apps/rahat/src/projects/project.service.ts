@@ -23,9 +23,10 @@ import {
 import { BeneficiaryType, KoboBeneficiaryStatus } from '@rahataid/sdk/enums';
 import { JOBS } from '@rahataid/sdk/project/project.events';
 import { PrismaService } from '@rumsan/prisma';
+import * as Sentry from '@sentry/nestjs';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { switchMap, tap, timeout } from 'rxjs';
+import { finalize, switchMap, tap, timeout } from 'rxjs';
 import { RequestContextService } from '../request-context/request-context.service';
 import {
   createExtrasAndPIIData,
@@ -58,6 +59,7 @@ import {
   AUTO_APPLY_KOBO_COUNTRY_CODE,
   COUNTRY_CODE_CACHE_TTL_MS,
   COUNTRY_CODE_SETTING_NAME,
+  KOBO_IMPORT_SLOW_THRESHOLD_MS,
 } from '../utils/envConfig';
 import {
   hasCallingCode,
@@ -396,13 +398,14 @@ export class ProjectService {
             )
             .pipe(
               timeout(MS_TIMEOUT),
-              tap((response) => {
-                // 4. Update status and addToProject
-                return this.addToProjectAndUpdate({
+              switchMap(async (response) => {
+                // 4. Update status and addToProject before completing the import.
+                await this.addToProjectAndUpdate({
                   projectId: uuid,
                   beneficiaryId: response.uuid,
                   importId: row.uuid,
                 });
+                return response;
               })
             );
         })
@@ -410,13 +413,26 @@ export class ProjectService {
   }
 
   async importKoboBeneficiary(uuid: UUID, data: any) {
+    const importStartedAt = Date.now();
+    const reportIfSlowImport = () => {
+      const durationMs = Date.now() - importStartedAt;
+      if (durationMs > KOBO_IMPORT_SLOW_THRESHOLD_MS) {
+        Sentry.captureMessage(
+          `[kobo-import] Villager creation took ${durationMs}ms for project ${uuid}`,
+          {
+            level: 'warning',
+            tags: { area: 'kobo-import', issue: 'slow-import' },
+            extra: { durationMs, projectUuid: uuid },
+          }
+        );
+      }
+    };
     const rawPayload = unwrapKoboPayload(data);
     this.logger.log(
       `[kobo-import] raw payload keys: ${JSON.stringify(
         Object.keys(rawPayload)
       )}`
     );
-    this.logger.log(`[kobo-import] raw payload: ${JSON.stringify(rawPayload)}`);
     const benef: any = mapKoboFields(rawPayload);
     const villageDoctorId = pickVillageDoctorIdentifier(benef);
     this.logger.log(
@@ -506,7 +522,9 @@ export class ProjectService {
           leadInterests: benef.leadInterests,
         },
       };
-      return this.saveToDiscarded(uuid, discardedPayload);
+      return this.saveToDiscarded(uuid, discardedPayload).then((obs) =>
+        obs.pipe(finalize(reportIfSlowImport))
+      );
     }
     if (phoneConflict === 'link') {
       return this.linkExistingKoboBeneficiary(
@@ -514,7 +532,7 @@ export class ProjectService {
         benef,
         extrasPayload,
         row.uuid
-      );
+      ).then((obs) => obs.pipe(finalize(reportIfSlowImport)));
     }
     // 2. Save to Beneficiary and PII
     return this.client
@@ -538,16 +556,18 @@ export class ProjectService {
             )
             .pipe(
               timeout(MS_TIMEOUT),
-              tap((response) => {
-                // 4. Update status and addToProject
-                return this.addToProjectAndUpdate({
+              switchMap(async (response) => {
+                // 4. Update status and addToProject before completing the import.
+                await this.addToProjectAndUpdate({
                   projectId: uuid,
                   beneficiaryId: response.uuid,
                   importId: row.uuid,
                 });
+                return response;
               })
             );
-        })
+        }),
+        finalize(reportIfSlowImport)
       );
   }
 
@@ -722,6 +742,9 @@ export class ProjectService {
           (err as Error)?.message
         }`
       );
+      Sentry.captureException(err, {
+        tags: { area: 'kobo-import', issue: 'country-code-lookup-failed' },
+      });
       return '';
     }
   }
@@ -738,9 +761,13 @@ export class ProjectService {
       return `+${digits.replace(/^00/, '')}`;
     const countryCode = await this.getKoboCountryCodeFromSettings();
     if (!countryCode) {
-      throw new Error(
+      const err = new Error(
         `[kobo-import] AUTO_APPLY_KOBO_COUNTRY_CODE is enabled but "${COUNTRY_CODE_SETTING_NAME}" could not be resolved; refusing to import a phone without a calling code.`
       );
+      Sentry.captureException(err, {
+        tags: { area: 'kobo-import', issue: 'country-code-missing' },
+      });
+      throw err;
     }
     const callingCode = String(countryCode).replace(/\D/g, '');
 
