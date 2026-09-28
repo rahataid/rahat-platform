@@ -159,7 +159,6 @@ export class AppService {
   async createRahatAppSettings(
     createSettingDto: CreateSettingDto,
   ) {
-    console.log('createRahatAppSettings called', createSettingDto); // Debugging line
     let {
       name,
       value: dtoValue,

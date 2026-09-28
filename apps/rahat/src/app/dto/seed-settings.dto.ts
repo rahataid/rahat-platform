@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { Allow, IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Allow, IsArray, IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 export class SeedSettingItemDto {
   @ApiProperty({ example: 'COMMUNICATION' })
@@ -45,17 +45,7 @@ export class SeedSettingsDto {
   settings: SeedSettingItemDto[];
 }
 
-export class CreateSiteSettingDto {
-  @ApiProperty({ description: 'Brand name' })
-  @IsString()
-  @IsNotEmpty()
-  brandName: string;
 
-  @ApiProperty({ description: 'Brand description' })
-  @IsString()
-  @IsNotEmpty()
-  brandDescription: string;
-}
 
 export class UpdateSiteSettingDto {
   @ApiPropertyOptional({ description: 'Brand name' })
