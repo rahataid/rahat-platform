@@ -83,7 +83,6 @@ export class CorsConfigService {
         'X-Requested-With',
         'Cache-Control',
         'Pragma',
-        'ngrok-skip-browser-warning',
       ],
       credentials: true,
       optionsSuccessStatus: 200, // Some legacy browsers choke on 204
