@@ -228,6 +228,13 @@ export class BeneficiaryController {
     return this.service.addBeneficiariesToGroup(payload);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.UPLOAD_BENEFICIARIES_TO_GROUP })
+  uploadBeneficiariesToGroup(
+    @Payload() payload: { dtos: CreateBeneficiaryDto[]; groupUuid: string },
+  ) {
+    return this.service.uploadBeneficiariesToGroup(payload.dtos, payload.groupUuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP })
   getGroup(payload: string | ({ uuid: string } & ListBeneficiariesByGroupDto)) {
     if (typeof payload === 'string') {

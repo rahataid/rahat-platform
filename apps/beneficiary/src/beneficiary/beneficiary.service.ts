@@ -48,6 +48,7 @@ import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
+import { GroupSyncService } from './group-sync.service';
 import { VerificationService } from './verification.service';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -69,7 +70,8 @@ export class BeneficiaryService {
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
     private readonly eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
-    private readonly beneficiaryUtilsService: BeneficiaryUtilsService
+    private readonly beneficiaryUtilsService: BeneficiaryUtilsService,
+    private readonly groupSyncService: GroupSyncService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -1485,6 +1487,144 @@ export class BeneficiaryService {
       success: true,
       group,
     };
+  }
+
+  async uploadBeneficiariesToGroup(
+    dtos: CreateBeneficiaryDto[],
+    groupUuid: string,
+  ): Promise<{ created: number; updated: number; addedToGroup: number; group: any }> {
+    console.log({ dtos, groupUuid })
+    const group = await this.prisma.beneficiaryGroup.findUnique({
+      where: { uuid: groupUuid },
+    });
+    console.log(group)
+    if (!group) {
+      throw new RpcException({
+        message: '[BENEFICIARY_GROUP_NOT_FOUND] Beneficiary group not found.',
+        code: 'BENEFICIARY_GROUP_NOT_FOUND',
+        params: { groupUuid },
+      });
+    }
+
+    const createdUuids: string[] = [];
+    const updatedUuids: string[] = [];
+
+    for (const dto of dtos) {
+      try {
+        let existing = null;
+
+        if (dto.uuid) {
+          existing = await this.prisma.beneficiary.findUnique({
+            where: { uuid: dto.uuid },
+            include: { pii: true },
+          });
+        }
+
+        if (existing && !existing.deletedAt) {
+          await this._updateBeneficiaryFromDto(existing, dto);
+          updatedUuids.push(existing.uuid);
+        } else {
+          const created = await this._createBeneficiaryFromDto(dto);
+          createdUuids.push(created.uuid);
+        }
+      } catch (error) {
+        this.logger.error(`Error processing beneficiary uuid=${dto.uuid}: ${(error as Error).message}`);
+        // continue — don't fail entire import for one row
+      }
+    }
+
+    const allUuids = [...createdUuids, ...updatedUuids];
+
+    if (allUuids.length > 0) {
+      await this.prisma.groupedBeneficiaries.createMany({
+        data: allUuids.map((beneficiaryId) => ({
+          beneficiaryGroupId: groupUuid,
+          beneficiaryId,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    await this.groupSyncService.syncGroup(groupUuid);
+
+    return {
+      created: createdUuids.length,
+      updated: updatedUuids.length,
+      addedToGroup: allUuids.length,
+      group,
+    };
+  }
+
+  private async _createBeneficiaryFromDto(
+    dto: CreateBeneficiaryDto,
+  ): Promise<{ uuid: string }> {
+    const { piiData, ...rest } = dto;
+    const uuid = rest.uuid ?? (uuidv4() as UUID);
+
+    const walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(
+      rest.walletAddress,
+    );
+
+    return this.prisma.$transaction(async (tx) => {
+      const ben = await tx.beneficiary.create({
+        data: { ...rest, uuid, walletAddress },
+      });
+
+      await tx.beneficiaryPii.create({
+        data: {
+          beneficiaryId: ben.id,
+          name: piiData?.name ?? null,
+          phone: piiData?.phone
+            ? piiData.phone.toString()
+            : BeneficiaryConstants.UNPHONED_PLACEHOLDER,
+          extras: piiData?.extras ?? {},
+        },
+      });
+
+      return { uuid: ben.uuid };
+    });
+  }
+
+  private async _updateBeneficiaryFromDto(
+    existing: any,
+    dto: CreateBeneficiaryDto,
+  ): Promise<void> {
+    const updateData: Record<string, any> = {};
+
+    if (dto.gender !== undefined) updateData.gender = dto.gender;
+    if (dto.location !== undefined) updateData.location = dto.location;
+    if (dto.latitude !== undefined) updateData.latitude = dto.latitude;
+    if (dto.longitude !== undefined) updateData.longitude = dto.longitude;
+    if (dto.notes !== undefined) updateData.notes = dto.notes;
+    if (dto.bankedStatus !== undefined) updateData.bankedStatus = dto.bankedStatus;
+    if (dto.internetStatus !== undefined) updateData.internetStatus = dto.internetStatus;
+    if (dto.phoneStatus !== undefined) updateData.phoneStatus = dto.phoneStatus;
+    if (dto.birthDate !== undefined) updateData.birthDate = dto.birthDate;
+    if (dto.age !== undefined) updateData.age = dto.age;
+    if (dto.extras) updateData.extras = { ...(existing.extras ?? {}), ...dto.extras };
+
+    if (Object.keys(updateData).length > 0) {
+      await this.prisma.beneficiary.update({
+        where: { uuid: existing.uuid },
+        data: updateData,
+      });
+    }
+
+    if (dto.piiData) {
+      const piiUpdates: Record<string, any> = {};
+
+      if (dto.piiData.name !== undefined) piiUpdates.name = dto.piiData.name;
+      if (dto.piiData.extras !== undefined) {
+        piiUpdates.extras = { ...(existing.pii?.extras ?? {}), ...dto.piiData.extras };
+      }
+
+      if (Object.keys(piiUpdates).length > 0 && existing.pii) {
+        await this.prisma.beneficiaryPii.update({
+          where: { beneficiaryId: existing.id },
+          data: piiUpdates,
+        });
+      }
+    }
   }
 
   async getOneGroup(
