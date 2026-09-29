@@ -1493,11 +1493,9 @@ export class BeneficiaryService {
     dtos: CreateBeneficiaryDto[],
     groupUuid: string,
   ): Promise<{ created: number; updated: number; addedToGroup: number; group: any }> {
-    console.log({ dtos, groupUuid })
     const group = await this.prisma.beneficiaryGroup.findUnique({
       where: { uuid: groupUuid },
     });
-    console.log(group)
     if (!group) {
       throw new RpcException({
         message: '[BENEFICIARY_GROUP_NOT_FOUND] Beneficiary group not found.',
