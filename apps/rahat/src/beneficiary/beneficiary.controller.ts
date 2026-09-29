@@ -260,10 +260,17 @@ export class BeneficiaryController {
     const toNumberOrUndefined = (value: unknown) =>
       value !== undefined && value !== '' ? Number(value) : undefined;
 
+    const toSnakeCase = (key: string) =>
+      key
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '');
+
     const beneficiariesMapped = beneficiaries.map((b) => {
       const remainingColumns = Object.keys(b).reduce((acc, key) => {
         if (!CLAIMED_UPLOAD_COLUMNS.includes(key)) {
-          acc[key] = b[key];
+          acc[toSnakeCase(key)] = b[key];
         }
         return acc;
       }, {} as Record<string, unknown>);
