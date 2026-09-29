@@ -1,14 +1,21 @@
 // Must be imported before any other module (including in main.ts) so Sentry
 // can instrument Node's core modules before the app uses them.
+// Load .env first: envConfig and the Sentry setup below read process.env at
+// import time, before ConfigModule loads the file. Real env vars still win.
+import 'dotenv/config';
 import * as Sentry from '@sentry/nestjs';
 import {
   AUTO_APPLY_KOBO_COUNTRY_CODE,
+  SENTRY_DSN,
   SENTRY_ENVIRONMENT,
   SENTRY_TRACES_SAMPLE_RATE,
 } from './utils/envConfig';
 
 // TEMP DEBUG — remove once dev-server SENTRY_DSN delivery is confirmed.
-console.log(process.env.SENTRY_DSN, 'sentry dsn value');
+console.log(AUTO_APPLY_KOBO_COUNTRY_CODE, 'auto apply kobo country code value');
+console.log(SENTRY_DSN, 'sentry dsn value');
+console.log(SENTRY_ENVIRONMENT, 'sentry environment value');
+console.log(SENTRY_TRACES_SAMPLE_RATE, 'sentry traces sample rate value');
 
 // AUTO_APPLY_KOBO_COUNTRY_CODE marks a production deployment (see
 // utils/envConfig.ts); Sentry should only report from production, so it's
@@ -16,7 +23,7 @@ console.log(process.env.SENTRY_DSN, 'sentry dsn value');
 // become no-ops.
 if (AUTO_APPLY_KOBO_COUNTRY_CODE) {
   Sentry.init({
-    dsn: process.env.SENTRY_DSN,
+    dsn: SENTRY_DSN,
     environment: SENTRY_ENVIRONMENT,
     tracesSampleRate: SENTRY_TRACES_SAMPLE_RATE,
   });

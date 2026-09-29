@@ -14,6 +14,9 @@ export const COUNTRY_CODE_CACHE_TTL_MS =
 export const KOBO_IMPORT_SLOW_THRESHOLD_MS =
   Number(process.env.KOBO_IMPORT_SLOW_THRESHOLD_MS) || 15_000;
 
+// tells Sentry where to send events; Sentry stays disabled when it is unset
+export const SENTRY_DSN = process.env.SENTRY_DSN;
+
 // labels Sentry events with the environment they came from, such as development, staging, or production
 export const SENTRY_ENVIRONMENT = process.env.SENTRY_ENVIRONMENT;
 
