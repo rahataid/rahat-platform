@@ -8,22 +8,30 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   GetVendorOtp,
   VendorAddToProjectDto,
+  VendorPasswordRegisterDto,
   VendorRegisterDto,
   VendorUpdateDto,
   VerifyVendorOtp,
 } from '@rahataid/extensions';
-import { VendorJobs } from '@rahataid/sdk';
+import { APP, VendorJobs } from '@rahataid/sdk';
+import { Request } from '@rumsan/sdk/types';
+
 import { RequestDetails } from '@rumsan/extensions/decorators';
+import { ChangePasswordDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
+import { CurrentUserInterface, JwtGuard } from '@rumsan/user';
+import { CurrentUser } from '@rumsan/user/lib/auths/decorator/current-user.decorator';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
-import { VendorsService } from './vendors.service';
 import { GetVendorsDTO } from './dto/get-vendors.dto';
+import { VendorsService } from './vendors.service';
+
 
 @ApiTags('Vendors')
 @Controller('vendors')
@@ -96,12 +104,38 @@ export class VendorsController {
   }
 
   @MessagePattern({ cmd: VendorJobs.GET_VENDOR_STATS })
-  getVendorStats(@Payload() dto) {
+  getVendorStats(@Payload() dto: any) {
     return this.vendorService.getVendorClaimStats(dto);
   }
 
   @MessagePattern({ cmd: VendorJobs.GET_BY_UUID })
-  getVenderByUuid(@Payload() dto) {
+  getVenderByUuid(@Payload() dto: any) {
     return this.vendorService.getVendorByUuid(dto);
+  }
+
+  @Post('password-register')
+  passwordRegister(
+    @Body() dto: VendorPasswordRegisterDto,
+    @RequestDetails() rdetails: Request
+  ) {
+    return this.vendorService.registerVendorWithPassword(dto, rdetails);
+  }
+
+  @Post('password-login')
+  passwordLogin(
+    @Body() dto: PasswordLoginDto,
+    @RequestDetails() rdetails: Request
+  ) {
+    return this.vendorService.loginByPassword(dto, rdetails);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard)
+  @Post('password-change')
+  passwordChange(
+    @CurrentUser() user: CurrentUserInterface,
+    @Body() dto: ChangePasswordDto
+  ) {
+    return this.vendorService.changeVendorPassword(user, dto);
   }
 }

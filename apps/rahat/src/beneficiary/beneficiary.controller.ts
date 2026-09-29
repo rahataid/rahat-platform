@@ -217,9 +217,9 @@ export class BeneficiaryController {
       .pipe(timeout(MS_TIMEOUT));
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.USER })
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.USER })
   @Post('groups/:uuid/upload')
   @ApiParam({ name: 'uuid', required: true })
   @UseInterceptors(FileInterceptor('file'))
@@ -256,9 +256,9 @@ export class BeneficiaryController {
     );
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async upload(@UploadedFile() file: TFile, @Req() req: Request) {
