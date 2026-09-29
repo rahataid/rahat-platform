@@ -761,11 +761,16 @@ export class ProjectService {
       return `+${digits.replace(/^00/, '')}`;
     const countryCode = await this.getKoboCountryCodeFromSettings();
     if (!countryCode) {
+      // Plain-language message: it becomes the Sentry issue title and alert
+      // email subject, which the business team reads.
       const err = new Error(
-        `[kobo-import] AUTO_APPLY_KOBO_COUNTRY_CODE is enabled but "${COUNTRY_CODE_SETTING_NAME}" could not be resolved; refusing to import a phone without a calling code.`
+        'Villager not imported from Kobo: the country code is not set up, so the phone number cannot be saved. Please ask the tech team to add the country code in Settings.'
       );
       Sentry.captureException(err, {
         tags: { area: 'kobo-import', issue: 'country-code-missing' },
+        extra: {
+          technicalDetail: `AUTO_APPLY_KOBO_COUNTRY_CODE is enabled but "${COUNTRY_CODE_SETTING_NAME}" could not be resolved; refusing to import a phone without a calling code.`,
+        },
       });
       throw err;
     }

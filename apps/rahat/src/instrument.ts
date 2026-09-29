@@ -11,15 +11,7 @@ import {
   SENTRY_TRACES_SAMPLE_RATE,
 } from './utils/envConfig';
 
-// TEMP DEBUG — remove once dev-server SENTRY_DSN delivery is confirmed.
-console.log(AUTO_APPLY_KOBO_COUNTRY_CODE, 'auto apply kobo country code value');
-console.log(SENTRY_DSN, 'sentry dsn value');
-console.log(SENTRY_ENVIRONMENT, 'sentry environment value');
-console.log(SENTRY_TRACES_SAMPLE_RATE, 'sentry traces sample rate value');
-
-// AUTO_APPLY_KOBO_COUNTRY_CODE marks a production deployment (see
-// utils/envConfig.ts); Sentry should only report from production, so it's
-// left uninitialized in development — captureException/captureMessage calls
+// Sentry should only report from production, so it's left uninitialized in development — captureException/captureMessage calls
 // become no-ops.
 if (AUTO_APPLY_KOBO_COUNTRY_CODE) {
   Sentry.init({
