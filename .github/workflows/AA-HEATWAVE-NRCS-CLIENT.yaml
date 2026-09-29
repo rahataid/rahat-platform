@@ -44,8 +44,8 @@ jobs:
           fi
 
           case "$ENV" in
-            release-v5.0.0-nrcs-client)
-              TAG="release-v5.0.0-nrcs-client"
+            nrcs-client-2026)
+              TAG="nrcs-client-2026"
               SECRET="ENV_AA_HEATWAVE"
               APPS="beneficiary,rahat,shared-auth"
               ;;
