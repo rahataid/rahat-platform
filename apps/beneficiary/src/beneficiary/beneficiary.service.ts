@@ -2452,12 +2452,17 @@ export class BeneficiaryService {
 
       console.log('adding beneficiary group');
       //3. Sync beneficiary to project
-      return this.client.send(
-        { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
-        {
-          beneficiaryGroupData,
-        }
-      );
+      return handleMicroserviceCall({
+        client: this.client.send(
+          { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
+          {
+            beneficiaryGroupData,
+          }
+        ),
+        onError: async (error) => {
+          throw new RpcException(error?.message);
+        },
+      });
     } catch (err) {
       console.log(err);
       throw new RpcException(err.message);
