@@ -101,7 +101,9 @@ export const JOBS = {
   CREATE_BENEFICIARY_WITH_DB_TRANSACTION: 'rahat.jobs.beneficiary.create_beneficiary_with_db_transaction',
   SYNC_GROUP_TO_PROJECTS: 'rahat.jobs.beneficiary.sync_group_to_projects',
   SYNC_GROUP_BENEFICIARIES_TO_PROJECT: 'rahat.jobs.beneficiary.sync_group_beneficiaries_to_project',
+  SYNC_BENEFICIARY_BATCH_TO_PROJECT: 'rahat.jobs.beneficiary.sync_beneficiary_batch_to_project',
   SYNC_IMPORTED_GROUP_BENEFICIARIES: 'rahat.jobs.beneficiary.sync_imported_group_beneficiaries',
+  SYNC_GROUP_BENEFICIARIES_TO_PROJECT_COMPLETED: 'rahat.jobs.beneficiary.sync_group_beneficiaries_to_project_completed',
   GET_GROUP_BANK_CHECK_STATUS: 'rahat.jobs.beneficiary.get_group_bank_check_status',
   GET_BENEFICIARY_BANK_ACCOUNT: 'rahat.jobs.beneficiary.get_beneficiary_bank_account',
 };
