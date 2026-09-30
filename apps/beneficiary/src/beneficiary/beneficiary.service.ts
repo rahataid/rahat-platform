@@ -1676,6 +1676,89 @@ export class BeneficiaryService {
     }
   }
 
+  // Forcefully invalidates all beneficiaries in a group for the group's
+  // purpose (bank or phone). Does NOT trigger re-validation itself —
+  // groupAttributesCheck (the existing revalidate action) is called
+  // separately by the caller once this has reset the state.
+  async groupForceInvalidate(uuid: string) {
+    const benfGroup = await this.getOneGroup(uuid);
+    const groupPurpose = benfGroup?.groupPurpose;
+
+    switch (groupPurpose) {
+      case GroupPurpose.MOBILE_MONEY:
+      case GroupPurpose.BANK_TRANSFER:
+        await this.forceInvalidateGroup(uuid, groupPurpose, benfGroup);
+        return {
+          success: true,
+          message: `Beneficiaries in group have been invalidated for ${groupPurpose}.`,
+        };
+      default:
+        return {
+          success: false,
+          message: `Force invalidate is not supported for group purpose: ${groupPurpose}.`,
+        };
+    }
+  }
+
+  private async forceInvalidateGroup(
+    uuid: string,
+    groupPurpose: GroupPurpose,
+    benfGroup: GroupWithValidationAA
+  ) {
+    const benfsInGroup = benfGroup.groupedBeneficiaries?.map((d) => d.Beneficiary) ?? [];
+
+    if (!benfsInGroup.length) return;
+
+    if (groupPurpose === GroupPurpose.MOBILE_MONEY) {
+      // groupPhoneCheck (and isGroupValidForAA) only look at
+      // extras.validPhoneNumber, so clearing it is enough to force a
+      // re-check for every beneficiary, valid or not.
+      await this.prisma.$transaction(
+        benfsInGroup.map((benf) => {
+          const cleanExtras = { ...(benf.extras as Record<string, unknown>) };
+          delete cleanExtras.validPhoneNumber;
+          delete cleanExtras.error;
+          return this.prisma.beneficiary.update({
+            where: { uuid: benf.uuid },
+            data: { extras: cleanExtras as any },
+          });
+        })
+      );
+
+      this.logger.log(
+        `Force-invalidated phone validation for ${benfsInGroup.length} beneficiaries in group: ${uuid}`
+      );
+      return;
+    }
+
+    // BANK_TRANSFER: two things need resetting, both required.
+    // 1. extras.validBankAccount — isGroupValidForAA reads this; if left
+    //    true, groupAttributesCheck short-circuits before re-checking.
+    // 2. bankAccount.isValid — groupAccountCheck's requeue filter reads
+    //    this (not extras.validBankAccount) to decide who to re-queue.
+    await this.prisma.$transaction(
+      benfsInGroup.map((benf) => {
+        const cleanExtras = { ...(benf.extras as Record<string, unknown>) };
+        delete cleanExtras.validBankAccount;
+        delete cleanExtras.bankedStatus;
+        delete cleanExtras.error;
+        return this.prisma.beneficiary.update({
+          where: { uuid: benf.uuid },
+          data: { bankedStatus: 'UNBANKED', extras: cleanExtras as any },
+        });
+      })
+    );
+
+    await this.prisma.beneficiaryBankAccount.updateMany({
+      where: { beneficiaryId: { in: benfsInGroup.map((benf) => benf.uuid) } },
+      data: { isValid: false },
+    });
+
+    this.logger.log(
+      `Force-invalidated bank validation for ${benfsInGroup.length} beneficiaries in group: ${uuid}`
+    );
+  }
+
   async groupPhoneCheck(uuid: string, benfGroup: GroupWithValidationAA) {
     const benfsInGroup = benfGroup.groupedBeneficiaries
       ?.map((d) => d.Beneficiary)
