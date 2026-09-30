@@ -151,7 +151,7 @@ export const JOBS = {
     EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
     EXPORT_PAYOUT_LOGS_PDF_FILE: 'aa.jobs.payout.exportPayoutLogsPdfFile',
     VERIFY_MANUAL_PAYOUT: 'aa.jobs.payout.verifyManualPayout',
-    CANCEL_PAYOUT: 'aa.jobs.payout.cancel'
+    COMPLETE_PAYOUT: 'aa.jobs.payout.complete'
   },
   INKIND: {
     CREATE: 'aa.jobs.inkinds.create',

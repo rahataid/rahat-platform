@@ -324,7 +324,7 @@ export const MS_ACTIONS = {
       EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
       EXPORT_PAYOUT_LOGS_PDF_FILE: 'aa.jobs.payout.exportPayoutLogsPdfFile',
       VERIFY_MANUAL_PAYOUT: 'aa.payout.verifyManualPayout',
-      CANCEL_PAYOUT: 'aa.payout.cancel'
+      COMPLETE_PAYOUT: 'aa.payout.complete'
     },
     INKIND: {
       CREATE: 'aa.inkinds.create',
