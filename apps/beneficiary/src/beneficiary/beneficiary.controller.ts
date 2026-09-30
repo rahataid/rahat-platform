@@ -221,11 +221,12 @@ export class BeneficiaryController {
   addGroup(payload: CreateBeneficiaryGroupsDto) {
     return this.service.addGroup(payload);
   }
-  //
-  // @MessagePattern({ cmd: BeneficiaryJobs.ADD_BENEFICIARIES_TO_GROUP })
-  // addBeneficiariesToGroup(payload: AddBeneficiariesToGroupDto) {
-  //   return this.service.addBeneficiariesToGroup(payload);
-  // }
+
+  // used by AA inkind walk-in redemption
+  @MessagePattern({ cmd: BeneficiaryJobs.ADD_BENEFICIARIES_TO_GROUP })
+  addBeneficiariesToGroup(payload: AddBeneficiariesToGroupDto) {
+    return this.service.addBeneficiariesToGroup(payload);
+  }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP })
   getGroup(payload: string | ({ uuid: string } & ListBeneficiariesByGroupDto)) {
@@ -286,6 +287,17 @@ export class BeneficiaryController {
     @Payload() dto: AddGroupsPurposeDto
   ) {
     return this.service.addGroupPurpose(dto);
+  }
+
+  // Reported by the project service when a group import finishes or finally fails
+  @MessagePattern({ cmd: BeneficiaryJobs.GROUP_ASSIGN_SYNC_RESULT })
+  groupAssignSyncResult(payload: {
+    projectId: string;
+    beneficiaryGroupId: string;
+    status: 'SUCCESS' | 'FAILED';
+    error?: string;
+  }) {
+    return this.service.handleGroupAssignSyncResult(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT })
