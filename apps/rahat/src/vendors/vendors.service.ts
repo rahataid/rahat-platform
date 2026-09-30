@@ -335,14 +335,28 @@ export class VendorsService {
         User: true,
       },
     });
+
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: {
+        entityId: data.uuid
+      },
+
+    })
+    const response = {
+      ...data,
+      walletDetails: walletDetails
+    };
+    let projectResponse = {} as any;
+
+    projectResponse.data = projectData;
+    projectResponse.walletDetails = walletDetails
     // const vendorIdentifier = projectData[0]?.extras;
     // const projects = projectData.map((project) => project.Project);
     // const userdata = { ...data, projects, vendorIdentifier };
     if (projectData.length === 0) {
-      return data;
+      return response;
     }
-
-    return projectData;
+    return projectResponse;
   }
 
   async listVendor(dto: GetVendorsDTO) {
@@ -389,7 +403,8 @@ export class VendorsService {
         },
       };
     }
-    return paginate(
+
+    const users = await paginate(
       this.prisma.userRole,
       {
         where,
@@ -413,6 +428,34 @@ export class VendorsService {
         perPage,
       }
     );
+
+
+    const userIds = users.data.map((user: any) => user.User.uuid)
+
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: {
+        entityId: { in: userIds },
+      },
+    });
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+
+
+    const data = users.data.map((user: any) => ({
+      ...user,
+      walletDetails: walletMap.get(user.User.uuid) || null,
+    }));
+    let result = {} as any;
+    result.data = data;
+    result.meta = users.meta;
+    return result;
   }
 
   async listProjectVendor(dto) {
@@ -440,6 +483,31 @@ export class VendorsService {
         createdAt: 'desc',
       },
     });
+    const userIds = venData.map((user: any) => user.User.uuid)
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: {
+        entityId: { in: userIds },
+      },
+    });
+
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+
+    const data = venData.map((user) => ({
+      ...user,
+      walletDetails: walletMap.get(user.User.uuid) || null,
+    }));
+
+
+
+
     // return venData
     return this.client.send(
       {
@@ -447,7 +515,7 @@ export class VendorsService {
         uuid: projectId,
       },
 
-      venData
+      data
     );
   }
 
@@ -460,6 +528,22 @@ export class VendorsService {
         },
       },
     });
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: {
+        entityId: { in: uuids }
+      }
+    });
+
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+
     const combinedData = data.data.map((item) => {
       const matchedData = vendorData.find(
         (vendor) => vendor.uuid === item.vendorId
@@ -469,6 +553,7 @@ export class VendorsService {
         Vendor: {
           ...item.Vendor,
           ...matchedData,
+          walletDetails: walletMap.get(item.Vendor.uuid)
         },
       };
     });
@@ -481,7 +566,6 @@ export class VendorsService {
 
   async verifyOtp(dto, rdetails) {
     const res = await this.authService.loginByOtp(dto, rdetails);
-    console.log(res);
     if (res.accessToken) {
       return this.getUserDetails(dto);
     }
@@ -675,7 +759,7 @@ export class VendorsService {
   }
 
   async getVendorByUuid(dto: { projectId: string; vendorId: string }) {
-    return this.prisma.projectVendors.findUnique({
+    const vendor = await this.prisma.projectVendors.findUnique({
       where: {
         projectVendorIdentifier: dto,
       },
@@ -683,5 +767,22 @@ export class VendorsService {
         User: true,
       },
     });
+
+    if (!vendor) return null;
+
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: { entityId: dto.vendorId },
+    });
+
+    return {
+      ...vendor,
+      User: {
+        ...vendor.User,
+        walletDetails: walletDetails.map((w) => ({
+          address: w.address,
+          chainType: w.chainType,
+        })),
+      },
+    };
   }
 }
