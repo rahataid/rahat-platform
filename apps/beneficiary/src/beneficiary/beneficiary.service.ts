@@ -162,9 +162,16 @@ export class BeneficiaryService {
 
   //find beneficiary by wallet address and attach pii data
   async findOneBeneficiary(data: any) {
+    const entityDetails = await this.prisma.walletAddress.findUnique({
+      where: {
+        address: data.walletAddress,
+      },
+    });
+    if (!entityDetails) return 'No details found';
+
     const getBeneficiaryByWallet = await this.prisma.beneficiary.findUnique({
       where: {
-        walletAddress: data.walletAddress,
+        uuid: entityDetails?.entityId,
       },
       include: {
         pii: true,
@@ -283,13 +290,15 @@ export class BeneficiaryService {
       },
     });
     const benIds = groupDetails?.flatMap((b) =>
-      b.groupedBeneficiaries.map((ben) =>
-        ben.Beneficiary.uuid
-      )
-    )
-    const walletDetails = await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(benIds)
+      b.groupedBeneficiaries.map((ben) => ben.Beneficiary.uuid)
+    );
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(benIds);
     const walletMap = new Map(
-      walletDetails.map((wallet) => [wallet.entityId, { address: wallet.address, chainType: wallet.chainType }])
+      walletDetails.map((wallet) => [
+        wallet.entityId,
+        { address: wallet.address, chainType: wallet.chainType },
+      ])
     );
 
     const updatedGroupDetails = groupDetails?.map((group) => ({
@@ -376,7 +385,9 @@ export class BeneficiaryService {
       }
     );
 
-    result = await this.beneficiaryUtilsService.attachPiiDataAndWalletDetails(result);
+    result = await this.beneficiaryUtilsService.attachPiiDataAndWalletDetails(
+      result
+    );
 
     console.timeEnd('check');
     console.log(new Date());
@@ -410,10 +421,18 @@ export class BeneficiaryService {
     //   }
     // })
 
+    const entityDetails = await this.prisma.walletAddress.findMany({
+      where: {
+        address: {
+          in: data.map((b) => b.walletAddress)
+        }
+      }
+    });
+
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
-        walletAddress: {
-          in: data.map((b) => b.walletAddress),
+        uuid: {
+          in: entityDetails.map((b) => b.entityId),
         },
       },
       include: {
@@ -427,7 +446,7 @@ export class BeneficiaryService {
     if (data && beneficiaries.length > 0) {
       const combinedData = data.map((dat) => {
         const benDetails = beneficiaries.find(
-          (ben) => ben.walletAddress === dat.walletAddress
+          (ben) => ben.uuid === dat.uuid
         );
         const { pii, ...rest } = benDetails || {};
         return {
@@ -562,15 +581,14 @@ export class BeneficiaryService {
     ]);
 
     if (!data) return null;
-    const bendetails: any = { ...data }
+    const bendetails: any = { ...data };
 
     if (piiData) bendetails.piiData = piiData;
-    if (walletDetails) bendetails.walletAddressDetails = walletDetails.map((d) =>
-    ({
-      address: d?.address,
-      chainType: d?.chainType
-
-    }))
+    if (walletDetails)
+      bendetails.walletAddressDetails = walletDetails.map((d) => ({
+        address: d?.address,
+        chainType: d?.chainType,
+      }));
     return bendetails;
   }
 
@@ -617,14 +635,14 @@ export class BeneficiaryService {
     const entityDetails = await this.rsprisma.walletAddress.findUnique({
       where: { address: walletAddress },
       select: {
-        entityId: true
-      }
-    }
-    );
-    if (!entityDetails) throw new RpcException({
-      message: '[BENEFICIARY_DATA_NOT_FOUND] Data not Found',
-      code: 'BENEFICIARY_DATA_NOT_FOUND',
+        entityId: true,
+      },
     });
+    if (!entityDetails)
+      throw new RpcException({
+        message: '[BENEFICIARY_DATA_NOT_FOUND] Data not Found',
+        code: 'BENEFICIARY_DATA_NOT_FOUND',
+      });
     const [data, piiData, walletDetails] = await Promise.all([
       this.rsprisma.beneficiary.findUnique({
         where: { uuid: entityDetails?.entityId },
@@ -648,29 +666,29 @@ export class BeneficiaryService {
             })
             : null
         ),
-      this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails([entityDetails?.entityId])
+      this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails([
+        entityDetails?.entityId,
+      ]),
     ]);
     if (!data) return null;
 
     data.piiData = piiData || null;
-    if (walletDetails) data.walletAddressDetails = walletDetails.map((d) =>
-    ({
-      address: d?.address,
-      chainType: d?.chainType
-
-    }))
+    if (walletDetails)
+      data.walletAddressDetails = walletDetails.map((d) => ({
+        address: d?.address,
+        chainType: d?.chainType,
+      }));
     return data;
   }
 
   async findBulkByWallet(walletAddresses: string[]) {
-
     const entityDetails = await this.rsprisma.walletAddress.findMany({
       where: { address: { in: walletAddresses } },
       select: {
-        entityId: true
-      }
+        entityId: true,
+      },
     });
-    const entityIds = entityDetails.map((entity) => entity.entityId)
+    const entityIds = entityDetails.map((entity) => entity.entityId);
     const [beneficiaries, piiData] = await Promise.all([
       this.rsprisma.beneficiary.findMany({
         where: { uuid: { in: entityIds } },
@@ -745,7 +763,10 @@ export class BeneficiaryService {
     });
 
     if (!beneficiary) return null;
-    const walletDetails = await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails([beneficiary.uuid])
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails([
+        beneficiary.uuid,
+      ]);
     let piiData = null;
     if (beneficiary.pii) {
       piiData = beneficiary.pii;
@@ -1683,8 +1704,6 @@ export class BeneficiaryService {
       },
     });
 
-
-
     if (!group) {
       throw new RpcException({
         message: '[BENEFICIARY_GROUP_NOT_FOUND] Group not found',
@@ -1692,12 +1711,16 @@ export class BeneficiaryService {
       });
     }
 
-    const benIds = group?.groupedBeneficiaries.map((ben) =>
-      ben.Beneficiary.uuid
-    )
+    const benIds = group?.groupedBeneficiaries.map(
+      (ben) => ben.Beneficiary.uuid
+    );
 
-    const walletDetails = await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(benIds)
-    const walletMap = new Map<string, { address: string; chainType: string }[]>();
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(benIds);
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
     for (const wallet of walletDetails) {
       const existing = walletMap.get(wallet.entityId) || [];
       existing.push({ address: wallet.address, chainType: wallet.chainType });
@@ -1714,10 +1737,9 @@ export class BeneficiaryService {
       return this.applyGroupBeneficiaryPagination(uuid, emptyResult, dto);
     }
 
-    console.log(walletDetails)
+    console.log(walletDetails);
 
-    const updatedGroupDetails =
-    {
+    const updatedGroupDetails = {
       ...group,
       groupedBeneficiaries: group.groupedBeneficiaries.map((item) => ({
         ...item,
@@ -1725,13 +1747,13 @@ export class BeneficiaryService {
           ...item.Beneficiary,
           walletAddressDetails: walletMap.get(item.Beneficiary.uuid),
         },
-
-      }))
+      })),
     };
 
-    console.log(updatedGroupDetails.groupedBeneficiaries[0]?.Beneficiary?.walletAddressDetails)
-
-
+    console.log(
+      updatedGroupDetails.groupedBeneficiaries[0]?.Beneficiary
+        ?.walletAddressDetails
+    );
 
     // If group is found, check if it is valid for AA
     const finalData = {
@@ -1798,24 +1820,30 @@ export class BeneficiaryService {
     );
 
     // Fetch wallet details for paginated beneficiaries
-    const benIds = paginatedGroupedBeneficiaries.data.map((ben: any) =>
-      ben.Beneficiary.uuid
-    )
-    const walletDetails = await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(benIds)
-    const walletMap = new Map<string, { address: string; chainType: string }[]>();
+    const benIds = paginatedGroupedBeneficiaries.data.map(
+      (ben: any) => ben.Beneficiary.uuid
+    );
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(benIds);
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
     for (const wallet of walletDetails) {
       const existing = walletMap.get(wallet.entityId) || [];
       existing.push({ address: wallet.address, chainType: wallet.chainType });
       walletMap.set(wallet.entityId, existing);
     }
 
-    const paginatedWithWalletDetails = paginatedGroupedBeneficiaries.data.map((item: any) => ({
-      ...item,
-      Beneficiary: {
-        ...item.Beneficiary,
-        walletAddressDetails: walletMap.get(item.Beneficiary.uuid),
-      },
-    }));
+    const paginatedWithWalletDetails = paginatedGroupedBeneficiaries.data.map(
+      (item: any) => ({
+        ...item,
+        Beneficiary: {
+          ...item.Beneficiary,
+          walletAddressDetails: walletMap.get(item.Beneficiary.uuid),
+        },
+      })
+    );
 
     const response = {
       ...result,
@@ -3101,7 +3129,6 @@ export class BeneficiaryService {
       this.logger.error('Error checking for orphaned transactions:', error);
     }
   }
-
 }
 
 async function checkPhoneNumber(
