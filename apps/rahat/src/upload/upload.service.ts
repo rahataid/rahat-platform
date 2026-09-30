@@ -1,6 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { uploadFileToS3 } from "../utils/fileUpload";
 
 @Injectable()
@@ -14,7 +14,10 @@ export class UploadService {
             rootFolderName
         );
 
-        if (!url) throw new Error('Error uploading file.')
+        if (!url) throw new BadRequestException({
+            message: 'Error uploading file.',
+            code: 'UPLOAD_FILE_ERROR',
+        })
 
         const mediaUrl = `https://${process.env.AWS_BUCKET}.s3.us-east-1.amazonaws.com/${rootFolderName}/${folderName}/${url.fileNameHash}`;
 

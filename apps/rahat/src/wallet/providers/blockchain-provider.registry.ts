@@ -6,6 +6,7 @@ import {
   IConnectedWallet,
 } from '@rahataid/wallet';
 import { Provider } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 
 // Registry token for dependency injection
 export const BLOCKCHAIN_REGISTRY_TOKEN = 'BLOCKCHAIN_REGISTRY';
@@ -220,10 +221,13 @@ export class BlockchainProviderRegistry {
       }
     }
 
-    throw new Error(
-      `Cannot detect chain type from address: ${address}. ` +
-        `No registered wallet can validate this address format.`
-    );
+    throw new RpcException({
+      message:
+        `Cannot detect chain type from address: ${address}. ` +
+        `No registered wallet can validate this address format.`,
+      code: 'CANNOT_DETECT_CHAIN_TYPE',
+      params: { address },
+    });
   }
 
   // Get wallet keys from storage

@@ -21,7 +21,7 @@ export class BankAccountCheckProcessor {
 
   @Process({
     name: BeneficiaryJobs.CHECK_BENEFICIARY_BANK_ACCOUNT,
-    concurrency: 1,
+    concurrency: 10,
   })
   async checkBeneficiaryAccount(
     job: Job<{

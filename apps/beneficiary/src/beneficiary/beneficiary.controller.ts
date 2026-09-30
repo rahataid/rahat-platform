@@ -85,6 +85,15 @@ export class BeneficiaryController {
 
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.CREATE_BULK_WITH_GROUP })
+  async createBulkWithGroup(@Payload() data) {
+    return this.service.createBulkWithGroup(
+      data?.payload,
+      data?.projectUUID,
+      data?.groupName
+    );
+  }
+
   @MessagePattern({
     cmd: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE,
   })

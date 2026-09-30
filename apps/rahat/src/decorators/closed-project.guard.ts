@@ -26,15 +26,20 @@ export class ClosedProjectGuard implements CanActivate {
     });
 
     if (!project) {
-      throw new BadRequestException('Project not found');
+      throw new BadRequestException({
+        message: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+        params: { uuid },
+      });
     }
 
     if (project.status !== 'CLOSED') return true;
 
     if (!CLOSED_PROJECT_ALLOWED_ACTIONS.has(action)) {
-      throw new ForbiddenException(
-        'Project is closed. Only read actions are allowed.'
-      );
+      throw new ForbiddenException({
+        message: 'Project is closed. Only read actions are allowed.',
+        code: 'PROJECT_CLOSED_ONLY_READ_ACTIONS_ALLOWED',
+      });
     }
 
     return true;
