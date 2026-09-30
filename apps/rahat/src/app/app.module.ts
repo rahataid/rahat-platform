@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { StatsModule } from '@rahat/stats';
+import { SentryModule } from '@sentry/nestjs/setup';
 import { SettingsModule } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import {
@@ -33,11 +34,13 @@ import { TokenModule } from '../token/token.module';
 import { UploadModule } from '../upload/upload.module';
 import { AppUsersModule } from '../vendors/vendors.module';
 import { WalletModule } from '../wallet/wallet.module';
+import { WebhooksModule } from '../webhooks/webhooks.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     BeneficiaryModule,
     DashboardModule,
@@ -56,11 +59,20 @@ import { AppService } from './app.service';
       }),
       inject: [ConfigService],
     }),
-    EventEmitterModule.forRoot({ maxListeners: 10, ignoreErrors: false, verboseMemoryLeak: false }),
+    EventEmitterModule.forRoot({
+      maxListeners: 10,
+      ignoreErrors: false,
+      verboseMemoryLeak: false,
+    }),
     ListenersModule,
     AppUsersModule,
     OtpModule,
-    RSUserModule.forRoot([AuthsModule, UsersModule, RolesModule,   SignupModule.forRoot({ autoApprove: true }),]),
+    RSUserModule.forRoot([
+      AuthsModule,
+      UsersModule,
+      RolesModule,
+      SignupModule.forRoot({ autoApprove: true }),
+    ]),
     ProjectModule,
     StatsModule,
     ProcessorsModule,
@@ -75,7 +87,7 @@ import { AppService } from './app.service';
     WalletModule,
     NotificationModule,
     CommsModule.forRoot(),
-
+    WebhooksModule,
   ],
   controllers: [AppController],
   providers: [
@@ -86,6 +98,6 @@ import { AppService } from './app.service';
       useClass: ExternalAppGuard,
     },
   ],
-  exports: [AppService]
+  exports: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

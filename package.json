@@ -89,6 +89,8 @@
     "@rumsan/rabbitmq": "^0.0.1",
     "@rumsan/sdk": "0.0.47-rc.1",
     "@rumsan/user": "3.0.170-rc.9",
+    "@sentry/nestjs": "^10.75.2",
+    "@sentry/profiling-node": "^10.75.2",
     "@stellar/stellar-sdk": "^13.3.0",
     "@types/amqplib": "^0.10.6",
     "@urql/core": "^5.0.4",

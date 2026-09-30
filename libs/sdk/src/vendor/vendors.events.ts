@@ -22,4 +22,5 @@ export const JOBS = {
   GET_ONE_FAILED_BATCH: 'rahat.jobs.vendor.get_one_failed_batch',
   DELETE_FAILED_BATCH: 'rahat.jobs.vendor.delete_failed_batch',
   RETRY_IMPORT: 'rahat.jobs.vendor.retry_import',
+  DELETE: 'rahat.jobs.vendor.delete',
 };
