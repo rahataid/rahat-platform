@@ -692,6 +692,15 @@ export class BeneficiaryController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.BENEFICIARY })
+  @Post('groups/:uuid/force-invalidate')
+  @ApiParam({ name: 'uuid', required: true })
+  async groupForceInvalidate(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GROUP_FORCE_INVALIDATE }, uuid);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('groups/:uuid/bank-check-status')
   @ApiParam({ name: 'uuid', required: true })

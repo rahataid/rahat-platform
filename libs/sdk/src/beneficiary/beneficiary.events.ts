@@ -66,6 +66,7 @@ export const JOBS = {
   UPDATE_GROUP: 'rahat.jobs.beneficiary.update_group',
   ADD_GROUP_PURPOSE: 'rahat.job.beneficiary.add_group_purpose',
   GROUP_ACCOUNT_CHECK: 'rahat.jobs.beneficiary.group_account_check',
+  GROUP_FORCE_INVALIDATE: 'rahat.jobs.beneficiary.group_force_invalidate',
   ADD_GROUP_TO_PROJECT: 'rahat.jobs.beneficiary.add_group_to_project',
   GET_BENEFICIARIES_DISBURSEMENTS: 'rahat.jobs.beneficiaries.getDisBURSEMENTS',
   IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL: 'rahat.jobs.beneficiary.import_beneficiaries_from_community_tool',
