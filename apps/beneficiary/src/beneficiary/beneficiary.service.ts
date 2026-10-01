@@ -2,47 +2,47 @@
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Beneficiary, BeneficiaryPii, GroupPurpose } from '@prisma/client';
 import {
-  AddBeneficiariesToGroupDto,
-  AddBenfGroupToProjectDto,
-  AddBenToProjectDto,
-  addBulkBeneficiaryToProject,
-  AddGroupsPurposeDto,
-  AddToProjectDto,
-  CreateBeneficiaryDto,
-  CreateBeneficiaryGroupsDto,
-  CreateBeneficiaryTransactionDto,
-  ImportTempBenefDto,
-  ListBeneficiariesByGroupDto,
-  ListBeneficiaryDto,
-  ListBeneficiaryGroupDto,
-  ListTempBeneficiariesDto,
-  ListTempGroupsDto,
-  UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto
+    AddBeneficiariesToGroupDto,
+    AddBenfGroupToProjectDto,
+    AddBenToProjectDto,
+    addBulkBeneficiaryToProject,
+    AddGroupsPurposeDto,
+    CreateBeneficiaryDto,
+    CreateBeneficiaryGroupsDto,
+    CreateBeneficiaryTransactionDto,
+    ImportTempBenefDto,
+    ListBeneficiariesByGroupDto,
+    ListBeneficiaryDto,
+    ListBeneficiaryGroupDto,
+    ListTempBeneficiariesDto,
+    ListTempGroupsDto,
+    UpdateBeneficiaryDto,
+    UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
-  AAJobs,
-  BeneficiaryConstants,
-  BeneficiaryEvents,
-  BeneficiaryJobs,
-  BQUEUE,
-  GroupWithValidationAA,
-  ProjectContants,
-  TPIIData,
-  WalletJobs
+    AAJobs,
+    BeneficiaryConstants,
+    BeneficiaryEvents,
+    BeneficiaryJobs,
+    BQUEUE,
+    GroupWithValidationAA,
+    ProjectContants,
+    TPIIData,
+    WalletJobs
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, timeout, TimeoutError } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  findTempBenefGroups,
-  validateDupicateWallet,
+    findTempBenefGroups,
+    validateDupicateWallet,
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
@@ -75,12 +75,11 @@ export class BeneficiaryService {
   }
 
   //Add single beneficiary to project
-  addToProject(dto: AddToProjectDto) {
-    return this.prisma.beneficiaryProject.create({
-      data: dto,
-    });
-  }
-
+  // addToProject(dto: AddToProjectDto) {
+  //   return this.prisma.beneficiaryProject.create({
+  //     data: dto,
+  //   });
+  // }
 
   // refresh beneficiary stats
   async refreshStats() {
@@ -162,7 +161,6 @@ export class BeneficiaryService {
     return data;
   }
 
-
   //find beneficiary by wallet address and attach pii data
   async findOneBeneficiary(data: any) {
     const getBeneficiaryByWallet = await this.prisma.beneficiary.findUnique({
@@ -178,7 +176,6 @@ export class BeneficiaryService {
     const { pii, ...rest } = getBeneficiaryByWallet;
     return { piiData: pii, projectData: rest, ...data };
   }
-
 
   // find beneficiary via phone
   async getBeneficiaryByPhoneOnly(payload: { phone: string }) {
@@ -197,8 +194,6 @@ export class BeneficiaryService {
 
     return { ...beneficiary, pii: piiData };
   }
-
-
 
   async listBeneficiaryPiiByWalletAddress(data: any) {
     if (!data?.data?.length) return data;
@@ -1382,7 +1377,7 @@ export class BeneficiaryService {
         beneficiaryGroupId: group.uuid,
         projectId: dto.projectId,
       };
-      await (await this.assignBeneficiaryGroupToProject(payload)).toPromise();
+      await (await this.assignBeneficiaryGroupToProject(payload));
     }
 
     return {
@@ -1391,6 +1386,7 @@ export class BeneficiaryService {
     };
   }
 
+  // used by AA inkind walk-in redemption
   async addBeneficiariesToGroup(dto: AddBeneficiariesToGroupDto) {
     const { groupUuid, beneficiaries } = dto;
     this.logger.log(`Adding beneficiaries to group ${groupUuid}: ${beneficiaries.map(b => b.uuid).join(', ')}`);
@@ -2209,6 +2205,8 @@ export class BeneficiaryService {
     };
   }
 
+
+  //used by AA
   async saveBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
     return this.prisma.beneficiaryGroupProject.create({
       data: {
@@ -2219,97 +2217,311 @@ export class BeneficiaryService {
     // return this.prisma.beneficiaryProject.create({ data: dto });
   }
 
+  //used by AA
+  // Commits the assignment as PENDING, then asks the project service to import the group.
+  // The project service reports the final outcome via GROUP_ASSIGN_SYNC_RESULT;
+  // reconcilePendingGroupSyncs covers lost messages.
   async assignBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
-    this.logger.log(`Assigning beneficiary group ${dto.beneficiaryGroupId} to project ${dto.projectId}`);
-    try {
-      const { beneficiaryGroupId, projectId } = dto;
+    const { beneficiaryGroupId, projectId } = dto;
+    this.logger.log(`Assigning beneficiary group ${beneficiaryGroupId} to project ${projectId}`);
 
-      // get project info
-      const project = await this.prisma.project.findUnique({
-        where: {
-          uuid: projectId,
-        },
-      });
+    const project = await this.prisma.project.findUnique({
+      where: { uuid: projectId },
+      select: { uuid: true, type: true, name: true },
+    });
 
-      if (project && (project.type.toLocaleLowerCase() === 'aa' || project.type.toLocaleLowerCase() === 'cva')) {
-        // check if groups has any benf that doesn't have valid bank account
-        const isGroupValidForAA = await this.isGroupValidForAA(
-          beneficiaryGroupId
-        );
+    if (!project) {
+      throw new RpcException('Project not found.');
+    }
 
-        if (!isGroupValidForAA) {
-          throw new RpcException({
-            message: '[GROUP_NOT_VALID_FOR_AA] Group is not valid for AA.',
-            code: 'GROUP_NOT_VALID_FOR_AA',
-          });
-        }
-      }
-
-      //1. Get beneficiary group data
-      const beneficiaryGroupData =
-        await this.prisma.beneficiaryGroup.findUnique({
-          where: {
-            uuid: beneficiaryGroupId,
-          },
-          include: {
-            groupedBeneficiaries: true,
-          },
+    if (this.isAAProject(project.type)) {
+      const isGroupValidForAA = await this.isGroupValidForAA(beneficiaryGroupId);
+      if (!isGroupValidForAA) {
+        throw new RpcException({
+          message: '[GROUP_NOT_VALID_FOR_AA] Group is not valid for AA.',
+          code: 'GROUP_NOT_VALID_FOR_AA',
         });
-
-      const benfsInGroup = beneficiaryGroupData.groupedBeneficiaries?.map(
-        (d) => d.beneficiaryId
-      );
-
-      // get beneficiaries from the group not assigned to selected project
-      const unassignedBenfs = await this.prisma.beneficiary.findMany({
-        where: {
-          AND: [
-            {
-              uuid: {
-                in: benfsInGroup,
-              },
-            },
-            {
-              BeneficiaryProject: {
-                none: {
-                  projectId: project.uuid,
-                },
-              },
-            },
-          ],
-          deletedAt: null,
-        },
-      });
-
-      // Bulk assign unassigned beneficiaries to project
-      if (unassignedBenfs?.length) {
-        const assignDtos = unassignedBenfs.map((beneficiary) => ({
-          beneficiaryId: beneficiary.uuid,
-          projectId: project.uuid,
-        }));
-
-        //SENDS COMMAND TO  JOBS.BENEFICIARY.ADD_BULK_TO_PROJECT rahat.jobs.beneficiary.create_bulk
-        await this.beneficiaryUtilsService.bulkAssignBeneficiaryToProject(
-          assignDtos
-        );
       }
+    }
 
-      //2.Save beneficiary group to project
-      await this.saveBeneficiaryGroupToProject(dto);
+    const { group, payload, unassignedIds } = await this.getGroupSyncData(
+      beneficiaryGroupId,
+      project
+    );
 
-      console.log('adding beneficiary group');
-      //3. Sync beneficiary to project
-      return this.client.send(
-        { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
-        {
-          beneficiaryGroupData,
-        }
+    try {
+      await this.prisma.$transaction(
+        async (txn) => {
+          await txn.beneficiaryGroupProject.create({
+            data: { beneficiaryGroupId, projectId, syncStatus: 'PENDING' },
+          });
+
+          const CHUNK_SIZE = 1000;
+          for (let i = 0; i < unassignedIds.length; i += CHUNK_SIZE) {
+            await txn.beneficiaryProject.createMany({
+              data: unassignedIds
+                .slice(i, i + CHUNK_SIZE)
+                .map((beneficiaryId) => ({ beneficiaryId, projectId })),
+              skipDuplicates: true,
+            });
+          }
+        },
+        { timeout: 30000, maxWait: 10000 }
       );
     } catch (err) {
-      console.log(err);
-      throw new RpcException(err.message);
+      this.logger.error(`Failed to assign group ${beneficiaryGroupId} to project ${projectId}`, err);
+      if (err.code === 'P2002') {
+        throw new RpcException('Group is already assigned to this project.');
+      }
+      throw new RpcException(err.message || 'Failed to assign beneficiary group to project.');
+    }
+
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
+      projectUuid: project.uuid,
+    });
+
+    const syncState = await this.sendGroupSync(payload);
+    const isSynced = syncState === 'SYNCED';
+
+    return {
+      success: true,
+      status: isSynced ? 'SYNCED' : 'IN_PROGRESS',
+      message: isSynced
+        ? `Successfully assigned group "${group.name}" to project "${project.name}".`
+        : `Assignment of group "${group.name}" to project "${project.name}" is in progress.`,
+      assignedCount: unassignedIds.length,
+      groupId: beneficiaryGroupId,
+      projectName: project.name,
+    };
+  }
+
+  // Result reported by the project service once the group import finishes or finally fails.
+  async handleGroupAssignSyncResult(dto: {
+    projectId: string;
+    beneficiaryGroupId: string;
+    status: 'SUCCESS' | 'FAILED';
+    error?: string;
+  }) {
+    const { projectId, beneficiaryGroupId, status, error } = dto;
+
+    if (status === 'SUCCESS') {
+      await this.markGroupSynced(beneficiaryGroupId, projectId);
+      this.logger.log(`Group ${beneficiaryGroupId} synced to project ${projectId}`);
+    } else {
+      this.logger.error(
+        `Project ${projectId} failed to import group ${beneficiaryGroupId}: ${error}. Reverting assignment.`
+      );
+      await this.revertGroupAssignment(beneficiaryGroupId, projectId);
+    }
+
+    return { success: true };
+  }
+
+  // Re-sends stale PENDING syncs (lost request/result); the project side is idempotent.
+  // ponytail: runs on every replica; resends are idempotent so no lock, add one if load matters
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async reconcilePendingGroupSyncs() {
+    const now = Date.now();
+    const staleBefore = new Date(now - 10 * 60 * 1000);
+    const giveUpBefore = new Date(now - 60 * 60 * 1000);
+
+    const pending = await this.prisma.beneficiaryGroupProject.findMany({
+      where: { syncStatus: 'PENDING', updatedAt: { lt: staleBefore } },
+      select: {
+        id: true,
+        beneficiaryGroupId: true,
+        createdAt: true,
+        Project: { select: { uuid: true, type: true, name: true } },
+      },
+    });
+
+    for (const row of pending) {
+      const { beneficiaryGroupId, Project: project } = row;
+      try {
+        // Touch updatedAt so the next run waits another interval.
+        await this.prisma.beneficiaryGroupProject.update({
+          where: { id: row.id },
+          data: { updatedAt: new Date() },
+        });
+
+        const { payload } = await this.getGroupSyncData(beneficiaryGroupId, project);
+        const syncState = await this.sendGroupSync(payload);
+
+        if (syncState === 'UNKNOWN' && row.createdAt < giveUpBefore) {
+          this.logger.error(
+            `Project ${project.uuid} unreachable for group ${beneficiaryGroupId} for over an hour. Reverting assignment.`
+          );
+          await this.revertGroupAssignment(beneficiaryGroupId, project.uuid);
+        }
+      } catch (err) {
+        this.logger.error(
+          `Failed to reconcile group ${beneficiaryGroupId} on project ${project.uuid}`,
+          err
+        );
+      }
     }
   }
+
+  private isAAProject(type?: string) {
+    // CVA projects are served by the AA project service
+    return ['aa', 'cva'].includes(type?.toLowerCase());
+  }
+
+  private async getGroupSyncData(
+    beneficiaryGroupId: string,
+    project: { uuid: string; type: string }
+  ) {
+    const group = await this.prisma.beneficiaryGroup.findUnique({
+      where: { uuid: beneficiaryGroupId },
+      select: {
+        name: true,
+        groupPurpose: true,
+        groupedBeneficiaries: {
+          where: { deletedAt: null },
+          select: { beneficiaryId: true },
+        },
+      },
+    });
+
+    if (!group) {
+      throw new RpcException('Beneficiary group not found.');
+    }
+
+    // All group members are sent, not only unassigned ones: a beneficiary already in the
+    // project via another group still needs the link to this group on the project side.
+    const beneficiaries = await this.prisma.beneficiary.findMany({
+      where: {
+        uuid: { in: group.groupedBeneficiaries.map((d) => d.beneficiaryId) },
+        deletedAt: null,
+      },
+      select: {
+        uuid: true,
+        walletAddress: true,
+        gender: true,
+        isVerified: true,
+        extras: true,
+        pii: { select: { phone: true } },
+        createdAt: true,
+        updatedAt: true,
+        BeneficiaryProject: { where: { projectId: project.uuid }, select: { id: true } },
+      },
+    });
+
+    const isAA = this.isAAProject(project.type);
+    const payload = {
+      beneficiaryGroupId,
+      beneficiaryGroupName: group.name,
+      groupPurpose: group.groupPurpose,
+      projectId: project.uuid,
+      beneficiaries: beneficiaries.map((beneficiary) => ({
+        uuid: beneficiary.uuid,
+        walletAddress: beneficiary.walletAddress,
+        phone: beneficiary.pii?.phone || null,
+        isVerified: beneficiary.isVerified,
+        beneficiaryGroupId,
+        createdAt: beneficiary.createdAt,
+        updatedAt: beneficiary.updatedAt,
+        ...(isAA
+          ? {
+            gender: beneficiary.gender,
+            extras: { ...(beneficiary.extras as Record<string, unknown>), phone: beneficiary.pii?.phone },
+          }
+          : { extras: beneficiary.extras || null }),
+      })),
+    };
+
+    const unassignedIds = beneficiaries
+      .filter((b) => b.BeneficiaryProject.length === 0)
+      .map((b) => b.uuid);
+
+    return { group, payload, unassignedIds };
+  }
+
+  /**
+   * SYNCED: project side already has the group.
+   * IN_PROGRESS: import queued/running, result arrives via handleGroupAssignSyncResult.
+   * UNKNOWN: no answer (timeout/transport), left PENDING for reconcilePendingGroupSyncs.
+   * A rejection from the project service reverts the assignment and is rethrown.
+   */
+  private async sendGroupSync(payload: {
+    beneficiaryGroupId: string;
+    projectId: string;
+  }): Promise<'SYNCED' | 'IN_PROGRESS' | 'UNKNOWN'> {
+    const { beneficiaryGroupId, projectId } = payload;
+    try {
+      const res = await lastValueFrom(
+        this.client
+          .send(
+            { cmd: BeneficiaryJobs.CREATE_BENF_ADD_GROUP_TO_PROJECT, uuid: projectId },
+            payload
+          )
+          .pipe(timeout(30000))
+      );
+
+      if (res?.status === 'COMPLETED') {
+        await this.markGroupSynced(beneficiaryGroupId, projectId);
+        return 'SYNCED';
+      }
+      return 'IN_PROGRESS';
+    } catch (err) {
+      // Remote RpcExceptions arrive as plain objects; Error instances are local
+      // (timeout, transport), where the remote outcome is unknown.
+      if (err instanceof TimeoutError || err instanceof Error) {
+        this.logger.warn(
+          `No answer from project ${projectId} for group ${beneficiaryGroupId}; leaving it PENDING`,
+          err
+        );
+        return 'UNKNOWN';
+      }
+
+      this.logger.error(`Project ${projectId} rejected group ${beneficiaryGroupId}`, err);
+      await this.revertGroupAssignment(beneficiaryGroupId, projectId);
+      throw new RpcException(err);
+    }
+  }
+
+  private markGroupSynced(beneficiaryGroupId: string, projectId: string) {
+    return this.prisma.beneficiaryGroupProject.updateMany({
+      where: { beneficiaryGroupId, projectId },
+      data: { syncStatus: 'SYNCED' },
+    });
+  }
+
+  // Removes the group from the project so the user can assign it again. Only drops project
+  // links created by this assignment for beneficiaries no other assigned group still needs.
+  private async revertGroupAssignment(beneficiaryGroupId: string, projectId: string) {
+    const groupProject = await this.prisma.beneficiaryGroupProject.findUnique({
+      where: { beneficiaryGroupProjectIdentifier: { projectId, beneficiaryGroupId } },
+    });
+    if (!groupProject) return;
+
+    await this.prisma.$transaction([
+      this.prisma.beneficiaryProject.deleteMany({
+        where: {
+          projectId,
+          createdAt: { gte: groupProject.createdAt },
+          Beneficiary: {
+            groupedBeneficiaries: {
+              some: { beneficiaryGroupId, deletedAt: null },
+              none: {
+                beneficiaryGroupId: { not: beneficiaryGroupId },
+                deletedAt: null,
+                beneficiaryGroup: { beneficiaryGroupProject: { some: { projectId } } },
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.beneficiaryGroupProject.delete({ where: { id: groupProject.id } }),
+    ]);
+
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
+      projectUuid: projectId,
+    });
+    this.logger.log(`Reverted group ${beneficiaryGroupId} assignment on project ${projectId}`);
+  }
+
+
 
   async listTempBeneficiaries(uuid: string, query: ListTempBeneficiariesDto) {
     const tempGroupWithBeneficiaries = await this.prisma.tempGroup.findUnique({
