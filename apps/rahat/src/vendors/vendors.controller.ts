@@ -20,15 +20,16 @@ import {
   VendorUpdateDto,
   VerifyVendorOtp,
 } from '@rahataid/extensions';
-import { APP, VendorJobs } from '@rahataid/sdk';
+import { ACTIONS, APP, SUBJECTS, VendorJobs } from '@rahataid/sdk';
 import { Request } from '@rumsan/sdk/types';
 
 import { RequestDetails } from '@rumsan/extensions/decorators';
 import { ChangePasswordDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
-import { CurrentUserInterface, JwtGuard } from '@rumsan/user';
+import { CheckAbilities, CurrentUserInterface, JwtGuard } from '@rumsan/user';
 import { CurrentUser } from '@rumsan/user/lib/auths/decorator/current-user.decorator';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
+import { DbAbilitiesGuard } from '../decorators/db-abilities.guard';
 import { GetVendorsDTO } from './dto/get-vendors.dto';
 import { VendorsService } from './vendors.service';
 
@@ -63,7 +64,7 @@ export class VendorsController {
   @UseGuards(JwtGuard, DbAbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.VENDOR })
   @Get('/stats')
-  getVendorCount(@Query() dto) {
+  getVendorCount() {
     return this.vendorService.getVendorCount();
   }
 
