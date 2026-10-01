@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Gender } from '@prisma/client';
 import { VendorCreateInput } from '@rahataid/sdk';
 import { Service } from '@rumsan/sdk/enums';
-import { IsObject, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsObject, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class VendorRegisterDto implements VendorCreateInput {
   id?: number | undefined;
@@ -39,7 +40,54 @@ export class VendorRegisterDto implements VendorCreateInput {
   // @IsEthereumAddress()
   wallet: string;
 
+  @ApiProperty({ example: 'FEMALE', required: false })
+  @IsString()
+  @IsOptional()
+  gender: Gender;
+
   @ApiProperty({ example: { isVendor: true }, required: false })
   @IsObject()
   extras?: object;
+}
+
+export class VendorPasswordRegisterDto extends VendorRegisterDto {
+  @ApiProperty({ example: 'john_vendor_1234' })
+  @IsString()
+  @MinLength(2, { message: 'Username must be at least 2 characters long' })
+  username: string;
+
+  @ApiProperty({ example: 'password' })
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters long' })
+  password: string;
+
+  @ApiProperty({
+    example: false,
+    description:
+      'If true, skips password strength validation (min length, uppercase, lowercase, digit, special character checks). Defaults to false.',
+    required: false,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  bypassPasswordValidation?: boolean;
+}
+
+export class VendorPasswordLoginDto {
+  @ApiProperty({ example: 'john@mailinator.com' })
+  @IsString()
+  email: string;
+
+  @ApiProperty({ example: 'password' })
+  @IsString()
+  password: string;
+}
+export class VendorSignupDto {
+  @ApiProperty({ example: 'john@mailinator.com' })
+  @IsString()
+  email: string;
+
+  @ApiProperty({ example: 'password' })
+  @IsString()
+  password: string;
 }

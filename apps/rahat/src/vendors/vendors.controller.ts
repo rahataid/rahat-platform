@@ -15,22 +15,24 @@ import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   GetVendorOtp,
   VendorAddToProjectDto,
+  VendorPasswordRegisterDto,
   VendorRegisterDto,
   VendorUpdateDto,
   VerifyVendorOtp,
 } from '@rahataid/extensions';
-import { APP, SUBJECTS, VendorJobs } from '@rahataid/sdk';
+import { ACTIONS, APP, SUBJECTS, VendorJobs } from '@rahataid/sdk';
+import { Request } from '@rumsan/sdk/types';
+
 import { RequestDetails } from '@rumsan/extensions/decorators';
-import {
-  ACTIONS,
-  CheckAbilities,
-  JwtGuard,
-} from '@rumsan/user';
+import { ChangePasswordDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
+import { CheckAbilities, CurrentUserInterface, JwtGuard } from '@rumsan/user';
+import { CurrentUser } from '@rumsan/user/lib/auths/decorator/current-user.decorator';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
-import { DbAbilitiesGuard } from '../decorators';
+import { DbAbilitiesGuard } from '../decorators/db-abilities.guard';
 import { GetVendorsDTO } from './dto/get-vendors.dto';
 import { VendorsService } from './vendors.service';
+
 
 @ApiTags('Vendors')
 @Controller('vendors')
@@ -62,13 +64,13 @@ export class VendorsController {
   @UseGuards(JwtGuard, DbAbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.VENDOR })
   @Get('/stats')
-  getVendorCount(@Query() dto) {
+  getVendorCount() {
     return this.vendorService.getVendorCount();
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.VENDOR })
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, DbAbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.VENDOR })
   @ApiParam({ name: 'id', required: true })
   @Get('/:id')
   getVendor(@Param('id') id: UUID | Address,
@@ -119,12 +121,38 @@ export class VendorsController {
   }
 
   @MessagePattern({ cmd: VendorJobs.GET_VENDOR_STATS })
-  getVendorStats(@Payload() dto) {
+  getVendorStats(@Payload() dto: any) {
     return this.vendorService.getVendorClaimStats(dto);
   }
 
   @MessagePattern({ cmd: VendorJobs.GET_BY_UUID })
-  getVenderByUuid(@Payload() dto) {
+  getVenderByUuid(@Payload() dto: any) {
     return this.vendorService.getVendorByUuid(dto);
+  }
+
+  @Post('password-register')
+  passwordRegister(
+    @Body() dto: VendorPasswordRegisterDto,
+    @RequestDetails() rdetails: Request
+  ) {
+    return this.vendorService.registerVendorWithPassword(dto, rdetails);
+  }
+
+  @Post('password-login')
+  passwordLogin(
+    @Body() dto: PasswordLoginDto,
+    @RequestDetails() rdetails: Request
+  ) {
+    return this.vendorService.loginByPassword(dto, rdetails);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard)
+  @Post('password-change')
+  passwordChange(
+    @CurrentUser() user: CurrentUserInterface,
+    @Body() dto: ChangePasswordDto
+  ) {
+    return this.vendorService.changeVendorPassword(user, dto);
   }
 }
