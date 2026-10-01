@@ -184,10 +184,10 @@ export class AddBenToProjectDto implements CreateBeneficiaryDto {
       { chain: 'evm', address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e', privateKey: '...' },
       { chain: 'stellar', address: 'GB...', privateKey: '...' }
     ],
-    description: 'Multi-chain wallet addresses with private keys (JSON string from interceptor)',
+    description: 'Multi-chain wallet addresses with private keys',
   })
   @IsOptional()
-  multiChainWallets: string | WalletDto[] = '';
+  multiChainWallets: WalletDto[] = [];
 
 }
 

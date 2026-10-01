@@ -82,21 +82,24 @@ export class BeneficiaryUtilsService {
     return result;
   }
 
-  async ensureValidWalletAddress(walletAddress?: string): Promise<string> {
-    const chain = await this.getChainName();
+  async ensureValidWalletAddress(
+    walletAddress?: string,
+    chainType?: string
+  ): Promise<string> {
     if (!walletAddress) {
-      const observable = this.walletClient.send({ cmd: WalletJobs.CREATE }, [
-        chain.toLowerCase(),
-      ]);
+      // Use DatabaseWalletStorage pattern - wallets are created and stored in DB during entity creation
+      // For single chain, use default; for multi-chain, caller should provide all wallets
+      const observable = this.walletClient.send(
+        { cmd: WalletJobs.CREATE },
+        [chainType || (await this.getChainName()).toLowerCase()]
+      );
       const result = await firstValueFrom(observable);
-      return result[0].address;
+      return result[0]?.address || '';
     }
 
-    const existingBeneficiary = await this.prismaService.beneficiary.findUnique(
-      {
-        where: { walletAddress },
-      }
-    );
+    const existingBeneficiary = await this.prismaService.beneficiary.findUnique({
+      where: { walletAddress },
+    });
 
     if (existingBeneficiary) {
       console.log('Wallet address already exists');
@@ -324,7 +327,7 @@ export class BeneficiaryUtilsService {
     if (!chainType?.trim()) return primaryWallet;
 
     const chainWallet = await this.prismaService.walletAddress.findFirst({
-      where: { entityId: beneficiaryUuid, chainType, deletedAt: null },
+      where: { entityId: beneficiaryUuid, chainType: chainType?.toUpperCase(), deletedAt: null },
       select: { address: true },
     });
 
@@ -389,22 +392,25 @@ export class BeneficiaryUtilsService {
             });
           }
 
-          if (multiChainWalletsList) {
-            const sanitizedWalletdata = multiChainWalletsList.map((walletData) => ({
-              entityId: walletData?.uuid,
-              address: walletData?.address,
-              isVerified: true,
-              chainType: walletData?.chain
+          if (multiChainWalletsList && multiChainWalletsList.length > 0) {
+            const walletsByEntity = new Map<string, { wallets: any[] }>();
+            for (const b of insertedBeneficiaries) {
+              const wallets = multiChainWalletsList.filter((w) => w.uuid === b.uuid);
+              if (wallets.length) walletsByEntity.set(b.uuid, { wallets: wallets.map(w => ({ address: w.address, chainType: w.chain })) });
+            }
 
-
-            }));
-            await prisma.walletAddress.createMany({
-              data: sanitizedWalletdata
-
-            })
-
+            // Direct DB update for wallet entityIds
+            await Promise.all(
+              [...walletsByEntity.entries()].map(([entityId, { wallets }]) =>
+                this.prismaService.walletAddress.updateMany({
+                  where: {
+                    address: { in: wallets.map(w => w.address) },
+                  },
+                  data: { entityId }
+                })
+              )
+            );
           }
-
           return prisma.beneficiary.findMany({
             where: {
               uuid: {
@@ -417,6 +423,15 @@ export class BeneficiaryUtilsService {
           });
         }
       );
+
+      // await Promise.all(
+      //   [...walletsByEntity.entries()].map(([entityId, { wallets }]) =>
+      //     lastValueFrom(
+      //       this.walletClient.send({ cmd: WalletJobs.SAVE_ENTITY_WALLETS }, { entityId, wallets })
+      //     )
+      //   )
+      // );
+
       return insertedBeneficiaries;
     } catch (error) {
       console.error('Error inserting beneficiaries and PII data:', error);

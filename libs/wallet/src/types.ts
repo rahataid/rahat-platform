@@ -37,6 +37,7 @@ export interface IWalletManager {
   createWallet(): Promise<IConnectedWallet>;
   createBulk?(count: number): Promise<WalletKeys[]>; // Bulk wallet creation
   importWallet(privateKey: string): Promise<IConnectedWallet>;
+  createWalletFromMnemonic?(mnemonic: string): Promise<IConnectedWallet>; // Create from shared mnemonic
   connect(
     walletAddress: string,
     blockchain: ChainType

@@ -8,6 +8,7 @@ import {
   BLOCKCHAIN_REGISTRY_TOKEN,
   BlockchainProviderRegistry,
 } from './providers/blockchain-provider.registry';
+import { DatabaseWalletStorage } from './storages/database.storage';
 
 export interface WalletCreateResult {
   chain: ChainType;
@@ -21,6 +22,11 @@ export interface MultiChainWalletResult {
   defaultChain: ChainType;
   /** One entry per active chain */
   wallets: WalletCreateResult[];
+}
+
+export interface SaveEntityWalletsDto {
+  entityId: string;
+  wallets: { address: string; chain: string }[];
 }
 
 // TODO: Multi-chain support - Future enhancement to support multiple chains per instance
@@ -40,8 +46,8 @@ export class WalletService implements OnModuleInit {
   async onModuleInit() {
     try {
       await this.initializeProviders();
-    } catch (e) {
-      this.logger.warn(`[WalletService] Wallet providers not initialized — waiting for settings. (${e.message})`);
+    } catch (e: unknown) {
+      this.logger.warn(`[WalletService] Wallet providers not initialized — waiting for settings. (${e instanceof Error ? e.message : String(e)})`);
     }
   }
 
@@ -50,8 +56,8 @@ export class WalletService implements OnModuleInit {
     this.logger.log('[WalletService] settings.seeded received. Re-initializing wallet providers...');
     try {
       await this.initializeProviders();
-    } catch (e) {
-      this.logger.error(`[WalletService] Failed to initialize after seed: ${e.message}`);
+    } catch (e: unknown) {
+      this.logger.error(`[WalletService] Failed to initialize after seed: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
@@ -229,9 +235,7 @@ export class WalletService implements OnModuleInit {
    * per-chain wallets (for tbl_wallet_addresses).
    */
   async createBulkForAllChains(count: number): Promise<MultiChainWalletResult[]> {
-    // Dynamic imports keep the heavy crypto libs out of the module-init path
     const { ethers } = await import('ethers');
-    const { Keypair } = await import('@stellar/stellar-sdk');
 
     const defaultChain = await this.getDefaultChainFromDb();
     const supportedChains = this.providerRegistry.getSupportedChains();
@@ -239,35 +243,21 @@ export class WalletService implements OnModuleInit {
     const results: MultiChainWalletResult[] = [];
 
     for (let i = 0; i < count; i++) {
-      // One mnemonic shared across all chains for this beneficiary
-      const mnemonic = ethers.Mnemonic.fromEntropy(ethers.randomBytes(16));
+      // Generate one mnemonic shared across all chains for this user
+      const mnemonicPhrase = ethers.Mnemonic.fromEntropy(ethers.randomBytes(16)).phrase;
       const wallets: WalletCreateResult[] = [];
 
       for (const chainType of supportedChains) {
         try {
-          let address: string;
-          let privateKey: string;
-
-          if (chainType === 'evm') {
-            const hdWallet = ethers.HDNodeWallet.fromMnemonic(mnemonic);
-            address = hdWallet.address;
-            privateKey = hdWallet.privateKey;
-          } else if (chainType === 'stellar') {
-            const hdPath = "m/44'/148'/0'/0/0";
-            const hdWallet = ethers.HDNodeWallet.fromMnemonic(mnemonic, hdPath);
-            const keypair = Keypair.fromRawEd25519Seed(
-              Buffer.from(hdWallet.privateKey.slice(2), 'hex')
-            );
-            address = keypair.publicKey();
-            privateKey = keypair.secret();
-          } else {
-            this.logger.warn(`No mnemonic derivation path for chain "${chainType}", skipping`);
-            continue;
-          }
-
-          // Persist derived key into the chain's wallet storage
-          await this.providerRegistry.importWallet(privateKey, chainType);
-          wallets.push({ chain: chainType, address, privateKey });
+          const walletKeys = await this.providerRegistry.createWalletFromMnemonic(
+            mnemonicPhrase,
+            chainType
+          );
+          wallets.push({
+            chain: chainType,
+            address: walletKeys.address,
+            privateKey: walletKeys.privateKey,
+          });
         } catch (error) {
           this.logger.error(`Failed to derive wallet for chain ${chainType}: ${error instanceof Error ? error.message : String(error)}`);
         }
@@ -315,9 +305,9 @@ export class WalletService implements OnModuleInit {
         if (walletKeys) {
           return walletKeys;
         }
-      } catch (error) {
+      } catch (error: unknown) {
         this.logger.warn(
-          `Failed to get wallet keys for ${chainType}: ${error.message}`
+          `Failed to get wallet keys for ${chainType}: ${error instanceof Error ? error.message : String(error)}`
         );
       }
     }
@@ -427,6 +417,14 @@ export class WalletService implements OnModuleInit {
 
   private async detectChainFromAddress(address: string): Promise<ChainType> {
     return this.providerRegistry.detectChainFromAddress(address);
+  }
+
+  /**
+   * Persists pre-generated wallets to tbl_wallet_addresses, linked to an entity.
+   * Called via microservice so beneficiary service doesn't write to wallet table directly.
+   */
+  async saveEntityWallets(dto: SaveEntityWalletsDto): Promise<void> {
+    await DatabaseWalletStorage.assignEntity(this.prisma, dto.wallets, dto.entityId);
   }
 
   // Backward compatibility methods (deprecated)

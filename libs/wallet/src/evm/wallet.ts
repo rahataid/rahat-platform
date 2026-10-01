@@ -88,6 +88,19 @@ export class EVMWallet implements IWalletManager {
     await this.storage.saveKey(walletKeys);
     return new ConnectedWallet(walletKeys, this.rpcUrl);
   }
+
+  async createWalletFromMnemonic(mnemonic: string): Promise<ConnectedWallet> {
+    const hdWallet = ethers.HDNodeWallet.fromPhrase(mnemonic);
+    const walletKeys = {
+      address: hdWallet.address,
+      privateKey: hdWallet.privateKey,
+      publicKey: hdWallet.publicKey,
+      mnemonic,
+      blockchain: EVMWallet.blockchainType,
+    };
+    await this.storage.saveKey(walletKeys);
+    return new ConnectedWallet(walletKeys, this.rpcUrl);
+  }
 }
 
 export default EVMWallet;
