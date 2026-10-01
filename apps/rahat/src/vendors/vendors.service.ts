@@ -177,8 +177,6 @@ export class VendorsService {
     let randomWallet: any = null;
 
     try {
-
-      console.log(dto)
       // Step 1: Check for duplicate email/phone/username BEFORE creating wallet
       await this.checkForDuplicates(dto);
 
@@ -200,11 +198,12 @@ export class VendorsService {
 
       // Step 5: Use transaction to ensure atomicity
       const result = await this.prisma.$transaction(async (tx) => {
+
         // Create signup request using SignupsService with USERNAME service
         const signupData = {
           name: dto.name,
           username: dto.username,
-          email: dto.email,
+          email: dto.email || '',
           phone: dto.phone,
           password: dto.password,
           confirmPassword: dto.password,
