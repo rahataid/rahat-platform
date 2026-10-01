@@ -14,7 +14,7 @@ import {
   ValidationError,
 } from '../imports/import-validator.util';
 import { ImportsService } from '../imports/imports.service';
-import { WalletService } from '../wallet/wallet.service';
+import { MultiChainWalletResult, WalletService } from '../wallet/wallet.service';
 
 const BATCH_SIZE = 500;
 const WALLET_GENERATION_BATCH_SIZE = 100;
@@ -116,13 +116,13 @@ export class ImportProcessor {
       this.logger.log(`Validation passed for import: ${importUuid}`);
 
       // PHASE 2.5: WALLET GENERATION (60% → 62%)
-      await this.generateWalletsForRows(mappedRows, job, totalRows);
+      const multiChainWallets = await this.generateWalletsForRows(mappedRows, job, totalRows);
 
       // PHASE 3: IMPORT (62% → 100%)
       this.logger.log(`Starting bulk import for: ${importUuid}`);
       await job.progress({ phase: 'importing', percent: 62, total: totalRows, processed: 0 });
 
-      const groupUuid = await this.executeBulkImport(importUuid, mappedRows, importRecord.groupName, job, totalRows);
+      const groupUuid = await this.executeBulkImport(importUuid, mappedRows, importRecord.groupName, job, totalRows, multiChainWallets);
 
       // Success
       await this.importsService.updateExtras(importUuid, {
@@ -151,9 +151,11 @@ export class ImportProcessor {
     groupName: string,
     job: Job,
     totalRows: number,
+    multiChainWallets: Map<number, MultiChainWalletResult>,
   ): Promise<string> {
     const batches = createBatches(mappedRows, BATCH_SIZE);
     const totalBatches = batches.length;
+    const rowToIndex = new Map(mappedRows.map((row, index) => [row, index]));
 
     const groupUuid = await this.prisma.$transaction(
       async (tx) => {
@@ -233,6 +235,26 @@ export class ImportProcessor {
                 },
                 select: { id: true, uuid: true },
               });
+
+            // Upsert per-chain wallet addresses into tbl_wallet_addresses
+            const rowIndex = rowToIndex.get(row);
+            const walletResult = rowIndex !== undefined ? multiChainWallets.get(rowIndex) : undefined;
+            if (walletResult) {
+              for (const wallet of walletResult.wallets) {
+                await tx.walletAddress.upsert({
+                  where: { address: wallet.address },
+                  create: {
+                    entityId: beneficiary.uuid,
+                    address: wallet.address,
+                    isPrimary: wallet.chain === walletResult.defaultChain,
+                    isVerified: true,
+                    chainType: wallet.chain,
+                    config: { privateKey: wallet.privateKey, address: wallet.address, chain: wallet.chain },
+                  },
+                  update: {},
+                });
+              }
+            }
 
             await tx.beneficiaryPii.upsert({
               where: { beneficiaryId: beneficiary.id },
@@ -323,7 +345,9 @@ export class ImportProcessor {
     mappedRows: MappedRow[],
     job: Job,
     totalRows: number
-  ): Promise<void> {
+  ): Promise<Map<number, MultiChainWalletResult>> {
+    const walletMap = new Map<number, MultiChainWalletResult>();
+
     // 1. Identify rows without wallet addresses
     const rowsMissingWallets = mappedRows
       .map((row, index) => ({ row, index }))
@@ -331,7 +355,7 @@ export class ImportProcessor {
 
     if (rowsMissingWallets.length === 0) {
       this.logger.log('All rows have wallet addresses, skipping generation');
-      return;
+      return walletMap;
     }
 
     // 2. Reuse wallets for beneficiaries that already exist (by uuid), regardless of group
@@ -367,7 +391,7 @@ export class ImportProcessor {
 
     if (rowsNeedingWallets.length === 0) {
       this.logger.log('No new wallets to generate after reuse check');
-      return;
+      return walletMap;
     }
 
     this.logger.log(`Generating ${rowsNeedingWallets.length} wallets in bulk`);
@@ -388,12 +412,13 @@ export class ImportProcessor {
       const batch = batches[batchIdx];
 
       try {
-        // Use bulk wallet generation from SDK
-        const wallets = await this.walletService.createBulk(batch.length);
+        // Generate multi-chain wallets (same mnemonic across all active chains)
+        const wallets = await this.walletService.createBulkForAllChains(batch.length);
 
-        // Assign to mappedRows
+        // Assign default-chain address to beneficiary and record full multi-chain result
         batch.forEach(({ index }, i) => {
-          mappedRows[index].beneficiary.walletAddress = wallets[i].address;
+          mappedRows[index].beneficiary.walletAddress = wallets[i].defaultAddress;
+          walletMap.set(index, wallets[i]);
         });
 
         walletsGenerated += batch.length;
@@ -421,6 +446,7 @@ export class ImportProcessor {
     }
 
     this.logger.log(`Wallet generation complete: ${walletsGenerated} wallets created, ${walletsReused} reused`);
+    return walletMap;
   }
 }
 
