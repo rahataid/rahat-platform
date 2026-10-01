@@ -41,7 +41,7 @@ export class GroupSyncService {
       await this.beneficiaryQueue.add(
         BeneficiaryJobs.SYNC_GROUP_BENEFICIARIES_TO_PROJECT,
         { groupUuid, projectId },
-        { attempts: 3, removeOnComplete: true, backoff: { type: 'exponential', delay: 2000 } },
+        { attempts: 1, removeOnComplete: true },
       );
       this.logger.log(`Queued SYNC_GROUP_TO_PROJECTS for group ${groupUuid} → project ${projectId}`);
     }
