@@ -216,9 +216,9 @@ export class BeneficiaryController {
       .pipe(timeout(MS_TIMEOUT));
   }
 
-  // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
-  // @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.USER })
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.BENEFICIARY })
   @Post('groups/:uuid/upload')
   @ApiParam({ name: 'uuid', required: true })
   @UseInterceptors(FileInterceptor('file'))
@@ -688,6 +688,15 @@ export class BeneficiaryController {
   @ApiParam({ name: 'uuid', required: true })
   async groupAccountCheck(@Param('uuid') uuid: UUID) {
     return this.client.send({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK }, uuid);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.BENEFICIARY })
+  @Post('groups/:uuid/force-invalidate')
+  @ApiParam({ name: 'uuid', required: true })
+  async groupForceInvalidate(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GROUP_FORCE_INVALIDATE }, uuid);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)

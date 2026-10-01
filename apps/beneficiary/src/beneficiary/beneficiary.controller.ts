@@ -265,6 +265,11 @@ export class BeneficiaryController {
     return this.service.groupAttributesCheck(uuid);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.GROUP_FORCE_INVALIDATE })
+  groupForceInvalidate(uuid: string) {
+    return this.service.groupForceInvalidate(uuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.GET_GROUP_BANK_CHECK_STATUS })
   getGroupBankCheckStatus(uuid: string) {
     return this.service.getGroupBankCheckStatus(uuid);
