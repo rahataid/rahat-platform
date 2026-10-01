@@ -6,19 +6,18 @@ import {
   Inject,
   Injectable,
   Logger,
-  NotFoundException,
-  OnModuleInit,
+  NotFoundException
 } from '@nestjs/common';
 // import * as jwt from '@nestjs/jwt';
-import { SettingsService } from '@rumsan/extensions/settings';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import {
   GetVendorOtp,
   VendorAddToProjectDto,
   VendorRegisterDto,
 } from '@rahataid/extensions';
 import { ProjectContants, ProjectEvents, UserRoles, VendorJobs } from '@rahataid/sdk';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
@@ -27,11 +26,11 @@ import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
 import { UUID } from 'crypto';
-import { isAddress } from '../utils/web3';
 import { lastValueFrom } from 'rxjs';
 import { Address } from 'viem';
 import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
+import { isAddress } from '../utils/web3';
 import { GetVendorsDTO } from './dto/get-vendors.dto';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
@@ -68,6 +67,24 @@ export class VendorsService {
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
+    // Resolve default chain and pick the matching wallet as primary
+    const defaultChainConfig = await (
+      this.prisma.chainConfig.findFirst({ where: { isActive: true, isDefault: true } })
+    ) ?? await this.prisma.chainConfig.findFirst({ where: { isActive: true } });
+
+    const defaultChainType = defaultChainConfig?.chain?.toLowerCase() ?? 'evm';
+
+    const defaultWallet = dto.wallets?.find(w => w.chain?.toLowerCase() === defaultChainType)
+      ?? dto.wallets?.[0];
+
+    if (!defaultWallet?.address)
+      throw new BadRequestException({
+        message: 'At least one wallet address is required',
+        code: 'VENDOR_WALLET_ADDRESS_REQUIRED',
+      });
+
+    const wallet = defaultWallet.address;
+
     const vendor = await this.prisma.$transaction(async (prisma) => {
       const role = await prisma.role.findFirst({
         where: { name: UserRoles.VENDOR },
@@ -78,7 +95,7 @@ export class VendorsService {
           code: 'VENDOR_ROLE_NOT_FOUND',
         });
       // Add to User table
-      const { service, wallet, authWallet, ...rest } = dto;
+      const { service, wallets, authWallet, ...rest } = dto;
       if (dto?.email || dto?.phone) {
         const userData = await prisma.user.findFirst({
           where: {
@@ -103,27 +120,43 @@ export class VendorsService {
       const user = await prisma.user.create({ data: { ...rest, wallet } });
 
       // Add to UserRole table
-      const userRolePayload = { userId: user.id, roleId: role.id };
-      await prisma.userRole.create({ data: userRolePayload });
+      await prisma.userRole.create({ data: { userId: user.id, roleId: role.id } });
+
       // Add to Auth table
       await prisma.auth.create({
         data: {
           userId: +user.id,
           service: dto.service as any,
-          serviceId: dto.authWallet ? authWallet : wallet,
+          serviceId: authWallet ?? wallet,
           details: dto.extras,
         },
       });
-      if (dto.service === Service.WALLET) return user;
+      if (dto.service !== Service.WALLET) {
+        await prisma.auth.create({
+          data: {
+            userId: +user.id,
+            service: Service.WALLET,
+            serviceId: wallet,
+            details: dto.extras,
+          },
+        });
+      }
 
-      await prisma.auth.create({
-        data: {
-          userId: +user.id,
-          service: Service.WALLET,
-          serviceId: dto.wallet,
-          details: dto.extras,
-        },
-      });
+      // Persist all multi-chain wallets to tbl_wallet_addresses
+      if (wallets?.length) {
+        await prisma.walletAddress.createMany({
+          data: wallets.map((w) => ({
+            entityId: user.uuid,
+            address: w.address,
+            isPrimary: w.address === wallet,
+            isVerified: true,
+            chainType: w.chain,
+            config: { privateKey: w.privateKey ?? null, address: w.address, chain: w.chain },
+          })),
+          skipDuplicates: true,
+        });
+      }
+
       return user;
     });
 
@@ -143,9 +176,12 @@ export class VendorsService {
 
   async assignToProject(dto: VendorAddToProjectDto) {
     const { vendorId, projectId } = dto;
-    const vendorUser = await this.prisma.user.findUnique({
-      where: { uuid: vendorId },
-    });
+    const [vendorUser, project] = await Promise.all([
+      this.prisma.user.findUnique({ where: { uuid: vendorId } }),
+      this.prisma.project.findUnique({ where: { uuid: projectId }, select: { chainType: true } }),
+    ]);
+    if (!vendorUser)
+      throw new NotFoundException({ message: 'Vendor not found', code: 'VENDOR_NOT_FOUND' });
     const userRoles = await this.prisma.userRole.findMany({
       where: { userId: vendorUser.id },
       include: {
@@ -162,9 +198,20 @@ export class VendorsService {
         message: 'Not a vendor',
         code: 'USER_IS_NOT_A_VENDOR',
       });
+
+    // Resolve chain-specific wallet address for this vendor; fallback to primary wallet
+    let walletAddress = vendorUser.wallet;
+    if (project?.chainType) {
+      const chainWallet = await this.prisma.walletAddress.findFirst({
+        where: { entityId: vendorId, chainType: project.chainType, deletedAt: null },
+        select: { address: true },
+      });
+      if (chainWallet?.address) walletAddress = chainWallet.address;
+    }
+
     const projectPayload = {
       uuid: vendorId,
-      walletAddress: vendorUser.wallet,
+      walletAddress,
     };
 
     const assigned = await this.getVendorAssignedToProject(vendorId, projectId);
@@ -294,9 +341,9 @@ export class VendorsService {
     if (projectData.length === 0) {
       return data;
     }
-    
+
     return projectData;
-}
+  }
 
   async listVendor(dto: GetVendorsDTO) {
     const { vendorName, projectName, status, page, perPage } = dto;
