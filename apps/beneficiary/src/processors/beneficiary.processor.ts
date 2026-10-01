@@ -596,6 +596,7 @@ export class BeneficiaryProcessor {
         extras: {
           ...((b.extras as object) || {}),
           phone: b.pii?.phone || null,
+          ...(b.pii?.name != null ? { name: b.pii.name } : {}),
           ...(b.location != null ? { location: b.location } : {}),
           ...(b.latitude != null ? { latitude: b.latitude } : {}),
           ...(b.longitude != null ? { longitude: b.longitude } : {}),
