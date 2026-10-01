@@ -332,12 +332,13 @@ export class WalletService implements OnModuleInit {
     return this.getSecretByWallet(walletAddress, chain);
   }
 
-  async getWalletByPhone(phoneNumber: string): Promise<string> {
+  async getWalletByPhone(phoneNumber: string, chain?: ChainType): Promise<string> {
+
     const result = await this.prisma.beneficiaryPii.findFirst({
       where: { phone: phoneNumber },
       select: {
         beneficiary: {
-          select: { walletAddress: true },
+          select: { uuid: true },
         },
       },
     });
@@ -349,7 +350,14 @@ export class WalletService implements OnModuleInit {
       });
     }
 
-    return result.beneficiary.walletAddress;
+    const walletAddressDetails = await this.prisma.walletAddress.findFirst({
+      where: {
+        entityId: result.beneficiary.uuid,
+        chainType: chain
+      }
+    })
+
+    return walletAddressDetails?.address;
   }
 
   async updateBulk(bulkUpdateWalletDto: BulkUpdateWallet) {
