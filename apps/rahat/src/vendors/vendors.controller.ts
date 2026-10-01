@@ -68,9 +68,9 @@ export class VendorsController {
     return this.vendorService.getVendorCount();
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.VENDOR })
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, DbAbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.VENDOR })
   @ApiParam({ name: 'id', required: true })
   @Get('/:id')
   getVendor(@Param('id') id: UUID | Address,
