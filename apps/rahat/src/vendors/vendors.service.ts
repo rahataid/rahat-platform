@@ -177,6 +177,8 @@ export class VendorsService {
     let randomWallet: any = null;
 
     try {
+
+      console.log(dto)
       // Step 1: Check for duplicate email/phone/username BEFORE creating wallet
       await this.checkForDuplicates(dto);
 
