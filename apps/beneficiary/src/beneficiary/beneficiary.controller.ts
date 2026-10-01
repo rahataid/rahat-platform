@@ -90,7 +90,8 @@ export class BeneficiaryController {
     return this.service.createBulkWithGroup(
       data?.payload,
       data?.projectUUID,
-      data?.groupName
+      data?.groupName,
+      data?.groupPurpose
     );
   }
 
@@ -225,6 +226,13 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.ADD_BENEFICIARIES_TO_GROUP })
   addBeneficiariesToGroup(payload: AddBeneficiariesToGroupDto) {
     return this.service.addBeneficiariesToGroup(payload);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.UPLOAD_BENEFICIARIES_TO_GROUP })
+  uploadBeneficiariesToGroup(
+    @Payload() payload: { dtos: CreateBeneficiaryDto[]; groupUuid: string },
+  ) {
+    return this.service.uploadBeneficiariesToGroup(payload.dtos, payload.groupUuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP })

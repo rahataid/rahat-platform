@@ -48,6 +48,7 @@ import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
+import { GroupSyncService } from './group-sync.service';
 import { VerificationService } from './verification.service';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
@@ -69,7 +70,8 @@ export class BeneficiaryService {
     @Inject('RAHAT_CLIENT') private readonly walletClient: ClientProxy,
     private readonly eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
-    private readonly beneficiaryUtilsService: BeneficiaryUtilsService
+    private readonly beneficiaryUtilsService: BeneficiaryUtilsService,
+    private readonly groupSyncService: GroupSyncService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -990,76 +992,76 @@ export class BeneficiaryService {
 
       // Assign beneficiaries to the project if a projectUuid is provided
       // && conditional
-      if (projectUuid) {
-        await this.prisma.beneficiaryProject.createMany({
-          data: insertedBeneficiariesWithPii.map(({ uuid }) => ({
-            beneficiaryId: uuid,
-            projectId: projectUuid,
-          })),
-        });
+      // if (projectUuid) {
+      //   await this.prisma.beneficiaryProject.createMany({
+      //     data: insertedBeneficiariesWithPii.map(({ uuid }) => ({
+      //       beneficiaryId: uuid,
+      //       projectId: projectUuid,
+      //     })),
+      //   });
 
-        // TEMP-DISABLED (perf blocker): this emit triggers saveAllStats(), a ~27-query
-        // full-table stats recompute (incl. an unindexed JSONB scan in calculateCountByBank,
-        // plus several unfiltered prisma.beneficiary.findMany({}) calls in calculateAgeGroups /
-        // calculateTypeOfSSA / calculateTotalFamilyMembers) that runs synchronously off this
-        // emit. At prod data volume it saturates the Prisma connection pool and stalls
-        // subsequent queries on the same pool (e.g. beneficiaryGroup.create in
-        // createBulkWithGroup) for several seconds. Confirmed by disabling this emit and
-        // the BENEFICIARY_CREATED emit below, which removed the stall entirely.
-        //
-        // Recommended fix (do this before re-enabling):
-        // 1. Move saveAllStats() off the request path entirely: dispatch it as a queued job
-        //    on BQUEUE.RAHAT_BENEFICIARY (see the already-registered but unused
-        //    BeneficiaryJobs.UPDATE_STATS handler in beneficiary.processor.ts) instead of
-        //    emitting an in-process event that runs inline.
-        // 2. Debounce/coalesce bursts: add the job with a fixed jobId (e.g. 'stats-recompute')
-        //    and a short delay (e.g. 5-10s), so repeated uploads in quick succession only
-        //    trigger one recompute instead of one per call.
-        // 3. Cap concurrency on the processor (e.g. { concurrency: 1 } or a Bull limiter) so
-        //    at most one stats recompute runs at a time even under heavy queueing.
-        // 4. Fix the underlying expensive queries regardless of 1-3: add a Postgres
-        //    expression index on extras->>'bank_name' for calculateCountByBank, and rewrite
-        //    calculateAgeGroups/calculateTypeOfSSA/calculateTotalFamilyMembers to use
-        //    groupBy/aggregate queries instead of pulling the full table into JS.
-        // 5. Consider dropping the reactive/event-driven model altogether in favor of a
-        //    periodic scheduled recompute (e.g. every 5-10 min via @nestjs/schedule or a
-        //    Bull repeatable job) so stats cost is decoupled from upload traffic entirely.
-        //
-        // this.eventEmitter.emit(
-        //   BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
-        //   {
-        //     projectUuid: projectUuid,
-        //   }
-        // );
-        //COMMENTING THIS BECAUSE ALREADY ADDED TO PROJECT
+      //   // TEMP-DISABLED (perf blocker): this emit triggers saveAllStats(), a ~27-query
+      //   // full-table stats recompute (incl. an unindexed JSONB scan in calculateCountByBank,
+      //   // plus several unfiltered prisma.beneficiary.findMany({}) calls in calculateAgeGroups /
+      //   // calculateTypeOfSSA / calculateTotalFamilyMembers) that runs synchronously off this
+      //   // emit. At prod data volume it saturates the Prisma connection pool and stalls
+      //   // subsequent queries on the same pool (e.g. beneficiaryGroup.create in
+      //   // createBulkWithGroup) for several seconds. Confirmed by disabling this emit and
+      //   // the BENEFICIARY_CREATED emit below, which removed the stall entirely.
+      //   //
+      //   // Recommended fix (do this before re-enabling):
+      //   // 1. Move saveAllStats() off the request path entirely: dispatch it as a queued job
+      //   //    on BQUEUE.RAHAT_BENEFICIARY (see the already-registered but unused
+      //   //    BeneficiaryJobs.UPDATE_STATS handler in beneficiary.processor.ts) instead of
+      //   //    emitting an in-process event that runs inline.
+      //   // 2. Debounce/coalesce bursts: add the job with a fixed jobId (e.g. 'stats-recompute')
+      //   //    and a short delay (e.g. 5-10s), so repeated uploads in quick succession only
+      //   //    trigger one recompute instead of one per call.
+      //   // 3. Cap concurrency on the processor (e.g. { concurrency: 1 } or a Bull limiter) so
+      //   //    at most one stats recompute runs at a time even under heavy queueing.
+      //   // 4. Fix the underlying expensive queries regardless of 1-3: add a Postgres
+      //   //    expression index on extras->>'bank_name' for calculateCountByBank, and rewrite
+      //   //    calculateAgeGroups/calculateTypeOfSSA/calculateTotalFamilyMembers to use
+      //   //    groupBy/aggregate queries instead of pulling the full table into JS.
+      //   // 5. Consider dropping the reactive/event-driven model altogether in favor of a
+      //   //    periodic scheduled recompute (e.g. every 5-10 min via @nestjs/schedule or a
+      //   //    Bull repeatable job) so stats cost is decoupled from upload traffic entirely.
+      //   //
+      //   // this.eventEmitter.emit(
+      //   //   BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT,
+      //   //   {
+      //   //     projectUuid: projectUuid,
+      //   //   }
+      //   // );
+      //   //COMMENTING THIS BECAUSE ALREADY ADDED TO PROJECT
 
-        const assignPromises = insertedBeneficiariesWithPii.map(
-          (b) => {
-            const projectPayload = {
-              uuid: b.uuid,
-              walletAddress: b.walletAddress,
-              extras: b?.extras || null,
-              type: BeneficiaryConstants.Types.ENROLLED,
-              isVerified: b?.isVerified,
-            };
-            return handleMicroserviceCall({
-              client: this.client.send(
-                { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUuid },
-                projectPayload
-              ),
-              onSuccess(response) {
-                console.log('response', response);
-              },
-              onError(error) {
-                console.log('error', error);
-                throw new RpcException(error.message);
-              },
-            });
-          }
-          // this.assignBeneficiaryGroupToProject({ beneficiaryId: b.uuid, projectId: projectUuid })
-        );
-        await Promise.all(assignPromises);
-      }
+      //   const assignPromises = insertedBeneficiariesWithPii.map(
+      //     (b) => {
+      //       const projectPayload = {
+      //         uuid: b.uuid,
+      //         walletAddress: b.walletAddress,
+      //         extras: b?.extras || null,
+      //         type: BeneficiaryConstants.Types.ENROLLED,
+      //         isVerified: b?.isVerified,
+      //       };
+      //       return handleMicroserviceCall({
+      //         client: this.client.send(
+      //           { cmd: BeneficiaryJobs.ADD_TO_PROJECT, uuid: projectUuid },
+      //           projectPayload
+      //         ),
+      //         onSuccess(response) {
+      //           console.log('response', response);
+      //         },
+      //         onError(error) {
+      //           console.log('error', error);
+      //           throw new RpcException(error.message);
+      //         },
+      //       });
+      //     }
+      //     // this.assignBeneficiaryGroupToProject({ beneficiaryId: b.uuid, projectId: projectUuid })
+      //   );
+      //   await Promise.all(assignPromises);
+      // }
 
       // TEMP-DISABLED (perf blocker): same saveAllStats() cost as above, see comment
       // near BENEFICIARY_ASSIGNED_TO_PROJECT emit in this function.
@@ -1083,7 +1085,8 @@ export class BeneficiaryService {
   async createBulkWithGroup(
     dtos: CreateBeneficiaryDto[],
     projectUuid?: string,
-    groupName?: string
+    groupName?: string,
+    groupPurpose?: string
   ) {
     this.logger.log(`Creating bulk beneficiaries with group: ${groupName}`);
     const trimmedGroupName = groupName?.trim();
@@ -1106,8 +1109,12 @@ export class BeneficiaryService {
       return createBulkResponse;
     }
 
+    const groupData = {
+      name: trimmedGroupName
+    } as any
+    if (groupPurpose) groupData.groupPurpose = groupPurpose;
     const group = await this.prisma.beneficiaryGroup.create({
-      data: { name: trimmedGroupName },
+      data: groupData
     });
 
     await this.prisma.groupedBeneficiaries.createMany({
@@ -1116,6 +1123,14 @@ export class BeneficiaryService {
         beneficiaryId: uuid,
       })),
     });
+
+    if (projectUuid) {
+      const groupDetails = {
+        projectId: projectUuid,
+        beneficiaryGroupId: group.uuid
+      }
+      await this.assignBeneficiaryGroupToProject(groupDetails);
+    }
 
     return {
       ...createBulkResponse,
@@ -1471,6 +1486,142 @@ export class BeneficiaryService {
       success: true,
       group,
     };
+  }
+
+  async uploadBeneficiariesToGroup(
+    dtos: CreateBeneficiaryDto[],
+    groupUuid: string,
+  ): Promise<{ created: number; updated: number; addedToGroup: number; group: any }> {
+    const group = await this.prisma.beneficiaryGroup.findUnique({
+      where: { uuid: groupUuid },
+    });
+    if (!group) {
+      throw new RpcException({
+        message: '[BENEFICIARY_GROUP_NOT_FOUND] Beneficiary group not found.',
+        code: 'BENEFICIARY_GROUP_NOT_FOUND',
+        params: { groupUuid },
+      });
+    }
+
+    const createdUuids: string[] = [];
+    const updatedUuids: string[] = [];
+
+    for (const dto of dtos) {
+      try {
+        let existing = null;
+
+        if (dto.uuid) {
+          existing = await this.prisma.beneficiary.findUnique({
+            where: { uuid: dto.uuid },
+            include: { pii: true },
+          });
+        }
+
+        if (existing && !existing.deletedAt) {
+          await this._updateBeneficiaryFromDto(existing, dto);
+          updatedUuids.push(existing.uuid);
+        } else {
+          const created = await this._createBeneficiaryFromDto(dto);
+          createdUuids.push(created.uuid);
+        }
+      } catch (error) {
+        this.logger.error(`Error processing beneficiary uuid=${dto.uuid}: ${(error as Error).message}`);
+        // continue — don't fail entire import for one row
+      }
+    }
+
+    const allUuids = [...createdUuids, ...updatedUuids];
+
+    if (allUuids.length > 0) {
+      await this.prisma.groupedBeneficiaries.createMany({
+        data: allUuids.map((beneficiaryId) => ({
+          beneficiaryGroupId: groupUuid,
+          beneficiaryId,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    await this.groupSyncService.syncGroup(groupUuid);
+
+    return {
+      created: createdUuids.length,
+      updated: updatedUuids.length,
+      addedToGroup: allUuids.length,
+      group,
+    };
+  }
+
+  private async _createBeneficiaryFromDto(
+    dto: CreateBeneficiaryDto,
+  ): Promise<{ uuid: string }> {
+    const { piiData, ...rest } = dto;
+    const uuid = rest.uuid ?? (uuidv4() as UUID);
+
+    const walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(
+      rest.walletAddress,
+    );
+
+    return this.prisma.$transaction(async (tx) => {
+      const ben = await tx.beneficiary.create({
+        data: { ...rest, uuid, walletAddress },
+      });
+
+      await tx.beneficiaryPii.create({
+        data: {
+          beneficiaryId: ben.id,
+          name: piiData?.name ?? null,
+          phone: piiData?.phone
+            ? piiData.phone.toString()
+            : BeneficiaryConstants.UNPHONED_PLACEHOLDER,
+          extras: piiData?.extras ?? {},
+        },
+      });
+
+      return { uuid: ben.uuid };
+    });
+  }
+
+  private async _updateBeneficiaryFromDto(
+    existing: any,
+    dto: CreateBeneficiaryDto,
+  ): Promise<void> {
+    const updateData: Record<string, any> = {};
+
+    if (dto.gender !== undefined) updateData.gender = dto.gender;
+    if (dto.location !== undefined) updateData.location = dto.location;
+    if (dto.latitude !== undefined) updateData.latitude = dto.latitude;
+    if (dto.longitude !== undefined) updateData.longitude = dto.longitude;
+    if (dto.notes !== undefined) updateData.notes = dto.notes;
+    if (dto.bankedStatus !== undefined) updateData.bankedStatus = dto.bankedStatus;
+    if (dto.internetStatus !== undefined) updateData.internetStatus = dto.internetStatus;
+    if (dto.phoneStatus !== undefined) updateData.phoneStatus = dto.phoneStatus;
+    if (dto.birthDate !== undefined) updateData.birthDate = dto.birthDate;
+    if (dto.age !== undefined) updateData.age = dto.age;
+    if (dto.extras) updateData.extras = { ...(existing.extras ?? {}), ...dto.extras };
+
+    if (Object.keys(updateData).length > 0) {
+      await this.prisma.beneficiary.update({
+        where: { uuid: existing.uuid },
+        data: updateData,
+      });
+    }
+
+    if (dto.piiData) {
+      const piiUpdates: Record<string, any> = {};
+
+      if (dto.piiData.name !== undefined) piiUpdates.name = dto.piiData.name;
+      if (dto.piiData.extras !== undefined) {
+        piiUpdates.extras = { ...(existing.pii?.extras ?? {}), ...dto.piiData.extras };
+      }
+
+      if (Object.keys(piiUpdates).length > 0 && existing.pii) {
+        await this.prisma.beneficiaryPii.update({
+          where: { beneficiaryId: existing.id },
+          data: piiUpdates,
+        });
+      }
+    }
   }
 
   async getOneGroup(
@@ -2231,6 +2382,7 @@ export class BeneficiaryService {
         },
       });
 
+
       if (project && (project.type.toLocaleLowerCase() === 'aa' || project.type.toLocaleLowerCase() === 'cva')) {
         // check if groups has any benf that doesn't have valid bank account
         const isGroupValidForAA = await this.isGroupValidForAA(
@@ -2299,12 +2451,17 @@ export class BeneficiaryService {
 
       console.log('adding beneficiary group');
       //3. Sync beneficiary to project
-      return this.client.send(
-        { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
-        {
-          beneficiaryGroupData,
-        }
-      );
+      return handleMicroserviceCall({
+        client: this.client.send(
+          { cmd: BeneficiaryJobs.ADD_GROUP_TO_PROJECT, uuid: project.uuid },
+          {
+            beneficiaryGroupData,
+          }
+        ),
+        onError: async (error) => {
+          throw new RpcException(error?.message);
+        },
+      });
     } catch (err) {
       console.log(err);
       throw new RpcException(err.message);
