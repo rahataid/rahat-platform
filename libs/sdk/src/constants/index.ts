@@ -691,6 +691,8 @@ export const MS_ACTIONS = {
     CREATE: 'notification.create',
     LIST: 'notification.list',
     GET: 'notification.get',
+    REGISTER_DEVICE: 'app.pushToken.register',
+    UNREGISTER_DEVICE: 'app.pushToken.unregister',
   },
 
   OTP: {

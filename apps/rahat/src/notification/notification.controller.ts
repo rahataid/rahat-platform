@@ -1,3 +1,4 @@
+// rahat-project/apps/rahat/src/notification/notification.controller.ts
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -7,13 +8,18 @@ import {
 } from '@rahataid/extensions';
 import { ACTIONS, APP, ProjectJobs, SUBJECTS } from '@rahataid/sdk';
 import { AbilitiesGuard, CheckAbilities, JwtGuard } from '@rumsan/user';
+import { RegisterDeviceDto } from './dto/register-device.dto';
 import { NotificationService } from './notification.service';
+import { PushService } from './push.service';
+
 
 @Controller('notifications')
 @ApiTags('Notifications')
-@Controller()
 export class NotificationController {
-  constructor(private readonly notificationService: NotificationService) { }
+  constructor(
+    private readonly notificationService: NotificationService,
+    private readonly pushService: PushService
+  ) { }
 
   @MessagePattern({ cmd: ProjectJobs.NOTIFICATION.CREATE })
   async createNotification(dto: CreateNotificationDto) {
@@ -30,6 +36,16 @@ export class NotificationController {
     return this.notificationService.getNotification(dto);
   }
 
+  @MessagePattern({ cmd: ProjectJobs.NOTIFICATION.REGISTER_DEVICE })
+  async registerDevice(dto: RegisterDeviceDto & { user?: any }) {
+    return this.pushService.registerDevice(dto);
+  }
+
+  @MessagePattern({ cmd: ProjectJobs.NOTIFICATION.UNREGISTER_DEVICE })
+  async unregisterDevice(dto: { token: string; user?: any }) {
+    return this.pushService.unregisterDevice(dto);
+  }
+
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
@@ -42,6 +58,7 @@ export class NotificationController {
   @MessagePattern({
     cmd: ProjectJobs.DISBURSEMENT_PLAN.SEND_EMAIL_NOTIFICATION,
   })
+
   async sendDisbursementEmailNotification(data: {
     actionType: 'INITIATED' | 'EXECUTED';
     projectId: string;

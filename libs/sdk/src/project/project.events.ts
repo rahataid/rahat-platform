@@ -112,6 +112,8 @@ export const JOBS = {
     CREATE: 'rahat.jobs.notification.create',
     LIST: 'rahat.jobs.notification.list',
     GET: 'rahat.jobs.notification.get',
+    REGISTER_DEVICE: 'rahat.jobs.notification.register_device',
+    UNREGISTER_DEVICE: 'rahat.jobs.notification.unregister_device',
   },
   HEALTH: {
     CHECK: 'rahat.jobs.health.getcheck'

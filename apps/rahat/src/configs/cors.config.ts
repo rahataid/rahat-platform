@@ -17,6 +17,8 @@ export class CorsConfigService {
       'http://localhost:3300',
       'http://localhost:3001',
       'http://localhost:5173',
+      'http://localhost',
+      'https://localhost',
     ];
     const rahatDomainRegex = /^https?:\/\/(.+\.)?rahat\.io$/;
     const allowedDomains = this.configService.get<string>('ALLOWED_DOMAINS');
