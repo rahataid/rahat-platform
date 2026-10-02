@@ -8,7 +8,7 @@ on:
         required: true
         type: choice
         options:
-          - 'nrcs-client-steller-2026'
+          - 'release-v5.0.0-nrcs-stellar'
       apps_to_build:
         description: 'Apps to build (leave empty for defaults)'
         required: false
@@ -44,8 +44,8 @@ jobs:
           fi
 
           case "$ENV" in
-            release-v5.1.0-nrcs-client)
-              TAG="release-v5.1.0-nrcs-client"
+            release-v5.0.0-nrcs-stellar)
+              TAG="release-v5.0.0-nrcs-stellar"
               SECRET="ENV_AA_HEATWAVE"
               APPS="beneficiary,rahat,shared-auth"
               ;;
