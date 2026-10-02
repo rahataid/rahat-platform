@@ -113,6 +113,9 @@ export const MS_TRIGGERS_JOBS = {
   },
   SETTINGS: {
     GET: 'ms.jobs.settings.get'
+  },
+  VERSION: {
+    GET: 'ms.jobs.version.get'
   }
 };
 
@@ -726,6 +729,12 @@ export const msTriggerActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
 
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.SETTINGS.GET }, payload);
+  },
+  // **** version — from package.json via readFile ****//
+  [MS_ACTIONS.MS_VERSION.GET]: (uuid, payload, sendCommand) => {
+    payload = payload || {};
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.VERSION.GET }, payload);
   },
   // **** settings end ****//https://api-aa-dev.rahat.io
 

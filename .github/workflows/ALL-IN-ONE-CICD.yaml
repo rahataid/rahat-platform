@@ -28,6 +28,7 @@ on:
           - 'mcn-training'
           - 'release-v4.0.0-nrcs'
           - 'nrcs-training'
+          - 'demo-nrcs'
 
       apps_to_build:
         description: 'Apps to build (leave empty for defaults)'
@@ -152,6 +153,11 @@ jobs:
             nrcs-training)
               TAG="nrcs-training"
               SECRET="ENV_AA_NRCS_TRAINING"
+              APPS="beneficiary,rahat,shared-auth"
+              ;;
+            demo-nrcs)
+              TAG="demo-nrcs"
+              SECRET="ENV_AA_NRCS_DEMO"
               APPS="beneficiary,rahat,shared-auth"
               ;;
             *)
