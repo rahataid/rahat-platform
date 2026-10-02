@@ -127,6 +127,10 @@ export class VendorsService {
           details: dto.extras,
         },
       });
+
+      if (walletDetails) {
+        await this.walletStorage.saveKey(walletDetails)
+      }
       if (dto.service === Service.WALLET) return user;
 
       await prisma.auth.create({
@@ -138,9 +142,6 @@ export class VendorsService {
         },
       });
 
-      if (walletDetails) {
-        await this.walletStorage.saveKey(walletDetails)
-      }
       return user;
     });
 
