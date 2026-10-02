@@ -161,13 +161,13 @@ export class HealthService {
           );
         }
         if (restored.length) {
-          const restoredServices = restored.map((name) => ({
-            name: SERVICE_LABELS[name] ?? name,
-          }));
-          await this.sendHealthRestoredEmail(
-            restoredServices,
-            frontendUrlSetting
-          );
+          const upServices = Object.entries(result.services)
+            .filter(([, status]) => status.status === 'up')
+            .map(([name]) => ({
+              name: SERVICE_LABELS[name] ?? name,
+              restored: restored.includes(name),
+            }));
+          await this.sendHealthRestoredEmail(upServices, frontendUrlSetting);
         }
       }
 
