@@ -185,4 +185,12 @@ export class AppService {
       }
     })
   }
+
+  async getFrontendUrl() {
+    return this.prisma.setting.findMany({
+      where: {
+        name: 'FRONTEND_URL',
+      },
+    });
+  }
 }
