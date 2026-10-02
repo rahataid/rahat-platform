@@ -38,6 +38,7 @@ import { Address } from 'viem';
 import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
 import { isAddress } from '../utils/web3';
+import { FileWalletStorage } from '../wallet/storages/fs.storage';
 import { WalletService } from '../wallet/wallet.service';
 import { GetVendorsDTO } from './dto/get-vendors.dto';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
@@ -57,7 +58,6 @@ export class VendorsService {
 
   private readonly logger = new Logger(VendorsService.name);
   private vendorRoleCache: { id: number; name: string } | null = null;
-
   private shouldFundVendorWallet: string;
 
   constructor(
@@ -69,6 +69,7 @@ export class VendorsService {
     private readonly eventEmitter: EventEmitter2,
     private readonly signUpService: SignupsService,
     private readonly walletService: WalletService,
+    private walletStorage: FileWalletStorage,
 
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
@@ -90,7 +91,7 @@ export class VendorsService {
           code: 'VENDOR_ROLE_NOT_FOUND',
         });
       // Add to User table
-      const { service, wallet, authWallet, ...rest } = dto;
+      const { service, wallet, authWallet, walletDetails, ...rest } = dto;
       if (dto?.email || dto?.phone) {
         const userData = await prisma.user.findFirst({
           where: {
@@ -136,6 +137,10 @@ export class VendorsService {
           details: dto.extras,
         },
       });
+
+      if (walletDetails) {
+        await this.walletStorage.saveKey(walletDetails)
+      }
       return user;
     });
 
