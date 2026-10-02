@@ -1556,6 +1556,12 @@ export class BeneficiaryService {
     dto: CreateBeneficiaryDto,
   ): Promise<{ uuid: string }> {
     const { piiData, ...rest } = dto;
+
+    const phone = piiData?.phone?.toString();
+    if (phone) {
+      await this.beneficiaryUtilsService.ensureUniquePhone(phone);
+    }
+
     const uuid = rest.uuid ?? (uuidv4() as UUID);
 
     const walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(
