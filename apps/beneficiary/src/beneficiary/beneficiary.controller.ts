@@ -4,7 +4,6 @@ import { Controller, Param } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   AddBeneficiariesToGroupDto,
-  addBulkBeneficiaryToProject,
   AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
@@ -18,15 +17,14 @@ import {
   UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
-  BeneficiaryJobs,
-  ValidateWallet
+  BeneficiaryJobs
 } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
 import { GroupSyncService } from './group-sync.service';
-import { VerificationService } from './verification.service';
+// import { VerificationService } from './verification.service';
 
 @Controller()
 export class BeneficiaryController {
@@ -34,7 +32,7 @@ export class BeneficiaryController {
     private readonly service: BeneficiaryService,
     private readonly utilService: BeneficiaryUtilsService,
     private readonly statsService: BeneficiaryStatService,
-    private readonly verificationService: VerificationService,
+    // private readonly verificationService: VerificationService,
     private readonly groupSyncService: GroupSyncService,
   ) { }
 
@@ -160,16 +158,16 @@ export class BeneficiaryController {
     return this.statsService.getAllStats(uuid);
   }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.ADD_TO_PROJECT })
-  async addToProject(payload: any) {
-    const { dto, projectUid } = payload;
-    return this.service.addBeneficiaryToProject(dto, projectUid);
-  }
+  // @MessagePattern({ cmd: BeneficiaryJobs.ADD_TO_PROJECT })
+  // async addToProject(payload: any) {
+  //   const { dto, projectUid } = payload;
+  //   return this.service.addBeneficiaryToProject(dto, projectUid);
+  // }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.BULK_ADD_TO_PROJECT })
-  async bulkaddToProject(payload: addBulkBeneficiaryToProject) {
-    return this.service.addBulkBeneficiaryToProject(payload);
-  }
+  // @MessagePattern({ cmd: BeneficiaryJobs.BULK_ADD_TO_PROJECT })
+  // async bulkaddToProject(payload: addBulkBeneficiaryToProject) {
+  //   return this.service.addBulkBeneficiaryToProject(payload);
+  // }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
   async assignToProject(payload: any) {
@@ -197,25 +195,25 @@ export class BeneficiaryController {
     return this.service.remove(payload);
   }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.GENERATE_LINK })
-  generateLink(uuid: UUID) {
-    return this.verificationService.generateLink(uuid);
-  }
+  // @MessagePattern({ cmd: BeneficiaryJobs.GENERATE_LINK })
+  // generateLink(uuid: UUID) {
+  //   return this.verificationService.generateLink(uuid);
+  // }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.VALIDATE_WALLET })
-  validateWallet(validationData: ValidateWallet) {
-    return this.verificationService.validateWallet(validationData);
-  }
+  // @MessagePattern({ cmd: BeneficiaryJobs.VALIDATE_WALLET })
+  // validateWallet(validationData: ValidateWallet) {
+  //   return this.verificationService.validateWallet(validationData);
+  // }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE })
-  verifySignature(verificationData: any) {
-    return this.verificationService.verifySignature(verificationData);
-  }
+  // @MessagePattern({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE })
+  // verifySignature(verificationData: any) {
+  //   return this.verificationService.verifySignature(verificationData);
+  // }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.LIST_REFERRAL })
-  listVendorReferral(data) {
-    return this.service.listReferredBen(data);
-  }
+  // @MessagePattern({ cmd: BeneficiaryJobs.LIST_REFERRAL })
+  // listVendorReferral(data) {
+  //   return this.service.listReferredBen(data);
+  // }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_BEN_VENDOR_COUNT })
   getTotalCount(data) {

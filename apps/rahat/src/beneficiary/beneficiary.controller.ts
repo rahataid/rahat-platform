@@ -22,7 +22,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   AddBeneficiariesToGroupDto,
-  AddBenToProjectDto,
   AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
@@ -34,8 +33,7 @@ import {
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto,
-  ValidateWalletDto
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
   APP,
@@ -185,20 +183,20 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.BENEFICIARY })
-  @ApiParam({ name: 'uuid', required: true })
-  @Post('projects/:uuid')
-  async referBeneficiary(
-    @Param('uuid') uuid: UUID,
-    @Body() dto: AddBenToProjectDto
-  ) {
-    return this.client.send(
-      { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
-      { dto, projectUid: uuid }
-    );
-  }
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
+  // @ApiParam({ name: 'uuid', required: true })
+  // @Post('projects/:uuid')
+  // async referBeneficiary(
+  //   @Param('uuid') uuid: UUID,
+  //   @Body() dto: AddBenToProjectDto
+  // ) {
+  //   return this.client.send(
+  //     { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
+  //     { dto, projectUid: uuid }
+  //   );
+  // }
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, DbAbilitiesGuard)
@@ -608,30 +606,30 @@ export class BeneficiaryController {
     );
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
-  @Get('verification-link/:uuid')
-  @ApiParam({ name: 'uuid', required: true })
-  async generateVerificationLink(@Param('uuid') uuid: UUID) {
-    return this.client.send({ cmd: BeneficiaryJobs.GENERATE_LINK }, uuid);
-  }
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @Get('verification-link/:uuid')
+  // @ApiParam({ name: 'uuid', required: true })
+  // async generateVerificationLink(@Param('uuid') uuid: UUID) {
+  //   return this.client.send({ cmd: BeneficiaryJobs.GENERATE_LINK }, uuid);
+  // }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
-  @Post('validate-wallet')
-  async validateWallet(@Body() dto: ValidateWalletDto) {
-    return this.client.send({ cmd: BeneficiaryJobs.VALIDATE_WALLET }, dto);
-  }
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @Post('validate-wallet')
+  // async validateWallet(@Body() dto: ValidateWalletDto) {
+  //   return this.client.send({ cmd: BeneficiaryJobs.VALIDATE_WALLET }, dto);
+  // }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
-  @Post('verify-signature')
-  async verifySignature(@Body() dto: any) {
-    return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
-  }
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @Post('verify-signature')
+  // async verifySignature(@Body() dto: any) {
+  //   return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
+  // }
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, DbAbilitiesGuard)
