@@ -35,6 +35,7 @@ import { AppUsersModule } from '../vendors/vendors.module';
 import { WalletModule } from '../wallet/wallet.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { HealthModule } from '../health/health.module';
 
 @Module({
   imports: [
@@ -75,7 +76,7 @@ import { AppService } from './app.service';
     WalletModule,
     NotificationModule,
     CommsModule.forRoot(),
-
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [
