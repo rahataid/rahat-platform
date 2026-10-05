@@ -236,15 +236,11 @@ export async function updateHealthStatus(
     ),
   ]);
 
-  console.log('Health check results:', { database, redis, rpcUrl, wom , smsVoucher });
-  const allUp =
-    database.status === 'up' &&
-    redis.status === 'up' &&
-    rpcUrl.status === 'up' &&
-    wom.status === 'up' &&
-    smsVoucher.status === 'up';
-  const result: HealthStatus = {
-    status: allUp ? 'up' : 'degraded',
+  const serviceStatuses = [database, redis, rpcUrl, wom, smsVoucher];
+  const allServicesUp = serviceStatuses.every((s) => s.status === 'up');
+
+  return {
+    status: allServicesUp ? 'up' : 'degraded',
     services: {
       database,
       redis,
@@ -253,5 +249,4 @@ export async function updateHealthStatus(
       smsVoucher,
     },
   };
-  return result;
 }
