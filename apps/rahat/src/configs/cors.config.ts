@@ -22,8 +22,7 @@ export class CorsConfigService {
     ];
     const rahatDomainRegex = /^https?:\/\/(.+\.)?rahat\.io$/;
     const allowedDomains = this.configService.get<string>('ALLOWED_DOMAINS');
-    console.log('ALLOWED_ORIGINS:', allowedOrigins);
-    console.log('ALLOWED_DOMAINS:', allowedDomains);
+
     const domainRegexes: RegExp[] = [
       rahatDomainRegex,
       ...(allowedDomains
@@ -34,11 +33,6 @@ export class CorsConfigService {
           .map((d) => new RegExp(`^https?:\\/\\/(.+\\.)?${d.replace('.', '\\.')}$`))
         : []),
     ];
-
-    this.logger.log(
-      `CORS config service initialized with allowed origins: ${allowedOrigins || 'none (using defaults)'
-      }, allowed domains: ${allowedDomains || 'rahat.io (default)'}`
-    );
 
     let corsOrigins: (string | RegExp)[];
 
@@ -51,9 +45,6 @@ export class CorsConfigService {
         ...domainRegexes,
       ];
 
-      this.logger.log(
-        `CORS configured with allowed origins: ${corsOrigins.join(', ')}`
-      );
     } else {
       const nodeEnv = this.configService.get<string>('NODE_ENV');
       corsOrigins =

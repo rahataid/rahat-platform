@@ -29,22 +29,17 @@ export class FirebaseService implements OnModuleInit {
     }
 
     onModuleInit() {
-        this.logger.log('[FCM] Checking push notification config...');
         if (process.env.PUSH_ENABLED !== 'true') {
-            this.logger.log('[FCM] Push notifications disabled (PUSH_ENABLED != true)');
             return;
         }
         try {
             const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
-            this.logger.log(`[FCM] FIREBASE_SERVICE_ACCOUNT_BASE64 present: ${!!b64}`);
             if (!b64) {
                 this.logger.warn('[FCM] FIREBASE_SERVICE_ACCOUNT_BASE64 missing. Push DISABLED.');
                 return;
             }
             const json = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
-            this.logger.log(`[FCM] Firebase config parsed, project ID: ${json.project_id}`);
             this.app = getApps()[0] ?? initializeApp({ credential: cert(json) });
-            this.logger.log('[FCM] Firebase Admin initialised. Push ENABLED.');
         } catch (err: any) {
             this.app = null;
             this.logger.error(`[FCM] Firebase init failed. Push DISABLED: ${err?.message}`, err?.stack);
@@ -60,7 +55,6 @@ export class FirebaseService implements OnModuleInit {
     }
 
     async sendToTokens(tokens: string[], payload: PushPayload): Promise<PushResult> {
-        this.logger.log(`[FCM] Sending push to ${tokens.length} tokens. Title: "${payload.title}"`);
         const result: PushResult = { successCount: 0, failureCount: 0, invalidTokens: [] };
         if (!this.app) {
             this.logger.error('[FCM] Firebase app not initialized');
@@ -76,7 +70,6 @@ export class FirebaseService implements OnModuleInit {
 
         for (let i = 0; i < tokens.length; i += 500) {
             const chunk = tokens.slice(i, i + 500);
-            this.logger.log(`[FCM] Processing batch ${Math.floor(i / 500) + 1}, tokens: ${i}-${Math.min(i + 500, tokens.length)}`);
             const res = await messaging.sendEachForMulticast({
                 tokens: chunk,
                 notification: { title: payload.title, body: payload.body },
@@ -86,7 +79,6 @@ export class FirebaseService implements OnModuleInit {
             });
             result.successCount += res.successCount;
             result.failureCount += res.failureCount;
-            this.logger.log(`[FCM] Batch result: ${res.successCount} success, ${res.failureCount} failures`);
             res.responses.forEach((r, idx) => {
                 if (!r.success && r.error) {
                     this.logger.warn(`[FCM] Token ${chunk[idx]} failed: ${r.error.code} - ${r.error.message}`);
@@ -94,7 +86,6 @@ export class FirebaseService implements OnModuleInit {
                 }
             });
         }
-        this.logger.log(`[FCM] Final result: ${result.successCount} success, ${result.failureCount} failures, ${result.invalidTokens.length} invalid tokens removed`);
         return result;
     }
 }

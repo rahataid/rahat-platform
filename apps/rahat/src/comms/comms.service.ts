@@ -24,7 +24,6 @@ export class CommsService {
       this.isReady = false;
       this.client = null;
       this.appId = null;
-      this.logger.warn('[CommsService] Waiting for settings deployment...');
       return;
     }
 
@@ -32,14 +31,12 @@ export class CommsService {
     this.client = getClient({
       baseURL: String(communicationValue['URL'] ?? ''),
     });
-    console.log(communicationValue['URL'], communicationValue['APP_ID']);
     this.client.setAppId(this.appId);
     this.isReady = true;
   }
 
   @OnEvent('settings.seeded')
   async handleSettingsSeeded() {
-    this.logger.log('[CommsService] settings.seeded received. Re-initializing communication client...');
     await this.init();
   }
 
@@ -65,7 +62,6 @@ export class CommsService {
 
   async listTransports() {
     const client = await this.getClient();
-    console.log(client.transport);
     return client.transport.list();
   }
 

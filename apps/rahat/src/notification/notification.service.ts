@@ -84,7 +84,6 @@ export class NotificationService {
       backoff: { type: 'exponential', delay: 1000 },
     });
 
-    this.logger.log(`Queued notification for ${users.length} users.`);
   }
 
   async listNotifications({
@@ -271,6 +270,5 @@ export class NotificationService {
       backoff: { type: 'exponential', delay: 1000 },
     });
 
-    this.logger.log(`Queued notification for ${users.length} users.`);
   }
 }
