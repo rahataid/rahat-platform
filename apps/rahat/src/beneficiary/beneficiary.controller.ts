@@ -176,6 +176,13 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET_TABLE_STATS }, {});
   }
 
+  @Post('stats/refresh')
+  async refreshCoreStats() {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.REFRESH_STATS }, {}
+    );
+  }
+
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, DbAbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
