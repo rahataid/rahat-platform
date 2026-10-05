@@ -9,9 +9,9 @@ import {
 import { ACTIONS, APP, ProjectJobs, SUBJECTS } from '@rahataid/sdk';
 import { AbilitiesGuard, CheckAbilities, JwtGuard } from '@rumsan/user';
 import { RegisterDeviceDto } from './dto/register-device.dto';
+import { SubscribeWebPushDto } from "./dto/subscribe-web-push.dto";
 import { NotificationService } from './notification.service';
 import { PushService } from './push.service';
-
 
 @Controller('notifications')
 @ApiTags('Notifications')
@@ -51,8 +51,22 @@ export class NotificationController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @Get()
   list(@Query() query: ListNotificationsDto) {
-    console.log('Listing notifications');
     return this.notificationService.listNotifications(query);
+  }
+
+  @MessagePattern({ cmd: ProjectJobs.NOTIFICATION.REGISTER_WEB_PUSH })
+  async registerWebPush(dto: SubscribeWebPushDto & { user?: any }) {
+    return this.pushService.registerWebPush(dto);
+  }
+
+  @MessagePattern({ cmd: ProjectJobs.NOTIFICATION.UNREGISTER_WEB_PUSH })
+  async unregisterWebPush(dto: { endpoint: string; user?: any }) {
+    return this.pushService.unregisterWebPush(dto);
+  }
+
+  @Get('vapid-public-key')
+  getVapidPublicKey() {
+    return { publicKey: this.pushService.getWebPushPublicKey() };
   }
 
   @MessagePattern({
