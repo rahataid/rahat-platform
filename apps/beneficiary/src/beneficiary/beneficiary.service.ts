@@ -47,6 +47,7 @@ import {
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
+import { BeneficiaryStatsUpdateService } from './beneficiary-stats-update.service';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { GroupSyncService } from './group-sync.service';
 import { VerificationService } from './verification.service';
@@ -71,7 +72,8 @@ export class BeneficiaryService {
     private readonly eventEmitter: EventEmitter2,
     private readonly verificationService: VerificationService,
     private readonly beneficiaryUtilsService: BeneficiaryUtilsService,
-    private readonly groupSyncService: GroupSyncService
+    private readonly groupSyncService: GroupSyncService,
+    private readonly statsUpdateService: BeneficiaryStatsUpdateService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -86,9 +88,7 @@ export class BeneficiaryService {
 
   // refresh beneficiary stats
   async refreshStats() {
-    this.eventEmitter.emit(BeneficiaryEvents.REFRESH_STATS, {
-      projectUUID: null,
-    });
+    await this.statsUpdateService.scheduleUpdate();
     return { message: 'Beneficiary stats refresh started' };
   }
 
@@ -1033,6 +1033,13 @@ export class BeneficiaryService {
       //     projectUuid: projectUuid,
       //   }
       // );
+
+      // added the new stats update service to handle the stats update in a queue instead of inline, to avoid blocking the request path
+      await this.statsUpdateService.scheduleUpdate();
+
+
+
+
       //   //COMMENTING THIS BECAUSE ALREADY ADDED TO PROJECT
 
       //   const assignPromises = insertedBeneficiariesWithPii.map(
