@@ -857,4 +857,20 @@ model DeviceToken {
   @@map("tbl_device_tokens")
 }
 
+model WebPushSubscription {
+  id         Int      @id @default(autoincrement())
+  userId     String
+  endpoint   String   @unique
+  p256dh     String
+  auth       String
+  userAgent  String?
+  active     Boolean  @default(true)
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId, active])
+  @@map("tbl_web_push_subscriptions")
+}
+
 // ++++++++++++++++++ END: Notification ++++++++++++++++++++

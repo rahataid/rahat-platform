@@ -1,4 +1,4 @@
-// rahat-platform/apps/rahat/src/processors/rahat.processor.ts
+//rahat-platform/apps/rahat/src/projects/actions/common.action.ts
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
@@ -158,4 +158,10 @@ export const notificationActions: ProjectActionFunc = {
     sendCommand({ cmd: ProjectJobs.NOTIFICATION.REGISTER_DEVICE }, payload),
   [MS_ACTIONS.NOTIFICATION.UNREGISTER_DEVICE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: ProjectJobs.NOTIFICATION.UNREGISTER_DEVICE }, payload),
+  [MS_ACTIONS.NOTIFICATION.REGISTER_WEB_PUSH]: (uuid, payload, sendCommand) => {
+    return sendCommand({ cmd: ProjectJobs.NOTIFICATION.REGISTER_WEB_PUSH }, payload);
+  },
+  [MS_ACTIONS.NOTIFICATION.UNREGISTER_WEB_PUSH]: (uuid, payload, sendCommand) => {
+    return sendCommand({ cmd: ProjectJobs.NOTIFICATION.UNREGISTER_WEB_PUSH }, payload);
+  },
 };

@@ -5,6 +5,7 @@ import { FirebaseService } from './firebase.service';
 import { NotificationController } from './notification.controller';
 import { NotificationService } from './notification.service';
 import { PushService } from './push.service';
+import { WebPushService } from './web-push.service';
 
 @Global()
 @Module({
@@ -14,7 +15,7 @@ import { PushService } from './push.service';
     }),
   ],
   controllers: [NotificationController],
-  providers: [NotificationService, FirebaseService, PushService],
+  providers: [NotificationService, FirebaseService, PushService, WebPushService],
   exports: [NotificationService, PushService],
 })
 export class NotificationModule { }

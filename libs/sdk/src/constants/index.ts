@@ -1,3 +1,4 @@
+//rahat-platform/libs/sdk/src/constants/index.ts
 import { RabbitMQModuleOptions } from '@rumsan/rabbitmq';
 
 export const APP_JOBS = {
@@ -680,6 +681,8 @@ export const MS_ACTIONS = {
     GET: 'notification.get',
     REGISTER_DEVICE: 'app.pushToken.register',
     UNREGISTER_DEVICE: 'app.pushToken.unregister',
+    REGISTER_WEB_PUSH: 'app.webPush.subscribe',
+    UNREGISTER_WEB_PUSH: 'app.webPush.unsubscribe',
   },
 
   OTP: {

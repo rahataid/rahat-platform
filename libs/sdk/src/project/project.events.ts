@@ -1,3 +1,4 @@
+//rahat-platform/libs/sdk/src/project/project.events.ts
 export const EVENTS = {
   PROJECT_CREATED: 'project.created',
   PROJECT_UPDATED: 'project.updated',
@@ -114,6 +115,8 @@ export const JOBS = {
     GET: 'rahat.jobs.notification.get',
     REGISTER_DEVICE: 'rahat.jobs.notification.register_device',
     UNREGISTER_DEVICE: 'rahat.jobs.notification.unregister_device',
+    REGISTER_WEB_PUSH: 'rahat.jobs.notification.register_web_push',
+    UNREGISTER_WEB_PUSH: 'rahat.jobs.notification.unregister_web_push',
   },
   HEALTH: {
     CHECK: 'rahat.jobs.health.getcheck'
