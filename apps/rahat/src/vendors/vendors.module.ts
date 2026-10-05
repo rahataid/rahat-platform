@@ -9,6 +9,7 @@ import { PrismaService } from '@rumsan/prisma';
 import { AuthsModule, SignupModule } from '@rumsan/user';
 import { NotificationModule } from '../notification/notification.module';
 import { UsersModule } from '../users/users.module';
+import { FileWalletStorage } from '../wallet/storages/fs.storage';
 import { VendorsController } from './vendors.controller';
 import { VendorsService } from './vendors.service';
 
@@ -36,6 +37,6 @@ import { VendorsService } from './vendors.service';
     NotificationModule
   ],
   controllers: [VendorsController],
-  providers: [VendorsService, PrismaService]
+  providers: [VendorsService, PrismaService, FileWalletStorage]
 })
 export class AppUsersModule { }

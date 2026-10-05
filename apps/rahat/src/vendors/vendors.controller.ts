@@ -39,9 +39,7 @@ import { VendorsService } from './vendors.service';
 export class VendorsController {
   constructor(private readonly vendorService: VendorsService) { }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.VENDOR })
+
   @Post('')
   registerVendor(@Body() dto: VendorRegisterDto) {
     return this.vendorService.registerVendor(dto);

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender } from '@prisma/client';
 import { VendorCreateInput } from '@rahataid/sdk';
+import { WalletKeys } from '@rahataid/wallet';
 import { Service } from '@rumsan/sdk/enums';
 import { IsBoolean, IsObject, IsOptional, IsString, MinLength } from 'class-validator';
 
@@ -48,6 +49,12 @@ export class VendorRegisterDto implements VendorCreateInput {
   @ApiProperty({ example: { isVendor: true }, required: false })
   @IsObject()
   extras?: object;
+
+
+  @ApiProperty({ example: { address: '0xmmmm', privateKey: '', publicKey: '', blockchain: '', mnemonic: '' }, required: false })
+  @IsObject()
+  @IsOptional()
+  walletDetails?: WalletKeys;
 }
 
 export class VendorPasswordRegisterDto extends VendorRegisterDto {
