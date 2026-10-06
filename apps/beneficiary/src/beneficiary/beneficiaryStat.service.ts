@@ -702,6 +702,12 @@ export class BeneficiaryStatService {
     return range;
   }
 
+  // Global stats always, plus the project's when one is given. Used by the UPDATE_STATS job.
+  async saveAllStats(projectUuid?: string) {
+    await this.saveGlobalStats();
+    if (projectUuid) await this.saveProjectStats(projectUuid);
+  }
+
   async saveGlobalStats() {
     const {
       gender,
