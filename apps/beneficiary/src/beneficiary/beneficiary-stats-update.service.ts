@@ -2,10 +2,8 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { BeneficiaryJobs, BQUEUE } from '@rahataid/sdk';
 import { Queue } from 'bull';
+import { STATS_RECOMPUTE_DELAY_MS, STATS_RECOMPUTE_JOB_ID } from './beneficiary.constants';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
-
-const STATS_RECOMPUTE_JOB_ID = 'stats-recompute';
-const STATS_RECOMPUTE_DELAY_MS = 5000;
 
 @Injectable()
 export class BeneficiaryStatsUpdateService {
