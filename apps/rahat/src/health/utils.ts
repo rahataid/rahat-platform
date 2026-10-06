@@ -99,7 +99,6 @@ export async function checkDatabase(
       status: 'up',
       latency: `${(performance.now() - start).toFixed(2)}ms`,
       last_checked,
-      link: process.env.DATABASE_URL,
       notes: {
         active_connections: Number(active),
         max_connections: Number(max),
@@ -112,7 +111,6 @@ export async function checkDatabase(
       message: (err as Error).message,
       latency: `${(performance.now() - start).toFixed(2)}ms`,
       last_checked,
-      link: process.env.DATABASE_URL,
       notes: {},
     };
   }
@@ -150,7 +148,6 @@ export async function checkRedis(queue: Queue): Promise<ServiceStatus> {
       status: 'up',
       latency: `${(performance.now() - start).toFixed(2)}ms`,
       last_checked,
-      link: process.env.REDIS_URL,
       notes: {
         connections,
         memory,
@@ -165,7 +162,6 @@ export async function checkRedis(queue: Queue): Promise<ServiceStatus> {
       message: (err as Error).message,
       latency: `${(performance.now() - start).toFixed(2)}ms`,
       last_checked,
-      link: process.env.REDIS_URL,
       notes: {},
     };
   }
