@@ -1,4 +1,7 @@
 export const JOBS = {
+  VERSION: {
+    GET: 'aa.jobs.version.get'
+  },
   RIVER_STATIONS: {
     GET_DHM: 'aa.jobs.riverStations.getDhm',
   },
@@ -80,6 +83,7 @@ export const JOBS = {
       'aa.jobs.beneficiary.create_beneficiary_with_db_transaction',
     GET_TOKEN_DETAILS: 'aa.jobs.beneficiary.getTokenDetails',
     GENERATE_QR_PDF: 'aa.jobs.beneficiary.generateQrPdf',
+    REGENERATE_QR_PDF: 'aa.jobs.beneficiary.regenerateQrPdf',
     GET_QR_PDF: 'aa.jobs.beneficiary.getQrPdf',
     EXPORT_GROUP_EXCEL: 'aa.jobs.beneficiary.exportGroupExcel',
     SPONSOR_BENEFICIARY_GROUP: 'aa.jobs.beneficiary.sponsorBeneficiaryGroup',
@@ -145,7 +149,9 @@ export const JOBS = {
     GET_PAYOUT_LOG: 'aa.jobs.payout.getPayoutLog',
     GET_PAYOUT_DETAILS: 'aa.jobs.payout.getPayoutDetails',
     EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+    EXPORT_PAYOUT_LOGS_PDF_FILE: 'aa.jobs.payout.exportPayoutLogsPdfFile',
     VERIFY_MANUAL_PAYOUT: 'aa.jobs.payout.verifyManualPayout',
+    COMPLETE_PAYOUT: 'aa.jobs.payout.complete'
   },
   INKIND: {
     CREATE: 'aa.jobs.inkinds.create',

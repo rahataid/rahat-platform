@@ -208,6 +208,9 @@ export const MS_ACTIONS = {
       ADD_TRIGGERS: 'aaProject.phases.addTriggers',
       REVERT_PHASE: 'aaProject.phases.revertPhase',
     },
+    VERSION: {
+      GET: 'aaProject.version.get',
+    },
     STAKEHOLDERS: {
       GET_ALL: 'aaProject.stakeholders.getAll',
       GET_ONE: 'aaProject.stakeholders.getOne',
@@ -247,6 +250,7 @@ export const MS_ACTIONS = {
       GET_BALANCE: 'aaProject.beneficiary.getBalance',
       GET_TOKEN_DETAILS: 'aaProject.beneficiary.getTokenDetails',
       GENERATE_QR_PDF: 'aaProject.beneficiary.generateQrPdf',
+      REGENERATE_QR_PDF: 'aaProject.beneficiary.regenerateQrPdf',
       GET_QR_PDF: 'aaProject.beneficiary.getQrPdf',
       EXPORT_GROUP_EXCEL: 'aaProject.beneficiary.exportGroupExcel',
       REVOKE_SPONSORSHIP_FOR_GROUP: 'aaProject.beneficiary.revokeSponsorshipForGroup',
@@ -318,7 +322,9 @@ export const MS_ACTIONS = {
       GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
       GET_PAYOUT_DETAILS: 'aa.payout.getPayoutDetails',
       EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+      EXPORT_PAYOUT_LOGS_PDF_FILE: 'aa.jobs.payout.exportPayoutLogsPdfFile',
       VERIFY_MANUAL_PAYOUT: 'aa.payout.verifyManualPayout',
+      COMPLETE_PAYOUT: 'aa.payout.complete'
     },
     INKIND: {
       CREATE: 'aa.inkinds.create',
@@ -680,6 +686,12 @@ export const MS_ACTIONS = {
   MS_SETTINGS: {
     GET: 'ms.settings.get',
     UPDATE_VALUES: 'ms.settings.updateValues',
+  },
+  MS_VERSION: {
+    GET: 'ms.jobs.version.get',
+  },
+  AA_JOBS_VERSION: {
+    GET: 'aa.jobs.version.get',
   },
   MS_SOURCES_DATA: {
     GET_SERIES_BY_DATA_SOURCE: 'ms.sourcesData.getSeriesByDataSource',

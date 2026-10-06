@@ -90,7 +90,8 @@ export class BeneficiaryController {
     return this.service.createBulkWithGroup(
       data?.payload,
       data?.projectUUID,
-      data?.groupName
+      data?.groupName,
+      data?.groupPurpose
     );
   }
 
@@ -227,6 +228,13 @@ export class BeneficiaryController {
     return this.service.addBeneficiariesToGroup(payload);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.UPLOAD_BENEFICIARIES_TO_GROUP })
+  uploadBeneficiariesToGroup(
+    @Payload() payload: { dtos: CreateBeneficiaryDto[]; groupUuid: string },
+  ) {
+    return this.service.uploadBeneficiariesToGroup(payload.dtos, payload.groupUuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP })
   getGroup(payload: string | ({ uuid: string } & ListBeneficiariesByGroupDto)) {
     if (typeof payload === 'string') {
@@ -255,6 +263,11 @@ export class BeneficiaryController {
   @MessagePattern({ cmd: BeneficiaryJobs.GROUP_ACCOUNT_CHECK })
   groupAttributesCheck(uuid: string) {
     return this.service.groupAttributesCheck(uuid);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.GROUP_FORCE_INVALIDATE })
+  groupForceInvalidate(uuid: string) {
+    return this.service.groupForceInvalidate(uuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_GROUP_BANK_CHECK_STATUS })
