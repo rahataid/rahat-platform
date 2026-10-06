@@ -22,7 +22,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   AddBeneficiariesToGroupDto,
-  AddBenToProjectDto,
   AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
@@ -192,20 +191,21 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.BENEFICIARY })
-  @ApiParam({ name: 'uuid', required: true })
-  @Post('projects/:uuid')
-  async referBeneficiary(
-    @Param('uuid') uuid: UUID,
-    @Body() dto: AddBenToProjectDto
-  ) {
-    return this.client.send(
-      { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
-      { dto, projectUid: uuid }
-    );
-  }
+  // Disabled: beneficiary MS ADD_TO_PROJECT handler removed (group-assign-optimization)
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, DbAbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.BENEFICIARY })
+  // @ApiParam({ name: 'uuid', required: true })
+  // @Post('projects/:uuid')
+  // async referBeneficiary(
+  //   @Param('uuid') uuid: UUID,
+  //   @Body() dto: AddBenToProjectDto
+  // ) {
+  //   return this.client.send(
+  //     { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
+  //     { dto, projectUid: uuid }
+  //   );
+  // }
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, DbAbilitiesGuard)
@@ -219,7 +219,7 @@ export class BeneficiaryController {
     }));
 
     return this.client
-      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, data)
+      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, { payload: data })
       .pipe(timeout(MS_TIMEOUT));
   }
 
