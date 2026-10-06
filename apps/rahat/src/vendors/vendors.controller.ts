@@ -87,7 +87,7 @@ export class VendorsController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  // @UseGuards(JwtGuard, DbAbilitiesGuard)
   // @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.VENDOR })
   @ApiParam({ name: 'uuid', required: true })
   @Patch('/update/:uuid')
