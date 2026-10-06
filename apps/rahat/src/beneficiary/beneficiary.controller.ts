@@ -22,7 +22,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   AddBeneficiariesToGroupDto,
-  AddBenToProjectDto,
   AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
@@ -176,6 +175,13 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.GET_TABLE_STATS }, {});
   }
 
+  @Post('stats/refresh')
+  async refreshCoreStats() {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.REFRESH_STATS }, {}
+    );
+  }
+
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, DbAbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
@@ -185,20 +191,21 @@ export class BeneficiaryController {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.BENEFICIARY })
-  @ApiParam({ name: 'uuid', required: true })
-  @Post('projects/:uuid')
-  async referBeneficiary(
-    @Param('uuid') uuid: UUID,
-    @Body() dto: AddBenToProjectDto
-  ) {
-    return this.client.send(
-      { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
-      { dto, projectUid: uuid }
-    );
-  }
+  // Disabled: beneficiary MS ADD_TO_PROJECT handler removed (group-assign-optimization)
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, DbAbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.BENEFICIARY })
+  // @ApiParam({ name: 'uuid', required: true })
+  // @Post('projects/:uuid')
+  // async referBeneficiary(
+  //   @Param('uuid') uuid: UUID,
+  //   @Body() dto: AddBenToProjectDto
+  // ) {
+  //   return this.client.send(
+  //     { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
+  //     { dto, projectUid: uuid }
+  //   );
+  // }
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, DbAbilitiesGuard)
@@ -212,8 +219,47 @@ export class BeneficiaryController {
     }));
 
     return this.client
-      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, data)
+      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, { payload: data })
       .pipe(timeout(MS_TIMEOUT));
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.BENEFICIARY })
+  @Post('groups/:uuid/upload')
+  @ApiParam({ name: 'uuid', required: true })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadToGroup(
+    @Param('uuid') uuid: UUID,
+    @UploadedFile() file: TFile,
+    @Req() req: Request,
+  ) {
+    const docType: Enums.UploadFileType =
+      req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
+
+    const raw = await DocParser(docType, file.buffer);
+    const beneficiariesMapped = this._mapUploadedBeneficiaries(raw);
+    const walletResult = await this.walletProcessingService.processBeneficiariesWithWallets(beneficiariesMapped);
+
+    return firstValueFrom(
+      this.client
+        .send(
+          { cmd: BeneficiaryJobs.UPLOAD_BENEFICIARIES_TO_GROUP },
+          { dtos: walletResult.validBeneficiaries, groupUuid: uuid },
+        )
+        .pipe(
+          map((response) => {
+            if (walletResult.discardedBeneficiaries.length > 0) {
+              console.warn(
+                `WARNING: ${walletResult.totalDiscarded} of ${walletResult.totalProcessed} beneficiaries discarded due to wallet failures`,
+              );
+            }
+            return response;
+          }),
+          catchError((error) => throwError(() => new BadRequestException(error.message))),
+          timeout(MS_TIMEOUT),
+        ),
+    );
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
@@ -226,6 +272,7 @@ export class BeneficiaryController {
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const projectId = req.body['projectId'];
     const groupName = req.body['groupName']?.trim();
+    const groupPurpose = req.body['groupPurpose']?.trim();
 
     const beneficiaries = await DocParser(docType, file.buffer);
 
@@ -310,6 +357,7 @@ export class BeneficiaryController {
             payload: walletProcessingResult.validBeneficiaries,
             projectUUID: projectId,
             groupName,
+            groupPurpose
           }
         )
         .pipe(
@@ -651,6 +699,15 @@ export class BeneficiaryController {
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.BENEFICIARY })
+  @Post('groups/:uuid/force-invalidate')
+  @ApiParam({ name: 'uuid', required: true })
+  async groupForceInvalidate(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GROUP_FORCE_INVALIDATE }, uuid);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('groups/:uuid/bank-check-status')
   @ApiParam({ name: 'uuid', required: true })
@@ -744,5 +801,69 @@ export class BeneficiaryController {
   @Post('beneficiaryWithDbTransaction')
   async createBeneficiaryWithDbTransaction(@Body() body: CreateBeneficiaryTransactionDto) {
     return await this.client.send({ cmd: BeneficiaryJobs.CREATE_BENEFICIARY_WITH_DB_TRANSACTION }, body);
+  }
+
+  private _mapUploadedBeneficiaries(raw: any[]): any[] {
+    const UPLOAD_COLUMN_ALIASES: Record<string, string[]> = {
+      birthDate: ['Birth Date'],
+      internetStatus: ['Internet Status', 'Internet Status*'],
+      bankedStatus: ['Bank Status', 'Bank Status*'],
+      location: ['Location'],
+      phoneStatus: ['Phone Status', 'Phone Status*'],
+      notes: ['Notes'],
+      gender: ['Gender*', 'Gender'],
+      latitude: ['Latitude'],
+      longitude: ['Longitude'],
+      age: ['Age', 'Age*'],
+      walletAddress: ['Wallet Address'],
+      name: ['Name*', 'Name'],
+      phone: ['Whatsapp Number*', 'Phone Number*', 'Phone Number'],
+      governmentId: ['Government ID'],
+      uuid: ['UUID', 'uuid'],
+    };
+    const CLAIMED_UPLOAD_COLUMNS = Object.values(UPLOAD_COLUMN_ALIASES).flat();
+
+    const pick = (row: any, field: keyof typeof UPLOAD_COLUMN_ALIASES) => {
+      const alias = UPLOAD_COLUMN_ALIASES[field].find(
+        (key) => row[key] !== undefined && row[key] !== '',
+      );
+      return alias ? row[alias] : undefined;
+    };
+
+    const toNumberOrUndefined = (value: unknown) =>
+      value !== undefined && value !== '' ? Number(value) : undefined;
+
+    return raw.map((b) => {
+      const remainingColumns = Object.keys(b).reduce((acc, key) => {
+        if (!CLAIMED_UPLOAD_COLUMNS.includes(key)) acc[key] = b[key];
+        return acc;
+      }, {} as Record<string, unknown>);
+
+      const birthDate = pick(b, 'birthDate');
+
+      return {
+        uuid: pick(b, 'uuid'),
+        birthDate: birthDate ? new Date(birthDate as string).toISOString() : null,
+        internetStatus: normalizeInternetStatus(pick(b, 'internetStatus') as string),
+        bankedStatus: normalizeBankedStatus(pick(b, 'bankedStatus') as string),
+        location: pick(b, 'location'),
+        phoneStatus: normalizePhoneStatus(pick(b, 'phoneStatus') as string),
+        notes: pick(b, 'notes'),
+        gender: normalizeGender(pick(b, 'gender') as string),
+        latitude: toNumberOrUndefined(pick(b, 'latitude')),
+        longitude: toNumberOrUndefined(pick(b, 'longitude')),
+        age: pick(b, 'age') || null,
+        walletAddress: pick(b, 'walletAddress'),
+        extras: remainingColumns,
+        piiData: {
+          name: pick(b, 'name') || 'Unknown',
+          phone: pick(b, 'phone'),
+          extras: {
+            isAdult: getDateInfo(birthDate as string)?.isAdult || Number(pick(b, 'age')) > 18,
+            governmentId: pick(b, 'governmentId'),
+          },
+        },
+      };
+    });
   }
 }

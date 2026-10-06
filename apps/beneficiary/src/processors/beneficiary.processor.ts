@@ -20,6 +20,7 @@ import { Job, Queue } from 'bull';
 import { randomUUID, UUID } from 'crypto';
 import { PhoneNumberUtil } from 'google-libphonenumber';
 import Redis from 'ioredis';
+import { BeneficiaryStatsUpdateService } from '../beneficiary/beneficiary-stats-update.service';
 import { splitBeneficiaryPII } from '../beneficiary/helpers';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
@@ -42,11 +43,12 @@ export class BeneficiaryProcessor {
     private readonly eventEmitter: EventEmitter2,
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY) private readonly beneficiaryQueue: Queue,
     @Inject(SYNC_TRACKING_REDIS) private readonly syncTrackingRedis: Redis,
+    private readonly statsUpdateService: BeneficiaryStatsUpdateService,
   ) { }
 
-  @Process(BeneficiaryJobs.UPDATE_STATS)
-  async sample(job: Job<any>) {
-    console.log('sample', job.data);
+  @Process({ name: BeneficiaryJobs.UPDATE_STATS, concurrency: 1 })
+  async updateStats(job: Job<{ projectUUID?: string | null }>) {
+    return this.statsUpdateService.updateStats(job.data?.projectUUID);
   }
 
   @Process(BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES)
@@ -596,6 +598,7 @@ export class BeneficiaryProcessor {
         extras: {
           ...((b.extras as object) || {}),
           phone: b.pii?.phone || null,
+          ...(b.pii?.name != null ? { name: b.pii.name } : {}),
           ...(b.location != null ? { location: b.location } : {}),
           ...(b.latitude != null ? { latitude: b.latitude } : {}),
           ...(b.longitude != null ? { longitude: b.longitude } : {}),
