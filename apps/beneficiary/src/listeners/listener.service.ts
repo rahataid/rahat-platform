@@ -1,7 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { BeneficiaryEvents, BQUEUE } from '@rahataid/sdk';
 import { EVENTS } from '@rumsan/user';
@@ -11,6 +11,8 @@ import { EmailService } from './email.service';
 @Injectable()
 export class ListenersService {
   private otp: string;
+  private readonly logger = new Logger();
+
 
   constructor(
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY) private readonly queue: Queue,
@@ -27,7 +29,8 @@ export class ListenersService {
   @OnEvent(BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL)
   @OnEvent(BeneficiaryEvents.REFRESH_STATS)
   async onBeneficiaryChanged(eventObject: any) {
-    await this.benStats.saveAllStats(eventObject.projectUuid);
+    this.logger.log("Reached to update stats after beneficiary change event");
+    await this.benStats.saveAllStats(eventObject?.projectUuid);
   }
 
   @OnEvent(EVENTS.OTP_CREATED)
