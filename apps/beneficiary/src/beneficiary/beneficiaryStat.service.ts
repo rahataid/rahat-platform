@@ -636,7 +636,6 @@ export class BeneficiaryStatService {
         count: bankCounts[key],
       };
     });
-    console.log(resultArray)
     return resultArray;
   }
 
