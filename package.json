@@ -1,6 +1,6 @@
 {
   "name": "@rahat-os/source",
-  "version": "v5.1.2",
+  "version": "v5.2.0",
   "license": "MPL-2.0",
   "scripts": {
     "rahat": "set NODE_ENV=development && npx nx serve rahat",
