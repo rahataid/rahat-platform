@@ -213,6 +213,7 @@ export class VendorsService {
           phone: dto.phone,
           password: dto.password,
           confirmPassword: dto.password,
+          gender: dto?.gender,
           service: Service.USERNAME,
           bypassPasswordValidation: dto.bypassPasswordValidation,
           wallet: randomWallet.address,
