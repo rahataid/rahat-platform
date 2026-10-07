@@ -90,7 +90,8 @@ export class BeneficiaryController {
     return this.service.createBulkWithGroup(
       data?.payload,
       data?.projectUUID,
-      data?.groupName
+      data?.groupName,
+      data?.groupPurpose
     );
   }
 
@@ -145,26 +146,26 @@ export class BeneficiaryController {
     return this.statsService.getAllStats(uuid);
   }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.ADD_TO_PROJECT })
-  async addToProject(payload: any) {
-    const { dto, projectUid } = payload;
-    return this.service.addBeneficiaryToProject(dto, projectUid);
-  }
+  // @MessagePattern({ cmd: BeneficiaryJobs.ADD_TO_PROJECT })
+  // async addToProject(payload: any) {
+  //   const { dto, projectUid } = payload;
+  //   return this.service.addBeneficiaryToProject(dto, projectUid);
+  // }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.BULK_ADD_TO_PROJECT })
-  async bulkaddToProject(payload: addBulkBeneficiaryToProject) {
-    return this.service.addBulkBeneficiaryToProject(payload);
-  }
-
+  // @MessagePattern({ cmd: BeneficiaryJobs.BULK_ADD_TO_PROJECT })
+  // async bulkaddToProject(payload: addBulkBeneficiaryToProject) {
+  //   return this.service.addBulkBeneficiaryToProject(payload);
+  // }
+  //
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT })
   async assignToProject(payload: any) {
     return this.utilService.assignBeneficiaryToProject(payload);
   }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT })
-  async bulkAssignToProject(payload: any) {
-    return this.service.bulkAssignToProject(payload);
-  }
+  // @MessagePattern({ cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT })
+  // async bulkAssignToProject(payload: any) {
+  //   return this.service.bulkAssignToProject(payload);
+  // }
 
   @MessagePattern({ cmd: BeneficiaryJobs.UPDATE })
   update(@Param('uuid') uuid: UUID, @Payload() dto: UpdateBeneficiaryDto) {
@@ -222,9 +223,17 @@ export class BeneficiaryController {
     return this.service.addGroup(payload);
   }
 
+  // used by AA inkind walk-in redemption
   @MessagePattern({ cmd: BeneficiaryJobs.ADD_BENEFICIARIES_TO_GROUP })
   addBeneficiariesToGroup(payload: AddBeneficiariesToGroupDto) {
     return this.service.addBeneficiariesToGroup(payload);
+  }
+
+  @MessagePattern({ cmd: BeneficiaryJobs.UPLOAD_BENEFICIARIES_TO_GROUP })
+  uploadBeneficiariesToGroup(
+    @Payload() payload: { dtos: CreateBeneficiaryDto[]; groupUuid: string },
+  ) {
+    return this.service.uploadBeneficiariesToGroup(payload.dtos, payload.groupUuid);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET_ONE_GROUP })
@@ -257,6 +266,11 @@ export class BeneficiaryController {
     return this.service.groupAttributesCheck(uuid);
   }
 
+  @MessagePattern({ cmd: BeneficiaryJobs.GROUP_FORCE_INVALIDATE })
+  groupForceInvalidate(uuid: string) {
+    return this.service.groupForceInvalidate(uuid);
+  }
+
   @MessagePattern({ cmd: BeneficiaryJobs.GET_GROUP_BANK_CHECK_STATUS })
   getGroupBankCheckStatus(uuid: string) {
     return this.service.getGroupBankCheckStatus(uuid);
@@ -286,6 +300,17 @@ export class BeneficiaryController {
     @Payload() dto: AddGroupsPurposeDto
   ) {
     return this.service.addGroupPurpose(dto);
+  }
+
+  // Reported by the project service when a group import finishes or finally fails
+  @MessagePattern({ cmd: BeneficiaryJobs.GROUP_ASSIGN_SYNC_RESULT })
+  groupAssignSyncResult(payload: {
+    projectId: string;
+    beneficiaryGroupId: string;
+    status: 'SUCCESS' | 'FAILED';
+    error?: string;
+  }) {
+    return this.service.handleGroupAssignSyncResult(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT })

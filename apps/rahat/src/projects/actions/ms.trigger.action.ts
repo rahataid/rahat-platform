@@ -104,6 +104,14 @@ export const MS_TRIGGERS_JOBS = {
     ADD: 'ms.jobs.categories.add',
     REMOVE: 'ms.jobs.categories.remove',
   },
+  COMMUNICATIONS: {
+    CREATE: 'ms.jobs.communications.create',
+    GET_ALL: 'ms.jobs.communications.getAll',
+    GET_ONE: 'ms.jobs.communications.getOne',
+    UPDATE: 'ms.jobs.communications.update',
+    REMOVE: 'ms.jobs.communications.remove',
+    TRIGGER: 'ms.jobs.communications.trigger',
+  },
   DAILY_MONITORING: {
     ADD: 'ms.jobs.dailyMonitoring.add',
     GET_ALL: 'ms.jobs.dailyMonitoring.getAll',
@@ -123,6 +131,9 @@ export const MS_TRIGGERS_JOBS = {
   },
   SETTINGS: {
     GET: 'ms.jobs.settings.get'
+  },
+  VERSION: {
+    GET: 'ms.jobs.version.get'
   }
 };
 
@@ -684,6 +695,32 @@ export const msTriggerActions: ProjectActionFunc = {
   },
   // **** activity categories end ******//
 
+  // **** communications start ******//
+  [MS_ACTIONS.MS_COMMUNICATIONS.CREATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.COMMUNICATIONS.CREATE }, payload),
+
+  [MS_ACTIONS.MS_COMMUNICATIONS.GET_ALL]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.COMMUNICATIONS.GET_ALL }, payload),
+
+  [MS_ACTIONS.MS_COMMUNICATIONS.GET_ONE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.COMMUNICATIONS.GET_ONE }, payload),
+
+  [MS_ACTIONS.MS_COMMUNICATIONS.UPDATE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.COMMUNICATIONS.UPDATE }, payload),
+
+  [MS_ACTIONS.MS_COMMUNICATIONS.REMOVE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: MS_TRIGGERS_JOBS.COMMUNICATIONS.REMOVE }, payload),
+
+  [MS_ACTIONS.MS_COMMUNICATIONS.TRIGGER]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+
+    return sendCommand(
+      { cmd: MS_TRIGGERS_JOBS.COMMUNICATIONS.TRIGGER },
+      payload
+    );
+  },
+  // **** communications end ******//
+
   // **** daily monitoring start ****//
   [MS_ACTIONS.MS_DAILY_MONITORING.ADD]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
@@ -780,6 +817,12 @@ export const msTriggerActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
 
     return sendCommand({ cmd: MS_TRIGGERS_JOBS.SETTINGS.GET }, payload);
+  },
+  // **** version — from package.json via readFile ****//
+  [MS_ACTIONS.MS_VERSION.GET]: (uuid, payload, sendCommand) => {
+    payload = payload || {};
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: MS_TRIGGERS_JOBS.VERSION.GET }, payload);
   },
   // **** settings end ****//https://api-aa-dev.rahat.io
 

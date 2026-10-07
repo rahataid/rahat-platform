@@ -8,19 +8,18 @@ import {
 import { StrKey } from '@stellar/stellar-sdk';
 import { Address, IsAddressOptions, isAddress as isEthAddress } from 'viem';
 
-export async function createContractSigner(abi: any, address: string) {
+export async function createContractSigner(abi: any, address: string, rpcUrl: string, privateKey: string) {
 
   //  Create wallet from private key
-  const provider = new JsonRpcProvider(process.env.NETWORK_PROVIDER);
-  const privateKey = process.env.RAHAT_ADMIN_PRIVATE_KEY;
+  const provider = new JsonRpcProvider(rpcUrl);
   const wallet = new ethers.Wallet(privateKey, provider);
   //  Create an instance of the contract
   const contracts = new Contract(address, abi, wallet);
   return contracts
 }
 
-export async function getBlocktimeStamp(txHash: string) {
-  const provider = new JsonRpcProvider(process.env.NETWORK_PROVIDER);
+export async function getBlocktimeStamp(txHash: string, rpcUrl: string) {
+  const provider = new JsonRpcProvider(rpcUrl);
   const receipt = await provider.waitForTransaction(txHash);
   if (!receipt) {
     console.error('Transaction is not mined or does not exist.');

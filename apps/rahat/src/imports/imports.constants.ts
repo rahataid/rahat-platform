@@ -47,3 +47,6 @@ export const STANDARD_FIELD_MAP: Record<string, { table: 'beneficiary' | 'pii'; 
   internetstatus: { table: 'beneficiary', field: 'internetStatus' },
   phonestatus: { table: 'beneficiary', field: 'phoneStatus' },
 };
+
+export const STATS_RECOMPUTE_JOB_ID = 'stats-recompute';
+export const STATS_RECOMPUTE_DELAY_MS = 5000;

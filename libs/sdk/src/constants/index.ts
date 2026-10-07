@@ -208,6 +208,9 @@ export const MS_ACTIONS = {
       ADD_TRIGGERS: 'aaProject.phases.addTriggers',
       REVERT_PHASE: 'aaProject.phases.revertPhase',
     },
+    VERSION: {
+      GET: 'aaProject.version.get',
+    },
     STAKEHOLDERS: {
       GET_ALL: 'aaProject.stakeholders.getAll',
       GET_ONE: 'aaProject.stakeholders.getOne',
@@ -247,11 +250,14 @@ export const MS_ACTIONS = {
       GET_BALANCE: 'aaProject.beneficiary.getBalance',
       GET_TOKEN_DETAILS: 'aaProject.beneficiary.getTokenDetails',
       GENERATE_QR_PDF: 'aaProject.beneficiary.generateQrPdf',
+      REGENERATE_QR_PDF: 'aaProject.beneficiary.regenerateQrPdf',
       GET_QR_PDF: 'aaProject.beneficiary.getQrPdf',
+      EXPORT_GROUP_EXCEL: 'aaProject.beneficiary.exportGroupExcel',
       REVOKE_SPONSORSHIP_FOR_GROUP: 'aaProject.beneficiary.revokeSponsorshipForGroup',
       RETRY_SPONSORSHIP_FOR_GROUP: 'aaProject.beneficiary.retrySponsorshipForGroup',
       SPONSOR_BENEFICIARY_GROUP: 'aaProject.beneficiary.sponsorBeneficiaryGroup',
       GET_SPONSORSHIP_STATUS_FOR_GROUP: 'aaProject.beneficiary.getSponsorshipStatusForGroup',
+      GET_PAYOUT_MODE: 'aaProject.beneficiary.getPayoutMode',
     },
     STATS: {
       GET_ALL: 'aaProject.stats.getAll',
@@ -316,7 +322,9 @@ export const MS_ACTIONS = {
       GET_PAYOUT_STATS: 'aa.jobs.payout.getPayoutStats',
       GET_PAYOUT_DETAILS: 'aa.payout.getPayoutDetails',
       EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+      EXPORT_PAYOUT_LOGS_PDF_FILE: 'aa.jobs.payout.exportPayoutLogsPdfFile',
       VERIFY_MANUAL_PAYOUT: 'aa.payout.verifyManualPayout',
+      COMPLETE_PAYOUT: 'aa.payout.complete'
     },
     INKIND: {
       CREATE: 'aa.inkinds.create',
@@ -656,6 +664,15 @@ export const MS_ACTIONS = {
     REMOVE: 'ms.activityCategories.remove',
   },
 
+  MS_COMMUNICATIONS: {
+    CREATE: 'ms.communications.create',
+    GET_ALL: 'ms.communications.getAll',
+    GET_ONE: 'ms.communications.getOne',
+    UPDATE: 'ms.communications.update',
+    REMOVE: 'ms.communications.remove',
+    TRIGGER: 'ms.communications.trigger',
+  },
+
   MS_DAILY_MONITORING: {
     ADD: 'ms.dailyMonitoring.add',
     GET_ALL: 'ms.dailyMonitoring.getAll',
@@ -679,6 +696,12 @@ export const MS_ACTIONS = {
     GET: 'ms.settings.get',
     UPDATE_VALUES: 'ms.settings.updateValues',
   },
+  MS_VERSION: {
+    GET: 'ms.jobs.version.get',
+  },
+  AA_JOBS_VERSION: {
+    GET: 'aa.jobs.version.get',
+  },
   MS_SOURCES_DATA: {
     GET_SERIES_BY_DATA_SOURCE: 'ms.sourcesData.getSeriesByDataSource',
   },
@@ -693,6 +716,9 @@ export const MS_ACTIONS = {
     SEND_OTP: 'otp.sendOtp',
     SEND_BULK_OTP: 'otp.sendBulkOtp',
   },
+  HEALTH: {
+    CHECK: 'health.getcheck'
+  }
 };
 
 export const RABBIT_MQ = {
