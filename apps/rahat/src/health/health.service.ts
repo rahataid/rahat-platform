@@ -16,8 +16,8 @@ const ALERT_STATE_KEY = 'core_health_alert_state';
 
 @Injectable()
 export class HealthService {
-    private readonly CACHE_KEY = 'health_status';
-    private readonly CACHE_TTL = 60;
+    private readonly CACHE_KEY = 'core_health_status';
+    private readonly CACHE_TTL = 300;
     private readonly _logger = new Logger(HealthService.name);
 
     constructor(
@@ -40,7 +40,8 @@ export class HealthService {
 
     async checkHealthStatus(): Promise<HealthStatus> {
         this._logger.log('Check the health status of all  used services');
-        const result = await updateHealthStatus(this.prisma, this.rahatQueue);
+        const previous = await this.getHealthStatusFromCache();
+        const result = await updateHealthStatus(this.prisma, this.rahatQueue, previous?.services);
         await this.setCache(result);
         await this.handleAlertTransitions(result);
         return result;
