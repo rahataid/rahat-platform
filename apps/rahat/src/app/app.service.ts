@@ -187,10 +187,8 @@ export class AppService {
   }
 
   async getFrontendUrl() {
-    return this.prisma.setting.findMany({
-      where: {
-        name: 'FRONTEND_URL',
-      },
+    return this.prisma.setting.findUnique({
+      where: { name: 'FRONTEND_URL' },
     });
   }
 }
