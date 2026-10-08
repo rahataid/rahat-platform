@@ -1,6 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { PrismaService } from '@rumsan/prisma';
 import { App, cert, getApps, initializeApp } from 'firebase-admin/app';
-import { getMessaging } from 'firebase-admin/messaging';
+import { getMessaging, Messaging } from 'firebase-admin/messaging';
+import { backoffDelay, chunk, mapWithConcurrency, sleep } from './utils/push.utils';
+import { getSecretSetting } from './utils/secret-settings';
 
 export interface PushPayload {
     title: string;
@@ -14,10 +17,22 @@ export interface PushResult {
     invalidTokens: string[];
 }
 
+
 const DEAD_TOKEN_CODES = new Set([
     'messaging/registration-token-not-registered',
     'messaging/invalid-registration-token',
 ]);
+const INVALID_ARGUMENT_CODE = 'messaging/invalid-argument';
+const TRANSIENT_CODES = new Set([
+    'messaging/internal-error',
+    'messaging/server-unavailable',
+    'messaging/message-rate-exceeded',
+    'messaging/device-message-rate-exceeded',
+]);
+
+const FCM_BATCH_SIZE = 500;
+const FCM_CONCURRENCY = Number(process.env.FCM_CONCURRENCY ?? 3);
+const FCM_MAX_RETRIES = 3;
 
 @Injectable()
 export class FirebaseService implements OnModuleInit {
@@ -28,12 +43,14 @@ export class FirebaseService implements OnModuleInit {
         return this.app !== null;
     }
 
-    onModuleInit() {
+    constructor(private readonly prisma: PrismaService) { }
+
+    async onModuleInit() {
         if (process.env.PUSH_ENABLED !== 'true') {
             return;
         }
         try {
-            const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
+            const b64 = await getSecretSetting(this.prisma, 'FIREBASE_SERVICE_ACCOUNT_BASE64', process.env.FIREBASE_SERVICE_ACCOUNT_BASE64);
             if (!b64) {
                 this.logger.warn('[FCM] FIREBASE_SERVICE_ACCOUNT_BASE64 missing. Push DISABLED.');
                 return;
@@ -54,6 +71,71 @@ export class FirebaseService implements OnModuleInit {
         );
     }
 
+
+    private async sendChunk(
+        messaging: Messaging,
+        tokens: string[],
+        payload: PushPayload,
+        data: Record<string, string>
+    ): Promise<{ successCount: number; invalid: string[] }> {
+        let pending = tokens;
+        let successCount = 0;
+        const invalid: string[] = [];
+
+        for (let attempt = 0; attempt <= FCM_MAX_RETRIES && pending.length; attempt++) {
+            if (attempt > 0) {
+                const wait = backoffDelay(attempt - 1);
+                this.logger.warn(`[FCM] Retry ${attempt}/${FCM_MAX_RETRIES} for ${pending.length} token(s) in ${wait}ms`);
+                await sleep(wait);
+            }
+
+            let res;
+            try {
+                res = await messaging.sendEachForMulticast({
+                    tokens: pending,
+                    notification: { title: payload.title, body: payload.body },
+                    data,
+                    android: { priority: 'high' },
+                    apns: { payload: { aps: { sound: 'default' } } },
+                });
+            } catch (err: any) {
+                // whole request failed (network/5xx): retry the same tokens
+                this.logger.warn(`[FCM] Multicast request threw (attempt ${attempt + 1}): ${err?.message}`);
+                continue;
+            }
+
+            successCount += res.successCount;
+            const retryNext: string[] = [];
+            const invalidArg: string[] = [];
+
+            res.responses.forEach((r, idx) => {
+                if (r.success) return;
+                const code = r.error?.code ?? '';
+                const token = pending[idx];
+                if (DEAD_TOKEN_CODES.has(code)) invalid.push(token);
+                else if (code === INVALID_ARGUMENT_CODE) invalidArg.push(token);
+                else if (TRANSIENT_CODES.has(code)) retryNext.push(token);
+                else this.logger.warn(`[FCM] Permanent failure ...${token.slice(-8)}: ${code}`);
+            });
+
+            // INVALID_ARGUMENT can also mean a bad *payload*. If every token in the batch failed
+            // that way, don't deactivate anything.
+            if (invalidArg.length && invalidArg.length === pending.length) {
+                this.logger.error('[FCM] All tokens returned INVALID_ARGUMENT, payload likely invalid. Not deactivating tokens.');
+            } else {
+                invalid.push(...invalidArg);
+            }
+
+            pending = retryNext;
+        }
+
+        if (pending.length) {
+            this.logger.error(`[FCM] Gave up on ${pending.length} token(s) after ${FCM_MAX_RETRIES} retries (transient errors)`);
+        }
+        return { successCount, invalid };
+    }
+
+
     async sendToTokens(tokens: string[], payload: PushPayload): Promise<PushResult> {
         const result: PushResult = { successCount: 0, failureCount: 0, invalidTokens: [] };
         if (!this.app) {
@@ -67,25 +149,18 @@ export class FirebaseService implements OnModuleInit {
 
         const messaging = getMessaging(this.app);
         const data = this.stringify(payload.data);
+        const batches = chunk(tokens, FCM_BATCH_SIZE);
 
-        for (let i = 0; i < tokens.length; i += 500) {
-            const chunk = tokens.slice(i, i + 500);
-            const res = await messaging.sendEachForMulticast({
-                tokens: chunk,
-                notification: { title: payload.title, body: payload.body },
-                data,
-                android: { priority: 'high' },
-                apns: { payload: { aps: { sound: 'default' } } },
-            });
-            result.successCount += res.successCount;
-            result.failureCount += res.failureCount;
-            res.responses.forEach((r, idx) => {
-                if (!r.success && r.error) {
-                    this.logger.warn(`[FCM] Token ${chunk[idx]} failed: ${r.error.code} - ${r.error.message}`);
-                    if (DEAD_TOKEN_CODES.has(r.error.code)) result.invalidTokens.push(chunk[idx]);
-                }
-            });
+
+        const outcomes = await mapWithConcurrency(batches, FCM_CONCURRENCY, (batch) =>
+            this.sendChunk(messaging, batch, payload, data)
+        );
+
+        for (const o of outcomes) {
+            result.successCount += o.successCount;
+            result.invalidTokens.push(...o.invalid);
         }
+        result.failureCount = tokens.length - result.successCount;
         return result;
     }
 }

@@ -1,13 +1,25 @@
 //rahat-platform/apps/rahat/src/notification/push.service.ts
+import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { Notification } from '@prisma/client';
-import { UserRoles } from '@rahataid/sdk';
+import { APP_JOBS, BQUEUE, UserRoles } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
+import { Queue } from 'bull';
 import { RegisterDeviceDto } from './dto/register-device.dto';
 import { SubscribeWebPushDto } from './dto/subscribe-web-push.dto';
-import { FirebaseService } from './firebase.service';
-import { WebPushService } from './web-push.service';
+import { FirebaseService, PushPayload } from './firebase.service';
+import { WebPushPayload, WebPushService, WebPushTarget } from './web-push.service';
+
+const PAGE_SIZE = Number(process.env.PUSH_PAGE_SIZE ?? 500);
+// above this many devices per channel, work goes to the queue instead of running inline
+const QUEUE_THRESHOLD = Number(process.env.PUSH_QUEUE_THRESHOLD ?? 1000);
+const PUSH_JOB_OPTS = {
+    attempts: 3,
+    removeOnComplete: true,
+    backoff: { type: 'exponential', delay: 1000 },
+};
+
 
 export interface PushOptions {
     enabled?: boolean;                 // false = skip push for this notification
@@ -29,7 +41,8 @@ export class PushService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly firebase: FirebaseService,
-        private readonly webPush: WebPushService
+        private readonly webPush: WebPushService,
+        @InjectQueue(BQUEUE.RAHAT) private readonly rahatQueue: Queue
     ) { }
 
     // ---------- device registration (called only by the mobile app) ----------
@@ -62,6 +75,12 @@ export class PushService {
         }
 
         const { token, platform, appId } = dto;
+        const existing = await this.prisma.deviceToken.findUnique({ where: { token } });
+
+        if (existing && existing.userId === userId && existing.active) {
+            this.logger.warn(`[DEVICE] Token ${token} is already registered to a different user (${existing.userId}), reassigning to ${userId}`);
+            return { registered: true, changed: false };
+        }
 
 
         // token is unique: if the same phone logs in as another user, it moves to that user
@@ -71,7 +90,7 @@ export class PushService {
             update: { userId, platform, appId, active: true, lastUsedAt: new Date() },
         });
 
-        return { registered: true };
+        return { registered: true, changed: true };
     }
 
     async unregisterDevice(dto: { token: string; user?: any }) {
@@ -86,8 +105,9 @@ export class PushService {
             this.logger.warn('[DEVICE] No token provided for unregistration');
             return { unregistered: false };
         }
-        const res = await this.prisma.deviceToken.deleteMany({
+        const res = await this.prisma.deviceToken.updateMany({
             where: { token: dto.token, userId },
+            data: { active: false },
         });
 
         return { unregistered: res.count > 0 };
@@ -114,12 +134,8 @@ export class PushService {
     }
 
     async pushForNotification(notification: Notification, opts: PushOptions = {}): Promise<void> {
-
         try {
-            if (opts.enabled === false) {
-
-                return;
-            }
+            if (opts.enabled === false) return;
 
             const userIds = opts.userIds?.length
                 ? opts.userIds
@@ -139,63 +155,126 @@ export class PushService {
                 ...(opts.data ?? {}),
             };
 
-            // ---- mobile (FCM) ----
-            if (this.firebase.enabled) {
-                const rows = await this.prisma.deviceToken.findMany({
-                    where: { userId: { in: userIds }, active: true },
-                    select: { token: true },
-                });
-                const tokens = rows.map((r) => r.token);
-
-                if (tokens.length) {
-                    const res = await this.firebase.sendToTokens(tokens, {
-                        title: notification.title,
-                        body: notification.description,
-                        data: pushData,
-                    });
-
-                    if (res.invalidTokens.length) {
-                        await this.prisma.deviceToken.deleteMany({ where: { token: { in: res.invalidTokens } } });
-
-                    }
-
-                } else {
-                    this.logger.warn('[PUSH][MOBILE] No registered mobile devices found for the resolved users');
-                }
-            } else {
-                this.logger.log('[PUSH][MOBILE] Firebase disabled, skipping mobile push');
-            }
-
-            // ---- web (VAPID) ----
-            if (this.webPush?.enabled) {
-                const webSubs = await this.prisma.webPushSubscription.findMany({
-                    where: { userId: { in: userIds }, active: true },
-                    select: { endpoint: true, p256dh: true, auth: true },
-                });
-
-                if (webSubs.length) {
-                    const webRes = await this.webPush.sendToSubscriptions(webSubs, {
-                        title: notification.title,
-                        body: notification.description,
-                        url: (pushData.url as string) ?? '/tabs/notifications',
-                        data: pushData,
-                    });
-
-                    if (webRes.invalidEndpoints.length) {
-                        await this.prisma.webPushSubscription.deleteMany({ where: { endpoint: { in: webRes.invalidEndpoints } } });
-                    }
-
-                } else {
-                    this.logger.warn('[PUSH][WEB] No registered web subscriptions found for the resolved users');
-                }
-            } else {
-                this.logger.log('[PUSH][WEB] WebPush disabled, skipping web push');
-            }
+            // channels are independent: one failing must not block the other
+            await Promise.allSettled([
+                this.dispatchMobile(userIds, notification, pushData),
+                this.dispatchWeb(userIds, notification, pushData),
+            ]);
         } catch (err: any) {
             this.logger.error(`[PUSH] Failed (notification unaffected): ${err?.message}`, err?.stack);
         }
     }
 
+    private async dispatchMobile(userIds: string[], notification: Notification, pushData: Record<string, any>) {
+        if (!this.firebase.enabled) {
+            this.logger.log('[PUSH][MOBILE] Firebase disabled, skipping mobile push');
+            return;
+        }
+        try {
+            const where = { userId: { in: userIds }, active: true };
+            const total = await this.prisma.deviceToken.count({ where });
+            if (!total) {
+                this.logger.warn('[PUSH][MOBILE] No active mobile devices for the resolved users');
+                return;
+            }
+
+            const payload: PushPayload = { title: notification.title, body: notification.description, data: pushData };
+            const useQueue = total > QUEUE_THRESHOLD;
+            this.logger.log(`[PUSH][MOBILE] ${total} device(s), mode=${useQueue ? 'queue' : 'inline'}`);
+
+            let cursor: number | undefined;
+            while (true) {
+                const rows = await this.prisma.deviceToken.findMany({
+                    where,
+                    select: { id: true, token: true },
+                    orderBy: { id: 'asc' },
+                    take: PAGE_SIZE,
+                    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+                });
+                if (!rows.length) break;
+                cursor = rows[rows.length - 1].id;
+                const tokens = rows.map((r) => r.token);
+
+                if (useQueue) await this.rahatQueue.add(APP_JOBS.PUSH_SEND_FCM, { tokens, payload }, PUSH_JOB_OPTS);
+                else await this.deliverFcm(tokens, payload);
+
+                if (rows.length < PAGE_SIZE) break;
+            }
+        } catch (err: any) {
+            this.logger.error(`[PUSH][MOBILE] dispatch failed: ${err?.message}`, err?.stack);
+        }
+    }
+
+    private async dispatchWeb(userIds: string[], notification: Notification, pushData: Record<string, any>) {
+        if (!this.webPush?.enabled) {
+            this.logger.log('[PUSH][WEB] WebPush disabled, skipping web push');
+            return;
+        }
+        try {
+            const where = { userId: { in: userIds }, active: true };
+            const total = await this.prisma.webPushSubscription.count({ where });
+            if (!total) {
+                this.logger.warn('[PUSH][WEB] No active web subscriptions for the resolved users');
+                return;
+            }
+
+            const payload: WebPushPayload = {
+                title: notification.title,
+                body: notification.description,
+                url: (pushData.url as string) ?? '/tabs/notifications',
+                data: pushData,
+            };
+            const useQueue = total > QUEUE_THRESHOLD;
+            this.logger.log(`[PUSH][WEB] ${total} subscription(s), mode=${useQueue ? 'queue' : 'inline'}`);
+
+            let cursor: number | undefined;
+            while (true) {
+                const rows = await this.prisma.webPushSubscription.findMany({
+                    where,
+                    select: { id: true, endpoint: true, p256dh: true, auth: true },
+                    orderBy: { id: 'asc' },
+                    take: PAGE_SIZE,
+                    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+                });
+                if (!rows.length) break;
+                cursor = rows[rows.length - 1].id;
+                const subs: WebPushTarget[] = rows.map(({ endpoint, p256dh, auth }) => ({ endpoint, p256dh, auth }));
+
+                if (useQueue) await this.rahatQueue.add(APP_JOBS.PUSH_SEND_WEB, { subs, payload }, PUSH_JOB_OPTS);
+                else await this.deliverWeb(subs, payload);
+
+                if (rows.length < PAGE_SIZE) break;
+            }
+        } catch (err: any) {
+            this.logger.error(`[PUSH][WEB] dispatch failed: ${err?.message}`, err?.stack);
+        }
+    }
+
+    // Used inline AND by the queue worker
+    async deliverFcm(tokens: string[], payload: PushPayload) {
+        const res = await this.firebase.sendToTokens(tokens, payload);
+        if (res.invalidTokens.length) {
+            // deactivate (not delete): if the device re-registers, case c reactivates the same row
+            await this.prisma.deviceToken.updateMany({
+                where: { token: { in: res.invalidTokens } },
+                data: { active: false },
+            });
+        }
+        this.logger.log(`[PUSH][MOBILE] batch done: ok=${res.successCount} failed=${res.failureCount} deactivated=${res.invalidTokens.length}`);
+        return res;
+    }
+
+    async deliverWeb(subs: WebPushTarget[], payload: WebPushPayload) {
+        const res = await this.webPush.sendToSubscriptions(subs, payload);
+        if (res.invalidEndpoints.length) {
+            await this.prisma.webPushSubscription.updateMany({
+                where: { endpoint: { in: res.invalidEndpoints } },
+                data: { active: false },
+            });
+        }
+        this.logger.log(`[PUSH][WEB] batch done: ok=${res.successCount} failed=${res.failureCount} deactivated=${res.invalidEndpoints.length}`);
+        return res;
+    }
 
     async registerWebPush(dto: SubscribeWebPushDto & { user?: any }) {
 
@@ -210,11 +289,13 @@ export class PushService {
                 });
             }
 
+            const { endpoint, keys, userAgent } = dto;
+            const existing = await this.prisma.webPushSubscription.findUnique({ where: { endpoint } });
 
-            if (!this.prisma.webPushSubscription) {
-                this.logger.error('[WEBPUSH] ERROR: this.prisma.webPushSubscription is UNDEFINED!');
-                throw new RpcException('Prisma model webPushSubscription not found');
+            if (existing && existing.userId === userId && existing.active && existing.p256dh === keys.p256dh && existing.auth === keys.auth) {
+                return { registered: true, changed: false };
             }
+
 
             const result = await this.prisma.webPushSubscription.upsert({
                 where: { endpoint: dto.endpoint },
@@ -223,9 +304,11 @@ export class PushService {
             });
 
 
-            return { registered: true, data: result };
+            return { registered: true, changed: true, data: result };
         } catch (err: any) {
             this.logger.error(`[WEBPUSH] registerWebPush THREW: ${err?.message}`, err?.stack);
+            if (err instanceof RpcException) throw err;
+
             throw new RpcException(err?.message || 'Failed to process web push subscription');
         }
     }
@@ -234,7 +317,11 @@ export class PushService {
     async unregisterWebPush(dto: { endpoint: string; user?: any }) {
         const userId = await this.resolveUserUuid(dto.user);
         if (!userId || !dto.endpoint) return { unregistered: false };
-        const res = await this.prisma.webPushSubscription.deleteMany({ where: { endpoint: dto.endpoint, userId } });
+
+        const res = await this.prisma.webPushSubscription.updateMany({
+            where: { endpoint: dto.endpoint, userId },
+            data: { active: false }
+        });
         return { unregistered: res.count > 0 };
     }
 
