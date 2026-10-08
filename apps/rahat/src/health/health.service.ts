@@ -17,7 +17,7 @@ const ALERT_STATE_KEY = 'core_health_alert_state';
 @Injectable()
 export class HealthService {
     private readonly CACHE_KEY = 'core_health_status';
-    private readonly CACHE_TTL = 300;
+    private readonly CACHE_TTL = 600;
     private readonly _logger = new Logger(HealthService.name);
 
     constructor(
