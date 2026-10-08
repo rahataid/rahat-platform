@@ -371,118 +371,6 @@ export class VendorsService {
     }
   }
 
-  // Helper: Generate unique username with collision prevention
-  private async generateUniqueUsername(name: string): Promise<string> {
-    const maxAttempts = 10;
-
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const username = this.generateUsername(name);
-
-      // Check if username exists
-      const existing = await this.prisma.auth.findFirst({
-        where: {
-          service: Service.USERNAME,
-          serviceId: username,
-        },
-      });
-
-      if (!existing) {
-        return username;
-      }
-
-      // If exists, try again with different random suffix
-    }
-
-    // Fallback to UUID-based username if all attempts fail
-    const fallbackUsername = `${name
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '_')}_${Date.now()}_${Math.floor(
-        Math.random() * 1000
-      )}`;
-    this.logger.warn(
-      'Failed to generate unique username after 10 attempts, using fallback:',
-      fallbackUsername
-    );
-    return fallbackUsername;
-  }
-
-  // Helper: Validate generated password meets requirements
-  private validateGeneratedPassword(password: string) {
-    const {
-      validatePasswordStrength,
-    } = require('@rumsan/user/lib/utils/password.utils');
-
-    const validation = validatePasswordStrength(password);
-    if (!validation.isValid) {
-      throw new Error(
-        `Generated password does not meet requirements: ${validation.errors.join(
-          ', '
-        )}`
-      );
-    }
-  }
-
-  // Helper to generate username from name (base version - doesn't check uniqueness)
-  private generateUsername(name: string): string {
-    // Convert to lowercase, replace spaces with underscore, remove special chars
-    const base = name
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, '_')
-      .replace(/[^a-z0-9_]/g, '');
-
-    // Ensure base is not empty
-    if (!base || base.length === 0) {
-      return `vendor_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
-    }
-
-    // Use crypto for better randomness
-    const crypto = require('crypto');
-    const randomBytes = crypto.randomBytes(3).toString('hex'); // 6 char hex
-
-    return `${base}_${randomBytes}`;
-  }
-
-  // Helper to generate secure password with stronger randomness
-  private generateSecurePassword(length: number = 14): string {
-    const crypto = require('crypto');
-
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const numbers = '0123456789';
-    const special = '!@#$%^&*';
-    const allChars = uppercase + lowercase + numbers + special;
-
-    let password = '';
-
-    // Ensure at least 2 of each type for stronger passwords
-    password += uppercase[crypto.randomInt(0, uppercase.length)];
-    password += uppercase[crypto.randomInt(0, uppercase.length)];
-    password += lowercase[crypto.randomInt(0, lowercase.length)];
-    password += lowercase[crypto.randomInt(0, lowercase.length)];
-    password += numbers[crypto.randomInt(0, numbers.length)];
-    password += numbers[crypto.randomInt(0, numbers.length)];
-    password += special[crypto.randomInt(0, special.length)];
-    password += special[crypto.randomInt(0, special.length)];
-
-    // Fill the rest randomly
-    for (let i = password.length; i < length; i++) {
-      password += allChars[crypto.randomInt(0, allChars.length)];
-    }
-
-    // Shuffle the password using Fisher-Yates algorithm for better randomness
-    const passwordArray = password.split('');
-    for (let i = passwordArray.length - 1; i > 0; i--) {
-      const j = crypto.randomInt(0, i + 1);
-      [passwordArray[i], passwordArray[j]] = [
-        passwordArray[j],
-        passwordArray[i],
-      ];
-    }
-
-    return passwordArray.join('');
-  }
-
   async loginByPassword(dto: PasswordLoginDto, rdetails: Request) {
     // Step 1: Validate user credentials (password check)
     const user = await this.authService.validateUser(
@@ -538,6 +426,8 @@ export class VendorsService {
         email: user.email,
         phone: user.phone,
         wallet: user.wallet,
+        gender: user.gender,
+        extras: user.extras
       },
       wallet,
     };
