@@ -7,33 +7,33 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Beneficiary, BeneficiaryPii, GroupPurpose } from '@prisma/client';
 import {
-    AddBeneficiariesToGroupDto,
-    AddBenfGroupToProjectDto,
-    AddBenToProjectDto,
-    addBulkBeneficiaryToProject,
-    AddGroupsPurposeDto,
-    CreateBeneficiaryDto,
-    CreateBeneficiaryGroupsDto,
-    CreateBeneficiaryTransactionDto,
-    ImportTempBenefDto,
-    ListBeneficiariesByGroupDto,
-    ListBeneficiaryDto,
-    ListBeneficiaryGroupDto,
-    ListTempBeneficiariesDto,
-    ListTempGroupsDto,
-    UpdateBeneficiaryDto,
-    UpdateBeneficiaryGroupDto
+  AddBeneficiariesToGroupDto,
+  AddBenfGroupToProjectDto,
+  AddBenToProjectDto,
+  addBulkBeneficiaryToProject,
+  AddGroupsPurposeDto,
+  CreateBeneficiaryDto,
+  CreateBeneficiaryGroupsDto,
+  CreateBeneficiaryTransactionDto,
+  ImportTempBenefDto,
+  ListBeneficiariesByGroupDto,
+  ListBeneficiaryDto,
+  ListBeneficiaryGroupDto,
+  ListTempBeneficiariesDto,
+  ListTempGroupsDto,
+  UpdateBeneficiaryDto,
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
-    AAJobs,
-    BeneficiaryConstants,
-    BeneficiaryEvents,
-    BeneficiaryJobs,
-    BQUEUE,
-    GroupWithValidationAA,
-    ProjectContants,
-    TPIIData,
-    WalletJobs
+  AAJobs,
+  BeneficiaryConstants,
+  BeneficiaryEvents,
+  BeneficiaryJobs,
+  BQUEUE,
+  GroupWithValidationAA,
+  ProjectContants,
+  TPIIData,
+  WalletJobs
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
@@ -41,8 +41,8 @@ import { UUID } from 'crypto';
 import { lastValueFrom, timeout, TimeoutError } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
-    findTempBenefGroups,
-    validateDupicateWallet,
+  findTempBenefGroups,
+  validateDupicateWallet,
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
@@ -1545,6 +1545,28 @@ export class BeneficiaryService {
       });
     }
 
+    // add benf into project benf group
+    const benfGroupProject = await this.prisma.beneficiaryGroupProject.findMany({
+      where: {
+        beneficiaryGroupId: groupUuid,
+      },
+    });
+
+    if (benfGroupProject.length > 0) {
+      for (const bgp of benfGroupProject) {
+        const projectId = bgp.projectId;
+        const benfProjectData = allUuids.map((beneficiaryId) => ({
+          projectId,
+          beneficiaryId,
+        }));
+
+        await this.prisma.beneficiaryProject.createMany({
+          data: benfProjectData,
+          skipDuplicates: true,
+        });
+      }
+    }
+
     await this.groupSyncService.syncGroup(groupUuid);
 
     return {
@@ -2472,12 +2494,12 @@ export class BeneficiaryService {
     const { beneficiaryGroupId, projectId } = dto;
     this.logger.log(`Assigning beneficiary group ${beneficiaryGroupId} to project ${projectId}`);
 
-      // get project info
-      const project = await this.prisma.project.findUnique({
-        where: {
-          uuid: projectId,
-        },
-      });
+    // get project info
+    const project = await this.prisma.project.findUnique({
+      where: {
+        uuid: projectId,
+      },
+    });
 
 
     if (!project) {
@@ -2650,7 +2672,14 @@ export class BeneficiaryService {
         gender: true,
         isVerified: true,
         extras: true,
-        pii: { select: { phone: true } },
+        location: true,
+        latitude: true,
+        longitude: true,
+        age: true,
+        bankedStatus: true,
+        internetStatus: true,
+        phoneStatus: true,
+        pii: { select: { phone: true, name: true } },
         createdAt: true,
         updatedAt: true,
         BeneficiaryProject: { where: { projectId: project.uuid }, select: { id: true } },
@@ -2671,10 +2700,21 @@ export class BeneficiaryService {
         beneficiaryGroupId,
         createdAt: beneficiary.createdAt,
         updatedAt: beneficiary.updatedAt,
+        gender: beneficiary.gender || null,
         ...(isAA
           ? {
-            gender: beneficiary.gender,
-            extras: { ...(beneficiary.extras as Record<string, unknown>), phone: beneficiary.pii?.phone },
+            extras: {
+              ...((beneficiary.extras as object) || {}),
+              phone: beneficiary.pii?.phone || null,
+              ...(beneficiary.pii?.name != null ? { name: beneficiary.pii.name } : {}),
+              ...(beneficiary.location != null ? { location: beneficiary.location } : {}),
+              ...(beneficiary.latitude != null ? { latitude: beneficiary.latitude } : {}),
+              ...(beneficiary.longitude != null ? { longitude: beneficiary.longitude } : {}),
+              ...(beneficiary.age != null ? { age: beneficiary.age } : {}),
+              ...(beneficiary.bankedStatus != null ? { bankedStatus: beneficiary.bankedStatus } : {}),
+              ...(beneficiary.internetStatus != null ? { internetStatus: beneficiary.internetStatus } : {}),
+              ...(beneficiary.phoneStatus != null ? { phoneStatus: beneficiary.phoneStatus } : {}),
+            },
           }
           : { extras: beneficiary.extras || null }),
       })),
