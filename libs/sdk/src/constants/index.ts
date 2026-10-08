@@ -6,6 +6,8 @@ export const APP_JOBS = {
   SLACK: 'slack',
   OTP: 'otp',
   NOTIFY: 'notify',
+  PUSH_SEND_FCM: 'push.send_fcm',
+  PUSH_SEND_WEB: 'push.send_web',
 };
 
 export const MS_TIMEOUT = 500000;
