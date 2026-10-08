@@ -10,7 +10,6 @@ export interface ServiceStatus {
   latency?: string;
   last_checked?: string;
   notes?: string | Record<string, any>;
-  link?: string;
 }
 
 export interface HealthStatus {
@@ -202,7 +201,6 @@ export async function checkRPCUrl(
       notes: {
         method: 'eth_blockNumber',
       },
-      link: rpcUrl,
     };
   } catch (err) {
     return {
@@ -210,7 +208,6 @@ export async function checkRPCUrl(
       message: (err as Error).message,
       latency: `${(performance.now() - start).toFixed(2)}ms`,
       last_checked,
-      link: rpcUrl,
     };
   }
 }
