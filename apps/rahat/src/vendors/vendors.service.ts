@@ -6,32 +6,40 @@ import {
   Inject,
   Injectable,
   Logger,
-  NotFoundException,
-  OnModuleInit,
+  NotFoundException
 } from '@nestjs/common';
 // import * as jwt from '@nestjs/jwt';
-import { SettingsService } from '@rumsan/extensions/settings';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import {
   GetVendorOtp,
   VendorAddToProjectDto,
-  VendorRegisterDto,
+  VendorPasswordRegisterDto,
+  VendorRegisterDto
 } from '@rahataid/extensions';
 import { ProjectContants, ProjectEvents, UserRoles, VendorJobs } from '@rahataid/sdk';
+import {
+  ChangePasswordDto,
+  PasswordLoginDto
+} from '@rumsan/extensions/dtos';
+import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
-import { AuthsService } from '@rumsan/user';
+import { Request } from '@rumsan/sdk/types';
+
+import { AuthsService, CurrentUserInterface, SignupsService } from '@rumsan/user';
 import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
 import { UUID } from 'crypto';
-import { isAddress } from '../utils/web3';
 import { lastValueFrom } from 'rxjs';
 import { Address } from 'viem';
 import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
+import { isAddress } from '../utils/web3';
+import { FileWalletStorage } from '../wallet/storages/fs.storage';
+import { WalletService } from '../wallet/wallet.service';
 import { GetVendorsDTO } from './dto/get-vendors.dto';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
 
@@ -49,6 +57,7 @@ export enum VendorRegisteredApp {
 export class VendorsService {
 
   private readonly logger = new Logger(VendorsService.name);
+  private vendorRoleCache: { id: number; name: string } | null = null;
   private shouldFundVendorWallet: string;
 
   constructor(
@@ -58,6 +67,10 @@ export class VendorsService {
     private readonly notificationService: NotificationService,
     private readonly settings: SettingsService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly signUpService: SignupsService,
+    private readonly walletService: WalletService,
+    private walletStorage: FileWalletStorage,
+
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
 
@@ -78,7 +91,7 @@ export class VendorsService {
           code: 'VENDOR_ROLE_NOT_FOUND',
         });
       // Add to User table
-      const { service, wallet, authWallet, ...rest } = dto;
+      const { service, wallet, authWallet, walletDetails, ...rest } = dto;
       if (dto?.email || dto?.phone) {
         const userData = await prisma.user.findFirst({
           where: {
@@ -114,6 +127,10 @@ export class VendorsService {
           details: dto.extras,
         },
       });
+
+      if (walletDetails) {
+        await this.walletStorage.saveKey(walletDetails)
+      }
       if (dto.service === Service.WALLET) return user;
 
       await prisma.auth.create({
@@ -124,6 +141,7 @@ export class VendorsService {
           details: dto.extras,
         },
       });
+
       return user;
     });
 
@@ -139,6 +157,294 @@ export class VendorsService {
       notify: true,
     })
     return vendor;
+  }
+
+
+  async registerVendorWithPassword(
+    dto: VendorPasswordRegisterDto,
+    rdetails: Request
+  ) {
+    // Validate input
+    if (!dto.name || dto.name.trim().length === 0) {
+      throw new BadRequestException(
+        'Vendor name is required and cannot be empty'
+      );
+    }
+
+    // Validate and get VENDOR role (with caching)
+    const vendorRole = await this.getVendorRole();
+    if (!vendorRole) {
+      throw new NotFoundException(
+        'VENDOR role not found in system. Please contact administrator.'
+      );
+    }
+
+    let walletCreated = false;
+    let randomWallet: any = null;
+
+    try {
+      // Step 1: Check for duplicate email/phone/username BEFORE creating wallet
+      await this.checkForDuplicates(dto);
+
+      // Step 4: Create wallet using WalletService
+      try {
+        randomWallet = await this.walletService.createWallet();
+        walletCreated = true;
+
+        this.logger.log('Vendor wallet created:', {
+          address: randomWallet.address,
+          blockchain: randomWallet.blockchain || 'evm',
+        });
+      } catch (walletError) {
+        this.logger.error('Failed to create wallet:', walletError);
+        throw new BadRequestException(
+          'Failed to create vendor wallet. Please try again.'
+        );
+      }
+
+      // Step 5: Use transaction to ensure atomicity
+      const result = await this.prisma.$transaction(async (tx) => {
+
+        // Create signup request using SignupsService with USERNAME service
+        const signupData = {
+          name: dto.name,
+          username: dto.username,
+          email: dto.email || '',
+          phone: dto.phone,
+          password: dto.password,
+          confirmPassword: dto.password,
+          gender: dto?.gender,
+          service: Service.USERNAME,
+          bypassPasswordValidation: dto.bypassPasswordValidation,
+          wallet: randomWallet.address,
+          extras: {
+            ...dto.extras,
+            isVendor: true,
+            walletBlockchain: randomWallet.blockchain || 'evm',
+          },
+        };
+
+        // Create signup (auto-approved)
+        const signup = await this.signUpService.signup(signupData);
+        // Find the created user's auth record
+        const auth = await tx.auth.findUnique({
+          where: {
+            authIdentifier: {
+              service: Service.USERNAME,
+              serviceId: dto.username,
+            },
+          },
+          include: {
+            User: true,
+          },
+        });
+
+        if (!auth) {
+          throw new NotFoundException(
+            'Auth record not found after signup. Please contact administrator.'
+          );
+        }
+
+        // Assign VENDOR role (no need to check if exists - it's a new user)
+        await tx.userRole.create({
+          data: {
+            userId: auth.userId,
+            roleId: vendorRole.id,
+          },
+        });
+
+        return { signup, auth, username: dto.username };
+      });
+
+      // Send notification about new vendor
+      try {
+        await this.notificationService.createNotification({
+          title: 'New Vendor Registered',
+          description: `Vendor ${dto.name} (${dto.username}) has been registered with password authentication.`,
+          group: 'Vendor Management',
+        });
+      } catch (notificationError) {
+        // Log but don't fail the request
+        this.logger.error('Failed to send notification:', notificationError);
+      }
+
+      // Create auth session and generate access token
+      const authSession = await this.authService.createAuthSessionAndToken(
+        result.auth.User,
+        rdetails
+      );
+
+      // Return response with credentials (private key should be handled securely)
+      return {
+        success: true,
+        data: {
+          // signup: result.signup,
+          accessToken: authSession.accessToken,
+          user: {
+            id: result.auth.User.id,
+            uuid: result.auth.User.uuid,
+            name: result.auth.User.name,
+            wallet: result.auth.User.wallet,
+            username: result.auth.User.username,
+            email: result.auth.User.email,
+            phone: result.auth.User.phone,
+            extras: result.auth.User.extras,
+          },
+
+          wallet: {
+            address: randomWallet.address,
+            blockchain: randomWallet.blockchain || 'evm',
+            // SECURITY: Consider encrypting private key or delivering via secure channel
+            privateKey: randomWallet.privateKey,
+            mnemonic: randomWallet.mnemonic,
+          },
+          message:
+            'Vendor registered successfully with VENDOR role and auto-generated wallet. ',
+        },
+      };
+    } catch (error) {
+      // Cleanup: If wallet was created but signup failed, log for manual cleanup
+      if (walletCreated && randomWallet) {
+        this.logger.error(
+          'Vendor registration failed after wallet creation. Orphaned wallet:',
+          {
+            address: randomWallet.address,
+            error: error.message,
+          }
+        );
+        // TODO: Implement wallet cleanup/recovery mechanism
+      }
+
+      // Re-throw the error
+      throw error;
+    }
+  }
+
+  // Helper: Get and cache VENDOR role
+  private async getVendorRole() {
+    if (this.vendorRoleCache) {
+      return this.vendorRoleCache;
+    }
+
+    const role = await this.prisma.role.findFirst({
+      where: { name: UserRoles.VENDOR },
+    });
+
+    if (role) {
+      this.vendorRoleCache = role;
+    }
+
+    return role;
+  }
+
+  // Helper: Check for duplicate email/phone/username
+  private async checkForDuplicates(dto: VendorRegisterDto) {
+    const duplicateChecks: Promise<any>[] = [];
+
+    if (dto.email) {
+      duplicateChecks.push(
+        this.prisma.auth.findFirst({
+          where: {
+            service: Service.EMAIL,
+            serviceId: dto.email,
+          },
+        })
+      );
+    }
+
+    if (dto.phone) {
+      duplicateChecks.push(
+        this.prisma.auth.findFirst({
+          where: {
+            service: Service.PHONE,
+            serviceId: dto.phone,
+          },
+        })
+      );
+    }
+
+    const results = await Promise.all(duplicateChecks);
+    const duplicate = results.find((result) => result !== null);
+
+    if (duplicate) {
+      throw new BadRequestException('Email or phone already registered');
+    }
+  }
+
+  async loginByPassword(dto: PasswordLoginDto, rdetails: Request) {
+    // Step 1: Validate user credentials (password check)
+    const user = await this.authService.validateUser(
+      dto.identifier,
+      dto.password,
+      dto.service
+    );
+
+    if (!user) {
+      throw new BadRequestException('Invalid credentials');
+    }
+
+    // Step 2: Check if user has VENDOR role
+    const userRoles = await this.prisma.userRole.findMany({
+      where: { userId: user.id },
+      include: {
+        Role: {
+          select: { name: true },
+        },
+      },
+    });
+
+    const isVendor = userRoles.some(
+      (userRole) => userRole.Role.name === UserRoles.VENDOR
+    );
+
+    if (!isVendor) {
+      throw new ForbiddenException('User is not a vendor');
+    }
+
+    // Step 3: Create auth session and token
+    const authSession = await this.authService.createAuthSessionAndToken(
+      user,
+      rdetails
+    );
+
+    // Step 4: Get vendor's wallet details
+    let wallet = null;
+    try {
+      wallet = await this.walletService.getSecretByWallet(user.wallet);
+    } catch (error) {
+      this.logger.error('Failed to retrieve wallet:', error);
+      // Don't fail login if wallet retrieval fails
+    }
+
+    return {
+      accessToken: authSession.accessToken,
+      user: {
+        id: user.id,
+        uuid: user.uuid,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+        wallet: user.wallet,
+        gender: user.gender,
+        extras: user.extras
+      },
+      wallet,
+    };
+  }
+  async changeVendorPassword(user: CurrentUserInterface, dto: ChangePasswordDto) {
+    const isVendor = user.roles?.includes(UserRoles.VENDOR);
+    if (!isVendor) {
+      throw new ForbiddenException('User is not a vendor');
+    }
+
+    const result = await this.authService.updatePassword(user.id, dto);
+
+    await this.prisma.authSession.deleteMany({
+      where: { Auth: { userId: user.id } },
+    });
+
+    return result;
   }
 
   async assignToProject(dto: VendorAddToProjectDto) {
@@ -294,9 +600,9 @@ export class VendorsService {
     if (projectData.length === 0) {
       return data;
     }
-    
+
     return projectData;
-}
+  }
 
   async listVendor(dto: GetVendorsDTO) {
     const { vendorName, projectName, status, page, perPage } = dto;
@@ -439,6 +745,8 @@ export class VendorsService {
       return this.getUserDetails(dto);
     }
   }
+
+
 
   async getUserDetails(dto) {
     const challengeData = decryptChallenge(

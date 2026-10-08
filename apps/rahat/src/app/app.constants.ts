@@ -1,4 +1,8 @@
 export const ABILITY_SUBJECTS = {
+  BENEFICIARY: 'beneficiary',
+  SETTINGS: 'settings',
+  PROJECT: 'project',
+  VENDOR: 'vendor',
   BENEFICIARY_GROUP: 'Beneficiary Group',
   STAKEHOLDER: 'Stakeholder',
   STAKEHOLDER_GROUP: 'Stakeholder Group',
@@ -8,7 +12,10 @@ export const ABILITY_SUBJECTS = {
   FUND_MANAGEMENT: 'Fund Management',
   MULTI_SIG: 'Multi Sig',
   PAYOUT: 'Payout',
-  INKIND: 'Inkind'
+  INKIND: 'Inkind',
+  COMMUNICATION_LOG: 'Communication Log',
+  GRIEVANCE: 'Grievance',
+  GROUP_CASH_TRANSFER: 'Group Cash Transfer'
 } as const;
 
 export const ABILITY_ACTIONS = {
@@ -16,3 +23,9 @@ export const ABILITY_ACTIONS = {
   ACTIVATE: 'activate',
   REVERT: 'revert',
 };
+
+export const SITE_INFO = {
+  SITE_CACHE_KEY: 'site_settings',
+  SITE_CACHE_TTL: 300
+
+}

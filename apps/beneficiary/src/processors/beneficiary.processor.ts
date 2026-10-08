@@ -1,7 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { MailerService } from '@nestjs-modules/mailer';
-import { Process, Processor } from '@nestjs/bull';
+import { InjectQueue, Process, Processor } from '@nestjs/bull';
 import { BadRequestException, Inject, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
@@ -16,9 +16,11 @@ import {
   ProjectContants,
 } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
-import { Job } from 'bull';
+import { Job, Queue } from 'bull';
 import { randomUUID, UUID } from 'crypto';
 import { PhoneNumberUtil } from 'google-libphonenumber';
+import Redis from 'ioredis';
+import { BeneficiaryStatsUpdateService } from '../beneficiary/beneficiary-stats-update.service';
 import { splitBeneficiaryPII } from '../beneficiary/helpers';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
@@ -29,6 +31,8 @@ import {
 
 const BATCH_SIZE = 500;
 
+export const SYNC_TRACKING_REDIS = 'SYNC_TRACKING_REDIS';
+
 @Processor(BQUEUE.RAHAT_BENEFICIARY)
 export class BeneficiaryProcessor {
   private readonly logger = new Logger(BeneficiaryProcessor.name);
@@ -37,11 +41,14 @@ export class BeneficiaryProcessor {
     private readonly prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly eventEmitter: EventEmitter2,
+    @InjectQueue(BQUEUE.RAHAT_BENEFICIARY) private readonly beneficiaryQueue: Queue,
+    @Inject(SYNC_TRACKING_REDIS) private readonly syncTrackingRedis: Redis,
+    private readonly statsUpdateService: BeneficiaryStatsUpdateService,
   ) { }
 
-  @Process(BeneficiaryJobs.UPDATE_STATS)
-  async sample(job: Job<any>) {
-    console.log('sample', job.data);
+  @Process({ name: BeneficiaryJobs.UPDATE_STATS, concurrency: 1 })
+  async updateStats(job: Job<{ projectUUID?: string | null }>) {
+    return this.statsUpdateService.updateStats(job.data?.projectUUID);
   }
 
   @Process(BeneficiaryJobs.IMPORT_TEMP_BENEFICIARIES)
@@ -539,42 +546,51 @@ export class BeneficiaryProcessor {
     }
   }
 
-  @Process({ name: BeneficiaryJobs.SYNC_GROUP_BENEFICIARIES_TO_PROJECT, concurrency: 2 })
+  @Process({ name: BeneficiaryJobs.SYNC_GROUP_BENEFICIARIES_TO_PROJECT, concurrency: 1 })
   async syncGroupToProject(job: Job<{ groupUuid: string; projectId: string }>) {
     const { groupUuid, projectId } = job.data;
     this.logger.log(`Starting sync: group ${groupUuid} → project ${projectId}`);
 
-    const grouped = await this.prisma.groupedBeneficiaries.findMany({
+    const total = await this.prisma.groupedBeneficiaries.count({
       where: { beneficiaryGroupId: groupUuid, deletedAt: null },
-      select: {
-        Beneficiary: {
-          select: {
-            uuid: true,
-            walletAddress: true,
-            gender: true,
-            extras: true,
-            location: true,
-            isVerified: true,
-            pii: { select: { phone: true, name: true, email: true } },
-          },
-        },
-      },
     });
 
-    if (!grouped.length) {
+    if (!total) {
       this.logger.log(`No beneficiaries in group ${groupUuid}, skipping`);
       return;
     }
 
-    const total = grouped.length;
-    const BATCH_SIZE = 50;
+    const BATCH_SIZE = 100;
     const totalBatches = Math.ceil(total / BATCH_SIZE);
-    let processed = 0;
 
     for (let batchIdx = 0; batchIdx < totalBatches; batchIdx++) {
-      const batch = grouped.slice(batchIdx * BATCH_SIZE, (batchIdx + 1) * BATCH_SIZE);
+      const page = await this.prisma.groupedBeneficiaries.findMany({
+        where: { beneficiaryGroupId: groupUuid, deletedAt: null },
+        select: {
+          Beneficiary: {
+            select: {
+              uuid: true,
+              walletAddress: true,
+              gender: true,
+              extras: true,
+              location: true,
+              latitude: true,
+              longitude: true,
+              age: true,
+              bankedStatus: true,
+              internetStatus: true,
+              phoneStatus: true,
+              isVerified: true,
+              pii: { select: { phone: true, name: true, email: true } },
+            },
+          },
+        },
+        orderBy: { uuid: 'asc' },
+        skip: batchIdx * BATCH_SIZE,
+        take: BATCH_SIZE,
+      });
 
-      const beneficiariesData = batch.map(({ Beneficiary: b }) => ({
+      const beneficiariesData = page.map(({ Beneficiary: b }) => ({
         uuid: b.uuid,
         walletAddress: b.walletAddress,
         gender: b.gender,
@@ -582,28 +598,85 @@ export class BeneficiaryProcessor {
         extras: {
           ...((b.extras as object) || {}),
           phone: b.pii?.phone || null,
+          ...(b.pii?.name != null ? { name: b.pii.name } : {}),
           ...(b.location != null ? { location: b.location } : {}),
+          ...(b.latitude != null ? { latitude: b.latitude } : {}),
+          ...(b.longitude != null ? { longitude: b.longitude } : {}),
+          ...(b.age != null ? { age: b.age } : {}),
+          ...(b.bankedStatus != null ? { bankedStatus: b.bankedStatus } : {}),
+          ...(b.internetStatus != null ? { internetStatus: b.internetStatus } : {}),
+          ...(b.phoneStatus != null ? { phoneStatus: b.phoneStatus } : {}),
         },
         phone: b.pii?.phone || null,
       }));
 
-      const isLastBatch = batchIdx === totalBatches - 1;
+      await this.beneficiaryQueue.add(
+        BeneficiaryJobs.SYNC_BENEFICIARY_BATCH_TO_PROJECT,
+        { groupUuid, projectId, beneficiariesData, totalBatches },
+        { attempts: 3, removeOnComplete: true, backoff: { type: 'exponential', delay: 2000 } },
+      );
 
-      await handleMicroserviceCall({
-        client: this.client.send(
-          { cmd: BeneficiaryJobs.SYNC_IMPORTED_GROUP_BENEFICIARIES, uuid: projectId },
-          { beneficiariesData, groupUuid, isLastBatch },
-        ),
-      });
-
-      processed += batch.length;
-      await job.progress({ processed, total });
       this.logger.log(
-        `Sync group ${groupUuid} → project ${projectId}: batch ${batchIdx + 1}/${totalBatches} complete (${processed}/${total})`,
+        `Queued sync batch ${batchIdx + 1}/${totalBatches} for group ${groupUuid} → project ${projectId}`,
       );
     }
 
-    this.logger.log(`Sync complete: group ${groupUuid} → project ${projectId} (${total} beneficiaries)`);
+    this.logger.log(`Queued all ${totalBatches} sync batches for group ${groupUuid} → project ${projectId} (${total} beneficiaries)`);
+  }
+
+  @Process({ name: BeneficiaryJobs.SYNC_BENEFICIARY_BATCH_TO_PROJECT, concurrency: 1 })
+  async syncBeneficiaryBatchToProject(
+    job: Job<{
+      groupUuid: string;
+      projectId: string;
+      beneficiariesData: any[];
+      totalBatches: number;
+    }>,
+  ) {
+    const { groupUuid, projectId, beneficiariesData, totalBatches } = job.data;
+
+    await handleMicroserviceCall({
+      client: this.client.send(
+        { cmd: BeneficiaryJobs.SYNC_IMPORTED_GROUP_BENEFICIARIES, uuid: projectId },
+        { beneficiariesData, groupUuid },
+      ),
+    });
+
+    this.logger.log(
+      `Sync group ${groupUuid} → project ${projectId}: batch complete (${beneficiariesData.length} beneficiaries)`,
+    );
+
+    await this.markBatchDoneAndNotifyIfComplete(groupUuid, projectId, totalBatches);
+  }
+
+  private async markBatchDoneAndNotifyIfComplete(
+    groupUuid: string,
+    projectId: string,
+    totalBatches: number,
+  ) {
+    const key = `sync:group:${groupUuid}:project:${projectId}:completed`;
+    const redis = this.syncTrackingRedis;
+
+    const completed = await redis.incr(key);
+    if (completed === 1) {
+      // Ensure the counter doesn't linger forever if something goes wrong.
+      await redis.expire(key, 60 * 60 * 24);
+    }
+
+    if (completed < totalBatches) return;
+
+    await redis.del(key);
+
+    this.logger.log(
+      `All ${totalBatches} batches synced for group ${groupUuid} → project ${projectId}, notifying project`,
+    );
+
+    await handleMicroserviceCall({
+      client: this.client.send(
+        { cmd: BeneficiaryJobs.SYNC_GROUP_BENEFICIARIES_TO_PROJECT_COMPLETED, uuid: projectId },
+        { groupUuid },
+      ),
+    });
   }
 }
 

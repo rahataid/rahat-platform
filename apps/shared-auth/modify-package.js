@@ -1,10 +1,15 @@
 const fs = require('fs');
+const path = require('path');
+
 // Load the existing package.json
 const appName = 'shared-auth';
 
 const packagePath = `dist/apps/${appName}/package.json`;
 
 try {
+  const rootPackageData = JSON.parse(
+    fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf8')
+  );
   // Read the package.json file as a JSON object
   const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
 
@@ -18,6 +23,7 @@ try {
   };
 
   packageData.dependencies = {
+    ...rootPackageData.dependencies,
     ...packageData.dependencies,
     prisma: '5.20.0',
     'ts-node': '^10.9.1',
