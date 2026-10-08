@@ -675,13 +675,34 @@ export class VendorsService {
   }
 
   async getVendorCount() {
-    return this.prisma.userRole.count({
+    const genderCounts = await this.prisma.user.groupBy({
+      by: ['gender'],
       where: {
-        Role: {
-          name: UserRoles.VENDOR,
+        deletedAt: null,
+        UserRole: {
+          some: {
+            Role: { name: UserRoles.VENDOR },
+          },
         },
       },
+      _count: { _all: true },
     });
+
+    const countsByGender = {
+      MALE: 0,
+      FEMALE: 0,
+      OTHER: 0,
+      UNKNOWN: 0,
+    };
+
+    for (const group of genderCounts) {
+      countsByGender[group.gender] = group._count._all;
+    }
+
+    return {
+      totalCounts: Object.values(countsByGender).reduce((total, count) => total + count, 0),
+      genderCounts: countsByGender,
+    };
   }
 
   async getVendor(id: UUID | Address) {
