@@ -701,7 +701,7 @@ export class VendorsService {
 
     return {
       totalCounts: Object.values(countsByGender).reduce((total, count) => total + count, 0),
-      genderCounts: countsByGender,
+      genderStats: countsByGender,
     };
   }
 
