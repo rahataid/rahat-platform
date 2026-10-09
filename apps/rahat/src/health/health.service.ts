@@ -2,6 +2,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { BQUEUE } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
+import axios from 'axios';
 import { Queue } from 'bull';
 import { EmailService } from '../listeners/email.service';
 import {
@@ -15,8 +16,8 @@ const ALERT_STATE_KEY = 'core_health_alert_state';
 
 @Injectable()
 export class HealthService {
-    private readonly CACHE_KEY = 'health_status';
-    private readonly CACHE_TTL = 60;
+    private readonly CACHE_KEY = 'core_health_status';
+    private readonly CACHE_TTL = 600;
     private readonly _logger = new Logger(HealthService.name);
 
     constructor(
@@ -39,7 +40,8 @@ export class HealthService {
 
     async checkHealthStatus(): Promise<HealthStatus> {
         this._logger.log('Check the health status of all  used services');
-        const result = await updateHealthStatus(this.prisma, this.rahatQueue);
+        const previous = await this.getHealthStatusFromCache();
+        const result = await updateHealthStatus(this.prisma, this.rahatQueue, previous?.services);
         await this.setCache(result);
         await this.handleAlertTransitions(result);
         return result;
@@ -62,7 +64,8 @@ export class HealthService {
 
     async sendHealthAlertEmail(
         downServices: Array<{ name: string; message?: string }>,
-        frontendUrl?: string
+        frontendUrl?: string,
+        serverIp?: string
     ): Promise<void> {
         try {
             this._logger.log('Health status alert email sending..');
@@ -82,7 +85,7 @@ export class HealthService {
                 `The following service(s) are currently unavailable: ${downServices
                     .map((s) => s.name)
                     .join(', ')}`,
-                this.buildHealthEmailHtml('down', downServices, frontendUrl)
+                this.buildHealthEmailHtml('down', downServices, frontendUrl, serverIp)
             );
 
             this._logger.log(`Health down-alert sent to: ${recipients.join(', ')}`);
@@ -93,7 +96,8 @@ export class HealthService {
 
     async sendHealthRestoredEmail(
         restoredServices: Array<{ name: string; restored: boolean }>,
-        frontendURL?: string
+        frontendURL?: string,
+        serverIp?: string
     ): Promise<void> {
         try {
             const recipients = (process.env.HEALTH_ALERT_EMAILS ?? '')
@@ -112,7 +116,8 @@ export class HealthService {
                 this.buildHealthEmailHtml(
                     'up',
                     restoredServices.map(({ name }) => ({ name })),
-                    frontendURL
+                    frontendURL,
+                    serverIp
                 )
             );
 
@@ -122,6 +127,22 @@ export class HealthService {
         } catch (err) {
             this._logger.error(err);
         }
+    }
+
+    private async getServerIp(): Promise<string> {
+        // Env override — set SERVER_IP or HOST_IP on the deployed machine
+        const envIp = process.env.SERVER_IP || process.env.HOST_IP;
+        if (envIp) return envIp;
+
+        // Auto-detect public IP via ipify
+        try {
+            const res = await axios.get<{ ip: string }>('https://api.ipify.org?format=json', { timeout: 3000 });
+            if (res.data?.ip) return res.data.ip;
+        } catch (err) {
+            this._logger.warn(`Could not fetch public IP: ${err}`);
+        }
+
+        return '';
     }
 
     private async handleAlertTransitions(result: HealthStatus): Promise<void> {
@@ -134,11 +155,10 @@ export class HealthService {
             const newlyDown = downNow.filter((s) => !downBefore.includes(s));
             const restored = downBefore.filter((s) => !downNow.includes(s));
 
-            const frontendSettings = await this.prisma.setting.findUnique({
-                where: {
-                    name: 'FRONTEND_URL',
-                },
-            });
+            const [frontendSettings, serverIp] = await Promise.all([
+                this.prisma.setting.findUnique({ where: { name: 'FRONTEND_URL' } }),
+                this.getServerIp(),
+            ]);
             const frontendUrl = frontendSettings?.value ?? ('' as string);
 
             // No emails on first run/baseline — just record current state.
@@ -146,28 +166,26 @@ export class HealthService {
                 if (newlyDown.length) {
                     await this.sendHealthAlertEmail(
                         newlyDown.map((name) => {
-                            const svc = (result.services as Record<string, ServiceStatus>)[
-                                name
-                            ];
+                            const svc = (result.services as Record<string, ServiceStatus>)[name];
                             return {
                                 name: SERVICE_LABELS[name] ?? name,
                                 message: svc?.message,
                             };
                         }),
-                        frontendUrl as string
+                        frontendUrl as string,
+                        serverIp
                     );
                 }
                 if (restored.length) {
                     this._logger.log('health status up ');
-                    const upServices = Object.entries(result.services)
-                        .filter(([, status]) => status.status === 'up')
-                        .map(([name]) => ({
-                            name: SERVICE_LABELS[name] ?? name,
-                            restored: restored.includes(name),
-                        }));
+                    const upServices = restored.map((name) => ({
+                        name: SERVICE_LABELS[name] ?? name,
+                        restored: true,
+                    }));
                     await this.sendHealthRestoredEmail(
                         upServices,
-                        frontendUrl as string
+                        frontendUrl as string,
+                        serverIp
                     );
                 }
             }
@@ -200,7 +218,8 @@ export class HealthService {
     private buildHealthEmailHtml(
         type: 'down' | 'up',
         services: Array<{ name: string; message?: string }>,
-        frontendURL?: string
+        frontendURL?: string,
+        serverIp?: string
     ): string {
         const isDown = type === 'down';
         const accent = isDown ? '#d9534f' : '#5cb85c';
@@ -219,8 +238,7 @@ export class HealthService {
           <td style="padding:8px 12px;border-bottom:1px solid #eee">${name}</td>
           <td style="padding:8px 12px;border-bottom:1px solid #eee;color:${accent};font-weight:500">${statusLabel}</td>
           ${isDown
-                        ? `<td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666;font-size:.9em">${message ?? 'No details'
-                        }</td>`
+                        ? `<td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666;font-size:.9em">${message ?? 'No details'}</td>`
                         : ''
                     }
         </tr>`
@@ -230,6 +248,14 @@ export class HealthService {
         const extraHeader = isDown
             ? `<th style="text-align:left;padding:10px 12px;font-size:.85em">Message</th>`
             : '';
+
+        const serverIpHtml = serverIp
+            ? `<span style="margin-left:12px">Server IP: <strong>${serverIp}</strong></span>`
+            : '';
+        const dashboardHtml = frontendURL
+            ? `<a href="${frontendURL}" style="color:#666">Dashboard(${frontendURL})</a>`
+            : '';
+        const footerLinks = [dashboardHtml, serverIpHtml].filter(Boolean).join(' · ');
 
         return `<!DOCTYPE html>
   <html>
@@ -258,7 +284,8 @@ export class HealthService {
       </table>
       </div>
       <div class="foot">
-      <p>Automated alert from Rahat Core Health Check · ${new Date().toLocaleString()} for  <a href= "${frontendURL}"> Dashboard</a></p>
+        <p>Automated alert from Rahat Core Health Check · ${new Date().toLocaleString()}</p>
+        ${footerLinks ? `<p>${footerLinks}</p>` : ''}
       </div>
       </div>
     </body>
