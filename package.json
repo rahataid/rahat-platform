@@ -117,6 +117,7 @@
     "dotenv-cli": "^7.3.0",
     "ethers": "6.11.1",
     "express": "^4.19.2",
+    "firebase-admin": "^14.4.0",
     "google-auth-library": "^9.15.1",
     "google-libphonenumber": "^3.2.42",
     "google-spreadsheet": "^4.1.4",
@@ -140,6 +141,7 @@
     "tslib": "2.6.2",
     "uuid": "^9.0.1",
     "viem": "^2.8.4",
+    "web-push": "^3.6.7",
     "winston": "^3.11.0",
     "xlsx": "^0.18.5",
     "zlib": "^1.0.5"
@@ -169,6 +171,7 @@
     "@types/google-libphonenumber": "^7.4.30",
     "@types/jest": "^29.5.12",
     "@types/node": "18.16.20",
+    "@types/web-push": "^3.6.4",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "~8.48.0",

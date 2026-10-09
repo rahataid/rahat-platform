@@ -9,8 +9,8 @@ dataSources:
     network: mainnet
     source:
       abi: RahatAccessManager
-      address: "0x51b3805Cb8A2669c2A75fe5Cf90E78B3758821A0"
-      startBlock: 31
+      address: "0xceF519Bec80493AC92370bAC5Ee68e9d3C8047cC"
+      startBlock: 22
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -63,8 +63,8 @@ dataSources:
     network: mainnet
     source:
       abi: RahatTreasury
-      address: "0xE2EB30030463D3b52866AEE6410ce2a6f788B2aD"
-      startBlock: 36
+      address: "0x52A3b7798119379067921DeE2E57f8d5Be0491Ea"
+      startBlock: 27
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

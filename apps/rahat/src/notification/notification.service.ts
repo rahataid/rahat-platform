@@ -1,3 +1,4 @@
+// rahat-project/apps/rahat/src/notification/notification.service.ts
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
@@ -9,6 +10,7 @@ import {
 import { APP_JOBS, BQUEUE, UserRoles } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
+import { PushService } from './push.service';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -18,20 +20,23 @@ export class NotificationService {
   constructor(
     @InjectQueue(BQUEUE.RAHAT)
     private readonly rahatQueue: Queue,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
+    private readonly pushService: PushService
   ) { }
 
   async createNotification(dto: CreateNotificationDto) {
     try {
+      const { push, ...record } = dto;
       const notification = await this.prisma.notification.create({
         data: {
-          ...dto,
+          ...record,
           createdAt: new Date(),
         },
       });
 
       if (notification.notify) {
         this.notifyUsers(notification);
+        void this.pushService.pushForNotification(notification, push);
       }
 
       return notification;
@@ -79,7 +84,6 @@ export class NotificationService {
       backoff: { type: 'exponential', delay: 1000 },
     });
 
-    this.logger.log(`Queued notification for ${users.length} users.`);
   }
 
   async listNotifications({
@@ -266,6 +270,5 @@ export class NotificationService {
       backoff: { type: 'exponential', delay: 1000 },
     });
 
-    this.logger.log(`Queued notification for ${users.length} users.`);
   }
 }
