@@ -22,6 +22,7 @@
         "target": "node",
         "compiler": "tsc",
         "generatePackageJson": true,
+        "sourceMap": true,
         "outputPath": "dist/apps/rahat",
         "main": "apps/rahat/src/main.ts",
         "tsConfig": "apps/rahat/tsconfig.app.json",
