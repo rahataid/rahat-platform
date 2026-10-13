@@ -37,6 +37,7 @@ import { WalletModule } from '../wallet/wallet.module';
 import { WebhooksModule } from '../webhooks/webhooks.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { HealthModule } from '../health/health.module';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { AppService } from './app.service';
     WalletModule,
     NotificationModule,
     CommsModule.forRoot(),
+    HealthModule,
     WebhooksModule,
   ],
   controllers: [AppController],

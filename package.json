@@ -79,6 +79,7 @@
     "@nestjs/platform-express": "^10.3.3",
     "@nestjs/platform-fastify": "^10.3.3",
     "@nestjs/swagger": "^7.3.0",
+    "@nestjs/schedule": "^4.1.0",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@openzeppelin/contracts": "^5.0.2",
     "@prisma/client": "5.20.0",
