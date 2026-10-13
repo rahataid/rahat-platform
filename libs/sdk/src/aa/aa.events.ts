@@ -205,6 +205,8 @@ export const JOBS = {
     DISBURSE: 'aa.jobs.chain.disburse',
     SEND_OTP: 'aa.jobs.chain.sendOtp',
     SEND_ASSET: 'aa.jobs.chain.sendAsset',
+    CHECK_OTP: 'aa.jobs.chain.checkOtp',
+    ADD_CVA_EVIDENCE: 'aa.jobs.chain.addCvaEvidence',
     GET_DISBURSEMENT_STATS: 'aa.jobs.chain.getDisbursementStats',
     GET_WALLET_BALANCE: 'aa.jobs.chain.getWalletBalance',
     GET_RAHAT_TOKEN_BALANCE: 'aa.jobs.chain.getRahatTokenBalance',
