@@ -58,6 +58,7 @@ export const JOBS = {
     UPDATE_CAMPAIGN: 'rahat.jobs.campaign.update',
     LIST_CAMPAIGN: 'rahat.jobs.campaign.list',
     FINDONE_CAMPAIGN: 'rahat.jobs.campaign.get',
+    REMOVE_CAMPAIGN: 'rahat.jobs.campaign.remove',
     GET_ALL_TRANSPORT: 'rahat.jobs.campaign.get_transport',
     GET_ALL_AUDIENCE: 'rahat.jobs.campaign.get_audience',
     TRIGGER_CAMPAIGN: 'rahat.jobs.campaign.trigger',
@@ -85,6 +86,7 @@ export const JOBS = {
       'rahat.jobs.campaign.refresh_communication_stats',
     LIST_LOGS_FOR_SESSIONS: 'rahat.jobs.campaign.list_logs_for_sessions',
     BACKFILL_DELIVERIES: 'rahat.jobs.campaign.backfill_deliveries',
+    HANDLE_SESSION_WEBHOOK: 'rahat.jobs.campaign.handle_session_webhook',
   },
   OFFLINE_BENEFICIARIES: {
     SYNC_BENEFICIARIES: 'rahat.jobs.sync_beneficiaries',
