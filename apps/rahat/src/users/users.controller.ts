@@ -23,4 +23,10 @@ export class CustomUsersController {
     getWallets(@Query() dto: ListUserDto) {
         return this.usersService.getWallets(dto);
     }
+
+    @Get('stats')
+    @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+    getUserStats(@Query() dto: ListUserDto) {
+        return this.usersService.getUserStats(dto);
+    }
 }
