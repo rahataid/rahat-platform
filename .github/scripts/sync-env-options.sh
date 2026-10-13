@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regenerates the `environment` dropdown in ALL-IN-ONE-CICD.yaml from
+# Regenerates the `environment` and `branch` dropdowns in ALL-IN-ONE-CICD.yaml from
 # .github/ALL-IN-ONE-CICD.environments.json. GitHub reads choice options only from the
 # workflow file, so run this after editing the JSON and commit both files.
 #
@@ -10,16 +10,19 @@ set -euo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
 CONFIG="$ROOT/.github/ALL-IN-ONE-CICD.environments.json"
 WORKFLOW="$ROOT/.github/workflows/ALL-IN-ONE-CICD.yaml"
-BEGIN='# BEGIN env-options'
-END='# END env-options'
+# Replaces the lines between "# BEGIN <name>" and "# END <name>" with $2
+replace_block() {
+  BLOCK="$2" awk -v begin="# BEGIN $1" -v end="# END $1" '
+    index($0, begin) { print; if (ENVIRON["BLOCK"] != "") print ENVIRON["BLOCK"]; skip = 1; next }
+    index($0, end)   { skip = 0 }
+    !skip            { print }
+  '
+}
 
-OPTIONS=$(jq -e -r 'to_entries[] | "          - \"\(.key) | Tag: \(.value.tag) | \(.value.description)\""' "$CONFIG")
+ENV_OPTIONS=$(jq -er '.environments | to_entries[] | "          - \"\(.key) | Tag: \(.value.tag) | \(.value.description)\""' "$CONFIG")
+BRANCH_OPTIONS=$(jq -er '.branches[] | "          - \"\(.)\""' "$CONFIG")
 
-UPDATED=$(OPTIONS="$OPTIONS" awk -v begin="$BEGIN" -v end="$END" '
-  index($0, begin) { print; print ENVIRON["OPTIONS"]; skip = 1; next }
-  index($0, end)   { skip = 0 }
-  !skip            { print }
-' "$WORKFLOW")
+UPDATED=$(replace_block env-options "$ENV_OPTIONS" < "$WORKFLOW" | replace_block branch-options "$BRANCH_OPTIONS")
 
 if [ "${1:-}" = "--check" ]; then
   if [ "$UPDATED" != "$(cat "$WORKFLOW")" ]; then
@@ -29,5 +32,5 @@ if [ "${1:-}" = "--check" ]; then
   echo "Dropdown options are in sync."
 else
   printf '%s\n' "$UPDATED" > "$WORKFLOW"
-  echo "Updated environment options in ${WORKFLOW#$ROOT/}"
+  echo "Updated dropdown options in ${WORKFLOW#$ROOT/}"
 fi

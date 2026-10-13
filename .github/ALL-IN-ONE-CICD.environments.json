@@ -1,148 +1,122 @@
 {
-  "test-load": {
-    "tag": "test-load",
-    "secret": "ENV_AA_TEST_LOAD",
-    "apps": "beneficiary,rahat",
-    "description": "Load Testing",
-    "urls": {
+  "branches": [
+    "dev",
+    "main",
+    "dev-crm"
+  ],
+  "environments": {
+    "test-load": {
+      "tag": "test-load",
+      "secret": "ENV_AA_TEST_LOAD",
+      "apps": "beneficiary,rahat",
+      "description": "Load Testing",
+      "urls": {},
+      "notes": []
     },
-    "notes": [
-
-    ]
-  },
-  "dev-unicef": {
-    "tag": "aa-dev-unicef",
-    "secret": "ENV_AA_DEV_UNICEF",
-    "apps": "beneficiary,rahat",
-    "description": "UNICEF Development",
-    "urls": {
+    "dev-unicef": {
+      "tag": "aa-dev-unicef",
+      "secret": "ENV_AA_DEV_UNICEF",
+      "apps": "beneficiary,rahat",
+      "description": "UNICEF Development",
+      "urls": {},
+      "notes": []
     },
-    "notes": [
-
-    ]
-  },
-  "demo-redcross": {
-    "tag": "demo-redcross",
-    "secret": "ENV_AA_REDCROSS",
-    "apps": "beneficiary,rahat",
-    "description": "Red Cross Demo",
-    "urls": {
+    "demo-redcross": {
+      "tag": "demo-redcross",
+      "secret": "ENV_AA_REDCROSS",
+      "apps": "beneficiary,rahat",
+      "description": "Red Cross Demo",
+      "urls": {},
+      "notes": []
     },
-    "notes": [
-
-    ]
-  },
-  "demo-aidlink": {
-    "tag": "demo-aidlink",
-    "secret": "ENV_AA_AIDLINK_DEMO",
-    "apps": "beneficiary,rahat",
-    "description": "AidLink Demo",
-    "urls": {
+    "demo-aidlink": {
+      "tag": "demo-aidlink",
+      "secret": "ENV_AA_AIDLINK_DEMO",
+      "apps": "beneficiary,rahat",
+      "description": "AidLink Demo",
+      "urls": {},
+      "notes": []
     },
-    "notes": [
-
-    ]
-  },
-  "dev-aidlink": {
-    "tag": "dev-aidlink",
-    "secret": "ENV_AA_AIDLINK_DEV",
-    "apps": "beneficiary,rahat",
-    "description": "AidLink Development",
-    "urls": {
+    "dev-aidlink": {
+      "tag": "dev-aidlink",
+      "secret": "ENV_AA_AIDLINK_DEV",
+      "apps": "beneficiary,rahat",
+      "description": "AidLink Development",
+      "urls": {},
+      "notes": []
     },
-    "notes": [
-
-    ]
-  },
-  "stage-el": {
-    "tag": "stage-el",
-    "secret": "ENV_AA_STAGE_EL",
-    "apps": "beneficiary,rahat",
-    "description": "EL Staging",
-    "urls": {
+    "stage-el": {
+      "tag": "stage-el",
+      "secret": "ENV_AA_STAGE_EL",
+      "apps": "beneficiary,rahat",
+      "description": "EL Staging",
+      "urls": {},
+      "notes": []
     },
-    "notes": [
-
-    ]
-  },
-  "main-aa": {
-    "tag": "latest",
-    "secret": "ENV_AA_MAIN",
-    "apps": "beneficiary,rahat",
-    "description": "AA Main (shared latest tag)",
-    "urls": {
+    "main-aa": {
+      "tag": "latest",
+      "secret": "ENV_AA_MAIN",
+      "apps": "beneficiary,rahat",
+      "description": "AA Main (shared latest tag)",
+      "urls": {},
+      "notes": [
+        "Pushes the shared `latest` tag, which `main` also uses. Anything pulling `latest` will get this build."
+      ]
     },
-    "notes": [
-      "Pushes the shared `latest` tag, which `main` also uses. Anything pulling `latest` will get this build."
-    ]
-  },
-  "aa-mcn-main": {
-    "tag": "aa-mcn-main",
-    "secret": "ENV_AA_MCN_MAIN",
-    "apps": "beneficiary,rahat",
-    "description": "AA MCN Main",
-    "urls": {
+    "aa-mcn-main": {
+      "tag": "aa-mcn-main",
+      "secret": "ENV_AA_MCN_MAIN",
+      "apps": "beneficiary,rahat",
+      "description": "AA MCN Main",
+      "urls": {},
+      "notes": []
     },
-    "notes": [
-
-    ]
-  },
-  "aa-demo-v2": {
-    "tag": "aa-demo-v2",
-    "secret": "ENV_AA_DEMO_V2",
-    "apps": "beneficiary,rahat",
-    "description": "AA Demo v2",
-    "urls": {
+    "aa-demo-v2": {
+      "tag": "aa-demo-v2",
+      "secret": "ENV_AA_DEMO_V2",
+      "apps": "beneficiary,rahat",
+      "description": "AA Demo v2",
+      "urls": {},
+      "notes": []
     },
-    "notes": [
-
-    ]
-  },
-  "dev-crm": {
-    "tag": "dev-crm",
-    "secret": "ENV_AA_DEV_CRM",
-    "apps": "beneficiary,rahat",
-    "description": "CRM Development",
-    "urls": {
+    "dev-crm": {
+      "tag": "dev-crm",
+      "secret": "ENV_AA_DEV_CRM",
+      "apps": "beneficiary,rahat",
+      "description": "CRM Development",
+      "urls": {},
+      "notes": []
     },
-    "notes": [
-
-    ]
-  },
-  "dev": {
-    "tag": "dev",
-    "secret": "ENV_AA_DEV",
-    "apps": "beneficiary,rahat",
-    "description": "Development",
-    "urls": {
-      "AA Dev": "https://aa-dev.rahat.io",
-      "AA Dev Stellar": "https://aa-dev-stellar.rahat.io"
+    "dev": {
+      "tag": "dev",
+      "secret": "ENV_AA_DEV",
+      "apps": "beneficiary,rahat",
+      "description": "Development",
+      "urls": {
+        "AA Dev": "https://aa-dev.rahat.io",
+        "AA Dev Stellar": "https://aa-dev-stellar.rahat.io"
+      },
+      "notes": []
     },
-    "notes": [
-
-    ]
-  },
-  "main": {
-    "tag": "latest",
-    "secret": "ENV_AA_MAIN",
-    "apps": "beneficiary,rahat",
-    "description": "Main (shared latest tag)",
-    "urls": {
+    "main": {
+      "tag": "latest",
+      "secret": "ENV_AA_MAIN",
+      "apps": "beneficiary,rahat",
+      "description": "Main (shared latest tag)",
+      "urls": {},
+      "notes": [
+        "Pushes the shared `latest` tag, which `main-aa` also uses. Anything pulling `latest` will get this build."
+      ]
     },
-    "notes": [
-      "Pushes the shared `latest` tag, which `main-aa` also uses. Anything pulling `latest` will get this build."
-    ]
-  },
-  "dev-qa": {
-    "tag": "dev-qa",
-    "secret": "ENV_AA_DEV-QA",
-    "apps": "beneficiary,rahat",
-    "description": "QA Development",
-    "urls": {
-      "AA Dev QA": "https://aa-dev-qa.rahat.io"
-    },
-    "notes": [
-
-    ]
+    "dev-qa": {
+      "tag": "dev-qa",
+      "secret": "ENV_AA_DEV-QA",
+      "apps": "beneficiary,rahat",
+      "description": "QA Development",
+      "urls": {
+        "AA Dev QA": "https://aa-dev-qa.rahat.io"
+      },
+      "notes": []
+    }
   }
 }
