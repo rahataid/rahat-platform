@@ -9,6 +9,7 @@ import {
   PipeTransform,
 } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
+import { SentryExceptionCaptured } from '@sentry/nestjs';
 import { ExceptionResponse } from '@rumsan/sdk/types';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -52,6 +53,7 @@ export class GlobalCustomExceptionFilter
     });
     return result;
   }
+  @SentryExceptionCaptured()
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx?.getResponse();

@@ -7,6 +7,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BeneficiaryConstants, BQUEUE } from '@rahataid/sdk';
 import { PrismaModule } from '@rumsan/prisma';
 import { ProjectController } from './project.controller';
+import { CountryCodeHealthcheckService } from './country-code-healthcheck.service';
 import { ProjectService } from './project.service';
 
 @Module({
@@ -43,6 +44,6 @@ import { ProjectService } from './project.service';
     }),
   ],
   controllers: [ProjectController],
-  providers: [ProjectService],
+  providers: [ProjectService, CountryCodeHealthcheckService],
 })
 export class ProjectModule { }

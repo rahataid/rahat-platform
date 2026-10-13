@@ -8,6 +8,12 @@ import { RequestContextService } from '../request-context/request-context.servic
 import { randomUUID } from 'crypto';
 import { ProjectStatus } from '@rahataid/sdk/enums';
 import * as envConfig from '../utils/envConfig';
+import * as Sentry from '@sentry/nestjs';
+
+jest.mock('@sentry/nestjs', () => ({
+  captureException: jest.fn(),
+  captureMessage: jest.fn(),
+}));
 
 jest.mock('@nestjs/event-emitter', () => ({
   EventEmitter2: jest.fn().mockImplementation(() => ({
@@ -297,6 +303,15 @@ describe('ProjectService', () => {
       expect(result).toBe('');
     });
 
+    it('should rethrow a failed lookup when forceRefresh is set', async () => {
+      (prisma.setting.findUnique as jest.Mock).mockRejectedValue(
+        new Error('db down')
+      );
+      await expect(
+        service.getKoboCountryCodeFromSettings(true)
+      ).rejects.toThrow('db down');
+    });
+
     it('should return an empty string when the lookup throws', async () => {
       (prisma.setting.findUnique as jest.Mock).mockRejectedValue(
         new Error('db down')
@@ -494,7 +509,7 @@ describe('ProjectService', () => {
       (envConfig as any).AUTO_APPLY_KOBO_COUNTRY_CODE = true;
       (prisma.setting.findUnique as jest.Mock).mockResolvedValue(null);
       await expect(service.normalizeKoboPhone('013800001111')).rejects.toThrow(
-        'COUNTRY_CODE_SETTINGS'
+        'country code is not set up'
       );
     });
 
@@ -504,7 +519,7 @@ describe('ProjectService', () => {
         new Error('db down')
       );
       await expect(service.normalizeKoboPhone('013800001111')).rejects.toThrow(
-        'COUNTRY_CODE_SETTINGS'
+        'country code is not set up'
       );
     });
 

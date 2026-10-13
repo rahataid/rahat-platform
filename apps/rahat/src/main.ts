@@ -17,6 +17,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import {
   GlobalCustomExceptionFilter,
   ResponseTransformInterceptor,
+  RpcSentryExceptionFilter,
 } from '@rahataid/extensions';
 import { APP } from '@rahataid/sdk';
 import helmet from 'helmet';
@@ -81,6 +82,7 @@ async function bootstrap() {
     })
   );
   app.useGlobalFilters(new GlobalCustomExceptionFilter());
+  microservice.useGlobalFilters(new RpcSentryExceptionFilter());
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
   app.disable('etag');

@@ -7,6 +7,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Project } from '@prisma/client';
 import { BQUEUE, ProjectJobs } from '@rahataid/sdk';
 import { SettingsService } from '@rumsan/extensions/settings';
+import * as Sentry from '@sentry/nestjs';
 import { Job } from 'bull';
 
 @Processor(BQUEUE.RAHAT_PROJECT)
@@ -32,6 +33,11 @@ export class ProjectProcessor {
       // remaining setup scripts
     } catch (err) {
       this.logger.error(err);
+      // queue jobs run outside any HTTP request, so no global filter sees this
+      Sentry.captureException(err, {
+        tags: { area: 'queue', processor: 'project' },
+        extra: { jobId: job?.id, projectUuid: job?.data?.uuid },
+      });
       // emit ws message to connected client
     }
   }

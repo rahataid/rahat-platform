@@ -714,8 +714,15 @@ export class ProjectService {
 
   // Reads the calling code from COUNTRY_CODE_SETTINGS ({ CHINA: '+86' } ->
   // '+86'), cached for the TTL. Returns '' when unset or unreadable.
-  async getKoboCountryCodeFromSettings(): Promise<string> {
-    if (this.countryCodeCache && this.countryCodeCache.expiresAt > Date.now()) {
+  // forceRefresh skips the cache so callers (the startup health check) see the
+  // live row, and rethrows read errors so they aren't mistaken for a missing
+  // setting (the error is already reported to Sentry here).
+  async getKoboCountryCodeFromSettings(forceRefresh = false): Promise<string> {
+    if (
+      !forceRefresh &&
+      this.countryCodeCache &&
+      this.countryCodeCache.expiresAt > Date.now()
+    ) {
       return this.countryCodeCache.value;
     }
     try {
@@ -745,6 +752,7 @@ export class ProjectService {
       Sentry.captureException(err, {
         tags: { area: 'kobo-import', issue: 'country-code-lookup-failed' },
       });
+      if (forceRefresh) throw err;
       return '';
     }
   }

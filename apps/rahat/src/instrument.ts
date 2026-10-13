@@ -5,18 +5,18 @@
 import 'dotenv/config';
 import * as Sentry from '@sentry/nestjs';
 import {
-  AUTO_APPLY_KOBO_COUNTRY_CODE,
   SENTRY_DSN,
   SENTRY_ENVIRONMENT,
+  SENTRY_RELEASE,
   SENTRY_TRACES_SAMPLE_RATE,
 } from './utils/envConfig';
+import { scrubSentryEvent } from './utils/sentryScrub';
 
-// Sentry should only report from production, so it's left uninitialized in development — captureException/captureMessage calls
-// become no-ops.
-if (AUTO_APPLY_KOBO_COUNTRY_CODE) {
-  Sentry.init({
-    dsn: SENTRY_DSN,
-    environment: SENTRY_ENVIRONMENT,
-    tracesSampleRate: SENTRY_TRACES_SAMPLE_RATE,
-  });
-}
+Sentry.init({
+  dsn: SENTRY_DSN,
+  environment: SENTRY_ENVIRONMENT,
+  release: SENTRY_RELEASE,
+  tracesSampleRate: SENTRY_TRACES_SAMPLE_RATE,
+  // Kobo imports carry phone numbers and names; mask them before sending.
+  beforeSend: scrubSentryEvent,
+});
