@@ -1,5 +1,5 @@
 name: "ALL DEPLOY CI/CD · Platform Build & Push"
-run-name: "🚀 ${{ inputs.environment }} · ${{ github.ref_name }} · @${{ github.actor }}"
+run-name: "🚀 ${{ inputs.environment }} · ${{ inputs.branch || github.ref_name }} · @${{ github.actor }}"
 
 # ------------------------------------------------------------------
 # HOW TO ADD / CHANGE AN ENVIRONMENT
@@ -35,13 +35,18 @@ on:
           - "dev-qa | Tag: dev-qa | QA Development"
           # END env-options
 
+      branch:
+        description: "Branch, tag or full commit SHA to build. Leave empty to build the branch picked in 'Use workflow from'."
+        required: false
+        type: string
+
       apps_to_build:
         description: "Apps to build, comma-separated (e.g. beneficiary,rahat). Leave empty for the environment defaults."
         required: false
         type: string
 
 concurrency:
-  group: aa-core-${{ github.workflow }}-${{ github.ref }}
+  group: aa-core-${{ github.workflow }}-${{ inputs.branch || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -62,12 +67,32 @@ jobs:
       apps_to_build: ${{ steps.config.outputs.apps_to_build }}
       apps_overridden: ${{ steps.config.outputs.apps_overridden }}
       env_config: ${{ steps.config.outputs.env_config }}
+      target_ref: ${{ steps.target.outputs.ref }}
+      target_sha: ${{ steps.target.outputs.sha }}
     steps:
       - name: Checkout environment config
         uses: actions/checkout@v4
         with:
           sparse-checkout: .github/ALL-IN-ONE-CICD.environments.json
           sparse-checkout-cone-mode: false
+
+      # The workflow file and env config always come from the "Use workflow from"
+      # branch; the code that gets built comes from the `branch` input.
+      - name: Resolve branch to build
+        id: target
+        env:
+          TARGET_REF: ${{ inputs.branch || github.ref_name }}
+        run: |
+          set -euo pipefail
+          REF=$(printf '%s' "$TARGET_REF" | xargs)
+          if ! git fetch --quiet --depth=1 --no-tags origin "$REF"; then
+            echo "::error::Could not find branch, tag or commit '$REF'. Use a full 40-character SHA for commits."
+            exit 1
+          fi
+          SHA=$(git rev-parse FETCH_HEAD)
+          echo "Building $REF @ $SHA"
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
       - name: Resolve config from branch or manual input
         id: config
@@ -144,10 +169,12 @@ jobs:
           APPS_OVERRIDDEN: ${{ needs.resolve-config.outputs.apps_overridden }}
           CFG: ${{ needs.resolve-config.outputs.env_config }}
           SECRET_NAME: ${{ needs.resolve-config.outputs.env_secret_name }}
+          TARGET_REF: ${{ needs.resolve-config.outputs.target_ref }}
+          TARGET_SHA: ${{ needs.resolve-config.outputs.target_sha }}
         run: |
           set -euo pipefail
 
-          SHORT_SHA="${GITHUB_SHA::7}"
+          SHORT_SHA="${TARGET_SHA::7}"
           RUN_TAG="${TAG}-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
           DESCRIPTION=$(jq -r '.description' <<<"$CFG")
 
@@ -160,8 +187,9 @@ jobs:
             echo "| **Description** | $DESCRIPTION |"
             echo "| **Docker tag** | \`$TAG\` |"
             echo "| **Run-specific tag** | \`$RUN_TAG\` |"
-            echo "| **Branch / ref** | \`$GITHUB_REF_NAME\` |"
-            echo "| **Commit** | [\`$SHORT_SHA\`]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA) |"
+            echo "| **Branch being built** | \`$TARGET_REF\` |"
+            echo "| **Commit** | [\`$SHORT_SHA\`]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$TARGET_SHA) |"
+            echo "| **Workflow file from** | \`$GITHUB_REF_NAME\` |"
             echo "| **Triggered by** | @$GITHUB_ACTOR |"
             echo "| **Env secret used** | \`$SECRET_NAME\` (contents not shown) |"
             echo "| **Apps** | \`$APPS\`$( [ "$APPS_OVERRIDDEN" = "true" ] && echo ' _(manual override)_' ) |"
@@ -232,6 +260,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.resolve-config.outputs.target_sha }}
 
       # -----------------------------
       # Node + PNPM Setup
@@ -292,7 +322,8 @@ jobs:
       - name: Extract Git Metadata
         id: meta
         run: |
-          echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          SHA="${{ needs.resolve-config.outputs.target_sha }}"
+          echo "short_sha=${SHA::7}" >> $GITHUB_OUTPUT
           echo "run_number=${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
 
       # -----------------------------
