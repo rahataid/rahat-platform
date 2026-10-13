@@ -8,7 +8,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { StatsModule } from '@rahat/stats';
 import { BQUEUE } from '@rahataid/sdk';
 import { SettingsModule } from '@rumsan/extensions/settings';
-import { PrismaService } from '@rumsan/prisma';
+import { PrismaModule } from '@rumsan/prisma';
 import {
   AbilityModule,
   AuthsModule,
@@ -46,6 +46,7 @@ import { AuthClientModule } from './auth-client.module';
 
 @Module({
   imports: [
+    PrismaModule,
     ConfigModule.forRoot({ isGlobal: true }),
     AuthClientModule,
     BeneficiaryModule,
@@ -96,7 +97,6 @@ import { AuthClientModule } from './auth-client.module';
   controllers: [AppController],
   providers: [
     AppService,
-    PrismaService,
     {
       provide: APP_GUARD,
       useClass: ExternalAppGuard,
