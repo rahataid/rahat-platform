@@ -359,7 +359,6 @@ export class BeneficiaryService {
     result = await this.beneficiaryUtilsService.attachPiiData(result);
 
     console.timeEnd('check');
-    console.log(new Date());
 
     return result;
   }
@@ -1242,7 +1241,6 @@ export class BeneficiaryService {
         name: sanitizeNonAlphaNumericValue(g),
       }));
 
-      console.log('groupData', { groupData });
 
       await this.prisma.beneficiaryGroup.createManyAndReturn({
         data: groupData,
@@ -1672,6 +1670,7 @@ export class BeneficiaryService {
             Beneficiary: {
               include: {
                 pii: true,
+                bankAccount: true,
               },
             },
           },
@@ -1688,6 +1687,7 @@ export class BeneficiaryService {
         },
       },
     });
+
 
     if (!group) {
       throw new RpcException({
@@ -1762,6 +1762,7 @@ export class BeneficiaryService {
           Beneficiary: {
             include: {
               pii: true,
+              bankAccount: true
             },
           },
         },
@@ -2943,7 +2944,6 @@ export class BeneficiaryService {
       })
     );
 
-    console.log(beneficiaryData);
     const tempBenefPhone = await this.listTempBenefPhone();
     return this.prisma.$transaction(async (txn) => {
       // 1. Upsert temp group by name
