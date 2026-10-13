@@ -1,48 +1,356 @@
-name: AA ALL DEV CI/CD
+# name: AA ALL DEV CI/CD
+
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       environment:
+#         description: 'Environment to deploy'
+#         required: true
+#         type: choice
+#         options:
+#           - 'test-load'
+#           - 'dev-unicef'
+#           - 'demo-redcross'
+#           - 'aidlink-demo'
+#           - 'aidlink-dev'
+#           - 'stage-el'
+#           - 'main-aa'
+#           - 'aa-mcn-main'
+#           - 'aa-demo-v2'
+#           - 'dev-crm'
+#           - 'dev'
+#           - 'main'
+#           - 'dev-qa'
+#           - 'dry-run-pin'
+#           - 'aa-stellar'
+#           - 'demo-gsma'
+#           - 'mcn-demo-2026'
+#           - 'mcn-training'
+#           - 'release-v4.0.0-nrcs'
+#           - 'nrcs-training'
+#           - 'demo-nrcs'
+
+#       apps_to_build:
+#         description: 'Apps to build (leave empty for defaults)'
+#         required: false
+#         type: string
+
+# concurrency:
+#   group: aa-core-${{ github.workflow }}-${{ github.ref }}
+#   cancel-in-progress: true
+
+# env:
+#   CI: false
+#   NODE_VERSION: '20.10.0'
+#   PNPM_VERSION: '8.14.1'
+#   REGISTRY: docker.io
+#   IMAGE_NAMESPACE: esatya
+
+# jobs:
+#   resolve-config:
+#     name: Resolve Environment Config
+#     runs-on: ubuntu-latest
+#     outputs:
+#       tag_suffix: ${{ steps.config.outputs.tag_suffix }}
+#       env_secret_name: ${{ steps.config.outputs.env_secret_name }}
+#       apps_to_build: ${{ steps.config.outputs.apps_to_build }}
+#     steps:
+#       - name: Resolve config from branch or manual input
+#         id: config
+#         run: |
+#           if [ "${{ github.event_name }}" = "push" ]; then
+#             ENV="${{ github.ref_name }}"
+#           else
+#             ENV="${{ inputs.environment }}"
+#           fi
+
+#           case "$ENV" in
+#             test-load)
+#               TAG="test-load"
+#               SECRET="ENV_AA_TEST_LOAD"
+#               APPS="beneficiary,rahat"
+#               ;;
+#             dev-unicef)
+#               TAG="aa-dev-unicef"
+#               SECRET="ENV_AA_DEV_UNICEF"
+#               APPS="beneficiary,rahat"
+#               ;;
+#             demo-redcross)
+#               TAG="demo-redcross"
+#               SECRET="ENV_AA_REDCROSS"
+#               APPS="beneficiary,rahat,shared-auth"
+#               ;;
+#             aidlink-demo)
+#               TAG="aidlink-demo"
+#               SECRET="ENV_AA_AIDLINK_DEMO"
+#               APPS="beneficiary,rahat"
+#               ;;
+#             aidlink-dev)
+#               TAG="aidlink-dev"
+#               SECRET="ENV_AA_AIDLINK_DEV"
+#               APPS="beneficiary,rahat"
+#               ;;
+#             stage-el)
+#               TAG="stage-el"
+#               SECRET="ENV_AA_STAGE_EL"
+#               APPS="beneficiary,rahat"
+#               ;;
+#             main-aa)
+#               TAG="latest"
+#               SECRET="ENV_AA_MAIN"
+#               APPS="beneficiary,rahat"
+#               ;;
+#             aa-mcn-main)
+#               TAG="aa-mcn-main"
+#               SECRET="ENV_AA_MCN_MAIN"
+#               APPS="beneficiary,rahat"
+#               ;;
+#             aa-demo-v2)
+#               TAG="aa-demo-v2"
+#               SECRET="ENV_AA_DEMO_V2"
+#               APPS="beneficiary,rahat"
+#               ;;
+#             dev-crm)
+#               TAG="dev-crm"
+#               SECRET="ENV_AA_DEV_CRM"
+#               APPS="beneficiary,rahat"
+#               ;;
+#             dev)
+#               TAG="dev"
+#               SECRET="ENV_AA_DEV"
+#               APPS="beneficiary,rahat,shared-auth"
+#               ;;
+#             main)
+#               TAG="latest"
+#               SECRET="ENV_AA_MAIN"
+#               APPS="beneficiary,rahat"
+#               ;;
+#             dev-qa)
+#               TAG="dev-qa"
+#               SECRET="ENV_AA_DEV-QA"
+#               APPS="beneficiary,rahat,shared-auth"
+#               ;;         
+#             aa-stellar)
+#               TAG="aa-stellar"
+#               SECRET="ENV_AA_DEV-STELLAR"
+#               APPS="beneficiary,rahat,shared-auth"
+#               ;;
+#             demo-gsma)
+#               TAG="demo-gsma"
+#               SECRET="ENV_AA_DEMO_GSMA"
+#               APPS="beneficiary,rahat,shared-auth"
+#               ;;
+#             mcn-demo-2026)
+#               TAG="mcn-demo-2026"
+#               SECRET="ENV_AA_DEMO_STELLAR"
+#               APPS="beneficiary,rahat,shared-auth"
+#               ;;
+#             mcn-training)
+#               TAG="mcn-training"
+#               SECRET="ENV_AA_MCN_TRAINING"
+#               APPS="beneficiary,rahat,shared-auth"
+#               ;;
+#             nrcs-training)
+#               TAG="nrcs-training"
+#               SECRET="ENV_AA_NRCS_TRAINING"
+#               APPS="beneficiary,rahat,shared-auth"
+#               ;;
+#             demo-nrcs)
+#               TAG="demo-nrcs"
+#               SECRET="ENV_AA_NRCS_DEMO"
+#               APPS="beneficiary,rahat,shared-auth"
+#               ;;
+#             *)
+#               echo "Unknown environment: $ENV"
+#               exit 1
+#               ;;
+#           esac
+
+#           # Allow manual override of apps
+#           if [ -n "${{ inputs.apps_to_build }}" ]; then
+#             APPS="${{ inputs.apps_to_build }}"
+#           fi
+
+#           echo "tag_suffix=$TAG" >> $GITHUB_OUTPUT
+#           echo "env_secret_name=$SECRET" >> $GITHUB_OUTPUT
+#           echo "apps_to_build=$APPS" >> $GITHUB_OUTPUT
+
+#   # -----------------------------
+#   # Build Matrix Setup
+#   # -----------------------------
+#   setup:
+#     name: Setup Build Matrix
+#     runs-on: ubuntu-latest
+#     needs: resolve-config
+#     outputs:
+#       matrix: ${{ steps.set-matrix.outputs.matrix }}
+#     steps:
+#       - name: Generate matrix
+#         id: set-matrix
+#         run: |
+#           APPS="${{ needs.resolve-config.outputs.apps_to_build }}"
+#           JSON=$(printf '%s\n' "$APPS" | awk -F',' '{printf "["; for(i=1;i<=NF;i++) printf "\"%s\"%s",$i,(i==NF?"":","); printf "]"}')
+#           echo "matrix={\"app\":$JSON}" >> $GITHUB_OUTPUT
+
+#   # -----------------------------
+#   # Build & Push
+#   # -----------------------------
+#   build:
+#     name: Build & Push - ${{ matrix.app }}
+#     runs-on: ubuntu-latest
+#     needs: [resolve-config, setup]
+#     strategy:
+#       fail-fast: false
+#       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+
+#     permissions:
+#       contents: read
+#       packages: write
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+
+#       # -----------------------------
+#       # Vault Import
+#       # -----------------------------
+#       - name: Import Secrets from Vault
+#         id: vault
+#         uses: hashicorp/vault-action@v2.4.0
+#         with:
+#           url: ${{ secrets.VAULT_URL }}
+#           token: ${{ secrets.VAULT_TOKEN }}
+#           secrets: |
+#             github/data/general/docker/esatya username | DOCKERHUB_USERNAME ;
+#             github/data/general/docker/esatya password | DOCKERHUB_TOKEN ;
+
+#       # -----------------------------
+#       # Docker Setup
+#       # -----------------------------
+#       - name: Setup Docker Buildx
+#         uses: docker/setup-buildx-action@v3
+
+#       - name: Login to Docker Hub
+#         uses: docker/login-action@v3
+#         with:
+#           username: ${{ steps.vault.outputs.DOCKERHUB_USERNAME }}
+#           password: ${{ steps.vault.outputs.DOCKERHUB_TOKEN }}
+
+#       # -----------------------------
+#       # Node + PNPM Setup
+#       # -----------------------------
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: ${{ env.NODE_VERSION }}
+
+#       - name: Enable Corepack
+#         run: corepack enable
+
+#       - name: Setup PNPM
+#         uses: pnpm/action-setup@v3
+#         with:
+#           version: ${{ env.PNPM_VERSION }}
+
+#       # -----------------------------
+#       # Inject Environment
+#       # -----------------------------
+#       - name: Inject Environment File
+#         run: |
+#           echo "${{ secrets[needs.resolve-config.outputs.env_secret_name] }}" > .env
+
+#       - name: Install Dependencies
+#         run: |
+#           pnpm install
+#           pnpm prisma:generate
+
+#       - name: Build Application
+#         run: npx nx build ${{ matrix.app }}
+
+#       - name: Extract Git Metadata
+#         id: meta
+#         run: |
+#           echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+#           echo "run_number=${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
+
+#       # -----------------------------
+#       # Docker Build & Push
+#       # -----------------------------
+#       - name: Build and Push Docker Image
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: .
+#           file: Dockerfile.${{ matrix.app }}
+#           push: true
+#           cache-from: type=gha
+#           cache-to: type=gha,mode=max
+#           tags: |
+#             ${{ env.IMAGE_NAMESPACE }}/rahat-platform-${{ matrix.app }}:${{ needs.resolve-config.outputs.tag_suffix }}
+#             ${{ env.IMAGE_NAMESPACE }}/rahat-platform-${{ matrix.app }}:${{ needs.resolve-config.outputs.tag_suffix }}-${{ steps.meta.outputs.short_sha }}-${{ steps.meta.outputs.run_number }}
+
+name: "ALL DEPLOY CI/CD · Platform Build & Push"
+run-name: "🚀 ${{ inputs.environment }} · ${{ inputs.custom_branch || (inputs.branch != '(same as Use workflow from)' && inputs.branch) || github.ref_name }} · @${{ github.actor }}"
 
 on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy'
+        description: "Environment to deploy  (env | Docker tag | purpose)"
         required: true
         type: choice
         options:
-          - 'test-load'
-          - 'dev-unicef'
-          - 'demo-redcross'
-          - 'aidlink-demo'
-          - 'aidlink-dev'
-          - 'stage-el'
-          - 'main-aa'
-          - 'aa-mcn-main'
-          - 'aa-demo-v2'
-          - 'dev-crm'
-          - 'dev'
-          - 'main'
-          - 'dev-qa'
-          - 'dry-run-pin'
-          - 'aa-stellar'
-          - 'demo-gsma'
-          - 'mcn-demo-2026'
-          - 'mcn-training'
-          - 'release-v4.0.0-nrcs'
-          - 'nrcs-training'
-          - 'demo-nrcs'
+          - "test-load | Tag: test-load | Load Testing"
+          - "dev-unicef | Tag: aa-dev-unicef | UNICEF Development"
+          - "demo-redcross | Tag: demo-redcross | Red Cross Demo"
+          - "demo-aidlink | Tag: demo-aidlink | AidLink Demo"
+          - "dev-aidlink | Tag: dev-aidlink | AidLink Development"
+          - "stage-el | Tag: stage-el | EL Staging"
+          - "main-aa | Tag: latest | AA Main (shared latest tag)"
+          - "aa-mcn-main | Tag: aa-mcn-main | AA MCN Main"
+          - "aa-demo-v2 | Tag: aa-demo-v2 | AA Demo v2"
+          - "dev-crm | Tag: dev-crm | CRM Development"
+          - "dev | Tag: dev | Development"
+          - "main | Tag: latest | Main (shared latest tag)"
+          - "dev-qa | Tag: dev-qa | QA Development"
+          - "aa-stellar | Tag: aa-stellar | Dev Stellat"
+          - "demo-gsma | Tag: demo-gsma | Demo GSMA"
+          - "mcn-demo-2026 | Tag: mcn-demo-202 | MCN Demo 2026"
+          - "mcn-training | Tag: mcn-training | MCN Training"
+          - "nrcs-training | Tag: nrcs-training | NRCS Training"
+          - "demo-nrcs | Tag:emo-nrcs | Demo NRCS"
+
+#           - 'demo-nrcs'
+      # branch:
+      #   description: "Branch to build"
+      #   required: true
+      #   type: choice
+      #   default: "(same as Use workflow from)"
+      #   options:
+      #     - "(same as Use workflow from)"
+      #     # BEGIN branch-options (generated by .github/scripts/sync-env-options.sh, do not edit by hand)
+      #     - "dev"
+      #     - "dev-qa"
+      #     - "dev-crm"
+      #     # END branch-options
+
+      # custom_branch:
+      #   description: "Other branch, tag or full commit SHA to build (overrides the dropdown above)"
+      #   required: false
+      #   type: string
 
       apps_to_build:
-        description: 'Apps to build (leave empty for defaults)'
+        description: "Apps to build, comma-separated (e.g. beneficiary,rahat). Leave empty for the environment defaults."
         required: false
         type: string
 
 concurrency:
-  group: aa-core-${{ github.workflow }}-${{ github.ref }}
+  group: aa-core-${{ github.workflow }}-${{ inputs.custom_branch || (inputs.branch != '(same as Use workflow from)' && inputs.branch) || github.ref }}
   cancel-in-progress: true
 
 env:
   CI: false
-  NODE_VERSION: '20.10.0'
-  PNPM_VERSION: '8.14.1'
+  NODE_VERSION: "20.10.0"
+  PNPM_VERSION: "8.14.1"
   REGISTRY: docker.io
   IMAGE_NAMESPACE: esatya
 
@@ -51,129 +359,169 @@ jobs:
     name: Resolve Environment Config
     runs-on: ubuntu-latest
     outputs:
+      env_name: ${{ steps.config.outputs.env_name }}
       tag_suffix: ${{ steps.config.outputs.tag_suffix }}
       env_secret_name: ${{ steps.config.outputs.env_secret_name }}
       apps_to_build: ${{ steps.config.outputs.apps_to_build }}
+      apps_overridden: ${{ steps.config.outputs.apps_overridden }}
+      env_config: ${{ steps.config.outputs.env_config }}
+      target_ref: ${{ steps.target.outputs.ref }}
+      target_sha: ${{ steps.target.outputs.sha }}
     steps:
+      - name: Checkout environment config
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/ALL-IN-ONE-CICD.environments.json
+          sparse-checkout-cone-mode: false
+
+      # The workflow file and env config always come from the "Use workflow from"
+      # branch; the code that gets built comes from the `branch` input.
+      - name: Resolve branch to build
+        id: target
+        env:
+          TARGET_REF: ${{ inputs.custom_branch || (inputs.branch != '(same as Use workflow from)' && inputs.branch) || github.ref_name }}
+        run: |
+          set -euo pipefail
+          REF=$(printf '%s' "$TARGET_REF" | xargs)
+          if ! git fetch --quiet --depth=1 --no-tags origin "$REF"; then
+            echo "::error::Could not find branch, tag or commit '$REF'. Use a full 40-character SHA for commits."
+            exit 1
+          fi
+          SHA=$(git rev-parse FETCH_HEAD)
+          echo "Building $REF @ $SHA"
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
       - name: Resolve config from branch or manual input
         id: config
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          SELECTED: ${{ inputs.environment }}
+          APPS_OVERRIDE: ${{ inputs.apps_to_build }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            ENV="${{ github.ref_name }}"
+          set -euo pipefail
+
+          # Environment config lives in .github/ALL-IN-ONE-CICD.environments.json
+          ENV_CONFIG=$(jq '.environments' .github/ALL-IN-ONE-CICD.environments.json)
+
+          if [ "$EVENT_NAME" = "push" ]; then
+            RAW="$REF_NAME"
           else
-            ENV="${{ inputs.environment }}"
+            RAW="$SELECTED"
           fi
 
-          case "$ENV" in
-            test-load)
-              TAG="test-load"
-              SECRET="ENV_AA_TEST_LOAD"
-              APPS="beneficiary,rahat"
-              ;;
-            dev-unicef)
-              TAG="aa-dev-unicef"
-              SECRET="ENV_AA_DEV_UNICEF"
-              APPS="beneficiary,rahat"
-              ;;
-            demo-redcross)
-              TAG="demo-redcross"
-              SECRET="ENV_AA_REDCROSS"
-              APPS="beneficiary,rahat,shared-auth"
-              ;;
-            aidlink-demo)
-              TAG="aidlink-demo"
-              SECRET="ENV_AA_AIDLINK_DEMO"
-              APPS="beneficiary,rahat"
-              ;;
-            aidlink-dev)
-              TAG="aidlink-dev"
-              SECRET="ENV_AA_AIDLINK_DEV"
-              APPS="beneficiary,rahat"
-              ;;
-            stage-el)
-              TAG="stage-el"
-              SECRET="ENV_AA_STAGE_EL"
-              APPS="beneficiary,rahat"
-              ;;
-            main-aa)
-              TAG="latest"
-              SECRET="ENV_AA_MAIN"
-              APPS="beneficiary,rahat"
-              ;;
-            aa-mcn-main)
-              TAG="aa-mcn-main"
-              SECRET="ENV_AA_MCN_MAIN"
-              APPS="beneficiary,rahat"
-              ;;
-            aa-demo-v2)
-              TAG="aa-demo-v2"
-              SECRET="ENV_AA_DEMO_V2"
-              APPS="beneficiary,rahat"
-              ;;
-            dev-crm)
-              TAG="dev-crm"
-              SECRET="ENV_AA_DEV_CRM"
-              APPS="beneficiary,rahat"
-              ;;
-            dev)
-              TAG="dev"
-              SECRET="ENV_AA_DEV"
-              APPS="beneficiary,rahat,shared-auth"
-              ;;
-            main)
-              TAG="latest"
-              SECRET="ENV_AA_MAIN"
-              APPS="beneficiary,rahat"
-              ;;
-            dev-qa)
-              TAG="dev-qa"
-              SECRET="ENV_AA_DEV-QA"
-              APPS="beneficiary,rahat,shared-auth"
-              ;;         
-            aa-stellar)
-              TAG="aa-stellar"
-              SECRET="ENV_AA_DEV-STELLAR"
-              APPS="beneficiary,rahat,shared-auth"
-              ;;
-            demo-gsma)
-              TAG="demo-gsma"
-              SECRET="ENV_AA_DEMO_GSMA"
-              APPS="beneficiary,rahat,shared-auth"
-              ;;
-            mcn-demo-2026)
-              TAG="mcn-demo-2026"
-              SECRET="ENV_AA_DEMO_STELLAR"
-              APPS="beneficiary,rahat,shared-auth"
-              ;;
-            mcn-training)
-              TAG="mcn-training"
-              SECRET="ENV_AA_MCN_TRAINING"
-              APPS="beneficiary,rahat,shared-auth"
-              ;;
-            nrcs-training)
-              TAG="nrcs-training"
-              SECRET="ENV_AA_NRCS_TRAINING"
-              APPS="beneficiary,rahat,shared-auth"
-              ;;
-            demo-nrcs)
-              TAG="demo-nrcs"
-              SECRET="ENV_AA_NRCS_DEMO"
-              APPS="beneficiary,rahat,shared-auth"
-              ;;
-            *)
-              echo "Unknown environment: $ENV"
-              exit 1
-              ;;
-          esac
+          # Dropdown options look like "demo-redcross | Tag: demo-redcross | Red Cross Demo"
+          ENV=$(printf '%s' "$RAW" | cut -d'|' -f1 | xargs)
+
+          if ! jq -e --arg e "$ENV" 'has($e)' <<<"$ENV_CONFIG" >/dev/null; then
+            echo "::error::Unknown environment: '$ENV' (from '$RAW')"
+            exit 1
+          fi
+
+          CFG=$(jq -c --arg e "$ENV" '.[$e]' <<<"$ENV_CONFIG")
+          TAG=$(jq -r '.tag' <<<"$CFG")
+          SECRET=$(jq -r '.secret' <<<"$CFG")
+          APPS=$(jq -r '.apps' <<<"$CFG")
+
+          # Guard: the Tag shown in the dropdown label must match ALL-IN-ONE-CICD.environments.json
+          LABEL_TAG=$(printf '%s' "$RAW" | sed -n 's/.*Tag:[[:space:]]*\([^|[:space:]]*\).*/\1/p')
+          if [ -n "$LABEL_TAG" ] && [ "$LABEL_TAG" != "$TAG" ]; then
+            echo "::error::Dropdown label says Tag '$LABEL_TAG' but ALL-IN-ONE-CICD.environments.json for '$ENV' uses '$TAG'. Run .github/scripts/sync-env-options.sh and commit."
+            exit 1
+          fi
 
           # Allow manual override of apps
-          if [ -n "${{ inputs.apps_to_build }}" ]; then
-            APPS="${{ inputs.apps_to_build }}"
+          OVERRIDDEN=false
+          if [ -n "$APPS_OVERRIDE" ]; then
+            APPS=$(printf '%s' "$APPS_OVERRIDE" | tr -d '[:space:]')
+            OVERRIDDEN=true
           fi
 
-          echo "tag_suffix=$TAG" >> $GITHUB_OUTPUT
-          echo "env_secret_name=$SECRET" >> $GITHUB_OUTPUT
-          echo "apps_to_build=$APPS" >> $GITHUB_OUTPUT
+          echo "Environment : $ENV"
+          echo "Docker tag  : $TAG"
+          echo "Apps        : $APPS (override: $OVERRIDDEN)"
+
+          {
+            echo "env_name=$ENV"
+            echo "tag_suffix=$TAG"
+            echo "env_secret_name=$SECRET"
+            echo "apps_to_build=$APPS"
+            echo "apps_overridden=$OVERRIDDEN"
+            echo "env_config=$CFG"
+          } >> "$GITHUB_OUTPUT"
+
+  # -----------------------------
+  # Deployment Preview (runs before any build)
+  # -----------------------------
+  preview:
+    name: Deployment Preview
+    runs-on: ubuntu-latest
+    needs: resolve-config
+    steps:
+      - name: Show what will be built and pushed
+        env:
+          ENV_NAME: ${{ needs.resolve-config.outputs.env_name }}
+          TAG: ${{ needs.resolve-config.outputs.tag_suffix }}
+          APPS: ${{ needs.resolve-config.outputs.apps_to_build }}
+          APPS_OVERRIDDEN: ${{ needs.resolve-config.outputs.apps_overridden }}
+          CFG: ${{ needs.resolve-config.outputs.env_config }}
+          SECRET_NAME: ${{ needs.resolve-config.outputs.env_secret_name }}
+          TARGET_REF: ${{ needs.resolve-config.outputs.target_ref }}
+          TARGET_SHA: ${{ needs.resolve-config.outputs.target_sha }}
+        run: |
+          set -euo pipefail
+
+          SHORT_SHA="${TARGET_SHA::7}"
+          RUN_TAG="${TAG}-${SHORT_SHA}-${GITHUB_RUN_NUMBER}"
+          DESCRIPTION=$(jq -r '.description' <<<"$CFG")
+
+          {
+            echo "## 🚀 Deployment Preview: \`$ENV_NAME\`"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| **Environment** | \`$ENV_NAME\` |"
+            echo "| **Description** | $DESCRIPTION |"
+            echo "| **Docker tag** | \`$TAG\` |"
+            echo "| **Run-specific tag** | \`$RUN_TAG\` |"
+            echo "| **Branch being built** | \`$TARGET_REF\` |"
+            echo "| **Commit** | [\`$SHORT_SHA\`]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$TARGET_SHA) |"
+            echo "| **Workflow file from** | \`$GITHUB_REF_NAME\` |"
+            echo "| **Triggered by** | @$GITHUB_ACTOR |"
+            echo "| **Env secret used** | \`$SECRET_NAME\` (contents not shown) |"
+            echo "| **Apps** | \`$APPS\`$( [ "$APPS_OVERRIDDEN" = "true" ] && echo ' _(manual override)_' ) |"
+            echo ""
+            echo "### 🐳 Images to be pushed"
+            echo ""
+            echo "| App | Image | Run-specific image |"
+            echo "|---|---|---|"
+            IFS=',' read -ra APP_LIST <<<"$APPS"
+            for app in "${APP_LIST[@]}"; do
+              IMAGE="$IMAGE_NAMESPACE/rahat-platform-$app"
+              echo "| $app | \`$IMAGE:$TAG\` | \`$IMAGE:$RUN_TAG\` |"
+            done
+            echo ""
+            echo "### 🌐 Deployment URLs"
+            echo ""
+            if [ "$(jq '.urls | length' <<<"$CFG")" -gt 0 ]; then
+              jq -r '.urls | to_entries[] | "- **\(.key):** <\(.value)>"' <<<"$CFG"
+            else
+              echo "_No deployment URLs configured for this environment. Add them to \`.github/ALL-IN-ONE-CICD.environments.json\`._"
+            fi
+            echo ""
+            NOTES=$(jq -r '.notes[]?' <<<"$CFG")
+            if [ -n "$NOTES" ] || [ "$APPS_OVERRIDDEN" = "true" ]; then
+              echo "### ⚠️ Notes"
+              echo ""
+              [ -n "$NOTES" ] && printf '%s\n' "$NOTES" | sed 's/^/> ⚠️ /'
+              [ "$APPS_OVERRIDDEN" = "true" ] && echo "> ⚠️ Default apps were overridden by the \`apps_to_build\` input."
+              echo ""
+            fi
+          } > preview.md
+
+          cat preview.md
+          cat preview.md >> "$GITHUB_STEP_SUMMARY"
 
   # -----------------------------
   # Build Matrix Setup
@@ -181,7 +529,7 @@ jobs:
   setup:
     name: Setup Build Matrix
     runs-on: ubuntu-latest
-    needs: resolve-config
+    needs: [resolve-config, preview]
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -210,31 +558,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # -----------------------------
-      # Vault Import
-      # -----------------------------
-      - name: Import Secrets from Vault
-        id: vault
-        uses: hashicorp/vault-action@v2.4.0
         with:
-          url: ${{ secrets.VAULT_URL }}
-          token: ${{ secrets.VAULT_TOKEN }}
-          secrets: |
-            github/data/general/docker/esatya username | DOCKERHUB_USERNAME ;
-            github/data/general/docker/esatya password | DOCKERHUB_TOKEN ;
-
-      # -----------------------------
-      # Docker Setup
-      # -----------------------------
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ steps.vault.outputs.DOCKERHUB_USERNAME }}
-          password: ${{ steps.vault.outputs.DOCKERHUB_TOKEN }}
+          ref: ${{ needs.resolve-config.outputs.target_sha }}
 
       # -----------------------------
       # Node + PNPM Setup
@@ -267,10 +592,36 @@ jobs:
       - name: Build Application
         run: npx nx build ${{ matrix.app }}
 
+      # -----------------------------
+      # Vault Import
+      # -----------------------------
+      - name: Import Secrets from Vault
+        id: vault
+        uses: hashicorp/vault-action@v2.4.0
+        with:
+          url: ${{ secrets.VAULT_URL }}
+          token: ${{ secrets.VAULT_TOKEN }}
+          secrets: |
+            github/data/general/docker/esatya username | DOCKERHUB_USERNAME ;
+            github/data/general/docker/esatya password | DOCKERHUB_TOKEN ;
+
+      # -----------------------------
+      # Docker Setup
+      # -----------------------------
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ steps.vault.outputs.DOCKERHUB_USERNAME }}
+          password: ${{ steps.vault.outputs.DOCKERHUB_TOKEN }}
+
       - name: Extract Git Metadata
         id: meta
         run: |
-          echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          SHA="${{ needs.resolve-config.outputs.target_sha }}"
+          echo "short_sha=${SHA::7}" >> $GITHUB_OUTPUT
           echo "run_number=${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
 
       # -----------------------------
