@@ -87,7 +87,7 @@ export class HealthService {
 
     await this.emailService.sendEmail(
       recipients,
-      `[ALERT] ${downServices.length} service(s) down – Rahat Health Check`,
+      `[ALERT] ${downServices.length} service(s) down – EL Core Health Check`,
       `The following service(s) are currently unavailable: ${downServices
         .map((s) => s.name)
         .join(', ')}`,
@@ -110,7 +110,7 @@ export class HealthService {
 
     await this.emailService.sendEmail(
       recipients,
-      `[NOTICE] ${restoredServices.length} service(s) restored – Rahat Health Check`,
+      `[NOTICE] ${restoredServices.length} service(s) restored – EL Core Health Check`,
       `The following service(s) have been restored: ${restoredServices
         .map(({ name }) => name)
         .join(', ')}`,
@@ -256,7 +256,7 @@ export class HealthService {
       </table>
       </div>
       <div class="foot">
-      <p>Automated alert from Rahat Core ${
+      <p>Automated alert from EL Core ${
         frontendUrlSetting?.server
       } Health Check · ${new Date().toLocaleString()} for  <a href= "${
       frontendUrlSetting?.url
