@@ -17,6 +17,8 @@ import {
   MAX_GROUP_NAME_LENGTH,
   R2_IMPORTS_PREFIX,
   SIGNED_URL_EXPIRY_SECONDS,
+  STATS_RECOMPUTE_DELAY_MS,
+  STATS_RECOMPUTE_JOB_ID,
 } from './imports.constants';
 
 interface R2Config {
@@ -27,6 +29,7 @@ interface R2Config {
 }
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: DEFAULT_PER_PAGE });
+
 
 @Injectable()
 export class ImportsService {
@@ -39,7 +42,8 @@ export class ImportsService {
     private readonly settingsService: SettingsService,
     private readonly httpService: HttpService,
     @InjectQueue(BQUEUE.RAHAT_IMPORT) private readonly importQueue: Queue,
-  ) {}
+    @InjectQueue(BQUEUE.RAHAT_BENEFICIARY) private readonly beneficiaryQueue: Queue,
+  ) { }
 
   private async getR2Config(): Promise<R2Config> {
     if (this.r2Config) return this.r2Config;
@@ -196,6 +200,19 @@ export class ImportsService {
       where: { uuid },
       data: { status },
     });
+  }
+
+  async scheduleStatsRefresh() {
+    return this.beneficiaryQueue.add(
+      BeneficiaryJobs.UPDATE_STATS,
+      { projectUUID: null },
+      {
+        jobId: STATS_RECOMPUTE_JOB_ID,
+        delay: STATS_RECOMPUTE_DELAY_MS,
+        removeOnComplete: true,
+        removeOnFail: true,
+      },
+    );
   }
 
   async startImport(uuid: string) {

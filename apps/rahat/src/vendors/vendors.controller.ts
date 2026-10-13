@@ -39,9 +39,6 @@ import { VendorsService } from './vendors.service';
 export class VendorsController {
   constructor(private readonly vendorService: VendorsService) { }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.VENDOR })
   @Post('')
   registerVendor(@Body() dto: VendorRegisterDto) {
     return this.vendorService.registerVendor(dto);
@@ -89,8 +86,8 @@ export class VendorsController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.VENDOR })
+  // @UseGuards(JwtGuard, DbAbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.VENDOR })
   @ApiParam({ name: 'uuid', required: true })
   @Patch('/update/:uuid')
   updateVendor(@Param('uuid') uuid: UUID, @Body() dto: VendorUpdateDto) {

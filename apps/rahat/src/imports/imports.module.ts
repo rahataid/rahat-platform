@@ -1,6 +1,6 @@
+import { HttpModule } from '@nestjs/axios';
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
 import { BQUEUE } from '@rahataid/sdk';
 import { SettingsModule } from '@rumsan/extensions/settings';
 import { PrismaModule } from '@rumsan/prisma';
@@ -13,6 +13,7 @@ import { ImportsService } from './imports.service';
     HttpModule,
     SettingsModule,
     BullModule.registerQueue({ name: BQUEUE.RAHAT_IMPORT }),
+    BullModule.registerQueue({ name: BQUEUE.RAHAT_BENEFICIARY }),
   ],
   controllers: [ImportsController],
   providers: [ImportsService],

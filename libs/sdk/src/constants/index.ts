@@ -324,6 +324,7 @@ export const MS_ACTIONS = {
       EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
       EXPORT_PAYOUT_LOGS_PDF_FILE: 'aa.jobs.payout.exportPayoutLogsPdfFile',
       VERIFY_MANUAL_PAYOUT: 'aa.payout.verifyManualPayout',
+      COMPLETE_PAYOUT: 'aa.payout.complete'
     },
     INKIND: {
       CREATE: 'aa.inkinds.create',
@@ -652,6 +653,15 @@ export const MS_ACTIONS = {
     GET_ALL: 'ms.activityCategories.getAll',
     ADD: 'ms.activityCategories.add',
     REMOVE: 'ms.activityCategories.remove',
+  },
+
+  MS_COMMUNICATIONS: {
+    CREATE: 'ms.communications.create',
+    GET_ALL: 'ms.communications.getAll',
+    GET_ONE: 'ms.communications.getOne',
+    UPDATE: 'ms.communications.update',
+    REMOVE: 'ms.communications.remove',
+    TRIGGER: 'ms.communications.trigger',
   },
 
   MS_DAILY_MONITORING: {

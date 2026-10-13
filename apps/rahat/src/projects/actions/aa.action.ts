@@ -731,6 +731,15 @@ export const aaActions: ProjectActionFunc = {
     return sendCommand({ cmd: AAJobs.PAYOUT.VERIFY_MANUAL_PAYOUT, uuid }, payload)
   },
 
+  [MS_ACTIONS.AAPROJECT.PAYOUT.COMPLETE_PAYOUT]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.PAYOUT.COMPLETE_PAYOUT, uuid }, payload)
+  },
+
   [MS_ACTIONS.AAPROJECT.PAYOUT.EXPORT_PAYOUT_LOGS_PDF_FILE]: (
     uuid,
     payload,
