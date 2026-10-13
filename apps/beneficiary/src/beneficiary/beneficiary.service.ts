@@ -168,6 +168,7 @@ export class BeneficiaryService {
         address: data.walletAddress,
       },
     });
+
     if (!entityDetails) return 'No details found';
 
     const getBeneficiaryByWallet = await this.prisma.beneficiary.findUnique({
@@ -391,7 +392,6 @@ export class BeneficiaryService {
     );
 
     console.timeEnd('check');
-    console.log(new Date());
 
     return result;
   }
@@ -1781,7 +1781,7 @@ export class BeneficiaryService {
   private async _createBeneficiaryFromDto(
     dto: CreateBeneficiaryDto,
   ): Promise<{ uuid: string }> {
-    const { piiData, ...rest } = dto;
+    const { piiData, multiChainWallets, ...rest } = dto;
 
     const phone = piiData?.phone?.toString();
     if (phone) {
@@ -1809,6 +1809,26 @@ export class BeneficiaryService {
           extras: piiData?.extras ?? {},
         },
       });
+
+
+      if (
+        multiChainWallets &&
+        Array.isArray(multiChainWallets) &&
+        multiChainWallets.length > 0
+      ) {
+        this.logger.log(
+          `[CREATE] Persisting ${multiChainWallets.length} multi-chain wallet(s) via database storage`
+        );
+        for (const wallet of multiChainWallets) {
+          await tx.walletAddress.update({
+            where: { address: wallet.address },
+            data: { entityId: ben.uuid },
+          });
+        }
+        this.logger.log(`[CREATE] Wallets persisted via database storage`);
+      } else {
+        this.logger.log('[CREATE] No multi-chain wallets to persist');
+      }
 
       return { uuid: ben.uuid };
     });
@@ -1843,9 +1863,13 @@ export class BeneficiaryService {
       const piiUpdates: Record<string, any> = {};
 
       if (dto.piiData.name !== undefined) piiUpdates.name = dto.piiData.name;
+      if (dto.piiData.phone !== undefined) piiUpdates.phone = dto.piiData.phone
+      if (dto.piiData.email !== undefined) piiUpdates.email = dto.piiData.email
+
       if (dto.piiData.extras !== undefined) {
         piiUpdates.extras = { ...(existing.pii?.extras ?? {}), ...dto.piiData.extras };
       }
+
 
       if (Object.keys(piiUpdates).length > 0 && existing.pii) {
         await this.prisma.beneficiaryPii.update({
@@ -1923,7 +1947,6 @@ export class BeneficiaryService {
       return this.applyGroupBeneficiaryPagination(uuid, emptyResult, dto);
     }
 
-    console.log(walletDetails);
 
     const updatedGroupDetails = {
       ...group,

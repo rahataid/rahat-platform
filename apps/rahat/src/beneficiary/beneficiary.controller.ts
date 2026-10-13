@@ -222,13 +222,19 @@ export class BeneficiaryController {
 
     const raw = await DocParser(docType, file.buffer);
     const beneficiariesMapped = mapUploadedBeneficiaryRows(raw as unknown as Record<string, unknown>[]);
-    const walletResult = await this.walletProcessingService.processBeneficiariesWithWallets(beneficiariesMapped);
+
+    // Existing beneficiaries (identified by uuid) already have wallets — skip wallet generation for them
+    const existing = beneficiariesMapped.filter((b) => b.uuid);
+    const newBeneficiaries = beneficiariesMapped.filter((b) => !b.uuid);
+
+    const walletResult = await this.walletProcessingService.processBeneficiariesWithWallets(newBeneficiaries);
+    const allDtos = [...existing, ...walletResult.validBeneficiaries];
 
     return firstValueFrom(
       this.client
         .send(
           { cmd: BeneficiaryJobs.UPLOAD_BENEFICIARIES_TO_GROUP },
-          { dtos: walletResult.validBeneficiaries, groupUuid: uuid },
+          { dtos: allDtos, groupUuid: uuid },
         )
         .pipe(
           map((response) => {
