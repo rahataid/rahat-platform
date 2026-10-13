@@ -170,6 +170,12 @@ export const elActions: ProjectActionFunc = {
       { ...payload },
       500000
     ),
+  [MS_ACTIONS.ELPROJECT.CRM.DELETE_CAMPAIGN]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.REMOVE_CAMPAIGN, uuid },
+      { ...payload },
+      500000
+    ),
   [MS_ACTIONS.ELPROJECT.CRM.TRIGGER_CAMPAIGN]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.CAMPAIGN.TRIGGER_CAMPAIGN, uuid },

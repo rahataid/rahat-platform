@@ -179,6 +179,7 @@ export const MS_ACTIONS = {
 
       CREATE_CAMPAIGN: 'elProject.campaign.create',
       UPDATE_CAMPAIGN: 'elProject.campaign.update',
+      DELETE_CAMPAIGN: 'elProject.campaign.delete',
       CREATE_AUDIENCE: 'elProject.campaign.create_audience',
       CREATE_BULK_AUDIENCE: 'elProject.campaign.create_bulk_audience',
       GET_ALL_CAMPAIGN: 'elProject.campaign.get',
