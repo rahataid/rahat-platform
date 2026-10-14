@@ -136,8 +136,7 @@ export class WalletProcessingService {
                 totalDiscarded: failedResponses.length
             };
         } catch (e) {
-            console.log(e)
-            this.logger.log(e)
+            this.logger.error(e)
             throw e instanceof RpcException ? e : new RpcException('Xcapit Wallet creation  failed');
         }
 

@@ -10,7 +10,6 @@ export class FileWalletStorage implements WalletStorage {
     }
 
     async init() {
-        console.log("Making new directory")
         try {
             await fs.mkdir(this.storageDir, { recursive: true });
         } catch (error) {

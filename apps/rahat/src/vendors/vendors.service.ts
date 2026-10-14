@@ -509,7 +509,7 @@ export class VendorsService {
             },
           },
         });
-        console.log('Vendor successfully assigned to the project:', createRes);
+        console.log('Vendor successfully assigned to the project:');
       },
       onError: (error) => {
         console.error('Error syncing vendor to project:', error);
@@ -524,7 +524,6 @@ export class VendorsService {
         }
       ),
       onSuccess(response) {
-        console.log('Microservice response', response);
         return response;
       },
       onError(error) {
@@ -761,7 +760,6 @@ export class VendorsService {
 
   async verifyOtp(dto, rdetails) {
     const res = await this.authService.loginByOtp(dto, rdetails);
-    console.log(res);
     if (res.accessToken) {
       return this.getUserDetails(dto);
     }

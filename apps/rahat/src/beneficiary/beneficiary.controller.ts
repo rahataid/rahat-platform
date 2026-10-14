@@ -131,7 +131,6 @@ export class BeneficiaryController {
 
   @Get('stats/refresh')
   async refreshStats() {
-    console.log("first")
     return this.client.send(
       { cmd: BeneficiaryJobs.REFRESH_STATS }, {}
     );
@@ -316,7 +315,6 @@ export class BeneficiaryController {
     automatedGroupOption.createAutomatedGroup = JSON.parse(
       automatedGroupOption.createAutomatedGroup
     );
-    console.log(automatedGroupOption);
     const beneficiaries = await DocParser(docType, file.buffer);
 
 
@@ -389,12 +387,6 @@ export class BeneficiaryController {
         )
     );
 
-    // uniquePhoneNumberedBeneficiaries.forEach((beneficiary) => {
-    //   console.log(beneficiary, beneficiary.piiData.extras);
-    // });
-    // return "sda"
-
-
     console.log(`Trying to upload ${beneficiariesMapped.length} beneficiaries through queue. Unique phone numbers: ${uniquePhoneNumberedBeneficiaries.length}, Duplicate phone numbers: ${beneficiariesMapped.length - uniquePhoneNumberedBeneficiaries.length}`);
 
     // Process wallet addresses using the wallet processing service
@@ -415,7 +407,6 @@ export class BeneficiaryController {
         return throwError(() => new BadRequestException(error.message));
       },
       onSuccess(response) {
-        // console.log('response', response)
         return response;
       },
     });
@@ -677,7 +668,6 @@ export class BeneficiaryController {
   @UseGuards(ExternalAppGuard)
   @CheckHeaders('Signature')
   async importBeneficiariesFromTool(@Req() req: Request) {
-    console.log('Received request to import beneficiaries from external tool');
     return this.client.send(
       {
         cmd: BeneficiaryJobs.IMPORT_BENEFICIARIES_FROM_COMMUNITY_TOOL,

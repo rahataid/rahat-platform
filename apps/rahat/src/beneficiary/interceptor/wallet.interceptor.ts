@@ -82,9 +82,9 @@ export class WalletInterceptor implements NestInterceptor {
       throw error instanceof RpcException
         ? error
         : new RpcException({
-            message: 'Wallet processing failed',
-            code: 'WALLET_PROCESSING_FAILED',
-          });
+          message: 'Wallet processing failed',
+          code: 'WALLET_PROCESSING_FAILED',
+        });
     }
   }
 
@@ -174,7 +174,7 @@ export class WalletInterceptor implements NestInterceptor {
     );
 
     if (existingBeneficiary) {
-      console.log('Wallet address already exists');
+      this.logger.warn('Wallet address already exists');
       throw new RpcException({
         message: 'Wallet address already exists',
         code: 'WALLET_ADDRESS_ALREADY_EXISTS',

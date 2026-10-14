@@ -256,7 +256,6 @@ export const msTriggerActions: ProjectActionFunc = {
   },
 
   [MS_ACTIONS.MS_PHASES.CONFIGURE_EXTENDED_LOGIC]: (uuid, payload, sendCommand) => {
-    console.log('Configuring extended logic with payload:', payload);
     return sendCommand(
       { cmd: MS_TRIGGERS_JOBS.PHASES.CONFIGURE_EXTENDED_LOGIC },
       payload

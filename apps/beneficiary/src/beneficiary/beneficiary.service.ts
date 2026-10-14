@@ -358,9 +358,6 @@ export class BeneficiaryService {
     );
     result = await this.beneficiaryUtilsService.attachPiiData(result);
 
-    console.timeEnd('check');
-    console.log(new Date());
-
     return result;
   }
 
@@ -951,7 +948,7 @@ export class BeneficiaryService {
               dto.piiData.phone.toString()
             );
           } catch (error) {
-            console.log(
+            this.logger.log(
               `Skipping entry due to duplicate phone: ${dto.piiData.phone}`
             );
             continue;
@@ -964,7 +961,7 @@ export class BeneficiaryService {
               dto.walletAddress
             );
         } catch (error) {
-          console.log(
+          this.logger.log(
             `Skipping entry due to duplicate/invalid wallet address: ${dto.walletAddress}`
           );
           continue;
@@ -1052,10 +1049,8 @@ export class BeneficiaryService {
       //           projectPayload
       //         ),
       //         onSuccess(response) {
-      //           console.log('response', response);
       //         },
       //         onError(error) {
-      //           console.log('error', error);
       //           throw new RpcException(error.message);
       //         },
       //       });
@@ -1185,7 +1180,7 @@ export class BeneficiaryService {
           ? await checkWalletAddress(batch, prisma)
           : [];
 
-      console.log(`
+      this.logger.log(`
         Found ${duplicatePhones.length
         } existing beneficiaries phone numbers i: ${duplicatePhones.join(', ')}
         Found ${duplicateWallets.length
@@ -1242,7 +1237,6 @@ export class BeneficiaryService {
         name: sanitizeNonAlphaNumericValue(g),
       }));
 
-      console.log('groupData', { groupData });
 
       await this.prisma.beneficiaryGroup.createManyAndReturn({
         data: groupData,
@@ -1252,13 +1246,7 @@ export class BeneficiaryService {
     // Break beneficiaries into batches
     const batches = createBatches(filteredBeneficiaries, BATCH_SIZE);
 
-    console.log(`Creating ${batches.length} batches of beneficiaries.
-    Total beneficiaries: ${filteredBeneficiaries.length}
-    Duplicate phone numbers: ${filteredBeneficiaries.length - batches.flat().length
-      }
-    Duplicate wallet addresses: ${filteredBeneficiaries.length - batches.flat().length
-      }
-      `);
+    this.logger.log(`Creating ${batches.length} batches of beneficiaries ${filteredBeneficiaries.length}`);
 
     const bulkQueueData = batches.map((batch, index) => ({
       name: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE,
@@ -2890,18 +2878,11 @@ export class BeneficiaryService {
   }
 
   async importBeneficiariesFromTool(data: any) {
-    console.log(
-      '🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ data:',
-      data
-    );
+    this.logger.log(
+      'BeneficiaryService ~ importBeneficiariesFromTool:',);
     const dataFromBuffer = Buffer.from(data);
     const bufferString = dataFromBuffer.toString('utf-8');
     const jsonData = JSON.parse(bufferString) || null;
-    console.log(
-      '🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ jsonData:',
-      jsonData
-    );
-
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
 
@@ -2911,11 +2892,10 @@ export class BeneficiaryService {
         { count: beneficiaries.length }
       ),
       onSuccess: (response) => {
-        console.log(`Response`, response);
         return response;
       },
       onError(error) {
-        console.log('Error assiging Beneficiaries to project.', error);
+        console.warn('Error assiging Beneficiaries to project.', error);
         throw new RpcException(error.message);
       },
     });

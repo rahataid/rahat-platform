@@ -1,8 +1,8 @@
 
-import request from 'supertest';
-import { AuthsModule, AuthsService, User } from '@rumsan/user';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
+import { AuthsModule, AuthsService, User } from '@rumsan/user';
+import request from 'supertest';
 import { updateDto, verifiedBeneficiaryGroupUUID } from './testFixtureGroupData';
 // import { invalidUUID } from '../beneficiary/testFixtureData';
 

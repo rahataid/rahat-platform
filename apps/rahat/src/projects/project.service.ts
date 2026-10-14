@@ -55,7 +55,7 @@ const CAMBODIA_COUNTRY_CODE = '+855';
 
 @Injectable()
 export class ProjectService {
-  private readonly logger = new Logger(PrismaService.name)
+  private readonly logger = new Logger(ProjectService.name)
 
   constructor(
     private prisma: PrismaService,
@@ -170,12 +170,7 @@ export class ProjectService {
     user: any
   ) {
     try {
-      console.log('CMD', cmd);
-      // const requiresUser = userRequiredActions.has(action);
-      // console.log({ requiresUser });
-      console.log('Payload', payload);
-      console.log('User', user);
-
+      this.logger.log(`Project action ${JSON.stringify(cmd)} by ${user?.name}`)
       return client
         .send(cmd, {
           ...payload,
@@ -188,7 +183,7 @@ export class ProjectService {
           })
         );
     } catch (err) {
-      console.log('Err', err);
+      this.logger.error('Err', err);
     }
   }
 
@@ -415,11 +410,9 @@ export class ProjectService {
         .split(' ')
         .map((item: string) => item.trim().toUpperCase());
     }
-    console.log({ NODE_ENV });
     if (NODE_ENV === 'production') {
       benef.phone = `${CAMBODIA_COUNTRY_CODE}${benef.phone}`;
     } else benef.phone = `+${benef.phone}`;
-    console.log('Beneficiary Phone', benef.phone);
 
     const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
     const extrasPayload = {
@@ -445,7 +438,6 @@ export class ProjectService {
       data: koboPayload,
     });
     const piiExist = await this.checkPiiPhone(benef.phone);
-    console.log({ piiExist });
     if (piiExist) {
       const discardedPayload = {
         ...piiData,
@@ -553,7 +545,6 @@ export class ProjectService {
   }
 
   async sendTestMsg(uuid: UUID) {
-    console.log({ uuid });
     return this.client
       .send({ cmd: 'rahat.jobs.test', uuid }, { msg: 'This is test msg!' })
       .pipe(timeout(MS_TIMEOUT));
