@@ -582,6 +582,12 @@ export const aaActions: ProjectActionFunc = {
   [MS_ACTIONS.AAPROJECT.CHAIN.SEND_ASSET]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.CHAIN.SEND_ASSET, uuid }, payload),
 
+  [MS_ACTIONS.AAPROJECT.CHAIN.CHECK_OTP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.CHAIN.CHECK_OTP, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CHAIN.ADD_CVA_EVIDENCE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.CHAIN.ADD_CVA_EVIDENCE, uuid }, payload),
+
   [MS_ACTIONS.AAPROJECT.CHAIN.GET_WALLET_BALANCE]: (
     uuid,
     payload,

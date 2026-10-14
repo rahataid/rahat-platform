@@ -278,6 +278,8 @@ export const MS_ACTIONS = {
       DISBURSE: 'aa.chain.disburse',
       SEND_OTP: 'aa.chain.sendOtp',
       SEND_ASSET: 'aa.chain.sendAsset',
+      CHECK_OTP: 'aa.chain.checkOtp',
+      ADD_CVA_EVIDENCE: 'aa.chain.addCvaEvidence',
       GET_DISBURSEMENT_STATS: 'aa.chain.getDisbursementStats',
       GET_WALLET_BALANCE: 'aa.chain.getWalletBalance',
       GET_RAHAT_TOKEN_BALANCE: 'aa.chain.getRahatTokenBalance',
