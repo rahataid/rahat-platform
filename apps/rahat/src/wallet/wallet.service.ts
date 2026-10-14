@@ -435,6 +435,20 @@ export class WalletService implements OnModuleInit {
     await DatabaseWalletStorage.assignEntity(this.prisma, dto.wallets, dto.entityId);
   }
 
+  /**
+   * Saves externally-provided wallets (e.g. vendor-owned) through composite storage
+   * (DB with placeholder entityId + FileWalletStorage). Call DatabaseWalletStorage.assignEntity
+   * inside the entity-creation transaction to swap the placeholder for the real uuid.
+   */
+  async saveExternalWallets(wallets: { address: string; chain: string; privateKey?: string }[]): Promise<void> {
+    const keys: WalletKeys[] = wallets.map((w) => ({
+      address: w.address,
+      blockchain: w.chain as ChainType,
+      privateKey: w.privateKey ?? null,
+    }));
+    await this.providerRegistry.saveWalletKeys(keys);
+  }
+
   // Backward compatibility methods (deprecated)
   /** @deprecated Use createWallet('stellar') instead */
   async createstellarWallets(): Promise<WalletKeys> {

@@ -38,6 +38,7 @@ import { Address } from 'viem';
 import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
 import { isAddress } from '../utils/web3';
+import { DatabaseWalletStorage } from '../wallet/storages/database.storage';
 import { WalletService } from '../wallet/wallet.service';
 import { GetVendorsDTO } from './dto/get-vendors.dto';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
@@ -97,6 +98,12 @@ export class VendorsService {
 
     const wallet = defaultWallet.address;
 
+    // Phase 1: pre-save wallets to composite storage (DB placeholder + FS)
+    // so the transaction can atomically assign the real entityId via assignEntity.
+    if (dto.wallets?.length) {
+      await this.walletService.saveExternalWallets(dto.wallets);
+    }
+
     const vendor = await this.prisma.$transaction(async (prisma) => {
       const role = await prisma.role.findFirst({
         where: { name: UserRoles.VENDOR },
@@ -154,18 +161,16 @@ export class VendorsService {
         });
       }
 
-      // Persist all multi-chain wallets to tbl_wallet_addresses
+      // Phase 2: assign pre-saved wallets to the new user; mark primary
       if (wallets?.length) {
-        await prisma.walletAddress.createMany({
-          data: wallets.map((w) => ({
-            entityId: user.uuid,
-            address: w.address,
-            isPrimary: w.address === wallet,
-            isVerified: true,
-            chainType: w.chain,
-            config: { privateKey: w.privateKey ?? null, address: w.address, chain: w.chain },
-          })),
-          skipDuplicates: true,
+        await DatabaseWalletStorage.assignEntity(
+          prisma,
+          wallets.map((w) => ({ address: w.address, chain: w.chain })),
+          user.uuid,
+        );
+        await prisma.walletAddress.update({
+          where: { address: wallet },
+          data: { isPrimary: true },
         });
       }
 
@@ -215,11 +220,11 @@ export class VendorsService {
 
       // Step 4: Create wallet using WalletService
       try {
-        randomWallet = await this.walletService.createWallet();
+        [randomWallet] = await this.walletService.createBulkForAllChains(1);
         walletCreated = true;
 
         this.logger.log('Vendor wallet created:', {
-          address: randomWallet.address,
+          address: randomWallet.defaultAddress,
           blockchain: randomWallet.blockchain || 'evm',
         });
       } catch (walletError) {
@@ -279,6 +284,11 @@ export class VendorsService {
             roleId: vendorRole.id,
           },
         });
+        await DatabaseWalletStorage.assignEntity(
+          tx,
+          randomWallet?.wallets,
+          auth.User.uuid
+        );
 
         return { signup, auth, username: dto.username };
       });
