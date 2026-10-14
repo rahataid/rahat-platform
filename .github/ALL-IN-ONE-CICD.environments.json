@@ -1,9 +1,5 @@
 {
-  "branches": [
-    "dev",
-    "main",
-    "dev-crm"
-  ],
+  "branches": ["dev", "main", "dev-crm"],
   "environments": {
     "test-load": {
       "tag": "test-load",
@@ -93,8 +89,7 @@
       "apps": "beneficiary,rahat",
       "description": "Development",
       "urls": {
-        "AA Dev": "https://aa-dev.rahat.io",
-        "AA Dev Stellar": "https://aa-dev-stellar.rahat.io"
+        "AA Dev": "https://aa-dev.rahat.io"
       },
       "notes": []
     },
@@ -155,14 +150,6 @@
       "secret": "ENV_AA_MCN_TRAINING",
       "apps": "beneficiary,rahat",
       "description": "MCN Training",
-      "urls": {},
-      "notes": []
-    },
-    "release-v4.0.0-nrcs": {
-      "tag": "release-v4.0.0-nrcs",
-      "secret": "ENV_AA_RELEASE_V4_0_0_NRCS",
-      "apps": "beneficiary,rahat",
-      "description": "Release v4.0.0 NRCS",
       "urls": {},
       "notes": []
     },
