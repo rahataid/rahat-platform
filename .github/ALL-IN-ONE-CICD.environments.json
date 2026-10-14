@@ -117,6 +117,69 @@
         "AA Dev QA": "https://aa-dev-qa.rahat.io"
       },
       "notes": []
+    },
+    "dry-run-pin": {
+      "tag": "dry-run-pin",
+      "secret": "ENV_AA_DRY_RUN_PIN",
+      "apps": "beneficiary,rahat",
+      "description": "DRY RUN PIN",
+      "urls": {},
+      "notes": []
+    },
+    "aa-stellar": {
+      "tag": "aa-stellar",
+      "secret": "ENV_AA_STELLAR",
+      "apps": "beneficiary,rahat",
+      "description": "AA Stellar",
+      "urls": {},
+      "notes": []
+    },
+    "demo-gsma": {
+      "tag": "demo-gsma",
+      "secret": "ENV_AA_DEMO_GSMA",
+      "apps": "beneficiary,rahat",
+      "description": "Demo GSMA",
+      "urls": {},
+      "notes": []
+    },
+    "mcn-demo-2026": {
+      "tag": "mcn-demo-2026",
+      "secret": "ENV_AA_MCN_DEMO_2026",
+      "apps": "beneficiary,rahat",
+      "description": "MCN Demo 2026",
+      "urls": {},
+      "notes": []
+    },
+    "mcn-training": {
+      "tag": "mcn-training",
+      "secret": "ENV_AA_MCN_TRAINING",
+      "apps": "beneficiary,rahat",
+      "description": "MCN Training",
+      "urls": {},
+      "notes": []
+    },
+    "release-v4.0.0-nrcs": {
+      "tag": "release-v4.0.0-nrcs",
+      "secret": "ENV_AA_RELEASE_V4_0_0_NRCS",
+      "apps": "beneficiary,rahat",
+      "description": "Release v4.0.0 NRCS",
+      "urls": {},
+      "notes": []
+    },
+    "nrcs-training": {
+      "tag": "nrcs-training",
+      "secret": "ENV_AA_NRCS_TRAINING",
+      "apps": "beneficiary,rahat",
+      "description": "NRCS Training",
+      "urls": {},
+      "notes": []
+    },
+    "demo-nrcs": {
+      "tag": "demo-nrcs",
+      "secret": "ENV_AA_DEMO_NRCS",
+      "apps": "beneficiary,rahat",
+      "urls": {},
+      "notes": []
     }
   }
 }
