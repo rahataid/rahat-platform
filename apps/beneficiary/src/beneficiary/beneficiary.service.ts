@@ -2469,6 +2469,16 @@ export class BeneficiaryService {
       },
     });
 
+    //group purpose is updated locally, now queue project sync to update the group purpose in project service
+    try {
+      await this.groupSyncService.syncGroup(dto.uuid);
+    } catch (err) {
+      this.logger.warn(
+        `Group ${dto.uuid}: purpose updated locally but failed to queue project sync`,
+        err
+      );
+    }
+
     return {
       success: `Group purpose successfully updated to ${dto.groupPurpose}`,
     };
