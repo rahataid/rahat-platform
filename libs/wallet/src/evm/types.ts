@@ -1,14 +1,31 @@
 import {
     AddressLike,
-    ContractTransaction,
+    BigNumberish,
     ethers,
     Interface,
     InterfaceAbi,
+    TransactionRequest,
+    TransactionResponse,
 } from "ethers";
 
 export type ABI = Interface | InterfaceAbi;
 
 export type ARGS = string | number | bigint | boolean | ethers.BytesLike;
+
+/**
+ * Normalized EVM transaction request used before signing or broadcasting.
+ */
+export type EVM_UnsignedTransaction = TransactionRequest;
+
+/**
+ * Serialized raw transaction returned by ethers wallets after signing.
+ */
+export type EVM_SignedTransaction = string;
+
+/**
+ * Transaction response returned after a signed payload is broadcast.
+ */
+export type EVM_BroadcastedTransaction = TransactionResponse;
 
 export type EVM_Transaction = {
     abi: ABI;
@@ -29,7 +46,7 @@ export type EVM_TransactionWithURL = EVM_Transaction & {
 };
 
 export type EVM_TransactionToSign = {
-    txn: ContractTransaction;
+    txn: EVM_UnsignedTransaction;
     privateKey: `0x${string}`;
 };
 
@@ -38,7 +55,7 @@ export type EVM_TransactionToSignWithURL = EVM_TransactionToSign & {
 };
 
 export type EVM_TransactionToSend = {
-    signedTxn: string;
+    signedTxn: EVM_SignedTransaction;
 };
 
 export type EVM_TransactionToSendWithURL = EVM_TransactionToSend & {
@@ -46,9 +63,9 @@ export type EVM_TransactionToSendWithURL = EVM_TransactionToSend & {
 };
 
 export type EVM_TransactionOptions = {
-    gasPrice?: number;
-    gasLimit?: number;
-    value?: number;
-    maxFeePerGas?: number;
-    maxPriorityFeePerGas?: number;
+    gasPrice?: BigNumberish;
+    gasLimit?: BigNumberish;
+    value?: BigNumberish;
+    maxFeePerGas?: BigNumberish;
+    maxPriorityFeePerGas?: BigNumberish;
 };

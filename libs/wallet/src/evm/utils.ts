@@ -1,9 +1,9 @@
 import { ethers } from "ethers";
-import { EVM_TransactionWithURL } from "./types";
+import { EVM_TransactionWithURL, EVM_UnsignedTransaction } from "./types";
 
 export async function getEVMTransaction(
     transactionParams: EVM_TransactionWithURL
-): Promise<any> {
+): Promise<EVM_UnsignedTransaction> {
     const provider = new ethers.JsonRpcProvider(
         transactionParams.networkProvider
     );
