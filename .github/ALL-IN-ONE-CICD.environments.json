@@ -4,7 +4,7 @@
     "test-load": {
       "tag": "test-load",
       "secret": "ENV_AA_TEST_LOAD",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "Load Testing",
       "urls": {},
       "notes": []
@@ -12,7 +12,7 @@
     "dev-unicef": {
       "tag": "aa-dev-unicef",
       "secret": "ENV_AA_DEV_UNICEF",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "UNICEF Development",
       "urls": {},
       "notes": []
@@ -20,7 +20,7 @@
     "demo-redcross": {
       "tag": "demo-redcross",
       "secret": "ENV_AA_REDCROSS",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "Red Cross Demo",
       "urls": {},
       "notes": []
@@ -28,7 +28,7 @@
     "demo-aidlink": {
       "tag": "demo-aidlink",
       "secret": "ENV_AA_AIDLINK_DEMO",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "AidLink Demo",
       "urls": {},
       "notes": []
@@ -36,7 +36,7 @@
     "dev-aidlink": {
       "tag": "dev-aidlink",
       "secret": "ENV_AA_AIDLINK_DEV",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "AidLink Development",
       "urls": {},
       "notes": []
@@ -44,7 +44,7 @@
     "stage-el": {
       "tag": "stage-el",
       "secret": "ENV_AA_STAGE_EL",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "EL Staging",
       "urls": {},
       "notes": []
@@ -52,7 +52,7 @@
     "main-aa": {
       "tag": "latest",
       "secret": "ENV_AA_MAIN",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "AA Main (shared latest tag)",
       "urls": {},
       "notes": [
@@ -62,7 +62,7 @@
     "aa-mcn-main": {
       "tag": "aa-mcn-main",
       "secret": "ENV_AA_MCN_MAIN",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "AA MCN Main",
       "urls": {},
       "notes": []
@@ -70,7 +70,7 @@
     "aa-demo-v2": {
       "tag": "aa-demo-v2",
       "secret": "ENV_AA_DEMO_V2",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "AA Demo v2",
       "urls": {},
       "notes": []
@@ -78,7 +78,7 @@
     "dev-crm": {
       "tag": "dev-crm",
       "secret": "ENV_AA_DEV_CRM",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "CRM Development",
       "urls": {},
       "notes": []
@@ -86,7 +86,7 @@
     "dev": {
       "tag": "dev",
       "secret": "ENV_AA_DEV",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "Development",
       "urls": {
         "AA Dev": "https://aa-dev.rahat.io"
@@ -96,7 +96,7 @@
     "main": {
       "tag": "latest",
       "secret": "ENV_AA_MAIN",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "Main (shared latest tag)",
       "urls": {},
       "notes": [
@@ -106,7 +106,7 @@
     "dev-qa": {
       "tag": "dev-qa",
       "secret": "ENV_AA_DEV-QA",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "QA Development",
       "urls": {
         "AA Dev QA": "https://aa-dev-qa.rahat.io"
@@ -116,7 +116,7 @@
     "dry-run-pin": {
       "tag": "dry-run-pin",
       "secret": "ENV_AA_DRY_RUN_PIN",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "DRY RUN PIN",
       "urls": {},
       "notes": []
@@ -124,7 +124,7 @@
     "aa-stellar": {
       "tag": "aa-stellar",
       "secret": "ENV_AA_STELLAR",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "AA Stellar",
       "urls": {},
       "notes": []
@@ -132,7 +132,7 @@
     "demo-gsma": {
       "tag": "demo-gsma",
       "secret": "ENV_AA_DEMO_GSMA",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "Demo GSMA",
       "urls": {},
       "notes": []
@@ -140,7 +140,7 @@
     "mcn-demo-2026": {
       "tag": "mcn-demo-2026",
       "secret": "ENV_AA_MCN_DEMO_2026",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "MCN Demo 2026",
       "urls": {},
       "notes": []
@@ -148,7 +148,7 @@
     "mcn-training": {
       "tag": "mcn-training",
       "secret": "ENV_AA_MCN_TRAINING",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "MCN Training",
       "urls": {},
       "notes": []
@@ -156,7 +156,7 @@
     "nrcs-training": {
       "tag": "nrcs-training",
       "secret": "ENV_AA_NRCS_TRAINING",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "description": "NRCS Training",
       "urls": {},
       "notes": []
@@ -164,7 +164,7 @@
     "demo-nrcs": {
       "tag": "demo-nrcs",
       "secret": "ENV_AA_DEMO_NRCS",
-      "apps": "beneficiary,rahat",
+      "apps": "beneficiary,rahat,shared-auth",
       "urls": {},
       "notes": []
     }
