@@ -79,6 +79,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
   app.setGlobalPrefix(globalPrefix);
   app.disable('etag');
+  app.enableShutdownHooks();
 
 
   const port = process.env.PORT || 3333;
