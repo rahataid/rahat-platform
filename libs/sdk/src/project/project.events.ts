@@ -58,6 +58,7 @@ export const JOBS = {
     UPDATE_CAMPAIGN: 'rahat.jobs.campaign.update',
     LIST_CAMPAIGN: 'rahat.jobs.campaign.list',
     FINDONE_CAMPAIGN: 'rahat.jobs.campaign.get',
+    REMOVE_CAMPAIGN: 'rahat.jobs.campaign.remove',
     GET_ALL_TRANSPORT: 'rahat.jobs.campaign.get_transport',
     GET_ALL_AUDIENCE: 'rahat.jobs.campaign.get_audience',
     TRIGGER_CAMPAIGN: 'rahat.jobs.campaign.trigger',
