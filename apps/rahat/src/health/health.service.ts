@@ -258,8 +258,8 @@ export class HealthService {
       </table>
       </div>
       <div class="foot">
-      <p>Automated alert from Rahat Core Health Check · ${new Date().toLocaleString()} for  <a href= "${frontendURL}"> Dashboard</a></p>
-      </div>
+      <p>Automated alert from Rahat Core Health Check · ${new Date().toLocaleString(undefined, { timeZone: process.env.TZ || Intl.DateTimeFormat().resolvedOptions().timeZone, timeZoneName: 'short' })} for  <a href= "${frontendURL}"> Dashboard</a></p>
+       </div>
       </div>
     </body>
   </html>`;
