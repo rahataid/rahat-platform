@@ -2,14 +2,14 @@
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
 import { ACTIONS, APP, SUBJECTS } from '@rahataid/sdk';
 import { AbilitiesGuard, CheckAbilities, JwtGuard } from '@rumsan/user';
 import { UUID } from 'crypto';
 import { AppJobs } from './app.jobs';
 import { AppService } from './app.service';
-import { AppVersionsDto } from './dto/app-versions.dto';
+import { AppVersionsDto, ProjectEnvironmentDto } from './dto/app-versions.dto';
 import { SeedSettingsDto, UpdateSiteSettingDto } from './dto/seed-settings.dto';
 
 @Controller('app')
@@ -120,8 +120,11 @@ export class AppController {
   @Get('versions')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get platform, AA, triggers, and frontend versions (public)' })
+  @ApiQuery({ name: 'projectId', required: false, type: String, description: 'Optional project UUID for project-scoped service versions' })
   @ApiOkResponse({ type: AppVersionsDto })
-  async getVersions(): Promise<AppVersionsDto> { return this.appService.getAppVersions(); }
+  async getVersions(@Query('projectId') projectId?: string): Promise<AppVersionsDto | ProjectEnvironmentDto> {
+    return this.appService.getAppVersions(projectId);
+  }
 
 }
 

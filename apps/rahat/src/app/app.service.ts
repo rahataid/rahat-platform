@@ -17,7 +17,7 @@ import { firstValueFrom, of } from 'rxjs';
 import { catchError, timeout } from 'rxjs/operators';
 import { getVersionFromPackageJson } from '../utils/version.helper';
 import { SITE_INFO } from './app.constants';
-import { AppVersionsDto, ServiceVersionDto } from './dto/app-versions.dto';
+import { AppVersionsDto, ProjectEnvironmentDto, ServiceVersionDto } from './dto/app-versions.dto';
 import { SeedSettingsDto } from './dto/seed-settings.dto';
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -309,10 +309,11 @@ export class AppService {
   }
 
   // Fetches the AA service version via Redis.
-  private async getAaVersion(): Promise<ServiceVersionDto> {
+  private async getAaVersion(projectId?: string): Promise<ServiceVersionDto> {
     const start = Date.now();
+    const targetProjectId = projectId || process.env.AA_PROJECT_ID;
     const result: any = await firstValueFrom(
-      this.rahatClient.send({ cmd: MS_ACTIONS.AA_JOBS_VERSION.GET }, {})
+      this.rahatClient.send({ cmd: MS_ACTIONS.AA_JOBS_VERSION.GET, uuid: targetProjectId }, {})
         .pipe(
           timeout(1500),
           catchError((err: Error) => {
@@ -326,9 +327,10 @@ export class AppService {
   }
 
   // Fetches the Triggers service version via Redis.
-  private async getTriggersVersion(): Promise<ServiceVersionDto> {
+  private async getTriggersVersion(projectId?: string): Promise<ServiceVersionDto> {
+    const targetAppId = projectId || process.env.AA_PROJECT_ID;
     const result: any = await firstValueFrom(
-      this.rahatClient.send({ cmd: MS_ACTIONS.MS_VERSION.GET }, { appId: process.env.AA_PROJECT_ID } as any)
+      this.rahatClient.send({ cmd: MS_ACTIONS.MS_VERSION.GET }, { appId: targetAppId } as any)
         .pipe(
           timeout(1500),
           catchError((err: Error) => {
@@ -340,8 +342,16 @@ export class AppService {
     return { version: result?.version || 'unreachable', env: result?.env ?? null };
   }
 
-  // Aggregates all service versions in parallel.
-  async getAppVersions(): Promise<AppVersionsDto> {
+  // Aggregates all service versions in parallel (global), or scopes to single project service.
+  async getAppVersions(projectId?: string): Promise<AppVersionsDto | ProjectEnvironmentDto> {
+    if (projectId) {
+      const aa = await this.getAaVersion(projectId);
+      return {
+        projectId,
+        env: aa.env,
+      };
+    }
+
     const [platform, aa, triggers] = await Promise.allSettled([
       this.getRahatVersion(),
       this.getAaVersion(),
