@@ -3,7 +3,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { Notification } from '@prisma/client';
-import { APP_JOBS, BQUEUE, UserRoles } from '@rahataid/sdk';
+import { APP_JOBS, BQUEUE, NOTIFICATION_GROUPS, UserRoles } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { RegisterDeviceDto } from './dto/register-device.dto';
@@ -30,8 +30,8 @@ export interface PushOptions {
 
 // Maps existing `group` values (emitted today by triggers) to a type the app can route on.
 const GROUP_TO_TYPE: Record<string, string> = {
-    'Phase Acivation': 'PHASE_ACTIVATED',   // spelling matches the triggers code
-    'Trigger Statement': 'TRIGGER_MET',
+    [NOTIFICATION_GROUPS.PHASE_ACTIVATION]: 'PHASE_ACTIVATION',
+    [NOTIFICATION_GROUPS.TRIGGER_STATEMENT]: 'TRIGGER_STATEMENT',
 };
 
 @Injectable()

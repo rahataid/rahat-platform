@@ -829,17 +829,46 @@ model OfframpTransaction {
 
 // ++++++++++++++++++ START: Notification ++++++++++++++++++++
 
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum AudienceType {
+  USER
+  ROLE
+  PERMISSION
+  PROJECT_MEMBERS
+  ALL
+}
+
 model Notification {
-  id          Int      @id @default(autoincrement())
+  id          Int                    @id @default(autoincrement())
   title       String
-  projectId   String?  @db.Uuid()
-  project     Project? @relation(fields: [projectId], references: [uuid])
+  projectId   String?                @db.Uuid()
+  project     Project?               @relation(fields: [projectId], references: [uuid])
   description String
   group       String
-  createdAt   DateTime @default(now())
-  notify      Boolean  @default(false)
+  notify      Boolean                @default(false)
+  channels    NotificationChannel[]  @default([])
+  audiences   NotificationAudience[]
+  createdAt   DateTime               @default(now())
 
   @@map("tbl_notifications")
+}
+
+model NotificationAudience {
+  id             Int          @id @default(autoincrement())
+  notificationId Int
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  type           AudienceType
+  value          Json?        @db.JsonB // USER: uuid string, ROLE: name string, PERMISSION: { action, subject }, others: null
+  exclude        Boolean      @default(false)
+
+  @@index([notificationId])
+  @@map("tbl_notifications_audience")
 }
 
 model DeviceToken {
