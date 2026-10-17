@@ -1,3 +1,4 @@
+//rahat-platform/libs/sdk/src/constants/index.ts
 import { RabbitMQModuleOptions } from '@rumsan/rabbitmq';
 
 export const APP_JOBS = {
@@ -5,6 +6,8 @@ export const APP_JOBS = {
   SLACK: 'slack',
   OTP: 'otp',
   NOTIFY: 'notify',
+  PUSH_SEND_FCM: 'push.send_fcm',
+  PUSH_SEND_WEB: 'push.send_web',
 };
 
 export const MS_TIMEOUT = 500000;
@@ -47,6 +50,11 @@ export const SUBJECTS = {
 export const APP = {
   JWT_BEARER: 'JWT',
 };
+
+export const NOTIFICATION_GROUPS = {
+  TRIGGER_STATEMENT: 'trigger_statement',
+  PHASE_ACTIVATION: 'phase_activation',
+} as const;
 
 export const MS_ACTIONS = {
   GROUP: {
@@ -704,6 +712,10 @@ export const MS_ACTIONS = {
     CREATE: 'notification.create',
     LIST: 'notification.list',
     GET: 'notification.get',
+    REGISTER_DEVICE: 'app.pushToken.register',
+    UNREGISTER_DEVICE: 'app.pushToken.unregister',
+    REGISTER_WEB_PUSH: 'app.webPush.subscribe',
+    UNREGISTER_WEB_PUSH: 'app.webPush.unsubscribe',
   },
 
   OTP: {
