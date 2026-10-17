@@ -2256,7 +2256,7 @@ export class BeneficiaryService {
     orderBy[dto.sort] = dto.order;
     const projectUUID = dto.projectId;
 
-    const where = projectUUID
+    const where: any = projectUUID
       ? {
         deletedAt: null,
         beneficiaryGroupProject:
@@ -2273,6 +2273,11 @@ export class BeneficiaryService {
       : {
         deletedAt: null,
       };
+
+    const groupName = dto.groupName?.trim();
+    if (groupName) {
+      where.name = { contains: groupName, mode: 'insensitive' };
+    }
 
     const data = await paginate(
       this.prisma.beneficiaryGroup,
