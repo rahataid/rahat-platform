@@ -25,7 +25,6 @@ export interface PushOptions {
     enabled?: boolean;                 // false = skip push for this notification
     roles?: string[];                  // audience by role name
     userIds?: string[];                // audience by user uuid (overrides roles)
-    data?: Record<string, any>;        // extra deep-link data
 }
 
 // Maps existing `group` values (emitted today by triggers) to a type the app can route on.
@@ -151,8 +150,6 @@ export class PushService {
                 notificationId: notification.id,
                 group: notification.group,
                 projectId: notification.projectId ?? '',
-                url: opts.data?.url ?? '/tabs/notifications',
-                ...(opts.data ?? {}),
             };
 
             // channels are independent: one failing must not block the other
