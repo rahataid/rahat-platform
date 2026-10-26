@@ -130,6 +130,14 @@ export class ImportProcessor {
         completedAt: new Date().toISOString(),
       });
 
+      try {
+        await this.importsService.scheduleStatsRefresh();
+        this.logger.log(`Queued beneficiary stats refresh after import: ${importUuid}`);
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        this.logger.error(`Failed to queue stats refresh after import ${importUuid}: ${err.message}`);
+      }
+
       // Fire event so listener can check if group is assigned to any project and enqueue sync
       if (groupUuid) {
         this.eventEmitter.emit(BeneficiaryEvents.GROUP_IMPORTED, { groupUuid });

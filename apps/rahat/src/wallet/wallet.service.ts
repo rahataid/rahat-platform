@@ -332,12 +332,13 @@ export class WalletService implements OnModuleInit {
     return this.getSecretByWallet(walletAddress, chain);
   }
 
-  async getWalletByPhone(phoneNumber: string): Promise<string> {
+  async getWalletByPhone(phoneNumber: string, chain?: ChainType): Promise<string> {
+
     const result = await this.prisma.beneficiaryPii.findFirst({
       where: { phone: phoneNumber },
       select: {
         beneficiary: {
-          select: { walletAddress: true },
+          select: { uuid: true },
         },
       },
     });
@@ -349,7 +350,14 @@ export class WalletService implements OnModuleInit {
       });
     }
 
-    return result.beneficiary.walletAddress;
+    const walletAddressDetails = await this.prisma.walletAddress.findFirst({
+      where: {
+        entityId: result.beneficiary.uuid,
+        chainType: chain
+      }
+    })
+
+    return walletAddressDetails?.address;
   }
 
   async updateBulk(bulkUpdateWalletDto: BulkUpdateWallet) {
@@ -425,6 +433,20 @@ export class WalletService implements OnModuleInit {
    */
   async saveEntityWallets(dto: SaveEntityWalletsDto): Promise<void> {
     await DatabaseWalletStorage.assignEntity(this.prisma, dto.wallets, dto.entityId);
+  }
+
+  /**
+   * Saves externally-provided wallets (e.g. vendor-owned) through composite storage
+   * (DB with placeholder entityId + FileWalletStorage). Call DatabaseWalletStorage.assignEntity
+   * inside the entity-creation transaction to swap the placeholder for the real uuid.
+   */
+  async saveExternalWallets(wallets: { address: string; chain: string; privateKey?: string }[]): Promise<void> {
+    const keys: WalletKeys[] = wallets.map((w) => ({
+      address: w.address,
+      blockchain: w.chain as ChainType,
+      privateKey: w.privateKey ?? null,
+    }));
+    await this.providerRegistry.saveWalletKeys(keys);
   }
 
   // Backward compatibility methods (deprecated)

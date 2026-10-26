@@ -1,0 +1,38 @@
+meta {
+  name: upload-beneficiaries-to-group
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{url}}/beneficiaries/groups/:groupUuid/upload
+  body: multipartForm
+  auth: bearer
+}
+
+params:path {
+  groupUuid: {{groupUuid}}
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:multipart-form {
+  file: @file()
+  doctype: JSON
+}
+
+assert {
+  res.status: eq 201
+}
+
+tests {
+  test('should upload beneficiaries to existing group and sync to projects', () => {
+    const data = res.getBody();
+    expect(data).to.have.property('created');
+    expect(data).to.have.property('updated');
+    expect(data).to.have.property('addedToGroup');
+    expect(data).to.have.property('group');
+  });
+}

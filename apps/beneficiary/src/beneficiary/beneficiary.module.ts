@@ -10,6 +10,7 @@ import { StatsModule } from '@rahat/stats';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
 import { PrismaModule } from '@rumsan/prisma';
 import { BeneficiaryConsumer } from '../consumers/beneficiary.consumer';
+import { BeneficiaryStatsUpdateService } from './beneficiary-stats-update.service';
 import { BeneficiaryController } from './beneficiary.controller';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
@@ -76,12 +77,13 @@ import { VerificationService } from './verification.service';
   controllers: [BeneficiaryController],
   providers: [
     BeneficiaryService,
+    BeneficiaryStatsUpdateService,
     BeneficiaryStatService,
     VerificationService,
     BeneficiaryConsumer,
     BeneficiaryUtilsService,
     GroupSyncService,
   ],
-  exports: [GroupSyncService],
+  exports: [GroupSyncService, BeneficiaryStatsUpdateService],
 })
 export class BeneficiaryModule { }

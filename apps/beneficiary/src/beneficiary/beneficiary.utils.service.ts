@@ -58,16 +58,27 @@ export class BeneficiaryUtilsService {
   }
 
   // Method to attach PII data to the result
-  async attachPiiData(
+  async attachPiiDataAndWalletDetails(
     result: PaginatorTypes.PaginatedResult<Beneficiary>
   ): Promise<PaginatorTypes.PaginatedResult<Beneficiary>> {
     const resultData = result.data;
 
     if (resultData.length > 0) {
       const beneficiaryIds = resultData.map((d) => d.id);
+      const benefiicaryUuids = resultData.map((d) => d.uuid)
       const benfPiiData = await this.prismaService.beneficiaryPii.findMany({
         where: { beneficiaryId: { in: beneficiaryIds } },
       });
+
+      const walletDetails = await this.fetchBeneficiaryWalletDetails(benefiicaryUuids);
+
+      const walletMap = new Map<string, { address: string; chainType: string }[]>();
+      for (const wallet of walletDetails) {
+        const existing = walletMap.get(wallet.entityId) || [];
+        existing.push({ address: wallet.address, chainType: wallet.chainType });
+        walletMap.set(wallet.entityId, existing);
+      }
+
 
       const piiDataMap = new Map(
         benfPiiData.map((pii) => [pii.beneficiaryId, pii])
@@ -76,10 +87,26 @@ export class BeneficiaryUtilsService {
       result.data = resultData.map((d) => ({
         ...d,
         piiData: piiDataMap.get(d.id) || null,
+        walletAddresses: walletMap.get(d.uuid) || null
       }));
     }
 
     return result;
+  }
+
+
+  async fetchBeneficiaryWalletDetails(benIds: string[]) {
+    const walletDetails = await this.prismaService.walletAddress.findMany({
+      where: {
+        entityId: { in: benIds }
+      },
+      select: {
+        address: true,
+        chainType: true,
+        entityId: true
+      }
+    });
+    return walletDetails;
   }
 
   async ensureValidWalletAddress(
@@ -294,12 +321,18 @@ export class BeneficiaryUtilsService {
       type: BeneficiaryConstants.Types.ENROLLED,
       isVerified: beneficiaryData.isVerified,
     };
-
     //Handle aa project type
     if (projectData.type.toLowerCase() === 'aa' || projectData.type.toLowerCase() === 'cva') {
       delete payload.type;
       (payload as AAPayload).gender = beneficiaryData.gender;
-      payload.extras = { ...payload.extras, phone: beneficiaryData.pii.phone, name: beneficiaryData.pii.name };
+      payload.extras = {
+        ...payload.extras,
+        phone: beneficiaryData.pii.phone,
+        name: beneficiaryData.pii.name,
+        ...(beneficiaryData.location != null
+          ? { location: beneficiaryData.location }
+          : {}),
+      };
     }
 
     if (projectData.type.toLowerCase() === 'rp') {

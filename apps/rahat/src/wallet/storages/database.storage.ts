@@ -101,23 +101,12 @@ export class DatabaseWalletStorage implements WalletStorage {
    */
   static async assignEntity(
     tx: any,
-    // : Omit<PrismaService, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>,
     wallets: { address: string; chain: string }[],
     entityId: string
-  ): Promise<any> {
-    console.log(wallets, entityId)
-    const updatePromises = wallets.map(async (w) => {
-      await tx.walletAddress.update({
-        where: {
-          address: w.address,
-        },
-        data: { entityId },
-      });
+  ): Promise<void> {
+    await tx.walletAddress.updateMany({
+      where: { address: { in: wallets.map((w) => w.address) } },
+      data: { entityId },
     });
-
-    return Promise.all(updatePromises);
-
-
-    // this.logger.log(`Assigned ${wallets.length} wallets to entity ${entityId}`);
   }
 }

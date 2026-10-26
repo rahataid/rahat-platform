@@ -258,6 +258,14 @@ export class BlockchainProviderRegistry {
     return this.storage.getKey(address, chainType);
   }
 
+  // Save arbitrary wallet keys through the configured storage (DB + FS via composite)
+  async saveWalletKeys(keys: WalletKeys[]): Promise<void> {
+    if (this.storage.saveBulk) {
+      return this.storage.saveBulk(keys);
+    }
+    await Promise.all(keys.map((k) => this.storage.saveKey(k)));
+  }
+
   // Basic address validation patterns as fallback
   private basicAddressValidation(
     address: string,
