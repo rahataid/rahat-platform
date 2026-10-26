@@ -129,7 +129,7 @@
 #               TAG="dev-qa"
 #               SECRET="ENV_AA_DEV-QA"
 #               APPS="beneficiary,rahat,shared-auth"
-#               ;;         
+#               ;;
 #             aa-stellar)
 #               TAG="aa-stellar"
 #               SECRET="ENV_AA_DEV-STELLAR"
@@ -288,38 +288,39 @@
 #             ${{ env.IMAGE_NAMESPACE }}/rahat-platform-${{ matrix.app }}:${{ needs.resolve-config.outputs.tag_suffix }}
 #             ${{ env.IMAGE_NAMESPACE }}/rahat-platform-${{ matrix.app }}:${{ needs.resolve-config.outputs.tag_suffix }}-${{ steps.meta.outputs.short_sha }}-${{ steps.meta.outputs.run_number }}
 
-name: "ALL DEPLOY CI/CD · Platform Build & Push"
+name: 'ALL DEPLOY CI/CD · Platform Build & Push'
 run-name: "🚀 ${{ inputs.environment }} · ${{ inputs.custom_branch || (inputs.branch != '(same as Use workflow from)' && inputs.branch) || github.ref_name }} · @${{ github.actor }}"
 
 on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to deploy  (env | Docker tag | purpose)"
+        description: 'Environment to deploy  (env | Docker tag | purpose)'
         required: true
         type: choice
         options:
-          - "test-load | Tag: test-load | Load Testing"
-          - "dev-unicef | Tag: aa-dev-unicef | UNICEF Development"
-          - "demo-redcross | Tag: demo-redcross | Red Cross Demo"
-          - "demo-aidlink | Tag: demo-aidlink | AidLink Demo"
-          - "dev-aidlink | Tag: dev-aidlink | AidLink Development"
-          - "stage-el | Tag: stage-el | EL Staging"
-          - "main-aa | Tag: latest | AA Main (shared latest tag)"
-          - "aa-mcn-main | Tag: aa-mcn-main | AA MCN Main"
-          - "aa-demo-v2 | Tag: aa-demo-v2 | AA Demo v2"
-          - "dev-crm | Tag: dev-crm | CRM Development"
-          - "dev | Tag: dev | Development"
-          - "main | Tag: latest | Main (shared latest tag)"
-          - "dev-qa | Tag: dev-qa | QA Development"
-          - "aa-stellar | Tag: aa-stellar | Dev Stellat"
-          - "demo-gsma | Tag: demo-gsma | Demo GSMA"
-          - "mcn-demo-2026 | Tag: mcn-demo-202 | MCN Demo 2026"
-          - "mcn-training | Tag: mcn-training | MCN Training"
-          - "nrcs-training | Tag: nrcs-training | NRCS Training"
-          - "demo-nrcs | Tag:emo-nrcs | Demo NRCS"
+          - 'test-load | Tag: test-load | Load Testing'
+          - 'dev-unicef | Tag: aa-dev-unicef | UNICEF Development'
+          - 'demo-redcross | Tag: demo-redcross | Red Cross Demo'
+          - 'demo-aidlink | Tag: demo-aidlink | AidLink Demo'
+          - 'dev-aidlink | Tag: dev-aidlink | AidLink Development'
+          - 'stage-el | Tag: stage-el | EL Staging'
+          - 'main-aa | Tag: latest | AA Main (shared latest tag)'
+          - 'aa-mcn-main | Tag: aa-mcn-main | AA MCN Main'
+          - 'aa-demo-v2 | Tag: aa-demo-v2 | AA Demo v2'
+          - 'dev-crm | Tag: dev-crm | CRM Development'
+          - 'dev | Tag: dev | Development'
+          - 'main | Tag: latest | Main (shared latest tag)'
+          - 'dev-qa | Tag: dev-qa | QA Development'
+          - 'dry-run-pin | Tag: dry-run-pin | DRY RUN PIN'
+          - 'aa-stellar | Tag: aa-stellar | AA Stellar'
+          - 'demo-gsma | Tag: demo-gsma | Demo GSMA'
+          - 'mcn-demo-2026 | Tag: mcn-demo-202 | MCN Demo 2026'
+          - 'mcn-training | Tag: mcn-training | MCN Training'
+          - 'nrcs-training | Tag: nrcs-training | NRCS Training'
+          - 'demo-nrcs | Tag:demo-nrcs | Demo NRCS'
 
-#           - 'demo-nrcs'
+      #           - 'demo-nrcs'
       # branch:
       #   description: "Branch to build"
       #   required: true
@@ -339,7 +340,7 @@ on:
       #   type: string
 
       apps_to_build:
-        description: "Apps to build, comma-separated (e.g. beneficiary,rahat). Leave empty for the environment defaults."
+        description: 'Apps to build, comma-separated (e.g. beneficiary,rahat). Leave empty for the environment defaults.'
         required: false
         type: string
 
@@ -349,8 +350,8 @@ concurrency:
 
 env:
   CI: false
-  NODE_VERSION: "20.10.0"
-  PNPM_VERSION: "8.14.1"
+  NODE_VERSION: '20.10.0'
+  PNPM_VERSION: '8.14.1'
   REGISTRY: docker.io
   IMAGE_NAMESPACE: esatya
 

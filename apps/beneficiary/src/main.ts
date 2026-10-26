@@ -24,6 +24,7 @@ async function bootstrap() {
     }
   );
   app.useGlobalFilters(new RpcExceptionFilter());
+  app.enableShutdownHooks();
   await app.listen();
   Logger.log(`🚀 Microservice is running on: http://localhost:${PORT}`);
 }
