@@ -319,6 +319,7 @@ on:
           - 'mcn-training | Tag: mcn-training | MCN Training'
           - 'nrcs-training | Tag: nrcs-training | NRCS Training'
           - 'demo-nrcs | Tag:demo-nrcs | Demo NRCS'
+          - 'dev-v2 | Tag: dev-v2 | Development-V2'
 
       #           - 'demo-nrcs'
       # branch:
