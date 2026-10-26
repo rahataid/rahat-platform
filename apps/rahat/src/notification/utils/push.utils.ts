@@ -1,4 +1,4 @@
-// rahat-platform/apps/rahat/src/notification/utils/push.util.ts  (NEW)
+// rahat-platform/apps/rahat/src/notification/utils/push.utils.ts
 export const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 /** Exponential backoff with jitter: ~base * 2^attempt, capped. */
