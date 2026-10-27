@@ -41,7 +41,18 @@ then it's automatically live — `handleProjectActions` spreads every action fil
 
 **The cmd string (`AAJobs.TRIGGERS.ADD` etc) must already exist in `libs/sdk/src/<project>/` (e.g. `libs/sdk/src/aa/aa.events.ts`'s `JOBS` export, re-exported as `AAJobs`).** This is the single source of truth, published as `@rahataid/sdk` and consumed by the project repo externally. **Do not hand-define a matching cmd string in the project repo without checking it already matches here exactly** — see the worked example below of what happens when it doesn't.
 
-## Worked example of a real, confirmed gap
+## Two parallel systems, easy to confuse: `aaActions` vs `msTriggerActions`
+
+`apps/rahat/src/projects/actions/` has **two separate action families that both sound like "AA triggers"**:
+
+- **`aaActions`** (`aa.action.ts`) — routes to `rahat-project-aa`, always `{cmd, uuid}` (`uuid` = that project's `PROJECT_ID`). Includes an `AAPROJECT.TRIGGERS.*` / `RIVER_STATIONS.*` / `WATER_LEVELS.*` / `PHASES.*` block whose cmd strings (`aa.jobs.triggers.*`, `aa.jobs.phases.*`, etc, from `libs/sdk/src/aa/aa.events.ts`) **have no listener anywhere in `rahat-project-aa`** — dead/legacy wiring, confirmed by grep on that repo.
+- **`msTriggerActions`** (`ms.trigger.action.ts`) — routes to **a different repo: `rahat-project-triggers`** (package `triggers`), a separate standalone Redis microservice (`apps/triggers/src/{trigger,phases,source,sources-data,activity,...}/`). Dispatches `ms.jobs.*` cmds with **no `uuid`** — this service is scoped by an `appId` field inside the payload instead of by the Redis message pattern. This is the real, live, implemented trigger/phase/forecast system the frontend actually uses.
+
+Both are dispatched through the same `this.client` (`RAHAT_CLIENT`) — Redis cmd routing isn't service-scoped, so nothing here enforces which repo's `@MessagePattern` ends up answering a given cmd; it's purely "whichever process is listening for that exact string." `rahat-project-aa` is also a *direct consumer* of `rahat-project-triggers` for some reads (e.g. `payouts.service.ts` calling `{cmd: 'ms.jobs.phases.getAll'}` directly over its own `CORE_MODULE` client) — so the triggers service has at least three callers: the frontend (via core), core itself, and AA directly.
+
+**If asked about "the AA trigger pipeline": the implementation lives in `rahat-project-triggers`, not here and not in `rahat-project-aa`.** This repo is the dispatcher in between.
+
+## Worked example of a real, confirmed gap (the dead path, not the live one)
 
 `aa.action.ts` wires these, all pointing at `AAJobs.TRIGGERS.*` / `AAJobs.RIVER_STATIONS.*` / `AAJobs.WATER_LEVELS.*` (defined in `libs/sdk/src/aa/aa.events.ts`):
 
