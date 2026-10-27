@@ -239,6 +239,7 @@ export class WalletService implements OnModuleInit {
 
     const defaultChain = await this.getDefaultChainFromDb();
     const supportedChains = this.providerRegistry.getSupportedChains();
+    console.log(supportedChains)
 
     const results: MultiChainWalletResult[] = [];
 

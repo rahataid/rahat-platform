@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { MemoryWalletStorage } from '../storages/memory.storage';
 import {
   ChainType,
   IConnectedWallet,
@@ -7,7 +8,6 @@ import {
   WalletStorage,
 } from '../types';
 import { ConnectedWallet } from './connectedWallet';
-import { MemoryWalletStorage } from '../storages/memory.storage';
 
 export class EVMWallet implements IWalletManager {
   static blockchainType = 'EVM';
@@ -98,6 +98,7 @@ export class EVMWallet implements IWalletManager {
       mnemonic,
       blockchain: EVMWallet.blockchainType,
     };
+    console.log(walletKeys)
     await this.storage.saveKey(walletKeys);
     return new ConnectedWallet(walletKeys, this.rpcUrl);
   }
