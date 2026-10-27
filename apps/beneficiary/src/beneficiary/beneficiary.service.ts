@@ -2939,7 +2939,7 @@ export class BeneficiaryService {
 
   private async getGroupSyncData(
     beneficiaryGroupId: string,
-    project: { uuid: string; type: string }
+    project: { uuid: string; type: string; chainType?: string | null }
   ) {
     const group = await this.prisma.beneficiaryGroup.findUnique({
       where: { uuid: beneficiaryGroupId },
@@ -2984,6 +2984,21 @@ export class BeneficiaryService {
       },
     });
 
+    // Bulk-fetch chain-specific wallet addresses
+    // Falls back to beneficiary.walletAddress when no chainType on project or no matching wallet.
+    const chainWalletMap = new Map<string, string>();
+    if (project.chainType?.trim()) {
+      const chainWallets = await this.prisma.walletAddress.findMany({
+        where: {
+          entityId: { in: beneficiaries.map((b) => b.uuid) },
+          chainType: project.chainType.toUpperCase(),
+          deletedAt: null,
+        },
+        select: { entityId: true, address: true },
+      });
+      for (const w of chainWallets) chainWalletMap.set(w.entityId, w.address);
+    }
+
     const isAA = this.isAAProject(project.type);
     const payload = {
       beneficiaryGroupId,
@@ -2992,7 +3007,7 @@ export class BeneficiaryService {
       projectId: project.uuid,
       beneficiaries: beneficiaries.map((beneficiary) => ({
         uuid: beneficiary.uuid,
-        walletAddress: beneficiary.walletAddress,
+        walletAddress: chainWalletMap.get(beneficiary.uuid) ?? beneficiary.walletAddress,
         phone: beneficiary.pii?.phone || null,
         isVerified: beneficiary.isVerified,
         beneficiaryGroupId,
