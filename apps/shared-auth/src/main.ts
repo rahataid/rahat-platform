@@ -27,6 +27,7 @@ async function bootstrap() {
     }
   );
   app.useGlobalFilters(new RpcExceptionFilter());
+  app.enableShutdownHooks();
   await app.listen();
 
   Logger.fatal(

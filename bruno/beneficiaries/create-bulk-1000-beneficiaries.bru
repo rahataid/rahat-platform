@@ -1,0 +1,70 @@
+meta {
+  name: create-bulk-1000-beneficiaries
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{url}}/beneficiaries/bulk
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  []
+}
+
+script:pre-request {
+  const beneficiaries = [];
+  
+  for (let i = 0; i < 1000; i++) {
+    const gender = i % 2 === 0 ? "MALE" : "FEMALE";
+    const year = 1970 + Math.floor(Math.random() * 54);
+    const month = Math.floor(Math.random() * 12) + 1;
+    const day = Math.floor(Math.random() * 28) + 1;
+    const birthDate = new Date(year, month, day).toISOString();
+    const age = 2026 - year;
+    
+    // Generate unique phone number
+    const uniquePhoneSuffix = Math.floor(10000000 + Math.random() * 90000000);
+    const phone = "+977-98" + uniquePhoneSuffix;
+    
+    beneficiaries.push({
+      gender,
+      birthDate,
+      age,
+      piiData: {
+        name: "Beneficiary " + (i + 1),
+        phone
+      }
+    });
+  }
+  
+  req.setBody(beneficiaries);
+}
+
+script:post-response {
+  const resData = res.getBody();
+  
+  if (resData && resData.data) {
+    console.log("Response:", JSON.stringify(resData, null, 2));
+    
+    if (resData.data.success === true && resData.data.beneficiariesData) {
+      const uuids = resData.data.beneficiariesData.map(b => b.uuid);
+      bru.setVar("beneficiaryUUIDs", JSON.stringify(uuids));
+    }
+  }
+}
+
+tests {
+  test('should create 1000 new beneficiaries in bulk', async () => {
+    const data = res.getBody();
+    expect(res.body.data.success).to.equal(true);
+    expect(res.body.data.count).to.equal(1000);
+    expect(res.body.data.beneficiariesData).to.have.length(1000);
+  });
+}

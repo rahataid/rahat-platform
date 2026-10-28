@@ -1,4 +1,7 @@
 export const JOBS = {
+  VERSION: {
+    GET: 'aa.jobs.version.get'
+  },
   RIVER_STATIONS: {
     GET_DHM: 'aa.jobs.riverStations.getDhm',
   },
@@ -62,6 +65,7 @@ export const JOBS = {
     ADD_GROUP: 'aa.jobs.stakeholders.addGroup',
     UPDATE_GROUP: 'aa.jobs.stakeholders.updateGroup',
     DELETE_GROUP: 'aa.jobs.stakeholders.deleteGroup',
+    EXPORT_GROUP: 'aa.jobs.stakeholders.exportGroup',
   },
   BENEFICIARY: {
     ADD_GROUP: 'aa.jobs.beneficiary.addGroup',
@@ -80,11 +84,15 @@ export const JOBS = {
       'aa.jobs.beneficiary.create_beneficiary_with_db_transaction',
     GET_TOKEN_DETAILS: 'aa.jobs.beneficiary.getTokenDetails',
     GENERATE_QR_PDF: 'aa.jobs.beneficiary.generateQrPdf',
+    REGENERATE_QR_PDF: 'aa.jobs.beneficiary.regenerateQrPdf',
     GET_QR_PDF: 'aa.jobs.beneficiary.getQrPdf',
+    EXPORT_GROUP_EXCEL: 'aa.jobs.beneficiary.exportGroupExcel',
     SPONSOR_BENEFICIARY_GROUP: 'aa.jobs.beneficiary.sponsorBeneficiaryGroup',
     REVOKE_SPONSORSHIP_FOR_GROUP: 'aa.jobs.beneficiary.revokeSponsorshipForGroup',
     RETRY_SPONSORSHIP_FOR_GROUP: 'aa.jobs.beneficiary.retrySponsorshipForGroup',
     GET_SPONSORSHIP_STATUS_FOR_GROUP: 'aa.jobs.beneficiary.getSponsorshipStatusForGroup',
+    GET_PAYOUT_MODE: 'aa.jobs.beneficiary.getPayoutMode',
+
   },
   CONTRACT: {
     INCREASE_BUDGET: 'aa.jobs.contract.increaseBudget',
@@ -142,7 +150,9 @@ export const JOBS = {
     GET_PAYOUT_LOG: 'aa.jobs.payout.getPayoutLog',
     GET_PAYOUT_DETAILS: 'aa.jobs.payout.getPayoutDetails',
     EXPORT_PAYOUT_LOGS: 'aa.jobs.payout.exportPayoutLogs',
+    EXPORT_PAYOUT_LOGS_PDF_FILE: 'aa.jobs.payout.exportPayoutLogsPdfFile',
     VERIFY_MANUAL_PAYOUT: 'aa.jobs.payout.verifyManualPayout',
+    COMPLETE_PAYOUT: 'aa.jobs.payout.complete'
   },
   INKIND: {
     CREATE: 'aa.jobs.inkinds.create',
@@ -196,6 +206,8 @@ export const JOBS = {
     DISBURSE: 'aa.jobs.chain.disburse',
     SEND_OTP: 'aa.jobs.chain.sendOtp',
     SEND_ASSET: 'aa.jobs.chain.sendAsset',
+    CHECK_OTP: 'aa.jobs.chain.checkOtp',
+    ADD_CVA_EVIDENCE: 'aa.jobs.chain.addCvaEvidence',
     GET_DISBURSEMENT_STATS: 'aa.jobs.chain.getDisbursementStats',
     GET_WALLET_BALANCE: 'aa.jobs.chain.getWalletBalance',
     GET_RAHAT_TOKEN_BALANCE: 'aa.jobs.chain.getRahatTokenBalance',

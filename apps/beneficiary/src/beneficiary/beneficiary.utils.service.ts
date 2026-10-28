@@ -284,12 +284,18 @@ export class BeneficiaryUtilsService {
       type: BeneficiaryConstants.Types.ENROLLED,
       isVerified: beneficiaryData.isVerified,
     };
-
     //Handle aa project type
     if (projectData.type.toLowerCase() === 'aa' || projectData.type.toLowerCase() === 'cva') {
       delete payload.type;
       (payload as AAPayload).gender = beneficiaryData.gender;
-      payload.extras = { ...payload.extras, phone: beneficiaryData.pii.phone, name: beneficiaryData.pii.name };
+      payload.extras = {
+        ...payload.extras,
+        phone: beneficiaryData.pii.phone,
+        name: beneficiaryData.pii.name,
+        ...(beneficiaryData.location != null
+          ? { location: beneficiaryData.location }
+          : {}),
+      };
     }
 
     if (projectData.type.toLowerCase() === 'rp') {

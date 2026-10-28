@@ -4,16 +4,18 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
-import { PrismaService } from '@rumsan/prisma';
-import { AuthsModule } from '@rumsan/user';
 import { SettingsModule } from '@rumsan/extensions/settings';
+import { PrismaModule } from '@rumsan/prisma';
+import { AuthsModule, SignupModule } from '@rumsan/user';
 import { NotificationModule } from '../notification/notification.module';
 import { UsersModule } from '../users/users.module';
+import { FileWalletStorage } from '../wallet/storages/fs.storage';
 import { VendorsController } from './vendors.controller';
 import { VendorsService } from './vendors.service';
 
 @Module({
   imports: [
+    PrismaModule,
     ClientsModule.register([
       {
         name: ProjectContants.ELClient,
@@ -31,10 +33,11 @@ import { VendorsService } from './vendors.service';
     }),
     SettingsModule,
     AuthsModule,
+    SignupModule.forRoot({ autoApprove: true }),
     UsersModule,
     NotificationModule
   ],
   controllers: [VendorsController],
-  providers: [VendorsService, PrismaService]
+  providers: [VendorsService, FileWalletStorage]
 })
 export class AppUsersModule { }

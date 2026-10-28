@@ -22,7 +22,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   AddBeneficiariesToGroupDto,
-  AddBenToProjectDto,
   AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
@@ -43,45 +42,29 @@ import {
   BQUEUE,
   Enums,
   MS_TIMEOUT,
+  SUBJECTS,
   TFile,
 } from '@rahataid/sdk';
 import {
-  AbilitiesGuard,
   ACTIONS,
   CheckAbilities,
   JwtGuard,
-  SUBJECTS,
 } from '@rumsan/user';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
 import { catchError, firstValueFrom, map, throwError, timeout } from 'rxjs';
 import { CommsService } from '../comms/comms.service';
-import { CheckHeaders, ExternalAppGuard } from '../decorators';
+import { CheckHeaders, DbAbilitiesGuard, ExternalAppGuard } from '../decorators';
 import { removeSpaces } from '../utils';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
-import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
+import {
+  mapUploadedBeneficiaryRows,
+  trimNonAlphaNumericValue,
+} from '../utils/sanitize-data';
 import { WalletService } from '../wallet/wallet.service';
 import { WalletInterceptor } from './interceptor/wallet.interceptor';
 import { DocParser } from './parser';
 import { WalletProcessingService } from './services/wallet-processing.service';
-
-function getDateInfo(dateString) {
-  try {
-    // const [day, month, year] = dateString.split("/");
-    const date = new Date(dateString);
-    return {
-      date: date.toISOString(),
-      year: date.getFullYear(),
-      month: date.getMonth(),
-      day: date.getDate(),
-      age: new Date().getFullYear() - date.getFullYear(),
-      isAdult: new Date().getFullYear() - date.getFullYear() > 18,
-    };
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-}
 
 @Controller('beneficiaries')
 @ApiTags('Beneficiaries')
@@ -95,16 +78,16 @@ export class BeneficiaryController {
   ) { }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get()
   async list(@Query() dto: ListBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.LIST }, dto);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('temp/:uuid')
   @ApiParam({ name: 'uuid', required: true })
   async listTempBenef(
@@ -118,16 +101,16 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('temp-groups')
   async listTempGroups(@Query() query: ListTempGroupsDto) {
     return this.client.send({ cmd: BeneficiaryJobs.LIST_TEMP_GROUPS }, query);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('pii')
   async listPiiData(@Query() dto: any) {
     return this.client.send({ cmd: BeneficiaryJobs.LIST_PII }, dto);
@@ -136,8 +119,8 @@ export class BeneficiaryController {
 
 
   // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
-  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @UseGuards(JwtGuard, DbAbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('stats')
   async getStats() {
     const commsClient = await this.commsService.getClient();
@@ -157,47 +140,55 @@ export class BeneficiaryController {
 
 
   // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @UseGuards(JwtGuard, DbAbilitiesGuard)
   @Get('statsSource')
   async getStatsSource() {
     return this.client.send({ cmd: BeneficiaryJobs.GET_ALL_STATS }, {});
   }
 
   // @ApiBearerAuth(APP.JWT_BEARER)
-  // @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('table-stats')
   async getTableStats() {
     return this.client.send({ cmd: BeneficiaryJobs.GET_TABLE_STATS }, {});
   }
 
+  @Post('stats/refresh')
+  async refreshCoreStats() {
+    return this.client.send(
+      { cmd: BeneficiaryJobs.REFRESH_STATS }, {}
+    );
+  }
+
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
   @Post()
   @UseInterceptors(WalletInterceptor)
   async create(@Body() dto: CreateBeneficiaryDto) {
     return this.client.send({ cmd: BeneficiaryJobs.CREATE }, dto);
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
-  @ApiParam({ name: 'uuid', required: true })
-  @Post('projects/:uuid')
-  async referBeneficiary(
-    @Param('uuid') uuid: UUID,
-    @Body() dto: AddBenToProjectDto
-  ) {
-    return this.client.send(
-      { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
-      { dto, projectUid: uuid }
-    );
-  }
+  // Disabled: beneficiary MS ADD_TO_PROJECT handler removed (group-assign-optimization)
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, DbAbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.BENEFICIARY })
+  // @ApiParam({ name: 'uuid', required: true })
+  // @Post('projects/:uuid')
+  // async referBeneficiary(
+  //   @Param('uuid') uuid: UUID,
+  //   @Body() dto: AddBenToProjectDto
+  // ) {
+  //   return this.client.send(
+  //     { cmd: BeneficiaryJobs.ADD_TO_PROJECT },
+  //     { dto, projectUid: uuid }
+  //   );
+  // }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
   @UseInterceptors(WalletInterceptor)
   @Post('bulk')
   async createBulk(@Body() dto: CreateBeneficiaryDto[]) {
@@ -207,13 +198,52 @@ export class BeneficiaryController {
     }));
 
     return this.client
-      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, data)
+      .send({ cmd: BeneficiaryJobs.CREATE_BULK }, { payload: data })
       .pipe(timeout(MS_TIMEOUT));
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.BENEFICIARY })
+  @Post('groups/:uuid/upload')
+  @ApiParam({ name: 'uuid', required: true })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadToGroup(
+    @Param('uuid') uuid: UUID,
+    @UploadedFile() file: TFile,
+    @Req() req: Request,
+  ) {
+    const docType: Enums.UploadFileType =
+      req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
+
+    const raw = await DocParser(docType, file.buffer);
+    const beneficiariesMapped = mapUploadedBeneficiaryRows(raw as unknown as Record<string, unknown>[]);
+    const walletResult = await this.walletProcessingService.processBeneficiariesWithWallets(beneficiariesMapped);
+
+    return firstValueFrom(
+      this.client
+        .send(
+          { cmd: BeneficiaryJobs.UPLOAD_BENEFICIARIES_TO_GROUP },
+          { dtos: walletResult.validBeneficiaries, groupUuid: uuid },
+        )
+        .pipe(
+          map((response) => {
+            if (walletResult.discardedBeneficiaries.length > 0) {
+              console.warn(
+                `WARNING: ${walletResult.totalDiscarded} of ${walletResult.totalProcessed} beneficiaries discarded due to wallet failures`,
+              );
+            }
+            return response;
+          }),
+          catchError((error) => throwError(() => new BadRequestException(error.message))),
+          timeout(MS_TIMEOUT),
+        ),
+    );
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async upload(@UploadedFile() file: TFile, @Req() req: Request) {
@@ -221,33 +251,11 @@ export class BeneficiaryController {
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
     const projectId = req.body['projectId'];
     const groupName = req.body['groupName']?.trim();
+    const groupPurpose = req.body['groupPurpose']?.trim();
 
     const beneficiaries = await DocParser(docType, file.buffer);
 
-    const beneficiariesMapped = beneficiaries.map((b) => ({
-      birthDate: b['Birth Date']
-        ? new Date(b['Birth Date']).toISOString()
-        : null,
-      internetStatus: b['Internet Status*'],
-      bankedStatus: b['Bank Status*'],
-      location: b['Location'],
-      phoneStatus: b['Phone Status*'],
-      notes: b['Notes'],
-      gender: b['Gender*'],
-      latitude: b['Latitude'],
-      longitude: b['Longitude'],
-      age: b['Age'] || null,
-      walletAddress: b['Wallet Address'],
-      piiData: {
-        name: b['Name*'] || b['Name'] || 'Unknown',
-        phone: b['Whatsapp Number*'] || b['Phone Number*'] || b['Phone Number'],
-        extras: {
-          isAdult:
-            getDateInfo(b['Birth Date'])?.isAdult || Number(b['Age*']) > 18,
-          governmentId: b['Government ID'],
-        },
-      },
-    }));
+    const beneficiariesMapped = mapUploadedBeneficiaryRows(beneficiaries as unknown as Record<string, unknown>[]);
 
     // Process wallet addresses using the wallet processing service
     const walletProcessingResult = await this.walletProcessingService.processBeneficiariesWithWallets(beneficiariesMapped);
@@ -259,6 +267,7 @@ export class BeneficiaryController {
             payload: walletProcessingResult.validBeneficiaries,
             projectUUID: projectId,
             groupName,
+            groupPurpose
           }
         )
         .pipe(
@@ -295,8 +304,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
   @Post('upload-queue')
   @UseInterceptors(FileInterceptor('file'))
   async uploadWithQueue(@UploadedFile() file: TFile, @Req() req: Request) {
@@ -431,8 +440,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.BENEFICIARY })
   @Patch(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   async update(@Param('uuid') uuid: UUID, @Body() dto: UpdateBeneficiaryDto) {
@@ -440,8 +449,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.DELETE, subject: SUBJECTS.BENEFICIARY })
   @Patch('remove/:uuid')
   @ApiParam({ name: 'uuid', required: true })
   async remove(@Param('uuid') uuid: UUID) {
@@ -449,8 +458,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.DELETE, subject: SUBJECTS.BENEFICIARY })
   @Delete(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   async delete(@Param('uuid') uuid: UUID) {
@@ -458,8 +467,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('bank-account')
   @ApiQuery({ name: 'uuid', required: false })
   @ApiQuery({ name: 'walletAddress', required: false })
@@ -474,8 +483,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get(':uuid')
   @ApiParam({ name: 'uuid', required: true })
   async getBeneficiary(@Param('uuid') uuid: UUID) {
@@ -489,8 +498,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('phone/:phone/:projectUUID')
   @ApiParam({ name: 'phone', required: true })
   @ApiParam({ name: 'projectUUID', required: true })
@@ -505,8 +514,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('phone/:phone')
   @ApiParam({ name: 'phone', required: true })
   async getBeneficiaryByPhoneOnly(@Param('phone') phone: string) {
@@ -517,8 +526,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('verification-link/:uuid')
   @ApiParam({ name: 'uuid', required: true })
   async generateVerificationLink(@Param('uuid') uuid: UUID) {
@@ -526,24 +535,24 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
   @Post('validate-wallet')
   async validateWallet(@Body() dto: ValidateWalletDto) {
     return this.client.send({ cmd: BeneficiaryJobs.VALIDATE_WALLET }, dto);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
   @Post('verify-signature')
   async verifySignature(@Body() dto: any) {
     return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.MANAGE, subject: SUBJECTS.BENEFICIARY })
   @Post('groups/:uuid/sync')
   @ApiParam({ name: 'uuid', required: true })
   async syncGroupToProjects(@Param('uuid') uuid: UUID) {
@@ -551,32 +560,32 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
   @Post('groups')
   async createGroup(@Body() dto: CreateBeneficiaryGroupsDto) {
     return this.client.send({ cmd: BeneficiaryJobs.ADD_GROUP }, dto);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.BENEFICIARY })
   @Post('groups/add-beneficiaries')
   async addBeneficiariesToGroup(@Body() dto: AddBeneficiariesToGroupDto) {
     return this.client.send({ cmd: BeneficiaryJobs.ADD_BENEFICIARIES_TO_GROUP }, dto);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('groups/all')
   async getAllGroups(@Query() dto: ListBeneficiaryGroupDto) {
     return this.client.send({ cmd: BeneficiaryJobs.GET_ALL_GROUPS }, dto);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
   async getOneGroup(
@@ -590,8 +599,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('groups/:uuid/account-check')
   @ApiParam({ name: 'uuid', required: true })
   async groupAccountCheck(@Param('uuid') uuid: UUID) {
@@ -599,8 +608,17 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.BENEFICIARY })
+  @Post('groups/:uuid/force-invalidate')
+  @ApiParam({ name: 'uuid', required: true })
+  async groupForceInvalidate(@Param('uuid') uuid: UUID) {
+    return this.client.send({ cmd: BeneficiaryJobs.GROUP_FORCE_INVALIDATE }, uuid);
+  }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('groups/:uuid/bank-check-status')
   @ApiParam({ name: 'uuid', required: true })
   async getGroupBankCheckStatus(@Param('uuid') uuid: UUID) {
@@ -608,8 +626,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Get('groups/:uuid/fail-account/export')
   @ApiParam({ name: 'uuid', required: true })
   async getGroupBeneficiariesFailedAccount(@Param('uuid') uuid: UUID) {
@@ -617,8 +635,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.DELETE, subject: SUBJECTS.BENEFICIARY })
   @Delete('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
   @ApiQuery({ name: 'hardDelete', required: false, type: Boolean, description: 'If true, permanently deletes the group and beneficiaries. If false or not provided, performs soft delete.' })
@@ -632,8 +650,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.BENEFICIARY })
   @Patch('groups/:uuid')
   @ApiParam({ name: 'uuid', required: true })
   async updateGroup(
@@ -647,8 +665,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.BENEFICIARY })
   @Patch('groups/:uuid/addGroupPurpose')
   @ApiParam({ name: 'uuid', required: true })
   async addGroupPurpose(@Param('uuid') uuid: UUID, @Body() dto: AddGroupsPurposeDto) {
@@ -669,8 +687,8 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
   @Post('import-temp')
   async importTempBeneficiaries(@Body() dto: ImportTempBenefDto) {
     return this.client.send(
@@ -680,16 +698,16 @@ export class BeneficiaryController {
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
   @Post('groupDetails')
   async getReferredBeneficiary(@Body() uuids: UUID[]) {
     return this.client.send({ cmd: BeneficiaryJobs.GET_GROUP_DETAILS_BY_UUIDS }, uuids);
   }
 
   @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
   @Post('beneficiaryWithDbTransaction')
   async createBeneficiaryWithDbTransaction(@Body() body: CreateBeneficiaryTransactionDto) {
     return await this.client.send({ cmd: BeneficiaryJobs.CREATE_BENEFICIARY_WITH_DB_TRANSACTION }, body);
