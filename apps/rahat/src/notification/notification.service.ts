@@ -72,13 +72,24 @@ export class NotificationService {
     }
   }
 
-  // channels from payload; legacy senders (no channels) derive them from `notify`
   private resolveChannels(dto: CreateNotificationDto): NotificationChannel[] {
-    if (dto.channels?.length) return [...new Set(dto.channels)] as NotificationChannel[];
-    return dto.notify
-      ? [NotificationChannel.IN_APP, NotificationChannel.PUSH, NotificationChannel.EMAIL]
-      : [NotificationChannel.IN_APP];
+    const valid = Object.values(NotificationChannel);
+
+    const requested = Array.isArray(dto.channels)
+      ? [...new Set(dto.channels)].filter((c) => valid.includes(c))
+      : [];
+
+    // empty / missing / all invalid -> default to in-app only
+    return requested.length ? requested : [NotificationChannel.IN_APP];
   }
+
+  // channels from payload; legacy senders (no channels) derive them from `notify`
+  // private resolveChannels(dto: CreateNotificationDto): NotificationChannel[] {
+  //   if (dto.channels?.length) return [...new Set(dto.channels)] as NotificationChannel[];
+  //   return dto.notify
+  //     ? [NotificationChannel.IN_APP, NotificationChannel.PUSH, NotificationChannel.EMAIL]
+  //     : [NotificationChannel.IN_APP];
+  // }
 
   // an unknown project must not lose the notification (projectId is a foreign key)
   private async validProjectId(projectId?: string): Promise<string | undefined> {
