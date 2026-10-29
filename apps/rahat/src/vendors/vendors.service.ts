@@ -6,7 +6,7 @@ import {
   Inject,
   Injectable,
   Logger,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 // import * as jwt from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -15,20 +15,26 @@ import {
   GetVendorOtp,
   VendorAddToProjectDto,
   VendorPasswordRegisterDto,
-  VendorRegisterDto
+  VendorRegisterDto,
 } from '@rahataid/extensions';
-import { ProjectContants, ProjectEvents, UserRoles, VendorJobs } from '@rahataid/sdk';
 import {
-  ChangePasswordDto,
-  PasswordLoginDto
-} from '@rumsan/extensions/dtos';
+  ProjectContants,
+  ProjectEvents,
+  UserRoles,
+  VendorJobs,
+} from '@rahataid/sdk';
+import { ChangePasswordDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
 import { Request } from '@rumsan/sdk/types';
 
-import { AuthsService, CurrentUserInterface, SignupsService } from '@rumsan/user';
+import {
+  AuthsService,
+  CurrentUserInterface,
+  SignupsService,
+} from '@rumsan/user';
 import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
@@ -55,7 +61,6 @@ export enum VendorRegisteredApp {
 
 @Injectable()
 export class VendorsService {
-
   private readonly logger = new Logger(VendorsService.name);
   private vendorRoleCache: { id: number; name: string } | null = null;
   private shouldFundVendorWallet: string;
@@ -74,21 +79,26 @@ export class VendorsService {
   ) { }
 
   async onModuleInit() {
-    const vendorFundSettings = await this.settings.getByName('FUND_VENDOR_WALLET');
+    const vendorFundSettings = await this.settings.getByName(
+      'FUND_VENDOR_WALLET'
+    );
     this.shouldFundVendorWallet = vendorFundSettings?.value as string;
   }
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
     // Resolve default chain and pick the matching wallet as primary
-    const defaultChainConfig = await (
-      this.prisma.chainConfig.findFirst({ where: { isActive: true, isDefault: true } })
-    ) ?? await this.prisma.chainConfig.findFirst({ where: { isActive: true } });
+    const defaultChainConfig =
+      (await this.prisma.chainConfig.findFirst({
+        where: { isActive: true, isDefault: true },
+      })) ??
+      (await this.prisma.chainConfig.findFirst({ where: { isActive: true } }));
 
     const defaultChainType = defaultChainConfig?.chain?.toLowerCase() ?? 'evm';
 
-    const defaultWallet = dto.wallets?.find(w => w.chain?.toLowerCase() === defaultChainType)
-      ?? dto.wallets?.[0];
+    const defaultWallet =
+      dto.wallets?.find((w) => w.chain?.toLowerCase() === defaultChainType) ??
+      dto.wallets?.[0];
 
     if (!defaultWallet?.address)
       throw new BadRequestException({
@@ -139,7 +149,9 @@ export class VendorsService {
       const user = await prisma.user.create({ data: { ...rest, wallet } });
 
       // Add to UserRole table
-      await prisma.userRole.create({ data: { userId: user.id, roleId: role.id } });
+      await prisma.userRole.create({
+        data: { userId: user.id, roleId: role.id },
+      });
 
       // Add to Auth table
       await prisma.auth.create({
@@ -166,7 +178,7 @@ export class VendorsService {
         await DatabaseWalletStorage.assignEntity(
           prisma,
           wallets.map((w) => ({ address: w.address, chain: w.chain })),
-          user.uuid,
+          user.uuid
         );
         await prisma.walletAddress.update({
           where: { address: wallet },
@@ -179,7 +191,9 @@ export class VendorsService {
 
     // Emit vendor created event to fund vendor wallet
     if (this.shouldFundVendorWallet?.toLowerCase() == 'true') {
-      this.eventEmitter.emit(ProjectEvents.VENDORS_CREATED, { wallet: vendor.wallet });
+      this.eventEmitter.emit(ProjectEvents.VENDORS_CREATED, {
+        wallet: vendor.wallet,
+      });
     }
 
     this.notificationService.createNotification({
@@ -187,10 +201,9 @@ export class VendorsService {
       description: `Vendor ${vendor.name} is waiting for admin approval`,
       group: 'Vendor Management',
       notify: true,
-    })
+    });
     return vendor;
   }
-
 
   async registerVendorWithPassword(
     dto: VendorPasswordRegisterDto,
@@ -236,7 +249,6 @@ export class VendorsService {
 
       // Step 5: Use transaction to ensure atomicity
       const result = await this.prisma.$transaction(async (tx) => {
-
         // Create signup request using SignupsService with USERNAME service
         const signupData = {
           name: dto.name,
@@ -327,10 +339,7 @@ export class VendorsService {
             phone: result.auth.User.phone,
             extras: result.auth.User.extras,
           },
-
-          wallet: {
-            ...randomWallet.wallets
-          },
+          walletDetails: randomWallet.wallets,
           message:
             'Vendor registered successfully with VENDOR role and auto-generated wallet. ',
         },
@@ -456,12 +465,15 @@ export class VendorsService {
         email: user.email,
         phone: user.phone,
         gender: user.gender,
-        extras: user.extras
+        extras: user.extras,
       },
       walletDetails,
     };
   }
-  async changeVendorPassword(user: CurrentUserInterface, dto: ChangePasswordDto) {
+  async changeVendorPassword(
+    user: CurrentUserInterface,
+    dto: ChangePasswordDto
+  ) {
     const isVendor = user.roles?.includes(UserRoles.VENDOR);
     if (!isVendor) {
       throw new ForbiddenException('User is not a vendor');
@@ -480,10 +492,16 @@ export class VendorsService {
     const { vendorId, projectId } = dto;
     const [vendorUser, project] = await Promise.all([
       this.prisma.user.findUnique({ where: { uuid: vendorId } }),
-      this.prisma.project.findUnique({ where: { uuid: projectId }, select: { chainType: true } }),
+      this.prisma.project.findUnique({
+        where: { uuid: projectId },
+        select: { chainType: true },
+      }),
     ]);
     if (!vendorUser)
-      throw new NotFoundException({ message: 'Vendor not found', code: 'VENDOR_NOT_FOUND' });
+      throw new NotFoundException({
+        message: 'Vendor not found',
+        code: 'VENDOR_NOT_FOUND',
+      });
     const userRoles = await this.prisma.userRole.findMany({
       where: { userId: vendorUser.id },
       include: {
@@ -505,7 +523,11 @@ export class VendorsService {
     let walletAddress = vendorUser.wallet;
     if (project?.chainType) {
       const chainWallet = await this.prisma.walletAddress.findFirst({
-        where: { entityId: vendorId, chainType: project.chainType, deletedAt: null },
+        where: {
+          entityId: vendorId,
+          chainType: project.chainType,
+          deletedAt: null,
+        },
         select: { address: true },
       });
       if (chainWallet?.address) walletAddress = chainWallet.address;
@@ -633,15 +655,23 @@ export class VendorsService {
     }
 
     return {
-      totalCounts: Object.values(countsByGender).reduce((total, count) => total + count, 0),
+      totalCounts: Object.values(countsByGender).reduce(
+        (total, count) => total + count,
+        0
+      ),
       genderStats: countsByGender,
     };
   }
 
   async getVendor(id: UUID | Address) {
-    const data = isAddress(id)
-      ? await this.prisma.user.findFirst({ where: { wallet: id } })
-      : await this.prisma.user.findUnique({ where: { uuid: id } });
+    let userId;
+    if (isAddress(id)) {
+      const entityDetails = await this.prisma.walletAddress.findUnique({
+        where: { address: id },
+      });
+      userId = entityDetails?.entityId;
+    } else userId = id;
+    const data = await this.prisma.user.findUnique({ where: { uuid: userId } });
 
     if (!data) {
       throw new NotFoundException({
@@ -652,7 +682,7 @@ export class VendorsService {
     }
 
     const projectData = await this.prisma.projectVendors.findMany({
-      where: { vendorId: data.uuid },
+      where: { vendorId: data?.uuid },
       include: {
         Project: true,
         User: true,
@@ -661,18 +691,21 @@ export class VendorsService {
 
     const walletDetails = await this.prisma.walletAddress.findMany({
       where: {
-        entityId: data.uuid
+        entityId: data.uuid,
       },
-
-    })
+      select: {
+        address: true,
+        chainType: true,
+      },
+    });
     const response = {
       ...data,
-      walletDetails: walletDetails
+      walletDetails: walletDetails,
     };
     let projectResponse = {} as any;
 
     projectResponse.data = projectData;
-    projectResponse.walletDetails = walletDetails
+    projectResponse.walletDetails = walletDetails;
     // const vendorIdentifier = projectData[0]?.extras;
     // const projects = projectData.map((project) => project.Project);
     // const userdata = { ...data, projects, vendorIdentifier };
@@ -685,7 +718,9 @@ export class VendorsService {
 
   async listVendor(dto: GetVendorsDTO) {
     const { vendorName, projectName, status, page, perPage } = dto;
-    this.logger.log(`Listing vendors with filters - Vendor Name: ${vendorName}, Project Name: ${projectName}, Status: ${status}, Page: ${page}, Per Page: ${perPage}`);
+    this.logger.log(
+      `Listing vendors with filters - Vendor Name: ${vendorName}, Project Name: ${projectName}, Status: ${status}, Page: ${page}, Per Page: ${perPage}`
+    );
 
     const where: any = {
       Role: {
@@ -753,8 +788,7 @@ export class VendorsService {
       }
     );
 
-
-    const userIds = users.data.map((user: any) => user.User.uuid)
+    const userIds = users.data.map((user: any) => user.User.uuid);
 
     const walletDetails = await this.prisma.walletAddress.findMany({
       where: {
@@ -770,7 +804,6 @@ export class VendorsService {
       existing.push({ address: wallet.address, chainType: wallet.chainType });
       walletMap.set(wallet.entityId, existing);
     }
-
 
     const data = users.data.map((user: any) => ({
       ...user,
@@ -807,7 +840,7 @@ export class VendorsService {
         createdAt: 'desc',
       },
     });
-    const userIds = venData.map((user: any) => user.User.uuid)
+    const userIds = venData.map((user: any) => user.User.uuid);
     const walletDetails = await this.prisma.walletAddress.findMany({
       where: {
         entityId: { in: userIds },
@@ -828,9 +861,6 @@ export class VendorsService {
       ...user,
       walletDetails: walletMap.get(user.User.uuid) || null,
     }));
-
-
-
 
     // return venData
     return this.client.send(
@@ -854,8 +884,8 @@ export class VendorsService {
     });
     const walletDetails = await this.prisma.walletAddress.findMany({
       where: {
-        entityId: { in: uuids }
-      }
+        entityId: { in: uuids },
+      },
     });
 
     const walletMap = new Map<
@@ -877,7 +907,7 @@ export class VendorsService {
         Vendor: {
           ...item.Vendor,
           ...matchedData,
-          walletDetails: walletMap.get(item.Vendor.uuid)
+          walletDetails: walletMap.get(item.Vendor.uuid),
         },
       };
     });
@@ -894,8 +924,6 @@ export class VendorsService {
       return this.getUserDetails(dto);
     }
   }
-
-
 
   async getUserDetails(dto) {
     const challengeData = decryptChallenge(
@@ -922,8 +950,14 @@ export class VendorsService {
 
   async updateVendor(dto, uuid: UUID) {
     // STEP 1: Load current vendor state and validate it exists
-    this.logger.log(`Starting vendor update for UUID: ${uuid} with data: ${JSON.stringify(dto)}`);
-    const originalVendor = await this.prisma.user.findUnique({ where: { uuid } });
+    this.logger.log(
+      `Starting vendor update for UUID: ${uuid} with data: ${JSON.stringify(
+        dto
+      )}`
+    );
+    const originalVendor = await this.prisma.user.findUnique({
+      where: { uuid },
+    });
     if (!originalVendor)
       throw new NotFoundException({
         message: 'Vendor not found',
@@ -947,7 +981,8 @@ export class VendorsService {
       // registeredApps must stay a closed set so the frontend can safely
       // translate each value against a known enum instead of rendering
       // arbitrary caller-supplied strings verbatim.
-      const registeredApps = (dto.extras as { registeredApps?: unknown })?.registeredApps;
+      const registeredApps = (dto.extras as { registeredApps?: unknown })
+        ?.registeredApps;
       if (registeredApps !== undefined) {
         if (!Array.isArray(registeredApps)) {
           throw new BadRequestException({
@@ -959,9 +994,14 @@ export class VendorsService {
         const invalid = registeredApps.filter((app) => !allowed.includes(app));
         if (invalid.length > 0) {
           throw new BadRequestException({
-            message: `Invalid registered app(s): ${invalid.join(', ')}. Allowed values: ${allowed.join(', ')}`,
+            message: `Invalid registered app(s): ${invalid.join(
+              ', '
+            )}. Allowed values: ${allowed.join(', ')}`,
             code: 'INVALID_REGISTERED_APPS',
-            params: { invalid: invalid.join(', '), allowed: allowed.join(', ') },
+            params: {
+              invalid: invalid.join(', '),
+              allowed: allowed.join(', '),
+            },
           });
         }
       }
@@ -969,7 +1009,13 @@ export class VendorsService {
     }
 
     // STEP 1.3: Capture a snapshot of original vendor (excluding system fields) for saga rollback
-    const originalSnapshot = (({ id, uuid: _u, createdAt, updatedAt, ...rest }) => rest)(originalVendor);
+    const originalSnapshot = (({
+      id,
+      uuid: _u,
+      createdAt,
+      updatedAt,
+      ...rest
+    }) => rest)(originalVendor);
 
     // STEP 2: Persist vendor update to the local database
     const result = await this.usersService.update(uuid, dto);
@@ -992,14 +1038,21 @@ export class VendorsService {
     for (const project of assignedProjects) {
       try {
         // STEP 4.1: Send vendor update to the project microservice
-        this.logger.log(`Propagating vendor update to project ${project.projectId} for vendor UUID: ${uuid}`);
+        this.logger.log(
+          `Propagating vendor update to project ${project.projectId} for vendor UUID: ${uuid}`
+        );
         await lastValueFrom(
-          this.client.send({ cmd: VendorJobs.UPDATE, uuid: project.projectId }, { uuid, ...dto })
+          this.client.send(
+            { cmd: VendorJobs.UPDATE, uuid: project.projectId },
+            { uuid, ...dto }
+          )
         );
         updatedProjects.push(project.projectId);
       } catch (error) {
         const err = error as Error;
-        this.logger.error(`Saga failed at project ${project.projectId}: ${err.message}`);
+        this.logger.error(
+          `Saga failed at project ${project.projectId}: ${err.message}`
+        );
 
         // STEP 4.2: Saga compensation — revert local vendor record to the original snapshot
         await this.revertVendorUpdate(originalSnapshot, uuid);
@@ -1008,8 +1061,15 @@ export class VendorsService {
         await Promise.allSettled(
           updatedProjects.map((projectId) =>
             lastValueFrom(
-              this.client.send({ cmd: VendorJobs.UPDATE, uuid: projectId }, { uuid, ...originalSnapshot })
-            ).catch((e: Error) => this.logger.error(`Failed to revert project ${projectId}: ${e.message}`))
+              this.client.send(
+                { cmd: VendorJobs.UPDATE, uuid: projectId },
+                { uuid, ...originalSnapshot }
+              )
+            ).catch((e: Error) =>
+              this.logger.error(
+                `Failed to revert project ${projectId}: ${e.message}`
+              )
+            )
           )
         );
 
@@ -1024,7 +1084,10 @@ export class VendorsService {
     return result;
   }
 
-  private async revertVendorUpdate(snapshot: Record<string, unknown>, uuid: string) {
+  private async revertVendorUpdate(
+    snapshot: Record<string, unknown>,
+    uuid: string
+  ) {
     await this.prisma.user.update({ where: { uuid }, data: snapshot });
   }
 
