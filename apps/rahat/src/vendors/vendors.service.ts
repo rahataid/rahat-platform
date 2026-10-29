@@ -329,11 +329,7 @@ export class VendorsService {
           },
 
           wallet: {
-            address: randomWallet.address,
-            blockchain: randomWallet.blockchain || 'evm',
-            // SECURITY: Consider encrypting private key or delivering via secure channel
-            privateKey: randomWallet.privateKey,
-            mnemonic: randomWallet.mnemonic,
+            ...randomWallet.wallets
           },
           message:
             'Vendor registered successfully with VENDOR role and auto-generated wallet. ',
@@ -444,14 +440,11 @@ export class VendorsService {
       rdetails
     );
 
-    // Step 4: Get vendor's wallet details
-    let wallet = null;
-    try {
-      wallet = await this.walletService.getSecretByWallet(user.wallet);
-    } catch (error) {
-      this.logger.error('Failed to retrieve wallet:', error);
-      // Don't fail login if wallet retrieval fails
-    }
+    // Step 4: Fetch all chain wallets generated for this vendor
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: { entityId: user.uuid },
+      select: { address: true, chainType: true, config: true },
+    });
 
     return {
       accessToken: authSession.accessToken,
@@ -462,11 +455,10 @@ export class VendorsService {
         username: user.username,
         email: user.email,
         phone: user.phone,
-        wallet: user.wallet,
         gender: user.gender,
         extras: user.extras
       },
-      wallet,
+      walletDetails,
     };
   }
   async changeVendorPassword(user: CurrentUserInterface, dto: ChangePasswordDto) {
