@@ -9,6 +9,8 @@ import {
 import { CompositeWalletStorage } from './storages/composite.storage';
 import { DatabaseWalletStorage } from './storages/database.storage';
 import { FileWalletStorage } from './storages/fs.storage';
+import { StellarSponsorController } from '../stellar-sponsor/stellar-sponsor.controller';
+import { StellarSponsorService } from '../stellar-sponsor/stellar-sponsor.service';
 import { WalletController } from './wallet.controller';
 import { WalletService } from './wallet.service';
 import { XcapitService } from './xcapit.service';
@@ -16,9 +18,10 @@ import { XcapitService } from './xcapit.service';
 @Global()
 @Module({
   imports: [SettingsModule],
-  controllers: [WalletController],
+  controllers: [WalletController, StellarSponsorController],
   providers: [
     WalletService,
+    StellarSponsorService,
     BlockchainProviderRegistry.register({
       wallets: [EVMWallet, StellarWallet],
       storageFactory: (prisma: PrismaService) =>
