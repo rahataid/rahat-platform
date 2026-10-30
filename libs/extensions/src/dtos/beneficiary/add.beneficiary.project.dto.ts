@@ -19,6 +19,7 @@ import {
 } from 'class-validator';
 import { UUID } from 'crypto';
 import { CreateBeneficiaryDto } from './create-beneficiary.dto';
+import { WalletDto } from './wallet.dto';
 
 export class AddBenToProjectDto implements CreateBeneficiaryDto {
   @ApiProperty({
@@ -177,6 +178,17 @@ export class AddBenToProjectDto implements CreateBeneficiaryDto {
   })
   @IsOptional()
   piiData: TPIIData;
+
+  @ApiProperty({
+    example: [
+      { chain: 'evm', address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e', privateKey: '...' },
+      { chain: 'stellar', address: 'GB...', privateKey: '...' }
+    ],
+    description: 'Multi-chain wallet addresses with private keys (JSON string from interceptor)',
+  })
+  @IsOptional()
+  multiChainWallets: string | WalletDto[] = '';
+
 }
 
 export type referrerBeneficiary = UUID | undefined
