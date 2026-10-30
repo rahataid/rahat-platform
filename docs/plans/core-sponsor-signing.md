@@ -72,12 +72,12 @@ Close-out does not use this path. Its ops are sourced from the beneficiary, so t
 - **Caller identity is trusted.** `projectUuid` comes from the message payload, as with the existing wallet-secret RPC. A project that lies about its uuid can only name beneficiaries of another project it can already reach by wallet address. Revisit if the transport gets authentication.
 - **Fee payer.** Under the core flow the Project Sponsor pays all fees, so its XLM balance now gates sponsorship. Add a clear error when it cannot cover fees.
 - **Timeout.** The tx uses `setTimeout(100)` (`account.ts`); the platform round trip must fit inside it, with a rebuild on `tx_too_late`.
-- **Mutex is per process.** If platform runs more than one replica, two can sign concurrently and the funds check races again. Upgrade path: a Redis lock (platform already has Redis via Bull), or the deferred reservation ledger.
+- **Mutex is per process.** Not a concern: production runs a single platform instance, so in-process serialization covers every project. A Redis lock is only needed if platform is ever scaled out.
 - **SDK versions differ.** AA builds with `@stellar/stellar-sdk` ^13, platform parses with 15.1.0. XDR is wire-stable, but cover a round trip in the testnet run.
 
 ## Build notes (2026-10-30)
 
-Phases 1 and 2 are implemented; the testnet run (Phase 3, last bullet) is still open.
+Phases 1 and 2 are implemented. Testnet run on 2026-10-30: tx `f388e7f2d9c0eb7294c79e15187f1423832a9fba6d95727bfd2c8704c0848a3d` sponsored one beneficiary with the project sponsor as source, both `beginSponsoringFutureReserves` sourced from the core, and 3 signatures. The two-project, underfunded-core scenario is still to run.
 
 Changes from the plan made during the build:
 
