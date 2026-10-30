@@ -185,4 +185,10 @@ export class AppService {
       }
     })
   }
+
+  async getFrontendUrl() {
+    return this.prisma.setting.findUnique({
+      where: { name: 'FRONTEND_URL' },
+    });
+  }
 }
