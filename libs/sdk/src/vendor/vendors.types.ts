@@ -22,7 +22,7 @@ export interface VendorCreateInput {
   email?: string | null;
   phone?: string | null;
   location?: string | null;
-  wallet: string | null;
+  wallets: any[] | null;
   service: Service;
   extras?: Record<string, any> | null;
   createdAt?: Date;

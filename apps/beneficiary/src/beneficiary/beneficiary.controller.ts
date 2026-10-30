@@ -4,7 +4,6 @@ import { Controller, Param } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   AddBeneficiariesToGroupDto,
-  addBulkBeneficiaryToProject,
   AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
@@ -18,15 +17,14 @@ import {
   UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
-  BeneficiaryJobs,
-  ValidateWallet
+  BeneficiaryJobs
 } from '@rahataid/sdk';
 import { UUID } from 'crypto';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
 import { GroupSyncService } from './group-sync.service';
-import { VerificationService } from './verification.service';
+// import { VerificationService } from './verification.service';
 
 @Controller()
 export class BeneficiaryController {
@@ -34,13 +32,27 @@ export class BeneficiaryController {
     private readonly service: BeneficiaryService,
     private readonly utilService: BeneficiaryUtilsService,
     private readonly statsService: BeneficiaryStatService,
-    private readonly verificationService: VerificationService,
+    // private readonly verificationService: VerificationService,
     private readonly groupSyncService: GroupSyncService,
   ) { }
 
+
   @MessagePattern({ cmd: BeneficiaryJobs.CREATE })
-  async create(@Payload() createBeneficiaryDto: CreateBeneficiaryDto) {
-    return this.service.create(createBeneficiaryDto);
+  async create(@Payload() payload: any) {
+    if (payload && payload.multiChainWallets) {
+      if (typeof payload.multiChainWallets === 'string') {
+        try {
+          payload.multiChainWallets = JSON.parse(payload.multiChainWallets);
+        } catch (e) {
+          console.error('[BENEFICIARY CONTROLLER] Failed to parse multiChainWallets:', e);
+          payload.multiChainWallets = [];
+        }
+      } else if (!Array.isArray(payload.multiChainWallets)) {
+        payload.multiChainWallets = [];
+      }
+    }
+
+    return this.service.create(payload);
   }
 
   @MessagePattern({ cmd: BeneficiaryJobs.GET })
@@ -183,25 +195,25 @@ export class BeneficiaryController {
     return this.service.remove(payload);
   }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.GENERATE_LINK })
-  generateLink(uuid: UUID) {
-    return this.verificationService.generateLink(uuid);
-  }
+  // @MessagePattern({ cmd: BeneficiaryJobs.GENERATE_LINK })
+  // generateLink(uuid: UUID) {
+  //   return this.verificationService.generateLink(uuid);
+  // }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.VALIDATE_WALLET })
-  validateWallet(validationData: ValidateWallet) {
-    return this.verificationService.validateWallet(validationData);
-  }
+  // @MessagePattern({ cmd: BeneficiaryJobs.VALIDATE_WALLET })
+  // validateWallet(validationData: ValidateWallet) {
+  //   return this.verificationService.validateWallet(validationData);
+  // }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE })
-  verifySignature(verificationData: any) {
-    return this.verificationService.verifySignature(verificationData);
-  }
+  // @MessagePattern({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE })
+  // verifySignature(verificationData: any) {
+  //   return this.verificationService.verifySignature(verificationData);
+  // }
 
-  @MessagePattern({ cmd: BeneficiaryJobs.LIST_REFERRAL })
-  listVendorReferral(data) {
-    return this.service.listReferredBen(data);
-  }
+  // @MessagePattern({ cmd: BeneficiaryJobs.LIST_REFERRAL })
+  // listVendorReferral(data) {
+  //   return this.service.listReferredBen(data);
+  // }
 
   @MessagePattern({ cmd: BeneficiaryJobs.LIST_BEN_VENDOR_COUNT })
   getTotalCount(data) {

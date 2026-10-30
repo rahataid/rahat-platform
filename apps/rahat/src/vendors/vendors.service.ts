@@ -6,7 +6,7 @@ import {
   Inject,
   Injectable,
   Logger,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 // import * as jwt from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -15,20 +15,26 @@ import {
   GetVendorOtp,
   VendorAddToProjectDto,
   VendorPasswordRegisterDto,
-  VendorRegisterDto
+  VendorRegisterDto,
 } from '@rahataid/extensions';
-import { ProjectContants, ProjectEvents, UserRoles, VendorJobs } from '@rahataid/sdk';
 import {
-  ChangePasswordDto,
-  PasswordLoginDto
-} from '@rumsan/extensions/dtos';
+  ProjectContants,
+  ProjectEvents,
+  UserRoles,
+  VendorJobs,
+} from '@rahataid/sdk';
+import { ChangePasswordDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
 import { Request } from '@rumsan/sdk/types';
 
-import { AuthsService, CurrentUserInterface, SignupsService } from '@rumsan/user';
+import {
+  AuthsService,
+  CurrentUserInterface,
+  SignupsService,
+} from '@rumsan/user';
 import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
 import { getServiceTypeByAddress } from '@rumsan/user/lib/utils/service.utils';
@@ -38,7 +44,7 @@ import { Address } from 'viem';
 import { NotificationService } from '../notification/notification.service';
 import { UsersService } from '../users/users.service';
 import { isAddress } from '../utils/web3';
-import { FileWalletStorage } from '../wallet/storages/fs.storage';
+import { DatabaseWalletStorage } from '../wallet/storages/database.storage';
 import { WalletService } from '../wallet/wallet.service';
 import { GetVendorsDTO } from './dto/get-vendors.dto';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
@@ -55,7 +61,6 @@ export enum VendorRegisteredApp {
 
 @Injectable()
 export class VendorsService {
-
   private readonly logger = new Logger(VendorsService.name);
   private vendorRoleCache: { id: number; name: string } | null = null;
   private shouldFundVendorWallet: string;
@@ -69,18 +74,46 @@ export class VendorsService {
     private readonly eventEmitter: EventEmitter2,
     private readonly signUpService: SignupsService,
     private readonly walletService: WalletService,
-    private walletStorage: FileWalletStorage,
 
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
 
   async onModuleInit() {
-    const vendorFundSettings = await this.settings.getByName('FUND_VENDOR_WALLET');
+    const vendorFundSettings = await this.settings.getByName(
+      'FUND_VENDOR_WALLET'
+    );
     this.shouldFundVendorWallet = vendorFundSettings?.value as string;
   }
 
   //TODO: Fix allow duplicate users?
   async registerVendor(dto: VendorRegisterDto) {
+    // Resolve default chain and pick the matching wallet as primary
+    const defaultChainConfig =
+      (await this.prisma.chainConfig.findFirst({
+        where: { isActive: true, isDefault: true },
+      })) ??
+      (await this.prisma.chainConfig.findFirst({ where: { isActive: true } }));
+
+    const defaultChainType = defaultChainConfig?.chain?.toLowerCase() ?? 'evm';
+
+    const defaultWallet =
+      dto.wallets?.find((w) => w.chain?.toLowerCase() === defaultChainType) ??
+      dto.wallets?.[0];
+
+    if (!defaultWallet?.address)
+      throw new BadRequestException({
+        message: 'At least one wallet address is required',
+        code: 'VENDOR_WALLET_ADDRESS_REQUIRED',
+      });
+
+    const wallet = defaultWallet.address;
+
+    // Phase 1: pre-save wallets to composite storage (DB placeholder + FS)
+    // so the transaction can atomically assign the real entityId via assignEntity.
+    if (dto.wallets?.length) {
+      await this.walletService.saveExternalWallets(dto.wallets);
+    }
+
     const vendor = await this.prisma.$transaction(async (prisma) => {
       const role = await prisma.role.findFirst({
         where: { name: UserRoles.VENDOR },
@@ -91,7 +124,7 @@ export class VendorsService {
           code: 'VENDOR_ROLE_NOT_FOUND',
         });
       // Add to User table
-      const { service, wallet, authWallet, walletDetails, ...rest } = dto;
+      const { service, wallets, authWallet, ...rest } = dto;
       if (dto?.email || dto?.phone) {
         const userData = await prisma.user.findFirst({
           where: {
@@ -116,38 +149,51 @@ export class VendorsService {
       const user = await prisma.user.create({ data: { ...rest, wallet } });
 
       // Add to UserRole table
-      const userRolePayload = { userId: user.id, roleId: role.id };
-      await prisma.userRole.create({ data: userRolePayload });
+      await prisma.userRole.create({
+        data: { userId: user.id, roleId: role.id },
+      });
+
       // Add to Auth table
       await prisma.auth.create({
         data: {
           userId: +user.id,
           service: dto.service as any,
-          serviceId: dto.authWallet ? authWallet : wallet,
+          serviceId: authWallet ?? wallet,
           details: dto.extras,
         },
       });
-
-      if (walletDetails) {
-        await this.walletStorage.saveKey(walletDetails)
+      if (dto.service !== Service.WALLET) {
+        await prisma.auth.create({
+          data: {
+            userId: +user.id,
+            service: Service.WALLET,
+            serviceId: wallet,
+            details: dto.extras,
+          },
+        });
       }
-      if (dto.service === Service.WALLET) return user;
 
-      await prisma.auth.create({
-        data: {
-          userId: +user.id,
-          service: Service.WALLET,
-          serviceId: dto.wallet,
-          details: dto.extras,
-        },
-      });
+      // Phase 2: assign pre-saved wallets to the new user; mark primary
+      if (wallets?.length) {
+        await DatabaseWalletStorage.assignEntity(
+          prisma,
+          wallets.map((w) => ({ address: w.address, chain: w.chain })),
+          user.uuid
+        );
+        await prisma.walletAddress.update({
+          where: { address: wallet },
+          data: { isPrimary: true },
+        });
+      }
 
       return user;
     });
 
     // Emit vendor created event to fund vendor wallet
     if (this.shouldFundVendorWallet?.toLowerCase() == 'true') {
-      this.eventEmitter.emit(ProjectEvents.VENDORS_CREATED, { wallet: vendor.wallet });
+      this.eventEmitter.emit(ProjectEvents.VENDORS_CREATED, {
+        wallet: vendor.wallet,
+      });
     }
 
     this.notificationService.createNotification({
@@ -155,10 +201,9 @@ export class VendorsService {
       description: `Vendor ${vendor.name} is waiting for admin approval`,
       group: 'Vendor Management',
       notify: true,
-    })
+    });
     return vendor;
   }
-
 
   async registerVendorWithPassword(
     dto: VendorPasswordRegisterDto,
@@ -188,11 +233,11 @@ export class VendorsService {
 
       // Step 4: Create wallet using WalletService
       try {
-        randomWallet = await this.walletService.createWallet();
+        [randomWallet] = await this.walletService.createBulkForAllChains(1);
         walletCreated = true;
 
         this.logger.log('Vendor wallet created:', {
-          address: randomWallet.address,
+          address: randomWallet.defaultAddress,
           blockchain: randomWallet.blockchain || 'evm',
         });
       } catch (walletError) {
@@ -204,7 +249,6 @@ export class VendorsService {
 
       // Step 5: Use transaction to ensure atomicity
       const result = await this.prisma.$transaction(async (tx) => {
-
         // Create signup request using SignupsService with USERNAME service
         const signupData = {
           name: dto.name,
@@ -252,6 +296,11 @@ export class VendorsService {
             roleId: vendorRole.id,
           },
         });
+        await DatabaseWalletStorage.assignEntity(
+          tx,
+          randomWallet?.wallets,
+          auth.User.uuid
+        );
 
         return { signup, auth, username: dto.username };
       });
@@ -290,14 +339,16 @@ export class VendorsService {
             phone: result.auth.User.phone,
             extras: result.auth.User.extras,
           },
-
-          wallet: {
-            address: randomWallet.address,
-            blockchain: randomWallet.blockchain || 'evm',
-            // SECURITY: Consider encrypting private key or delivering via secure channel
-            privateKey: randomWallet.privateKey,
-            mnemonic: randomWallet.mnemonic,
-          },
+          walletDetails: randomWallet.wallets.map((w) => ({
+            address: w.address,
+            chainType: w.chain,
+            config: {
+              chain: w.chain,
+              address: w.address,
+              mnemonic: w.mnemonic,
+              privateKey: w.privateKey,
+            }
+          })),
           message:
             'Vendor registered successfully with VENDOR role and auto-generated wallet. ',
         },
@@ -407,14 +458,12 @@ export class VendorsService {
       rdetails
     );
 
-    // Step 4: Get vendor's wallet details
-    let wallet = null;
-    try {
-      wallet = await this.walletService.getSecretByWallet(user.wallet);
-    } catch (error) {
-      this.logger.error('Failed to retrieve wallet:', error);
-      // Don't fail login if wallet retrieval fails
-    }
+    // Step 4: Fetch all chain wallets generated for this vendor
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: { entityId: user.uuid },
+      select: { address: true, chainType: true, config: true },
+    });
+
 
     return {
       accessToken: authSession.accessToken,
@@ -425,14 +474,16 @@ export class VendorsService {
         username: user.username,
         email: user.email,
         phone: user.phone,
-        wallet: user.wallet,
         gender: user.gender,
-        extras: user.extras
+        extras: user.extras,
       },
-      wallet,
+      walletDetails,
     };
   }
-  async changeVendorPassword(user: CurrentUserInterface, dto: ChangePasswordDto) {
+  async changeVendorPassword(
+    user: CurrentUserInterface,
+    dto: ChangePasswordDto
+  ) {
     const isVendor = user.roles?.includes(UserRoles.VENDOR);
     if (!isVendor) {
       throw new ForbiddenException('User is not a vendor');
@@ -449,9 +500,18 @@ export class VendorsService {
 
   async assignToProject(dto: VendorAddToProjectDto) {
     const { vendorId, projectId } = dto;
-    const vendorUser = await this.prisma.user.findUnique({
-      where: { uuid: vendorId },
-    });
+    const [vendorUser, project] = await Promise.all([
+      this.prisma.user.findUnique({ where: { uuid: vendorId } }),
+      this.prisma.project.findUnique({
+        where: { uuid: projectId },
+        select: { chainType: true },
+      }),
+    ]);
+    if (!vendorUser)
+      throw new NotFoundException({
+        message: 'Vendor not found',
+        code: 'VENDOR_NOT_FOUND',
+      });
     const userRoles = await this.prisma.userRole.findMany({
       where: { userId: vendorUser.id },
       include: {
@@ -468,12 +528,28 @@ export class VendorsService {
         message: 'Not a vendor',
         code: 'USER_IS_NOT_A_VENDOR',
       });
+
+    // Resolve chain-specific wallet address for this vendor; fallback to primary wallet
+    let walletAddress = vendorUser.wallet;
+    if (project?.chainType) {
+      const chainWallet = await this.prisma.walletAddress.findFirst({
+        where: {
+          entityId: vendorId,
+          chainType: project?.chainType,
+          deletedAt: null,
+        },
+        select: { address: true },
+      });
+      if (chainWallet?.address) walletAddress = chainWallet.address;
+    }
+
     const projectPayload = {
       uuid: vendorId,
-      walletAddress: vendorUser.wallet,
+      walletAddress,
     };
 
     const assigned = await this.getVendorAssignedToProject(vendorId, projectId);
+    vendorUser.wallet = walletAddress;
 
     if (assigned)
       throw new RpcException({
@@ -590,15 +666,23 @@ export class VendorsService {
     }
 
     return {
-      totalCounts: Object.values(countsByGender).reduce((total, count) => total + count, 0),
+      totalCounts: Object.values(countsByGender).reduce(
+        (total, count) => total + count,
+        0
+      ),
       genderStats: countsByGender,
     };
   }
 
   async getVendor(id: UUID | Address) {
-    const data = isAddress(id)
-      ? await this.prisma.user.findFirst({ where: { wallet: id } })
-      : await this.prisma.user.findUnique({ where: { uuid: id } });
+    let userId;
+    if (isAddress(id)) {
+      const entityDetails = await this.prisma.walletAddress.findUnique({
+        where: { address: id },
+      });
+      userId = entityDetails?.entityId;
+    } else userId = id;
+    const data = await this.prisma.user.findUnique({ where: { uuid: userId } });
 
     if (!data) {
       throw new NotFoundException({
@@ -609,17 +693,35 @@ export class VendorsService {
     }
 
     const projectData = await this.prisma.projectVendors.findMany({
-      where: { vendorId: data.uuid },
+      where: { vendorId: data?.uuid },
       include: {
         Project: true,
         User: true,
       },
     });
+
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: {
+        entityId: data.uuid,
+      },
+      select: {
+        address: true,
+        chainType: true,
+      },
+    });
+    const response = {
+      ...data,
+      walletDetails: walletDetails,
+    };
+    let projectResponse = {} as any;
+
+    projectResponse.data = projectData;
+    projectResponse.walletDetails = walletDetails;
     // const vendorIdentifier = projectData[0]?.extras;
     // const projects = projectData.map((project) => project.Project);
     // const userdata = { ...data, projects, vendorIdentifier };
     if (projectData.length === 0) {
-      return data;
+      return response;
     }
 
     return projectData;
@@ -627,7 +729,9 @@ export class VendorsService {
 
   async listVendor(dto: GetVendorsDTO) {
     const { vendorName, projectName, status, page, perPage } = dto;
-    this.logger.log(`Listing vendors with filters - Vendor Name: ${vendorName}, Project Name: ${projectName}, Status: ${status}, Page: ${page}, Per Page: ${perPage}`);
+    this.logger.log(
+      `Listing vendors with filters - Vendor Name: ${vendorName}, Project Name: ${projectName}, Status: ${status}, Page: ${page}, Per Page: ${perPage}`
+    );
 
     const where: any = {
       Role: {
@@ -669,7 +773,8 @@ export class VendorsService {
         },
       };
     }
-    return paginate(
+
+    const users = await paginate(
       this.prisma.userRole,
       {
         where,
@@ -693,6 +798,32 @@ export class VendorsService {
         perPage,
       }
     );
+
+    const userIds = users.data.map((user: any) => user.User.uuid);
+
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: {
+        entityId: { in: userIds },
+      },
+    });
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+
+    const data = users.data.map((user: any) => ({
+      ...user,
+      walletDetails: walletMap.get(user.User.uuid) || null,
+    }));
+    let result = {} as any;
+    result.data = data;
+    result.meta = users.meta;
+    return result;
   }
 
   async listProjectVendor(dto) {
@@ -720,6 +851,28 @@ export class VendorsService {
         createdAt: 'desc',
       },
     });
+    const userIds = venData.map((user: any) => user.User.uuid);
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: {
+        entityId: { in: userIds },
+      },
+    });
+
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+
+    const data = venData.map((user) => ({
+      ...user,
+      walletDetails: walletMap.get(user.User.uuid) || null,
+    }));
+
     // return venData
     return this.client.send(
       {
@@ -727,7 +880,7 @@ export class VendorsService {
         uuid: projectId,
       },
 
-      venData
+      data
     );
   }
 
@@ -740,6 +893,22 @@ export class VendorsService {
         },
       },
     });
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: {
+        entityId: { in: uuids },
+      },
+    });
+
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+
     const combinedData = data.data.map((item) => {
       const matchedData = vendorData.find(
         (vendor) => vendor.uuid === item.vendorId
@@ -749,6 +918,7 @@ export class VendorsService {
         Vendor: {
           ...item.Vendor,
           ...matchedData,
+          walletDetails: walletMap.get(item.Vendor.uuid),
         },
       };
     });
@@ -761,13 +931,10 @@ export class VendorsService {
 
   async verifyOtp(dto, rdetails) {
     const res = await this.authService.loginByOtp(dto, rdetails);
-    console.log(res);
     if (res.accessToken) {
       return this.getUserDetails(dto);
     }
   }
-
-
 
   async getUserDetails(dto) {
     const challengeData = decryptChallenge(
@@ -794,8 +961,14 @@ export class VendorsService {
 
   async updateVendor(dto, uuid: UUID) {
     // STEP 1: Load current vendor state and validate it exists
-    this.logger.log(`Starting vendor update for UUID: ${uuid} with data: ${JSON.stringify(dto)}`);
-    const originalVendor = await this.prisma.user.findUnique({ where: { uuid } });
+    this.logger.log(
+      `Starting vendor update for UUID: ${uuid} with data: ${JSON.stringify(
+        dto
+      )}`
+    );
+    const originalVendor = await this.prisma.user.findUnique({
+      where: { uuid },
+    });
     if (!originalVendor)
       throw new NotFoundException({
         message: 'Vendor not found',
@@ -819,7 +992,8 @@ export class VendorsService {
       // registeredApps must stay a closed set so the frontend can safely
       // translate each value against a known enum instead of rendering
       // arbitrary caller-supplied strings verbatim.
-      const registeredApps = (dto.extras as { registeredApps?: unknown })?.registeredApps;
+      const registeredApps = (dto.extras as { registeredApps?: unknown })
+        ?.registeredApps;
       if (registeredApps !== undefined) {
         if (!Array.isArray(registeredApps)) {
           throw new BadRequestException({
@@ -831,9 +1005,14 @@ export class VendorsService {
         const invalid = registeredApps.filter((app) => !allowed.includes(app));
         if (invalid.length > 0) {
           throw new BadRequestException({
-            message: `Invalid registered app(s): ${invalid.join(', ')}. Allowed values: ${allowed.join(', ')}`,
+            message: `Invalid registered app(s): ${invalid.join(
+              ', '
+            )}. Allowed values: ${allowed.join(', ')}`,
             code: 'INVALID_REGISTERED_APPS',
-            params: { invalid: invalid.join(', '), allowed: allowed.join(', ') },
+            params: {
+              invalid: invalid.join(', '),
+              allowed: allowed.join(', '),
+            },
           });
         }
       }
@@ -841,7 +1020,13 @@ export class VendorsService {
     }
 
     // STEP 1.3: Capture a snapshot of original vendor (excluding system fields) for saga rollback
-    const originalSnapshot = (({ id, uuid: _u, createdAt, updatedAt, ...rest }) => rest)(originalVendor);
+    const originalSnapshot = (({
+      id,
+      uuid: _u,
+      createdAt,
+      updatedAt,
+      ...rest
+    }) => rest)(originalVendor);
 
     // STEP 2: Persist vendor update to the local database
     const result = await this.usersService.update(uuid, dto);
@@ -864,14 +1049,21 @@ export class VendorsService {
     for (const project of assignedProjects) {
       try {
         // STEP 4.1: Send vendor update to the project microservice
-        this.logger.log(`Propagating vendor update to project ${project.projectId} for vendor UUID: ${uuid}`);
+        this.logger.log(
+          `Propagating vendor update to project ${project.projectId} for vendor UUID: ${uuid}`
+        );
         await lastValueFrom(
-          this.client.send({ cmd: VendorJobs.UPDATE, uuid: project.projectId }, { uuid, ...dto })
+          this.client.send(
+            { cmd: VendorJobs.UPDATE, uuid: project.projectId },
+            { uuid, ...dto }
+          )
         );
         updatedProjects.push(project.projectId);
       } catch (error) {
         const err = error as Error;
-        this.logger.error(`Saga failed at project ${project.projectId}: ${err.message}`);
+        this.logger.error(
+          `Saga failed at project ${project.projectId}: ${err.message}`
+        );
 
         // STEP 4.2: Saga compensation — revert local vendor record to the original snapshot
         await this.revertVendorUpdate(originalSnapshot, uuid);
@@ -880,8 +1072,15 @@ export class VendorsService {
         await Promise.allSettled(
           updatedProjects.map((projectId) =>
             lastValueFrom(
-              this.client.send({ cmd: VendorJobs.UPDATE, uuid: projectId }, { uuid, ...originalSnapshot })
-            ).catch((e: Error) => this.logger.error(`Failed to revert project ${projectId}: ${e.message}`))
+              this.client.send(
+                { cmd: VendorJobs.UPDATE, uuid: projectId },
+                { uuid, ...originalSnapshot }
+              )
+            ).catch((e: Error) =>
+              this.logger.error(
+                `Failed to revert project ${projectId}: ${e.message}`
+              )
+            )
           )
         );
 
@@ -896,7 +1095,10 @@ export class VendorsService {
     return result;
   }
 
-  private async revertVendorUpdate(snapshot: Record<string, unknown>, uuid: string) {
+  private async revertVendorUpdate(
+    snapshot: Record<string, unknown>,
+    uuid: string
+  ) {
     await this.prisma.user.update({ where: { uuid }, data: snapshot });
   }
 
@@ -957,7 +1159,7 @@ export class VendorsService {
   }
 
   async getVendorByUuid(dto: { projectId: string; vendorId: string }) {
-    return this.prisma.projectVendors.findUnique({
+    const vendor = await this.prisma.projectVendors.findUnique({
       where: {
         projectVendorIdentifier: dto,
       },
@@ -965,5 +1167,22 @@ export class VendorsService {
         User: true,
       },
     });
+
+    if (!vendor) return null;
+
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: { entityId: dto.vendorId },
+    });
+
+    return {
+      ...vendor,
+      User: {
+        ...vendor.User,
+        walletDetails: walletDetails.map((w) => ({
+          address: w.address,
+          chainType: w.chainType,
+        })),
+      },
+    };
   }
 }

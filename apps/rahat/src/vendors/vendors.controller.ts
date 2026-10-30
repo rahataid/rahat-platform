@@ -1,24 +1,24 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
-    Body,
-    Controller,
-    Get,
-    Param,
-    Patch,
-    Post,
-    Query,
-    UseGuards,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
-    GetVendorOtp,
-    VendorAddToProjectDto,
-    VendorPasswordRegisterDto,
-    VendorRegisterDto,
-    VendorUpdateDto,
-    VerifyVendorOtp,
+  GetVendorOtp,
+  VendorAddToProjectDto,
+  VendorPasswordRegisterDto,
+  VendorRegisterDto,
+  VendorUpdateDto,
+  VerifyVendorOtp,
 } from '@rahataid/extensions';
 import { ACTIONS, APP, SUBJECTS, VendorJobs } from '@rahataid/sdk';
 import { Request } from '@rumsan/sdk/types';
@@ -38,7 +38,6 @@ import { VendorsService } from './vendors.service';
 @Controller('vendors')
 export class VendorsController {
   constructor(private readonly vendorService: VendorsService) { }
-
 
   @Post('')
   registerVendor(@Body() dto: VendorRegisterDto) {
