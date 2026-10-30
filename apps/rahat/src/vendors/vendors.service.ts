@@ -339,7 +339,16 @@ export class VendorsService {
             phone: result.auth.User.phone,
             extras: result.auth.User.extras,
           },
-          walletDetails: randomWallet.wallets,
+          walletDetails: randomWallet.wallets.map((w) => ({
+            address: w.address,
+            chainType: w.chain,
+            config: {
+              chain: w.chain,
+              address: w.address,
+              mnemonic: w.mnemonic,
+              privateKey: w.privateKey,
+            }
+          })),
           message:
             'Vendor registered successfully with VENDOR role and auto-generated wallet. ',
         },
@@ -454,6 +463,7 @@ export class VendorsService {
       where: { entityId: user.uuid },
       select: { address: true, chainType: true, config: true },
     });
+
 
     return {
       accessToken: authSession.accessToken,

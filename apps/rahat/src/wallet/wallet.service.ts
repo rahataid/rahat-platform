@@ -14,6 +14,7 @@ export interface WalletCreateResult {
   chain: ChainType;
   address: string;
   privateKey: string;
+  mnemonic?: string;
 }
 
 export interface MultiChainWalletResult {
@@ -258,6 +259,7 @@ export class WalletService implements OnModuleInit {
             chain: chainType,
             address: walletKeys.address,
             privateKey: walletKeys.privateKey,
+            mnemonic: walletKeys.mnemonic,
           });
         } catch (error) {
           this.logger.error(`Failed to derive wallet for chain ${chainType}: ${error instanceof Error ? error.message : String(error)}`);
