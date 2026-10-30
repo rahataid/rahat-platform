@@ -97,3 +97,12 @@ Mirror what's already here — see [coding-patterns.md](./docs/agent/coding-patt
 ## Keeping docs in sync
 
 Same convention as rahat-project-aa: update the relevant `docs/agent/*.md` whenever the implementation it describes changes, and bump a `_Last updated: YYYY-MM-DD_` line at the bottom for any functional change (skip for typo/formatting-only edits).
+
+## Commits and pull requests
+
+Commits and PRs in this repo are authored by the developer. When writing them:
+
+- Do not add `Co-Authored-By` trailers or "Generated with ..." lines for any AI agent or tool.
+- Do not name or mention an AI agent, assistant, or model in commit messages, PR titles, or PR descriptions.
+- Commit as the configured git user; never set the author or committer to an agent identity.
+- Describe the change itself, in the developer's voice.
