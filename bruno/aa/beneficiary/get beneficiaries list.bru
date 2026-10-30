@@ -1,0 +1,33 @@
+meta {
+  name: get beneficiaries list
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/projects/{{project_id}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "beneficiary.list_by_project",
+    "payload": {
+      "page": 1,
+      "perPage": 10000,
+      "order": "desc",
+      "sort": "createdAt"
+    }
+  }
+  
+}
+
+script:post-response {
+  const responseData = res.getBody();
+  bru.setVar("categoryId", responseData.data?.uuid);
+}

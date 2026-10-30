@@ -35,3 +35,11 @@ export class WebVersionDto {
     @ApiProperty({ example: 'https://aa-dev.rahat.io' }) url: string;
     @ApiProperty({ example: 'dev', nullable: true }) env: string | null;
 }
+
+export class ProjectEnvironmentDto {
+    @ApiProperty({ example: '73887c41-2d49-445b-85da-f86c65608a23' })
+    projectId: string;
+
+    @ApiProperty({ example: 'development', nullable: true })
+    env: string | null;
+}

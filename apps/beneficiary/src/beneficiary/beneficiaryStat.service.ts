@@ -1,9 +1,10 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { Prisma } from '@prisma/client';
 import { StatsService } from '@rahat/stats';
-import { MS_TIMEOUT, ProjectContants } from '@rahataid/sdk';
+import { ProjectContants } from '@rahataid/sdk';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { timeout } from 'rxjs';
@@ -23,11 +24,19 @@ const REPORTING_FIELD = {
 
 @Injectable()
 export class BeneficiaryStatService {
+  private readonly logger = new Logger(BeneficiaryStatService.name);
+
   constructor(
     protected prisma: PrismaService,
     private readonly statsService: StatsService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
+
+  // Relation filter instead of loading the project's ids into a huge IN list. Also keeps an
+  // empty project at 0 instead of falling back to all beneficiaries.
+  private projectFilter(projectUuid?: string): Prisma.BeneficiaryWhereInput {
+    return projectUuid ? { BeneficiaryProject: { some: { projectId: projectUuid } } } : {};
+  }
 
   async getTableStats() {
     return await this.prisma.stats.findMany({});
@@ -35,25 +44,7 @@ export class BeneficiaryStatService {
 
 
   async calculateGenderStats(projectUuid?: string) {
-    const filter: any = {};
-
-    // Add filter if projectUuid is provided
-    if (projectUuid) {
-      const beneficiaryIds = await this.prisma.beneficiaryProject
-        .findMany({
-          where: {
-            projectId: projectUuid,
-          },
-          select: {
-            beneficiaryId: true,
-          },
-        })
-        .then((projectBen) => projectBen.map((data) => data?.beneficiaryId));
-
-      if (beneficiaryIds.length > 0) {
-        filter.uuid = { in: beneficiaryIds };
-      }
-    }
+    const filter = this.projectFilter(projectUuid);
 
     const genderStats = await this.prisma.beneficiary.groupBy({
       by: ['gender'],
@@ -70,27 +61,7 @@ export class BeneficiaryStatService {
   }
 
   async calculateAgeStats(projectUuid?: string) {
-    const filter: any = {};
-
-    // Add filter if projectUuid is provided
-    if (projectUuid) {
-      const beneficiaryIds = await this.prisma.beneficiaryProject
-        .findMany({
-          where: {
-            projectId: projectUuid,
-          },
-          select: {
-            beneficiaryId: true,
-          },
-        })
-        .then((projectBen) =>
-          projectBen.map((data: any) => data?.beneficiaryId)
-        );
-
-      if (beneficiaryIds.length > 0) {
-        filter.uuid = { in: beneficiaryIds };
-      }
-    }
+    const filter = this.projectFilter(projectUuid);
 
     const ageStats = await this.prisma.beneficiary.groupBy({
       by: ['age'],
@@ -107,25 +78,7 @@ export class BeneficiaryStatService {
   }
 
   async calculateBankedStatusStats(projectUuid?: string) {
-    const filter: any = {};
-
-    // Add filter if projectUuid is provided
-    if (projectUuid) {
-      const beneficiaryIds = await this.prisma.beneficiaryProject
-        .findMany({
-          where: {
-            projectId: projectUuid,
-          },
-          select: {
-            beneficiaryId: true,
-          },
-        })
-        .then((projectBen) => projectBen.map((data) => data?.beneficiaryId));
-
-      if (beneficiaryIds.length > 0) {
-        filter.uuid = { in: beneficiaryIds };
-      }
-    }
+    const filter = this.projectFilter(projectUuid);
     const bankedStatusStats = await this.prisma.beneficiary.groupBy({
       by: ['bankedStatus'],
       _count: {
@@ -190,27 +143,7 @@ export class BeneficiaryStatService {
   }
 
   async calculateInternetStatusStats(projectUuid?: string) {
-    const filter: any = {};
-
-    // Add filter if projectUuid is provided
-    if (projectUuid) {
-      const beneficiaryIds = await this.prisma.beneficiaryProject
-        .findMany({
-          where: {
-            projectId: projectUuid,
-          },
-          select: {
-            beneficiaryId: true,
-          },
-        })
-        .then((projectBen) =>
-          projectBen.map((data: any) => data?.beneficiaryId)
-        );
-
-      if (beneficiaryIds.length > 0) {
-        filter.uuid = { in: beneficiaryIds };
-      }
-    }
+    const filter = this.projectFilter(projectUuid);
 
     const internetStatusStats = await this.prisma.beneficiary.groupBy({
       by: ['internetStatus'],
@@ -227,27 +160,7 @@ export class BeneficiaryStatService {
   }
 
   async calculatePhoneStatusStats(projectUuid?: string) {
-    const filter: any = {};
-
-    // Add filter if projectUuid is provided
-    if (projectUuid) {
-      const beneficiaryIds = await this.prisma.beneficiaryProject
-        .findMany({
-          where: {
-            projectId: projectUuid,
-          },
-          select: {
-            beneficiaryId: true,
-          },
-        })
-        .then((projectBen) =>
-          projectBen.map((data: any) => data?.beneficiaryId)
-        );
-
-      if (beneficiaryIds.length > 0) {
-        filter.uuid = { in: beneficiaryIds };
-      }
-    }
+    const filter = this.projectFilter(projectUuid);
     const phoneStatusStats = await this.prisma.beneficiary.groupBy({
       by: ['phoneStatus'],
       _count: {
@@ -263,26 +176,7 @@ export class BeneficiaryStatService {
   }
 
   async totalBeneficiaries(projectUuid?: string) {
-    const filter: any = {};
-
-    // Add filter if projectUuid is provided
-    if (projectUuid) {
-      const beneficiaryIds = await this.prisma.beneficiaryProject
-        .findMany({
-          where: {
-            projectId: projectUuid,
-          },
-          select: {
-            beneficiaryId: true,
-          },
-        })
-        .then((projectBen) =>
-          projectBen.map((data: any) => data?.beneficiaryId)
-        );
-      if (beneficiaryIds.length > 0) {
-        filter.uuid = { in: beneficiaryIds };
-      }
-    }
+    const filter = this.projectFilter(projectUuid);
     const result = {
       count: await this.prisma.beneficiary.count({ where: filter }),
     };
@@ -808,7 +702,13 @@ export class BeneficiaryStatService {
     return range;
   }
 
+  // Global stats always, plus the project's when one is given. Used by the UPDATE_STATS job.
   async saveAllStats(projectUuid?: string) {
+    await this.saveGlobalStats();
+    if (projectUuid) await this.saveProjectStats(projectUuid);
+  }
+
+  async saveGlobalStats() {
     const {
       gender,
       bankedStatus,
@@ -979,69 +879,75 @@ export class BeneficiaryStatService {
         group: 'beneficiary',
       }),
     ]);
+  }
 
-    if (projectUuid) {
-      const { gender, bankedStatus, internetStatus, phoneStatus, total, age, totalVendors } =
-        await this.calculateProjectStats(projectUuid);
-      const rangedAge = await this.calculateRangedAge(age);
-      await Promise.all([
-        this.statsService.save({
-          name: 'beneficiary_total',
-          data: total,
-          group: projectUuid,
-        }),
-        this.statsService.save({
-          name: 'beneficiary_gender',
-          data: gender,
-          group: projectUuid,
-        }),
-        this.statsService.save({
-          name: 'beneficiary_bankedStatus',
-          data: bankedStatus,
-          group: projectUuid,
-        }),
-        this.statsService.save({
-          name: 'beneficiary_internetStatus',
-          data: internetStatus,
-          group: projectUuid,
-        }),
-        this.statsService.save({
-          name: 'beneficiary_phoneStatus',
-          data: phoneStatus,
-          group: projectUuid,
-        }),
-        this.statsService.save({
-          name: 'beneficiary_age_range',
-          data: rangedAge,
-          group: projectUuid,
-        }),
-        this.statsService.save({
-          name: 'vendor_total',
-          data: totalVendors,
-          group: projectUuid
-        }),
-        //PROJECT VOUCHER SHOULD BE CALCUATED IN PROJECT
-        // this.statsService.save({
-        //   name: 'voucher_total',
-        //   data: await this.getTotalVoucher(),
-        //   group: projectUuid
-        // })
-      ]);
+  async saveProjectStats(projectUuid: string) {
+    const { gender, bankedStatus, internetStatus, phoneStatus, total, age, totalVendors } =
+      await this.calculateProjectStats(projectUuid);
+    const rangedAge = await this.calculateRangedAge(age);
+    await Promise.all([
+      this.statsService.save({
+        name: 'beneficiary_total',
+        data: total,
+        group: projectUuid,
+      }),
+      this.statsService.save({
+        name: 'beneficiary_gender',
+        data: gender,
+        group: projectUuid,
+      }),
+      this.statsService.save({
+        name: 'beneficiary_bankedStatus',
+        data: bankedStatus,
+        group: projectUuid,
+      }),
+      this.statsService.save({
+        name: 'beneficiary_internetStatus',
+        data: internetStatus,
+        group: projectUuid,
+      }),
+      this.statsService.save({
+        name: 'beneficiary_phoneStatus',
+        data: phoneStatus,
+        group: projectUuid,
+      }),
+      this.statsService.save({
+        name: 'beneficiary_age_range',
+        data: rangedAge,
+        group: projectUuid,
+      }),
+      this.statsService.save({
+        name: 'vendor_total',
+        data: totalVendors,
+        group: projectUuid
+      }),
+      //PROJECT VOUCHER SHOULD BE CALCUATED IN PROJECT
+      // this.statsService.save({
+      //   name: 'voucher_total',
+      //   data: await this.getTotalVoucher(),
+      //   group: projectUuid
+      // })
+    ]);
 
 
-      const projectStats = await this.client.send({ cmd: "rahat.jobs.reporting.list", uuid: projectUuid }, {})
-        .pipe(timeout(MS_TIMEOUT)).toPromise();
+    // Not every project service implements reporting.list (AA doesn't), and Redis transport
+    // never answers an unhandled pattern, so don't wait the full MS_TIMEOUT for it.
+    const projectStats = await this.client.send({ cmd: "rahat.jobs.reporting.list", uuid: projectUuid }, {})
+      .pipe(timeout(10000)).toPromise()
+      .catch((err) => {
+        this.logger.warn(`No reporting stats from project ${projectUuid}: ${err?.message ?? err}`);
+        return [];
+      });
 
-      projectStats.forEach((stat) => {
+    await Promise.all(
+      projectStats.map((stat) =>
         this.statsService.save({
           name: stat.name,
           data: stat.data,
           group: projectUuid
         })
-      })
-    }
-
-    return { gender, bankedStatus, internetStatus, phoneStatus, total };
+      )
+    );
   }
 }
 

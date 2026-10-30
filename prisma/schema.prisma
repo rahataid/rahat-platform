@@ -404,6 +404,9 @@ model BeneficiaryGroupProject {
   beneficiaryGroupId String           @db.Uuid()
   beneficiaryGroup   BeneficiaryGroup @relation(fields: [beneficiaryGroupId], references: [uuid])
 
+  // PENDING until the project service confirms the group sync
+  syncStatus GroupSyncStatus @default(SYNCED)
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt()
   deletedAt DateTime?
@@ -434,6 +437,11 @@ model BeneficiaryProject {
   @@index([beneficiaryId])
   @@index([deletedAt])
   @@map("tbl_beneficiaries_projects")
+}
+
+enum GroupSyncStatus {
+  PENDING
+  SYNCED
 }
 
 enum GroupPurpose {

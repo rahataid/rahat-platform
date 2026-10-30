@@ -8,29 +8,64 @@ import { EVENTS } from '@rumsan/user';
 import { Queue } from 'bull';
 import { BeneficiaryStatService } from '../beneficiary/beneficiaryStat.service';
 import { EmailService } from './email.service';
+
+const STATS_DEBOUNCE_MS = 5000;
+
 @Injectable()
 export class ListenersService {
+  private readonly logger = new Logger(ListenersService.name);
   private otp: string;
-  private readonly logger = new Logger();
-
+  private readonly statsTimers = new Map<string, NodeJS.Timeout>();
+  private statsRun: Promise<unknown> = Promise.resolve();
 
   constructor(
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY) private readonly queue: Queue,
     private readonly benStats: BeneficiaryStatService,
-    private emailService: EmailService,
-  ) { }
+    private emailService: EmailService
+  ) {}
 
   @OnEvent(BeneficiaryEvents.BENEFICIARY_CREATED)
   @OnEvent(BeneficiaryEvents.BENEFICIARY_UPDATED)
   @OnEvent(BeneficiaryEvents.BENEFICIARY_REMOVED)
-  @OnEvent(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT)
   @OnEvent(BeneficiaryEvents.VENDORS_CREATED)
   @OnEvent(BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_CT)
   @OnEvent(BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL)
   @OnEvent(BeneficiaryEvents.REFRESH_STATS)
-  async onBeneficiaryChanged(eventObject: any) {
-    this.logger.log("Reached to update stats after beneficiary change event");
-    await this.benStats.saveAllStats(eventObject?.projectUuid);
+  onBeneficiaryChanged(eventObject?: { projectUuid?: string }) {
+    this.scheduleStats('global', () => this.benStats.saveGlobalStats());
+    if (eventObject?.projectUuid)
+      this.scheduleProjectStats(eventObject.projectUuid);
+  }
+
+  // Assignment only changes project membership; global stats are unaffected.
+  @OnEvent(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT)
+  onAssignedToProject(eventObject?: { projectUuid?: string }) {
+    if (eventObject?.projectUuid)
+      this.scheduleProjectStats(eventObject.projectUuid);
+  }
+
+  private scheduleProjectStats(projectUuid: string) {
+    this.scheduleStats(`project:${projectUuid}`, () =>
+      this.benStats.saveProjectStats(projectUuid)
+    );
+  }
+
+  // Debounced per key so bursts (imports, batched assignment) recompute once, and run one at a
+  // time because each recompute scans the beneficiary table on the shared Prisma pool.
+  // ponytail: in-process only; each replica recomputes on its own, move to a shared queue if that hurts
+  private scheduleStats(key: string, run: () => Promise<unknown>) {
+    clearTimeout(this.statsTimers.get(key));
+    this.statsTimers.set(
+      key,
+      setTimeout(() => {
+        this.statsTimers.delete(key);
+        this.statsRun = this.statsRun
+          .then(run)
+          .catch((err) =>
+            this.logger.error(`Stats refresh failed (${key})`, err)
+          );
+      }, STATS_DEBOUNCE_MS)
+    );
   }
 
   @OnEvent(EVENTS.OTP_CREATED)

@@ -33,6 +33,8 @@ export const JOBS = {
   LIST_PROJECT_PII: 'rahat.jobs.beneficiary.list_project_pii',
   REMOVE: 'rahat.jobs.beneficiary.remove',
   ADD_TO_PROJECT: 'rahat.jobs.beneficiary.add_to_project',
+  CREATE_BENF_ADD_GROUP_TO_PROJECT: 'rahat.jobs.beneficiary.create_benf_add_group_to_project',
+  GROUP_ASSIGN_SYNC_RESULT: 'rahat.jobs.beneficiary.group_assign_sync_result',
   BULK_ADD_TO_PROJECT: 'rahat.jobs.beneficiary.bulk_add_to_project',
   ASSIGN_TO_PROJECT: 'rahat.jobs.beneficiary.assign_to_project',
   ASSIGN_GROUP_TO_PROJECT: 'rahat.jobs.beneficiary.assign_group_to_project',
