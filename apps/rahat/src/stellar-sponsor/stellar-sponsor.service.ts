@@ -183,8 +183,15 @@ export class StellarSponsorService {
     if (network !== 'mainnet' && network !== 'testnet') {
       throw rpcError('INVALID_CORE_SPONSOR_SETTINGS', `${SETTING_NAME}.network must be "mainnet" or "testnet" (got ${JSON.stringify(network)})`);
     }
+    let keypair: Keypair;
+    try {
+      keypair = Keypair.fromSecret(settings.sponsorSecret);
+    } catch {
+      // never echo the value: it is (meant to be) the core secret
+      throw rpcError('INVALID_CORE_SPONSOR_SETTINGS', `${SETTING_NAME}.sponsorSecret is not a valid Stellar secret key`);
+    }
     return {
-      keypair: Keypair.fromSecret(settings.sponsorSecret),
+      keypair,
       server: new Horizon.Server(settings.horizonUrl || HORIZON_URLS[network]),
       networkPassphrase: PASSPHRASES[network],
     };

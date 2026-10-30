@@ -94,6 +94,14 @@ describe('StellarSponsorService', () => {
     });
   });
 
+  it('rejects an invalid secret without echoing it', async () => {
+    const publicKeyByMistake = core.publicKey();
+    prisma.setting.findUnique.mockResolvedValue({ value: { network: 'testnet', sponsorSecret: publicKeyByMistake } });
+    const error = await service.getCoreSponsorStatus().catch((e) => e);
+    expect(error.error).toMatchObject({ code: 'INVALID_CORE_SPONSOR_SETTINGS' });
+    expect(JSON.stringify(error.error)).not.toContain(publicKeyByMistake);
+  });
+
   it('reports free XLM in status', async () => {
     await expect(service.getCoreSponsorStatus()).resolves.toEqual({
       publicKey: core.publicKey(),
