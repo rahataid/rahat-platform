@@ -535,7 +535,7 @@ export class VendorsService {
       const chainWallet = await this.prisma.walletAddress.findFirst({
         where: {
           entityId: vendorId,
-          chainType: project.chainType,
+          chainType: project?.chainType,
           deletedAt: null,
         },
         select: { address: true },
@@ -549,6 +549,7 @@ export class VendorsService {
     };
 
     const assigned = await this.getVendorAssignedToProject(vendorId, projectId);
+    vendorUser.wallet = walletAddress;
 
     if (assigned)
       throw new RpcException({
