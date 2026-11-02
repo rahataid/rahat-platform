@@ -200,7 +200,11 @@ export class BeneficiaryService {
 
     const { beneficiary, ...piiData } = getBeneficiaryByPhone;
 
-    return { ...beneficiary, pii: piiData };
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails([
+        beneficiary.uuid,
+      ]);
+    return { ...beneficiary, pii: piiData, walletDetails };
   }
 
   async listBeneficiaryPiiByWalletAddress(data: any) {
@@ -425,9 +429,9 @@ export class BeneficiaryService {
     const entityDetails = await this.prisma.walletAddress.findMany({
       where: {
         address: {
-          in: data.map((b) => b.walletAddress)
-        }
-      }
+          in: data.map((b) => b.walletAddress),
+        },
+      },
     });
 
     const beneficiaries = await this.prisma.beneficiary.findMany({
@@ -446,9 +450,7 @@ export class BeneficiaryService {
 
     if (data && beneficiaries.length > 0) {
       const combinedData = data.map((dat) => {
-        const benDetails = beneficiaries.find(
-          (ben) => ben.uuid === dat.uuid
-        );
+        const benDetails = beneficiaries.find((ben) => ben.uuid === dat.uuid);
         const { pii, ...rest } = benDetails || {};
         return {
           piiData: pii,
@@ -675,7 +677,7 @@ export class BeneficiaryService {
 
     data.piiData = piiData || null;
     if (walletDetails)
-      data.walletAddressDetails = walletDetails.map((d) => ({
+      data.walletDetails = walletDetails.map((d) => ({
         address: d?.address,
         chainType: d?.chainType,
       }));
@@ -719,6 +721,11 @@ export class BeneficiaryService {
   }
 
   async findOneByPhone(payload: { phone: string; projectUUID: string }) {
+    const projectDetails = await this.prisma.project.findFirst({
+      where: {
+        uuid: payload.projectUUID,
+      },
+    });
     const beneficiary = await this.prisma.beneficiary.findFirst({
       where: {
         AND: [
@@ -765,9 +772,10 @@ export class BeneficiaryService {
 
     if (!beneficiary) return null;
     const walletDetails =
-      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails([
-        beneficiary.uuid,
-      ]);
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(
+        [beneficiary.uuid],
+        projectDetails?.chainType || ''
+      );
     let piiData = null;
     if (beneficiary.pii) {
       piiData = beneficiary.pii;
@@ -787,7 +795,7 @@ export class BeneficiaryService {
 
     return {
       ...beneficiary,
-      ...walletDetails,
+      walletDetails,
       piiData,
       groupedBeneficiaries,
     };
@@ -1217,9 +1225,6 @@ export class BeneficiaryService {
       // added the new stats update service to handle the stats update in a queue instead of inline, to avoid blocking the request path
       await this.statsUpdateService.scheduleUpdate();
 
-
-
-
       //   //COMMENTING THIS BECAUSE ALREADY ADDED TO PROJECT
 
       //   const assignPromises = insertedBeneficiariesWithPii.map(
@@ -1297,11 +1302,11 @@ export class BeneficiaryService {
     }
 
     const groupData = {
-      name: trimmedGroupName
-    } as any
+      name: trimmedGroupName,
+    } as any;
     if (groupPurpose) groupData.groupPurpose = groupPurpose;
     const group = await this.prisma.beneficiaryGroup.create({
-      data: groupData
+      data: groupData,
     });
 
     await this.prisma.groupedBeneficiaries.createMany({
@@ -1314,8 +1319,8 @@ export class BeneficiaryService {
     if (projectUuid) {
       const groupDetails = {
         projectId: projectUuid,
-        beneficiaryGroupId: group.uuid
-      }
+        beneficiaryGroupId: group.uuid,
+      };
       await this.assignBeneficiaryGroupToProject(groupDetails);
     }
 
@@ -1591,7 +1596,7 @@ export class BeneficiaryService {
         beneficiaryGroupId: group.uuid,
         projectId: dto.projectId,
       };
-      await (await this.assignBeneficiaryGroupToProject(payload));
+      await await this.assignBeneficiaryGroupToProject(payload);
     }
 
     return {
@@ -1694,8 +1699,13 @@ export class BeneficiaryService {
 
   async uploadBeneficiariesToGroup(
     dtos: CreateBeneficiaryDto[],
-    groupUuid: string,
-  ): Promise<{ created: number; updated: number; addedToGroup: number; group: any }> {
+    groupUuid: string
+  ): Promise<{
+    created: number;
+    updated: number;
+    addedToGroup: number;
+    group: any;
+  }> {
     const group = await this.prisma.beneficiaryGroup.findUnique({
       where: { uuid: groupUuid },
     });
@@ -1729,7 +1739,10 @@ export class BeneficiaryService {
           createdUuids.push(created.uuid);
         }
       } catch (error) {
-        this.logger.error(`Error processing beneficiary uuid=${dto.uuid}: ${(error as Error).message}`);
+        this.logger.error(
+          `Error processing beneficiary uuid=${dto.uuid}: ${(error as Error).message
+          }`
+        );
         // continue — don't fail entire import for one row
       }
     }
@@ -1747,11 +1760,13 @@ export class BeneficiaryService {
     }
 
     // add benf into project benf group
-    const benfGroupProject = await this.prisma.beneficiaryGroupProject.findMany({
-      where: {
-        beneficiaryGroupId: groupUuid,
-      },
-    });
+    const benfGroupProject = await this.prisma.beneficiaryGroupProject.findMany(
+      {
+        where: {
+          beneficiaryGroupId: groupUuid,
+        },
+      }
+    );
 
     if (benfGroupProject.length > 0) {
       for (const bgp of benfGroupProject) {
@@ -1779,7 +1794,7 @@ export class BeneficiaryService {
   }
 
   private async _createBeneficiaryFromDto(
-    dto: CreateBeneficiaryDto,
+    dto: CreateBeneficiaryDto
   ): Promise<{ uuid: string }> {
     const { piiData, multiChainWallets, ...rest } = dto;
 
@@ -1790,9 +1805,10 @@ export class BeneficiaryService {
 
     const uuid = rest.uuid ?? (uuidv4() as UUID);
 
-    const walletAddress = await this.beneficiaryUtilsService.ensureValidWalletAddress(
-      rest.walletAddress,
-    );
+    const walletAddress =
+      await this.beneficiaryUtilsService.ensureValidWalletAddress(
+        rest.walletAddress
+      );
 
     return this.prisma.$transaction(async (tx) => {
       const ben = await tx.beneficiary.create({
@@ -1809,7 +1825,6 @@ export class BeneficiaryService {
           extras: piiData?.extras ?? {},
         },
       });
-
 
       if (
         multiChainWallets &&
@@ -1836,7 +1851,7 @@ export class BeneficiaryService {
 
   private async _updateBeneficiaryFromDto(
     existing: any,
-    dto: CreateBeneficiaryDto,
+    dto: CreateBeneficiaryDto
   ): Promise<void> {
     const updateData: Record<string, any> = {};
 
@@ -1845,12 +1860,15 @@ export class BeneficiaryService {
     if (dto.latitude !== undefined) updateData.latitude = dto.latitude;
     if (dto.longitude !== undefined) updateData.longitude = dto.longitude;
     if (dto.notes !== undefined) updateData.notes = dto.notes;
-    if (dto.bankedStatus !== undefined) updateData.bankedStatus = dto.bankedStatus;
-    if (dto.internetStatus !== undefined) updateData.internetStatus = dto.internetStatus;
+    if (dto.bankedStatus !== undefined)
+      updateData.bankedStatus = dto.bankedStatus;
+    if (dto.internetStatus !== undefined)
+      updateData.internetStatus = dto.internetStatus;
     if (dto.phoneStatus !== undefined) updateData.phoneStatus = dto.phoneStatus;
     if (dto.birthDate !== undefined) updateData.birthDate = dto.birthDate;
     if (dto.age !== undefined) updateData.age = dto.age;
-    if (dto.extras) updateData.extras = { ...(existing.extras ?? {}), ...dto.extras };
+    if (dto.extras)
+      updateData.extras = { ...(existing.extras ?? {}), ...dto.extras };
 
     if (Object.keys(updateData).length > 0) {
       await this.prisma.beneficiary.update({
@@ -1863,13 +1881,15 @@ export class BeneficiaryService {
       const piiUpdates: Record<string, any> = {};
 
       if (dto.piiData.name !== undefined) piiUpdates.name = dto.piiData.name;
-      if (dto.piiData.phone !== undefined) piiUpdates.phone = dto.piiData.phone
-      if (dto.piiData.email !== undefined) piiUpdates.email = dto.piiData.email
+      if (dto.piiData.phone !== undefined) piiUpdates.phone = dto.piiData.phone;
+      if (dto.piiData.email !== undefined) piiUpdates.email = dto.piiData.email;
 
       if (dto.piiData.extras !== undefined) {
-        piiUpdates.extras = { ...(existing.pii?.extras ?? {}), ...dto.piiData.extras };
+        piiUpdates.extras = {
+          ...(existing.pii?.extras ?? {}),
+          ...dto.piiData.extras,
+        };
       }
-
 
       if (Object.keys(piiUpdates).length > 0 && existing.pii) {
         await this.prisma.beneficiaryPii.update({
@@ -1946,7 +1966,6 @@ export class BeneficiaryService {
       };
       return this.applyGroupBeneficiaryPagination(uuid, emptyResult, dto);
     }
-
 
     const updatedGroupDetails = {
       ...group,
@@ -2171,7 +2190,8 @@ export class BeneficiaryService {
     groupPurpose: GroupPurpose,
     benfGroup: GroupWithValidationAA
   ) {
-    const benfsInGroup = benfGroup.groupedBeneficiaries?.map((d) => d.Beneficiary) ?? [];
+    const benfsInGroup =
+      benfGroup.groupedBeneficiaries?.map((d) => d.Beneficiary) ?? [];
 
     if (!benfsInGroup.length) return;
 
@@ -2772,7 +2792,6 @@ export class BeneficiaryService {
     };
   }
 
-
   //used by AA
   async saveBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
     return this.prisma.beneficiaryGroupProject.create({
@@ -2790,7 +2809,9 @@ export class BeneficiaryService {
   // reconcilePendingGroupSyncs covers lost messages.
   async assignBeneficiaryGroupToProject(dto: AddBenfGroupToProjectDto) {
     const { beneficiaryGroupId, projectId } = dto;
-    this.logger.log(`Assigning beneficiary group ${beneficiaryGroupId} to project ${projectId}`);
+    this.logger.log(
+      `Assigning beneficiary group ${beneficiaryGroupId} to project ${projectId}`
+    );
 
     // get project info
     const project = await this.prisma.project.findUnique({
@@ -2799,13 +2820,14 @@ export class BeneficiaryService {
       },
     });
 
-
     if (!project) {
       throw new RpcException('Project not found.');
     }
 
     if (this.isAAProject(project.type)) {
-      const isGroupValidForAA = await this.isGroupValidForAA(beneficiaryGroupId);
+      const isGroupValidForAA = await this.isGroupValidForAA(
+        beneficiaryGroupId
+      );
       if (!isGroupValidForAA) {
         throw new RpcException({
           message: '[GROUP_NOT_VALID_FOR_AA] Group is not valid for AA.',
@@ -2839,11 +2861,16 @@ export class BeneficiaryService {
         { timeout: 30000, maxWait: 10000 }
       );
     } catch (err) {
-      this.logger.error(`Failed to assign group ${beneficiaryGroupId} to project ${projectId}`, err);
+      this.logger.error(
+        `Failed to assign group ${beneficiaryGroupId} to project ${projectId}`,
+        err
+      );
       if (err.code === 'P2002') {
         throw new RpcException('Group is already assigned to this project.');
       }
-      throw new RpcException(err.message || 'Failed to assign beneficiary group to project.');
+      throw new RpcException(
+        err.message || 'Failed to assign beneficiary group to project.'
+      );
     }
 
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
@@ -2876,7 +2903,9 @@ export class BeneficiaryService {
 
     if (status === 'SUCCESS') {
       await this.markGroupSynced(beneficiaryGroupId, projectId);
-      this.logger.log(`Group ${beneficiaryGroupId} synced to project ${projectId}`);
+      this.logger.log(
+        `Group ${beneficiaryGroupId} synced to project ${projectId}`
+      );
     } else {
       this.logger.error(
         `Project ${projectId} failed to import group ${beneficiaryGroupId}: ${error}. Reverting assignment.`
@@ -2914,7 +2943,10 @@ export class BeneficiaryService {
           data: { updatedAt: new Date() },
         });
 
-        const { payload } = await this.getGroupSyncData(beneficiaryGroupId, project);
+        const { payload } = await this.getGroupSyncData(
+          beneficiaryGroupId,
+          project
+        );
         const syncState = await this.sendGroupSync(payload);
 
         if (syncState === 'UNKNOWN' && row.createdAt < giveUpBefore) {
@@ -2980,7 +3012,10 @@ export class BeneficiaryService {
         pii: { select: { phone: true, name: true } },
         createdAt: true,
         updatedAt: true,
-        BeneficiaryProject: { where: { projectId: project.uuid }, select: { id: true } },
+        BeneficiaryProject: {
+          where: { projectId: project.uuid },
+          select: { id: true },
+        },
       },
     });
 
@@ -3007,7 +3042,8 @@ export class BeneficiaryService {
       projectId: project.uuid,
       beneficiaries: beneficiaries.map((beneficiary) => ({
         uuid: beneficiary.uuid,
-        walletAddress: chainWalletMap.get(beneficiary.uuid) ?? beneficiary.walletAddress,
+        walletAddress:
+          chainWalletMap.get(beneficiary.uuid) ?? beneficiary.walletAddress,
         phone: beneficiary.pii?.phone || null,
         isVerified: beneficiary.isVerified,
         beneficiaryGroupId,
@@ -3019,14 +3055,28 @@ export class BeneficiaryService {
             extras: {
               ...((beneficiary.extras as object) || {}),
               phone: beneficiary.pii?.phone || null,
-              ...(beneficiary.pii?.name != null ? { name: beneficiary.pii.name } : {}),
-              ...(beneficiary.location != null ? { location: beneficiary.location } : {}),
-              ...(beneficiary.latitude != null ? { latitude: beneficiary.latitude } : {}),
-              ...(beneficiary.longitude != null ? { longitude: beneficiary.longitude } : {}),
+              ...(beneficiary.pii?.name != null
+                ? { name: beneficiary.pii.name }
+                : {}),
+              ...(beneficiary.location != null
+                ? { location: beneficiary.location }
+                : {}),
+              ...(beneficiary.latitude != null
+                ? { latitude: beneficiary.latitude }
+                : {}),
+              ...(beneficiary.longitude != null
+                ? { longitude: beneficiary.longitude }
+                : {}),
               ...(beneficiary.age != null ? { age: beneficiary.age } : {}),
-              ...(beneficiary.bankedStatus != null ? { bankedStatus: beneficiary.bankedStatus } : {}),
-              ...(beneficiary.internetStatus != null ? { internetStatus: beneficiary.internetStatus } : {}),
-              ...(beneficiary.phoneStatus != null ? { phoneStatus: beneficiary.phoneStatus } : {}),
+              ...(beneficiary.bankedStatus != null
+                ? { bankedStatus: beneficiary.bankedStatus }
+                : {}),
+              ...(beneficiary.internetStatus != null
+                ? { internetStatus: beneficiary.internetStatus }
+                : {}),
+              ...(beneficiary.phoneStatus != null
+                ? { phoneStatus: beneficiary.phoneStatus }
+                : {}),
             },
           }
           : { extras: beneficiary.extras || null }),
@@ -3055,7 +3105,10 @@ export class BeneficiaryService {
       const res = await lastValueFrom(
         this.client
           .send(
-            { cmd: BeneficiaryJobs.CREATE_BENF_ADD_GROUP_TO_PROJECT, uuid: projectId },
+            {
+              cmd: BeneficiaryJobs.CREATE_BENF_ADD_GROUP_TO_PROJECT,
+              uuid: projectId,
+            },
             payload
           )
           .pipe(timeout(30000))
@@ -3077,7 +3130,10 @@ export class BeneficiaryService {
         return 'UNKNOWN';
       }
 
-      this.logger.error(`Project ${projectId} rejected group ${beneficiaryGroupId}`, err);
+      this.logger.error(
+        `Project ${projectId} rejected group ${beneficiaryGroupId}`,
+        err
+      );
       await this.revertGroupAssignment(beneficiaryGroupId, projectId);
       throw new RpcException(err);
     }
@@ -3092,9 +3148,14 @@ export class BeneficiaryService {
 
   // Removes the group from the project so the user can assign it again. Only drops project
   // links created by this assignment for beneficiaries no other assigned group still needs.
-  private async revertGroupAssignment(beneficiaryGroupId: string, projectId: string) {
+  private async revertGroupAssignment(
+    beneficiaryGroupId: string,
+    projectId: string
+  ) {
     const groupProject = await this.prisma.beneficiaryGroupProject.findUnique({
-      where: { beneficiaryGroupProjectIdentifier: { projectId, beneficiaryGroupId } },
+      where: {
+        beneficiaryGroupProjectIdentifier: { projectId, beneficiaryGroupId },
+      },
     });
     if (!groupProject) return;
 
@@ -3109,22 +3170,26 @@ export class BeneficiaryService {
               none: {
                 beneficiaryGroupId: { not: beneficiaryGroupId },
                 deletedAt: null,
-                beneficiaryGroup: { beneficiaryGroupProject: { some: { projectId } } },
+                beneficiaryGroup: {
+                  beneficiaryGroupProject: { some: { projectId } },
+                },
               },
             },
           },
         },
       }),
-      this.prisma.beneficiaryGroupProject.delete({ where: { id: groupProject.id } }),
+      this.prisma.beneficiaryGroupProject.delete({
+        where: { id: groupProject.id },
+      }),
     ]);
 
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
       projectUuid: projectId,
     });
-    this.logger.log(`Reverted group ${beneficiaryGroupId} assignment on project ${projectId}`);
+    this.logger.log(
+      `Reverted group ${beneficiaryGroupId} assignment on project ${projectId}`
+    );
   }
-
-
 
   async listTempBeneficiaries(uuid: string, query: ListTempBeneficiariesDto) {
     const tempGroupWithBeneficiaries = await this.prisma.tempGroup.findUnique({

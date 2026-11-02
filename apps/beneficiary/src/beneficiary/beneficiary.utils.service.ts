@@ -95,16 +95,17 @@ export class BeneficiaryUtilsService {
   }
 
 
-  async fetchBeneficiaryWalletDetails(benIds: string[]) {
+  async fetchBeneficiaryWalletDetails(benIds: string[], chainType?: string) {
     const walletDetails = await this.prismaService.walletAddress.findMany({
       where: {
-        entityId: { in: benIds }
+        entityId: { in: benIds },
+        ...(chainType ? { chainType: chainType.toUpperCase() } : {}),
       },
       select: {
         address: true,
         chainType: true,
-        entityId: true
-      }
+        entityId: true,
+      },
     });
     return walletDetails;
   }
