@@ -443,11 +443,12 @@ export class WalletService implements OnModuleInit {
    * (DB with placeholder entityId + FileWalletStorage). Call DatabaseWalletStorage.assignEntity
    * inside the entity-creation transaction to swap the placeholder for the real uuid.
    */
-  async saveExternalWallets(wallets: { address: string; chain: string; privateKey?: string }[]): Promise<void> {
+  async saveExternalWallets(wallets: { address: string; chain: string; privateKey?: string, mnemonic?: string }[]): Promise<void> {
     const keys: WalletKeys[] = wallets.map((w) => ({
       address: w.address,
       blockchain: w.chain as ChainType,
       privateKey: w.privateKey ?? null,
+      mnemonic: w.mnemonic ?? null
     }));
     await this.providerRegistry.saveWalletKeys(keys);
   }
