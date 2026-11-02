@@ -65,6 +65,7 @@ export const JOBS = {
     ADD_GROUP: 'aa.jobs.stakeholders.addGroup',
     UPDATE_GROUP: 'aa.jobs.stakeholders.updateGroup',
     DELETE_GROUP: 'aa.jobs.stakeholders.deleteGroup',
+    EXPORT_GROUP: 'aa.jobs.stakeholders.exportGroup',
   },
   BENEFICIARY: {
     ADD_GROUP: 'aa.jobs.beneficiary.addGroup',

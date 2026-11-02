@@ -6,7 +6,7 @@ import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
-import { PrismaService } from '@rumsan/prisma';
+import { PrismaModule } from '@rumsan/prisma';
 import Redis from 'ioredis';
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { BankAccountCheckProcessor } from './bank-account-check.processor';
@@ -37,9 +37,8 @@ import { BeneficiaryProcessor, SYNC_TRACKING_REDIS } from './beneficiary.process
         duration: 1000, // window in ms — 1 request per second
       },
     }),
-    BeneficiaryModule, EventEmitterModule.forRoot()],
+    BeneficiaryModule, EventEmitterModule.forRoot(), PrismaModule],
   providers: [
-    PrismaService,
     BeneficiaryProcessor,
     BankAccountCheckProcessor,
     {

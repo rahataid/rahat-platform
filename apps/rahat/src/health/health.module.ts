@@ -3,7 +3,7 @@
 import { BullModule } from "@nestjs/bull";
 import { Logger, Module } from "@nestjs/common";
 import { BQUEUE } from "@rahataid/sdk";
-import { PrismaService } from "@rumsan/prisma";
+import { PrismaModule } from "@rumsan/prisma";
 import { AuthsModule } from "@rumsan/user";
 import { EmailService } from "../listeners/email.service";
 import { HealthController } from "./health.controller";
@@ -11,11 +11,12 @@ import { HealthService } from "./health.service";
 
 @Module({
     imports: [
+        PrismaModule,
         BullModule.registerQueue({ name: BQUEUE.RAHAT }),
         AuthsModule,
     ],
     controllers: [HealthController],
-    providers: [HealthService, PrismaService, Logger, EmailService],
+    providers: [HealthService, Logger, EmailService],
     exports: [HealthService],
 })
 export class HealthModule { }
