@@ -93,6 +93,16 @@
       },
       "notes": []
     },
+    "dev-v2": {
+      "tag": "dev-v2",
+      "secret": "ENV_AA_DEV",
+      "apps": "beneficiary,rahat,shared-auth",
+      "description": "Development V2",
+      "urls": {
+        "AA Dev": "https://aa-dev-v2.rahat.io"
+      },
+      "notes": []
+    },
     "main": {
       "tag": "latest",
       "secret": "ENV_AA_MAIN",
