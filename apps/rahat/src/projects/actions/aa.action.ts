@@ -245,6 +245,12 @@ export const aaActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
     return sendCommand({ cmd: AAJobs.STAKEHOLDERS.DELETE_GROUP, uuid }, payload);
   },
+
+  [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.EXPORT_GROUP]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STAKEHOLDERS.EXPORT_GROUP, uuid }, payload),
   // **** Stakeholders groups end ******//
 
   // **** Contract Interactions ****//
@@ -581,6 +587,12 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.CHAIN.SEND_ASSET]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.CHAIN.SEND_ASSET, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CHAIN.CHECK_OTP]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.CHAIN.CHECK_OTP, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.CHAIN.ADD_CVA_EVIDENCE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: AAJobs.CHAIN.ADD_CVA_EVIDENCE, uuid }, payload),
 
   [MS_ACTIONS.AAPROJECT.CHAIN.GET_WALLET_BALANCE]: (
     uuid,

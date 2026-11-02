@@ -4,12 +4,13 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
-import { PrismaService } from '@rumsan/prisma';
+import { PrismaModule } from '@rumsan/prisma';
 import { QueueController } from './queue.controller';
 import { QueueService } from './queue.service';
 
 @Module({
   imports: [
+    PrismaModule,
     ClientsModule.register([
       {
         name: ProjectContants.ELClient,
@@ -43,7 +44,7 @@ import { QueueService } from './queue.service';
       name: BQUEUE.FUND_VENDOR_WALLET,
     }),
   ],
-  providers: [PrismaService, QueueService],
+  providers: [QueueService],
   controllers: [QueueController],
   exports: [QueueService],
 })

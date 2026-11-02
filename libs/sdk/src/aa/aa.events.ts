@@ -65,6 +65,7 @@ export const JOBS = {
     ADD_GROUP: 'aa.jobs.stakeholders.addGroup',
     UPDATE_GROUP: 'aa.jobs.stakeholders.updateGroup',
     DELETE_GROUP: 'aa.jobs.stakeholders.deleteGroup',
+    EXPORT_GROUP: 'aa.jobs.stakeholders.exportGroup',
   },
   BENEFICIARY: {
     ADD_GROUP: 'aa.jobs.beneficiary.addGroup',
@@ -205,6 +206,8 @@ export const JOBS = {
     DISBURSE: 'aa.jobs.chain.disburse',
     SEND_OTP: 'aa.jobs.chain.sendOtp',
     SEND_ASSET: 'aa.jobs.chain.sendAsset',
+    CHECK_OTP: 'aa.jobs.chain.checkOtp',
+    ADD_CVA_EVIDENCE: 'aa.jobs.chain.addCvaEvidence',
     GET_DISBURSEMENT_STATS: 'aa.jobs.chain.getDisbursementStats',
     GET_WALLET_BALANCE: 'aa.jobs.chain.getWalletBalance',
     GET_RAHAT_TOKEN_BALANCE: 'aa.jobs.chain.getRahatTokenBalance',

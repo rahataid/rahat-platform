@@ -21,8 +21,8 @@ export class ListenersService {
   constructor(
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY) private readonly queue: Queue,
     private readonly benStats: BeneficiaryStatService,
-    private emailService: EmailService,
-  ) { }
+    private emailService: EmailService
+  ) {}
 
   @OnEvent(BeneficiaryEvents.BENEFICIARY_CREATED)
   @OnEvent(BeneficiaryEvents.BENEFICIARY_UPDATED)
@@ -33,17 +33,21 @@ export class ListenersService {
   @OnEvent(BeneficiaryEvents.REFRESH_STATS)
   onBeneficiaryChanged(eventObject?: { projectUuid?: string }) {
     this.scheduleStats('global', () => this.benStats.saveGlobalStats());
-    if (eventObject?.projectUuid) this.scheduleProjectStats(eventObject.projectUuid);
+    if (eventObject?.projectUuid)
+      this.scheduleProjectStats(eventObject.projectUuid);
   }
 
   // Assignment only changes project membership; global stats are unaffected.
   @OnEvent(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT)
   onAssignedToProject(eventObject?: { projectUuid?: string }) {
-    if (eventObject?.projectUuid) this.scheduleProjectStats(eventObject.projectUuid);
+    if (eventObject?.projectUuid)
+      this.scheduleProjectStats(eventObject.projectUuid);
   }
 
   private scheduleProjectStats(projectUuid: string) {
-    this.scheduleStats(`project:${projectUuid}`, () => this.benStats.saveProjectStats(projectUuid));
+    this.scheduleStats(`project:${projectUuid}`, () =>
+      this.benStats.saveProjectStats(projectUuid)
+    );
   }
 
   // Debounced per key so bursts (imports, batched assignment) recompute once, and run one at a
@@ -57,7 +61,9 @@ export class ListenersService {
         this.statsTimers.delete(key);
         this.statsRun = this.statsRun
           .then(run)
-          .catch((err) => this.logger.error(`Stats refresh failed (${key})`, err));
+          .catch((err) =>
+            this.logger.error(`Stats refresh failed (${key})`, err)
+          );
       }, STATS_DEBOUNCE_MS)
     );
   }

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { PrismaModule, PrismaService } from '@rumsan/prisma';
+import { PrismaModule } from '@rumsan/prisma';
 import {
   UsersModule as RSUserModule,
   UsersService as RSUserService,
@@ -18,7 +18,7 @@ import { UsersService } from './users.service';
     ]),
   ],
   controllers: [CustomUsersController],
-  providers: [PrismaService, EventEmitter2, UsersService],
-  exports: [PrismaService, EventEmitter2, UsersService], // Removed WalletService since it's globally available
+  providers: [EventEmitter2, UsersService],
+  exports: [EventEmitter2, UsersService], // Removed WalletService since it's globally available
 })
 export class UsersModule { }

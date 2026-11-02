@@ -10,6 +10,7 @@ export interface ServiceStatus {
     last_checked?: string;
     notes?: string | Record<string, any>;
     link?: string;
+    down_time?: string;
 }
 
 export interface HealthStatus {
@@ -33,7 +34,8 @@ export const SERVICE_LABELS: Record<string, string> = {
 };
 
 export async function checkDatabase(
-    prisma: PrismaService
+    prisma: PrismaService,
+    previousStatus?: ServiceStatus
 ): Promise<ServiceStatus> {
     const start = performance.now();
     const last_checked = new Date().toISOString();
@@ -58,18 +60,20 @@ export async function checkDatabase(
             },
         };
     } catch (err) {
+        const down_time = previousStatus?.status === 'down' ? previousStatus.down_time : last_checked;
         return {
             status: 'down',
             message: (err as Error).message,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
             link: process.env.DATABASE_URL,
-            notes: {}
+            notes: {},
+            down_time
         };
     }
 }
 
-export async function checkRedis(queue: Queue): Promise<ServiceStatus> {
+export async function checkRedis(queue: Queue, previousStatus?: ServiceStatus): Promise<ServiceStatus> {
     const start = performance.now();
     const last_checked = new Date().toISOString();
     try {
@@ -111,20 +115,22 @@ export async function checkRedis(queue: Queue): Promise<ServiceStatus> {
             },
         };
     } catch (err) {
+        const down_time = previousStatus?.status === 'down' ? previousStatus.down_time : last_checked;
         return {
             status: 'down',
             message: (err as Error).message,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
             link: process.env.REDIS_URL,
-            notes: {}
-
+            notes: {},
+            down_time,
         };
     }
 }
 
 export async function checkRPCUrl(
-    prisma: PrismaService
+    prisma: PrismaService,
+    previousStatus?: ServiceStatus
 ): Promise<ServiceStatus> {
     const start = performance.now();
     let rpcUrl;
@@ -156,18 +162,21 @@ export async function checkRPCUrl(
             link: rpcUrl,
         };
     } catch (err) {
+        const down_time = previousStatus?.status === 'down' ? previousStatus.down_time : last_checked;
         return {
             status: 'down',
             message: (err as Error).message,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
             link: rpcUrl,
+            down_time,
         };
     }
 }
 
 export async function checkCloudflare(
-    prisma: PrismaService
+    prisma: PrismaService,
+    previousStatus?: ServiceStatus
 ): Promise<ServiceStatus> {
     const start = performance.now();
     const last_checked = new Date().toISOString();
@@ -206,18 +215,21 @@ export async function checkCloudflare(
         } else if (error.message) {
             message = error.message;
         }
+        const down_time = previousStatus?.status === 'down' ? previousStatus.down_time : last_checked;
         return {
             status: 'down',
             message,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
             link: endpoint || '',
+            down_time,
         };
     }
 }
 
 export async function checkCommunication(
-    prisma: PrismaService
+    prisma: PrismaService,
+    previousStatus?: ServiceStatus
 ): Promise<ServiceStatus> {
     const start = performance.now();
     const last_checked = new Date().toISOString();
@@ -238,18 +250,21 @@ export async function checkCommunication(
             link: endpoint,
         };
     } catch (error: any) {
+        const down_time = previousStatus?.status === 'down' ? previousStatus.down_time : last_checked;
         return {
             status: 'down',
             message: error,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
             link: endpoint,
+            down_time,
         };
     }
 }
 
 export async function checkOffRampService(
-    prisma: PrismaService
+    prisma: PrismaService,
+    previousStatus?: ServiceStatus
 ): Promise<ServiceStatus> {
     let settingsValue;
     const start = performance.now();
@@ -277,25 +292,31 @@ export async function checkOffRampService(
             link: endpoint,
         };
     } catch (err) {
+        const down_time = previousStatus?.status === 'down' ? previousStatus.down_time : last_checked;
         return {
             status: 'down',
             message: err,
             latency: `${(performance.now() - start).toFixed(2)}ms`,
             last_checked,
             link: endpoint,
+            down_time,
         };
     }
 }
 
 
-export async function updateHealthStatus(prisma: PrismaService, rahatQueue: Queue): Promise<HealthStatus> {
+export async function updateHealthStatus(
+    prisma: PrismaService,
+    rahatQueue: Queue,
+    previousServices?: HealthStatus['services']
+): Promise<HealthStatus> {
     const [database, redis, rpcUrl, cloudflare, communication, offRamp] = await Promise.all([
-        checkDatabase(prisma),
-        checkRedis(rahatQueue),
-        checkRPCUrl(prisma),
-        checkCloudflare(prisma),
-        checkCommunication(prisma),
-        checkOffRampService(prisma)
+        checkDatabase(prisma, previousServices?.database),
+        checkRedis(rahatQueue, previousServices?.redis),
+        checkRPCUrl(prisma, previousServices?.rpcUrl),
+        checkCloudflare(prisma, previousServices?.cloudflare),
+        checkCommunication(prisma, previousServices?.communication),
+        checkOffRampService(prisma, previousServices?.offRamp),
     ]);
     const allUp = database.status === 'up' && redis.status === 'up';
     const result: HealthStatus = {
