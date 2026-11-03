@@ -781,6 +781,7 @@ export class BeneficiaryService {
       piiData = beneficiary.pii;
       delete beneficiary.pii;
     }
+    beneficiary.walletAddress = walletDetails[0].address;
     const groupedBeneficiaries = beneficiary.groupedBeneficiaries.filter(
       (gb) => {
         const { beneficiaryGroupProject } = gb.beneficiaryGroup;
