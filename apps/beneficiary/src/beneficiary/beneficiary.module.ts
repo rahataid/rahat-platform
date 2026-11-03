@@ -16,6 +16,7 @@ import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { BeneficiaryStatService } from './beneficiaryStat.service';
 import { GroupSyncService } from './group-sync.service';
+import { SsePublisherService } from './sse-publisher.service';
 import { VerificationService } from './verification.service';
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { VerificationService } from './verification.service';
   controllers: [BeneficiaryController],
   providers: [
     BeneficiaryService,
+    SsePublisherService,
     BeneficiaryStatsUpdateService,
     BeneficiaryStatService,
     VerificationService,

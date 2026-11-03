@@ -726,3 +726,6 @@ export const queueOptions: RabbitMQModuleOptions['queues'] = [
     options: {},
   },
 ];
+export const SSE_CHANNELS = {
+  LISTENER: 'sse:listener',
+};
