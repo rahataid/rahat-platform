@@ -24,6 +24,7 @@ import {
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
+import { SsePublisherService } from '@rahataid/sse';
 import {
   AAJobs,
   BeneficiaryConstants,
@@ -50,7 +51,6 @@ import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { BeneficiaryStatsUpdateService } from './beneficiary-stats-update.service';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { GroupSyncService } from './group-sync.service';
-import { SsePublisherService } from './sse-publisher.service';
 import { VerificationService } from './verification.service';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });

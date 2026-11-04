@@ -6,13 +6,13 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RpcException } from '@nestjs/microservices';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateBeneficiaryDto } from '@rahataid/extensions';
+import { SsePublisherService } from '@rahataid/sse';
 import { BeneficiaryEvents, BQUEUE, ProjectContants } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
-import { SsePublisherService } from './sse-publisher.service';
 import { VerificationService } from './verification.service';
 
 
