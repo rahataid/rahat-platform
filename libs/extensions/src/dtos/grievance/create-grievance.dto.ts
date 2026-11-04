@@ -56,6 +56,14 @@ export class CreateGrievanceDTO implements Grievance {
   @IsString()
   reportedBy: string;
 
+  @ApiProperty({
+    example: [{ fileName: 'photo.png', mediaURL: 'https://...' }],
+    description: 'Documents related to the grievance',
+    required: false,
+  })
+  @IsOptional()
+  grievanceDocuments?: Record<string, any>[];
+
 }
 
 export class createGrivenceResponseDTO {
