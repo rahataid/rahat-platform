@@ -14,8 +14,8 @@ interface SeedItem {
 
 const ITEMS: SeedItem[] = [
     {
-        name: 'FIREBASE_SERVICE_ACCOUNT_BASE64',
-        envKey: 'FIREBASE_SERVICE_ACCOUNT_BASE64',
+        name: 'GOOGLE_APPLICATION_CREDENTIALS',
+        envKey: 'GOOGLE_APPLICATION_CREDENTIALS',
         isPrivate: true,
         validate: (v) => {
             let json: any;
