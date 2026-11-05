@@ -467,7 +467,7 @@ enum BeneficiaryTypes {
 model BeneficiaryPii {
   beneficiaryId Int         @unique
   name          String?
-  phone         String      
+  phone         String
   email         String?
   extras        Json?       @db.JsonB()
   beneficiary   Beneficiary @relation("BeneficiaryToPii", fields: [beneficiaryId], references: [id])
@@ -867,17 +867,77 @@ model OfframpTransaction {
 
 // ++++++++++++++++++ START: Notification ++++++++++++++++++++
 
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum AudienceType {
+  USER
+  ROLE
+  PERMISSION
+  PROJECT_MEMBERS
+  ALL
+}
+
 model Notification {
-  id          Int      @id @default(autoincrement())
+  id          Int                    @id @default(autoincrement())
   title       String
-  projectId   String?  @db.Uuid()
-  project     Project? @relation(fields: [projectId], references: [uuid])
+  projectId   String?                @db.Uuid()
+  project     Project?               @relation(fields: [projectId], references: [uuid])
   description String
   group       String
-  createdAt   DateTime @default(now())
-  notify      Boolean  @default(false)
+  notify      Boolean                @default(false)
+  channels    NotificationChannel[]  @default([])
+  audiences   NotificationAudience[]
+  createdAt   DateTime               @default(now())
 
   @@map("tbl_notifications")
+}
+
+model NotificationAudience {
+  id             Int          @id @default(autoincrement())
+  notificationId Int
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  type           AudienceType
+  value          Json?        @db.JsonB // USER: uuid string, ROLE: name string, PERMISSION: { action, subject }, others: null
+  exclude        Boolean      @default(false)
+
+  @@index([notificationId])
+  @@map("tbl_notifications_audience")
+}
+
+model DeviceToken {
+  id         Int      @id @default(autoincrement())
+  userId     String
+  token      String   @unique // FCM registration token
+  platform   String // android | ios | web
+  appId      String?
+  active     Boolean  @default(true)
+  lastUsedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId, active])
+  @@map("tbl_device_tokens")
+}
+
+model WebPushSubscription {
+  id         Int      @id @default(autoincrement())
+  userId     String
+  endpoint   String   @unique
+  p256dh     String
+  auth       String
+  userAgent  String?
+  active     Boolean  @default(true)
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId, active])
+  @@map("tbl_web_push_subscriptions")
 }
 
 // ++++++++++++++++++ END: Notification ++++++++++++++++++++

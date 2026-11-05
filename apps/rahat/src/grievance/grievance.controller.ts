@@ -31,7 +31,6 @@ export class GrievanceController {
     @Body() createGrievanceDto: CreateGrievanceDTO,
     @Request() req: { user: { id: number } }
   ) {
-    console.log('createGrievanceDtoxxxxxx', createGrievanceDto);
     const userId = req?.user?.id;
 
     if (!userId) {
@@ -78,7 +77,6 @@ export class GrievanceController {
     cmd: 'rahat.jobs.grievance.created',
   })
   async createProjectGrievance(payload: CreateGrievanceMessageDTO) {
-    console.log('createGrievanceDtoxxxxxx', payload);
     const { userId, ...rest } = payload;
 
     return this.grievanceService.createGrievance(
@@ -92,7 +90,6 @@ export class GrievanceController {
     cmd: 'rahat.jobs.grievance.updated',
   })
   updateProjectGrievance(payload: any) {
-    console.log('updatedGrievanceDtoxxxxxx', payload);
     return this.grievanceService.updateProjectGrievance(payload.uuid, payload);
   }
 
@@ -100,7 +97,6 @@ export class GrievanceController {
     cmd: 'rahat.jobs.grievance.removed',
   })
   deleteProjectGrievance(payload: DeleteGrievanceMessageDTO) {
-    console.log('deleteGrievanceDtoxxxxxx', payload);
     return this.grievanceService.softDelete(payload.uuid);
   }
 

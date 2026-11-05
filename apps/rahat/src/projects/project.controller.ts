@@ -1,3 +1,4 @@
+//rahat-platform/apps/rahat/src/projects/project.controller.ts
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
@@ -82,17 +83,21 @@ export class ProjectController {
   @UseGuards(HybridJwtGuard, AbilitiesGuard)
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @Post('actions')
-  msActions(
+  async msActions(
     @Body() data: ProjectCommunicationDto,
     @Req() request: Request
   ) {
-    const response = this.projectService.handleMsActions({
-      ...data,
-      user: request.user,
-    });
-    return response;
+    try {
+      const response = this.projectService.handleMsActions({
+        ...data,
+        user: request.user,
+      });
+      return response;
+    } catch (err: any) {
+      console.error('[msActions] THREW before handleMsActions:', err?.message, err?.stack); // ADD
+      throw err;
+    }
   }
-
   /*
   this endpoint  is used to upload file and parsed the file and send it to  project microservice
   */

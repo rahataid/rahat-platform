@@ -1,16 +1,29 @@
+// rahat-project/apps/rahat/src/notification/notification.service.ts
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { Notification } from '@prisma/client';
+import {
+  Notification,
+  NotificationAudience,
+  NotificationChannel
+} from '@prisma/client';
 import {
   CreateNotificationDto,
   ListNotificationsDto,
 } from '@rahataid/extensions';
 import { APP_JOBS, BQUEUE, UserRoles } from '@rahataid/sdk';
+import { AudienceType } from '@rahataid/sdk/enums';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
+import { isUUID } from 'class-validator';
+import { toAudienceRows } from './audience.mapper';
+import { AudienceResolver, AudienceUser } from './audience.resolver';
+import { PushService } from './push.service';
+import { SmsService } from './sms.service'; //(TOTO : RIGHT NOW IT NOT REQUIRE , BUT KEEPING IT FOR FUTURE USE)
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
+type NotificationWithAudiences = Notification & { audiences: NotificationAudience[] };
+
 
 @Injectable()
 export class NotificationService {
@@ -18,20 +31,35 @@ export class NotificationService {
   constructor(
     @InjectQueue(BQUEUE.RAHAT)
     private readonly rahatQueue: Queue,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
+    private readonly pushService: PushService,
+    private readonly audienceResolver: AudienceResolver,
+    private readonly smsService: SmsService //(TOTO : RIGHT NOW IT NOT REQUIRE , BUT KEEPING IT FOR FUTURE USE)
   ) { }
 
   async createNotification(dto: CreateNotificationDto) {
     try {
+      const { title, description, group } = dto;
+      const channels = this.resolveChannels(dto);
+      const deliverable = channels.filter((c) => c !== NotificationChannel.IN_APP);
+      const projectId = await this.validProjectId(dto.projectId);
+
       const notification = await this.prisma.notification.create({
         data: {
-          ...dto,
+          title,
+          description,
+          group,
+          projectId,
+          channels,
+          notify: deliverable.length > 0,
+          audiences: { create: this.buildAudienceRows(dto) },
           createdAt: new Date(),
         },
+        include: { audiences: true },
       });
-
-      if (notification.notify) {
-        this.notifyUsers(notification);
+      if (deliverable.length) {
+        // fire and forget: a delivery problem must never fail notification creation
+        void this.dispatch(notification, deliverable);
       }
 
       return notification;
@@ -44,42 +72,106 @@ export class NotificationService {
     }
   }
 
-  private async notifyUsers(notification: Notification) {
-    const { ADMIN, MANAGER } = UserRoles;
+  private resolveChannels(dto: CreateNotificationDto): NotificationChannel[] {
+    const valid = Object.values(NotificationChannel);
 
-    const roleFilter = {
-      deletedAt: null,
-      UserRole: {
-        some: {
-          Role: {
-            name: { in: [ADMIN, MANAGER] },
-          },
-        },
-      },
-    };
+    const requested = Array.isArray(dto.channels)
+      ? [...new Set(dto.channels)].filter((c) => valid.includes(c))
+      : [];
 
-    const users = await this.prisma.user.findMany({ where: roleFilter });
+    // empty / missing / all invalid -> default to in-app only
+    return requested.length ? requested : [NotificationChannel.IN_APP];
+  }
 
-    if (users.length === 0) {
-      this.logger.warn('No users found to notify.');
+  // channels from payload; legacy senders (no channels) derive them from `notify`
+  // private resolveChannels(dto: CreateNotificationDto): NotificationChannel[] {
+  //   if (dto.channels?.length) return [...new Set(dto.channels)] as NotificationChannel[];
+  //   return dto.notify
+  //     ? [NotificationChannel.IN_APP, NotificationChannel.PUSH, NotificationChannel.EMAIL]
+  //     : [NotificationChannel.IN_APP];
+  // }
+
+  // an unknown project must not lose the notification (projectId is a foreign key)
+  private async validProjectId(projectId?: string): Promise<string | undefined> {
+    if (!projectId) return undefined;
+    if (!isUUID(projectId)) {
+      this.logger.warn(`[NOTIFY] projectId "${projectId}" is not a UUID, saving without project`);
+      return undefined;
+    }
+    const project = await this.prisma.project.findUnique({ where: { uuid: projectId }, select: { uuid: true } });
+    if (!project) {
+      this.logger.warn(`[NOTIFY] project ${projectId} not found, saving without project`);
+      return undefined;
+    }
+    return projectId;
+  }
+
+  private defaultRoles(): string[] {
+    const env = process.env.PUSH_DEFAULT_ROLES?.split(',').map((r) => r.trim()).filter(Boolean);
+    return env?.length ? env : [UserRoles.ADMIN, UserRoles.MANAGER];
+  }
+
+  // no include-selector in the payload (legacy sender) -> default roles; stored as rows so the DB shows who was targeted
+  private buildAudienceRows(dto: CreateNotificationDto) {
+    const rows = toAudienceRows(dto.audience);
+    if (!rows.some((r) => !r.exclude)) {
+      this.logger.warn('[NOTIFY] No audience in payload, using default roles. Send `audience` from the sender.');
+      rows.push(...this.defaultRoles().map((role) => ({ type: AudienceType.ROLE, value: role, exclude: false })));
+    }
+    return rows;
+  }
+
+
+  private async dispatch(notification: NotificationWithAudiences, channels: NotificationChannel[]) {
+    try {
+      const users = await this.audienceResolver.resolve(
+        notification.audiences,
+        notification.projectId ?? undefined
+      );
+      if (!users.length) {
+        // an explicit audience that resolves to nobody sends to nobody
+        this.logger.warn(`[NOTIFY] #${notification.id} audience resolved to 0 users, nothing sent`);
+        return;
+      }
+      this.logger.log(
+        `[NOTIFY] #${notification.id} group="${notification.group}" users=${users.length} channels=${channels.join(',')}`
+      );
+
+      const wanted = new Set(channels);
+      const tasks: Promise<unknown>[] = [];
+
+      if (wanted.has(NotificationChannel.PUSH)) {
+        tasks.push(this.pushService.pushForNotification(notification, { userIds: users.map((u) => u.uuid) }));
+      }
+      if (wanted.has(NotificationChannel.EMAIL)) tasks.push(this.queueEmail(notification, users));
+      if (wanted.has(NotificationChannel.SMS)) tasks.push(this.sendSms(notification, users));
+
+      await Promise.allSettled(tasks);
+    } catch (err: any) {
+      this.logger.error(`[NOTIFY] dispatch failed (notification already saved): ${err?.message}`, err?.stack);
+    }
+  }
+
+  private async queueEmail(notification: Notification, users: AudienceUser[]) {
+    const usersEmail = users.map((u) => u.email).filter((e): e is string => !!e);
+    if (!usersEmail.length) {
+      this.logger.warn(`[NOTIFY] #${notification.id} no email addresses in audience`);
       return;
     }
+    await this.rahatQueue.add(
+      APP_JOBS.NOTIFY,
+      { usersEmail, subject: notification.title, text: notification.description },
+      { attempts: 3, removeOnComplete: true, backoff: { type: 'exponential', delay: 1000 } }
+    );
+  }
 
-    const usersEmail = users?.map((user) => user.email);
-
-    const queueData = {
-      usersEmail,
-      subject: notification.title,
-      text: notification.description,
-    };
-
-    await this.rahatQueue.add(APP_JOBS.NOTIFY, queueData, {
-      attempts: 3,
-      removeOnComplete: true,
-      backoff: { type: 'exponential', delay: 1000 },
-    });
-
-    this.logger.log(`Queued notification for ${users.length} users.`);
+  private async sendSms(notification: Notification, users: AudienceUser[]) {
+    const phones = users.map((u) => u.phone).filter((p): p is string => !!p);
+    if (!phones.length) {
+      this.logger.warn(`[NOTIFY] #${notification.id} no phone numbers in audience`);
+      return;
+    }
+    await this.smsService.send(phones, `${notification.title}\n${notification.description}`);
   }
 
   async listNotifications({
@@ -266,6 +358,5 @@ export class NotificationService {
       backoff: { type: 'exponential', delay: 1000 },
     });
 
-    this.logger.log(`Queued notification for ${users.length} users.`);
   }
 }
