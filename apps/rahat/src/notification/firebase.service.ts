@@ -50,9 +50,9 @@ export class FirebaseService implements OnModuleInit {
             return;
         }
         try {
-            const b64 = await getSecretSetting(this.prisma, 'FIREBASE_SERVICE_ACCOUNT_BASE64', process.env.FIREBASE_SERVICE_ACCOUNT_BASE64);
+            const b64 = await getSecretSetting(this.prisma, 'GOOGLE_APPLICATION_CREDENTIALS', process.env.GOOGLE_APPLICATION_CREDENTIALS);
             if (!b64) {
-                this.logger.warn('[FCM] FIREBASE_SERVICE_ACCOUNT_BASE64 missing. Push DISABLED.');
+                this.logger.warn('[FCM] GOOGLE_APPLICATION_CREDENTIALS missing. Push DISABLED.');
                 return;
             }
             const json = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
