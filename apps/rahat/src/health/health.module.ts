@@ -2,6 +2,7 @@
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { BullModule } from '@nestjs/bull';
 import { Logger, Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { AuthsModule } from '@rumsan/user';
@@ -16,15 +17,18 @@ import { ScheduleModule } from '@nestjs/schedule';
   imports: [
     BullModule.registerQueue({ name: BQUEUE.RAHAT }),
     AuthsModule,
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
         name: ProjectContants.ELClient,
-        transport: Transport.REDIS,
-        options: {
-          host: process.env.REDIS_HOST,
-          port: Number(process.env.REDIS_PORT ?? 0),
-          password: process.env.REDIS_PASSWORD,
-        },
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.REDIS,
+          options: {
+            host: configService.get('REDIS_HOST'),
+            port: Number(configService.get('REDIS_PORT') ?? 0),
+            password: configService.get('REDIS_PASSWORD'),
+          },
+        }),
+        inject: [ConfigService],
       },
     ]),
     ScheduleModule.forRoot(),
