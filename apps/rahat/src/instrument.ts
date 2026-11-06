@@ -5,15 +5,14 @@
 import 'dotenv/config';
 import * as Sentry from '@sentry/nestjs';
 import {
-  AUTO_APPLY_KOBO_COUNTRY_CODE,
   SENTRY_DSN,
   SENTRY_ENVIRONMENT,
   SENTRY_TRACES_SAMPLE_RATE,
 } from './utils/envConfig';
 
 // Sentry should only report from production, so it's left uninitialized in development — captureException/captureMessage calls
-// become no-ops.
-if (AUTO_APPLY_KOBO_COUNTRY_CODE) {
+// become no-ops. A missing DSN also leaves Sentry disabled.
+if (process.env.NODE_ENV === 'production' && SENTRY_DSN) {
   Sentry.init({
     dsn: SENTRY_DSN,
     environment: SENTRY_ENVIRONMENT,
