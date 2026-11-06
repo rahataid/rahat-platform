@@ -61,15 +61,16 @@ export class WalletInterceptor implements NestInterceptor {
           );
         }
       } else {
+        this.logger.log('[INTERCEPTOR] Using multi-chain wallet validation');
         // Validate/ensure wallet addresses for all items
         updatedItems = await Promise.all(
           items.map(async (item) => {
-            const walletAddress = await this.ensureValidWalletAddress(
-              item.walletAddress
-            );
-            return { ...item, walletAddress };
+            const { walletAddress, multiChainWallets } =
+              await this.ensureValidWalletAddress(item.walletAddress);
+            return { ...item, walletAddress, multiChainWallets };
           })
         );
+        this.logger.log(`[INTERCEPTOR] Multi-chain validation complete: ${updatedItems.length} items processed`);
       }
 
       // Restore single object if original input was not an array
@@ -77,14 +78,14 @@ export class WalletInterceptor implements NestInterceptor {
 
       return next.handle().pipe(map((response) => ({ ...response })));
     } catch (error) {
-      console.error('Wallet processing failed:', error);
+      this.logger.error('[INTERCEPTOR] Wallet processing failed:', error);
 
       throw error instanceof RpcException
         ? error
         : new RpcException({
-            message: 'Wallet processing failed',
-            code: 'WALLET_PROCESSING_FAILED',
-          });
+          message: 'Wallet processing failed',
+          code: 'WALLET_PROCESSING_FAILED',
+        });
     }
   }
 
@@ -143,10 +144,18 @@ export class WalletInterceptor implements NestInterceptor {
 
   private async ensureValidWalletAddress(
     walletAddress?: string
-  ): Promise<string> {
+  ): Promise<{ walletAddress: string; multiChainWallets: any }> {
     if (!walletAddress) {
-      const result = await this.walletService.createWallet();
-      return result.address;
+      const [result] = await this.walletService.createBulkForAllChains(1);
+      const multiChainWallets = result.wallets.map((w) => ({
+        chain: w.chain,
+        address: w.address,
+        privateKey: w.privateKey,
+      }));
+      return {
+        walletAddress: result.defaultAddress,
+        multiChainWallets: JSON.stringify(multiChainWallets), // Serialize to string to preserve structure
+      };
     }
 
     try {
@@ -172,16 +181,19 @@ export class WalletInterceptor implements NestInterceptor {
         where: { walletAddress },
       }
     );
+    this.logger.log(`[INTERCEPTOR] Existing beneficiary check: ${existingBeneficiary ? 'FOUND' : 'NOT FOUND'}`);
 
     if (existingBeneficiary) {
-      console.log('Wallet address already exists');
+      this.logger.warn(`[INTERCEPTOR] Wallet address already exists in DB: ${walletAddress}`);
       throw new RpcException({
         message: 'Wallet address already exists',
         code: 'WALLET_ADDRESS_ALREADY_EXISTS',
       });
     }
 
-    return walletAddress;
+    // Provided address — no multi-chain wallets generated; downstream can handle if needed
+    this.logger.log(`[INTERCEPTOR] Wallet validation complete for: ${walletAddress}`);
+    return { walletAddress, multiChainWallets: [] };
   }
 
   private async getDefaultChain(): Promise<ChainType> {
