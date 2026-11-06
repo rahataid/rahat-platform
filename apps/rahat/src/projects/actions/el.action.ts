@@ -48,6 +48,8 @@ export const elActions: ProjectActionFunc = {
     sendCommand({ cmd: VendorJobs.LIST, uuid }, payload, 500000),
   [MS_ACTIONS.ELPROJECT.CRM.EXPORT_VENDOR]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: VendorJobs.EXPORT, uuid }, payload, 500000),
+  [MS_ACTIONS.ELPROJECT.CRM.DELETE_VENDOR]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: VendorJobs.DELETE, uuid }, payload),
   [MS_ACTIONS.ELPROJECT.CRM.GET_ALL_BENEFICIARY]: (
     uuid,
     payload,
@@ -165,6 +167,12 @@ export const elActions: ProjectActionFunc = {
   [MS_ACTIONS.ELPROJECT.CRM.SEND_CAMPAIGN_EXCEL]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.CAMPAIGN.TRIGGER_CAMPAIGN_EXCEL, uuid },
+      { ...payload },
+      500000
+    ),
+  [MS_ACTIONS.ELPROJECT.CRM.DELETE_CAMPAIGN]: (uuid, payload, sendCommand) =>
+    sendCommand(
+      { cmd: ProjectJobs.CAMPAIGN.REMOVE_CAMPAIGN, uuid },
       { ...payload },
       500000
     ),
