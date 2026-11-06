@@ -665,6 +665,7 @@ export const MS_ACTIONS = {
     UPDATE: 'ms.communications.update',
     REMOVE: 'ms.communications.remove',
     TRIGGER: 'ms.communications.trigger',
+    GET_OVERVIEW: 'ms.communications.getOverview',
   },
 
   MS_DAILY_MONITORING: {
