@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { StatsModule } from '@rahat/stats';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
+import { SseModule } from '@rahataid/sse';
 import { PrismaModule } from '@rumsan/prisma';
 import { BeneficiaryConsumer } from '../consumers/beneficiary.consumer';
 import { BeneficiaryStatsUpdateService } from './beneficiary-stats-update.service';
@@ -45,6 +46,7 @@ import { VerificationService } from './verification.service';
       },
     ]),
     PrismaModule,
+    SseModule,
     StatsModule,
     BullModule.registerQueue({
       name: BQUEUE.RAHAT_BENEFICIARY,

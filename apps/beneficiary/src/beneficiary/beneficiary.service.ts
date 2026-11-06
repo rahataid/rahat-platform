@@ -24,6 +24,7 @@ import {
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
+import { SsePublisherService } from '@rahataid/sse';
 import {
   AAJobs,
   BeneficiaryConstants,
@@ -73,7 +74,8 @@ export class BeneficiaryService {
     private readonly verificationService: VerificationService,
     private readonly beneficiaryUtilsService: BeneficiaryUtilsService,
     private readonly groupSyncService: GroupSyncService,
-    private readonly statsUpdateService: BeneficiaryStatsUpdateService
+    private readonly statsUpdateService: BeneficiaryStatsUpdateService,
+    private readonly ssePublisher: SsePublisherService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -480,6 +482,8 @@ export class BeneficiaryService {
       projectUuid,
     });
 
+    this.ssePublisher.publishEvent('beneficiary.event', createdBeneficiary);
+
     return createdBeneficiary;
   }
 
@@ -847,6 +851,7 @@ export class BeneficiaryService {
     });
     if (dto.piiData) await this.updatePIIByBenefUUID(uuid, piiData);
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
+    void this.ssePublisher.publishEvent('beneficiary.event', rdata);
     return rdata;
   }
 
@@ -882,6 +887,7 @@ export class BeneficiaryService {
     });
 
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
+    this.ssePublisher.publishEvent('beneficiary.event', rdata);
     return rdata;
   }
 
@@ -922,6 +928,7 @@ export class BeneficiaryService {
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_REMOVED, {
       projectUuid: uuid,
     });
+    this.ssePublisher.publishEvent('beneficiary.event', rdata);
 
     const res = await this.prisma.groupedBeneficiaries.updateMany({
       where: {
@@ -1124,6 +1131,8 @@ export class BeneficiaryService {
         beneficiaryId: uuid,
       })),
     });
+
+    this.ssePublisher.publishEvent('beneficiary.event', group);
 
     if (projectUuid) {
       const groupDetails = {
@@ -1399,7 +1408,7 @@ export class BeneficiaryService {
       };
       await (await this.assignBeneficiaryGroupToProject(payload));
     }
-
+    this.ssePublisher.publishEvent('beneficiary.group.event', group);
     return {
       ...groupedBeneficiaries,
       group,
@@ -2153,7 +2162,7 @@ export class BeneficiaryService {
         code: 'BENEFICIARY_GROUP_NOT_FOUND_OR_DELETED',
       });
 
-    return this.prisma.beneficiaryGroup.update({
+    const group = await this.prisma.beneficiaryGroup.update({
       where: {
         uuid: uuid,
       },
@@ -2161,9 +2170,13 @@ export class BeneficiaryService {
         deletedAt: new Date(),
       },
     });
+    this.ssePublisher.publishEvent('beneficiary.group.event', { uuid });
+
+    return group;
   }
 
   async deleteOneGroup(uuid: string) {
+
     this.logger.log(`Attempting to delete group with UUID: ${uuid}`);
 
     const benefGroup = await this.prisma.beneficiaryGroup.findUnique({
@@ -2204,6 +2217,8 @@ export class BeneficiaryService {
 
     if (beneficiaryIds.length === 0) {
       await this.prisma.beneficiaryGroup.delete({ where: { uuid } });
+      this.ssePublisher.publishEvent('beneficiary.group.event', { uuid });
+
       return { message: 'Group successfully deleted (group was empty).' };
     }
 
@@ -2246,7 +2261,7 @@ export class BeneficiaryService {
         where: { uuid },
       }),
     ]);
-
+    this.ssePublisher.publishEvent('beneficiary.group.event', { uuid });
     return {
       message: 'Group and all associated beneficiaries successfully deleted.',
     };
@@ -2377,6 +2392,8 @@ export class BeneficiaryService {
       data: { name: dto?.name || existingGroup?.name },
     });
 
+    this.ssePublisher.publishEvent('beneficiary.group.event', { uuid });
+
     if (!dto.beneficiaries?.length) {
       return { success: true, message: 'Group name updated successfully.' };
     }
@@ -2474,7 +2491,7 @@ export class BeneficiaryService {
         groupPurpose: dto.groupPurpose,
       },
     });
-
+    this.ssePublisher.publishEvent('beneficiary.group.event', { uuid: dto.uuid });
     return {
       success: `Group purpose successfully updated to ${dto.groupPurpose}`,
     };

@@ -22,6 +22,7 @@ import {
 } from '@rahataid/sdk';
 import { BeneficiaryType, KoboBeneficiaryStatus } from '@rahataid/sdk/enums';
 import { JOBS } from '@rahataid/sdk/project/project.events';
+import { SsePublisherService } from '@rahataid/sse';
 import { PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -50,6 +51,7 @@ import { notificationActions } from './actions/common.action';
 import { commsActions } from './actions/comms.action';
 import { rpActions } from './actions/rp.action';
 
+
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const CAMBODIA_COUNTRY_CODE = '+855';
 
@@ -61,6 +63,7 @@ export class ProjectService {
     private prisma: PrismaService,
     private eventEmitter: EventEmitter2,
     private requestContextService: RequestContextService,
+    private readonly ssePublisher: SsePublisherService,
     @Inject('RAHAT_CLIENT') private readonly client: ClientProxy,
     @InjectQueue(BQUEUE.META_TXN) private readonly metaTransactionQueue: Queue
   ) { }
@@ -109,21 +112,25 @@ export class ProjectService {
   }
 
   async update(uuid: UUID, data: UpdateProjectDto) {
-    return this.prisma.project.update({
+    const project = await this.prisma.project.update({
       where: {
         uuid,
       },
       data,
     });
+    this.ssePublisher.publishEvent('project.event', project);
+    return project;
   }
 
   async updateStatus(uuid: UUID, data: UpdateProjectStatusDto) {
-    return this.prisma.project.update({
+    const project = await this.prisma.project.update({
       where: {
         uuid,
       },
       data,
     });
+    this.ssePublisher.publishEvent('project.event', project);
+    return project;
   }
 
   async remove(uuid: UUID) {
