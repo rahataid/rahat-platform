@@ -185,14 +185,12 @@ export async function checkRPCUrl(
     const settingsValue = settings?.value as any;
     rpcUrl = settingsValue?.rpcUrl;
 
-    // if (settingsValue?.name?.toLowerCase() === 'evm') {
     res = await axios.post(
       rpcUrl,
       { jsonrpc: '2.0', method: 'eth_blockNumber', params: [], id: 1 },
       { headers: { 'Content-Type': 'application/json' }, timeout: 5000 }
     );
     if (res.data?.error) throw new Error(`Unexpected error during RPCCall`);
-    // }
 
     return {
       status: 'up',
