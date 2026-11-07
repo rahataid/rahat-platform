@@ -112,6 +112,7 @@ export class FirebaseService implements OnModuleInit {
                 if (r.success) return;
                 const code = r.error?.code ?? '';
                 const token = pending[idx];
+                this.logger.warn(`[FCM ------>>>>>>??????+++++++++++] ...${token.slice(-8)} failed: ${code} | ${r.error?.message}`);
                 if (DEAD_TOKEN_CODES.has(code)) invalid.push(token);
                 else if (code === INVALID_ARGUMENT_CODE) invalidArg.push(token);
                 else if (TRANSIENT_CODES.has(code)) retryNext.push(token);
