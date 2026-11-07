@@ -1,5 +1,5 @@
 // rahat-project/apps/rahat/src/notification/notification.controller.ts
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Logger, Query, UseGuards } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
@@ -16,6 +16,8 @@ import { PushService } from './push.service';
 @Controller('notifications')
 @ApiTags('Notifications')
 export class NotificationController {
+  private readonly logger = new Logger(NotificationController.name);
+
   constructor(
     private readonly notificationService: NotificationService,
     private readonly pushService: PushService
@@ -38,6 +40,7 @@ export class NotificationController {
 
   @MessagePattern({ cmd: ProjectJobs.NOTIFICATION.REGISTER_DEVICE })
   async registerDevice(dto: RegisterDeviceDto & { user?: any }) {
+    this.logger.log(`Register device payload: ${JSON.stringify(dto)}`);
     return this.pushService.registerDevice(dto);
   }
 

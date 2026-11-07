@@ -74,24 +74,24 @@ export class PushService {
         }
 
         const { token, platform, appId } = dto;
-        console.log(`----=>>>>????[DEVICE] Registering device token=${token} platform=${platform} appId=${appId} userId=${userId}`);
-        this.logger.log(`----=>>>>????[DEVICE] Registering device token=${token} platform=${platform} appId=${appId} userId=${userId}`);
+        console.log(`----=>>>>????666666[DEVICE] Registering device token=${token} platform=${platform} appId=${appId} userId=${userId}`);
+        this.logger.log(`----=>>>>????7777777[DEVICE] Registering device token=${token} platform=${platform} appId=${appId} userId=${userId}`);
 
         const existing = await this.prisma.deviceToken.findUnique({ where: { token } });
 
         if (existing && existing.userId === userId && existing.active) {
-            this.logger.warn(`----=>>>>????[DEVICE] Token ${token} is already registered to a different user (${existing.userId}), reassigning to ${userId}`);
+            this.logger.warn(`----=>>>>????8888888[DEVICE] Token ${token} is already registered to a different user (${existing.userId}), reassigning to ${userId}`);
             return { registered: true, changed: false };
         }
 
 
         // token is unique: if the same phone logs in as another user, it moves to that user
-        await this.prisma.deviceToken.upsert({
+        const deviceToken = await this.prisma.deviceToken.upsert({
             where: { token },
             create: { userId, token, platform, appId },
             update: { userId, platform, appId, active: true, lastUsedAt: new Date() },
         });
-
+        console.log(`----=>>>>????9999999[DEVICE] Registered device deviceToken=${deviceToken} `);
         return { registered: true, changed: true };
     }
 
