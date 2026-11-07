@@ -17,6 +17,7 @@ export class CorsConfigService {
       'http://localhost:3300',
       'http://localhost:3001',
       'http://localhost:5173',
+      'https://ageless-scion-skater.ngrok-free.dev',
       'http://localhost',
       'https://localhost',
     ];
