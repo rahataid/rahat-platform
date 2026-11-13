@@ -166,10 +166,10 @@ export class PushService {
     }
 
     private async dispatchMobile(userIds: string[], notification: Notification, pushData: Record<string, any>) {
-        if (!this.firebase.enabled) {
-            this.logger.log('[PUSH][MOBILE] Firebase disabled, skipping mobile push');
-            return;
-        }
+        // if (!this.firebase.enabled) {
+        //     this.logger.log('[PUSH][MOBILE] Firebase disabled, skipping mobile push');
+        //     return;
+        // }
         try {
             const where = { userId: { in: userIds }, active: true };
             const total = await this.prisma.deviceToken.count({ where });
@@ -206,10 +206,10 @@ export class PushService {
     }
 
     private async dispatchWeb(userIds: string[], notification: Notification, pushData: Record<string, any>) {
-        if (!this.webPush?.enabled) {
-            this.logger.log('[PUSH][WEB] WebPush disabled, skipping web push');
-            return;
-        }
+        // if (!this.webPush?.enabled) {
+        //     this.logger.log('[PUSH][WEB] WebPush disabled, skipping web push');
+        //     return;
+        // }
         try {
             const where = { userId: { in: userIds }, active: true };
             const total = await this.prisma.webPushSubscription.count({ where });
