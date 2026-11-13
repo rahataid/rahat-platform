@@ -6,6 +6,7 @@ import { PrismaService } from '@rumsan/prisma';
 import { UsersService as RSUserService } from '@rumsan/user';
 import { AUTH_SERVICE_CLIENT } from '@rumsan/user/ability/ms-rpc-auth';
 import { NotificationService } from '../notification/notification.service';
+import { DatabaseWalletStorage } from '../wallet/storages/database.storage';
 import { WalletService } from '../wallet/wallet.service';
 
 @Injectable()
@@ -20,38 +21,38 @@ export class UsersService extends RSUserService {
     super(prisma, eventEmitter, authClient);
   }
 
-  // TODO: Multi-chain support - Currently uses instance's configured chain
-  // Future: Allow chain selection per user
   async create(userData: CreateUserDto) {
-    console.log('Creating a new user with a random wallet address');
-
     try {
-      // Use wallet service's configured chain (single-chain per instance)
-      // No need to specify chain - wallet service will use its detected chain type
-      const randomWallet = await this.walletService.createWallet();
+      // Create wallets for all active chains from a shared mnemonic
+      const [multiChainResult] =
+        await this.walletService.createBulkForAllChains(1);
 
-      console.log('Random wallet created:', {
-        address: randomWallet.address,
-        blockchain: randomWallet.blockchain || 'detected',
+      userData.wallet = multiChainResult.defaultAddress;
+
+      const res = await super.create(userData, async (err, tx, user) => {
+        if (err || !user) return;
+        // Assign the entity ID to pre-generated wallets using database storage helper
+        await DatabaseWalletStorage.assignEntity(
+          tx,
+          multiChainResult.wallets,
+          user.uuid
+        );
       });
 
-      userData.wallet = randomWallet.address;
-
-      const res = super.create(userData);
       await this.notificationService.createNotification({
-        title: "User has been added",
+        title: 'User has been added',
         description: `A new user has been added Name: ${userData.name}`,
-        group: "User Management"
-      })
-      return res
+        group: 'User Management',
+      });
+
+      return res;
     } catch (error) {
-      console.error('Error creating user wallet:', error);
+      console.error('Error creating user:', error);
       throw error;
     }
   }
 
   async getWallets(dto: ListUserDto) {
-    console.log('Listing users');
     const userListData = await super.list(dto);
     const wallets = userListData.data.map((user) => {
       return {
@@ -62,6 +63,34 @@ export class UsersService extends RSUserService {
       };
     });
     return wallets;
+  }
+
+  async list(dto: ListUserDto) {
+    const users = await super.list(dto);
+    const userIds = users.data.map((user) => user.uuid);
+    const walletDetails = await this.prisma.walletAddress.findMany({
+      where: {
+        entityId: { in: userIds },
+      },
+    });
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+    const data = users.data.map((user) => ({
+      ...user,
+      walletDetails: walletMap.get(user.uuid) || null,
+    }));
+    let result = {} as any;
+    result.data = data;
+    result.meta = users.meta;
+
+    return result;
   }
 
   // TODO: Multi-chain support - Helper method for future use
