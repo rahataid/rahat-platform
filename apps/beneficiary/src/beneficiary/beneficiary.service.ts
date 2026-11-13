@@ -232,7 +232,7 @@ export class BeneficiaryService {
   }
 
   async getOneGroupByProject(uuid: UUID) {
-    return await this.prisma.beneficiaryGroup.findUnique({
+    const group = await this.prisma.beneficiaryGroup.findUnique({
       where: {
         uuid: uuid,
       },
@@ -251,6 +251,38 @@ export class BeneficiaryService {
         },
       },
     });
+    if (!group) {
+      throw new RpcException({
+        message: '[BENEFICIARY_GROUP_NOT_FOUND] Group not found',
+        code: 'BENEFICIARY_GROUP_NOT_FOUND',
+      });
+    }
+
+    const benIds = group?.groupedBeneficiaries.map(
+      (ben) => ben.Beneficiary.uuid
+    );
+
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(benIds);
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+    return {
+      ...group,
+      groupedBeneficiaries: group.groupedBeneficiaries.map((item) => ({
+        ...item,
+        Beneficiary: {
+          ...item.Beneficiary,
+          walletAddressDetails: walletMap.get(item.Beneficiary.uuid),
+        },
+      })),
+    }
   }
 
   async getGroupDetailsByUuids(uuids: UUID[]) {
@@ -1980,10 +2012,6 @@ export class BeneficiaryService {
       })),
     };
 
-    console.log(
-      updatedGroupDetails.groupedBeneficiaries[0]?.Beneficiary
-        ?.walletAddressDetails
-    );
 
     // If group is found, check if it is valid for AA
     const finalData = {
