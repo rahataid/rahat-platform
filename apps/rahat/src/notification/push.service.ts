@@ -193,6 +193,11 @@ export class PushService {
                 });
                 if (!rows.length) break;
                 cursor = rows[rows.length - 1].id;
+                this.logger.log(
+                    `[---???101010101PUSH][MOBILE] device token(s): ${rows
+                        .map(({ id, token }) => `id=${id}, token=...${token.slice(-8)}`)
+                        .join('; ')}`
+                );
                 const tokens = rows.map((r) => r.token);
 
                 if (useQueue) await this.rahatQueue.add(APP_JOBS.PUSH_SEND_FCM, { tokens, payload }, PUSH_JOB_OPTS);
@@ -238,6 +243,12 @@ export class PushService {
                 });
                 if (!rows.length) break;
                 cursor = rows[rows.length - 1].id;
+                this.logger.log(
+                    `--->>101101101[PUSH][WEB] subscription endpoint(s): ${rows
+                        .map(({ id, endpoint }) => `id=${id}, endpoint=...${endpoint.slice(-8)}`)
+                        .join('; ')}`
+                );
+
                 const subs: WebPushTarget[] = rows.map(({ endpoint, p256dh, auth }) => ({ endpoint, p256dh, auth }));
 
                 if (useQueue) await this.rahatQueue.add(APP_JOBS.PUSH_SEND_WEB, { subs, payload }, PUSH_JOB_OPTS);
