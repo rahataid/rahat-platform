@@ -46,9 +46,9 @@ export class FirebaseService implements OnModuleInit {
     constructor(private readonly prisma: PrismaService) { }
 
     async onModuleInit() {
-        // if (process.env.PUSH_ENABLED !== 'true') {
-        //     return;
-        // }
+        if (process.env.PUSH_ENABLED !== 'true') {
+            return;
+        }
         try {
             const b64 = await getSecretSetting(this.prisma, 'GOOGLE_APPLICATION_CREDENTIALS', process.env.GOOGLE_APPLICATION_CREDENTIALS);
             if (!b64) {
