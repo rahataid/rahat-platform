@@ -46,7 +46,12 @@ export class FirebaseService implements OnModuleInit {
     constructor(private readonly prisma: PrismaService) { }
 
     async onModuleInit() {
-        if (process.env.PUSH_ENABLED !== 'true') {
+        const pushEnabled = await getSecretSetting(
+            this.prisma,
+            'PUSH_ENABLED',
+            process.env.PUSH_ENABLED
+        );
+        if (pushEnabled?.toLowerCase() !== 'true') {
             return;
         }
         try {
