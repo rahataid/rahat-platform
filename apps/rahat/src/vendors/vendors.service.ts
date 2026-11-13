@@ -177,7 +177,7 @@ export class VendorsService {
       if (wallets?.length) {
         await DatabaseWalletStorage.assignEntity(
           prisma,
-          wallets.map((w) => ({ address: w.address, chain: w.chain })),
+          wallets.map((w) => ({ address: w.address, chain: w.chain.toUpperCase() })),
           user.uuid
         );
         await prisma.walletAddress.update({
@@ -538,6 +538,7 @@ export class VendorsService {
           chainType: project?.chainType,
           deletedAt: null,
         },
+
         select: { address: true },
       });
       if (chainWallet?.address) walletAddress = chainWallet.address;

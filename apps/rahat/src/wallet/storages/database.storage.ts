@@ -27,13 +27,13 @@ export class DatabaseWalletStorage implements WalletStorage {
         address: keys.address,
         isPrimary: false,
         isVerified: true,
-        chainType: keys.blockchain,
+        chainType: keys.blockchain?.toUpperCase(),
         config: {
           privateKey: keys.privateKey ?? null,
           publicKey: keys.publicKey ?? null,
           mnemonic: keys.mnemonic ?? null,
           address: keys.address,
-          chain: keys.blockchain,
+          chain: keys.blockchain?.toUpperCase(),
         },
       },
       // skipDuplicates: true,
@@ -50,13 +50,13 @@ export class DatabaseWalletStorage implements WalletStorage {
       address: k.address,
       isPrimary: false,
       isVerified: true,
-      chainType: k.blockchain,
+      chainType: k.blockchain?.toUpperCase(),
       config: {
         privateKey: k.privateKey ?? null,
         publicKey: k.publicKey ?? null,
         mnemonic: k.mnemonic ?? null,
         address: k.address,
-        chain: k.blockchain,
+        chain: k.blockchain?.toUpperCase(),
       },
     }));
 
