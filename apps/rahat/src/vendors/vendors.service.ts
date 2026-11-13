@@ -681,6 +681,13 @@ export class VendorsService {
         where: { address: id },
       });
       userId = entityDetails?.entityId;
+      if (!entityDetails) {
+        throw new NotFoundException({
+          message: `Vendor not found with id: ${id}`,
+          code: 'VENDOR_NOT_FOUND_WITH_ID',
+          params: { id: String(id) },
+        });
+      }
     } else userId = id;
     const data = await this.prisma.user.findUnique({ where: { uuid: userId } });
 
