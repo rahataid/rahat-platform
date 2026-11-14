@@ -1,12 +1,19 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { Injectable } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import { Grievance, Prisma } from "@prisma/client";
 import { ChangeGrievanceStatusDTO, ListGrievanceDTO } from "@rahataid/extensions";
 import { PaginatorTypes, PrismaService, paginator } from "@rumsan/prisma";
 
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
+
+type GrievanceWithRelations = Prisma.GrievanceGetPayload<{
+  include: {
+    project: { select: { name: true; uuid: true } };
+    reporterUser: { select: { name: true; uuid: true; id: true } };
+  };
+}>;
 
 @Injectable()
 export class GrievanceService {
@@ -15,7 +22,7 @@ export class GrievanceService {
     private readonly prisma: PrismaService
   ) { }
 
-  async createGrievance(data: any, userId: number) {
+  async createGrievance(data: any, userId: number): Promise<Grievance> {
     return this.prisma.grievance.create({
       data: {
         ...data,
@@ -24,7 +31,7 @@ export class GrievanceService {
     })
   }
 
-  async findAll(query: ListGrievanceDTO) {
+  async findAll(query: ListGrievanceDTO): Promise<PaginatorTypes.PaginatedResult<GrievanceWithRelations>> {
     const include: Prisma.GrievanceInclude = {
       project: {
         select: {
@@ -57,7 +64,7 @@ export class GrievanceService {
       }
     }
 
-    return paginate(this.prisma.grievance, {
+    return paginate<GrievanceWithRelations, Prisma.GrievanceFindManyArgs>(this.prisma.grievance, {
       include,
       where,
       orderBy: {
@@ -69,7 +76,7 @@ export class GrievanceService {
     });
   }
 
-  async changeStatus(uuid: string, data: ChangeGrievanceStatusDTO) {
+  async changeStatus(uuid: string, data: ChangeGrievanceStatusDTO): Promise<Grievance> {
     const { status } = data;
     return this.prisma.grievance.update({
       where: {
@@ -81,7 +88,7 @@ export class GrievanceService {
     })
   }
 
-  async getGrievance(uuid: string) {
+  async getGrievance(uuid: string): Promise<GrievanceWithRelations | null> {
     return this.prisma.grievance.findUnique({
       where: {
         uuid
@@ -104,7 +111,7 @@ export class GrievanceService {
     })
   }
 
-  async softDelete(uuid: string) {
+  async softDelete(uuid: string): Promise<Grievance> {
     return this.prisma.grievance.update({
       where: {
         uuid
@@ -115,7 +122,7 @@ export class GrievanceService {
     })
   }
 
-  async updateProjectGrievance(uuid: string, data: any) {
+  async updateProjectGrievance(uuid: string, data: any): Promise<Grievance> {
     const { projectId, userId, ...updateData } = data;
 
     const updatePayload: any = { ...updateData };
