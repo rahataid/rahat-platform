@@ -283,6 +283,7 @@ export const MS_ACTIONS = {
       LIST: 'aa.payout.list',
       GET: 'aa.payout.get',
       UPDATE: 'aa.payout.update',
+      CANCEL_PAYOUT: 'aa.payout.cancelPayout',
       GET_PAYMENT_PROVIDERS: 'aa.payout.getPaymentProviders',
       TRIGGER_PAYOUT: 'aa.payout.triggerPayout',
       TRIGGER_FAILED_PAYOUT_REQUEST: 'aa.payout.triggerFailedPayoutRequest',
