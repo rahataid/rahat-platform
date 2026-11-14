@@ -11,13 +11,15 @@ import {
   Param,
   Patch,
   Post,
+  MessageEvent,
   Query,
   Req,
+  Sse,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, EventPattern } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
@@ -36,6 +38,7 @@ import {
 } from '@rahataid/extensions';
 import {
   APP,
+  BeneficiaryEvents,
   BeneficiaryJobs,
   BQUEUE,
   Enums,
@@ -59,6 +62,10 @@ import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
 import { WalletInterceptor } from './interceptor/wallet.interceptor';
 import { DocParser } from './parser';
+import {
+  BeneficiaryChangeEvent,
+  BeneficiaryEventsService,
+} from './beneficiary-events.service';
 
 function getDateInfo(dateString) {
   try {
@@ -84,8 +91,22 @@ export class BeneficiaryController {
   constructor(
     @Inject('BEN_CLIENT') private readonly client: ClientProxy,
     @Inject('COMMS_CLIENT') private commsClient: CommsClient,
-    @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue
+    @InjectQueue(BQUEUE.RAHAT) private readonly queue: Queue,
+    private readonly beneficiaryEvents: BeneficiaryEventsService
   ) { }
+
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  @Sse('events')
+  streamEvents(@Query('projectUuid') projectUuid?: string) {
+    return this.beneficiaryEvents.stream(projectUuid);
+  }
+
+  @EventPattern(BeneficiaryEvents.BENEFICIARY_CHANGED)
+  handleBeneficiaryChange(event: BeneficiaryChangeEvent) {
+    this.beneficiaryEvents.publish(event);
+  }
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, AbilitiesGuard)

@@ -56,6 +56,31 @@ export class BeneficiaryService {
 
   private readonly logger = new Logger(BeneficiaryService.name);
 
+  private publishBeneficiaryChange(
+    eventType: 'created' | 'updated' | 'deleted' | 'removed',
+    beneficiaryUuids: string[],
+    projectUuids: string[] = []
+  ) {
+    const event = {
+      eventId: uuidv4(),
+      eventType,
+      beneficiaryUuids,
+      projectUuids,
+      projectUuid: projectUuids[0],
+      occurredAt: new Date().toISOString(),
+    };
+
+    this.walletClient
+      .emit(BeneficiaryEvents.BENEFICIARY_CHANGED, event)
+      .subscribe({
+        error: (error) =>
+          this.logger.error(
+            `Failed to publish beneficiary ${eventType} event`,
+            error instanceof Error ? error.stack : String(error)
+          ),
+      });
+  }
+
   constructor(
     protected prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
@@ -397,6 +422,11 @@ export class BeneficiaryService {
         projectUUIDs
       );
     }
+    this.publishBeneficiaryChange(
+      'created',
+      [createdBeneficiary.uuid],
+      [...new Set([...(projectUUIDs || []), ...(projectUuid ? [projectUuid] : [])])]
+    );
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
       projectUuid,
     });
@@ -702,6 +732,11 @@ export class BeneficiaryService {
       where: {
         uuid,
       },
+      include: {
+        BeneficiaryProject: {
+          select: { projectId: true },
+        },
+      },
     });
 
     if (!findUuid) throw new Error('Data not Found');
@@ -723,6 +758,11 @@ export class BeneficiaryService {
       data: rest,
     });
     if (dto.piiData) await this.updatePIIByBenefUUID(uuid, piiData);
+    this.publishBeneficiaryChange(
+      'updated',
+      [uuid],
+      findUuid.BeneficiaryProject?.map(({ projectId }) => projectId) || []
+    );
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
     return rdata;
   }
@@ -742,6 +782,11 @@ export class BeneficiaryService {
       where: {
         uuid,
       },
+      include: {
+        BeneficiaryProject: {
+          select: { projectId: true },
+        },
+      },
     });
 
     if (!findUuid) throw new Error('Data not Found');
@@ -754,6 +799,11 @@ export class BeneficiaryService {
       },
     });
 
+    this.publishBeneficiaryChange(
+      'deleted',
+      [uuid],
+      findUuid.BeneficiaryProject?.map(({ projectId }) => projectId) || []
+    );
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
     return rdata;
   }
@@ -775,6 +825,11 @@ export class BeneficiaryService {
     const findUuid = await this.prisma.beneficiary.findUnique({
       where: {
         uuid,
+      },
+      include: {
+        BeneficiaryProject: {
+          select: { projectId: true },
+        },
       },
     });
 
@@ -801,6 +856,11 @@ export class BeneficiaryService {
       },
     });
 
+    this.publishBeneficiaryChange(
+      'removed',
+      [uuid],
+      findUuid.BeneficiaryProject?.map(({ projectId }) => projectId) || []
+    );
     return rdata;
   }
 
@@ -882,6 +942,11 @@ export class BeneficiaryService {
       this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
         projectUuid,
       });
+      this.publishBeneficiaryChange(
+        'created',
+        insertedBeneficiariesWithPii.map(({ uuid }) => uuid),
+        projectUuid ? [projectUuid] : []
+      );
 
       // Return some form of success indicator, as createMany does not return the records themselves
       return {
@@ -2161,5 +2226,3 @@ async function checkWalletAddress(
 
 
 }
-
-
