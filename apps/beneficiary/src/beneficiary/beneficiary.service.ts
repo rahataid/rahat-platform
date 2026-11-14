@@ -32,6 +32,7 @@ import {
   TPIIData,
   WalletJobs
 } from '@rahataid/sdk';
+import { ProjectStatus } from '@rahataid/sdk/enums';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -1720,6 +1721,13 @@ export class BeneficiaryService {
         },
       });
 
+      if (!project) throw new RpcException('Project not found.');
+      if (project.status === ProjectStatus.CLOSED) {
+        throw new RpcException(
+          'This project is closed. Beneficiary group and vendor assignment is not allowed.'
+        );
+      }
+
       if (project && project.type.toLocaleLowerCase() === 'aa') {
         // check if groups has any benf that doesn't have valid bank account
         const isGroupValidForAA = await this.isGroupValidForAA(beneficiaryGroupId);
@@ -2161,5 +2169,4 @@ async function checkWalletAddress(
 
 
 }
-
 
