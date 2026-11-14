@@ -128,7 +128,6 @@ export class WalletService implements OnModuleInit {
   // Bulk wallet creation for a specific chain
   async createBulk(count: number): Promise<WalletCreateResult[]> {
     const chainSettings = await this.getCurrentChainSettings();
-    console.log('chainSettings', chainSettings);
 
     // TODO: Multi-chain support - Validate chain is supported
     if (
@@ -146,8 +145,6 @@ export class WalletService implements OnModuleInit {
     );
 
     const wallets = await Promise.all(walletPromises);
-
-    console.log(wallets);
 
     return wallets.map((wallet) => ({
       chain: chainSettings.detectedChain,
@@ -286,7 +283,6 @@ export class WalletService implements OnModuleInit {
     evm: any;
   }> {
     const settings = await this.settings.getByName('CHAIN_SETTINGS');
-    console.log('CHAIN_SETTINGS', settings);
 
     if (!settings || !settings.value) {
       throw new Error(
