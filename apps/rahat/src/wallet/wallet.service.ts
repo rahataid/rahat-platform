@@ -169,18 +169,12 @@ export class WalletService implements OnModuleInit {
     const chains = chain ? [chain] : this.providerRegistry.getSupportedChains();
 
     for (const chainType of chains) {
-      try {
-        const walletKeys = await this.providerRegistry.getWalletKeys(
-          walletAddress,
-          chainType
-        );
-        if (walletKeys) {
-          return walletKeys;
-        }
-      } catch (error) {
-        this.logger.warn(
-          `Failed to get wallet keys for ${chainType}: ${error.message}`
-        );
+      const walletKeys = await this.providerRegistry.getWalletKeys(
+        walletAddress,
+        chainType
+      );
+      if (walletKeys) {
+        return walletKeys;
       }
     }
 
