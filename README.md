@@ -110,3 +110,8 @@ Explore the functionalities provided by the Rahat Platform locally. If you encou
 The `prisma/` directory contains seed and utility scripts for populating initial settings, dev credentials, and dashboard data sources. Refer to the full reference guide for usage of each script:
 
 - [Prisma Seed Scripts](docs/prisma-seed-scripts.md)
+
+## Email Providers
+
+See [Email providers](docs/email-providers.md) for SMTP, SendGrid, Mailgun,
+custom endpoint, and fallback configuration.

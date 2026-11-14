@@ -33,7 +33,7 @@ export class ListenersService {
   @OnEvent(EVENTS.OTP_CREATED)
   async sendOTPEmail(data: any) {
     this.otp = data.otp;
-    this.emailService.sendEmail(
+    await this.emailService.sendEmail(
       data.address,
       'Login OTP',
       'Login OTP',
@@ -72,7 +72,7 @@ export class ListenersService {
     const settings = new SettingsService(this.prisma);
     const frontendURL: any = await settings.getSettingsByName('FRONTEND_URL');
 
-    this.emailService.sendEmail(
+    await this.emailService.sendEmail(
       data.address,
       'Welcome to Rahat.',
       `
