@@ -16,7 +16,7 @@ export class CommsService {
 
   ) { }
 
-  async init() {
+  async init(): Promise<void> {
 
     const communicationSettings = await this.appService.getCommunicationSettings()
 
@@ -32,7 +32,7 @@ export class CommsService {
     this.client.setAppId(communicationSettings[0]?.value['APP_ID']);
   }
 
-  async getClient(): Promise<any> {
+  async getClient(): Promise<CommsClient> {
     if (!this.client) {
       await this.init();
       return this.client;

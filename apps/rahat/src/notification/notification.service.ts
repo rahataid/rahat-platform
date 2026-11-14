@@ -1,13 +1,14 @@
 import { InjectQueue } from "@nestjs/bull";
 import { Injectable, Logger } from "@nestjs/common";
 import { RpcException } from "@nestjs/microservices";
-import { Notification } from "@prisma/client";
+import { Notification, Prisma } from "@prisma/client";
 import { CreateNotificationDto, ListNotificationsDto } from "@rahataid/extensions";
 import { APP_JOBS, BQUEUE, UserRoles } from "@rahataid/sdk";
 import { paginator, PaginatorTypes, PrismaService } from "@rumsan/prisma";
 import { Queue } from "bull";
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
+type NotificationWithProject = Prisma.NotificationGetPayload<{ include: { project: true } }>;
 
 @Injectable()
 export class NotificationService {
@@ -18,7 +19,7 @@ export class NotificationService {
     private readonly prisma: PrismaService,
   ) { }
 
-  async createNotification(dto: CreateNotificationDto) {
+  async createNotification(dto: CreateNotificationDto): Promise<Notification> {
     try {
       const notification = await this.prisma.notification.create({
         data: {
@@ -38,7 +39,7 @@ export class NotificationService {
     }
   }
 
-  private async notifyUsers(notification: Notification) {
+  private async notifyUsers(notification: Notification): Promise<void> {
     const { ADMIN, MANAGER } = UserRoles;
 
     const roleFilter = {
@@ -76,7 +77,7 @@ export class NotificationService {
     this.logger.log(`Queued notification for ${users.length} users.`);
   }
 
-  async listNotifications({ projectId, group, title, page, perPage }: ListNotificationsDto): Promise<PaginatorTypes.PaginatedResult<Notification>> {
+  async listNotifications({ projectId, group, title, page, perPage }: ListNotificationsDto): Promise<PaginatorTypes.PaginatedResult<NotificationWithProject>> {
     try {
       const query = {
         where: {
@@ -89,7 +90,7 @@ export class NotificationService {
         },
         orderBy: { createdAt: "desc" },
       }
-      return paginate(this.prisma.notification, query, {
+      return paginate<NotificationWithProject, typeof query>(this.prisma.notification, query, {
         page,
         perPage
       })
@@ -100,7 +101,7 @@ export class NotificationService {
 
   }
 
-  async getNotification(dto: { id: number }) {
+  async getNotification(dto: { id: number }): Promise<NotificationWithProject | null> {
     const { id } = dto;
     try {
       return await this.prisma.notification.findUnique({
