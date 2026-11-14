@@ -1,4 +1,4 @@
-import { JsonRpcProvider, Provider, Wallet } from "ethers";
+import { JsonRpcProvider, Provider, TransactionRequest, TransactionResponse, Wallet } from "ethers";
 import { IConnectedWallet, WalletKeys } from "../types";
 import { EVM_CreateTransactionWithPk } from "./types";
 import { getEVMTransaction } from "./utils";
@@ -26,8 +26,7 @@ export class ConnectedWallet implements IConnectedWallet {
         return wallet.signMessage(message);
     }
 
-    //TODO define transaction type
-    async signTransaction(transactionData: any): Promise<any> {
+    async signTransaction(transactionData: TransactionRequest): Promise<string> {
         if (!this.currentWalletKeys || !this.provider) {
             throw new Error("No current account or provider set for signing transaction");
         }
@@ -35,15 +34,12 @@ export class ConnectedWallet implements IConnectedWallet {
         return wallet.signTransaction(transactionData);
     }
 
-    async sendTransaction(rawTransaction: any): Promise<any> {
+    async sendTransaction(rawTransaction: TransactionRequest): Promise<TransactionResponse> {
         if (!this.provider) {
             throw new Error("Provider is not initialized");
         }
         const signedTransaction = await this.signTransaction(rawTransaction);
-        if (!this.provider.sendTransaction) {
-            throw new Error("Provider's sendTransaction method is not available");
-        }
-        return await this.provider.sendTransaction(signedTransaction);
+        return this.provider.broadcastTransaction(signedTransaction);
     }
 
     getWalletKeys(): WalletKeys {
@@ -51,7 +47,7 @@ export class ConnectedWallet implements IConnectedWallet {
     }
 
     //TODO : cleanup this 
-    async writeContract(transactionParams: EVM_CreateTransactionWithPk) {
+    async writeContract(transactionParams: EVM_CreateTransactionWithPk): Promise<TransactionResponse> {
         if (!this.provider) {
             throw new Error("Provider is not initialized");
         }
@@ -60,9 +56,7 @@ export class ConnectedWallet implements IConnectedWallet {
             networkProvider: this.rpcUrl,
         });
 
-        const signedTxn = await this.signTransaction(txn)
-
-        this.sendTransaction(signedTxn);
+        return this.sendTransaction(txn);
     }
 
 }
