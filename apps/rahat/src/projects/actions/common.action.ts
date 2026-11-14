@@ -23,41 +23,41 @@ export const beneficiaryActions: ProjectActionFunc = {
   [MS_ACTIONS.BENEFICIARY.ASSGIN_TO_PROJECT]: (uuid, payload, sendCommand) => {
     return sendCommand(
       { cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT },
-      { projectId: uuid, ...payload } // WHY IS PROJECT ID PASSED HERE? THIS GOES TO BENF MS
+      { ...payload, projectId: uuid }
 
     )
   },
   [MS_ACTIONS.BENEFICIARY.ASSGIN_GROUP_TO_PROJECT]: (uuid, payload, sendCommand) => {
     return sendCommand(
       { cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT },
-      { projectId: uuid, ...payload }
+      { ...payload, projectId: uuid }
 
     )
   },
   [MS_ACTIONS.BENEFICIARY.BULK_ASSIGN_TO_PROJECT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.BULK_ASSIGN_TO_PROJECT },
-      { projectId: uuid, ...payload }
+      { ...payload, projectId: uuid }
     ),
   [MS_ACTIONS.BENEFICIARY.LIST_BY_PROJECT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.LIST, uuid },
-      { projectId: uuid, ...payload }
+      { ...payload, projectId: uuid }
     ),
   [MS_ACTIONS.BENEFICIARY.GET_ONE_BENEFICARY]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.GET_ONE_BENEFICIARY, uuid },
-      { projectId: uuid, ...payload }
+      { ...payload, projectId: uuid }
     ),
   [MS_ACTIONS.BENEFICIARY.LIST_FULL_DATA_BY_PROJECT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.LIST_FULL_DATA, uuid },
-      { projectId: uuid, ...payload }
+      { ...payload, projectId: uuid }
     ),
   [MS_ACTIONS.BENEFICIARY.GET_PROJECT_SPECIFIC]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: BeneficiaryJobs.GET_PROJECT_SPECIFIC },
-      { projectId: uuid, ...payload }
+      { ...payload, projectId: uuid }
     ),
   [MS_ACTIONS.ELPROJECT.GET_VENDOR_REFERRER]: (uuid, payload, sendCommand) =>
     sendCommand(
@@ -71,18 +71,18 @@ export const vendorActions: ProjectActionFunc = {
   [MS_ACTIONS.VENDOR.ASSIGN_TO_PROJECT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: VendorJobs.ASSIGN_PROJECT },
-      { projectId: uuid, ...payload }
+      { ...payload, projectId: uuid }
     ),
   [MS_ACTIONS.VENDOR.LIST_BY_PROJECT]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: VendorJobs.LIST_BY_PROJECT },
-      { projectId: uuid, ...payload }
+      { ...payload, projectId: uuid }
     ),
 
   [MS_ACTIONS.VENDOR.GET_BY_UUID]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: VendorJobs.GET_BY_UUID },
-      { projectId: uuid, ...payload }
+      { ...payload, projectId: uuid }
     ),
 
   [MS_ACTIONS.VENDOR.LIST_WITH_PROJECT_DATA]: (uuid, payload, sendCommand) => sendCommand(
@@ -104,7 +104,7 @@ export const settingActions: ProjectActionFunc = {
   [MS_ACTIONS.SETTINGS.GET]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.PROJECT_SETTINGS_GET, uuid },
-      { projectId: uuid, ...payload }
+      { ...payload, projectId: uuid }
     ),
 
 }

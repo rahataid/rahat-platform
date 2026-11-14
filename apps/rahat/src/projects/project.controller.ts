@@ -207,8 +207,8 @@ export class ProjectController {
     @Req() request: Request
   ) {
     const response = this.projectService.handleProjectActions({
-      uuid,
       ...data,
+      uuid,
       user: request.user,
     });
     return response;
