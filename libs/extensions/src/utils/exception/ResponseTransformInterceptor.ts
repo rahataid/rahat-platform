@@ -4,6 +4,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
+import { SSE_METADATA } from '@nestjs/common/constants';
 import { Response } from '@rumsan/sdk/types';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -16,7 +17,9 @@ export class ResponseTransformInterceptor<T>
     next: CallHandler,
   ): Observable<Response<T>> {
     const request = context.switchToHttp().getRequest();
-    if (request.query.raw) return next.handle();
+    if (request.query.raw || Reflect.getMetadata(SSE_METADATA, context.getHandler())) {
+      return next.handle();
+    }
 
     return next.handle().pipe(
       map((retData) => {
