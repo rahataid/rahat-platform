@@ -5,12 +5,16 @@ import { BadRequestException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RpcException } from '@nestjs/microservices';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateBeneficiaryDto } from '@rahataid/extensions';
+import {
+  CreateBeneficiaryDto,
+  ListBeneficiaryGroupDto,
+} from '@rahataid/extensions';
 import { BeneficiaryEvents, BQUEUE, ProjectContants } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import { BeneficiaryService } from './beneficiary.service';
+import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
 
@@ -72,7 +76,9 @@ describe('BeneficiaryService', () => {
             beneficiaryGroup: {
               create: jest.fn(),
               findUnique: jest.fn(),
-              update: jest.fn()
+              update: jest.fn(),
+              findMany: jest.fn(),
+              count: jest.fn(),
             }
           },
         },
@@ -90,10 +96,20 @@ describe('BeneficiaryService', () => {
           },
         },
         {
+          provide: 'RAHAT_CLIENT',
+          useValue: {
+            send: jest.fn(),
+          },
+        },
+        {
           provide: VerificationService,
           useValue: {
             verify: jest.fn(),
           },
+        },
+        {
+          provide: BeneficiaryUtilsService,
+          useValue: {},
         },
       ],
     }).compile();
@@ -851,6 +867,68 @@ describe('BeneficiaryService', () => {
         data: expectedCreateManyPayload
       });
       expect(result).toEqual(mockResponse);
+    });
+  });
+
+  describe('getAllGroups', () => {
+    it('filters group names case-insensitively with project pagination', async () => {
+      const dto: ListBeneficiaryGroupDto = {
+        groupName: '  Relief  ',
+        projectId: 'project-uuid',
+        page: 2,
+        perPage: 5,
+        sort: 'name',
+        order: 'desc',
+      };
+      const where = {
+        deletedAt: null,
+        beneficiaryGroupProject: {
+          some: {
+            projectId: 'project-uuid',
+          },
+        },
+        name: {
+          contains: 'Relief',
+          mode: 'insensitive',
+        },
+      };
+      (prisma.beneficiaryGroup.count as jest.Mock).mockResolvedValue(0);
+      (prisma.beneficiaryGroup.findMany as jest.Mock).mockResolvedValue([]);
+
+      await service.getAllGroups(dto);
+
+      expect(prisma.beneficiaryGroup.count).toHaveBeenCalledWith({ where });
+      expect(prisma.beneficiaryGroup.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where,
+          orderBy: { name: 'desc' },
+          take: 5,
+          skip: 5,
+        })
+      );
+    });
+
+    it('does not apply the group name filter when the search is blank', async () => {
+      const dto: ListBeneficiaryGroupDto = {
+        groupName: '  ',
+        page: 1,
+        perPage: 10,
+        sort: 'name',
+        order: 'asc',
+      };
+      (prisma.beneficiaryGroup.count as jest.Mock).mockResolvedValue(0);
+      (prisma.beneficiaryGroup.findMany as jest.Mock).mockResolvedValue([]);
+
+      await service.getAllGroups(dto);
+
+      expect(prisma.beneficiaryGroup.count).toHaveBeenCalledWith({
+        where: { deletedAt: null },
+      });
+      expect(prisma.beneficiaryGroup.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { deletedAt: null },
+        })
+      );
     });
   });
 
