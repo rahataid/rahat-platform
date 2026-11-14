@@ -15,6 +15,7 @@ import {
   VendorRegisterDto,
 } from '@rahataid/extensions';
 import { ProjectContants, UserRoles, VendorJobs } from '@rahataid/sdk';
+import { ProjectStatus } from '@rahataid/sdk/enums';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
@@ -104,6 +105,15 @@ export class VendorsService {
 
   async assignToProject(dto: VendorAddToProjectDto) {
     const { vendorId, projectId } = dto;
+    const project = await this.prisma.project.findUnique({
+      where: { uuid: projectId },
+    });
+    if (!project) throw new RpcException('Project not found.');
+    if (project.status === ProjectStatus.CLOSED) {
+      throw new RpcException(
+        'This project is closed. Beneficiary group and vendor assignment is not allowed.'
+      );
+    }
     const vendorUser = await this.prisma.user.findUnique({
       where: { uuid: vendorId },
     });
