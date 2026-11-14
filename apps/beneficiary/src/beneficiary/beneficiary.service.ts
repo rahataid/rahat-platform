@@ -35,6 +35,7 @@ import {
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
+import { isDeepStrictEqual } from 'node:util';
 import { v4 as uuidv4 } from 'uuid';
 import {
   findTempBenefGroups,
@@ -49,6 +50,19 @@ import { VerificationService } from './verification.service';
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 const BATCH_SIZE = 20;
+const STATS_RELEVANT_BENEFICIARY_FIELDS = [
+  'gender',
+  'birthDate',
+  'age',
+  'location',
+  'latitude',
+  'longitude',
+  'extras',
+  'bankedStatus',
+  'internetStatus',
+  'phoneStatus',
+] as const;
+const STATS_RELEVANT_PII_FIELDS = ['name', 'phone', 'extras'] as const;
 
 @Injectable()
 export class BeneficiaryService {
@@ -76,9 +90,18 @@ export class BeneficiaryService {
     });
   }
   async refreshStats() {
-    this.eventEmitter.emit(BeneficiaryEvents.REFRESH_STATS, { projectUUID: null });
+    this.emitStatsRefresh(BeneficiaryEvents.REFRESH_STATS, []);
     return { message: 'Beneficiary stats refresh started' };
   }
+
+  private emitStatsRefresh(event: string, projectUuids: string[]) {
+    const uniqueProjectUuids = [...new Set(projectUuids)];
+    const payload = uniqueProjectUuids.length
+      ? { projectUuids: uniqueProjectUuids }
+      : { projectUuid: null };
+    this.eventEmitter.emit(event, payload);
+  }
+
   async listPiiData(dto: any) {
     const repository = dto.projectId
       ? this.rsprisma.beneficiaryProject
@@ -702,19 +725,51 @@ export class BeneficiaryService {
       where: {
         uuid,
       },
+      include: {
+        pii: {
+          select: {
+            name: true,
+            phone: true,
+            extras: true,
+          },
+        },
+        BeneficiaryProject: {
+          where: {
+            deletedAt: null,
+          },
+          select: {
+            projectId: true,
+          },
+        },
+      },
     });
 
     if (!findUuid) throw new Error('Data not Found');
-    const { piiData, id, ...rest } = dto;
+    const { piiData, ...rest } = dto;
+    delete rest.id;
+    const shouldRefreshStats =
+      STATS_RELEVANT_BENEFICIARY_FIELDS.some(
+        (field) =>
+          Object.prototype.hasOwnProperty.call(rest, field) &&
+          !isDeepStrictEqual(findUuid[field], rest[field])
+      ) ||
+      STATS_RELEVANT_PII_FIELDS.some(
+        (field) =>
+          piiData?.[field] !== undefined &&
+          !isDeepStrictEqual(findUuid.pii?.[field], piiData[field])
+      );
 
-    const benWithSameNumber = await this.rsprisma.beneficiaryPii.findFirst({
-      where: {
-        phone: piiData.phone,
-        beneficiaryId: { not: id },
-      },
-    });
-    if (benWithSameNumber)
-      throw new RpcException('Phone number should be unique');
+    if (piiData?.phone) {
+      const benWithSameNumber =
+        await this.rsprisma.beneficiaryPii.findFirst({
+          where: {
+            phone: piiData.phone,
+            beneficiaryId: { not: findUuid.id },
+          },
+        });
+      if (benWithSameNumber)
+        throw new RpcException('Phone number should be unique');
+    }
 
     const rdata = await this.prisma.beneficiary.update({
       where: {
@@ -723,7 +778,12 @@ export class BeneficiaryService {
       data: rest,
     });
     if (dto.piiData) await this.updatePIIByBenefUUID(uuid, piiData);
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
+    if (shouldRefreshStats) {
+      this.emitStatsRefresh(
+        BeneficiaryEvents.BENEFICIARY_UPDATED,
+        findUuid.BeneficiaryProject?.map(({ projectId }) => projectId) ?? []
+      );
+    }
     return rdata;
   }
 
@@ -742,6 +802,16 @@ export class BeneficiaryService {
       where: {
         uuid,
       },
+      include: {
+        BeneficiaryProject: {
+          where: {
+            deletedAt: null,
+          },
+          select: {
+            projectId: true,
+          },
+        },
+      },
     });
 
     if (!findUuid) throw new Error('Data not Found');
@@ -754,7 +824,10 @@ export class BeneficiaryService {
       },
     });
 
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
+    this.emitStatsRefresh(
+      BeneficiaryEvents.BENEFICIARY_UPDATED,
+      findUuid.BeneficiaryProject?.map(({ projectId }) => projectId) ?? []
+    );
     return rdata;
   }
 
@@ -776,6 +849,16 @@ export class BeneficiaryService {
       where: {
         uuid,
       },
+      include: {
+        BeneficiaryProject: {
+          where: {
+            deletedAt: null,
+          },
+          select: {
+            projectId: true,
+          },
+        },
+      },
     });
 
     if (!findUuid) throw new Error('Data not Found');
@@ -788,11 +871,8 @@ export class BeneficiaryService {
         deletedAt: new Date(),
       },
     });
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_REMOVED, {
-      projectUuid: uuid,
-    });
 
-    const res = await this.prisma.groupedBeneficiaries.updateMany({
+    await this.prisma.groupedBeneficiaries.updateMany({
       where: {
         beneficiaryId: findUuid.uuid,
       },
@@ -800,6 +880,11 @@ export class BeneficiaryService {
         deletedAt: new Date(),
       },
     });
+
+    this.emitStatsRefresh(
+      BeneficiaryEvents.BENEFICIARY_REMOVED,
+      findUuid.BeneficiaryProject?.map(({ projectId }) => projectId) ?? []
+    );
 
     return rdata;
   }
@@ -901,19 +986,7 @@ export class BeneficiaryService {
 
   async createBulkBeneficiaries(dtos: CreateBeneficiaryDto[],
     projectUuid?: string, conditional?: boolean) {
-    try {
-      const result = this.createBulk(dtos, projectUuid, conditional)
-      this.eventEmitter.emit(
-        BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL,
-        {
-          projectUuid: null,
-        }
-      );
-      return result
-    } catch (error) {
-      this.logger.error(error.message)
-    }
-
+    return this.createBulk(dtos, projectUuid, conditional);
   }
   async syncProjectStats(projectUuid) {
     return await this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_CREATED, {
@@ -2161,5 +2234,3 @@ async function checkWalletAddress(
 
 
 }
-
-
