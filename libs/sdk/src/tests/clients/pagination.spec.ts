@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { Pagination } from '@rumsan/sdk/types';
 import { getBeneficiaryClient } from '../../clients/beneficiary.client';
+import { getAppClient } from '../../clients/app.client';
 import { getGrievanceClient } from '../../clients/grievance.client';
 import { getSettingsClient } from '../../clients/settings.client';
 import { getVendorClient } from '../../clients/vendor.client';
@@ -15,6 +16,7 @@ describe('SDK list pagination', () => {
   const vendor = getVendorClient(http);
   const grievance = getGrievanceClient(http);
   const settings = getSettingsClient(http);
+  const app = getAppClient(http);
   const routes: [string, (config: AxiosRequestConfig) => Promise<unknown>][] = [
     ['/beneficiaries', (config) => beneficiary.list(pagination, config)],
     ['/beneficiaries/pii', (config) => beneficiary.listPiiData(pagination, config)],
@@ -23,6 +25,7 @@ describe('SDK list pagination', () => {
     ['/vendors', (config) => vendor.list(pagination, config)],
     ['/grievances', (config) => grievance.list(pagination, config)],
     ['/settings', (config) => settings.listSettings(pagination, config)],
+    ['/app/auth-apps', (config) => app.listAuthApps(pagination, config)],
   ];
 
   beforeEach(() => get.mockClear());
