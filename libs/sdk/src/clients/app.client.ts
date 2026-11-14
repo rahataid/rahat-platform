@@ -4,6 +4,7 @@ import { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { UUID } from 'crypto';
 import { TAuthApp } from '../app';
 import { AppClient } from '../types/app.types';
+import { withPagination } from './pagination';
 
 export const getAppClient = (client: AxiosInstance): AppClient => {
     return {
@@ -19,10 +20,7 @@ export const getAppClient = (client: AxiosInstance): AppClient => {
             return formatResponse<TAuthApp>(response);
         },
         listAuthApps: async (data: Pagination, config?: AxiosRequestConfig) => {
-            const response = await client.get('/app/auth-apps', {
-                params: data,
-                ...config
-            });
+            const response = await client.get('/app/auth-apps', withPagination(data, config));
             return formatResponse<TAuthApp[]>(response)
         },
         getAuthApp: async (uuid: UUID, config?: AxiosRequestConfig) => {

@@ -4,6 +4,7 @@ import { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { UUID } from 'crypto';
 import { Beneficiary, ImportTempBeneficiary, TPIIData, TempBeneficiary } from '../beneficiary';
 import { BeneficiaryClient, Stats } from '../types';
+import { withPagination } from './pagination';
 
 export const getBeneficiaryClient = (
   client: AxiosInstance
@@ -30,34 +31,22 @@ export const getBeneficiaryClient = (
     },
 
     listTempBeneficiary: async (uuid: string, data?: Pagination, config?: AxiosRequestConfig) => {
-      const response = await client.get(`/beneficiaries/temp/${uuid}`, {
-        params: data,
-        ...config,
-      });
+      const response = await client.get(`/beneficiaries/temp/${uuid}`, withPagination(data, config));
       return formatResponse<TempBeneficiary[]>(response);
     },
 
     listTempGroups: async (data?: Pagination, config?: AxiosRequestConfig) => {
-      const response = await client.get('/beneficiaries/temp-groups', {
-        params: data,
-        ...config,
-      });
+      const response = await client.get('/beneficiaries/temp-groups', withPagination(data, config));
       return formatResponse<TempBeneficiary[]>(response);
     },
 
     list: async (data?: Pagination, config?: AxiosRequestConfig) => {
-      const response = await client.get('/beneficiaries', {
-        params: data,
-        ...config,
-      });
+      const response = await client.get('/beneficiaries', withPagination(data, config));
       return formatResponse<Beneficiary[]>(response);
     },
 
     listPiiData: async (data?: Pagination, config?: AxiosRequestConfig) => {
-      const response = await client.get('/beneficiaries/pii', {
-        params: data,
-        ...config,
-      });
+      const response = await client.get('/beneficiaries/pii', withPagination(data, config));
       return formatResponse<TPIIData[]>(response);
     },
 

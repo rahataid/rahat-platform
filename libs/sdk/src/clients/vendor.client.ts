@@ -4,6 +4,7 @@ import { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { UUID } from 'crypto';
 import { VendorClient } from '../types/vendor.types';
 import { Vendor } from '../vendor';
+import { withPagination } from './pagination';
 
 export const getVendorClient = (client: AxiosInstance): VendorClient => {
   return {
@@ -13,10 +14,7 @@ export const getVendorClient = (client: AxiosInstance): VendorClient => {
     },
 
     list: async (data: Pagination, config?: AxiosRequestConfig) => {
-      const response = await client.get('/vendors', {
-        params: data,
-        ...config
-      });
+      const response = await client.get('/vendors', withPagination(data, config));
       return formatResponse<Vendor[]>(response)
     },
 
