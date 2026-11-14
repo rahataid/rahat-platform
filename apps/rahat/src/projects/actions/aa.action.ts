@@ -1,7 +1,10 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { AAJobs, MS_ACTIONS } from '@rahataid/sdk';
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
+import { isUUID } from 'class-validator';
+import { firstValueFrom } from 'rxjs';
 
 export const aaActions: ProjectActionFunc = {
   /***********************
@@ -468,6 +471,44 @@ export const aaActions: ProjectActionFunc = {
 
   [MS_ACTIONS.AAPROJECT.PAYOUT.UPDATE]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PAYOUT.UPDATE, uuid }, payload),
+
+  [MS_ACTIONS.AAPROJECT.PAYOUT.CANCEL_PAYOUT]: async (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
+    const payoutUuid =
+      typeof payload?.uuid === 'string' ? payload.uuid.trim() : '';
+    if (!isUUID(payoutUuid)) {
+      throw new BadRequestException('A valid payout UUID is required');
+    }
+
+    const payout = await firstValueFrom<{
+      status?: string | null;
+      isPayoutTriggered?: boolean;
+    } | null>(
+      await sendCommand({ cmd: AAJobs.PAYOUT.GET, uuid }, { uuid: payoutUuid })
+    );
+    if (!payout) {
+      throw new NotFoundException(`Payout with UUID '${payoutUuid}' not found`);
+    }
+
+    if (
+      payout.status?.toUpperCase() !== 'PENDING' ||
+      payout.isPayoutTriggered === true
+    ) {
+      throw new BadRequestException(
+        `Payout with UUID '${payoutUuid}' cannot be cancelled`
+      );
+    }
+
+    return firstValueFrom(
+      await sendCommand(
+        { cmd: AAJobs.PAYOUT.UPDATE, uuid },
+        { uuid: payoutUuid, status: 'CANCELLED' }
+      )
+    );
+  },
 
   [MS_ACTIONS.AAPROJECT.PAYOUT.ASSIGN_TOKEN]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.PAYOUT.ASSIGN_TOKEN, uuid }, payload),
