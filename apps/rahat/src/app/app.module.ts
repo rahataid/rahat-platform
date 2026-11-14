@@ -17,6 +17,7 @@ import {
 import { BeneficiaryModule } from '../beneficiary/beneficiary.module';
 import { CommsModule } from '../comms/comms.module';
 import { ExternalAppGuard } from '../decorators';
+import { EventsModule } from '../events/events.module';
 import { GrievanceModule } from '../grievance/grievance.module';
 import { ListenersModule } from '../listeners/listeners.module';
 import { NotificationModule } from '../notification/notification.module';
@@ -38,6 +39,7 @@ import { AppService } from './app.service';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     BeneficiaryModule,
+    EventsModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
