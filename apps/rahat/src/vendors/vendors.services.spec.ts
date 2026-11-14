@@ -2,11 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from "@rumsan/prisma";
 import { VendorsService } from "./vendors.service";
 import { UserRoles } from '@rahataid/sdk';
-import { AuthsService, UsersService } from '@rumsan/user';
+import { AuthsService } from '@rumsan/user';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import { VendorRegisterDto } from '@rahataid/extensions';
 import { Service } from '@rumsan/sdk/enums';
+import { UsersService } from '../users/users.service';
+import { NotificationService } from '../notification/notification.service';
 
 jest.mock('@rahataid/sdk', () => ({
   ...jest.requireActual('@rahataid/sdk'),
@@ -52,7 +54,8 @@ describe('VendorsService', () => {
             user: {
               findFirst: jest.fn(),
               findUnique: jest.fn(),
-              create: jest.fn()
+              create: jest.fn(),
+              groupBy: jest.fn(),
             },
             auth: {  
               create: jest.fn()
@@ -72,7 +75,14 @@ describe('VendorsService', () => {
         {
           provide: UsersService,
           useValue: {
-              update: jest.fn()
+            update: jest.fn(),
+            delete: jest.fn(),
+          },
+        },
+        {
+          provide: NotificationService,
+          useValue: {
+            createNotification: jest.fn(),
           },
         },
         {
@@ -137,18 +147,40 @@ describe('VendorsService', () => {
   });
 
   describe('get vendor count', () => {
-    it('should return the count of vendors', async () => {
-      const mockCount = 6;
-      (prisma.userRole.count as jest.Mock).mockResolvedValue(mockCount);
+    it('should return vendor gender statistics and include missing genders as unknown', async () => {
+      (prisma.user.groupBy as jest.Mock).mockResolvedValue([
+        { gender: 'MALE', _count: { gender: 2 } },
+        { gender: 'FEMALE', _count: { gender: 1 } },
+        { gender: undefined, _count: { gender: 3 } },
+      ]);
+
       const result = await service.getVendorCount();
-      expect(prisma.userRole.count).toHaveBeenCalledWith({
+
+      expect(prisma.user.groupBy).toHaveBeenCalledWith({
+        by: ['gender'],
+        _count: {
+          gender: true,
+        },
         where: {
-          Role: {
-            name: UserRoles.VENDOR,
+          deletedAt: null,
+          UserRole: {
+            some: {
+              Role: {
+                name: UserRoles.VENDOR,
+              },
+            },
           },
         },
       });
-      expect(result).toBe(mockCount);
+      expect(result).toEqual({
+        total: 6,
+        genderStats: [
+          { gender: 'MALE', count: 2 },
+          { gender: 'FEMALE', count: 1 },
+          { gender: 'OTHER', count: 0 },
+          { gender: 'UNKNOWN', count: 3 },
+        ],
+      });
     });
   });
 
