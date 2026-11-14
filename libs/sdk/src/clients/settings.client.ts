@@ -6,6 +6,7 @@ import {
   SettingResponse
 } from '../settings/settings.types';
 import { SettingClient } from '../types/settings.clients.types';
+import { withPagination } from './pagination';
 
 export const getSettingsClient = (client: AxiosInstance): SettingClient => {
   return {
@@ -14,10 +15,7 @@ export const getSettingsClient = (client: AxiosInstance): SettingClient => {
       return formatResponse<SettingResponse>(response);
     },
     listSettings: async (data?: Pagination, config?: AxiosRequestConfig) => {
-      const response = await client.get('/settings', {
-        params: data,
-        ...config,
-      });
+      const response = await client.get('/settings', withPagination(data, config));
       return formatResponse<SettingList>(response);
     },
 

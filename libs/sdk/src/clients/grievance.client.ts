@@ -4,6 +4,7 @@ import { FormattedResponse, formatResponse } from "@rumsan/sdk/utils";
 import { AxiosInstance, AxiosRequestConfig } from "axios";
 import { UUID } from "crypto";
 import { Grievance, GrievanceStatus } from "../grievance";
+import { withPagination } from "./pagination";
 
 
 type OptionalPagination = Partial<Pagination>;
@@ -38,10 +39,7 @@ export const getGrievanceClient = (
     },
 
     list: async (data?: Pagination, config?: AxiosRequestConfig) => {
-      const response = await client.get('/grievances', {
-        params: data,
-        ...config,
-      });
+      const response = await client.get('/grievances', withPagination(data, config));
       return formatResponse<Grievance[]>(response);
     },
 
