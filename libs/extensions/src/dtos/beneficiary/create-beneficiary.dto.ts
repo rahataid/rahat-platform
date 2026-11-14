@@ -1,14 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Beneficiary, Enums, TPIIData } from '@rahataid/sdk';
+import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsDate,
   IsEnum,
   IsNumber,
   IsOptional,
-  IsString
+  IsString,
+  IsObject,
+  ValidateNested,
 } from 'class-validator';
 import { UUID, randomUUID } from 'crypto';
+import { BeneficiaryPiiDto } from './beneficiary-pii.dto';
 
 export class CreateBeneficiaryDto implements Beneficiary {
   @ApiProperty({
@@ -140,7 +144,7 @@ export class CreateBeneficiaryDto implements Beneficiary {
     required: false,
     example: {
       name: 'Ram Shrestha',
-      phone: '98670023857',
+      phone: '+9779812345678',
       extras: {
         bank: 'Laxmi Bank',
         account: '9872200001',
@@ -148,6 +152,9 @@ export class CreateBeneficiaryDto implements Beneficiary {
     },
   })
   @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => BeneficiaryPiiDto)
   piiData: TPIIData;
 
   @ApiProperty({

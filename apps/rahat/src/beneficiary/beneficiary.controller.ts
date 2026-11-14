@@ -25,6 +25,8 @@ import {
   AddGroupsPurposeDto,
   CreateBeneficiaryDto,
   CreateBeneficiaryGroupsDto,
+  E164_PHONE_MESSAGE,
+  E164_PHONE_PATTERN,
   ImportTempBenefDto,
   ListBeneficiaryDto,
   ListBeneficiaryGroupDto,
@@ -76,6 +78,15 @@ function getDateInfo(dateString) {
     console.error(error);
     return null;
   }
+}
+
+function validateBeneficiaryPhones(beneficiaries: Array<{ piiData?: { phone?: unknown } }>) {
+  beneficiaries.forEach((beneficiary, index) => {
+    const phone = beneficiary.piiData?.phone;
+    if (typeof phone !== 'string' || !E164_PHONE_PATTERN.test(phone)) {
+      throw new BadRequestException(`Beneficiary ${index + 1}: ${E164_PHONE_MESSAGE}`);
+    }
+  });
 }
 
 @Controller('beneficiaries')
@@ -193,6 +204,7 @@ export class BeneficiaryController {
   @UseInterceptors(WalletInterceptor)
   @Post('bulk')
   async createBulk(@Body() dto: CreateBeneficiaryDto[]) {
+    validateBeneficiaryPhones(dto);
     const data = dto.map((b) => ({
       ...b,
       birthDate: b.birthDate ? new Date(b.birthDate).toISOString() : null,
@@ -238,6 +250,7 @@ export class BeneficiaryController {
       },
     }));
 
+    validateBeneficiaryPhones(beneficiariesMapped);
     return this.client
       .send(
         { cmd: BeneficiaryJobs.CREATE_BULK },
@@ -329,6 +342,7 @@ export class BeneficiaryController {
       },
     }));
 
+    validateBeneficiaryPhones(beneficiariesMapped);
 
     const uniquePhoneNumberedBeneficiaries = beneficiariesMapped.filter(
       (b, index, self) =>
