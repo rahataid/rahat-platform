@@ -1,3 +1,4 @@
+<a href="https://www.digitalpublicgoods.net/r/rahat"><img src="https://github.com/DPGAlliance/dpg-resources/blob/main/docs/assets/dpg-badge/dpg-badge.png?raw=true" width="100" alt="Digital Public Goods Badge"></a>
 
 ## Core Repository Overview
 
