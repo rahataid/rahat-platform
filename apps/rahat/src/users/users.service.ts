@@ -1,8 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ClientProxy } from '@nestjs/microservices';
 import { CreateUserDto, ListUserDto } from '@rumsan/extensions/dtos';
 import { PrismaService } from '@rumsan/prisma';
-import { UsersService as RSUserService } from '@rumsan/user';
+import {
+  AUTH_SERVICE_CLIENT,
+  UsersService as RSUserService,
+} from '@rumsan/user';
 import { NotificationService } from '../notification/notification.service';
 import { WalletService } from '../wallet/wallet.service';
 
@@ -12,9 +16,10 @@ export class UsersService extends RSUserService {
     protected readonly prisma: PrismaService,
     protected readonly eventEmitter: EventEmitter2,
     protected readonly walletService: WalletService,
-    protected readonly notificationService: NotificationService
+    protected readonly notificationService: NotificationService,
+    @Inject(AUTH_SERVICE_CLIENT) authClient: ClientProxy
   ) {
-    super(prisma, eventEmitter);
+    super(prisma, eventEmitter, authClient);
   }
 
   // TODO: Multi-chain support - Currently uses instance's configured chain

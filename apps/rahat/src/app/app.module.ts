@@ -31,12 +31,14 @@ import { TokenModule } from '../token/token.module';
 import { UploadModule } from '../upload/upload.module';
 import { AppUsersModule } from '../vendors/vendors.module';
 import { WalletModule } from '../wallet/wallet.module';
+import { AuthServiceClientModule } from '../users/auth-service-client.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    AuthServiceClientModule,
     BeneficiaryModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
