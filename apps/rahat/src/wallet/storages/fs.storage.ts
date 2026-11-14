@@ -19,13 +19,20 @@ export class FileWalletStorage implements WalletStorage {
         const dirExists = await fs.stat(this.storageDir).then(() => true).catch(() => false);
         if (!dirExists) {
             this.logger.log("Making new directory");
-            await fs.mkdir(this.storageDir, { recursive: true });
+            await fs.mkdir(this.storageDir, { recursive: true, mode: 0o700 });
         }
     }
 
     async saveKey(keys: WalletKeys) {
         const filePath = path.join(this.storageDir, `${keys.blockchain.toLocaleUpperCase()}_${keys.address}.json`);
-        await fs.writeFile(filePath, JSON.stringify(keys, null, 2));
+        const file = await fs.open(filePath, 'a', 0o600);
+        try {
+            await file.chmod(0o600);
+            await file.truncate(0);
+            await file.writeFile(JSON.stringify(keys, null, 2));
+        } finally {
+            await file.close();
+        }
     }
     async getKey(address: string, blockchain: ChainType): Promise<WalletKeys | null> {
         this.logger.log(`Getting key for address: ${address.toLocaleUpperCase()} and blockchain: ${blockchain}`);
