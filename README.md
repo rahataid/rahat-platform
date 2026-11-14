@@ -43,7 +43,11 @@ Before you begin, ensure your system has the following dependencies installed:
 
 - Docker: Version 20.10.7 or higher
 - Node.js: Version 20.10.0 or higher
-- pnpm (Package Manager): Version 6.16.1 or higher
+- pnpm (Package Manager): Version 9.0.0 or higher (for the version 9 lockfile)
+
+Run `node tools/scripts/check-dev-env.cjs` to check these prerequisites and
+confirm that the Docker daemon is accessible. Once pnpm is installed, the
+same check is also available as `pnpm dev:check`.
 
 #### Setup
 
