@@ -92,8 +92,18 @@ describe('CRUD /v1/vendors', () => {
         const response = await request(baseUrl).get('/vendors/stats').set('Authorization', header);
         expect(response.statusCode).toBe(200);
         expect(response.body.success).toBe(true);
-        expect(typeof response.body.data).toEqual('number');
-        expect(response.body.data).toEqual(resBulkCache.get('bulkVendors').length);
+        expect(response.body.data.total).toEqual(resBulkCache.get('bulkVendors').length);
+        expect(response.body.data.genderStats).toEqual(
+            expect.arrayContaining([
+                { gender: 'MALE', count: expect.any(Number) },
+                { gender: 'FEMALE', count: expect.any(Number) },
+                { gender: 'OTHER', count: expect.any(Number) },
+                { gender: 'UNKNOWN', count: expect.any(Number) },
+            ])
+        );
+        expect(
+            response.body.data.genderStats.reduce((sum, stat) => sum + stat.count, 0)
+        ).toBe(response.body.data.total);
     });
 
     it('should return details of vendor using id', async () => {

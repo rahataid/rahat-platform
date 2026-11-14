@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 // import * as jwt from '@nestjs/jwt';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { Gender } from '@prisma/client';
 import {
   GetVendorOtp,
   VendorAddToProjectDto,
@@ -195,13 +196,43 @@ export class VendorsService {
   }
 
   async getVendorCount() {
-    return this.prisma.userRole.count({
+    const genderCounts = await this.prisma.user.groupBy({
+      by: ['gender'],
+      _count: {
+        gender: true,
+      },
       where: {
-        Role: {
-          name: UserRoles.VENDOR,
+        deletedAt: null,
+        UserRole: {
+          some: {
+            Role: {
+              name: UserRoles.VENDOR,
+            },
+          },
         },
       },
     });
+
+    const counts: Record<Gender, number> = {
+      [Gender.MALE]: 0,
+      [Gender.FEMALE]: 0,
+      [Gender.OTHER]: 0,
+      [Gender.UNKNOWN]: 0,
+    };
+
+    for (const { gender, _count } of genderCounts) {
+      counts[gender ?? Gender.UNKNOWN] += _count.gender;
+    }
+
+    const genderStats = Object.entries(counts).map(([gender, count]) => ({
+      gender,
+      count,
+    }));
+
+    return {
+      total: genderStats.reduce((total, stat) => total + stat.count, 0),
+      genderStats,
+    };
   }
 
   async getVendor(id: UUID | Address) {
