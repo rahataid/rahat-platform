@@ -11,6 +11,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model WalletKey {
+  id         Int    @id @default(autoincrement())
+  address    String
+  blockchain String
+  ciphertext Bytes
+  nonce      Bytes
+  tag        Bytes
+
+  @@unique([blockchain, address])
+  @@map("tbl_wallet_keys")
+}
+
 // ++++++++++++++++++ START: @rumsan/user - User +++++++++++++++++++++++++++++++
 
 // =================== User Module ==================
@@ -755,5 +767,4 @@ model Notification {
 }
 
 // ++++++++++++++++++ END: Notification ++++++++++++++++++++
-
 
