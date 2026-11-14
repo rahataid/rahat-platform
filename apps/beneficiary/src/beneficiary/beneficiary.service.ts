@@ -705,16 +705,20 @@ export class BeneficiaryService {
     });
 
     if (!findUuid) throw new Error('Data not Found');
-    const { piiData, id, ...rest } = dto;
+    const { piiData, ...rest } = dto;
+    delete rest.id;
 
-    const benWithSameNumber = await this.rsprisma.beneficiaryPii.findFirst({
-      where: {
-        phone: piiData.phone,
-        beneficiaryId: { not: id },
-      },
-    });
-    if (benWithSameNumber)
-      throw new RpcException('Phone number should be unique');
+    if (piiData?.phone) {
+      const benWithSameNumber =
+        await this.rsprisma.beneficiaryPii.findFirst({
+          where: {
+            phone: piiData.phone,
+            beneficiaryId: { not: findUuid.id },
+          },
+        });
+      if (benWithSameNumber)
+        throw new RpcException('Phone number should be unique');
+    }
 
     const rdata = await this.prisma.beneficiary.update({
       where: {
@@ -723,7 +727,9 @@ export class BeneficiaryService {
       data: rest,
     });
     if (dto.piiData) await this.updatePIIByBenefUUID(uuid, piiData);
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED, {
+      projectUuid: null,
+    });
     return rdata;
   }
 
@@ -754,7 +760,9 @@ export class BeneficiaryService {
       },
     });
 
-    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
+    this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED, {
+      projectUuid: null,
+    });
     return rdata;
   }
 
@@ -2161,5 +2169,4 @@ async function checkWalletAddress(
 
 
 }
-
 
