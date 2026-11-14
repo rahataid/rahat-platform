@@ -11,6 +11,7 @@ import { PrismaService } from '@rumsan/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import { BeneficiaryService } from './beneficiary.service';
+import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
 
@@ -27,6 +28,26 @@ describe('BeneficiaryService', () => {
   let prisma: PrismaService;
   let eventEmitter: EventEmitter2;
   let rsprisma;
+  const activeBeneficiaryProjectInclude = {
+    BeneficiaryProject: {
+      where: {
+        deletedAt: null,
+      },
+      select: {
+        projectId: true,
+      },
+    },
+  };
+  const beneficiaryUpdateInclude = {
+    pii: {
+      select: {
+        name: true,
+        phone: true,
+        extras: true,
+      },
+    },
+    ...activeBeneficiaryProjectInclude,
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -90,6 +111,16 @@ describe('BeneficiaryService', () => {
           },
         },
         {
+          provide: 'RAHAT_CLIENT',
+          useValue: {
+            send: jest.fn(),
+          },
+        },
+        {
+          provide: BeneficiaryUtilsService,
+          useValue: {},
+        },
+        {
           provide: VerificationService,
           useValue: {
             verify: jest.fn(),
@@ -102,6 +133,20 @@ describe('BeneficiaryService', () => {
     prisma = module.get<PrismaService>(PrismaService);
     eventEmitter = module.get<EventEmitter2>(EventEmitter2);
     rsprisma = prisma.rsclient;
+  });
+
+  describe('refreshStats', () => {
+    it('should emit a global stats refresh event', async () => {
+      const result = await service.refreshStats();
+
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        BeneficiaryEvents.REFRESH_STATS,
+        { projectUuid: null }
+      );
+      expect(result).toEqual({
+        message: 'Beneficiary stats refresh started',
+      });
+    });
   });
 
   describe('create', () => {
@@ -477,20 +522,29 @@ describe('BeneficiaryService', () => {
           bank: "Laxmi Bank",
           account: "9872200001"
         }
-      }
+      },
+      pii: {
+        name: "Ram Shrestha",
+        phone: "9999999999",
+        extras: {
+          bank: "Laxmi Bank",
+          account: "9872200001"
+        }
+      },
     };
     it('should update the beneficiary details if dto doesnot contains piiData', async () => {
       const mockDto = {
-        notes: '9999'
+        notes: 'Updated note'
       };
       (prisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(mockResponse);
       (prisma.beneficiary.update as jest.Mock).mockResolvedValue({ ...mockResponse, ...mockDto });
       const result = await service.update(mockResponse.uuid, mockDto);
-      expect(result).toEqual(mockResponse);
+      expect(result).toEqual({ ...mockResponse, ...mockDto });
       expect(prisma.beneficiary.findUnique).toHaveBeenCalledWith({
         where: {
           uuid: mockResponse.uuid
-        }
+        },
+        include: beneficiaryUpdateInclude,
       });
       expect(prisma.beneficiary.update).toHaveBeenCalledWith({
         where: {
@@ -498,25 +552,29 @@ describe('BeneficiaryService', () => {
         },
         data: mockDto
       });
-      expect(eventEmitter.emit).toHaveBeenCalledWith(BeneficiaryEvents.BENEFICIARY_UPDATED);
+      expect(eventEmitter.emit).not.toHaveBeenCalled();
     });
 
     it('should update the beneficiary details if dto contains piiData', async () => {
       const mockDto = {
-        gender: 'MALE',
+        gender: 'FEMALE',
         piiData: {
           phone: '9999999999'
         }
       };
       const mockUpdatePII = jest.spyOn(service, 'updatePIIByBenefUUID').mockResolvedValue(mockDto.piiData);
-      (prisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(mockResponse);
+      (prisma.beneficiary.findUnique as jest.Mock).mockResolvedValue({
+        ...mockResponse,
+        BeneficiaryProject: [{ projectId: 'project-uuid' }],
+      });
       (prisma.beneficiary.update as jest.Mock).mockResolvedValue({ ...mockResponse, ...mockDto });
       await service.update(mockResponse.uuid, mockDto as CreateBeneficiaryDto);
       jest.spyOn(service, 'updatePIIByBenefUUID').mockResolvedValue(mockDto.piiData);
       expect(prisma.beneficiary.findUnique).toHaveBeenCalledWith({
         where: {
           uuid: mockResponse.uuid
-        }
+        },
+        include: beneficiaryUpdateInclude,
       });
       expect(prisma.beneficiary.update).toHaveBeenCalledWith({
         where: {
@@ -527,7 +585,46 @@ describe('BeneficiaryService', () => {
         }
       });
       expect(mockUpdatePII).toHaveBeenCalledWith(mockResponse.uuid, mockDto.piiData);
-      expect(eventEmitter.emit).toHaveBeenCalledWith(BeneficiaryEvents.BENEFICIARY_UPDATED);
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        BeneficiaryEvents.BENEFICIARY_UPDATED,
+        { projectUuids: ['project-uuid'] }
+      );
+    });
+
+    it('should refresh affected project stats when PII changes', async () => {
+      const mockDto = {
+        notes: 'Updated with new phone',
+        piiData: {
+          phone: '8888888888',
+        },
+      };
+      jest.spyOn(service, 'updatePIIByBenefUUID').mockResolvedValue(mockDto.piiData);
+      (prisma.beneficiary.findUnique as jest.Mock).mockResolvedValue({
+        ...mockResponse,
+        BeneficiaryProject: [{ projectId: 'project-uuid' }],
+      });
+      (rsprisma.beneficiaryPii.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.beneficiary.update as jest.Mock).mockResolvedValue(mockResponse);
+
+      await service.update(mockResponse.uuid, mockDto as CreateBeneficiaryDto);
+
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        BeneficiaryEvents.BENEFICIARY_UPDATED,
+        { projectUuids: ['project-uuid'] }
+      );
+    });
+
+    it('should not emit a stats event when the update fails', async () => {
+      (prisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(mockResponse);
+      (prisma.beneficiary.update as jest.Mock).mockRejectedValue(
+        new Error('Database update failed')
+      );
+
+      await expect(
+        service.update(mockResponse.uuid, { notes: 'update failed' })
+      ).rejects.toThrow('Database update failed');
+
+      expect(eventEmitter.emit).not.toHaveBeenCalled();
     });
 
     it('should throw error if beneficiary is not found', async () => {
@@ -572,6 +669,7 @@ describe('BeneficiaryService', () => {
         }
       },
       projectUUIDs: ['uuid' as `${string}-${string}-${string}-${string}-${string}`],
+      BeneficiaryProject: [{ projectId: 'project-uuid' }],
     };
     it('should soft delete beneficiary', async () => {
       (prisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(mockResponse);
@@ -581,7 +679,8 @@ describe('BeneficiaryService', () => {
       expect(prisma.beneficiary.findUnique).toHaveBeenCalledWith({
         where: {
           uuid: mockResponse.uuid
-        }
+        },
+        include: activeBeneficiaryProjectInclude,
       });
       expect(prisma.beneficiary.update).toHaveBeenCalledWith({
         where: {
@@ -591,9 +690,6 @@ describe('BeneficiaryService', () => {
           deletedAt: expect.any(Date)
         }
       });
-      expect(eventEmitter.emit).toHaveBeenCalledWith(BeneficiaryEvents.BENEFICIARY_REMOVED, {
-        projectUuid: mockResponse.uuid
-      });
       expect(prisma.groupedBeneficiaries.updateMany).toHaveBeenCalledWith({
         where: {
           beneficiaryId: mockResponse.uuid
@@ -602,6 +698,10 @@ describe('BeneficiaryService', () => {
           deletedAt: expect.any(Date)
         }
       });
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        BeneficiaryEvents.BENEFICIARY_REMOVED,
+        { projectUuids: ['project-uuid'] }
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -611,7 +711,8 @@ describe('BeneficiaryService', () => {
       expect(prisma.beneficiary.findUnique).toHaveBeenCalledWith({
         where: {
           uuid: mockResponse.uuid
-        }
+        },
+        include: activeBeneficiaryProjectInclude,
       });
     });
   });
@@ -657,7 +758,8 @@ describe('BeneficiaryService', () => {
       expect(prisma.beneficiary.findUnique).toHaveBeenCalledWith({
         where: {
           uuid: mockResponse.uuid
-        }
+        },
+        include: activeBeneficiaryProjectInclude,
       });
       expect(prisma.beneficiary.delete).toHaveBeenCalledWith({
         where: {
@@ -666,7 +768,10 @@ describe('BeneficiaryService', () => {
       });
       expect(deletePIIMock).toHaveBeenCalledTimes(1);
       expect(deletePIIMock).toHaveBeenCalledWith(mockResponse.uuid);
-      expect(eventEmitter.emit).toHaveBeenCalledWith(BeneficiaryEvents.BENEFICIARY_UPDATED)
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        BeneficiaryEvents.BENEFICIARY_UPDATED,
+        { projectUuid: null }
+      );
       expect(result).toBeDefined();
     });
 
@@ -676,7 +781,8 @@ describe('BeneficiaryService', () => {
       expect(prisma.beneficiary.findUnique).toHaveBeenCalledWith({
         where: {
           uuid: mockResponse.uuid
-        }
+        },
+        include: activeBeneficiaryProjectInclude,
       });
     });
   });

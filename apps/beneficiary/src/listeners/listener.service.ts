@@ -26,8 +26,15 @@ export class ListenersService {
   @OnEvent(BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_CT)
   @OnEvent(BeneficiaryEvents.IMPORTED_TEMP_BENEFICIARIES_FROM_EXCEL)
   @OnEvent(BeneficiaryEvents.REFRESH_STATS)
-  async onBeneficiaryChanged(eventObject: any) {
-    await this.benStats.saveAllStats(eventObject.projectUuid);
+  async onBeneficiaryChanged(
+    eventObject?: {
+      projectUuid?: string | null;
+      projectUuids?: string[];
+    }
+  ) {
+    await this.benStats.saveAllStats(
+      eventObject?.projectUuids ?? eventObject?.projectUuid ?? undefined
+    );
   }
 
   @OnEvent(EVENTS.OTP_CREATED)
