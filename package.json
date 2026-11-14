@@ -13,6 +13,7 @@
     "build:rahat": "nx build rahat",
     "build:beneficiary": "nx build beneficiary",
     "setup:devtools": "bash ./tools/scripts/setupDevTools.sh",
+    "dev:check": "node ./tools/scripts/check-dev-env.cjs",
     "bootstrap": "bash ./tools/scripts/local-setup/bootstrap.sh",
     "reset": "bash ./tools/scripts/local-setup/reset.sh",
     "clean": "rm -rf dist node_modules tmp",
