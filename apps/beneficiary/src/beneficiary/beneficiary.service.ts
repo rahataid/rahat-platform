@@ -26,7 +26,9 @@ import {
   BeneficiaryConstants,
   BeneficiaryEvents,
   BeneficiaryJobs,
+  BeneficiaryBankAccount,
   BQUEUE,
+  GroupWithBankAccounts,
   GroupWithValidationAA,
   ProjectContants,
   TPIIData,
@@ -1153,7 +1155,7 @@ export class BeneficiaryService {
     return groupedBeneficiaries;
   }
 
-  async getOneGroup(uuid: string): Promise<GroupWithValidationAA> {
+  async getOneGroup(uuid: string): Promise<GroupWithBankAccounts> {
     const group = await this.prisma.beneficiaryGroup.findUnique({
       where: {
         uuid: uuid,
@@ -1189,10 +1191,60 @@ export class BeneficiaryService {
       throw new RpcException('Group not found');
     }
 
+    const groupWithBankAccounts: GroupWithBankAccounts = {
+      ...group,
+      isGroupValidForAA: false,
+      isAnyBeneficiaryInvalid: false,
+      groupedBeneficiaries: group.groupedBeneficiaries.map(
+        (groupedBeneficiary) => {
+          const beneficiary = groupedBeneficiary.Beneficiary;
+          const beneficiaryExtras = this.getJsonRecord(beneficiary.extras);
+          const piiExtras = this.getJsonRecord(beneficiary.pii?.extras);
+          const bank_name = this.getStringValue(
+            beneficiaryExtras.bank_name,
+            piiExtras.bank
+          );
+          const bank_ac_name = this.getStringValue(
+            beneficiaryExtras.bank_ac_name,
+            piiExtras.accountName
+          );
+          const bank_ac_number = this.getStringValue(
+            beneficiaryExtras.bank_ac_number,
+            piiExtras.account
+          );
+          const hasBankAccount = Boolean(
+            bank_name || bank_ac_name || bank_ac_number
+          );
+          const BankAccount: BeneficiaryBankAccount | null = hasBankAccount
+            ? {
+                bank_name,
+                bank_ac_name,
+                bank_ac_number,
+                validBankAccount:
+                  typeof beneficiaryExtras.validBankAccount === 'boolean'
+                    ? beneficiaryExtras.validBankAccount
+                    : null,
+              }
+            : null;
+
+          return {
+            ...groupedBeneficiary,
+            Beneficiary: {
+              ...beneficiary,
+              BankAccount,
+            },
+          };
+        }
+      ),
+    };
+
     // If groupPurpose is not found and groupedBeneficiaries is empty, return group with isGroupValidForAA as false
-    if (!group.groupPurpose || !group.groupedBeneficiaries?.length) {
+    if (
+      !group.groupPurpose ||
+      !groupWithBankAccounts.groupedBeneficiaries?.length
+    ) {
       return {
-        ...group,
+        ...groupWithBankAccounts,
         isGroupValidForAA: false,
         isAnyBeneficiaryInvalid: false,
       }
@@ -1200,7 +1252,7 @@ export class BeneficiaryService {
 
     // If group is found, check if it is valid for AA
     const finalData = {
-      ...group,
+      ...groupWithBankAccounts,
       isGroupValidForAA: await this.isGroupValidForAA(group.uuid),
     };
 
@@ -1222,6 +1274,23 @@ export class BeneficiaryService {
       ...finalData,
       isAnyBeneficiaryInvalid
     };
+  }
+
+  private getJsonRecord(value: unknown): Record<string, unknown> {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      return {};
+    }
+
+    return value as Record<string, unknown>;
+  }
+
+  private getStringValue(...values: unknown[]): string | null {
+    return (
+      values.find(
+        (value): value is string =>
+          typeof value === 'string' && value.length > 0
+      ) ?? null
+    );
   }
 
   async isGroupValidForAA(uuid: string) {
@@ -2161,5 +2230,3 @@ async function checkWalletAddress(
 
 
 }
-
-
