@@ -467,7 +467,7 @@ export class BeneficiaryProcessor {
         return;
       }
 
-      const { success, isValid } = await this.isValidNepaliNumber(phone);
+      const { success, isValid } = await this.isValidPhoneNumber(phone);
       if (!isValid) {
         this.logger.warn(`Invalid phone number for beneficiary ${uuid}: ${phone}`);
         await this.updateExtras(uuid, {
@@ -518,17 +518,17 @@ export class BeneficiaryProcessor {
     });
   }
 
-  async isValidNepaliNumber(phone: string): Promise<{ success: boolean; isValid: boolean }> {
+  async isValidPhoneNumber(phone: string): Promise<{ success: boolean; isValid: boolean }> {
     const phoneUtil = PhoneNumberUtil.getInstance();
     try {
-      const number = phoneUtil.parse(phone, 'NP');
-      const isValid = phoneUtil.isValidNumber(number) && phoneUtil.getRegionCodeForNumber(number) === 'NP';
+      const number = phoneUtil.parse(phone, process.env.BENEFICIARY_DEFAULT_PHONE_REGION || 'NP');
+      const isValid = phoneUtil.isValidNumber(number);
       return {
         success: true,
         isValid,
       };
     } catch (e) {
-      this.logger.error('Error validating nepali number', e);
+      this.logger.error('Error validating phone number', e);
       return {
         success: false,
         isValid: false,
