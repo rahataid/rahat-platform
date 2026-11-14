@@ -11,6 +11,7 @@ import { PrismaService } from '@rumsan/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import { BeneficiaryService } from './beneficiary.service';
+import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
 
@@ -90,10 +91,20 @@ describe('BeneficiaryService', () => {
           },
         },
         {
+          provide: 'RAHAT_CLIENT',
+          useValue: {
+            send: jest.fn(),
+          },
+        },
+        {
           provide: VerificationService,
           useValue: {
             verify: jest.fn(),
           },
+        },
+        {
+          provide: BeneficiaryUtilsService,
+          useValue: {},
         },
       ],
     }).compile();
@@ -972,9 +983,55 @@ describe('BeneficiaryService', () => {
         }
       ]
     };
-    it('should return the details of specific group using uuid', async () => {
-      (prisma.beneficiaryGroup.findUnique as jest.Mock).mockResolvedValue(mockResponse);
+    it('should return bank account details associated with each beneficiary', async () => {
+      const secondGroupedBeneficiary = {
+        ...mockResponse.groupedBeneficiaries[0],
+        id: 2,
+        uuid: 'second-grouped-beneficiary',
+        beneficiaryId: 'second-beneficiary',
+        Beneficiary: {
+          ...mockResponse.groupedBeneficiaries[0].Beneficiary,
+          id: 2,
+          uuid: 'second-beneficiary',
+          pii: {
+            ...mockResponse.groupedBeneficiaries[0].Beneficiary.pii,
+            beneficiaryId: 2,
+            extras: {
+              bank: 'Nabil Bank',
+              account: '001234',
+            },
+          },
+        },
+      };
+      const responseWithMultipleBeneficiaries = {
+        ...mockResponse,
+        groupedBeneficiaries: [
+          mockResponse.groupedBeneficiaries[0],
+          secondGroupedBeneficiary,
+        ],
+      };
+      (prisma.beneficiaryGroup.findUnique as jest.Mock).mockResolvedValue(
+        responseWithMultipleBeneficiaries
+      );
+
       const result = await service.getOneGroup(mockResponse.uuid);
+
+      expect(result.groupedBeneficiaries[0].Beneficiary.BankAccount).toEqual({
+        bank_name: 'Laxmi Bank',
+        bank_ac_name: null,
+        bank_ac_number: '9872200001',
+        validBankAccount: null,
+      });
+      expect(result.groupedBeneficiaries[1].Beneficiary.BankAccount).toEqual({
+        bank_name: 'Nabil Bank',
+        bank_ac_name: null,
+        bank_ac_number: '001234',
+        validBankAccount: null,
+      });
+      expect(result.groupedBeneficiaries[0].Beneficiary.pii).toEqual(
+        mockResponse.groupedBeneficiaries[0].Beneficiary.pii
+      );
+
       expect(prisma.beneficiaryGroup.findUnique).toHaveBeenCalledWith({
         where: {
           uuid: mockResponse.uuid
@@ -991,8 +1048,78 @@ describe('BeneficiaryService', () => {
             where: {
               deletedAt: null
             }
+          },
+          beneficiaryGroupProject: {
+            select: {
+              Project: {
+                select: {
+                  id: true,
+                  name: true,
+                  type: true
+                }
+              }
+            }
           }
         }
+      });
+    });
+
+    it('should return beneficiaries without bank account details', async () => {
+      const responseWithoutBankAccount = {
+        ...mockResponse,
+        groupedBeneficiaries: [
+          {
+            ...mockResponse.groupedBeneficiaries[0],
+            Beneficiary: {
+              ...mockResponse.groupedBeneficiaries[0].Beneficiary,
+              extras: {},
+              pii: {
+                ...mockResponse.groupedBeneficiaries[0].Beneficiary.pii,
+                extras: {},
+              },
+            },
+          },
+        ],
+      };
+      (prisma.beneficiaryGroup.findUnique as jest.Mock).mockResolvedValue(
+        responseWithoutBankAccount
+      );
+
+      const result = await service.getOneGroup(mockResponse.uuid);
+
+      expect(result.groupedBeneficiaries[0].Beneficiary.BankAccount).toBeNull();
+    });
+
+    it('should map current bank account fields from beneficiary extras', async () => {
+      const responseWithCurrentFields = {
+        ...mockResponse,
+        groupedBeneficiaries: [
+          {
+            ...mockResponse.groupedBeneficiaries[0],
+            Beneficiary: {
+              ...mockResponse.groupedBeneficiaries[0].Beneficiary,
+              extras: {
+                bank_name: 'Nabil Bank',
+                bank_ac_name: 'Ram Shrestha',
+                bank_ac_number: '001234',
+                validBankAccount: true,
+              },
+              pii: null,
+            },
+          },
+        ],
+      };
+      (prisma.beneficiaryGroup.findUnique as jest.Mock).mockResolvedValue(
+        responseWithCurrentFields
+      );
+
+      const result = await service.getOneGroup(mockResponse.uuid);
+
+      expect(result.groupedBeneficiaries[0].Beneficiary.BankAccount).toEqual({
+        bank_name: 'Nabil Bank',
+        bank_ac_name: 'Ram Shrestha',
+        bank_ac_number: '001234',
+        validBankAccount: true,
       });
     });
   });
