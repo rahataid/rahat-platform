@@ -1977,23 +1977,27 @@ export class BeneficiaryService {
   }
 
   async importBeneficiariesFromTool(data: any) {
-    console.log("🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ data:", data)
     const dataFromBuffer = Buffer.from(data);
     const bufferString = dataFromBuffer.toString('utf-8');
     const jsonData = JSON.parse(bufferString) || null;
-    console.log("🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ jsonData:", jsonData)
 
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
+
+    const region = process.env.BENEFICIARY_DEFAULT_PHONE_REGION || 'NP';
+    const phones = beneficiaries.map((d: { phone?: string }, index: number) => {
+      try {
+        return sanitizePhone(d.phone, region);
+      } catch {
+        throw new RpcException(`Invalid phone number in beneficiary row ${index + 1}`);
+      }
+    });
 
     const walletAddress = await handleMicroserviceCall({
       client: this.walletClient.send(
         { cmd: WalletJobs.CREATE_BULK }, { count: beneficiaries.length }
       ),
       onSuccess: (response) => {
-        console.log(
-          `Response`, response
-        );
         return response;
       },
       onError(error) {
@@ -2018,7 +2022,7 @@ export class BeneficiaryService {
         phoneStatus: d.phoneStatus,
         internetStatus: d.internetStatus,
         email: d.email || null,
-        phone: sanitizePhone(d.phone) || null,
+        phone: phones[index],
         birthDate: d.birthDate || null,
         location: d.location || null,
         latitude: d.latitude || null,
@@ -2161,5 +2165,3 @@ async function checkWalletAddress(
 
 
 }
-
-

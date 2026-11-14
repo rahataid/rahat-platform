@@ -1,5 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import { PhoneNumberFormat, PhoneNumberUtil } from 'google-libphonenumber';
+
 export function sanitizeNonAlphaNumericValue(input: string): string {
   return input.replace(/[^\w\s]/gi, ''); // Remove all non-alphanumeric characters except whitespace
 }
@@ -32,20 +34,16 @@ export const trimNonAlphaNumericValue = (input: string): string => {
   return input.replace(/^\W+|\W+$/g, ''); // Remove all non-alphanumeric characters from the beginning and end of the string
 }
 
-export const sanitizePhone = (phone?: string): string | null => {
+export const sanitizePhone = (phone?: string, defaultRegion = 'NP'): string | null => {
   if (!phone) return null;
-
-  // Remove all whitespace and non-numeric characters except leading +
-  let cleaned = phone.replace(/\s+/g, "").replace(/[^\d+]/g, "");
-
-  // Ensure it starts with +977, otherwise prepend
-  if (!cleaned.startsWith("+977")) {
-    // If starts with 0, remove it and prepend +977
-    if (cleaned.startsWith("0")) {
-      cleaned = cleaned.slice(1);
-    }
-    cleaned = `+977${cleaned}`;
+  if (typeof phone !== 'string') throw new Error('Beneficiary phone number must be text');
+  const util = PhoneNumberUtil.getInstance();
+  let number;
+  try {
+    number = util.parse(phone, defaultRegion);
+  } catch {
+    throw new Error('Invalid beneficiary phone number');
   }
-
-  return cleaned;
+  if (!util.isValidNumber(number)) throw new Error('Invalid beneficiary phone number');
+  return util.format(number, PhoneNumberFormat.E164);
 }
