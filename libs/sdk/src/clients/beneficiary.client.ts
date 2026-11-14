@@ -30,7 +30,7 @@ export const getBeneficiaryClient = (
     },
 
     listTempBeneficiary: async (uuid: string, data?: Pagination, config?: AxiosRequestConfig) => {
-      const response = await client.get(`/beneficiaries/temp/${uuid}`, {
+      const response = await client.get(`/beneficiaries/temp/${encodeURIComponent(uuid)}`, {
         params: data,
         ...config,
       });
@@ -95,7 +95,7 @@ export const getBeneficiaryClient = (
 
     getByPhone: async (phone: string, config?: AxiosRequestConfig) => {
       const response = await client.get(
-        `/beneficiaries/phone/${phone}`,
+        `/beneficiaries/phone/${encodeURIComponent(phone)}`,
         config
       );
       return formatResponse<Beneficiary>(response);

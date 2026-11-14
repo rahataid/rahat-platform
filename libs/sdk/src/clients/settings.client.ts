@@ -23,7 +23,7 @@ export const getSettingsClient = (client: AxiosInstance): SettingClient => {
 
     update: async (data: Setting, config?: AxiosRequestConfig) => {
       const response = await client.patch(
-        `/settings/${data?.name}`,
+        `/settings/${encodeURIComponent(data.name)}`,
         data,
         config,
       );
@@ -31,7 +31,7 @@ export const getSettingsClient = (client: AxiosInstance): SettingClient => {
     },
 
     getByName: async (name: string, config?: AxiosRequestConfig) => {
-      const response = await client.get(`/settings/${name}`, config);
+      const response = await client.get(`/settings/${encodeURIComponent(name)}`, config);
       return formatResponse<SettingResponse>(response);
     },
   };
