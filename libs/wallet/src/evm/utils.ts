@@ -3,7 +3,7 @@ import { EVM_TransactionWithURL } from "./types";
 
 export async function getEVMTransaction(
     transactionParams: EVM_TransactionWithURL
-): Promise<any> {
+): Promise<ethers.TransactionRequest> {
     const provider = new ethers.JsonRpcProvider(
         transactionParams.networkProvider
     );

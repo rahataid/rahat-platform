@@ -1,4 +1,4 @@
-import { BASE_FEE, Keypair, Networks, TransactionBuilder } from 'stellar-sdk';
+import { Account, BASE_FEE, Keypair, Networks, TransactionBuilder } from 'stellar-sdk';
 import { IConnectedWallet, WalletKeys } from "../types.js";
 
 
@@ -22,8 +22,7 @@ export class ConnectedWallet implements IConnectedWallet {
     }
 
 
-    //TODO: Desine transaction type
-    async signTransaction(transactionData: any): Promise<any> {
+    async signTransaction(transactionData: Account): Promise<void> {
 
         if (!this.currentWalletKeys) {
             throw new Error("No current account set for signing");
@@ -40,7 +39,7 @@ export class ConnectedWallet implements IConnectedWallet {
     }
 
     //TDOD: implement Send transactions
-    async sendTransaction(transactionData: any): Promise<any> {
+    async sendTransaction(transactionData: Account): Promise<void> {
 
         if (!this.currentWalletKeys) {
             throw new Error("No current account set for signing");
