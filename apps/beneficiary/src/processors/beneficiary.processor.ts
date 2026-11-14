@@ -7,7 +7,7 @@ import { BadRequestException, Inject, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { PhoneStatus } from '@prisma/client';
-import { CreateBeneficiaryDto } from '@rahataid/extensions';
+import { CreateBeneficiaryDto, E164_PHONE_MESSAGE, E164_PHONE_PATTERN } from '@rahataid/extensions';
 import {
   BeneficiaryEvents,
   BeneficiaryJobs,
@@ -145,6 +145,13 @@ export class BeneficiaryProcessor {
       totalBatches,
       automatedGroupOption,
     } = job.data;
+
+    for (const beneficiary of beneficiaries) {
+      const phone = beneficiary.piiData?.phone;
+      if (typeof phone !== 'string' || !E164_PHONE_PATTERN.test(phone)) {
+        throw new RpcException(E164_PHONE_MESSAGE);
+      }
+    }
 
     // const canProceed = await canProcessJob(job, this.logger);
     // if (!canProceed) {

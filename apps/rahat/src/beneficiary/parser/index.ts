@@ -3,7 +3,7 @@
 import { CreateBeneficiaryDto } from '@rahataid/extensions';
 import { Enums } from '@rahataid/sdk';
 import { plainToClass } from 'class-transformer';
-import { validate } from 'class-validator';
+import { validate, ValidationError } from 'class-validator';
 import { ExcelParser } from './excel.parser';
 import { JsonParser } from './json.parser';
 
@@ -25,7 +25,7 @@ export async function DocParser(
   const beneficiaries = [];
 
   // Validate each row
-  for (const row of parsedData) {
+  for (const [index, row] of parsedData.entries()) {
 
     const beneficiaryDto = plainToClass(CreateBeneficiaryDto, row);
 
@@ -33,11 +33,18 @@ export async function DocParser(
 
     if (errors.length > 0) {
       validationErrors.push({
-        row,
-        errors: errors.map((error) => Object.values(error.constraints)),
+        row: index + 1,
+        errors: flattenErrors(errors),
       });
     } else {
       beneficiaries.push(row);
+    }
+
+    function flattenErrors(errors: ValidationError[]): string[] {
+      return errors.flatMap((error) => [
+        ...Object.values(error.constraints || {}),
+        ...flattenErrors(error.children || []),
+      ]);
     }
   }
 

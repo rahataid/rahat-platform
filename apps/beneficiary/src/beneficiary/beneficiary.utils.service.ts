@@ -7,6 +7,8 @@ import { Beneficiary } from '@prisma/client';
 import {
   AddToProjectDto,
   CreateBeneficiaryDto,
+  E164_PHONE_MESSAGE,
+  E164_PHONE_PATTERN,
   ListBeneficiaryDto,
 } from '@rahataid/extensions';
 import {
@@ -105,8 +107,12 @@ export class BeneficiaryUtilsService {
   }
 
   async ensurePhoneNumbers(dtos: CreateBeneficiaryDto[]) {
-    const hasPhone = dtos.every((dto) => dto.piiData.phone);
-    if (!hasPhone) throw new RpcException('Phone number is required');
+    for (const dto of dtos) {
+      if (!dto.piiData?.phone) throw new RpcException('Phone number is required');
+      if (typeof dto.piiData.phone !== 'string' || !E164_PHONE_PATTERN.test(dto.piiData.phone)) {
+        throw new RpcException(E164_PHONE_MESSAGE);
+      }
+    }
   }
 
   async ensureUniquePhone(phone: string): Promise<void> {
