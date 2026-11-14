@@ -4,7 +4,12 @@ import { InjectQueue } from '@nestjs/bull';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { Beneficiary, BeneficiaryPii, GroupPurpose } from '@prisma/client';
+import {
+  Beneficiary,
+  BeneficiaryPii,
+  GroupPurpose,
+  Prisma,
+} from '@prisma/client';
 import {
   AddBenfGroupToProjectDto,
   AddBenToProjectDto,
@@ -1496,23 +1501,30 @@ export class BeneficiaryService {
     orderBy[dto.sort] = dto.order;
     const projectUUID = dto.projectId;
 
-    const where = projectUUID
-      ? {
-        deletedAt: null,
-        beneficiaryGroupProject:
-          projectUUID === 'NOT_ASSGNED'
-            ? {
-              none: {},
-            }
-            : {
-              some: {
-                projectId: projectUUID,
-              },
+    const where: Prisma.BeneficiaryGroupWhereInput = {
+      deletedAt: null,
+    };
+
+    if (projectUUID) {
+      where.beneficiaryGroupProject =
+        projectUUID === 'NOT_ASSGNED'
+          ? {
+            none: {},
+          }
+          : {
+            some: {
+              projectId: projectUUID,
             },
-      }
-      : {
-        deletedAt: null,
+          };
+    }
+
+    const groupName = dto.groupName?.trim();
+    if (groupName) {
+      where.name = {
+        contains: groupName,
+        mode: 'insensitive',
       };
+    }
 
     const data = await paginate(
       this.prisma.beneficiaryGroup,
@@ -2161,5 +2173,3 @@ async function checkWalletAddress(
 
 
 }
-
-

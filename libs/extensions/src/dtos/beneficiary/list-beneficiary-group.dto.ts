@@ -24,6 +24,11 @@ export class ListBeneficiaryGroupDto {
   @IsString()
   @IsOptional()
   projectId?: string;
+
+  @ApiPropertyOptional({ example: 'Relief group' })
+  @IsString()
+  @IsOptional()
+  groupName?: string;
 }
 
 // export class ListProjectBeneficiaryDto {
