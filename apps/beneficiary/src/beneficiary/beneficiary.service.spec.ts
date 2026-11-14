@@ -11,6 +11,7 @@ import { PrismaService } from '@rumsan/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { isAddress } from 'viem';
 import { BeneficiaryService } from './beneficiary.service';
+import { BeneficiaryUtilsService } from './beneficiary.utils.service';
 import { VerificationService } from './verification.service';
 
 
@@ -88,6 +89,16 @@ describe('BeneficiaryService', () => {
           useValue: {
             send: jest.fn(),
           },
+        },
+        {
+          provide: 'RAHAT_CLIENT',
+          useValue: {
+            send: jest.fn(),
+          },
+        },
+        {
+          provide: BeneficiaryUtilsService,
+          useValue: {},
         },
         {
           provide: VerificationService,
@@ -498,7 +509,10 @@ describe('BeneficiaryService', () => {
         },
         data: mockDto
       });
-      expect(eventEmitter.emit).toHaveBeenCalledWith(BeneficiaryEvents.BENEFICIARY_UPDATED);
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        BeneficiaryEvents.BENEFICIARY_UPDATED,
+        { projectUuid: null }
+      );
     });
 
     it('should update the beneficiary details if dto contains piiData', async () => {
@@ -527,7 +541,30 @@ describe('BeneficiaryService', () => {
         }
       });
       expect(mockUpdatePII).toHaveBeenCalledWith(mockResponse.uuid, mockDto.piiData);
-      expect(eventEmitter.emit).toHaveBeenCalledWith(BeneficiaryEvents.BENEFICIARY_UPDATED);
+      expect(rsprisma.beneficiaryPii.findFirst).toHaveBeenCalledWith({
+        where: {
+          phone: mockDto.piiData.phone,
+          beneficiaryId: { not: mockResponse.id },
+        },
+      });
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        BeneficiaryEvents.BENEFICIARY_UPDATED,
+        { projectUuid: null }
+      );
+    });
+
+    it('should not emit a stats event when the database update fails', async () => {
+      const mockDto = { notes: 'update failed' };
+      (prisma.beneficiary.findUnique as jest.Mock).mockResolvedValue(mockResponse);
+      (prisma.beneficiary.update as jest.Mock).mockRejectedValue(
+        new Error('Database update failed')
+      );
+
+      await expect(
+        service.update(mockResponse.uuid, mockDto)
+      ).rejects.toThrow('Database update failed');
+
+      expect(eventEmitter.emit).not.toHaveBeenCalled();
     });
 
     it('should throw error if beneficiary is not found', async () => {
@@ -666,7 +703,10 @@ describe('BeneficiaryService', () => {
       });
       expect(deletePIIMock).toHaveBeenCalledTimes(1);
       expect(deletePIIMock).toHaveBeenCalledWith(mockResponse.uuid);
-      expect(eventEmitter.emit).toHaveBeenCalledWith(BeneficiaryEvents.BENEFICIARY_UPDATED)
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        BeneficiaryEvents.BENEFICIARY_UPDATED,
+        { projectUuid: null }
+      );
       expect(result).toBeDefined();
     });
 
