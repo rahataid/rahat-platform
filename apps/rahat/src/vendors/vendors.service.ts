@@ -732,7 +732,7 @@ export class VendorsService {
       return response;
     }
 
-    return projectData;
+    return projectResponse;
   }
 
   async listVendor(dto: GetVendorsDTO) {
