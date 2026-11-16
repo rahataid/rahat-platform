@@ -166,10 +166,10 @@ export class PushService {
     }
 
     private async dispatchMobile(userIds: string[], notification: Notification, pushData: Record<string, any>) {
-        // if (!this.firebase.enabled) {
-        //     this.logger.log('[PUSH][MOBILE] Firebase disabled, skipping mobile push');
-        //     return;
-        // }
+        if (!this.firebase.enabled) {
+            this.logger.log('[PUSH][MOBILE] Firebase disabled, skipping mobile push');
+            return;
+        }
         try {
             const where = { userId: { in: userIds }, active: true };
             const total = await this.prisma.deviceToken.count({ where });
@@ -211,10 +211,10 @@ export class PushService {
     }
 
     private async dispatchWeb(userIds: string[], notification: Notification, pushData: Record<string, any>) {
-        // if (!this.webPush?.enabled) {
-        //     this.logger.log('[PUSH][WEB] WebPush disabled, skipping web push');
-        //     return;
-        // }
+        if (!this.webPush?.enabled) {
+            this.logger.log('[PUSH][WEB] WebPush disabled, skipping web push');
+            return;
+        }
         try {
             const where = { userId: { in: userIds }, active: true };
             const total = await this.prisma.webPushSubscription.count({ where });
@@ -292,6 +292,7 @@ export class PushService {
         try {
             const userId = await this.resolveUserUuid(dto.user);
 
+            this.logger.log(`----=>>>>????66000xxx6666[WEBPUSH] Registering web push userId=${userId}`);
             if (!userId) {
                 this.logger.error('[WEBPUSH] Could not resolve user');
                 throw new RpcException({
@@ -303,6 +304,7 @@ export class PushService {
             const { endpoint, keys, userAgent } = dto;
             const existing = await this.prisma.webPushSubscription.findUnique({ where: { endpoint } });
 
+            this.logger.log(`----=>>>>????66000xxx7777[WEBPUSH] Registering web push userId=${userId} endpoint=${endpoint} existing=${existing ? 'yes' : 'no'}`);
             if (existing && existing.userId === userId && existing.active && existing.p256dh === keys.p256dh && existing.auth === keys.auth) {
                 return { registered: true, changed: false };
             }
@@ -314,7 +316,7 @@ export class PushService {
                 update: { userId, p256dh: dto.keys.p256dh, auth: dto.keys.auth, userAgent: dto.userAgent, active: true, lastSeenAt: new Date() },
             });
 
-
+            this.logger.log(`----=>>>>????66000xxx8888[WEBPUSH] Registered web push result=${result} endpoint=${endpoint} result=${result ? 'yes' : 'no'}`);
             return { registered: true, changed: true, data: result };
         } catch (err: any) {
             this.logger.error(`[WEBPUSH] registerWebPush THREW: ${err?.message}`, err?.stack);
