@@ -133,9 +133,7 @@ export class NotificationService {
         this.logger.warn(`[NOTIFY] #${notification.id} audience resolved to 0 users, nothing sent`);
         return;
       }
-      this.logger.log(
-        `[NOTIFY] #${notification.id} group="${notification.group}" users=${users.length} channels=${channels.join(',')}`
-      );
+
 
       const wanted = new Set(channels);
       const tasks: Promise<unknown>[] = [];

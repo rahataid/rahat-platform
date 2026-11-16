@@ -15,13 +15,11 @@ export class PushProcessor {
 
     @Process({ name: APP_JOBS.PUSH_SEND_FCM, concurrency: 2 })
     async handleFcm(job: Job<{ tokens: string[]; payload: PushPayload }>) {
-        this.logger.log(`[QUEUE] FCM job ${job.id}: ${job.data.tokens.length} token(s)`);
         await this.pushService.deliverFcm(job.data.tokens, job.data.payload);
     }
 
     @Process({ name: APP_JOBS.PUSH_SEND_WEB, concurrency: 2 })
     async handleWeb(job: Job<{ subs: WebPushTarget[]; payload: WebPushPayload }>) {
-        this.logger.log(`[QUEUE] WebPush job ${job.id}: ${job.data.subs.length} subscription(s)`);
         await this.pushService.deliverWeb(job.data.subs, job.data.payload);
     }
 }

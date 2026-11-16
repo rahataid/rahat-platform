@@ -74,8 +74,6 @@ export class PushService {
         }
 
         const { token, platform, appId } = dto;
-        console.log(`----=>>>>????666666[DEVICE] Registering device token=${token} platform=${platform} appId=${appId} userId=${userId}`);
-        this.logger.log(`----=>>>>????7777777[DEVICE] Registering device token=${token} platform=${platform} appId=${appId} userId=${userId}`);
 
         const existing = await this.prisma.deviceToken.findUnique({ where: { token } });
 
@@ -86,12 +84,11 @@ export class PushService {
 
 
         // token is unique: if the same phone logs in as another user, it moves to that user
-        const deviceToken = await this.prisma.deviceToken.upsert({
+        await this.prisma.deviceToken.upsert({
             where: { token },
             create: { userId, token, platform, appId },
             update: { userId, platform, appId, active: true, lastUsedAt: new Date() },
         });
-        console.log(`----=>>>>????9999999[DEVICE] Registered device deviceToken=${deviceToken} `);
         return { registered: true, changed: true };
     }
 
@@ -167,7 +164,6 @@ export class PushService {
 
     private async dispatchMobile(userIds: string[], notification: Notification, pushData: Record<string, any>) {
         if (!this.firebase.enabled) {
-            this.logger.log('[PUSH][MOBILE] Firebase disabled, skipping mobile push');
             return;
         }
         try {
@@ -180,7 +176,6 @@ export class PushService {
 
             const payload: PushPayload = { title: notification.title, body: notification.description, data: pushData };
             const useQueue = total > QUEUE_THRESHOLD;
-            this.logger.log(`[PUSH][MOBILE] ${total} device(s), mode=${useQueue ? 'queue' : 'inline'}`);
 
             let cursor: number | undefined;
             while (true) {
@@ -193,11 +188,7 @@ export class PushService {
                 });
                 if (!rows.length) break;
                 cursor = rows[rows.length - 1].id;
-                this.logger.log(
-                    `[---???101010101PUSH][MOBILE] device token(s): ${rows
-                        .map(({ id, token }) => `id=${id}, token=...${token.slice(-8)}`)
-                        .join('; ')}`
-                );
+
                 const tokens = rows.map((r) => r.token);
 
                 if (useQueue) await this.rahatQueue.add(APP_JOBS.PUSH_SEND_FCM, { tokens, payload }, PUSH_JOB_OPTS);
@@ -212,7 +203,6 @@ export class PushService {
 
     private async dispatchWeb(userIds: string[], notification: Notification, pushData: Record<string, any>) {
         if (!this.webPush?.enabled) {
-            this.logger.log('[PUSH][WEB] WebPush disabled, skipping web push');
             return;
         }
         try {
@@ -230,7 +220,6 @@ export class PushService {
                 data: pushData,
             };
             const useQueue = total > QUEUE_THRESHOLD;
-            this.logger.log(`[PUSH][WEB] ${total} subscription(s), mode=${useQueue ? 'queue' : 'inline'}`);
 
             let cursor: number | undefined;
             while (true) {
@@ -243,11 +232,6 @@ export class PushService {
                 });
                 if (!rows.length) break;
                 cursor = rows[rows.length - 1].id;
-                this.logger.log(
-                    `--->>101101101[PUSH][WEB] subscription endpoint(s): ${rows
-                        .map(({ id, endpoint }) => `id=${id}, endpoint=...${endpoint.slice(-8)}`)
-                        .join('; ')}`
-                );
 
                 const subs: WebPushTarget[] = rows.map(({ endpoint, p256dh, auth }) => ({ endpoint, p256dh, auth }));
 
@@ -271,7 +255,6 @@ export class PushService {
                 data: { active: false },
             });
         }
-        this.logger.log(`[PUSH][MOBILE] batch done: ok=${res.successCount} failed=${res.failureCount} deactivated=${res.invalidTokens.length}`);
         return res;
     }
 
@@ -283,7 +266,6 @@ export class PushService {
                 data: { active: false },
             });
         }
-        this.logger.log(`[PUSH][WEB] batch done: ok=${res.successCount} failed=${res.failureCount} deactivated=${res.invalidEndpoints.length}`);
         return res;
     }
 
@@ -292,7 +274,6 @@ export class PushService {
         try {
             const userId = await this.resolveUserUuid(dto.user);
 
-            this.logger.log(`----=>>>>????66000xxx6666[WEBPUSH] Registering web push userId=${userId}`);
             if (!userId) {
                 this.logger.error('[WEBPUSH] Could not resolve user');
                 throw new RpcException({
@@ -304,7 +285,6 @@ export class PushService {
             const { endpoint, keys, userAgent } = dto;
             const existing = await this.prisma.webPushSubscription.findUnique({ where: { endpoint } });
 
-            this.logger.log(`----=>>>>????66000xxx7777[WEBPUSH] Registering web push userId=${userId} endpoint=${endpoint} existing=${existing ? 'yes' : 'no'}`);
             if (existing && existing.userId === userId && existing.active && existing.p256dh === keys.p256dh && existing.auth === keys.auth) {
                 return { registered: true, changed: false };
             }
@@ -316,7 +296,6 @@ export class PushService {
                 update: { userId, p256dh: dto.keys.p256dh, auth: dto.keys.auth, userAgent: dto.userAgent, active: true, lastSeenAt: new Date() },
             });
 
-            this.logger.log(`----=>>>>????66000xxx8888[WEBPUSH] Registered web push result=${result} endpoint=${endpoint} result=${result ? 'yes' : 'no'}`);
             return { registered: true, changed: true, data: result };
         } catch (err: any) {
             this.logger.error(`[WEBPUSH] registerWebPush THREW: ${err?.message}`, err?.stack);

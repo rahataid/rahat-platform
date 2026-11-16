@@ -40,7 +40,6 @@ export class NotificationController {
 
   @MessagePattern({ cmd: ProjectJobs.NOTIFICATION.REGISTER_DEVICE })
   async registerDevice(dto: RegisterDeviceDto & { user?: any }) {
-    this.logger.log(`Register device payload: ${JSON.stringify(dto)}`);
     return this.pushService.registerDevice(dto);
   }
 

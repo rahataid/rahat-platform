@@ -344,7 +344,6 @@ export class ProjectService {
   }
 
   async setupAAProject(uuid: UUID, dto: SeedSettingsDto) {
-    this.logger.log(`start project setup step of project with uuid: ${uuid}`)
     const project = await this.prisma.project.findUnique({
       where: {
         uuid
