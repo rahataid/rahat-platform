@@ -171,6 +171,14 @@
       "urls": {},
       "notes": []
     },
+    "nrcs-simulation": {
+      "tag": "release-v5.0.0-nrcs",
+      "secret": "ENV_AA_NRCS_SIMULATION",
+      "apps": "beneficiary,rahat,shared-auth",
+      "description": "NRCS Simulation",
+      "urls": {},
+      "notes": []
+    },
     "demo-nrcs": {
       "tag": "demo-nrcs",
       "secret": "ENV_AA_DEMO_NRCS",
