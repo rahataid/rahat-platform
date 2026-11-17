@@ -1163,10 +1163,10 @@ export class BeneficiaryService {
         }
 
         try {
-          dto.walletAddress =
+          ({ walletAddress: dto.walletAddress } =
             await this.beneficiaryUtilsService.ensureValidWalletAddress(
               dto.walletAddress
-            );
+            ));
           this.logger.log(
             `[CREATE_BULK] Wallet address validated/set: ${dto.walletAddress}`
           );
@@ -1860,7 +1860,7 @@ export class BeneficiaryService {
 
     const uuid = rest.uuid ?? (uuidv4() as UUID);
 
-    const walletAddress =
+    const { walletAddress } =
       await this.beneficiaryUtilsService.ensureValidWalletAddress(
         rest.walletAddress
       );
@@ -3638,10 +3638,9 @@ export class BeneficiaryService {
 
     const dbTxId = `db-tx-${Date.now()}`;
 
-    const walletAddress =
+    const walletAddressDetails =
       await this.beneficiaryUtilsService.ensureValidWalletAddress();
-
-    if (!walletAddress) {
+    if (!walletAddressDetails?.walletAddress) {
       this.logger.error(
         'Failed to obtain a valid wallet address for the beneficiary.'
       );
@@ -3651,6 +3650,14 @@ export class BeneficiaryService {
         code: 'FAILED_TO_OBTAIN_WALLET_ADDRESS',
       });
     }
+
+    const projectDetails = await this.prisma.project.findUnique({
+      where: {
+        uuid: projectId
+      }
+    })
+
+    const supportedChain = projectDetails?.chainType
 
     try {
       await this.cleanupOrphanedTransactions();
@@ -3666,7 +3673,7 @@ export class BeneficiaryService {
       const createdBeneficiary = await this.prisma.beneficiary.create({
         data: {
           ...benfData,
-          walletAddress,
+          walletAddress: walletAddressDetails?.walletAddress,
           extras: {
             validPhoneNumber: true,
           },
@@ -3690,9 +3697,22 @@ export class BeneficiaryService {
         },
       });
 
+      for (const wallet of walletAddressDetails?.multiChainWallets) {
+        await this.prisma.walletAddress.update({
+          where: { address: wallet.address },
+          data: { entityId: createdBeneficiary.uuid },
+        });
+      }
+
+
+      const benprojectWallet = walletAddressDetails?.multiChainWallets?.find(
+        (w: { address: string; chain: string }) =>
+          w?.chain.toLowerCase() === supportedChain?.toLowerCase()
+      )?.address
+
       const aaPayload = {
         uuid: createdBeneficiary.uuid,
-        walletAddress: createdBeneficiary.walletAddress,
+        walletAddress: benprojectWallet || createdBeneficiary.walletAddress,
         extras: {
           ...((createdBeneficiary.extras ?? {}) as Record<string, any>),
           phone: createdPii.phone,
@@ -3700,6 +3720,7 @@ export class BeneficiaryService {
         },
         isVerified: createdBeneficiary.isVerified,
         gender: createdBeneficiary.gender,
+        phone: piiData.phone
       };
 
       await this.sendAATxAction(projectId, 'CREATE', dbTxId, aaPayload);

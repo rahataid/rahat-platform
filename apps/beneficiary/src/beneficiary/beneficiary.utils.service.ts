@@ -113,16 +113,24 @@ export class BeneficiaryUtilsService {
   async ensureValidWalletAddress(
     walletAddress?: string,
     chainType?: string
-  ): Promise<string> {
+  ): Promise<{ walletAddress: string; multiChainWallets: any }> {
     if (!walletAddress) {
       // Use DatabaseWalletStorage pattern - wallets are created and stored in DB during entity creation
       // For single chain, use default; for multi-chain, caller should provide all wallets
       const observable = this.walletClient.send(
-        { cmd: WalletJobs.CREATE },
-        [chainType || (await this.getChainName()).toLowerCase()]
+        { cmd: WalletJobs.CREATE_BULK_ALL_CHAINS },
+        1
       );
       const result = await firstValueFrom(observable);
-      return result[0]?.address || '';
+      const multiChainWallets = result[0].wallets.map((w) => ({
+        chain: w.chain,
+        address: w.address,
+        privateKey: w.privateKey,
+      }));
+      return {
+        walletAddress: result[0].defaultAddress,
+        multiChainWallets,
+      };
     }
 
     const existingBeneficiary = await this.prismaService.beneficiary.findUnique({
@@ -139,7 +147,7 @@ export class BeneficiaryUtilsService {
     // if (!isAddress(walletAddress)) {
     //   throw new RpcException('Wallet should be valid Ethereum Address');
     // }
-    return walletAddress;
+    return { walletAddress, multiChainWallets: [] };
   }
 
   async isUniquePhoneRequired(): Promise<boolean> {
