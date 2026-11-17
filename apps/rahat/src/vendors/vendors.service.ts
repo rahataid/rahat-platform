@@ -724,7 +724,7 @@ export class VendorsService {
     let projectResponse = {} as any;
 
     projectResponse.data = projectData;
-    projectResponse.walletDetails = walletDetails;
+    projectResponse.data[0].walletAddressDetails = walletDetails;
     // const vendorIdentifier = projectData[0]?.extras;
     // const projects = projectData.map((project) => project.Project);
     // const userdata = { ...data, projects, vendorIdentifier };
