@@ -228,6 +228,7 @@ export class BeneficiaryService {
       data.data = groupData;
     }
 
+
     return data;
   }
 
@@ -392,7 +393,29 @@ export class BeneficiaryService {
       });
       groups.push(datas);
     }
-    return groups;
+    const allBenIds = groups.flatMap((g) =>
+      (g?.groupedBeneficiaries ?? []).map((gb: any) => gb.Beneficiary.uuid)
+    );
+
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(allBenIds);
+    const walletMap = new Map<string, { address: string; chainType: string }[]>();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+
+    return groups.map((g) => ({
+      ...g,
+      groupedBeneficiaries: (g?.groupedBeneficiaries ?? []).map((gb: any) => ({
+        ...gb,
+        Beneficiary: {
+          ...gb.Beneficiary,
+          walletAddressDetails: walletMap.get(gb.Beneficiary.uuid),
+        },
+      })),
+    }));
   }
 
   async list(
