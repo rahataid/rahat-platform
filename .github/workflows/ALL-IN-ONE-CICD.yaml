@@ -377,6 +377,15 @@ jobs:
           sparse-checkout: .github/ALL-IN-ONE-CICD.environments.json
           sparse-checkout-cone-mode: false
 
+      - name: Extract version dynamically
+        id: extract_version
+        env:
+          APP: ${{ matrix.app }}
+        run: |
+          VERSION=$(jq -r --arg k "${APP}-version" '.[$k]' package.json)
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       # The workflow file and env config always come from the "Use workflow from"
       # branch; the code that gets built comes from the `branch` input.
       - name: Resolve branch to build
@@ -641,3 +650,6 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAMESPACE }}/rahat-platform-${{ matrix.app }}:${{ needs.resolve-config.outputs.tag_suffix }}
             ${{ env.IMAGE_NAMESPACE }}/rahat-platform-${{ matrix.app }}:${{ needs.resolve-config.outputs.tag_suffix }}-${{ steps.meta.outputs.short_sha }}-${{ steps.meta.outputs.run_number }}
+
+          build-args: |
+            NEXT_PUBLIC_APP_VERSION=${{ steps.extract_version.outputs.version }}
