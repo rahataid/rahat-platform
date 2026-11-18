@@ -54,7 +54,6 @@ export class RahatProcessor {
             </h2>
 
             <p style="color: #374151; font-size: 14px; line-height: 1.6; margin-bottom: 20px; text-align: center;">
-              Hi, <br><br>
               ${text}
             </p>
 
