@@ -58,34 +58,13 @@ import { CheckHeaders, DbAbilitiesGuard, ExternalAppGuard } from '../decorators'
 import { removeSpaces } from '../utils';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import {
-  normalizeBankedStatus,
-  normalizeGender,
-  normalizeInternetStatus,
-  normalizePhoneStatus,
+  mapUploadedBeneficiaryRows,
   trimNonAlphaNumericValue,
 } from '../utils/sanitize-data';
 import { WalletService } from '../wallet/wallet.service';
 import { WalletInterceptor } from './interceptor/wallet.interceptor';
 import { DocParser } from './parser';
 import { WalletProcessingService } from './services/wallet-processing.service';
-
-function getDateInfo(dateString) {
-  try {
-    // const [day, month, year] = dateString.split("/");
-    const date = new Date(dateString);
-    return {
-      date: date.toISOString(),
-      year: date.getFullYear(),
-      month: date.getMonth(),
-      day: date.getDate(),
-      age: new Date().getFullYear() - date.getFullYear(),
-      isAdult: new Date().getFullYear() - date.getFullYear() > 18,
-    };
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-}
 
 @Controller('beneficiaries')
 @ApiTags('Beneficiaries')
@@ -238,7 +217,7 @@ export class BeneficiaryController {
       req.body['doctype']?.toUpperCase() || Enums.UploadFileType.JSON;
 
     const raw = await DocParser(docType, file.buffer);
-    const beneficiariesMapped = this._mapUploadedBeneficiaries(raw);
+    const beneficiariesMapped = mapUploadedBeneficiaryRows(raw as unknown as Record<string, unknown>[]);
     const walletResult = await this.walletProcessingService.processBeneficiariesWithWallets(beneficiariesMapped);
 
     return firstValueFrom(
@@ -276,76 +255,7 @@ export class BeneficiaryController {
 
     const beneficiaries = await DocParser(docType, file.buffer);
 
-    // Each entry lists every header alias a column may appear under; the first
-    // alias with a value wins. Keeping aliases together also drives extras capture.
-    const UPLOAD_COLUMN_ALIASES: Record<string, string[]> = {
-      birthDate: ['Birth Date'],
-      internetStatus: ['Internet Status', 'Internet Status*'],
-      bankedStatus: ['Bank Status', 'Bank Status*'],
-      location: ['Location'],
-      phoneStatus: ['Phone Status', 'Phone Status*'],
-      notes: ['Notes'],
-      gender: ['Gender*', 'Gender'],
-      latitude: ['Latitude'],
-      longitude: ['Longitude'],
-      age: ['Age', 'Age*'],
-      walletAddress: ['Wallet Address'],
-      name: ['Name*', 'Name'],
-      phone: ['Whatsapp Number*', 'Phone Number*', 'Phone Number'],
-      governmentId: ['Government ID'],
-    };
-    const CLAIMED_UPLOAD_COLUMNS = Object.values(UPLOAD_COLUMN_ALIASES).flat();
-
-    const pick = (row: any, field: keyof typeof UPLOAD_COLUMN_ALIASES) => {
-      const alias = UPLOAD_COLUMN_ALIASES[field].find(
-        (key) => row[key] !== undefined && row[key] !== ''
-      );
-      return alias ? row[alias] : undefined;
-    };
-
-    const toNumberOrUndefined = (value: unknown) =>
-      value !== undefined && value !== '' ? Number(value) : undefined;
-
-    const toSnakeCase = (key: string) =>
-      key
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '_')
-        .replace(/^_+|_+$/g, '');
-
-    const beneficiariesMapped = beneficiaries.map((b) => {
-      const remainingColumns = Object.keys(b).reduce((acc, key) => {
-        if (!CLAIMED_UPLOAD_COLUMNS.includes(key)) {
-          acc[toSnakeCase(key)] = b[key];
-        }
-        return acc;
-      }, {} as Record<string, unknown>);
-
-      const birthDate = pick(b, 'birthDate');
-
-      return {
-        birthDate: birthDate ? new Date(birthDate as string).toISOString() : null,
-        internetStatus: normalizeInternetStatus(pick(b, 'internetStatus') as string),
-        bankedStatus: normalizeBankedStatus(pick(b, 'bankedStatus') as string),
-        location: pick(b, 'location'),
-        phoneStatus: normalizePhoneStatus(pick(b, 'phoneStatus') as string),
-        notes: pick(b, 'notes'),
-        gender: normalizeGender(pick(b, 'gender') as string),
-        latitude: toNumberOrUndefined(pick(b, 'latitude')),
-        longitude: toNumberOrUndefined(pick(b, 'longitude')),
-        age: pick(b, 'age') || null,
-        walletAddress: pick(b, 'walletAddress'),
-        extras: remainingColumns,
-        piiData: {
-          name: pick(b, 'name') || 'Unknown',
-          phone: pick(b, 'phone'),
-          extras: {
-            isAdult: getDateInfo(birthDate as string)?.isAdult || Number(pick(b, 'age')) > 18,
-            governmentId: pick(b, 'governmentId'),
-          },
-        },
-      };
-    });
+    const beneficiariesMapped = mapUploadedBeneficiaryRows(beneficiaries as unknown as Record<string, unknown>[]);
 
     // Process wallet addresses using the wallet processing service
     const walletProcessingResult = await this.walletProcessingService.processBeneficiariesWithWallets(beneficiariesMapped);
@@ -801,69 +711,5 @@ export class BeneficiaryController {
   @Post('beneficiaryWithDbTransaction')
   async createBeneficiaryWithDbTransaction(@Body() body: CreateBeneficiaryTransactionDto) {
     return await this.client.send({ cmd: BeneficiaryJobs.CREATE_BENEFICIARY_WITH_DB_TRANSACTION }, body);
-  }
-
-  private _mapUploadedBeneficiaries(raw: any[]): any[] {
-    const UPLOAD_COLUMN_ALIASES: Record<string, string[]> = {
-      birthDate: ['Birth Date'],
-      internetStatus: ['Internet Status', 'Internet Status*'],
-      bankedStatus: ['Bank Status', 'Bank Status*'],
-      location: ['Location'],
-      phoneStatus: ['Phone Status', 'Phone Status*'],
-      notes: ['Notes'],
-      gender: ['Gender*', 'Gender'],
-      latitude: ['Latitude'],
-      longitude: ['Longitude'],
-      age: ['Age', 'Age*'],
-      walletAddress: ['Wallet Address'],
-      name: ['Name*', 'Name'],
-      phone: ['Whatsapp Number*', 'Phone Number*', 'Phone Number'],
-      governmentId: ['Government ID'],
-      uuid: ['UUID', 'uuid'],
-    };
-    const CLAIMED_UPLOAD_COLUMNS = Object.values(UPLOAD_COLUMN_ALIASES).flat();
-
-    const pick = (row: any, field: keyof typeof UPLOAD_COLUMN_ALIASES) => {
-      const alias = UPLOAD_COLUMN_ALIASES[field].find(
-        (key) => row[key] !== undefined && row[key] !== '',
-      );
-      return alias ? row[alias] : undefined;
-    };
-
-    const toNumberOrUndefined = (value: unknown) =>
-      value !== undefined && value !== '' ? Number(value) : undefined;
-
-    return raw.map((b) => {
-      const remainingColumns = Object.keys(b).reduce((acc, key) => {
-        if (!CLAIMED_UPLOAD_COLUMNS.includes(key)) acc[key] = b[key];
-        return acc;
-      }, {} as Record<string, unknown>);
-
-      const birthDate = pick(b, 'birthDate');
-
-      return {
-        uuid: pick(b, 'uuid'),
-        birthDate: birthDate ? new Date(birthDate as string).toISOString() : null,
-        internetStatus: normalizeInternetStatus(pick(b, 'internetStatus') as string),
-        bankedStatus: normalizeBankedStatus(pick(b, 'bankedStatus') as string),
-        location: pick(b, 'location'),
-        phoneStatus: normalizePhoneStatus(pick(b, 'phoneStatus') as string),
-        notes: pick(b, 'notes'),
-        gender: normalizeGender(pick(b, 'gender') as string),
-        latitude: toNumberOrUndefined(pick(b, 'latitude')),
-        longitude: toNumberOrUndefined(pick(b, 'longitude')),
-        age: pick(b, 'age') || null,
-        walletAddress: pick(b, 'walletAddress'),
-        extras: remainingColumns,
-        piiData: {
-          name: pick(b, 'name') || 'Unknown',
-          phone: pick(b, 'phone'),
-          extras: {
-            isAdult: getDateInfo(birthDate as string)?.isAdult || Number(pick(b, 'age')) > 18,
-            governmentId: pick(b, 'governmentId'),
-          },
-        },
-      };
-    });
   }
 }
