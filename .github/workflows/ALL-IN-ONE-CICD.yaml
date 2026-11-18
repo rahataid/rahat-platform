@@ -320,7 +320,7 @@ on:
           - 'nrcs-training | Tag: nrcs-training | NRCS Training'
           - 'demo-nrcs | Tag:demo-nrcs | Demo NRCS'
           - 'dev-v2 | Tag: dev-v2 | Development-V2'
-          - 'nrcs-simulation | Tag: release-v5.0.0-nrcs | NRCS Simulation'
+          - 'nrcs-simulation | Tag: nrcs-simulation | NRCS Simulation'
 
       #           - 'demo-nrcs'
       # branch:
