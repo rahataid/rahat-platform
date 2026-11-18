@@ -1,0 +1,34 @@
+meta {
+  name: create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.triggers.callbacks.add",
+    "payload": {
+    "triggerId": "a5eb1541-6255-41c9-9423-b064bb427a74",
+    "type":"ACTIVITY_COMMUNICATION",
+    "config":{
+        "activityUuid":"7bfd02be-ef28-49b1-a18b-0aa6c5a7fda3"
+      }
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+  forwardAuthorizationHeader: false
+}

@@ -1,0 +1,28 @@
+meta {
+  name: getBenef/Stake Stats data
+  type: http
+  seq: 34
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.triggers.getTransportSessionStatsByGroup",
+    "payload": {
+      
+  }
+  }
+  
+  
+  
+  
+}

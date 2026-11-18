@@ -1,0 +1,25 @@
+meta {
+  name: Activity Trigger Communication
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{url}}/projects/{{uuid}}/actions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "action": "ms.activities.communication.trigger",
+    "payload": {
+      "activityId": "9b87ffea-a90b-453b-a395-4c091381050b",
+      "communicationId": "47e1a1d1-7bc4-4222-995e-10febc07a51d"
+    }
+  }
+}
