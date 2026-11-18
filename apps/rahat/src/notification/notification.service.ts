@@ -16,6 +16,8 @@ import { AudienceType } from '@rahataid/sdk/enums';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { isUUID } from 'class-validator';
+import { PROJECT_NAME_PLACEHOLDER, USER_NAME_PLACEHOLDER } from '../constants';
+import { escapeHtml } from '../utils/escape-html';
 import { toAudienceRows } from './audience.mapper';
 import { AudienceResolver, AudienceUser } from './audience.resolver';
 import { PushService } from './push.service';
@@ -83,14 +85,6 @@ export class NotificationService {
     return requested.length ? requested : [NotificationChannel.IN_APP];
   }
 
-  // channels from payload; legacy senders (no channels) derive them from `notify`
-  // private resolveChannels(dto: CreateNotificationDto): NotificationChannel[] {
-  //   if (dto.channels?.length) return [...new Set(dto.channels)] as NotificationChannel[];
-  //   return dto.notify
-  //     ? [NotificationChannel.IN_APP, NotificationChannel.PUSH, NotificationChannel.EMAIL]
-  //     : [NotificationChannel.IN_APP];
-  // }
-
   // an unknown project must not lose the notification (projectId is a foreign key)
   private async validProjectId(projectId?: string): Promise<string | undefined> {
     if (!projectId) return undefined;
@@ -151,15 +145,67 @@ export class NotificationService {
   }
 
   private async queueEmail(notification: Notification, users: AudienceUser[]) {
-    const usersEmail = users.map((u) => u.email).filter((e): e is string => !!e);
-    if (!usersEmail.length) {
+    const recipients = users.filter((u) => !!u.email);
+    if (!recipients.length) {
       this.logger.warn(`[NOTIFY] #${notification.id} no email addresses in audience`);
       return;
     }
-    await this.rahatQueue.add(
-      APP_JOBS.NOTIFY,
-      { usersEmail, subject: notification.title, text: notification.description },
-      { attempts: 3, removeOnComplete: true, backoff: { type: 'exponential', delay: 1000 } }
+
+    const project = notification.projectId
+      ? await this.prisma.project.findUnique({
+        where: { uuid: notification.projectId },
+        select: { name: true },
+      })
+      : null;
+
+    if (notification.projectId && !project) {
+      this.logger.warn(`[NOTIFY] #${notification.id} project ${notification.projectId} not found`);
+    }
+
+    const subject = notification.title;
+    const jobOpts = {
+      attempts: 3,
+      removeOnComplete: true,
+      backoff: { type: 'exponential' as const, delay: 1000 },
+    };
+
+    // resolve the project placeholder (same for every recipient)
+    const withProject = notification.description
+      .split(PROJECT_NAME_PLACEHOLDER)
+      .join(escapeHtml(project?.name ?? 'your project'));
+
+    // no user placeholder -> one job for everyone, as before
+    if (!withProject.includes(USER_NAME_PLACEHOLDER)) {
+      await this.rahatQueue.add(
+        APP_JOBS.NOTIFY,
+        { usersEmail: recipients.map((u) => u.email), subject, text: withProject },
+        jobOpts,
+      );
+      return;
+    }
+
+    // user placeholder present -> personalise: one job per recipient
+    const dbUsers = await this.prisma.user.findMany({
+      where: { uuid: { in: recipients.map((u) => u.uuid) } },
+      select: { uuid: true, name: true },
+    });
+
+    const nameMap = new Map(dbUsers.map((u) => [u.uuid, u.name]));
+
+    await Promise.all(
+      recipients.map((u) =>
+        this.rahatQueue.add(
+          APP_JOBS.NOTIFY,
+          {
+            usersEmail: [u.email],
+            subject,
+            text: withProject
+              .split(USER_NAME_PLACEHOLDER)
+              .join(escapeHtml(nameMap.get(u.uuid) || 'User')),
+          },
+          jobOpts,
+        ),
+      ),
     );
   }
 
