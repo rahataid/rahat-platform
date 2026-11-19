@@ -723,14 +723,16 @@ export class VendorsService {
     };
     let projectResponse = {} as any;
 
+    if (projectData.length === 0) {
+      return response;
+    }
+
     projectResponse.data = projectData;
     projectResponse.data[0].walletAddressDetails = walletDetails;
     // const vendorIdentifier = projectData[0]?.extras;
     // const projects = projectData.map((project) => project.Project);
     // const userdata = { ...data, projects, vendorIdentifier };
-    if (projectData.length === 0) {
-      return response;
-    }
+
 
     return projectResponse;
   }
