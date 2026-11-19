@@ -103,6 +103,10 @@ export const JOBS = {
     GET_MAP_LOCATION: 'aa.jobs.stats.getMapLocation',
     GET_ONE: 'aa.jobs.stats.getOne',
   },
+  DASHBOARD_REPORTS: {
+    LIST_REPORTS: 'aa.jobs.dashboard.listReports',
+    EXPORT_FILE: 'aa.jobs.dashboard.exportReport',
+  },
   DAILY_MONITORING: {
     ADD: 'aa.jobs.dailyMonitoring.add',
     GET_ALL: 'aa.jobs.dailyMonitoring.getAll',
