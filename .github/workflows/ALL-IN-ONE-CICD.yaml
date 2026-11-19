@@ -377,14 +377,7 @@ jobs:
           sparse-checkout: .github/ALL-IN-ONE-CICD.environments.json
           sparse-checkout-cone-mode: false
 
-      - name: Extract version dynamically
-        id: extract_version
-        env:
-          APP: ${{ matrix.app }}
-        run: |
-          VERSION=$(jq -r --arg k "${APP}-version" '.[$k]' package.json)
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      
 
       # The workflow file and env config always come from the "Use workflow from"
       # branch; the code that gets built comes from the `branch` input.
@@ -572,6 +565,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ needs.resolve-config.outputs.target_sha }}
+
+      - name: Extract version dynamically
+        id: extract_version
+        env:
+          APP: ${{ matrix.app }}
+        run: |
+          VERSION=$(jq -r --arg k "${APP}-version" '.[$k]' package.json)
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       # -----------------------------
       # Node + PNPM Setup
