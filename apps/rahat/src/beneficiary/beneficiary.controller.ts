@@ -33,8 +33,7 @@ import {
   ListTempBeneficiariesDto,
   ListTempGroupsDto,
   UpdateBeneficiaryDto,
-  UpdateBeneficiaryGroupDto,
-  ValidateWalletDto
+  UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
 import {
   APP,
@@ -58,7 +57,12 @@ import { CheckHeaders, DbAbilitiesGuard, ExternalAppGuard } from '../decorators'
 import { removeSpaces } from '../utils';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import {
+  getDateInfo,
   mapUploadedBeneficiaryRows,
+  normalizeBankedStatus,
+  normalizeGender,
+  normalizeInternetStatus,
+  normalizePhoneStatus,
   trimNonAlphaNumericValue,
 } from '../utils/sanitize-data';
 import { WalletService } from '../wallet/wallet.service';
@@ -218,13 +222,19 @@ export class BeneficiaryController {
 
     const raw = await DocParser(docType, file.buffer);
     const beneficiariesMapped = mapUploadedBeneficiaryRows(raw as unknown as Record<string, unknown>[]);
-    const walletResult = await this.walletProcessingService.processBeneficiariesWithWallets(beneficiariesMapped);
+
+    // Existing beneficiaries (identified by uuid) already have wallets — skip wallet generation for them
+    const existing = beneficiariesMapped.filter((b) => b.uuid);
+    const newBeneficiaries = beneficiariesMapped.filter((b) => !b.uuid);
+
+    const walletResult = await this.walletProcessingService.processBeneficiariesWithWallets(newBeneficiaries);
+    const allDtos = [...existing, ...walletResult.validBeneficiaries];
 
     return firstValueFrom(
       this.client
         .send(
           { cmd: BeneficiaryJobs.UPLOAD_BENEFICIARIES_TO_GROUP },
-          { dtos: walletResult.validBeneficiaries, groupUuid: uuid },
+          { dtos: allDtos, groupUuid: uuid },
         )
         .pipe(
           map((response) => {
@@ -525,30 +535,30 @@ export class BeneficiaryController {
     );
   }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.BENEFICIARY })
-  @Get('verification-link/:uuid')
-  @ApiParam({ name: 'uuid', required: true })
-  async generateVerificationLink(@Param('uuid') uuid: UUID) {
-    return this.client.send({ cmd: BeneficiaryJobs.GENERATE_LINK }, uuid);
-  }
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @Get('verification-link/:uuid')
+  // @ApiParam({ name: 'uuid', required: true })
+  // async generateVerificationLink(@Param('uuid') uuid: UUID) {
+  //   return this.client.send({ cmd: BeneficiaryJobs.GENERATE_LINK }, uuid);
+  // }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
-  @Post('validate-wallet')
-  async validateWallet(@Body() dto: ValidateWalletDto) {
-    return this.client.send({ cmd: BeneficiaryJobs.VALIDATE_WALLET }, dto);
-  }
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @Post('validate-wallet')
+  // async validateWallet(@Body() dto: ValidateWalletDto) {
+  //   return this.client.send({ cmd: BeneficiaryJobs.VALIDATE_WALLET }, dto);
+  // }
 
-  @ApiBearerAuth(APP.JWT_BEARER)
-  @UseGuards(JwtGuard, DbAbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.BENEFICIARY })
-  @Post('verify-signature')
-  async verifySignature(@Body() dto: any) {
-    return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
-  }
+  // @ApiBearerAuth(APP.JWT_BEARER)
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.USER })
+  // @Post('verify-signature')
+  // async verifySignature(@Body() dto: any) {
+  //   return this.client.send({ cmd: BeneficiaryJobs.VERIFY_SIGNATURE }, dto);
+  // }
 
   @ApiBearerAuth(APP.JWT_BEARER)
   @UseGuards(JwtGuard, DbAbilitiesGuard)
@@ -711,5 +721,69 @@ export class BeneficiaryController {
   @Post('beneficiaryWithDbTransaction')
   async createBeneficiaryWithDbTransaction(@Body() body: CreateBeneficiaryTransactionDto) {
     return await this.client.send({ cmd: BeneficiaryJobs.CREATE_BENEFICIARY_WITH_DB_TRANSACTION }, body);
+  }
+
+  private _mapUploadedBeneficiaries(raw: any[]): any[] {
+    const UPLOAD_COLUMN_ALIASES: Record<string, string[]> = {
+      birthDate: ['Birth Date'],
+      internetStatus: ['Internet Status', 'Internet Status*'],
+      bankedStatus: ['Bank Status', 'Bank Status*'],
+      location: ['Location'],
+      phoneStatus: ['Phone Status', 'Phone Status*'],
+      notes: ['Notes'],
+      gender: ['Gender*', 'Gender'],
+      latitude: ['Latitude'],
+      longitude: ['Longitude'],
+      age: ['Age', 'Age*'],
+      walletAddress: ['Wallet Address'],
+      name: ['Name*', 'Name'],
+      phone: ['Whatsapp Number*', 'Phone Number*', 'Phone Number'],
+      governmentId: ['Government ID'],
+      uuid: ['UUID', 'uuid'],
+    };
+    const CLAIMED_UPLOAD_COLUMNS = Object.values(UPLOAD_COLUMN_ALIASES).flat();
+
+    const pick = (row: any, field: keyof typeof UPLOAD_COLUMN_ALIASES) => {
+      const alias = UPLOAD_COLUMN_ALIASES[field].find(
+        (key) => row[key] !== undefined && row[key] !== '',
+      );
+      return alias ? row[alias] : undefined;
+    };
+
+    const toNumberOrUndefined = (value: unknown) =>
+      value !== undefined && value !== '' ? Number(value) : undefined;
+
+    return raw.map((b) => {
+      const remainingColumns = Object.keys(b).reduce((acc, key) => {
+        if (!CLAIMED_UPLOAD_COLUMNS.includes(key)) acc[key] = b[key];
+        return acc;
+      }, {} as Record<string, unknown>);
+
+      const birthDate = pick(b, 'birthDate');
+
+      return {
+        uuid: pick(b, 'uuid'),
+        birthDate: birthDate ? new Date(birthDate as string).toISOString() : null,
+        internetStatus: normalizeInternetStatus(pick(b, 'internetStatus') as string),
+        bankedStatus: normalizeBankedStatus(pick(b, 'bankedStatus') as string),
+        location: pick(b, 'location'),
+        phoneStatus: normalizePhoneStatus(pick(b, 'phoneStatus') as string),
+        notes: pick(b, 'notes'),
+        gender: normalizeGender(pick(b, 'gender') as string),
+        latitude: toNumberOrUndefined(pick(b, 'latitude')),
+        longitude: toNumberOrUndefined(pick(b, 'longitude')),
+        age: pick(b, 'age') || null,
+        walletAddress: pick(b, 'walletAddress'),
+        extras: remainingColumns,
+        piiData: {
+          name: pick(b, 'name') || 'Unknown',
+          phone: pick(b, 'phone'),
+          extras: {
+            isAdult: getDateInfo(birthDate as string)?.isAdult || Number(pick(b, 'age')) > 18,
+            governmentId: pick(b, 'governmentId'),
+          },
+        },
+      };
+    });
   }
 }

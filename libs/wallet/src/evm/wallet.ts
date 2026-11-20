@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { MemoryWalletStorage } from '../storages/memory.storage';
 import {
   ChainType,
   IConnectedWallet,
@@ -7,7 +8,6 @@ import {
   WalletStorage,
 } from '../types';
 import { ConnectedWallet } from './connectedWallet';
-import { MemoryWalletStorage } from '../storages/memory.storage';
 
 export class EVMWallet implements IWalletManager {
   static blockchainType = 'EVM';
@@ -85,6 +85,20 @@ export class EVMWallet implements IWalletManager {
       publicKey: wallet.signingKey.compressedPublicKey,
       blockchain: EVMWallet.blockchainType,
     };
+    await this.storage.saveKey(walletKeys);
+    return new ConnectedWallet(walletKeys, this.rpcUrl);
+  }
+
+  async createWalletFromMnemonic(mnemonic: string): Promise<ConnectedWallet> {
+    const hdWallet = ethers.HDNodeWallet.fromPhrase(mnemonic);
+    const walletKeys = {
+      address: hdWallet.address,
+      privateKey: hdWallet.privateKey,
+      publicKey: hdWallet.publicKey,
+      mnemonic,
+      blockchain: EVMWallet.blockchainType,
+    };
+    console.log(walletKeys)
     await this.storage.saveKey(walletKeys);
     return new ConnectedWallet(walletKeys, this.rpcUrl);
   }

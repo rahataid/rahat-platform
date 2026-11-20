@@ -53,10 +53,10 @@ export class WalletProcessingService {
                 // Validate/ensure wallet addresses for all items
                 const updatedBeneficiaries = await Promise.all(
                     beneficiaries.map(async (item) => {
-                        const walletAddress = await this.ensureValidWalletAddress(
+                        const { walletAddress, multiChainWallets } = await this.ensureValidWalletAddress(
                             item.walletAddress
                         );
-                        return { ...item, walletAddress };
+                        return { ...item, walletAddress, multiChainWallets };
                     })
                 );
                 result = {
@@ -145,17 +145,29 @@ export class WalletProcessingService {
 
     private async ensureValidWalletAddress(
         walletAddress?: string
-    ): Promise<string> {
+    ): Promise<{ walletAddress: string; multiChainWallets: { chain: ChainType; address: string; privateKey: string }[] }> {
         if (!walletAddress) {
-            const result = await this.walletService.createWallet();
-            this.logger.log('Created new wallet for chain:', result.address);
-            return result.address;
+            this.logger.log('[WALLET] No address provided, generating multi-chain wallets');
+            const results = await this.walletService.createBulkForAllChains(1);
+            const defaultResult = results[0];
+            const chains = defaultResult.wallets.map(w => w.chain).join(', ');
+            this.logger.log(`[WALLET] Multi-chain wallets created on chains: [${chains}], default address: ${defaultResult.defaultAddress}`);
+            return {
+                walletAddress: defaultResult.defaultAddress,
+                multiChainWallets: defaultResult.wallets.map(w => ({
+                    chain: w.chain,
+                    address: w.address,
+                    privateKey: w.privateKey
+                }))
+            };
         }
 
+        this.logger.log(`[WALLET] Validating provided address: ${walletAddress}`);
         // Validate address format and detect chain type
         try {
             const isValid = await this.walletService.validateAddress(walletAddress);
             if (!isValid) {
+                this.logger.warn(`[WALLET] Address format invalid: ${walletAddress}`);
                 throw new RpcException({
                     message: `Invalid wallet address format: ${walletAddress}`,
                     code: 'INVALID_WALLET_ADDRESS_FORMAT',
@@ -179,14 +191,16 @@ export class WalletProcessingService {
         );
 
         if (existingBeneficiary) {
-            this.logger.log('Wallet address already exists');
+            this.logger.warn(`[WALLET] Address already in use: ${walletAddress}`);
             throw new RpcException({
                 message: 'Wallet address already exists',
                 code: 'WALLET_ADDRESS_ALREADY_EXISTS',
             });
         }
 
-        return walletAddress;
+        this.logger.log(`[WALLET] Address valid, using provided: ${walletAddress}`);
+        // Provided address — no multi-chain wallets generated
+        return { walletAddress, multiChainWallets: [] };
     }
 
     private async getDefaultChain(): Promise<ChainType> {
