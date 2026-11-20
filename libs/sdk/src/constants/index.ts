@@ -266,6 +266,10 @@ export const MS_ACTIONS = {
       GET_MAP_LOCATION: 'aaProject.stats.getMapLocation',
       GET_ONE: 'aaProject.stats.getOne',
     },
+    DASHBOARD_REPORTS: {
+      LIST_REPORTS: 'aa.jobs.dashboard.listReports',
+      EXPORT_FILE: 'aa.jobs.dashboard.exportReport',
+    },
     DAILY_MONITORING: {
       ADD: 'aaProject.dailyMonitoring.add',
       GET_ALL: 'aaProject.dailyMonitoring.getAll',
