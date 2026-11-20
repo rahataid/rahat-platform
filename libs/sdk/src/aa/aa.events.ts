@@ -204,6 +204,7 @@ export const JOBS = {
   },
   CHAIN: {
     DISBURSE: 'aa.jobs.chain.disburse',
+    SYNC_DISBURSE: 'aa.jobs.chain.syncDisburse',
     SEND_OTP: 'aa.jobs.chain.sendOtp',
     SEND_ASSET: 'aa.jobs.chain.sendAsset',
     CHECK_OTP: 'aa.jobs.chain.checkOtp',
