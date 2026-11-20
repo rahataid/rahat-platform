@@ -2786,11 +2786,12 @@ export class BeneficiaryService {
         ...(isAA
           ? {
               extras: {
-                ...(beneficiary.pii?.extras &&
-                (beneficiary.pii.extras as any).governmentId
+                ...((beneficiary.pii?.extras as any)?.govtIDNumber ||
+                (beneficiary.pii?.extras as any)?.governmentId
                   ? {
-                      governmentId: (beneficiary.pii.extras as any)
-                        .governmentId,
+                      governmentId:
+                        (beneficiary.pii?.extras as any)?.govtIDNumber ||
+                        (beneficiary.pii?.extras as any)?.governmentId,
                     }
                   : {}),
                 ...((beneficiary.extras as object) || {}),

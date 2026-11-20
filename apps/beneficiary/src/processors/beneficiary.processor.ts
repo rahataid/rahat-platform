@@ -620,8 +620,13 @@ export class BeneficiaryProcessor {
           ...((b.extras as object) || {}),
           phone: b.pii?.phone || null,
           ...(b.pii?.name != null ? { name: b.pii.name } : {}),
-          ...((b.pii?.extras as any)?.governmentId
-            ? { governmentId: (b.pii?.extras as any).governmentId }
+          ...((b.pii?.extras as any)?.govtIDNumber ||
+          (b.pii?.extras as any)?.governmentId
+            ? {
+                governmentId:
+                  (b.pii?.extras as any)?.govtIDNumber ||
+                  (b.pii?.extras as any)?.governmentId,
+              }
             : {}),
           ...(b.location != null ? { location: b.location } : {}),
           ...(b.latitude != null ? { latitude: b.latitude } : {}),
