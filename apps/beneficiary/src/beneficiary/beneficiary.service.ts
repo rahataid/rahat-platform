@@ -1880,6 +1880,7 @@ export class BeneficiaryService {
       case GroupPurpose.MOBILE_MONEY:
       case GroupPurpose.BANK_TRANSFER:
         await this.forceInvalidateGroup(uuid, groupPurpose, benfGroup);
+        this.ssePublisher.publishEvent('beneficiary.group.event', benfGroup);
         return {
           success: true,
           message: `Beneficiaries in group have been invalidated for ${groupPurpose}.`,
