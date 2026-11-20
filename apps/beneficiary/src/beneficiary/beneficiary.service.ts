@@ -24,7 +24,6 @@ import {
   UpdateBeneficiaryDto,
   UpdateBeneficiaryGroupDto
 } from '@rahataid/extensions';
-import { SsePublisherService } from '@rahataid/sse';
 import {
   AAJobs,
   BeneficiaryConstants,
@@ -36,6 +35,7 @@ import {
   TPIIData,
   WalletJobs
 } from '@rahataid/sdk';
+import { SsePublisherService } from '@rahataid/sse';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -1955,6 +1955,7 @@ export class BeneficiaryService {
     const benfsInGroup = benfGroup.groupedBeneficiaries
       ?.map((d) => d.Beneficiary)
       .filter((benf) => !(benf.extras as any)?.validPhoneNumber);
+    const batchId = uuidv4();
 
     this.logger.log(
       `Group phone check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`
@@ -1965,6 +1966,11 @@ export class BeneficiaryService {
       data: {
         uuid: benf.uuid,
         phone: (benf.pii as BeneficiaryPii)?.phone,
+        groupValidation: {
+          groupUuid: uuid,
+          batchId,
+          total: benfsInGroup.length,
+        },
       },
       opts: {
         attempts: 3,
@@ -2013,6 +2019,7 @@ export class BeneficiaryService {
 
     // Intersect with benfsWithBankInfo so only those that have bank details are queued
     const benfsInGroup = benfsWithBankInfo.filter((benf) => needsCheckIds.has(benf.uuid));
+    const batchId = uuidv4();
 
     this.logger.log(
       `Group account check for group: ${uuid} — queuing ${benfsInGroup.length} (skipping ${benfsWithBankInfo.length - benfsInGroup.length} already validated)`
@@ -2042,6 +2049,11 @@ export class BeneficiaryService {
       data: {
         uuid: benf.uuid,
         walletAddress: benf.walletAddress,
+        groupValidation: {
+          groupUuid: uuid,
+          batchId,
+          total: benfsInGroup.length,
+        },
         extras: {
           bank_name: (benf.extras as any)?.bank_name as string,
           bank_ac_name: (benf.extras as any)?.bank_ac_name as string,
@@ -2574,6 +2586,9 @@ export class BeneficiaryService {
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
       projectUuid: project.uuid,
     });
+
+    this.ssePublisher.publishEvent('beneficiary.group.event', group);
+
 
     const syncState = await this.sendGroupSync(payload);
     const isSynced = syncState === 'SYNCED';

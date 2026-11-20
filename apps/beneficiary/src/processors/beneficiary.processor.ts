@@ -15,6 +15,7 @@ import {
   generateRandomWallet,
   ProjectContants,
 } from '@rahataid/sdk';
+import { SsePublisherService } from '@rahataid/sse';
 import { PrismaService } from '@rumsan/prisma';
 import { Job, Queue } from 'bull';
 import { randomUUID, UUID } from 'crypto';
@@ -25,13 +26,14 @@ import { splitBeneficiaryPII } from '../beneficiary/helpers';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
 import {
+  GroupValidationBatch,
   findTempBenefGroups,
+  publishGroupValidationEvent,
+  SYNC_TRACKING_REDIS,
   validateDupicateWallet
 } from './processor.utils';
 
 const BATCH_SIZE = 500;
-
-export const SYNC_TRACKING_REDIS = 'SYNC_TRACKING_REDIS';
 
 @Processor(BQUEUE.RAHAT_BENEFICIARY)
 export class BeneficiaryProcessor {
@@ -44,6 +46,7 @@ export class BeneficiaryProcessor {
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY) private readonly beneficiaryQueue: Queue,
     @Inject(SYNC_TRACKING_REDIS) private readonly syncTrackingRedis: Redis,
     private readonly statsUpdateService: BeneficiaryStatsUpdateService,
+    private readonly ssePublisher: SsePublisherService,
   ) { }
 
   @Process({ name: BeneficiaryJobs.UPDATE_STATS, concurrency: 1 })
@@ -451,7 +454,9 @@ export class BeneficiaryProcessor {
     name: BeneficiaryJobs.CHECK_BENEFICIARY_PHONE_NUMBER,
     concurrency: 1,
   })
-  async checkBeneficiaryPhone(job: Job<{ uuid: string; phone: string; }>) {
+  async checkBeneficiaryPhone(
+    job: Job<{ uuid: string; phone: string; groupValidation?: GroupValidationBatch }>
+  ) {
     const { uuid, phone } = job.data;
     this.logger.log(`Checking beneficiary phone number for benf: ${uuid}`);
 
@@ -518,6 +523,14 @@ export class BeneficiaryProcessor {
     } catch (error) {
       this.logger.error('Error checking phone number', error);
       return;
+    } finally {
+      await publishGroupValidationEvent(
+        this.syncTrackingRedis,
+        this.ssePublisher,
+        job.id,
+        job.data.groupValidation,
+        this.logger
+      );
     }
   }
 
