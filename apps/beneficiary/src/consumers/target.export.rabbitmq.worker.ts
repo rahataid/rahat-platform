@@ -40,8 +40,6 @@ export class ExportTargerBeneficiary extends BaseWorker<any> {
         confirm: true,
         setup: async (channel) => {
           await this.initializeWorker(channel);
-          // console.log('this.data', this.dataProvider);
-          console.log('this.apiUrl', this.apiUrl);
         },
       });
     } catch (err) {
