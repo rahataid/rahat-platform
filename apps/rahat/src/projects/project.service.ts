@@ -101,6 +101,7 @@ export class ProjectService {
   }
 
   async findOne(uuid: UUID) {
+    this.logger.log(`fetching one group with uuid:${uuid}`)
     return this.prisma.project.findUnique({
       where: {
         uuid,
@@ -170,6 +171,7 @@ export class ProjectService {
     user: any
   ) {
     try {
+      this.logger.log(`Project action ${JSON.stringify(cmd)} by ${user?.name}`)
       // const requiresUser = userRequiredActions.has(action);
       return client
         .send(cmd, {
@@ -226,7 +228,6 @@ export class ProjectService {
     const actionFunc = actions[action];
 
     if (!actionFunc) {
-      console.error(`[handleMsActions] UNKNOWN ACTION: "${action}". Known keys:`, Object.keys(actions));
       throw new RpcException({
         message: 'Please provide a valid action!',
         code: 'INVALID_ACTION',
@@ -344,6 +345,7 @@ export class ProjectService {
   }
 
   async setupAAProject(uuid: UUID, dto: SeedSettingsDto) {
+    this.logger.log(`start project setup step of project with uuid: ${uuid}`)
     const project = await this.prisma.project.findUnique({
       where: {
         uuid
