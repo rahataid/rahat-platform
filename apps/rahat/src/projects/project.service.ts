@@ -56,7 +56,7 @@ const CAMBODIA_COUNTRY_CODE = '+855';
 
 @Injectable()
 export class ProjectService {
-  private readonly logger = new Logger(PrismaService.name)
+  private readonly logger = new Logger(ProjectService.name)
 
   constructor(
     private prisma: PrismaService,
@@ -185,7 +185,7 @@ export class ProjectService {
           })
         );
     } catch (err) {
-      console.log('Err', err);
+      this.logger.error('Err', err);
     }
   }
 

@@ -16,7 +16,6 @@ export class RahatProcessor {
 
   @Process(APP_JOBS.EMAIL)
   async sendEmail(job: Job<any>) {
-    console.log('Email sent');
     // this.emailService.sendEmail(
     //   job.data.address,
     //   'OTP for login',
