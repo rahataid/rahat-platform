@@ -1,4 +1,3 @@
-// rahat-project/apps/rahat/src/notification/notification.service.ts
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
@@ -132,6 +131,8 @@ export class NotificationService {
         tasks.push(this.pushService.pushForNotification(notification, { userIds: users.map((u) => u.uuid) }));
       }
       if (wanted.has(NotificationChannel.EMAIL)) tasks.push(this.queueEmail(notification, users));
+      //TODO: SMS is not in work yet, it will be implemented in future
+
       if (wanted.has(NotificationChannel.SMS)) tasks.push(this.sendSms(notification, users));
 
       await Promise.allSettled(tasks);
@@ -204,6 +205,8 @@ export class NotificationService {
       ),
     );
   }
+
+  //TODO: SMS is not in work yet, it will be implemented in future
 
   private async sendSms(notification: Notification, users: AudienceUser[]) {
     const phones = users.map((u) => u.phone).filter((p): p is string => !!p);

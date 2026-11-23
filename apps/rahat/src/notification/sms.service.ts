@@ -1,4 +1,4 @@
-// rahat-platform/apps/rahat/src/notification/sms.service.ts   (TODO : IT NOT REQUIRE RIGHT NOW , BUT KEEPING IT FOR FUTURE USE)
+// (TODO : IT NOT REQUIRE RIGHT NOW , BUT KEEPING IT FOR FUTURE USE)
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '@rumsan/prisma';
 import { backoffDelay, chunk, sleep } from './utils/push.utils';
