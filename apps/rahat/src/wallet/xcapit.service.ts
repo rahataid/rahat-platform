@@ -87,7 +87,6 @@ export class XcapitService {
       (res) => res,
       async (error) => {
         if (error.response?.status === 500) {
-          console.log('Token expired, re-logging in...');
           this.token = await this.login();
 
           const config: AxiosRequestConfig = error.config;
