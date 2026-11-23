@@ -79,7 +79,7 @@ export class PushService {
         const existing = await this.prisma.deviceToken.findUnique({ where: { token } });
 
         if (existing && existing.userId === userId && existing.active) {
-            this.logger.warn(`----=>>>>????8888888[DEVICE] Token ${token} is already registered to a different user (${existing.userId}), reassigning to ${userId}`);
+            this.logger.warn(`[DEVICE] Token ${token} is already registered to a different user (${existing.userId}), reassigning to ${userId}`);
             return { registered: true, changed: false };
         }
 
