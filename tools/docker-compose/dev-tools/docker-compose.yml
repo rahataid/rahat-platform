@@ -19,10 +19,8 @@ services:
     command: postgres -c max_prepared_transactions=100
     volumes:
       - rahat_pg_data:/var/lib/postgresql/data
-    # ports:
-    #   - '${PG_PORT}:5432'
     ports:
-      - '127.0.0.1:5558:5432'
+      - '${PG_PORT}:5432'
     networks:
       - rahat_platform
 
