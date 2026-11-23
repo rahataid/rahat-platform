@@ -35,7 +35,6 @@ export class NotificationController {
   @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
   @Get()
   list(@Query() query: ListNotificationsDto) {
-    console.log('Listing notifications');
     return this.notificationService.listNotifications(query);
   }
 

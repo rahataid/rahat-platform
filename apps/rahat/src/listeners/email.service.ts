@@ -14,7 +14,6 @@ export class EmailService {
 
   initialize() {
     if (!this.transporter) {
-      console.log('Initializing email service');
       try {
         this.transporter = nodemailer.createTransport({
           pool: true,
@@ -48,7 +47,6 @@ export class EmailService {
         html: html,
       };
       const info = await this.transporter.sendMail(mailOptions);
-      console.log('Email sent:', info.messageId);
     } catch (error) {
       //console.error('Error sending email:', error);
       //throw error; // Or handle it as per your application needs

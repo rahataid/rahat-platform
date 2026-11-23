@@ -574,8 +574,8 @@ export class BeneficiaryService {
         .then((beneficiary) =>
           beneficiary
             ? this.rsprisma.beneficiaryPii.findUnique({
-                where: { beneficiaryId: beneficiary.id },
-              })
+              where: { beneficiaryId: beneficiary.id },
+            })
             : null
         ),
     ]);
@@ -961,7 +961,7 @@ export class BeneficiaryService {
               dto.piiData.phone.toString()
             );
           } catch (error) {
-            console.log(
+            this.logger.log(
               `Skipping entry due to duplicate phone: ${dto.piiData.phone}`
             );
             continue;
@@ -974,7 +974,7 @@ export class BeneficiaryService {
               dto.walletAddress
             );
         } catch (error) {
-          console.log(
+          this.logger.log(
             `Skipping entry due to duplicate/invalid wallet address: ${dto.walletAddress}`
           );
           continue;
@@ -1059,10 +1059,8 @@ export class BeneficiaryService {
       //           projectPayload
       //         ),
       //         onSuccess(response) {
-      //           console.log('response', response);
       //         },
       //         onError(error) {
-      //           console.log('error', error);
       //           throw new RpcException(error.message);
       //         },
       //       });
@@ -1192,15 +1190,13 @@ export class BeneficiaryService {
           ? await checkWalletAddress(batch, prisma)
           : [];
 
-      console.log(`
-        Found ${
-          duplicatePhones.length
+      this.logger.log(`
+        Found ${duplicatePhones.length
         } existing beneficiaries phone numbers i: ${duplicatePhones.join(', ')}
-        Found ${
-          duplicateWallets.length
+        Found ${duplicateWallets.length
         } existing beneficiaries wallet addresses: ${duplicateWallets.join(
-        ', '
-      )}
+          ', '
+        )}
         `);
 
       if (!ignoreExisting) {
@@ -1255,6 +1251,7 @@ export class BeneficiaryService {
         name: sanitizeNonAlphaNumericValue(g),
       }));
 
+
       await this.prisma.beneficiaryGroup.createManyAndReturn({
         data: groupData,
         skipDuplicates: true,
@@ -1263,15 +1260,7 @@ export class BeneficiaryService {
     // Break beneficiaries into batches
     const batches = createBatches(filteredBeneficiaries, BATCH_SIZE);
 
-    console.log(`Creating ${batches.length} batches of beneficiaries.
-    Total beneficiaries: ${filteredBeneficiaries.length}
-    Duplicate phone numbers: ${
-      filteredBeneficiaries.length - batches.flat().length
-    }
-    Duplicate wallet addresses: ${
-      filteredBeneficiaries.length - batches.flat().length
-    }
-      `);
+    this.logger.log(`Creating ${batches.length} batches of beneficiaries ${filteredBeneficiaries.length}`);
 
     const bulkQueueData = batches.map((batch, index) => ({
       name: BeneficiaryJobs.IMPORT_BENEFICIARY_LARGE_QUEUE,
@@ -1559,8 +1548,7 @@ export class BeneficiaryService {
         }
       } catch (error) {
         this.logger.error(
-          `Error processing beneficiary uuid=${dto.uuid}: ${
-            (error as Error).message
+          `Error processing beneficiary uuid=${dto.uuid}: ${(error as Error).message
           }`
         );
         // continue — don't fail entire import for one row
@@ -2058,10 +2046,8 @@ export class BeneficiaryService {
     );
 
     this.logger.log(
-      `Group account check for group: ${uuid} — queuing ${
-        benfsInGroup.length
-      } (skipping ${
-        benfsWithBankInfo.length - benfsInGroup.length
+      `Group account check for group: ${uuid} — queuing ${benfsInGroup.length
+      } (skipping ${benfsWithBankInfo.length - benfsInGroup.length
       } already validated)`
     );
 
@@ -2318,21 +2304,21 @@ export class BeneficiaryService {
 
     const where: any = projectUUID
       ? {
-          deletedAt: null,
-          beneficiaryGroupProject:
-            projectUUID === 'NOT_ASSGNED'
-              ? {
-                  none: {},
-                }
-              : {
-                  some: {
-                    projectId: projectUUID,
-                  },
-                },
-        }
+        deletedAt: null,
+        beneficiaryGroupProject:
+          projectUUID === 'NOT_ASSGNED'
+            ? {
+              none: {},
+            }
+            : {
+              some: {
+                projectId: projectUUID,
+              },
+            },
+      }
       : {
-          deletedAt: null,
-        };
+        deletedAt: null,
+      };
 
     const groupName = dto.groupName?.trim();
     if (groupName) {
@@ -2785,41 +2771,41 @@ export class BeneficiaryService {
         gender: beneficiary.gender || null,
         ...(isAA
           ? {
-              extras: {
-                ...((beneficiary.pii?.extras as any)?.govtIDNumber ||
+            extras: {
+              ...((beneficiary.pii?.extras as any)?.govtIDNumber ||
                 (beneficiary.pii?.extras as any)?.governmentId
-                  ? {
-                      governmentId:
-                        (beneficiary.pii?.extras as any)?.govtIDNumber ||
-                        (beneficiary.pii?.extras as any)?.governmentId,
-                    }
-                  : {}),
-                ...((beneficiary.extras as object) || {}),
-                phone: beneficiary.pii?.phone || null,
-                ...(beneficiary.pii?.name != null
-                  ? { name: beneficiary.pii.name }
-                  : {}),
-                ...(beneficiary.location != null
-                  ? { location: beneficiary.location }
-                  : {}),
-                ...(beneficiary.latitude != null
-                  ? { latitude: beneficiary.latitude }
-                  : {}),
-                ...(beneficiary.longitude != null
-                  ? { longitude: beneficiary.longitude }
-                  : {}),
-                ...(beneficiary.age != null ? { age: beneficiary.age } : {}),
-                ...(beneficiary.bankedStatus != null
-                  ? { bankedStatus: beneficiary.bankedStatus }
-                  : {}),
-                ...(beneficiary.internetStatus != null
-                  ? { internetStatus: beneficiary.internetStatus }
-                  : {}),
-                ...(beneficiary.phoneStatus != null
-                  ? { phoneStatus: beneficiary.phoneStatus }
-                  : {}),
-              },
-            }
+                ? {
+                  governmentId:
+                    (beneficiary.pii?.extras as any)?.govtIDNumber ||
+                    (beneficiary.pii?.extras as any)?.governmentId,
+                }
+                : {}),
+              ...((beneficiary.extras as object) || {}),
+              phone: beneficiary.pii?.phone || null,
+              ...(beneficiary.pii?.name != null
+                ? { name: beneficiary.pii.name }
+                : {}),
+              ...(beneficiary.location != null
+                ? { location: beneficiary.location }
+                : {}),
+              ...(beneficiary.latitude != null
+                ? { latitude: beneficiary.latitude }
+                : {}),
+              ...(beneficiary.longitude != null
+                ? { longitude: beneficiary.longitude }
+                : {}),
+              ...(beneficiary.age != null ? { age: beneficiary.age } : {}),
+              ...(beneficiary.bankedStatus != null
+                ? { bankedStatus: beneficiary.bankedStatus }
+                : {}),
+              ...(beneficiary.internetStatus != null
+                ? { internetStatus: beneficiary.internetStatus }
+                : {}),
+              ...(beneficiary.phoneStatus != null
+                ? { phoneStatus: beneficiary.phoneStatus }
+                : {}),
+            },
+          }
           : { extras: beneficiary.extras || null }),
       })),
     };
@@ -3009,18 +2995,11 @@ export class BeneficiaryService {
   }
 
   async importBeneficiariesFromTool(data: any) {
-    console.log(
-      '🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ data:',
-      data
-    );
+    this.logger.log(
+      'BeneficiaryService ~ importBeneficiariesFromTool:',);
     const dataFromBuffer = Buffer.from(data);
     const bufferString = dataFromBuffer.toString('utf-8');
     const jsonData = JSON.parse(bufferString) || null;
-    console.log(
-      '🚀 ~ BeneficiaryService ~ importBeneficiariesFromTool ~ jsonData:',
-      jsonData
-    );
-
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
 
@@ -3030,11 +3009,10 @@ export class BeneficiaryService {
         { count: beneficiaries.length }
       ),
       onSuccess: (response) => {
-        console.log(`Response`, response);
         return response;
       },
       onError(error) {
-        console.log('Error assiging Beneficiaries to project.', error);
+        console.warn('Error assiging Beneficiaries to project.', error);
         throw new RpcException(error.message);
       },
     });

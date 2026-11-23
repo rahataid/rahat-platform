@@ -23,18 +23,11 @@ export class UsersService extends RSUserService {
   // TODO: Multi-chain support - Currently uses instance's configured chain
   // Future: Allow chain selection per user
   async create(userData: CreateUserDto) {
-    console.log('Creating a new user with a random wallet address');
 
     try {
       // Use wallet service's configured chain (single-chain per instance)
       // No need to specify chain - wallet service will use its detected chain type
       const randomWallet = await this.walletService.createWallet();
-
-      console.log('Random wallet created:', {
-        address: randomWallet.address,
-        blockchain: randomWallet.blockchain || 'detected',
-      });
-
       userData.wallet = randomWallet.address;
 
       const res = super.create(userData);
@@ -51,7 +44,6 @@ export class UsersService extends RSUserService {
   }
 
   async getWallets(dto: ListUserDto) {
-    console.log('Listing users');
     const userListData = await super.list(dto);
     const wallets = userListData.data.map((user) => {
       return {

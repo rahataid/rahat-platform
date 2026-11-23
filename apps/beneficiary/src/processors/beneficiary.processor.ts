@@ -79,7 +79,6 @@ export class BeneficiaryProcessor {
 
       // =====Txn start====
       for (let i = 0; i < beneficiaries.length; i += BATCH_SIZE) {
-        console.log('Batch=>', i);
         const batch = beneficiaries.slice(i, i + BATCH_SIZE);
         await this.prisma.$transaction(
           async (txn) => {
@@ -98,14 +97,13 @@ export class BeneficiaryProcessor {
         { projectUuid: null }
       );
     } catch (err) {
-      console.log('Import Error=>', err.message);
+      this.logger.error('Import Error=>', err.message);
       throw err;
     }
   }
 
   @Process(BeneficiaryJobs.GENERATE_LINK)
   async generateLink(job: Job<any>) {
-    console.log(job.data);
     if (job.data) {
       await this.mailerService.sendMail({
         to: job.data.email,
@@ -114,7 +112,7 @@ export class BeneficiaryProcessor {
         template: './wallet-verification',
         context: { encryptedData: job.data.encrypted, name: job.data.name },
       });
-      console.log('Email sent to', job.data.email);
+      this.logger.log('Email sent to', job.data.email);
       return true;
     }
 
@@ -151,7 +149,6 @@ export class BeneficiaryProcessor {
     // if (!canProceed) {
     //   return; // Stop processing if the queue is busy
     // }
-    // console.log(`Processing batch ${batchNumber} of ${totalBatches}`);
 
     // Helper function to validate phone numbers and wallet addresses
     const validateBeneficiaries = async (
@@ -206,7 +203,7 @@ export class BeneficiaryProcessor {
     };
 
     // Log the size of the current batch being processed
-    console.log(
+    this.logger.log(
       `Batch ${batchNumber} contains ${beneficiaries.length} beneficiaries.`
     );
 
@@ -219,7 +216,7 @@ export class BeneficiaryProcessor {
             this.prisma
           );
           if (filteredBatch.length === 0) {
-            console.log(
+            this.logger.log(
               `Batch ${batchNumber} skipped, no new beneficiaries after filtering.`
             );
             return; // Skip the batch if there are no valid beneficiaries to process
@@ -253,7 +250,6 @@ export class BeneficiaryProcessor {
                 `Failed to insert beneficiaries: ${error.message}`
               );
             });
-          // console.log(insertedBeneficiaries);
           // // Retrieve inserted beneficiaries for linking PII data
           // const insertedBeneficiaries = await txn.beneficiary.findMany({
           //   where: {
@@ -304,8 +300,6 @@ export class BeneficiaryProcessor {
                 },
               },
             });
-            console.log('groups', groups);
-
             const beneficiaryGroupData = insertedBeneficiaries.map((b) => {
               const beneficiaryId = b.uuid;
               const beneficiaryGroupId = groups.find(
@@ -385,10 +379,6 @@ export class BeneficiaryProcessor {
                   return response;
                 },
                 onError(error) {
-                  console.log(
-                    'Error assiging Beneficiaries to project.',
-                    error
-                  );
                   throw new RpcException(error.message);
                 },
               });
@@ -398,13 +388,11 @@ export class BeneficiaryProcessor {
           }
 
           // if (automatedGroupOption.groupKey && projectUUID) {
-          //   // console.log('createdGroups', createdBenGroups);
           //   const assignedGroupsToProject = createdBenGroups.map((bg) => {
           //     const payload = {
           //       beneficiaryGroupId: bg.beneficiaryGroup.uuid,
           //       projectId: projectUUID,
           //     };
-          //     console.log('payload', payload);
           //     return handleMicroserviceCall({
           //       client: this.client.send(
           //         {
@@ -414,25 +402,22 @@ export class BeneficiaryProcessor {
           //         payload
           //       ),
           //       onSuccess(response) {
-          //         console.log('response', response);
           //         return response;
           //       },
           //       onError(error) {
-          //         console.log('Error assiging Groups to project.', error);
           //         throw new RpcException(error.message);
           //       },
           //     });
           //   });
           //   await Promise.all(assignedGroupsToProject);
           // }
-          console.log(`Successfully processed batch ${batchNumber}`);
+          this.logger.log(`Successfully processed batch ${batchNumber}`);
         },
         {
           timeout: 25000,
         }
       )
       .catch((error) => {
-        console.log('Error importing Beneficiaries', error);
         console.error(
           `Failed to process batch ${batchNumber}: ${error.message}`
         );
