@@ -5,7 +5,7 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BQUEUE, ProjectContants } from '@rahataid/sdk';
 import { SettingsModule } from '@rumsan/extensions/settings';
-import { PrismaService } from '@rumsan/prisma';
+import { PrismaModule } from '@rumsan/prisma';
 import { AuthsModule, SignupModule } from '@rumsan/user';
 import { NotificationModule } from '../notification/notification.module';
 import { UsersModule } from '../users/users.module';
@@ -15,6 +15,7 @@ import { VendorsService } from './vendors.service';
 
 @Module({
   imports: [
+    PrismaModule,
     ClientsModule.register([
       {
         name: ProjectContants.ELClient,
@@ -37,6 +38,6 @@ import { VendorsService } from './vendors.service';
     NotificationModule
   ],
   controllers: [VendorsController],
-  providers: [VendorsService, PrismaService, FileWalletStorage]
+  providers: [VendorsService, FileWalletStorage]
 })
 export class AppUsersModule { }

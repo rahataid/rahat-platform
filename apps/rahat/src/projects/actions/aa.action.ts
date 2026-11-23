@@ -245,6 +245,12 @@ export const aaActions: ProjectActionFunc = {
     payload.appId = uuid || payload.appId;
     return sendCommand({ cmd: AAJobs.STAKEHOLDERS.DELETE_GROUP, uuid }, payload);
   },
+
+  [MS_ACTIONS.AAPROJECT.STAKEHOLDERS.EXPORT_GROUP]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => sendCommand({ cmd: AAJobs.STAKEHOLDERS.EXPORT_GROUP, uuid }, payload),
   // **** Stakeholders groups end ******//
 
   // **** Contract Interactions ****//

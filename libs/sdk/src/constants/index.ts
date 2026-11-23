@@ -228,6 +228,7 @@ export const MS_ACTIONS = {
       ADD_GROUP: 'aaProject.stakeholders.addGroup',
       UPDATE_GROUP: 'aaProject.stakeholders.updateGroup',
       DELETE_GROUP: 'aaProject.stakeholders.deleteGroup',
+      EXPORT_GROUP: 'aaProject.stakeholders.exportGroup',
     },
     CONTRACT: {
       INCREASE_BUDEGET: 'aaProject.contract.increase_budget',
@@ -664,6 +665,7 @@ export const MS_ACTIONS = {
     UPDATE: 'ms.communications.update',
     REMOVE: 'ms.communications.remove',
     TRIGGER: 'ms.communications.trigger',
+    GET_OVERVIEW: 'ms.communications.getOverview',
   },
 
   MS_DAILY_MONITORING: {
