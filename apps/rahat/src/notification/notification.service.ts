@@ -17,6 +17,7 @@ import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { isUUID } from 'class-validator';
 import { PROJECT_NAME_PLACEHOLDER, USER_NAME_PLACEHOLDER } from '../constants';
+import { getDefaultPushRoles } from '../utils/default-roles';
 import { escapeHtml } from '../utils/escape-html';
 import { toAudienceRows } from './audience.mapper';
 import { AudienceResolver, AudienceUser } from './audience.resolver';
@@ -100,17 +101,12 @@ export class NotificationService {
     return projectId;
   }
 
-  private defaultRoles(): string[] {
-    const env = process.env.PUSH_DEFAULT_ROLES?.split(',').map((r) => r.trim()).filter(Boolean);
-    return env?.length ? env : [UserRoles.ADMIN, UserRoles.MANAGER];
-  }
-
   // no include-selector in the payload (legacy sender) -> default roles; stored as rows so the DB shows who was targeted
   private buildAudienceRows(dto: CreateNotificationDto) {
     const rows = toAudienceRows(dto.audience);
     if (!rows.some((r) => !r.exclude)) {
       this.logger.warn('[NOTIFY] No audience in payload, using default roles. Send `audience` from the sender.');
-      rows.push(...this.defaultRoles().map((role) => ({ type: AudienceType.ROLE, value: role, exclude: false })));
+      rows.push(...getDefaultPushRoles().map((role) => ({ type: AudienceType.ROLE, value: role, exclude: false })));
     }
     return rows;
   }
@@ -189,7 +185,7 @@ export class NotificationService {
       where: { uuid: { in: recipients.map((u) => u.uuid) } },
       select: { uuid: true, name: true },
     });
-
+    this.logger.log(`Queued notification for ${users.length} users.`);
     const nameMap = new Map(dbUsers.map((u) => [u.uuid, u.name]));
 
     await Promise.all(

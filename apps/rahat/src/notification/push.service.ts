@@ -3,9 +3,10 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { Notification } from '@prisma/client';
-import { APP_JOBS, BQUEUE, NOTIFICATION_GROUPS, UserRoles } from '@rahataid/sdk';
+import { APP_JOBS, BQUEUE, NOTIFICATION_GROUPS } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
+import { getDefaultPushRoles } from '../utils/default-roles';
 import { RegisterDeviceDto } from './dto/register-device.dto';
 import { SubscribeWebPushDto } from './dto/subscribe-web-push.dto';
 import { FirebaseService, PushPayload } from './firebase.service';
@@ -114,14 +115,6 @@ export class PushService {
 
     // ---------- sending (never throws) ----------
 
-    private defaultRoles(): string[] {
-
-        const env = process.env.PUSH_DEFAULT_ROLES?.split(',').map((r) => r.trim()).filter(Boolean);
-        const result = env?.length ? env : [UserRoles.ADMIN, UserRoles.MANAGER];
-
-        return result;
-    }
-
     private async userIdsByRoles(roles: string[]): Promise<string[]> {
 
         const users = await this.prisma.user.findMany({
@@ -138,7 +131,7 @@ export class PushService {
 
             const userIds = opts.userIds?.length
                 ? opts.userIds
-                : await this.userIdsByRoles(opts.roles?.length ? opts.roles : this.defaultRoles());
+                : await this.userIdsByRoles(opts.roles?.length ? opts.roles : getDefaultPushRoles());
 
             if (!userIds.length) {
                 this.logger.warn('[PUSH] No users resolved, aborting push');
