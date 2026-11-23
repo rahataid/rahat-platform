@@ -564,6 +564,11 @@ export class BeneficiaryProcessor {
       return;
     }
 
+    const group = await this.prisma.beneficiaryGroup.findUnique({
+      where: { uuid: groupUuid },
+      select: { groupPurpose: true },
+    });
+
     const BATCH_SIZE = 100;
     const totalBatches = Math.ceil(total / BATCH_SIZE);
 
@@ -628,12 +633,8 @@ export class BeneficiaryProcessor {
 
       await this.beneficiaryQueue.add(
         BeneficiaryJobs.SYNC_BENEFICIARY_BATCH_TO_PROJECT,
-        { groupUuid, projectId, beneficiariesData, totalBatches },
-        {
-          attempts: 3,
-          removeOnComplete: true,
-          backoff: { type: 'exponential', delay: 2000 },
-        }
+        { groupUuid, projectId, beneficiariesData, totalBatches, groupPurpose: group?.groupPurpose ?? null },
+        { attempts: 3, removeOnComplete: true, backoff: { type: 'exponential', delay: 2000 } },
       );
 
       this.logger.log(
@@ -658,17 +659,15 @@ export class BeneficiaryProcessor {
       projectId: string;
       beneficiariesData: any[];
       totalBatches: number;
-    }>
+      groupPurpose?: string | null;
+    }>,
   ) {
-    const { groupUuid, projectId, beneficiariesData, totalBatches } = job.data;
+    const { groupUuid, projectId, beneficiariesData, totalBatches, groupPurpose } = job.data;
 
     await handleMicroserviceCall({
       client: this.client.send(
-        {
-          cmd: BeneficiaryJobs.SYNC_IMPORTED_GROUP_BENEFICIARIES,
-          uuid: projectId,
-        },
-        { beneficiariesData, groupUuid }
+        { cmd: BeneficiaryJobs.SYNC_IMPORTED_GROUP_BENEFICIARIES, uuid: projectId },
+        { beneficiariesData, groupUuid, ...(groupPurpose ? { groupPurpose } : {}) },
       ),
     });
 
