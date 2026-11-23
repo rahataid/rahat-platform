@@ -7,9 +7,14 @@ import {
   ListNotificationsDto,
 } from '@rahataid/extensions';
 import { ACTIONS, APP, ProjectJobs, SUBJECTS } from '@rahataid/sdk';
-import { AbilitiesGuard, CheckAbilities, JwtGuard } from '@rumsan/user';
+import {
+  AbilitiesGuard,
+  CheckAbilities,
+  JwtGuard,
+} from '@rumsan/user';
 import { RegisterDeviceDto } from './dto/register-device.dto';
-import { SubscribeWebPushDto } from "./dto/subscribe-web-push.dto";
+import { SubscribeWebPushDto } from './dto/subscribe-web-push.dto';
+import { NotificationUserContext } from './notification.types';
 import { NotificationService } from './notification.service';
 import { PushService } from './push.service';
 
@@ -39,12 +44,17 @@ export class NotificationController {
   }
 
   @MessagePattern({ cmd: ProjectJobs.NOTIFICATION.REGISTER_DEVICE })
-  async registerDevice(dto: RegisterDeviceDto & { user?: any }) {
+  async registerDevice(
+    dto: RegisterDeviceDto & { user?: NotificationUserContext }
+  ) {
     return this.pushService.registerDevice(dto);
   }
 
   @MessagePattern({ cmd: ProjectJobs.NOTIFICATION.UNREGISTER_DEVICE })
-  async unregisterDevice(dto: { token: string; user?: any }) {
+  async unregisterDevice(dto: {
+    token: string;
+    user?: NotificationUserContext;
+  }) {
     return this.pushService.unregisterDevice(dto);
   }
 
@@ -57,12 +67,17 @@ export class NotificationController {
   }
 
   @MessagePattern({ cmd: ProjectJobs.NOTIFICATION.REGISTER_WEB_PUSH })
-  async registerWebPush(dto: SubscribeWebPushDto & { user?: any }) {
+  async registerWebPush(
+    dto: SubscribeWebPushDto & { user?: NotificationUserContext }
+  ) {
     return this.pushService.registerWebPush(dto);
   }
 
   @MessagePattern({ cmd: ProjectJobs.NOTIFICATION.UNREGISTER_WEB_PUSH })
-  async unregisterWebPush(dto: { endpoint: string; user?: any }) {
+  async unregisterWebPush(dto: {
+    endpoint: string;
+    user?: NotificationUserContext;
+  }) {
     return this.pushService.unregisterWebPush(dto);
   }
 

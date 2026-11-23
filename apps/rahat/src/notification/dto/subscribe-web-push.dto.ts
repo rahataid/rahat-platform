@@ -18,6 +18,4 @@ export class SubscribeWebPushDto {
     keys: PushKeysDto;
 
     @ApiPropertyOptional() @IsOptional() @IsString() userAgent?: string;
-
-    @ApiPropertyOptional() @IsOptional() user?: any; // attached server-side by sendCommand
 }

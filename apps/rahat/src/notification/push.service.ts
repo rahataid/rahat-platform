@@ -9,6 +9,7 @@ import { Queue } from 'bull';
 import { getDefaultPushRoles } from '../utils/default-roles';
 import { RegisterDeviceDto } from './dto/register-device.dto';
 import { SubscribeWebPushDto } from './dto/subscribe-web-push.dto';
+import { NotificationUserContext } from './notification.types';
 import { FirebaseService, PushPayload } from './firebase.service';
 import { WebPushPayload, WebPushService, WebPushTarget } from './web-push.service';
 
@@ -47,7 +48,9 @@ export class PushService {
 
     // ---------- device registration (called only by the mobile app) ----------
 
-    private async resolveUserUuid(user?: any): Promise<string | null> {
+    private async resolveUserUuid(
+        user?: NotificationUserContext
+    ): Promise<string | null> {
 
         if (user?.uuid) {
             return user.uuid;
@@ -63,7 +66,9 @@ export class PushService {
         return null;
     }
 
-    async registerDevice(dto: RegisterDeviceDto & { user?: any }) {
+    async registerDevice(
+        dto: RegisterDeviceDto & { user?: NotificationUserContext }
+    ) {
 
         const userId = await this.resolveUserUuid(dto.user);
         if (!userId) {
@@ -93,7 +98,10 @@ export class PushService {
         return { registered: true, changed: true };
     }
 
-    async unregisterDevice(dto: { token: string; user?: any }) {
+    async unregisterDevice(dto: {
+        token: string;
+        user?: NotificationUserContext;
+    }) {
 
         const userId = await this.resolveUserUuid(dto.user);
         if (!userId) {
@@ -262,7 +270,9 @@ export class PushService {
         return res;
     }
 
-    async registerWebPush(dto: SubscribeWebPushDto & { user?: any }) {
+    async registerWebPush(
+        dto: SubscribeWebPushDto & { user?: NotificationUserContext }
+    ) {
 
         try {
             const userId = await this.resolveUserUuid(dto.user);
@@ -299,7 +309,10 @@ export class PushService {
     }
 
 
-    async unregisterWebPush(dto: { endpoint: string; user?: any }) {
+    async unregisterWebPush(dto: {
+        endpoint: string;
+        user?: NotificationUserContext;
+    }) {
         const userId = await this.resolveUserUuid(dto.user);
         if (!userId || !dto.endpoint) return { unregistered: false };
 
