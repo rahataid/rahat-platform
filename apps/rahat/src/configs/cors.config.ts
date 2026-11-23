@@ -17,9 +17,6 @@ export class CorsConfigService {
       'http://localhost:3300',
       'http://localhost:3001',
       'http://localhost:5173',
-      'https://ageless-scion-skater.ngrok-free.dev',
-      'http://localhost',
-      'https://localhost',
     ];
     const rahatDomainRegex = /^https?:\/\/(.+\.)?rahat\.io$/;
     const allowedDomains = this.configService.get<string>('ALLOWED_DOMAINS');
@@ -35,6 +32,11 @@ export class CorsConfigService {
         : []),
     ];
 
+    this.logger.log(
+      `CORS config service initialized with allowed origins: ${allowedOrigins || 'none (using defaults)'
+      }, allowed domains: ${allowedDomains || 'rahat.io (default)'}`
+    );
+
     let corsOrigins: (string | RegExp)[];
 
     if (allowedOrigins) {
@@ -45,7 +47,9 @@ export class CorsConfigService {
           .filter((origin) => origin.length > 0),
         ...domainRegexes,
       ];
-
+      this.logger.log(
+        `CORS configured with allowed origins: ${corsOrigins.join(', ')}`
+      );
     } else {
       const nodeEnv = this.configService.get<string>('NODE_ENV');
       corsOrigins =
