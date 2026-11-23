@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { BQUEUE } from '@rahataid/sdk';
 import { BeneficiaryEvents, BeneficiaryJobs } from '@rahataid/sdk/beneficiary';
+import { SsePublisherService } from '@rahataid/sse';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { Job } from 'bull';
@@ -29,6 +30,7 @@ export class ImportProcessor {
     private readonly walletService: WalletService,
     private readonly eventEmitter: EventEmitter2,
     private readonly settingsService: SettingsService,
+    private readonly ssePublisher: SsePublisherService,
   ) { }
 
   @Process({ name: BeneficiaryJobs.IMPORT_V2, concurrency: 1 })
@@ -125,10 +127,11 @@ export class ImportProcessor {
       const groupUuid = await this.executeBulkImport(importUuid, mappedRows, importRecord.groupName, job, totalRows);
 
       // Success
-      await this.importsService.updateExtras(importUuid, {
+      const completedImport = await this.importsService.updateExtras(importUuid, {
         importedCount: totalRows,
         completedAt: new Date().toISOString(),
       });
+      await this.ssePublisher.publishEvent('import.event', completedImport);
 
       try {
         await this.importsService.scheduleStatsRefresh();

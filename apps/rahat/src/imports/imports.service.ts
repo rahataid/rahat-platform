@@ -5,6 +5,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { BQUEUE } from '@rahataid/sdk';
 import { BeneficiaryJobs } from '@rahataid/sdk/beneficiary';
+import { SsePublisherService } from '@rahataid/sse';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PaginatorTypes, PrismaService, paginator } from '@rumsan/prisma';
 import { Queue } from 'bull';
@@ -41,6 +42,7 @@ export class ImportsService {
     private readonly prisma: PrismaService,
     private readonly settingsService: SettingsService,
     private readonly httpService: HttpService,
+    private readonly ssePublisher: SsePublisherService,
     @InjectQueue(BQUEUE.RAHAT_IMPORT) private readonly importQueue: Queue,
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY) private readonly beneficiaryQueue: Queue,
   ) { }
@@ -229,10 +231,11 @@ export class ImportsService {
     }
 
     // Update status to PROCESSING
-    await this.prisma.beneficiaryImport.update({
+    const updatedRecord = await this.prisma.beneficiaryImport.update({
       where: { uuid },
       data: { status: 'PROCESSING' },
     });
+    await this.ssePublisher.publishEvent('import.event', updatedRecord);
 
     // Add job to the import queue
     const job = await this.importQueue.add(BeneficiaryJobs.IMPORT_V2, {
