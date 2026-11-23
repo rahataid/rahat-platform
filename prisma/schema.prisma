@@ -647,6 +647,7 @@ model Grievance {
   deletedAt       DateTime?
   resolvedAt      DateTime?
   closedAt        DateTime?
+  grievanceDocuments Json? @db.JsonB()
 
   @@map("tbl_grievances")
 }
