@@ -1,3 +1,4 @@
+//rahat-platform/apps/rahat/src/projects/project.service.ts
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
@@ -171,6 +172,7 @@ export class ProjectService {
   ) {
     try {
       this.logger.log(`Project action ${JSON.stringify(cmd)} by ${user?.name}`)
+      // const requiresUser = userRequiredActions.has(action);
       return client
         .send(cmd, {
           ...payload,
@@ -224,6 +226,7 @@ export class ProjectService {
     };
 
     const actionFunc = actions[action];
+
     if (!actionFunc) {
       throw new RpcException({
         message: 'Please provide a valid action!',

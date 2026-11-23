@@ -9,7 +9,6 @@ export class commonLib {
     provider: ethers.JsonRpcProvider;
 
     constructor() {
-        console.log('Network:', process.env.NETWORK_PROVIDER)
         this.provider = new ethers.JsonRpcProvider(process.env.NETWORK_PROVIDER);
     }
     static getUUID() {

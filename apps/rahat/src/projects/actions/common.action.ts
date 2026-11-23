@@ -1,3 +1,4 @@
+//rahat-platform/apps/rahat/src/projects/actions/common.action.ts
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
@@ -7,6 +8,7 @@ import {
   VendorJobs
 } from '@rahataid/sdk';
 import { ProjectActionFunc } from '@rahataid/sdk/project/project.types';
+
 export const beneficiaryActions: ProjectActionFunc = {
   // Disabled: beneficiary MS handler removed (group-assign-optimization)
   // [MS_ACTIONS.BENEFICIARY.ADD_TO_PROJECT]: (uuid, payload, sendCommand) => {
@@ -25,14 +27,12 @@ export const beneficiaryActions: ProjectActionFunc = {
     return sendCommand(
       { cmd: BeneficiaryJobs.ASSIGN_TO_PROJECT },
       { projectId: uuid, ...payload } // WHY IS PROJECT ID PASSED HERE? THIS GOES TO BENF MS
-
     )
   },
   [MS_ACTIONS.BENEFICIARY.ASSGIN_GROUP_TO_PROJECT]: (uuid, payload, sendCommand) => {
     return sendCommand(
       { cmd: BeneficiaryJobs.ASSIGN_GROUP_TO_PROJECT },
       { projectId: uuid, ...payload }
-
     )
   },
   // Disabled: beneficiary MS handler removed (group-assign-optimization)
@@ -100,8 +100,6 @@ export const vendorActions: ProjectActionFunc = {
     { cmd: VendorJobs.GET_BENEFICIARIES, uuid },
     payload
   )
-
-
 };
 
 export const settingActions: ProjectActionFunc = {
@@ -116,9 +114,9 @@ export const settingActions: ProjectActionFunc = {
   [MS_ACTIONS.HEALTH.CHECK]: (uuid, payload, sendCommand) =>
     sendCommand(
       { cmd: ProjectJobs.HEALTH.CHECK, uuid },
-      { projectId: uuid, }
+      { projectId: uuid }
     )
-}
+};
 
 export const projectActions: ProjectActionFunc = {
   [MS_ACTIONS.PROJECT.SETUP]: (uuid, payload, sendCommand) =>
@@ -157,5 +155,15 @@ export const notificationActions: ProjectActionFunc = {
   [MS_ACTIONS.NOTIFICATION.GET]: (uuid, payload, sendCommand) => {
     payload.projectId = uuid || payload.projectId;
     return sendCommand({ cmd: ProjectJobs.NOTIFICATION.GET }, payload);
-  }
+  },
+  [MS_ACTIONS.NOTIFICATION.REGISTER_DEVICE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.NOTIFICATION.REGISTER_DEVICE }, payload),
+  [MS_ACTIONS.NOTIFICATION.UNREGISTER_DEVICE]: (uuid, payload, sendCommand) =>
+    sendCommand({ cmd: ProjectJobs.NOTIFICATION.UNREGISTER_DEVICE }, payload),
+  [MS_ACTIONS.NOTIFICATION.REGISTER_WEB_PUSH]: (uuid, payload, sendCommand) => {
+    return sendCommand({ cmd: ProjectJobs.NOTIFICATION.REGISTER_WEB_PUSH }, payload);
+  },
+  [MS_ACTIONS.NOTIFICATION.UNREGISTER_WEB_PUSH]: (uuid, payload, sendCommand) => {
+    return sendCommand({ cmd: ProjectJobs.NOTIFICATION.UNREGISTER_WEB_PUSH }, payload);
+  },
 };
