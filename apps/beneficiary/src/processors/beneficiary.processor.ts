@@ -24,10 +24,7 @@ import { BeneficiaryStatsUpdateService } from '../beneficiary/beneficiary-stats-
 import { splitBeneficiaryPII } from '../beneficiary/helpers';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
-import {
-  findTempBenefGroups,
-  validateDupicateWallet
-} from './processor.utils';
+import { findTempBenefGroups, validateDupicateWallet } from './processor.utils';
 
 const BATCH_SIZE = 500;
 
@@ -41,10 +38,11 @@ export class BeneficiaryProcessor {
     private readonly prisma: PrismaService,
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy,
     private readonly eventEmitter: EventEmitter2,
-    @InjectQueue(BQUEUE.RAHAT_BENEFICIARY) private readonly beneficiaryQueue: Queue,
+    @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
+    private readonly beneficiaryQueue: Queue,
     @Inject(SYNC_TRACKING_REDIS) private readonly syncTrackingRedis: Redis,
-    private readonly statsUpdateService: BeneficiaryStatsUpdateService,
-  ) { }
+    private readonly statsUpdateService: BeneficiaryStatsUpdateService
+  ) {}
 
   @Process({ name: BeneficiaryJobs.UPDATE_STATS, concurrency: 1 })
   async updateStats(job: Job<{ projectUUID?: string | null }>) {
@@ -178,7 +176,9 @@ export class BeneficiaryProcessor {
       if (!ignoreExisting) {
         if (duplicatePhones.length > 0) {
           throw new RpcException({
-            message: `[DUPLICATE_PHONE_NUMBERS_IN_BATCH] Duplicate phone numbers: ${duplicatePhones.join(', ')}`,
+            message: `[DUPLICATE_PHONE_NUMBERS_IN_BATCH] Duplicate phone numbers: ${duplicatePhones.join(
+              ', '
+            )}`,
             code: 'DUPLICATE_PHONE_NUMBERS_IN_BATCH',
             params: { phones: duplicatePhones.join(', ') },
           });
@@ -186,7 +186,9 @@ export class BeneficiaryProcessor {
 
         if (duplicateWallets.length > 0) {
           throw new RpcException({
-            message: `[DUPLICATE_WALLET_ADDRESSES_IN_BATCH] Duplicate wallet addresses: ${duplicateWallets.join(', ')}`,
+            message: `[DUPLICATE_WALLET_ADDRESSES_IN_BATCH] Duplicate wallet addresses: ${duplicateWallets.join(
+              ', '
+            )}`,
             code: 'DUPLICATE_WALLET_ADDRESSES_IN_BATCH',
             params: { wallets: duplicateWallets.join(', ') },
           });
@@ -287,9 +289,9 @@ export class BeneficiaryProcessor {
                 beneficiaries.map(
                   (b) =>
                     b[
-                    trimNonAlphaNumericValue(
-                      automatedGroupOption?.groupKey
-                    ).toLowerCase()
+                      trimNonAlphaNumericValue(
+                        automatedGroupOption?.groupKey
+                      ).toLowerCase()
                     ]
                 )
               ),
@@ -310,9 +312,9 @@ export class BeneficiaryProcessor {
                 (g) =>
                   g.name ===
                   b[
-                  trimNonAlphaNumericValue(
-                    automatedGroupOption?.groupKey
-                  ).toLowerCase()
+                    trimNonAlphaNumericValue(
+                      automatedGroupOption?.groupKey
+                    ).toLowerCase()
                   ]
               ).uuid;
               return {
@@ -451,19 +453,23 @@ export class BeneficiaryProcessor {
     name: BeneficiaryJobs.CHECK_BENEFICIARY_PHONE_NUMBER,
     concurrency: 1,
   })
-  async checkBeneficiaryPhone(job: Job<{ uuid: string; phone: string; }>) {
+  async checkBeneficiaryPhone(job: Job<{ uuid: string; phone: string }>) {
     const { uuid, phone } = job.data;
     this.logger.log(`Checking beneficiary phone number for benf: ${uuid}`);
 
     try {
-      const benf = await this.prisma.beneficiary.findUnique({ where: { uuid } });
+      const benf = await this.prisma.beneficiary.findUnique({
+        where: { uuid },
+      });
 
       if (!benf) {
         this.logger.error(`Beneficiary not found: ${uuid}`);
         return;
       }
 
-      const benfExtras = benf.extras ? JSON.parse(JSON.stringify(benf.extras)) : {};
+      const benfExtras = benf.extras
+        ? JSON.parse(JSON.stringify(benf.extras))
+        : {};
 
       if (!phone) {
         this.logger.error(`No phone number for beneficiary: ${uuid}`);
@@ -479,7 +485,9 @@ export class BeneficiaryProcessor {
 
       const { success, isValid } = await this.isValidNepaliNumber(phone);
       if (!isValid) {
-        this.logger.warn(`Invalid phone number for beneficiary ${uuid}: ${phone}`);
+        this.logger.warn(
+          `Invalid phone number for beneficiary ${uuid}: ${phone}`
+        );
         await this.updateExtras(uuid, {
           extras: {
             ...benfExtras,
@@ -491,7 +499,9 @@ export class BeneficiaryProcessor {
       }
 
       if (!success) {
-        this.logger.warn(`Error checking phone number for beneficiary ${uuid}: ${phone}`);
+        this.logger.warn(
+          `Error checking phone number for beneficiary ${uuid}: ${phone}`
+        );
         await this.updateExtras(uuid, {
           extras: {
             ...benfExtras,
@@ -514,25 +524,31 @@ export class BeneficiaryProcessor {
       });
 
       return;
-
     } catch (error) {
       this.logger.error('Error checking phone number', error);
       return;
     }
   }
 
-  async updateExtras(uuid: string, data: Partial<{ phoneStatus: PhoneStatus; extras: Record<string, any> }>) {
+  async updateExtras(
+    uuid: string,
+    data: Partial<{ phoneStatus: PhoneStatus; extras: Record<string, any> }>
+  ) {
     await this.prisma.beneficiary.update({
       where: { uuid },
       data,
     });
   }
 
-  async isValidNepaliNumber(phone: string): Promise<{ success: boolean; isValid: boolean }> {
+  async isValidNepaliNumber(
+    phone: string
+  ): Promise<{ success: boolean; isValid: boolean }> {
     const phoneUtil = PhoneNumberUtil.getInstance();
     try {
       const number = phoneUtil.parse(phone, 'NP');
-      const isValid = phoneUtil.isValidNumber(number) && phoneUtil.getRegionCodeForNumber(number) === 'NP';
+      const isValid =
+        phoneUtil.isValidNumber(number) &&
+        phoneUtil.getRegionCodeForNumber(number) === 'NP';
       return {
         success: true,
         isValid,
@@ -546,7 +562,10 @@ export class BeneficiaryProcessor {
     }
   }
 
-  @Process({ name: BeneficiaryJobs.SYNC_GROUP_BENEFICIARIES_TO_PROJECT, concurrency: 1 })
+  @Process({
+    name: BeneficiaryJobs.SYNC_GROUP_BENEFICIARIES_TO_PROJECT,
+    concurrency: 1,
+  })
   async syncGroupToProject(job: Job<{ groupUuid: string; projectId: string }>) {
     const { groupUuid, projectId } = job.data;
     this.logger.log(`Starting sync: group ${groupUuid} → project ${projectId}`);
@@ -581,7 +600,9 @@ export class BeneficiaryProcessor {
               internetStatus: true,
               phoneStatus: true,
               isVerified: true,
-              pii: { select: { phone: true, name: true, email: true } },
+              pii: {
+                select: { phone: true, name: true, email: true, extras: true },
+              },
             },
           },
         },
@@ -599,12 +620,22 @@ export class BeneficiaryProcessor {
           ...((b.extras as object) || {}),
           phone: b.pii?.phone || null,
           ...(b.pii?.name != null ? { name: b.pii.name } : {}),
+          ...((b.pii?.extras as any)?.govtIDNumber ||
+          (b.pii?.extras as any)?.governmentId
+            ? {
+                governmentId:
+                  (b.pii?.extras as any)?.govtIDNumber ||
+                  (b.pii?.extras as any)?.governmentId,
+              }
+            : {}),
           ...(b.location != null ? { location: b.location } : {}),
           ...(b.latitude != null ? { latitude: b.latitude } : {}),
           ...(b.longitude != null ? { longitude: b.longitude } : {}),
           ...(b.age != null ? { age: b.age } : {}),
           ...(b.bankedStatus != null ? { bankedStatus: b.bankedStatus } : {}),
-          ...(b.internetStatus != null ? { internetStatus: b.internetStatus } : {}),
+          ...(b.internetStatus != null
+            ? { internetStatus: b.internetStatus }
+            : {}),
           ...(b.phoneStatus != null ? { phoneStatus: b.phoneStatus } : {}),
         },
         phone: b.pii?.phone || null,
@@ -613,46 +644,64 @@ export class BeneficiaryProcessor {
       await this.beneficiaryQueue.add(
         BeneficiaryJobs.SYNC_BENEFICIARY_BATCH_TO_PROJECT,
         { groupUuid, projectId, beneficiariesData, totalBatches },
-        { attempts: 3, removeOnComplete: true, backoff: { type: 'exponential', delay: 2000 } },
+        {
+          attempts: 3,
+          removeOnComplete: true,
+          backoff: { type: 'exponential', delay: 2000 },
+        }
       );
 
       this.logger.log(
-        `Queued sync batch ${batchIdx + 1}/${totalBatches} for group ${groupUuid} → project ${projectId}`,
+        `Queued sync batch ${
+          batchIdx + 1
+        }/${totalBatches} for group ${groupUuid} → project ${projectId}`
       );
     }
 
-    this.logger.log(`Queued all ${totalBatches} sync batches for group ${groupUuid} → project ${projectId} (${total} beneficiaries)`);
+    this.logger.log(
+      `Queued all ${totalBatches} sync batches for group ${groupUuid} → project ${projectId} (${total} beneficiaries)`
+    );
   }
 
-  @Process({ name: BeneficiaryJobs.SYNC_BENEFICIARY_BATCH_TO_PROJECT, concurrency: 1 })
+  @Process({
+    name: BeneficiaryJobs.SYNC_BENEFICIARY_BATCH_TO_PROJECT,
+    concurrency: 1,
+  })
   async syncBeneficiaryBatchToProject(
     job: Job<{
       groupUuid: string;
       projectId: string;
       beneficiariesData: any[];
       totalBatches: number;
-    }>,
+    }>
   ) {
     const { groupUuid, projectId, beneficiariesData, totalBatches } = job.data;
 
     await handleMicroserviceCall({
       client: this.client.send(
-        { cmd: BeneficiaryJobs.SYNC_IMPORTED_GROUP_BENEFICIARIES, uuid: projectId },
-        { beneficiariesData, groupUuid },
+        {
+          cmd: BeneficiaryJobs.SYNC_IMPORTED_GROUP_BENEFICIARIES,
+          uuid: projectId,
+        },
+        { beneficiariesData, groupUuid }
       ),
     });
 
     this.logger.log(
-      `Sync group ${groupUuid} → project ${projectId}: batch complete (${beneficiariesData.length} beneficiaries)`,
+      `Sync group ${groupUuid} → project ${projectId}: batch complete (${beneficiariesData.length} beneficiaries)`
     );
 
-    await this.markBatchDoneAndNotifyIfComplete(groupUuid, projectId, totalBatches);
+    await this.markBatchDoneAndNotifyIfComplete(
+      groupUuid,
+      projectId,
+      totalBatches
+    );
   }
 
   private async markBatchDoneAndNotifyIfComplete(
     groupUuid: string,
     projectId: string,
-    totalBatches: number,
+    totalBatches: number
   ) {
     const key = `sync:group:${groupUuid}:project:${projectId}:completed`;
     const redis = this.syncTrackingRedis;
@@ -668,13 +717,16 @@ export class BeneficiaryProcessor {
     await redis.del(key);
 
     this.logger.log(
-      `All ${totalBatches} batches synced for group ${groupUuid} → project ${projectId}, notifying project`,
+      `All ${totalBatches} batches synced for group ${groupUuid} → project ${projectId}, notifying project`
     );
 
     await handleMicroserviceCall({
       client: this.client.send(
-        { cmd: BeneficiaryJobs.SYNC_GROUP_BENEFICIARIES_TO_PROJECT_COMPLETED, uuid: projectId },
-        { groupUuid },
+        {
+          cmd: BeneficiaryJobs.SYNC_GROUP_BENEFICIARIES_TO_PROJECT_COMPLETED,
+          uuid: projectId,
+        },
+        { groupUuid }
       ),
     });
   }
