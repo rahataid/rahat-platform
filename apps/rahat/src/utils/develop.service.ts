@@ -5,7 +5,7 @@ import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class DevService {
-  constructor() {}
+  constructor() { }
   @Inject('RAHAT_CLIENT') private readonly rahatClient: ClientProxy;
 
   log(cmd: string, data: any) {
@@ -14,7 +14,6 @@ export class DevService {
   }
 
   async otp(data: any) {
-    console.log('otp', data);
     if (process.env.NODE_ENV === 'production') return;
     this.rahatClient
       .send(

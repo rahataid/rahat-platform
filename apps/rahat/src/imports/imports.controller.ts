@@ -109,7 +109,6 @@ export class ImportsController {
   @Post(':uuid/start')
   @ApiParam({ name: 'uuid', required: true })
   async startImport(@Param('uuid') uuid: string) {
-    console.log(`Starting import for UUID: ${uuid}`);
     return this.importsService.startImport(uuid);
   }
 
