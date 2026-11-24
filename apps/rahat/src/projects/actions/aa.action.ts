@@ -764,6 +764,28 @@ export const aaActions: ProjectActionFunc = {
     );
   },
   // **** Payout end **** //
+  [MS_ACTIONS.AAPROJECT.DASHBOARD_REPORTS.LIST_REPORTS]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
+      { cmd: AAJobs.DASHBOARD_REPORTS.LIST_REPORTS, uuid },
+      payload
+    );
+  },
+  [MS_ACTIONS.AAPROJECT.DASHBOARD_REPORTS.EXPORT_FILE]: (
+    uuid,
+    payload,
+    sendCommand
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
+      { cmd: AAJobs.DASHBOARD_REPORTS.EXPORT_FILE, uuid },
+      payload
+    );
+  },
   // **** Inkind start **** //
   [MS_ACTIONS.AAPROJECT.INKIND.CREATE]: (uuid, payload, sendCommand) => {
     payload.appId = uuid || payload.appId;
