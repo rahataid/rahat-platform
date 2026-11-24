@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import {
     GetVendorOtp,
     VendorAddToProjectDto,
@@ -25,7 +26,13 @@ import { Request } from '@rumsan/sdk/types';
 
 import { RequestDetails } from '@rumsan/extensions/decorators';
 import { ChangePasswordDto, PasswordLoginDto } from '@rumsan/extensions/dtos';
-import { CheckAbilities, CurrentUserInterface, JwtGuard } from '@rumsan/user';
+import {
+  CheckAbilities,
+  CurrentUserInterface,
+  JwtGuard,
+  ONE_MINUTE_MS,
+  ThrottleTarget,
+} from '@rumsan/user';
 import { CurrentUser } from '@rumsan/user/lib/auths/decorator/current-user.decorator';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
@@ -40,6 +47,9 @@ export class VendorsController {
   constructor(private readonly vendorService: VendorsService) { }
 
 
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: ONE_MINUTE_MS } })
+  @ThrottleTarget('wallet', 3, 60 * ONE_MINUTE_MS)
   @Post('')
   registerVendor(@Body() dto: VendorRegisterDto) {
     return this.vendorService.registerVendor(dto);
@@ -76,11 +86,17 @@ export class VendorsController {
     return this.vendorService.getVendor(id,);
   }
 
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: ONE_MINUTE_MS } })
+  @ThrottleTarget('address', 3, 15 * ONE_MINUTE_MS)
   @Post('/getOtp')
   getOtp(@Body() dto: GetVendorOtp, @RequestDetails() rdetails: any) {
     return this.vendorService.getOtp(dto, rdetails);
   }
 
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: ONE_MINUTE_MS } })
+  @ThrottleTarget('address', 5, 15 * ONE_MINUTE_MS)
   @Post('/verifyOtp')
   verifyOtp(@Body() dto: VerifyVendorOtp, @RequestDetails() rdetails: any) {
     return this.vendorService.verifyOtp(dto, rdetails);
@@ -128,6 +144,9 @@ export class VendorsController {
     return this.vendorService.getVendorByUuid(dto);
   }
 
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: ONE_MINUTE_MS } })
+  @ThrottleTarget('username', 3, 60 * ONE_MINUTE_MS)
   @Post('password-register')
   passwordRegister(
     @Body() dto: VendorPasswordRegisterDto,
@@ -136,6 +155,9 @@ export class VendorsController {
     return this.vendorService.registerVendorWithPassword(dto, rdetails);
   }
 
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: ONE_MINUTE_MS } })
+  @ThrottleTarget('identifier', 5, 15 * ONE_MINUTE_MS)
   @Post('password-login')
   passwordLogin(
     @Body() dto: PasswordLoginDto,

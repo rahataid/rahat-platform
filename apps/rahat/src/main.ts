@@ -18,6 +18,7 @@ import {
   ResponseTransformInterceptor,
 } from '@rahataid/extensions';
 import { APP } from '@rahataid/sdk';
+import { getTrustProxy } from '@rumsan/extensions/utilities';
 import helmet from 'helmet';
 import { WinstonModule } from 'nest-winston';
 import { AppModule } from './app/app.module';
@@ -61,6 +62,7 @@ async function bootstrap() {
     })
   );
 
+  app.set('trust proxy', getTrustProxy());
   // app.use(bodyParser.raw({ type: 'application/octet-stream' }));
   app.use(bodyParser.raw({ type: 'application/octet-stream', limit: '50mb' }));
 
