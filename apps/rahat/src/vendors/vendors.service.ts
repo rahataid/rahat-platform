@@ -937,12 +937,14 @@ export class VendorsService {
         code: 'PROJECT_VENDOR_NOT_FOUND',
       });
 
-    await this.prisma.projectVendors.deleteMany({
+    const result = await this.prisma.projectVendors.deleteMany({
       where: {
         projectId: projectId,
         vendorId: uuid,
       },
     });
+
+    this.ssePublisher.publishEvent('vendor.event', result);
 
     return this.client.send({ cmd: VendorJobs.REMOVE }, uuid);
   }
