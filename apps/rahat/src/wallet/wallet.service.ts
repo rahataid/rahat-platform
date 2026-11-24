@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
 import { OnEvent } from '@nestjs/event-emitter';
+import { RpcException } from '@nestjs/microservices';
 import { BulkUpdateWallet, ChainType, IConnectedWallet, WalletKeys } from '@rahataid/wallet';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
@@ -320,8 +320,6 @@ export class WalletService implements OnModuleInit {
     evm: any;
   }> {
     const settings = await this.settings.getByName('CHAIN_SETTINGS');
-    console.log('CHAIN_SETTINGS', settings);
-
     if (!settings || !settings.value) {
       throw new RpcException({
         message:
@@ -344,7 +342,7 @@ export class WalletService implements OnModuleInit {
     if (!validChainTypes.includes(rawValue.type as ChainType)) {
       throw new RpcException({
         message: `Invalid chain type "${rawValue.type
-        }". Must be one of: ${validChainTypes.join(', ')}`,
+          }". Must be one of: ${validChainTypes.join(', ')}`,
         code: 'INVALID_CHAIN_TYPE',
         params: { type: rawValue.type, validTypes: validChainTypes.join(', ') },
       });

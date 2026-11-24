@@ -32,7 +32,7 @@ export class CommsService {
     this.client = getClient({
       baseURL: String(communicationValue['URL'] ?? ''),
     });
-    console.log(communicationValue['URL'], communicationValue['APP_ID']);
+    this.logger.log(communicationValue['URL'], communicationValue['APP_ID']);
     this.client.setAppId(this.appId);
     this.isReady = true;
   }
@@ -65,7 +65,6 @@ export class CommsService {
 
   async listTransports() {
     const client = await this.getClient();
-    console.log(client.transport);
     return client.transport.list();
   }
 

@@ -59,7 +59,6 @@ export class StatsService {
   //   if (group) {
   //     where.group = group;
   //   }
-  //   console.log('where', where, names, group)
   //   return this.prismaService["stats"].findMany({
   //     where
   //   });

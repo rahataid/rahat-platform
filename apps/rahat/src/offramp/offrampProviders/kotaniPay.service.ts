@@ -25,9 +25,8 @@ type TCheck = {
 
 @Injectable()
 export class KotaniPayService
-  implements OfframpService<TCreate, KotaniPayExecutionData, TCheck>
-{
-  constructor(private readonly prisma: PrismaService) {}
+  implements OfframpService<TCreate, KotaniPayExecutionData, TCheck> {
+  constructor(private readonly prisma: PrismaService) { }
 
   private async getProviderConfig(
     uuid: string
@@ -57,13 +56,11 @@ export class KotaniPayService
 
   async createCustomerMobileMoneyWallet(data: ProviderActionDto) {
     const phone = data.payload.phone_number;
-    console.log('phone', phone);
     // const isBeneficiary = await this.prisma.beneficiaryPii.findFirst({
     //   where: {
     //     phone
     //   },
     // });
-    // console.log('isBeneficiary==>>offramp create wallet', isBeneficiary)
     // if (!isBeneficiary) {
     //   throw new BadRequestException(
     //     'Should be a valid beneficiary in order to proceed.'
@@ -98,7 +95,6 @@ export class KotaniPayService
         currency: data.payload.currency,
         name: data.payload.name,
       });
-      console.log({ response });
       return { data: response.data };
     } catch (error) {
       return { data: error.response.data };
@@ -128,8 +124,6 @@ export class KotaniPayService
         throw new BadRequestException(e.response.data);
       });
 
-    console.log('THis is the response from off', response);
-
     return { data: response.data as any };
   }
 
@@ -140,7 +134,6 @@ export class KotaniPayService
     const client = await this.getKotaniPayAxiosClient(providerUuid);
 
     const response = await client.post('/offramp', data).catch((e) => {
-      console.log('e', e);
       throw new BadRequestException(e.response.data);
     });
 
@@ -151,7 +144,6 @@ export class KotaniPayService
     // Implementation goes here
     const client = await this.getKotaniPayAxiosClient(data.uuid);
     const response = await client.get(`/offramp/${data.payload.referenceId}`);
-    // console.log('response', response)
     return { data: response.data };
   }
 
@@ -168,7 +160,6 @@ export class KotaniPayService
     const response = await client.get(
       '/offramp/crypto-to-fiat/supported-chains'
     );
-    console.log('response', response);
     return { data: response.data };
   }
 
@@ -210,7 +201,7 @@ export class KotaniPayService
           // Update extras only if there are changes
           const currentExtras =
             typeof transaction.extras === 'object' &&
-            transaction.extras !== null
+              transaction.extras !== null
               ? transaction.extras
               : {};
           const newExtras = {
