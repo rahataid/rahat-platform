@@ -240,7 +240,7 @@ export class WalletService implements OnModuleInit {
 
     const defaultChain = await this.getDefaultChainFromDb();
     const supportedChains = this.providerRegistry.getSupportedChains();
-    console.log(supportedChains)
+    console.log({ supportedChains })
 
     const results: MultiChainWalletResult[] = [];
 
@@ -272,6 +272,7 @@ export class WalletService implements OnModuleInit {
           code: 'MULTICHAIN_WALLET_CREATION_FAILED',
         });
       }
+      console.log({ wallets })
 
       const defaultWallet = wallets.find(w => w.chain === defaultChain) ?? wallets[0];
       results.push({
