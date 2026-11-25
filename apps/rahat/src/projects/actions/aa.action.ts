@@ -1152,133 +1152,170 @@ export const aaActions: ProjectActionFunc = {
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.CREATE, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.CREATE, uuid }, payload);
+  },
 
   // Update details for the group cash transfer group
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.UPDATE]: (
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.UPDATE, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.UPDATE, uuid }, payload);
+  },
 
   // Delete the GCT
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.DELETE]: (
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.DELETE, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.DELETE, uuid }, payload);
+  },
 
   // Fetch details for cash transfer group
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET]: (
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET, uuid }, payload);
+  },
 
   // Get details of one specific cash transfer group
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_ONE]: (
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET_ONE, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET_ONE, uuid }, payload);
+  },
 
   // Allocate fund to a single cash transfer group
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.ALLOCATE_FUND]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.GROUP_CASH_TRANSFER.ALLOCATE_FUND, uuid },
       payload
-    ),
+    );
+  },
 
   // Disburse funds for the cash transfer group
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.DISBURSE]: (
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.DISBURSE, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.DISBURSE, uuid }, payload);
+  },
 
   // Confirm the disbursement of funds for the cash transfer group
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.CONFIRM_DISBURSE]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.GROUP_CASH_TRANSFER.CONFIRM_DISBURSE, uuid },
       payload
-    ),
+    );
+  },
 
   // Get all the allocated fund records of the cash transfer groups
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_RECORDS]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET_RECORDS, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.GET_RECORDS, uuid }, payload);
+  },
 
   // Get one details of the allocated fund for the cash transfer group
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_ONE_RECORD]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.GROUP_CASH_TRANSFER.GET_ONE_RECORD, uuid },
       payload
-    ),
+    );
+  },
 
   // Validate bank account of the cash transfer group
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.VALIDATE_BANK_ACCOUNT]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.GROUP_CASH_TRANSFER.VALIDATE_BANK_ACCOUNT, uuid },
       payload
-    ),
+    );
+  },
 
   // Get all valid groups which are eligible for assigning funds
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_ALL_VALID]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.GROUP_CASH_TRANSFER.GET_ALL_VALID, uuid },
       payload
-    ),
+    );
+  },
 
   // Update the allocation of funds
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.UPDATE_GROUP_RECORD]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.GROUP_CASH_TRANSFER.UPDATE_GROUP_RECORD, uuid },
       payload
-    ),
+    );
+  },
 
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.SEND_OTP]: (
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.SEND_OTP, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.GROUP_CASH_TRANSFER.SEND_OTP, uuid }, payload);
+  },
 
   // Get an overview data for GCT related queries
   [MS_ACTIONS.AAPROJECT.GROUP_CASH_TRANSFER.GET_GCT_DATA]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.GROUP_CASH_TRANSFER.GET_GCT_DATA, uuid },
       payload
-    ),
+    );
+  },
 
   // **** group cash transfer end **** //
 
