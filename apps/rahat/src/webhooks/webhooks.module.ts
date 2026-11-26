@@ -13,7 +13,7 @@ import { WebhooksService } from './webhooks.service';
           transport: Transport.REDIS,
           options: {
             host: configService.get('REDIS_HOST'),
-            port: configService.get('REDIS_PORT'),
+            port: Number(configService.get('REDIS_PORT') ?? 0),
             password: configService.get('REDIS_PASSWORD'),
           },
         }),

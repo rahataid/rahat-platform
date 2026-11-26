@@ -75,10 +75,7 @@ export class HealthService {
     frontendUrlSetting?: { url: string; server: string }
   ): Promise<void> {
     this._logger.log('Health status alert email sending..');
-    const recipients = (process.env.HEALTH_ALERT_EMAILS ?? '')
-      .split(',')
-      .map((e) => e.trim())
-      .filter(Boolean);
+    const recipients = this.getAlertRecipients();
 
     if (!recipients.length) {
       this._logger.warn('HEALTH_ALERT_EMAILS not configured, skipping alert');
@@ -101,10 +98,7 @@ export class HealthService {
     restoredServices: Array<{ name: string }>,
     frontendUrlSetting?: { url: string; server: string }
   ): Promise<void> {
-    const recipients = (process.env.HEALTH_ALERT_EMAILS ?? '')
-      .split(',')
-      .map((e) => e.trim())
-      .filter(Boolean);
+    const recipients = this.getAlertRecipients();
 
     if (!recipients.length) return;
 
@@ -182,6 +176,13 @@ export class HealthService {
     return Object.entries(result.services)
       .filter(([, status]) => status.status === 'down')
       .map(([name]) => name);
+  }
+
+  private getAlertRecipients(): string[] {
+    return (process.env.HEALTH_ALERT_EMAILS ?? '')
+      .split(',')
+      .map((email) => email.trim())
+      .filter(Boolean);
   }
 
   private async setCache(data: HealthStatus): Promise<void> {
