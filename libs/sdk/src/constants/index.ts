@@ -45,6 +45,7 @@ export const SUBJECTS = {
   PROJECT: 'project',
   VENDOR: 'vendor',
   PUBLIC: 'public',
+  SETTINGS: 'settings',
 };
 
 export const APP = {
