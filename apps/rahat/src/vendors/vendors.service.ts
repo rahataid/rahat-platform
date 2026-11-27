@@ -654,6 +654,14 @@ export class VendorsService {
       results.push({ projectId, response: projectResponse });
     }
 
+    if (results.every((result) => result.skipped)) {
+      throw new BadRequestException({
+        message:
+          'All requested vendor(s) are already assigned to the specified projects.',
+        code: 'NO_NEW_VENDOR_ASSIGNMENTS',
+      });
+    }
+
     return results;
   }
 
