@@ -28,6 +28,7 @@ import { CONSTANTS } from '@rumsan/sdk/constants/index';
 import { Service } from '@rumsan/sdk/enums';
 import { Request } from '@rumsan/sdk/types';
 
+import { SsePublisherService } from '@rahataid/sse';
 import { AuthsService, CurrentUserInterface, SignupsService } from '@rumsan/user';
 import { decryptChallenge } from '@rumsan/user/lib/utils/challenge.utils';
 import { getSecret } from '@rumsan/user/lib/utils/config.utils';
@@ -42,6 +43,7 @@ import { FileWalletStorage } from '../wallet/storages/fs.storage';
 import { WalletService } from '../wallet/wallet.service';
 import { GetVendorsDTO } from './dto/get-vendors.dto';
 import { handleMicroserviceCall } from './handleMicroServiceCall.util';
+
 
 const paginate: PaginatorTypes.PaginateFunction = paginator({ perPage: 20 });
 
@@ -70,6 +72,8 @@ export class VendorsService {
     private readonly signUpService: SignupsService,
     private readonly walletService: WalletService,
     private walletStorage: FileWalletStorage,
+    private readonly ssePublisher: SsePublisherService,
+
 
     @Inject(ProjectContants.ELClient) private readonly client: ClientProxy
   ) { }
@@ -509,7 +513,10 @@ export class VendorsService {
             },
           },
         });
-        console.log('Vendor successfully assigned to the project:');
+
+        this.ssePublisher.publishEvent('vendor.event', createRes);
+
+        console.log('Vendor successfully assigned to the project:', createRes);
       },
       onError: (error) => {
         console.error('Error syncing vendor to project:', error);
@@ -928,12 +935,14 @@ export class VendorsService {
         code: 'PROJECT_VENDOR_NOT_FOUND',
       });
 
-    await this.prisma.projectVendors.deleteMany({
+    const result = await this.prisma.projectVendors.deleteMany({
       where: {
         projectId: projectId,
         vendorId: uuid,
       },
     });
+
+    this.ssePublisher.publishEvent('vendor.event', result);
 
     return this.client.send({ cmd: VendorJobs.REMOVE }, uuid);
   }

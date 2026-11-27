@@ -1,0 +1,19 @@
+{
+  "name": "sse",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/sse",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/sse",
+        "main": "libs/sse/index.ts",
+        "tsConfig": "libs/sse/tsconfig.lib.json",
+        "rootDir": "libs/sse"
+      }
+    }
+  },
+  "tags": []
+}

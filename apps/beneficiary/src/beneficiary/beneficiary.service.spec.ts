@@ -6,6 +6,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RpcException } from '@nestjs/microservices';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateBeneficiaryDto } from '@rahataid/extensions';
+import { SsePublisherService } from '@rahataid/sse';
 import { BeneficiaryEvents, BQUEUE, ProjectContants } from '@rahataid/sdk';
 import { PrismaService } from '@rumsan/prisma';
 import { v4 as uuidv4 } from 'uuid';
@@ -27,6 +28,7 @@ describe('BeneficiaryService', () => {
   let service: BeneficiaryService;
   let prisma: PrismaService;
   let eventEmitter: EventEmitter2;
+  let ssePublisher: SsePublisherService;
   let rsprisma;
 
   beforeEach(async () => {
@@ -38,6 +40,10 @@ describe('BeneficiaryService', () => {
       ],
       providers: [
         BeneficiaryService,
+        {
+          provide: SsePublisherService,
+          useValue: { publishEvent: jest.fn().mockResolvedValue(undefined) },
+        },
         {
           provide: PrismaService,
           useValue: {
@@ -128,6 +134,7 @@ describe('BeneficiaryService', () => {
     service = module.get<BeneficiaryService>(BeneficiaryService);
     prisma = module.get<PrismaService>(PrismaService);
     eventEmitter = module.get<EventEmitter2>(EventEmitter2);
+    ssePublisher = module.get<SsePublisherService>(SsePublisherService);
     rsprisma = prisma.rsclient;
   });
 
@@ -492,6 +499,10 @@ describe('BeneficiaryService', () => {
         }
       });
       expect(eventEmitter.emit).toHaveBeenCalledWith(BeneficiaryEvents.BENEFICIARY_UPDATED);
+      expect(ssePublisher.publishEvent).toHaveBeenCalledWith(
+        BeneficiaryEvents.BENEFICIARY_UPDATED,
+        { uuid: mockResponse.uuid }
+      );
     });
 
     it('should update the beneficiary details if dto contains piiData', async () => {

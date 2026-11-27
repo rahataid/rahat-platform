@@ -35,6 +35,7 @@ import {
   TPIIData,
   WalletJobs,
 } from '@rahataid/sdk';
+import { SsePublisherService } from '@rahataid/sse';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
 import { UUID } from 'crypto';
@@ -73,7 +74,8 @@ export class BeneficiaryService {
     private readonly verificationService: VerificationService,
     private readonly beneficiaryUtilsService: BeneficiaryUtilsService,
     private readonly groupSyncService: GroupSyncService,
-    private readonly statsUpdateService: BeneficiaryStatsUpdateService
+    private readonly statsUpdateService: BeneficiaryStatsUpdateService,
+    private readonly ssePublisher: SsePublisherService
   ) {
     this.rsprisma = this.prisma.rsclient;
   }
@@ -480,6 +482,8 @@ export class BeneficiaryService {
       projectUuid,
     });
 
+    this.ssePublisher.publishEvent('beneficiary.event', createdBeneficiary);
+
     return createdBeneficiary;
   }
 
@@ -856,6 +860,7 @@ export class BeneficiaryService {
     });
     if (dto.piiData) await this.updatePIIByBenefUUID(uuid, piiData);
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
+    void this.ssePublisher.publishEvent('beneficiary.event', rdata);
     return rdata;
   }
 
@@ -891,6 +896,7 @@ export class BeneficiaryService {
     });
 
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_UPDATED);
+    this.ssePublisher.publishEvent('beneficiary.event', rdata);
     return rdata;
   }
 
@@ -931,6 +937,7 @@ export class BeneficiaryService {
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_REMOVED, {
       projectUuid: uuid,
     });
+    this.ssePublisher.publishEvent('beneficiary.event', rdata);
 
     const res = await this.prisma.groupedBeneficiaries.updateMany({
       where: {
@@ -1130,6 +1137,8 @@ export class BeneficiaryService {
         beneficiaryId: uuid,
       })),
     });
+
+    this.ssePublisher.publishEvent('beneficiary.event', group);
 
     if (projectUuid) {
       const groupDetails = {
@@ -1406,7 +1415,7 @@ export class BeneficiaryService {
       };
       await await this.assignBeneficiaryGroupToProject(payload);
     }
-
+    this.ssePublisher.publishEvent('beneficiary.group.event', group);
     return {
       ...groupedBeneficiaries,
       group,
@@ -1903,6 +1912,7 @@ export class BeneficiaryService {
       case GroupPurpose.MOBILE_MONEY:
       case GroupPurpose.BANK_TRANSFER:
         await this.forceInvalidateGroup(uuid, groupPurpose, benfGroup);
+        this.ssePublisher.publishEvent('beneficiary.group.event', benfGroup);
         return {
           success: true,
           message: `Beneficiaries in group have been invalidated for ${groupPurpose}.`,
@@ -1979,6 +1989,7 @@ export class BeneficiaryService {
     const benfsInGroup = benfGroup.groupedBeneficiaries
       ?.map((d) => d.Beneficiary)
       .filter((benf) => !(benf.extras as any)?.validPhoneNumber);
+    const batchId = uuidv4();
 
     this.logger.log(
       `Group phone check for group: ${uuid} with ${benfsInGroup.length} beneficiaries`
@@ -1989,6 +2000,11 @@ export class BeneficiaryService {
       data: {
         uuid: benf.uuid,
         phone: (benf.pii as BeneficiaryPii)?.phone,
+        groupValidation: {
+          groupUuid: uuid,
+          batchId,
+          total: benfsInGroup.length,
+        },
       },
       opts: {
         attempts: 3,
@@ -2044,6 +2060,7 @@ export class BeneficiaryService {
     const benfsInGroup = benfsWithBankInfo.filter((benf) =>
       needsCheckIds.has(benf.uuid)
     );
+    const batchId = uuidv4();
 
     this.logger.log(
       `Group account check for group: ${uuid} — queuing ${benfsInGroup.length
@@ -2076,6 +2093,11 @@ export class BeneficiaryService {
       data: {
         uuid: benf.uuid,
         walletAddress: benf.walletAddress,
+        groupValidation: {
+          groupUuid: uuid,
+          batchId,
+          total: benfsInGroup.length,
+        },
         extras: {
           bank_name: (benf.extras as any)?.bank_name as string,
           bank_ac_name: (benf.extras as any)?.bank_ac_name as string,
@@ -2198,7 +2220,7 @@ export class BeneficiaryService {
         code: 'BENEFICIARY_GROUP_NOT_FOUND_OR_DELETED',
       });
 
-    return this.prisma.beneficiaryGroup.update({
+    const group = await this.prisma.beneficiaryGroup.update({
       where: {
         uuid: uuid,
       },
@@ -2206,9 +2228,13 @@ export class BeneficiaryService {
         deletedAt: new Date(),
       },
     });
+    this.ssePublisher.publishEvent('beneficiary.group.event', { uuid });
+
+    return group;
   }
 
   async deleteOneGroup(uuid: string) {
+
     this.logger.log(`Attempting to delete group with UUID: ${uuid}`);
 
     const benefGroup = await this.prisma.beneficiaryGroup.findUnique({
@@ -2249,6 +2275,8 @@ export class BeneficiaryService {
 
     if (beneficiaryIds.length === 0) {
       await this.prisma.beneficiaryGroup.delete({ where: { uuid } });
+      this.ssePublisher.publishEvent('beneficiary.group.event', { uuid });
+
       return { message: 'Group successfully deleted (group was empty).' };
     }
 
@@ -2291,7 +2319,7 @@ export class BeneficiaryService {
         where: { uuid },
       }),
     ]);
-
+    this.ssePublisher.publishEvent('beneficiary.group.event', { uuid });
     return {
       message: 'Group and all associated beneficiaries successfully deleted.',
     };
@@ -2424,6 +2452,8 @@ export class BeneficiaryService {
       data: { name: dto?.name || existingGroup?.name },
     });
 
+    this.ssePublisher.publishEvent('beneficiary.group.event', { uuid });
+
     if (!dto.beneficiaries?.length) {
       return { success: true, message: 'Group name updated successfully.' };
     }
@@ -2521,10 +2551,10 @@ export class BeneficiaryService {
         groupPurpose: dto.groupPurpose,
       },
     });
-
+    this.ssePublisher.publishEvent('beneficiary.group.event', { uuid: dto.uuid });
     //group purpose is updated locally, now queue project sync to update the group purpose in project service
     try {
-      await this.groupSyncService.syncGroup(dto.uuid);
+      await this.groupSyncService.syncGroup(dto?.uuid as string);
     } catch (err) {
       this.logger.warn(
         `Group ${dto.uuid}: purpose updated locally but failed to queue project sync`,
@@ -2621,6 +2651,9 @@ export class BeneficiaryService {
     this.eventEmitter.emit(BeneficiaryEvents.BENEFICIARY_ASSIGNED_TO_PROJECT, {
       projectUuid: project.uuid,
     });
+
+    this.ssePublisher.publishEvent('beneficiary.group.event', group);
+
 
     const syncState = await this.sendGroupSync(payload);
     const isSynced = syncState === 'SYNCED';

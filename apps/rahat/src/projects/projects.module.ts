@@ -5,6 +5,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BeneficiaryConstants, BQUEUE } from '@rahataid/sdk';
+import { SseModule } from '@rahataid/sse';
 import { PrismaModule } from '@rumsan/prisma';
 import { AuthsModule } from '@rumsan/user';
 import { ProjectController } from './project.controller';
@@ -14,6 +15,7 @@ import { ProjectService } from './project.service';
   imports: [
     PrismaModule,
     AuthsModule,
+    SseModule,
     ClientsModule.registerAsync([
       {
         name: 'RAHAT_CLIENT',

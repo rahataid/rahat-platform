@@ -2,12 +2,19 @@
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { HttpService } from '@nestjs/axios';
 import { Process, Processor } from '@nestjs/bull';
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import { BeneficiaryJobs, BQUEUE } from '@rahataid/sdk';
+import { SsePublisherService } from '@rahataid/sse';
 import { SettingsService } from '@rumsan/extensions/settings';
 import { PrismaService } from '@rumsan/prisma';
 import { Job } from 'bull';
+import Redis from 'ioredis';
 import { getBankId } from '../utils/banks';
+import {
+  GroupValidationBatch,
+  publishGroupValidationEvent,
+  SYNC_TRACKING_REDIS,
+} from './processor.utils';
 
 @Processor(BQUEUE.RAHAT_BENEFICIARY_BANK_CHECK)
 export class BankAccountCheckProcessor {
@@ -17,6 +24,8 @@ export class BankAccountCheckProcessor {
     private readonly httpService: HttpService,
     private readonly prisma: PrismaService,
     private readonly settingsService: SettingsService,
+    @Inject(SYNC_TRACKING_REDIS) private readonly syncTrackingRedis: Redis,
+    private readonly ssePublisher: SsePublisherService,
   ) {}
 
   @Process({
@@ -27,6 +36,7 @@ export class BankAccountCheckProcessor {
     job: Job<{
       uuid: string;
       walletAddress: string;
+      groupValidation?: GroupValidationBatch;
       extras: {
         bank_name: string;
         bank_ac_name: string;
@@ -170,6 +180,14 @@ export class BankAccountCheckProcessor {
     } catch (error) {
       this.logger.error('Error checking bank account', error);
       return;
+    } finally {
+      await publishGroupValidationEvent(
+        this.syncTrackingRedis,
+        this.ssePublisher,
+        job.id,
+        job.data.groupValidation,
+        this.logger
+      );
     }
   }
 
