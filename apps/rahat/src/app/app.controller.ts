@@ -1,11 +1,38 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateAuthAppDto, ListAuthAppsDto, UpdateAuthAppDto } from '@rahataid/extensions';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  CreateAuthAppDto,
+  ListAuthAppsDto,
+  UpdateAuthAppDto,
+} from '@rahataid/extensions';
 import { ACTIONS, APP, SUBJECTS } from '@rahataid/sdk';
-import { AbilitiesGuard, CheckAbilities, JwtGuard } from '@rumsan/user';
+import { CheckAbilities, JwtGuard } from '@rumsan/user';
+import { DbAbilitiesGuard } from '../decorators/db-abilities.guard';
 import { UUID } from 'crypto';
 import { AppJobs } from './app.jobs';
 import { AppService } from './app.service';
@@ -16,52 +43,53 @@ import { SeedSettingsDto, UpdateSiteSettingDto } from './dto/seed-settings.dto';
 @ApiTags('App')
 @ApiBearerAuth(APP.JWT_BEARER)
 export class AppController {
-  constructor(private readonly appService: AppService,
-
-  ) { }
+  constructor(private readonly appService: AppService) {}
 
   @MessagePattern({ cmd: AppJobs.COMMUNICATION.GET_SETTINGS })
   getSettings() {
-    return this.appService.getCommunicationSettings()
+    return this.appService.getCommunicationSettings();
   }
 
   @MessagePattern({ cmd: AppJobs.FRONTEND_URL.GET })
   getFrontendUrl() {
-    return this.appService.getFrontendUrl()
+    return this.appService.getFrontendUrl();
   }
 
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.SETTINGS })
   @Get('auth-apps')
   async listAuthApps(@Query() query: ListAuthAppsDto) {
     return this.appService.listAuthApps(query);
   }
 
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.SETTINGS })
   @Post('auth-apps')
   async createAuthApp(@Body() dto: CreateAuthAppDto) {
     return this.appService.createAuthApps(dto);
   }
 
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.SETTINGS })
   @Get('auth-apps/:uuid')
   @ApiParam({ name: 'uuid', type: 'string' })
   async getAuthApp(@Param('uuid') uuid: UUID) {
     return this.appService.getAuthApp(uuid);
   }
 
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.SETTINGS })
   @Put('auth-apps/:uuid')
   @ApiParam({ name: 'uuid', type: 'string' })
-  async updateAuthApp(@Param('uuid') uuid: UUID, @Body() dto: UpdateAuthAppDto) {
+  async updateAuthApp(
+    @Param('uuid') uuid: UUID,
+    @Body() dto: UpdateAuthAppDto
+  ) {
     return this.appService.updateAuthApp(uuid, dto);
   }
 
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.PUBLIC })
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.DELETE, subject: SUBJECTS.SETTINGS })
   @Delete('auth-apps/:uuid')
   @ApiParam({ name: 'uuid', type: 'string' })
   async softDeleteAuthApp(@Param('uuid') uuid: UUID) {
@@ -74,14 +102,11 @@ export class AppController {
     return this.appService.getByAddress(address);
   }
 
-
   @Get('chain-type')
   @ApiOperation({ summary: 'Get active chain type (public)' })
   async getChainType() {
     return this.appService.getChainType();
   }
-
-
 
   @Post('settings/seed')
   @HttpCode(HttpStatus.OK)
@@ -90,41 +115,58 @@ export class AppController {
     description:
       'Upserts all settings from the deployment JSON. Automatically locks itself after the first successful call. Returns 403 if already locked.',
   })
-
   @ApiBody({ type: SeedSettingsDto })
   @ApiResponse({ status: 200, description: 'Settings seeded and API locked.' })
-  @ApiResponse({ status: 403, description: 'Settings already seeded — API is locked.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Settings already seeded — API is locked.',
+  })
   async seedSettings(@Body() dto: SeedSettingsDto) {
     return this.appService.seedSettings(dto);
   }
 
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.READ, subject: SUBJECTS.SETTINGS })
   @Get('settings/site-info')
   @ApiOperation({ summary: 'Get site info (brand name, description, images)' })
-  @ApiResponse({ status: 200, description: 'Site info retrieved successfully.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Site info retrieved successfully.',
+  })
   @ApiResponse({ status: 404, description: 'Site info not found.' })
   async getSiteInfo() {
     return this.appService.getSiteInfo();
   }
 
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.UPDATE, subject: SUBJECTS.SETTINGS })
   @Patch('settings/site-info')
-  @ApiOperation({ summary: 'Update site info (brand name, description, images)' })
+  @ApiOperation({
+    summary: 'Update site info (brand name, description, images)',
+  })
   @ApiBody({ type: UpdateSiteSettingDto })
   @ApiResponse({ status: 200, description: 'Site info updated successfully.' })
   @ApiResponse({ status: 404, description: 'Site info not found.' })
   async updateSiteInfo(@Body() dto: { value: UpdateSiteSettingDto }) {
-    const { value: payload } = dto
+    const { value: payload } = dto;
     return this.appService.updateSiteInfo(payload);
   }
 
-
   @Get('versions')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get platform, AA, triggers, and frontend versions (public)' })
-  @ApiQuery({ name: 'projectId', required: false, type: String, description: 'Optional project UUID for project-scoped service versions' })
+  @ApiOperation({
+    summary: 'Get platform, AA, triggers, and frontend versions (public)',
+  })
+  @ApiQuery({
+    name: 'projectId',
+    required: false,
+    type: String,
+    description: 'Optional project UUID for project-scoped service versions',
+  })
   @ApiOkResponse({ type: AppVersionsDto })
-  async getVersions(@Query('projectId') projectId?: string): Promise<AppVersionsDto | ProjectEnvironmentDto> {
+  async getVersions(
+    @Query('projectId') projectId?: string
+  ): Promise<AppVersionsDto | ProjectEnvironmentDto> {
     return this.appService.getAppVersions(projectId);
   }
-
 }
-
