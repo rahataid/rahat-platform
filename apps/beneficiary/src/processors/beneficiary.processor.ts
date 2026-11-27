@@ -26,8 +26,8 @@ import { splitBeneficiaryPII } from '../beneficiary/helpers';
 import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { trimNonAlphaNumericValue } from '../utils/sanitize-data';
 import {
-  GroupValidationBatch,
   findTempBenefGroups,
+  GroupValidationBatch,
   publishGroupValidationEvent,
   SYNC_TRACKING_REDIS,
   validateDupicateWallet
@@ -46,7 +46,7 @@ export class BeneficiaryProcessor {
     @InjectQueue(BQUEUE.RAHAT_BENEFICIARY)
     private readonly beneficiaryQueue: Queue,
     @Inject(SYNC_TRACKING_REDIS) private readonly syncTrackingRedis: Redis,
-    private readonly statsUpdateService: BeneficiaryStatsUpdateService
+    private readonly statsUpdateService: BeneficiaryStatsUpdateService,
     private readonly ssePublisher: SsePublisherService,
   ) { }
 
