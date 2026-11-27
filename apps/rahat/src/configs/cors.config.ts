@@ -20,8 +20,7 @@ export class CorsConfigService {
     ];
     const rahatDomainRegex = /^https?:\/\/(.+\.)?rahat\.io$/;
     const allowedDomains = this.configService.get<string>('ALLOWED_DOMAINS');
-    console.log('ALLOWED_ORIGINS:', allowedOrigins);
-    console.log('ALLOWED_DOMAINS:', allowedDomains);
+
     const domainRegexes: RegExp[] = [
       rahatDomainRegex,
       ...(allowedDomains
@@ -48,7 +47,6 @@ export class CorsConfigService {
           .filter((origin) => origin.length > 0),
         ...domainRegexes,
       ];
-
       this.logger.log(
         `CORS configured with allowed origins: ${corsOrigins.join(', ')}`
       );

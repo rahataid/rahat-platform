@@ -586,7 +586,7 @@ export class VendorsService {
             },
           },
         });
-        console.log('Vendor successfully assigned to the project:', createRes);
+        console.log('Vendor successfully assigned to the project:');
       },
       onError: (error) => {
         console.error('Error syncing vendor to project:', error);
@@ -601,7 +601,6 @@ export class VendorsService {
         }
       ),
       onSuccess(response) {
-        console.log('Microservice response', response);
         return response;
       },
       onError(error) {

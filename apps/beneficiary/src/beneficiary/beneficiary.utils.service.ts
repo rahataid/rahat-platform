@@ -138,7 +138,6 @@ export class BeneficiaryUtilsService {
     });
 
     if (existingBeneficiary) {
-      console.log('Wallet address already exists');
       throw new RpcException({
         message: '[WALLET_ADDRESS_ALREADY_EXISTS] Wallet address already exists',
         code: 'WALLET_ADDRESS_ALREADY_EXISTS',
@@ -162,8 +161,6 @@ export class BeneficiaryUtilsService {
       where: { phone },
     });
     if (existingPiiData) {
-      console.log('Phone number should be unique');
-
       throw new RpcException({
         message: '[PHONE_NUMBER_SHOULD_BE_UNIQUE] Phone number should be unique',
         code: 'PHONE_NUMBER_SHOULD_BE_UNIQUE',
@@ -242,10 +239,8 @@ export class BeneficiaryUtilsService {
           projectPayload
         ),
         onSuccess(response) {
-          console.log('response', response);
         },
         onError(error) {
-          console.log('error', error);
           if (error instanceof RpcException) throw error;
           throw new RpcException(error.message);
         },
@@ -298,10 +293,8 @@ export class BeneficiaryUtilsService {
           { beneficiaries: allProjectPayloads }
         ),
         onSuccess(response) {
-          console.log('Bulk assignment response', response);
         },
         onError(error) {
-          console.log('Bulk assignment error', error);
           if (error instanceof RpcException) throw error;
           throw new RpcException(error.message);
         },

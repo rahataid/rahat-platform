@@ -86,142 +86,145 @@ export class WalletInterceptor implements NestInterceptor {
           message: 'Wallet processing failed',
           code: 'WALLET_PROCESSING_FAILED',
         });
-    }
+      message: 'Wallet processing failed',
+        code: 'WALLET_PROCESSING_FAILED',
+        });
   }
+}
 
-  private async attachXcapitWallets(items: any[]): Promise<{
-    validBeneficiaries: any[];
-    discardedBeneficiaries: { phoneNumber: string; status: string }[];
-    totalProcessed: number;
-    totalDiscarded: number;
-  }> {
-    // Collect phones
-    const phones = items
-      .map((d) => d?.piiData?.phone)
-      .filter(Boolean)
-      .map((phone) => ({ phoneNumber: phone }));
+  private async attachXcapitWallets(items: any[]): Promise < {
+  validBeneficiaries: any[];
+  discardedBeneficiaries: { phoneNumber: string; status: string }[];
+  totalProcessed: number;
+  totalDiscarded: number;
+} > {
+  // Collect phones
+  const phones = items
+    .map((d) => d?.piiData?.phone)
+    .filter(Boolean)
+    .map((phone) => ({ phoneNumber: phone }));
 
-    // Bulk generate wallets
-    const bulkRes = await this.xcapitService.bulkGenerateXcapitWallet(phones);
+  // Bulk generate wallets
+  const bulkRes = await this.xcapitService.bulkGenerateXcapitWallet(phones);
 
-    // Filter successful responses and build phone → wallet mapping
-    const successfulResponses =
-      bulkRes?.filter(
-        (response) => response.status === 'success' && response.walletAddress
-      ) || [];
+  // Filter successful responses and build phone → wallet mapping
+  const successfulResponses =
+    bulkRes?.filter(
+      (response) => response.status === 'success' && response.walletAddress
+    ) || [];
 
-    const failedResponses =
-      bulkRes?.filter(
-        (response) => response.status !== 'success' || !response.walletAddress
-      ) || [];
+  const failedResponses =
+    bulkRes?.filter(
+      (response) => response.status !== 'success' || !response.walletAddress
+    ) || [];
 
-    // Build phone → wallet mapping only for successful responses
-    const phoneToWallet = Object.fromEntries(
-      successfulResponses.map((b) => [b.phoneNumber, b.walletAddress])
-    );
+  // Build phone → wallet mapping only for successful responses
+  const phoneToWallet = Object.fromEntries(
+    successfulResponses.map((b) => [b.phoneNumber, b.walletAddress])
+  );
 
-    // Filter items to only include those with successful wallet creation
-    const validItems = items.filter((item) => {
-      const phone = item?.piiData?.phone;
-      return phone && phoneToWallet.hasOwnProperty(phone);
-    });
+  // Filter items to only include those with successful wallet creation
+  const validItems = items.filter((item) => {
+    const phone = item?.piiData?.phone;
+    return phone && phoneToWallet.hasOwnProperty(phone);
+  });
 
-    const updatedItems = validItems.map((d) => ({
-      ...d,
-      walletAddress: phoneToWallet[d?.piiData?.phone] || d.walletAddress,
+  const updatedItems = validItems.map((d) => ({
+    ...d,
+    walletAddress: phoneToWallet[d?.piiData?.phone] || d.walletAddress,
+  }));
+
+  return {
+    validBeneficiaries: updatedItems,
+    discardedBeneficiaries: failedResponses.map((response) => ({
+      phoneNumber: response.phoneNumber,
+      status: response.status,
+    })),
+    totalProcessed: items.length,
+    totalDiscarded: failedResponses.length,
+  };
+}
+
+  private async ensureValidWalletAddress(
+  walletAddress ?: string
+): Promise < { walletAddress: string; multiChainWallets: any } > {
+  if(!walletAddress) {
+    const [result] = await this.walletService.createBulkForAllChains(1);
+    const multiChainWallets = result.wallets.map((w) => ({
+      chain: w.chain,
+      address: w.address,
+      privateKey: w.privateKey,
     }));
-
     return {
-      validBeneficiaries: updatedItems,
-      discardedBeneficiaries: failedResponses.map((response) => ({
-        phoneNumber: response.phoneNumber,
-        status: response.status,
-      })),
-      totalProcessed: items.length,
-      totalDiscarded: failedResponses.length,
+      walletAddress: result.defaultAddress,
+      multiChainWallets: JSON.stringify(multiChainWallets), // Serialize to string to preserve structure
     };
   }
 
-  private async ensureValidWalletAddress(
-    walletAddress?: string
-  ): Promise<{ walletAddress: string; multiChainWallets: any }> {
-    if (!walletAddress) {
-      const [result] = await this.walletService.createBulkForAllChains(1);
-      const multiChainWallets = result.wallets.map((w) => ({
-        chain: w.chain,
-        address: w.address,
-        privateKey: w.privateKey,
-      }));
-      return {
-        walletAddress: result.defaultAddress,
-        multiChainWallets: JSON.stringify(multiChainWallets), // Serialize to string to preserve structure
-      };
-    }
-
     try {
-      const isValid = await this.walletService.validateAddress(walletAddress);
-      if (!isValid) {
-        throw new RpcException({
-          message: `Invalid wallet address format: ${walletAddress}`,
-          code: 'INVALID_WALLET_ADDRESS_FORMAT',
-          params: { addr: walletAddress },
-        });
-      }
-    } catch (error) {
-      if (error instanceof RpcException) throw error;
+    const isValid = await this.walletService.validateAddress(walletAddress);
+    if(!isValid) {
       throw new RpcException({
-        message: `Invalid wallet address: ${error.message}`,
-        code: 'INVALID_WALLET_ADDRESS',
-        params: { message: error.message },
+        message: `Invalid wallet address format: ${walletAddress}`,
+        code: 'INVALID_WALLET_ADDRESS_FORMAT',
+        params: { addr: walletAddress },
       });
     }
+  } catch(error) {
+    if (error instanceof RpcException) throw error;
+    throw new RpcException({
+      message: `Invalid wallet address: ${error.message}`,
+      code: 'INVALID_WALLET_ADDRESS',
+      params: { message: error.message },
+    });
+  }
 
     const existingBeneficiary = await this.prismaService.beneficiary.findUnique(
-      {
-        where: { walletAddress },
-      }
-    );
-    this.logger.log(`[INTERCEPTOR] Existing beneficiary check: ${existingBeneficiary ? 'FOUND' : 'NOT FOUND'}`);
-
-    if (existingBeneficiary) {
-      this.logger.warn(`[INTERCEPTOR] Wallet address already exists in DB: ${walletAddress}`);
-      throw new RpcException({
-        message: 'Wallet address already exists',
-        code: 'WALLET_ADDRESS_ALREADY_EXISTS',
-      });
+    {
+      where: { walletAddress },
     }
+  );
+  this.logger.log(`[INTERCEPTOR] Existing beneficiary check: ${existingBeneficiary ? 'FOUND' : 'NOT FOUND'}`);
+
+  if(existingBeneficiary) {
+    this.logger.warn(`[INTERCEPTOR] Wallet address already exists in DB: ${walletAddress}`);
+    throw new RpcException({
+      message: 'Wallet address already exists',
+      code: 'WALLET_ADDRESS_ALREADY_EXISTS',
+    });
+  }
 
     // Provided address — no multi-chain wallets generated; downstream can handle if needed
     this.logger.log(`[INTERCEPTOR] Wallet validation complete for: ${walletAddress}`);
-    return { walletAddress, multiChainWallets: [] };
+  return { walletAddress, multiChainWallets: [] };
+}
+
+  private async getDefaultChain(): Promise < ChainType > {
+  try {
+    return await this.walletService.getDefaultChain();
+  } catch(error) {
+    console.warn(
+      'Failed to get default chain from wallet service, falling back to settings detection'
+    );
+    return this.getChainFromSettings();
   }
+}
 
-  private async getDefaultChain(): Promise<ChainType> {
-    try {
-      return await this.walletService.getDefaultChain();
-    } catch (error) {
-      console.warn(
-        'Failed to get default chain from wallet service, falling back to settings detection'
-      );
-      return this.getChainFromSettings();
-    }
+  private async getChainFromSettings(): Promise < ChainType > {
+  const settings = new SettingsService(this.prismaService);
+  const contractSettings = await settings.getByName('CHAIN_SETTINGS');
+  const contractValue = contractSettings?.value as {
+    type: string;
+  };
+
+  if(!contractValue?.type) {
+    throw new RpcException({
+      message:
+        'Chain configuration must include a "type" field (evm or stellar)',
+      code: 'CHAIN_CONFIG_MISSING_TYPE',
+    });
   }
-
-  private async getChainFromSettings(): Promise<ChainType> {
-    const settings = new SettingsService(this.prismaService);
-    const contractSettings = await settings.getByName('CHAIN_SETTINGS');
-    const contractValue = contractSettings?.value as {
-      type: string;
-    };
-
-    if (!contractValue?.type) {
-      throw new RpcException({
-        message:
-          'Chain configuration must include a "type" field (evm or stellar)',
-        code: 'CHAIN_CONFIG_MISSING_TYPE',
-      });
-    }
 
     return contractValue.type as ChainType;
-  }
+}
 }
