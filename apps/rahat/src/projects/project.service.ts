@@ -1,3 +1,4 @@
+//rahat-platform/apps/rahat/src/projects/project.service.ts
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import { InjectQueue } from '@nestjs/bull';
@@ -57,7 +58,7 @@ const CAMBODIA_COUNTRY_CODE = '+855';
 
 @Injectable()
 export class ProjectService {
-  private readonly logger = new Logger(PrismaService.name)
+  private readonly logger = new Logger(ProjectService.name)
 
   constructor(
     private prisma: PrismaService,
@@ -177,12 +178,8 @@ export class ProjectService {
     user: any
   ) {
     try {
-      console.log('CMD', cmd);
+      this.logger.log(`Project action ${JSON.stringify(cmd)} by ${user?.name}`)
       // const requiresUser = userRequiredActions.has(action);
-      // console.log({ requiresUser });
-      console.log('Payload', payload);
-      console.log('User', user);
-
       return client
         .send(cmd, {
           ...payload,
@@ -195,7 +192,7 @@ export class ProjectService {
           })
         );
     } catch (err) {
-      console.log('Err', err);
+      this.logger.error('Err', err);
     }
   }
 
@@ -236,6 +233,7 @@ export class ProjectService {
     };
 
     const actionFunc = actions[action];
+
     if (!actionFunc) {
       throw new RpcException({
         message: 'Please provide a valid action!',
@@ -422,11 +420,9 @@ export class ProjectService {
         .split(' ')
         .map((item: string) => item.trim().toUpperCase());
     }
-    console.log({ NODE_ENV });
     if (NODE_ENV === 'production') {
       benef.phone = `${CAMBODIA_COUNTRY_CODE}${benef.phone}`;
     } else benef.phone = `+${benef.phone}`;
-    console.log('Beneficiary Phone', benef.phone);
 
     const { piiData, type, ...rest } = createExtrasAndPIIData(benef);
     const extrasPayload = {
@@ -452,7 +448,6 @@ export class ProjectService {
       data: koboPayload,
     });
     const piiExist = await this.checkPiiPhone(benef.phone);
-    console.log({ piiExist });
     if (piiExist) {
       const discardedPayload = {
         ...piiData,
@@ -560,7 +555,6 @@ export class ProjectService {
   }
 
   async sendTestMsg(uuid: UUID) {
-    console.log({ uuid });
     return this.client
       .send({ cmd: 'rahat.jobs.test', uuid }, { msg: 'This is test msg!' })
       .pipe(timeout(MS_TIMEOUT));

@@ -70,6 +70,10 @@ temp
 # TypeChain files
 
 
+serviceAccountKey.json
+serviceAccount*.json
+*firebase-adminsdk*.json
+
 # Hardhat files
 /cache
 /libs/contracts/artifacts

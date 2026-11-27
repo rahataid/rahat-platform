@@ -21,7 +21,6 @@ export class OfframpService {
   ) { }
 
   registerProvider(createOfframpDto: CreateOfframpProviderDto) {
-    console.log({ createOfframpDto });
     return this.prisma.offrampProvider.create({
       data: createOfframpDto,
     });
@@ -83,7 +82,6 @@ export class OfframpService {
   }
 
   async createOfframpRequest(createOfframpData: CreateOfframpRequestDto) {
-    console.log({ createOfframpData });
     const { providerUuid, ...offrampRequestData } = createOfframpData;
     // const isBeneficiary = await this.prisma.beneficiary.findUnique({
     //   where: {
@@ -119,7 +117,6 @@ export class OfframpService {
 
   //TODO: Geenralize the offramp request execution
   async executeOfframpRequest(executeOfframpData: any) {
-    console.log({ executeOfframpData });
     const { providerUuid, ...data } = executeOfframpData;
 
 
@@ -146,14 +143,12 @@ export class OfframpService {
     //     'Should be a valid beneficiary in order to proceed.'
     //   );
     // }
-    console.log(JSON.stringify(executionData, null, 2));
     try {
       const { data: kotaniPayResponse } =
         await this.kotaniPayService.executeOfframpRequest(
           providerUuid,
           executionData
         );
-      console.log('kota', kotaniPayResponse);
 
       const transaction = await this.prisma.offrampTransaction.create({
         data: {
@@ -285,8 +280,6 @@ export class OfframpService {
         string_contains: payload.senderAddress.toLowerCase(),
       };
     }
-
-    console.log('where', where);
 
     // Compute pagination
     const page = payload.page ?? 1;
