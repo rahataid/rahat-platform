@@ -633,14 +633,19 @@ export const aaActions: ProjectActionFunc = {
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.STELLAR.GET_VENDOR_STATS, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.STELLAR.GET_VENDOR_STATS, uuid }, payload);
+  },
 
   [MS_ACTIONS.AAPROJECT.STELLAR.GET_REDEMPTION_REQUEST]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand({ cmd: AAJobs.STELLAR.GET_REDEMPTION_REQUEST, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.STELLAR.GET_REDEMPTION_REQUEST, uuid }, payload);
+  },
 
   [MS_ACTIONS.AAPROJECT.STELLAR.RAHAT_FAUCET]: (uuid, payload, sendCommand) =>
     sendCommand({ cmd: AAJobs.STELLAR.RAHAT_FAUCET, uuid }, payload),
@@ -955,45 +960,55 @@ export const aaActions: ProjectActionFunc = {
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.INKIND.GET_VENDOR_AVAILABLE_INKIND_DETAILS, uuid },
       payload
-    ),
+    );
+  },
 
   [MS_ACTIONS.AAPROJECT.INKIND.CREATE_VENDOR_REDEMPTION]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand({ cmd: AAJobs.INKIND.CREATE_VENDOR_REDEMPTION, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.INKIND.CREATE_VENDOR_REDEMPTION, uuid }, payload);
+  },
 
   [MS_ACTIONS.AAPROJECT.INKIND.GET_VENDOR_REDEMPTIONS]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand({ cmd: AAJobs.INKIND.GET_VENDOR_REDEMPTIONS, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.INKIND.GET_VENDOR_REDEMPTIONS, uuid }, payload);
+  },
 
   [MS_ACTIONS.AAPROJECT.INKIND.UPDATE_VENDOR_REDEMPTION_STATUS]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.INKIND.UPDATE_VENDOR_REDEMPTION_STATUS, uuid },
       payload
-    ),
+    );
+  },
 
   [MS_ACTIONS.AAPROJECT.INKIND.UPDATE_VENDOR_REDEMPTION_TX_HASH]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.INKIND.UPDATE_VENDOR_REDEMPTION_TX_HASH, uuid },
       payload
-    ),
+    );
+  },
 
   // **** grievance start **** //
   [MS_ACTIONS.AAPROJECT.GRIEVANCES.CREATE]: (uuid, payload, sendCommand) => {
@@ -1272,76 +1287,100 @@ export const aaActions: ProjectActionFunc = {
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.VENDOR.TEST_OFFLINE_PAYOUT, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.VENDOR.TEST_OFFLINE_PAYOUT, uuid }, payload);
+  },
 
   [MS_ACTIONS.AAPROJECT.VENDOR.FETCH_OFFLINE_BENEFICIARIES]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.VENDOR.FETCH_OFFLINE_BENEFICIARIES, uuid },
       payload
-    ),
+    );
+  },
 
   [MS_ACTIONS.AAPROJECT.VENDOR.SYNC_OFFLINE_DATA]: (
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.VENDOR.SYNC_OFFLINE_DATA, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.VENDOR.SYNC_OFFLINE_DATA, uuid }, payload);
+  },
 
-  [MS_ACTIONS.AAPROJECT.VENDOR.BATCH_TRANSFER]: (uuid, payload, sendCommand) =>
-    sendCommand({ cmd: AAJobs.VENDOR.BATCH_TRANSFER, uuid }, payload),
+  [MS_ACTIONS.AAPROJECT.VENDOR.BATCH_TRANSFER]: (uuid, payload, sendCommand) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.VENDOR.BATCH_TRANSFER, uuid }, payload);
+  },
 
   // **** Token Redemption start **** //
   [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.CREATE]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.CREATE, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.CREATE, uuid }, payload);
+  },
 
   [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.GET]: (
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.GET, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.GET, uuid }, payload);
+  },
 
   [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.UPDATE_STATUS]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.UPDATE_STATUS, uuid },
       payload
-    ),
+    );
+  },
 
   [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.LIST]: (
     uuid,
     payload,
     sendCommand
-  ) => sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.LIST, uuid }, payload),
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand({ cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.LIST, uuid }, payload);
+  },
 
   [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.GET_VENDOR_REDEMPTIONS]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.GET_VENDOR_REDEMPTIONS, uuid },
       payload
-    ),
+    );
+  },
 
   [MS_ACTIONS.AAPROJECT.VENDOR.TOKEN_REDEMPTION.GET_STATS]: (
     uuid,
     payload,
     sendCommand
-  ) =>
-    sendCommand(
+  ) => {
+    payload.appId = uuid || payload.appId;
+    return sendCommand(
       { cmd: AAJobs.VENDOR.TOKEN_REDEMPTION.GET_STATS, uuid },
       payload
-    ),
+    );
+  },
   // **** Token Redemption end **** //
 
   // **** Vendor end **** //
