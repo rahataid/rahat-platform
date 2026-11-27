@@ -50,6 +50,13 @@ export class CreateProjectDto {
   @IsOptional()
   @IsString()
   contractAddress?: string
+
+  @ApiProperty({
+    required: true,
+    example: 'evm'
+  })
+  @IsString()
+  chainType: string
 }
 
 export class UpdateProjectDto extends OmitType(PartialType(CreateProjectDto), [

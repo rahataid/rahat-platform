@@ -23,6 +23,13 @@ export class WalletController {
     return this.walletService.createBulk(chains.count);
   }
 
+
+  @MessagePattern({ cmd: WalletJobs.CREATE_BULK_ALL_CHAINS })
+  createBulkAllChains(chainCount: number) {
+    return this.walletService.createBulkForAllChains(chainCount);
+  }
+
+
   // Creates n wallets and updates beneficiaries
   @MessagePattern({ cmd: WalletJobs.UPDATE_BULK })
   updateBulk(chains: BulkUpdateWallet) {

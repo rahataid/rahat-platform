@@ -285,6 +285,7 @@ export const MS_ACTIONS = {
     // new chain
     CHAIN: {
       DISBURSE: 'aa.chain.disburse',
+      SYNC_DISBURSE: 'aa.chain.syncDisburse',
       SEND_OTP: 'aa.chain.sendOtp',
       SEND_ASSET: 'aa.chain.sendAsset',
       CHECK_OTP: 'aa.chain.checkOtp',

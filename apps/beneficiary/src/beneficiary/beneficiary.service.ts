@@ -33,7 +33,6 @@ import {
   GroupWithValidationAA,
   ProjectContants,
   TPIIData,
-  WalletJobs,
 } from '@rahataid/sdk';
 import { paginator, PaginatorTypes, PrismaService } from '@rumsan/prisma';
 import { Queue } from 'bull';
@@ -45,7 +44,6 @@ import {
   validateDupicateWallet,
 } from '../processors/processor.utils';
 import { createBatches } from '../utils/array';
-import { handleMicroserviceCall } from '../utils/handleMicroserviceCall';
 import { sanitizeNonAlphaNumericValue } from '../utils/sanitize-data';
 import { BeneficiaryStatsUpdateService } from './beneficiary-stats-update.service';
 import { BeneficiaryUtilsService } from './beneficiary.utils.service';
@@ -165,9 +163,17 @@ export class BeneficiaryService {
 
   //find beneficiary by wallet address and attach pii data
   async findOneBeneficiary(data: any) {
+    const entityDetails = await this.prisma.walletAddress.findUnique({
+      where: {
+        address: data.walletAddress,
+      },
+    });
+
+    if (!entityDetails) return 'No details found';
+
     const getBeneficiaryByWallet = await this.prisma.beneficiary.findUnique({
       where: {
-        walletAddress: data.walletAddress,
+        uuid: entityDetails?.entityId,
       },
       include: {
         pii: true,
@@ -194,7 +200,11 @@ export class BeneficiaryService {
 
     const { beneficiary, ...piiData } = getBeneficiaryByPhone;
 
-    return { ...beneficiary, pii: piiData };
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails([
+        beneficiary.uuid,
+      ]);
+    return { ...beneficiary, pii: piiData, walletDetails };
   }
 
   async listBeneficiaryPiiByWalletAddress(data: any) {
@@ -218,11 +228,12 @@ export class BeneficiaryService {
       data.data = groupData;
     }
 
+
     return data;
   }
 
   async getOneGroupByProject(uuid: UUID) {
-    return await this.prisma.beneficiaryGroup.findUnique({
+    const group = await this.prisma.beneficiaryGroup.findUnique({
       where: {
         uuid: uuid,
       },
@@ -241,6 +252,38 @@ export class BeneficiaryService {
         },
       },
     });
+    if (!group) {
+      throw new RpcException({
+        message: '[BENEFICIARY_GROUP_NOT_FOUND] Group not found',
+        code: 'BENEFICIARY_GROUP_NOT_FOUND',
+      });
+    }
+
+    const benIds = group?.groupedBeneficiaries.map(
+      (ben) => ben.Beneficiary.uuid
+    );
+
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(benIds);
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+    return {
+      ...group,
+      groupedBeneficiaries: group.groupedBeneficiaries.map((item) => ({
+        ...item,
+        Beneficiary: {
+          ...item.Beneficiary,
+          walletAddressDetails: walletMap.get(item.Beneficiary.uuid),
+        },
+      })),
+    }
   }
 
   async getGroupDetailsByUuids(uuids: UUID[]) {
@@ -266,7 +309,7 @@ export class BeneficiaryService {
   }
 
   async listGroupByUUid(uuid: UUID[]) {
-    return await this.prisma.beneficiaryGroup.findMany({
+    const groupDetails = await this.prisma.beneficiaryGroup.findMany({
       where: {
         uuid: { in: uuid },
       },
@@ -285,6 +328,30 @@ export class BeneficiaryService {
         },
       },
     });
+    const benIds = groupDetails?.flatMap((b) =>
+      b.groupedBeneficiaries.map((ben) => ben.Beneficiary.uuid)
+    );
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(benIds);
+    const walletMap = new Map(
+      walletDetails.map((wallet) => [
+        wallet.entityId,
+        { address: wallet.address, chainType: wallet.chainType },
+      ])
+    );
+
+    const updatedGroupDetails = groupDetails?.map((group) => ({
+      ...group,
+      groupedBeneficiaries: group.groupedBeneficiaries.map((item) => ({
+        ...item,
+        Beneficiary: {
+          ...item.Beneficiary,
+          walletAddressDetails: walletMap.get(item.Beneficiary.uuid),
+        },
+      })),
+    }));
+
+    return updatedGroupDetails;
   }
 
   async processBenfGroups(data: any) {
@@ -326,7 +393,29 @@ export class BeneficiaryService {
       });
       groups.push(datas);
     }
-    return groups;
+    const allBenIds = groups.flatMap((g) =>
+      (g?.groupedBeneficiaries ?? []).map((gb: any) => gb.Beneficiary.uuid)
+    );
+
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(allBenIds);
+    const walletMap = new Map<string, { address: string; chainType: string }[]>();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+
+    return groups.map((g) => ({
+      ...g,
+      groupedBeneficiaries: (g?.groupedBeneficiaries ?? []).map((gb: any) => ({
+        ...gb,
+        Beneficiary: {
+          ...gb.Beneficiary,
+          walletAddressDetails: walletMap.get(gb.Beneficiary.uuid),
+        },
+      })),
+    }));
   }
 
   async list(
@@ -356,7 +445,10 @@ export class BeneficiaryService {
         perPage,
       }
     );
-    result = await this.beneficiaryUtilsService.attachPiiData(result);
+
+    result = await this.beneficiaryUtilsService.attachPiiDataAndWalletDetails(
+      result
+    );
 
     console.timeEnd('check');
 
@@ -389,10 +481,18 @@ export class BeneficiaryService {
     //   }
     // })
 
+    const entityDetails = await this.prisma.walletAddress.findMany({
+      where: {
+        address: {
+          in: data.map((b) => b.walletAddress),
+        },
+      },
+    });
+
     const beneficiaries = await this.prisma.beneficiary.findMany({
       where: {
-        walletAddress: {
-          in: data.map((b) => b.walletAddress),
+        uuid: {
+          in: entityDetails.map((b) => b.entityId),
         },
       },
       include: {
@@ -405,9 +505,7 @@ export class BeneficiaryService {
 
     if (data && beneficiaries.length > 0) {
       const combinedData = data.map((dat) => {
-        const benDetails = beneficiaries.find(
-          (ben) => ben.walletAddress === dat.walletAddress
-        );
+        const benDetails = beneficiaries.find((ben) => ben.uuid === dat.uuid);
         const { pii, ...rest } = benDetails || {};
         return {
           piiData: pii,
@@ -451,23 +549,52 @@ export class BeneficiaryService {
   }
 
   async create(dto: CreateBeneficiaryDto, projectUuid?: string) {
-    const { piiData, projectUUIDs, walletAddress, ...data } = dto;
+    const { piiData, projectUUIDs, walletAddress, multiChainWallets, ...data } =
+      dto;
 
     if (piiData.phone) {
       await this.beneficiaryUtilsService.ensureUniquePhone(
         piiData.phone.toString()
       );
+      this.logger.log('[CREATE] Phone validation passed');
     }
 
     if (data.birthDate) data.birthDate = new Date(data.birthDate);
-    const createdBeneficiary = await this.rsprisma.beneficiary.create({
-      data: { ...data, walletAddress },
+    const createdBeneficiary = await this.rsprisma.$transaction(async (tx) => {
+      const beneficiary = await tx.beneficiary.create({
+        data: { ...data, walletAddress },
+      });
+      this.logger.log(
+        `[CREATE] Beneficiary record created with UUID: ${beneficiary.uuid}`
+      );
+
+      if (
+        multiChainWallets &&
+        Array.isArray(multiChainWallets) &&
+        multiChainWallets.length > 0
+      ) {
+        this.logger.log(
+          `[CREATE] Persisting ${multiChainWallets.length} multi-chain wallet(s) via database storage`
+        );
+        for (const wallet of multiChainWallets) {
+          await tx.walletAddress.update({
+            where: { address: wallet.address },
+            data: { entityId: beneficiary.uuid },
+          });
+        }
+        this.logger.log(`[CREATE] Wallets persisted via database storage`);
+      } else {
+        this.logger.log('[CREATE] No multi-chain wallets to persist');
+      }
+
+      return beneficiary;
     });
 
     await this.beneficiaryUtilsService.addPIIData(
       createdBeneficiary.id,
       piiData
     );
+    this.logger.log('[CREATE] PII data added');
 
     // Assign beneficiary to project while creating. Useful when a beneficiary is created from inside a project
     if (projectUUIDs && projectUUIDs.length) {
@@ -484,7 +611,7 @@ export class BeneficiaryService {
   }
 
   async findOne(uuid: UUID) {
-    const [data, piiData] = await Promise.all([
+    const [data, piiData, walletDetails] = await Promise.all([
       this.rsprisma.beneficiary.findUnique({
         where: { uuid },
         include: {
@@ -508,11 +635,19 @@ export class BeneficiaryService {
             )?.id || '',
         },
       }),
+      this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails([uuid]),
     ]);
 
     if (!data) return null;
-    if (piiData) data.piiData = piiData;
-    return data;
+    const bendetails: any = { ...data };
+
+    if (piiData) bendetails.piiData = piiData;
+    if (walletDetails)
+      bendetails.walletAddressDetails = walletDetails.map((d) => ({
+        address: d?.address,
+        chainType: d?.chainType,
+      }));
+    return bendetails;
   }
 
   async findPhoneByUUID(uuids: UUID[]) {
@@ -555,9 +690,20 @@ export class BeneficiaryService {
   }
 
   async findOneByWallet(walletAddress: string) {
-    const [data, piiData] = await Promise.all([
+    const entityDetails = await this.rsprisma.walletAddress.findUnique({
+      where: { address: walletAddress },
+      select: {
+        entityId: true,
+      },
+    });
+    if (!entityDetails)
+      throw new RpcException({
+        message: '[BENEFICIARY_DATA_NOT_FOUND] Data not Found',
+        code: 'BENEFICIARY_DATA_NOT_FOUND',
+      });
+    const [data, piiData, walletDetails] = await Promise.all([
       this.rsprisma.beneficiary.findUnique({
-        where: { walletAddress },
+        where: { uuid: entityDetails?.entityId },
         include: {
           BeneficiaryProject: {
             include: {
@@ -568,7 +714,7 @@ export class BeneficiaryService {
       }),
       this.rsprisma.beneficiary
         .findUnique({
-          where: { walletAddress },
+          where: { uuid: entityDetails?.entityId },
           select: { id: true },
         })
         .then((beneficiary) =>
@@ -578,18 +724,32 @@ export class BeneficiaryService {
             })
             : null
         ),
+      this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails([
+        entityDetails?.entityId,
+      ]),
     ]);
     if (!data) return null;
 
     data.piiData = piiData || null;
-
+    if (walletDetails)
+      data.walletDetails = walletDetails.map((d) => ({
+        address: d?.address,
+        chainType: d?.chainType,
+      }));
     return data;
   }
 
   async findBulkByWallet(walletAddresses: string[]) {
+    const entityDetails = await this.rsprisma.walletAddress.findMany({
+      where: { address: { in: walletAddresses } },
+      select: {
+        entityId: true,
+      },
+    });
+    const entityIds = entityDetails.map((entity) => entity.entityId);
     const [beneficiaries, piiData] = await Promise.all([
       this.rsprisma.beneficiary.findMany({
-        where: { walletAddress: { in: walletAddresses } },
+        where: { uuid: { in: entityIds } },
         include: {
           BeneficiaryProject: {
             include: {
@@ -601,7 +761,7 @@ export class BeneficiaryService {
       this.rsprisma.beneficiaryPii.findMany({
         where: {
           beneficiary: {
-            walletAddress: { in: walletAddresses },
+            uuid: { in: entityIds },
           },
         },
       }),
@@ -616,6 +776,11 @@ export class BeneficiaryService {
   }
 
   async findOneByPhone(payload: { phone: string; projectUUID: string }) {
+    const projectDetails = await this.prisma.project.findFirst({
+      where: {
+        uuid: payload.projectUUID,
+      },
+    });
     const beneficiary = await this.prisma.beneficiary.findFirst({
       where: {
         AND: [
@@ -661,11 +826,17 @@ export class BeneficiaryService {
     });
 
     if (!beneficiary) return null;
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(
+        [beneficiary.uuid],
+        projectDetails?.chainType || ''
+      );
     let piiData = null;
     if (beneficiary.pii) {
       piiData = beneficiary.pii;
       delete beneficiary.pii;
     }
+    beneficiary.walletAddress = walletDetails[0].address;
     const groupedBeneficiaries = beneficiary.groupedBeneficiaries.filter(
       (gb) => {
         const { beneficiaryGroupProject } = gb.beneficiaryGroup;
@@ -680,16 +851,26 @@ export class BeneficiaryService {
 
     return {
       ...beneficiary,
+      walletDetails,
       piiData,
       groupedBeneficiaries,
     };
   }
 
   async addBeneficiaryToProject(dto: AddBenToProjectDto, projectUid: UUID) {
-    const { type, referrerBeneficiary, referrerVendor, ...rest } = dto;
+    const {
+      type,
+      referrerBeneficiary,
+      referrerVendor,
+      multiChainWallets,
+      ...rest
+    } = dto;
 
     // 1. Create Beneficiary
-    const benef = await this.create(rest, projectUid);
+    const benef = await this.create(
+      { ...rest, multiChainWallets: [] },
+      projectUid
+    );
 
     const projectPayload = {
       uuid: benef.uuid,
@@ -951,31 +1132,51 @@ export class BeneficiaryService {
   ) {
     try {
       this.logger.log(
-        `Creating bulk beneficiaries with projectId: ${projectUuid}`
+        `[CREATE_BULK] Starting bulk creation for ${dtos.length} beneficiaries, projectId: ${projectUuid}`
       );
       const validDtos: CreateBeneficiaryDto[] = [];
-      for (const dto of dtos) {
+      for (let i = 0; i < dtos.length; i++) {
+        const dto = dtos[i];
+        this.logger.log(
+          `[CREATE_BULK] Processing entry ${i + 1}/${dtos.length}, phone: ${dto.piiData?.phone
+          }`
+        );
+
         if (dto.piiData.phone) {
           try {
             await this.beneficiaryUtilsService.ensureUniquePhone(
               dto.piiData.phone.toString()
             );
+            this.logger.log(
+              `[CREATE_BULK] Phone validation passed for ${dto.piiData.phone}`
+            );
           } catch (error) {
             this.logger.log(
               `Skipping entry due to duplicate phone: ${dto.piiData.phone}`
+            );
+            this.logger.warn(
+              `[CREATE_BULK] Skipping entry ${i + 1}: duplicate phone ${dto.piiData.phone
+              }`
             );
             continue;
           }
         }
 
         try {
-          dto.walletAddress =
+          ({ walletAddress: dto.walletAddress } =
             await this.beneficiaryUtilsService.ensureValidWalletAddress(
               dto.walletAddress
-            );
+            ));
+          this.logger.log(
+            `[CREATE_BULK] Wallet address validated/set: ${dto.walletAddress}`
+          );
         } catch (error) {
           this.logger.log(
             `Skipping entry due to duplicate/invalid wallet address: ${dto.walletAddress}`
+          );
+          this.logger.warn(
+            `[CREATE_BULK] Skipping entry ${i + 1}: invalid wallet ${dto.walletAddress
+            }`
           );
           continue;
         }
@@ -983,17 +1184,55 @@ export class BeneficiaryService {
         dto.uuid = dto.uuid || uuidv4();
         validDtos.push(dto);
       }
+      this.logger.log(
+        `[CREATE_BULK] Validated ${validDtos.length}/${dtos.length} beneficiaries`
+      );
 
-      const { beneficiariesData, piiDataList } =
+      const { beneficiariesData, piiDataList, multiChainWalletsList } =
         this.beneficiaryUtilsService.prepareBulkInsertData(validDtos);
+      this.logger.log(
+        `[CREATE_BULK] Preparing bulk insert data for ${validDtos.length} beneficiaries`
+      );
 
       // Insert beneficiaries in bulk
       const insertedBeneficiariesWithPii =
         await this.beneficiaryUtilsService.insertBeneficiariesAndPIIData(
           beneficiariesData,
           piiDataList,
-          validDtos
+          validDtos,
+          multiChainWalletsList
         );
+      this.logger.log(
+        `[CREATE_BULK] Successfully inserted ${insertedBeneficiariesWithPii.length} beneficiaries`
+      );
+
+      // Persist multi-chain wallets via database storage microservice
+      this.logger.log(
+        '[CREATE_BULK] Starting multi-chain wallet persistence via database storage'
+      );
+      // const savePromises = insertedBeneficiariesWithPii
+      //   .map((beneficiary) => {
+      //     const wallets = multiChainWalletsList.filter((w) => w.uuid === beneficiary.uuid);
+      //     if (!wallets.length) return null;
+      //     return handleMicroserviceCall({
+      //       client: this.walletClient.send(
+      //         { cmd: WalletJobs.SAVE_ENTITY_WALLETS },
+      //         {
+      //           entityId: beneficiary.uuid,
+      //           primaryAddress: beneficiary.walletAddress,
+      //           wallets,
+      //         }
+      //       ),
+      //       onError(error) {
+      //         throw new RpcException(error.message);
+      //       },
+      //     });
+      //   })
+      //   .filter(Boolean);
+      // await Promise.all(savePromises);
+      this.logger.log(
+        `[CREATE_BULK] Multi-chain wallet persistence complete: ${multiChainWalletsList.length} wallet(s) saved`
+      );
 
       // Assign beneficiaries to the project if a projectUuid is provided
       // && conditional
@@ -1604,7 +1843,7 @@ export class BeneficiaryService {
   private async _createBeneficiaryFromDto(
     dto: CreateBeneficiaryDto
   ): Promise<{ uuid: string }> {
-    const { piiData, ...rest } = dto;
+    const { piiData, multiChainWallets, ...rest } = dto;
 
     const phone = piiData?.phone?.toString();
     if (phone) {
@@ -1613,7 +1852,7 @@ export class BeneficiaryService {
 
     const uuid = rest.uuid ?? (uuidv4() as UUID);
 
-    const walletAddress =
+    const { walletAddress } =
       await this.beneficiaryUtilsService.ensureValidWalletAddress(
         rest.walletAddress
       );
@@ -1633,6 +1872,25 @@ export class BeneficiaryService {
           extras: piiData?.extras ?? {},
         },
       });
+
+      if (
+        multiChainWallets &&
+        Array.isArray(multiChainWallets) &&
+        multiChainWallets.length > 0
+      ) {
+        this.logger.log(
+          `[CREATE] Persisting ${multiChainWallets.length} multi-chain wallet(s) via database storage`
+        );
+        for (const wallet of multiChainWallets) {
+          await tx.walletAddress.update({
+            where: { address: wallet.address },
+            data: { entityId: ben.uuid },
+          });
+        }
+        this.logger.log(`[CREATE] Wallets persisted via database storage`);
+      } else {
+        this.logger.log('[CREATE] No multi-chain wallets to persist');
+      }
 
       return { uuid: ben.uuid };
     });
@@ -1670,6 +1928,9 @@ export class BeneficiaryService {
       const piiUpdates: Record<string, any> = {};
 
       if (dto.piiData.name !== undefined) piiUpdates.name = dto.piiData.name;
+      if (dto.piiData.phone !== undefined) piiUpdates.phone = dto.piiData.phone;
+      if (dto.piiData.email !== undefined) piiUpdates.email = dto.piiData.email;
+
       if (dto.piiData.extras !== undefined) {
         piiUpdates.extras = {
           ...(existing.pii?.extras ?? {}),
@@ -1728,6 +1989,22 @@ export class BeneficiaryService {
       });
     }
 
+    const benIds = group?.groupedBeneficiaries.map(
+      (ben) => ben.Beneficiary.uuid
+    );
+
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(benIds);
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+
     // If groupPurpose is not found and groupedBeneficiaries is empty, return group with isGroupValidForAA as false
     if (!group.groupPurpose || !group.groupedBeneficiaries?.length) {
       const emptyResult: GroupWithValidationAA = {
@@ -1738,9 +2015,21 @@ export class BeneficiaryService {
       return this.applyGroupBeneficiaryPagination(uuid, emptyResult, dto);
     }
 
+    const updatedGroupDetails = {
+      ...group,
+      groupedBeneficiaries: group.groupedBeneficiaries.map((item) => ({
+        ...item,
+        Beneficiary: {
+          ...item.Beneficiary,
+          walletAddressDetails: walletMap.get(item.Beneficiary.uuid),
+        },
+      })),
+    };
+
+
     // If group is found, check if it is valid for AA
     const finalData = {
-      ...group,
+      ...updatedGroupDetails,
       isGroupValidForAA: await this.isGroupValidForAA(group.uuid),
     };
 
@@ -1803,9 +2092,35 @@ export class BeneficiaryService {
       { page, perPage }
     );
 
+    // Fetch wallet details for paginated beneficiaries
+    const benIds = paginatedGroupedBeneficiaries.data.map(
+      (ben: any) => ben.Beneficiary.uuid
+    );
+    const walletDetails =
+      await this.beneficiaryUtilsService.fetchBeneficiaryWalletDetails(benIds);
+    const walletMap = new Map<
+      string,
+      { address: string; chainType: string }[]
+    >();
+    for (const wallet of walletDetails) {
+      const existing = walletMap.get(wallet.entityId) || [];
+      existing.push({ address: wallet.address, chainType: wallet.chainType });
+      walletMap.set(wallet.entityId, existing);
+    }
+
+    const paginatedWithWalletDetails = paginatedGroupedBeneficiaries.data.map(
+      (item: any) => ({
+        ...item,
+        Beneficiary: {
+          ...item.Beneficiary,
+          walletAddressDetails: walletMap.get(item.Beneficiary.uuid),
+        },
+      })
+    );
+
     const response = {
       ...result,
-      groupedBeneficiaries: paginatedGroupedBeneficiaries.data,
+      groupedBeneficiaries: paginatedWithWalletDetails,
       meta: paginatedGroupedBeneficiaries.meta,
     };
     return response as GroupWithValidationAA;
@@ -2716,7 +3031,7 @@ export class BeneficiaryService {
 
   private async getGroupSyncData(
     beneficiaryGroupId: string,
-    project: { uuid: string; type: string }
+    project: { uuid: string; type: string; chainType?: string | null }
   ) {
     const group = await this.prisma.beneficiaryGroup.findUnique({
       where: { uuid: beneficiaryGroupId },
@@ -2764,6 +3079,21 @@ export class BeneficiaryService {
       },
     });
 
+    // Bulk-fetch chain-specific wallet addresses
+    // Falls back to beneficiary.walletAddress when no chainType on project or no matching wallet.
+    const chainWalletMap = new Map<string, string>();
+    if (project.chainType?.trim()) {
+      const chainWallets = await this.prisma.walletAddress.findMany({
+        where: {
+          entityId: { in: beneficiaries.map((b) => b.uuid) },
+          chainType: project.chainType.toUpperCase(),
+          deletedAt: null,
+        },
+        select: { entityId: true, address: true },
+      });
+      for (const w of chainWallets) chainWalletMap.set(w.entityId, w.address);
+    }
+
     const isAA = this.isAAProject(project.type);
     const payload = {
       beneficiaryGroupId,
@@ -2772,7 +3102,8 @@ export class BeneficiaryService {
       projectId: project.uuid,
       beneficiaries: beneficiaries.map((beneficiary) => ({
         uuid: beneficiary.uuid,
-        walletAddress: beneficiary.walletAddress,
+        walletAddress:
+          chainWalletMap.get(beneficiary.uuid) ?? beneficiary.walletAddress,
         phone: beneficiary.pii?.phone || null,
         isVerified: beneficiary.isVerified,
         beneficiaryGroupId,
@@ -3013,26 +3344,31 @@ export class BeneficiaryService {
     if (!jsonData) return null;
     const { groupName, beneficiaries } = jsonData;
 
-    const walletAddress = await handleMicroserviceCall({
-      client: this.walletClient.send(
-        { cmd: WalletJobs.CREATE_BULK },
-        { count: beneficiaries.length }
-      ),
-      onSuccess: (response) => {
-        return response;
-      },
-      onError(error) {
-        console.warn('Error assiging Beneficiaries to project.', error);
-        throw new RpcException(error.message);
-      },
-    });
+    // Use multi-chain wallet creation to get wallets for all supported chains
+    // const multiChainWallets = await handleMicroserviceCall({
+    //   client: this.walletClient.send(
+    //     { cmd: WalletJobs.CREATE_BULK_FOR_ALL_CHAINS },
+    //     beneficiaries.length
+    //   ),
+    //   onSuccess: (response) => {
+    //     console.log(`Multi-chain wallet response`, response);
+    //     return response;
+    //   },
+    //   onError(error) {
+    //     console.log('Error creating multi-chain wallets for beneficiaries.', error);
+    //     throw new RpcException(error.message);
+    //   },
+    // });
 
     const beneficiaryData = await Promise.all(
       beneficiaries.map(async (d: any, index: number) => {
+        // Use default address from multi-chain wallet result
+        // const defaultAddress = multiChainWallets[index]?.defaultAddress;
+
         return {
           firstName: d.firstName,
           lastName: d.lastName,
-          walletAddress: walletAddress[index]?.address,
+          walletAddress: 'defaultAddress',
           govtIDNumber: d.govtIDNumber,
           gender: d.gender,
           bankedStatus: d.bankedStatus,
@@ -3304,10 +3640,9 @@ export class BeneficiaryService {
 
     const dbTxId = `db-tx-${Date.now()}`;
 
-    const walletAddress =
+    const walletAddressDetails =
       await this.beneficiaryUtilsService.ensureValidWalletAddress();
-
-    if (!walletAddress) {
+    if (!walletAddressDetails?.walletAddress) {
       this.logger.error(
         'Failed to obtain a valid wallet address for the beneficiary.'
       );
@@ -3317,6 +3652,14 @@ export class BeneficiaryService {
         code: 'FAILED_TO_OBTAIN_WALLET_ADDRESS',
       });
     }
+
+    const projectDetails = await this.prisma.project.findUnique({
+      where: {
+        uuid: projectId
+      }
+    })
+
+    const supportedChain = projectDetails?.chainType
 
     try {
       await this.cleanupOrphanedTransactions();
@@ -3332,7 +3675,7 @@ export class BeneficiaryService {
       const createdBeneficiary = await this.prisma.beneficiary.create({
         data: {
           ...benfData,
-          walletAddress,
+          walletAddress: walletAddressDetails?.walletAddress,
           extras: {
             validPhoneNumber: true,
           },
@@ -3356,9 +3699,22 @@ export class BeneficiaryService {
         },
       });
 
+      for (const wallet of walletAddressDetails?.multiChainWallets) {
+        await this.prisma.walletAddress.update({
+          where: { address: wallet.address },
+          data: { entityId: createdBeneficiary.uuid },
+        });
+      }
+
+
+      const benprojectWallet = walletAddressDetails?.multiChainWallets?.find(
+        (w: { address: string; chain: string }) =>
+          w?.chain.toLowerCase() === supportedChain?.toLowerCase()
+      )?.address
+
       const aaPayload = {
         uuid: createdBeneficiary.uuid,
-        walletAddress: createdBeneficiary.walletAddress,
+        walletAddress: benprojectWallet || createdBeneficiary.walletAddress,
         extras: {
           ...((createdBeneficiary.extras ?? {}) as Record<string, any>),
           phone: createdPii.phone,
@@ -3366,6 +3722,7 @@ export class BeneficiaryService {
         },
         isVerified: createdBeneficiary.isVerified,
         gender: createdBeneficiary.gender,
+        phone: piiData.phone
       };
 
       await this.sendAATxAction(projectId, 'CREATE', dbTxId, aaPayload);
