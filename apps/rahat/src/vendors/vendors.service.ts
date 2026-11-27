@@ -12,6 +12,7 @@ import {
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import {
+  BulkVendorAssignToProjectDto,
   GetVendorOtp,
   VendorAddToProjectDto,
   VendorPasswordRegisterDto,
@@ -552,6 +553,116 @@ export class VendorsService {
         },
       },
     });
+  }
+
+  async bulkAssignToProject(dto: BulkVendorAssignToProjectDto) {
+    const { vendorIds, projectIds } = dto;
+    const uniqueVendorIds = [...new Set(vendorIds)];
+    const uniqueProjectIds = [...new Set(projectIds)];
+    const vendorUsers = await this.prisma.user.findMany({
+      where: { uuid: { in: uniqueVendorIds } },
+    });
+    const userRoles = await this.prisma.userRole.findMany({
+      where: { userId: { in: vendorUsers.map((vendor) => vendor.id) } },
+      include: {
+        Role: {
+          select: { name: true },
+        },
+      },
+    });
+    const vendorUserIds = new Set(
+      userRoles
+        .filter((userRole) => userRole.Role.name === UserRoles.VENDOR)
+        .map((userRole) => userRole.userId)
+    );
+    const vendors = vendorUsers.filter((vendor) =>
+      vendorUserIds.has(vendor.id)
+    );
+
+    if (vendors.length !== uniqueVendorIds.length)
+      throw new BadRequestException({
+        message: 'Not a vendor',
+        code: 'USER_IS_NOT_A_VENDOR',
+      });
+
+    // Check for already assigned vendors to projects
+    const assignedVendors = await this.prisma.projectVendors.findMany({
+      where: {
+        projectId: { in: uniqueProjectIds },
+        vendorId: { in: uniqueVendorIds },
+      },
+      select: { projectId: true, vendorId: true },
+    });
+
+    // Create a set of strings in the format "projectId:vendorId" for quick lookup
+    const assignedPairs = new Set(
+      assignedVendors.map(({ projectId, vendorId }) => `${projectId}:${vendorId}`)
+    );
+
+    const results = [];
+    for (const projectId of uniqueProjectIds) {
+      // Filter out vendors that are already assigned to this project
+      const newVendors = vendors.filter(
+        ({ uuid }) => !assignedPairs.has(`${projectId}:${uuid}`)
+      );
+
+      // If no new vendors to assign, skip this project and add a message to results
+      if (newVendors.length === 0) {
+        results.push({
+          projectId,
+          message: 'All requested vendors are already assigned to this project.',
+          skipped: true,
+        });
+        continue;
+      }
+      console.log("----->outside vendors length check")
+      // Send the bulk assignment request to the microservice
+      const projectResponse = await handleMicroserviceCall({
+        client: this.client.send(
+          { cmd: VendorJobs.BULK_ASSIGN_TO_PROJECTS, uuid: projectId },
+          newVendors.map((vendor) => ({
+            uuid: vendor.uuid,
+            walletAddress: vendor.wallet,
+            vendor,
+          }))
+        ),
+      });
+      // Save new vendor assignments to the database
+      await this.prisma.projectVendors.createMany({
+        data: newVendors.map((vendor) => ({
+          projectId,
+          vendorId: vendor.uuid,
+        })),
+        skipDuplicates: true,
+      });
+
+      // After assigning vendors, trigger the project stats calculation microservice call
+      await handleMicroserviceCall({
+        client: this.client.send(
+          { cmd: 'rahat.jobs.projects.calculate_stats' },
+          { projectUUID: projectId }
+        ),
+        onError: (error) => {
+          throw new RpcException({
+            message: 'Microservice call failed: ' + error.message,
+            code: 'MICROSERVICE_CALL_FAILED',
+            params: { message: error.message },
+          });
+        },
+      });
+
+      results.push({ projectId, response: projectResponse });
+    }
+
+    if (results.every((result) => result.skipped)) {
+      throw new BadRequestException({
+        message:
+          'All requested vendor(s) are already assigned to the specified projects.',
+        code: 'NO_NEW_VENDOR_ASSIGNMENTS',
+      });
+    }
+
+    return results;
   }
 
   async getVendorAssignedToProject(vendorId: string, projectId: string) {

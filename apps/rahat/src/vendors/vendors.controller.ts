@@ -1,24 +1,24 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import {
-    Body,
-    Controller,
-    Get,
-    Param,
-    Patch,
-    Post,
-    Query,
-    UseGuards,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards
 } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
-    GetVendorOtp,
-    VendorAddToProjectDto,
-    VendorPasswordRegisterDto,
-    VendorRegisterDto,
-    VendorUpdateDto,
-    VerifyVendorOtp,
+  GetVendorOtp,
+  VendorAddToProjectDto,
+  VendorPasswordRegisterDto,
+  VendorRegisterDto,
+  VendorUpdateDto,
+  VerifyVendorOtp
 } from '@rahataid/extensions';
 import { ACTIONS, APP, SUBJECTS, VendorJobs } from '@rahataid/sdk';
 import { Request } from '@rumsan/sdk/types';
@@ -107,6 +107,20 @@ export class VendorsController {
     return this.vendorService.removeVendor(vendorId, projectId);
   }
 
+  @ApiBearerAuth(APP.JWT_BEARER)
+  @UseGuards(JwtGuard, DbAbilitiesGuard)
+  @CheckAbilities({ actions: ACTIONS.CREATE, subject: SUBJECTS.VENDOR })
+  @Post('/bulk-assign')
+  bulkAssign(
+    @Body() data: {
+      vendorIds: string[];
+      projectIds: string[];
+    }
+  ) {
+    console.log('bulkAssign called with data:', data); // Debugging log
+    return this.vendorService.bulkAssignToProject(data);
+  }
+
   ///microservice
   @MessagePattern({ cmd: VendorJobs.GET_REDEMPTION_VENDORS })
   listRedemptionVendors(data) {
@@ -117,7 +131,10 @@ export class VendorsController {
   assignToProject(@Payload() dto: VendorAddToProjectDto) {
     return this.vendorService.assignToProject(dto);
   }
-
+  // @MessagePattern({ cmd: VendorJobs.BULK_ASSIGN_TO_PROJECTS })
+  // bulkAssignToProject(@Payload() dto: BulkVendorAssignToProjectDto) {
+  //   return this.vendorService.bulkAssignToProject(dto);
+  // }
   @MessagePattern({ cmd: VendorJobs.GET_VENDOR_STATS })
   getVendorStats(@Payload() dto: any) {
     return this.vendorService.getVendorClaimStats(dto);
